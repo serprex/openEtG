@@ -1,5 +1,5 @@
 import * as etg from '../etg.js';
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 import RngMock from '../RngMock.js';
 import Builder from './Builder.js';
 

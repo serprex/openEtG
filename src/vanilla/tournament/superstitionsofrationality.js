@@ -22,11 +22,11 @@ function rationality(deck) {
 	deck.forEach(function(card) {
 		if (~etg.ShardList.indexOf(card.asUpped(false).code)) unupped += 4;
 		if (!card.upped) unupped--;
-		if (card.type == etg.ShieldEnum) shields++;
-		if (card.type == etg.WeaponEnum) weapons++;
-		if (card.type == etg.SpellEnum || card.isOf(Cards.Chimera)) spells++;
-		else if (card.type == etg.CreatureEnum) creas++;
-		else if (card.type == etg.PermanentEnum) perms++;
+		if (card.type == etg.Shield) shields++;
+		if (card.type == etg.Weapon) weapons++;
+		if (card.type == etg.Spell || card.isOf(Cards.Chimera)) spells++;
+		else if (card.type == etg.Creature) creas++;
+		else if (card.type == etg.Permanent) perms++;
 	});
 	if (unupped > 0) return '. Unupgrade ' + unupped + ' cards';
 	if (shields != 1) return '. Must have 1 shield';

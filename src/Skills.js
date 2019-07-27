@@ -2,7 +2,6 @@ import * as imm from './immutable.js';
 import * as sfx from './audio.js';
 import * as etg from './etg.js';
 import Skill from './Skill.js';
-import * as Cards from './Cards.js';
 import parseSkill from './parseSkill.js';
 
 const exports = {};
@@ -71,7 +70,7 @@ const Skills = {
 		c.buffhp(10);
 		if (c.truehp() > 30) {
 			c.remove();
-			c.transform(c.card.as(Cards.Names.BlackHole));
+			c.transform(c.card.as(ctx.Cards.Names.BlackHole));
 			c.owner.addCard(c);
 		}
 	},
@@ -92,10 +91,10 @@ const Skills = {
 		t.setStatus('aflatoxin', 1);
 	},
 	aggroskele: (ctx, c, t) => {
-		c.owner.addCrea(c.owner.newThing(c.card.as(Cards.Names.Skeleton)));
+		c.owner.addCrea(c.owner.newThing(c.card.as(ctx.Cards.Names.Skeleton)));
 		const dmg = c.owner.creatures.reduce(
 			(dmg, cr) =>
-				cr && cr.card.isOf(Cards.Names.Skeleton) ? dmg + cr.trueatk() : dmg,
+				cr && cr.card.isOf(ctx.Cards.Names.Skeleton) ? dmg + cr.trueatk() : dmg,
 			0,
 		);
 		t.dmg(dmg);
@@ -105,7 +104,7 @@ const Skills = {
 		c.owner.spend(etg.Air, -1);
 	},
 	alphawolf: (ctx, c, t) => {
-		const pwolf = c.card.as(Cards.Names.PackWolf);
+		const pwolf = c.card.as(ctx.Cards.Names.PackWolf);
 		for (let i = 0; i < 2; i++) {
 			const wolf = c.owner.newThing(pwolf);
 			ctx.effect({ x: 'StartPos', id: wolf.id, src: c.id });
@@ -142,7 +141,7 @@ const Skills = {
 		t.delay(5);
 	},
 	becomearctic: passive((ctx, c, t) => {
-		c.transform(c.card.as(Cards.Names.ArcticSquid));
+		c.transform(c.card.as(ctx.Cards.Names.ArcticSquid));
 	}),
 	beguile: (ctx, c, t) => {
 		t.remove();
@@ -182,7 +181,7 @@ const Skills = {
 		);
 	},
 	boneyard: (ctx, c, t) => {
-		c.owner.addCrea(c.owner.newThing(c.card.as(Cards.Names.Skeleton)));
+		c.owner.addCrea(c.owner.newThing(c.card.as(ctx.Cards.Names.Skeleton)));
 	},
 	bow: (ctx, c, t) => {
 		return c.owner.mark === etg.Air || c.owner.mark === etg.Light ? 1 : 0;
@@ -221,14 +220,14 @@ const Skills = {
 	},
 	brew: (ctx, c, t) => {
 		const inst = c.owner.newThing(
-			c.card.as(Cards.Codes[etg.AlchemyList[ctx.upto(12) + 1]]),
+			c.card.as(ctx.Cards.Codes[etg.AlchemyList[ctx.upto(12) + 1]]),
 		);
 		ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
 		c.owner.addCard(inst);
 	},
 	brokenmirror: (ctx, c, t, fromhand) => {
 		if (fromhand && t.type === etg.Creature && c.ownerId !== t.ownerId) {
-			const phantom = c.owner.newThing(c.card.as(Cards.Names.Phantom));
+			const phantom = c.owner.newThing(c.card.as(ctx.Cards.Names.Phantom));
 			ctx.effect({ x: 'StartPos', id: phantom.id, src: c.id });
 			c.owner.addCrea(phantom);
 		}
@@ -270,7 +269,7 @@ const Skills = {
 		}
 	}),
 	cell: passive((ctx, c, t) => {
-		c.transform(c.card.as(Cards.Names.MalignantCell));
+		c.transform(c.card.as(ctx.Cards.Names.MalignantCell));
 	}),
 	chimera: (ctx, c, t) => {
 		let atk = 0,
@@ -281,7 +280,7 @@ const Skills = {
 				hp += cr.truehp();
 			}
 		}
-		const chim = c.owner.newThing(c.card.as(Cards.Names.Chimera));
+		const chim = c.owner.newThing(c.card.as(ctx.Cards.Names.Chimera));
 		chim.atk = atk;
 		chim.maxhp = chim.hp = hp;
 		chim.setStatus('momentum', 1);
@@ -367,9 +366,9 @@ const Skills = {
 	},
 	cseed2: (ctx, c, t) => {
 		const choice = c.choose(
-			Cards.filter(ctx.upto(2), c => {
+			ctx.Cards.filter(ctx.upto(2), c => {
 				if (c.type !== etg.Spell) return false;
-				const tgting = Cards.Targeting[c.active.get('cast').castName];
+				const tgting = ctx.Cards.Targeting[c.active.get('cast').castName];
 				return tgting && tgting(c, t);
 			}),
 		);
@@ -395,7 +394,7 @@ const Skills = {
 			c.ownerId === t.ownerId ||
 			tgt.ownerId !== c.ownerId ||
 			tgt.type !== etg.Creature ||
-			!Cards.Targeting[data.active.castName](t, c)
+			!ctx.Cards.Targeting[data.active.castName](t, c)
 		)
 			return;
 		if (!tgt.hasactive('prespell', 'deathwish')) return (data.tgt = c.id);
@@ -443,7 +442,7 @@ const Skills = {
 		Skills.parallel(ctx, c, c);
 	},
 	deployblobs: (ctx, c, t) => {
-		const blob = c.card.as(Cards.Names.Blob);
+		const blob = c.card.as(ctx.Cards.Names.Blob);
 		for (let i = 0; i < 3; i++) {
 			const inst = c.owner.newThing(blob);
 			ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
@@ -608,7 +607,7 @@ const Skills = {
 	},
 	elf: passive((ctx, c, t, data) => {
 		if (data.tgt === c.id && data.active === exports.cseed) {
-			c.transform(c.card.as(Cards.Names.FallenElf));
+			c.transform(c.card.as(ctx.Cards.Names.FallenElf));
 			data.evade = true;
 		}
 	}),
@@ -668,7 +667,7 @@ const Skills = {
 		c.setStatus('epoch', 0);
 	},
 	evolve: (ctx, c, t) => {
-		c.transform(c.card.as(Cards.Names.Shrieker));
+		c.transform(c.card.as(ctx.Cards.Names.Shrieker));
 		c.setStatus('burrowed', 0);
 	},
 	feed: (ctx, c, t) => {
@@ -770,10 +769,10 @@ const Skills = {
 			const card = t.card;
 			if (t.owner.getStatus('sanctuary')) return;
 			if (card.type === etg.Spell) {
-				tgting = Cards.Targeting[card.active.get('cast').castName];
+				tgting = ctx.Cards.Targeting[card.active.get('cast').castName];
 			}
 		} else if (t.active.has('cast')) {
-			tgting = Cards.Targeting[t.active.get('cast').castName];
+			tgting = ctx.Cards.Targeting[t.active.get('cast').castName];
 		}
 		const realturn = ctx.turn;
 		ctx.turn = t.ownerId;
@@ -823,7 +822,7 @@ const Skills = {
 	},
 	freezeperm: (ctx, c, t) => Skills.freeze(ctx, c, t),
 	fungusrebirth: (ctx, c, t) => {
-		c.transform(c.card.as(Cards.Names.Fungus));
+		c.transform(c.card.as(ctx.Cards.Names.Fungus));
 	},
 	gaincharge2: (ctx, c, t) => {
 		if (c.id !== t.id) {
@@ -837,7 +836,7 @@ const Skills = {
 		}
 	},
 	gas: (ctx, c, t) => {
-		c.owner.addPerm(c.owner.newThing(c.card.as(Cards.Names.UnstableGas)));
+		c.owner.addPerm(c.owner.newThing(c.card.as(ctx.Cards.Names.UnstableGas)));
 	},
 	give: (ctx, c, t) => {
 		c.owner.dmg(c.card.upped ? -10 : -5);
@@ -911,7 +910,7 @@ const Skills = {
 	},
 	heatmirror: (ctx, c, t, fromhand) => {
 		if (fromhand && t.type === etg.Creature && c.ownerId !== t.ownerId) {
-			const spark = c.owner.newThing(c.card.as(Cards.Names.Spark));
+			const spark = c.owner.newThing(c.card.as(ctx.Cards.Names.Spark));
 			ctx.effect({ x: 'StartPos', id: spark.id, src: c.id });
 			c.owner.addCrea(spark);
 		}
@@ -976,7 +975,7 @@ const Skills = {
 		c.owner.foe.forEach(inflate);
 	},
 	ink: (ctx, c, t) => {
-		const p = c.owner.newThing(c.card.as(Cards.Names.Cloak));
+		const p = c.owner.newThing(c.card.as(ctx.Cards.Names.Cloak));
 		p.setStatus('charges', 1);
 		c.owner.addPerm(p);
 	},
@@ -1073,7 +1072,7 @@ const Skills = {
 			handIds = c.owner.handIds;
 		for (let i = handIds.length - 1; ~i; i--) {
 			const card = ctx.get(handIds[i]).get('card');
-			if (etg.ShardList.some(x => x && card.isOf(Cards.Codes[x]))) {
+			if (etg.ShardList.some(x => x && card.isOf(ctx.Cards.Codes[x]))) {
 				if (card.upped) {
 					stat += 0.5;
 				}
@@ -1158,11 +1157,14 @@ const Skills = {
 			addSkill('hit', 'poison ' + tally[etg.Death]);
 		}
 		ctx.set(c.ownerId, 'shardgolem', new imm.Map(shardgolem));
-		c.owner.addCrea(c.owner.newThing(c.card.as(Cards.Names.ShardGolem)), true);
+		c.owner.addCrea(
+			c.owner.newThing(c.card.as(ctx.Cards.Names.ShardGolem)),
+			true,
+		);
 	},
 	jelly: (ctx, c, t) => {
 		const tcard = t.card;
-		t.transform(tcard.as(Cards.Names.PinkJelly));
+		t.transform(tcard.as(ctx.Cards.Names.PinkJelly));
 		t.castele = tcard.element;
 		t.cast = 4;
 		t.atk = 7;
@@ -1255,12 +1257,12 @@ const Skills = {
 	midas: (ctx, c, t) => {
 		if (t.getStatus('stackable') && t.getStatus('charges') > 1) {
 			Skills.destroy(ctx, c, t, true);
-			const relic = t.owner.newThing(t.card.as(Cards.Names.GoldenRelic));
+			const relic = t.owner.newThing(t.card.as(ctx.Cards.Names.GoldenRelic));
 			relic.usedactive = false;
 			t.owner.addPerm(relic);
 		} else {
 			t.clearStatus();
-			t.transform(t.card.as(Cards.Names.GoldenRelic));
+			t.transform(t.card.as(ctx.Cards.Names.GoldenRelic));
 			t.atk = t.maxhp = t.hp = 1;
 		}
 	},
@@ -1304,7 +1306,7 @@ const Skills = {
 	},
 	mummy: passive((ctx, c, t, data) => {
 		if (data.tgt === c.id && data.active === exports.rewind) {
-			c.transform(c.card.as(Cards.Names.Pharaoh));
+			c.transform(c.card.as(ctx.Cards.Names.Pharaoh));
 			data.evade = true;
 		}
 	}),
@@ -1325,7 +1327,7 @@ const Skills = {
 			Skills.improve(ctx, c, t);
 		} else {
 			ctx.effect({ x: 'Text', text: 'Abomination', id: t.id });
-			t.transform(Cards.Names.Abomination.asShiny(t.card.shiny));
+			t.transform(ctx.Cards.Names.Abomination.asShiny(t.card.shiny));
 		}
 	},
 	neuro: adrenathrottle((ctx, c, t) => {
@@ -1364,7 +1366,7 @@ const Skills = {
 		}
 		c.owner.incrStatus('nova', 2);
 		if (c.owner.getStatus('nova') >= 6) {
-			c.transform(Cards.Names.Singularity.asShiny(c.card.shiny));
+			c.transform(ctx.Cards.Names.Singularity.asShiny(c.card.shiny));
 			c.owner.addCrea(c);
 		}
 	},
@@ -1374,7 +1376,9 @@ const Skills = {
 		}
 		c.owner.incrStatus('nova', 3);
 		if (c.owner.getStatus('nova') >= 6) {
-			c.transform(Cards.Names.Singularity.asUpped(true).asShiny(c.card.shiny));
+			c.transform(
+				ctx.Cards.Names.Singularity.asUpped(true).asShiny(c.card.shiny),
+			);
 			c.owner.addCrea(c);
 		}
 	},
@@ -1410,7 +1414,9 @@ const Skills = {
 				? c.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether])
 				: ctx.upto(12) + 1);
 		Skills.destroy(ctx, c, t, true, true);
-		const nymph = t.owner.newThing(t.card.as(Cards.Codes[etg.NymphList[e]]));
+		const nymph = t.owner.newThing(
+			t.card.as(ctx.Cards.Codes[etg.NymphList[e]]),
+		);
 		ctx.effect({ x: 'StartPos', id: nymph.id, src: t.id });
 		t.owner.addCrea(nymph);
 	},
@@ -1420,7 +1426,7 @@ const Skills = {
 	ouija: (ctx, c, t) => {
 		const { foe } = c.owner;
 		if (!foe.getStatus('sanctuary') && foe.handIds.length < 8) {
-			const inst = foe.newThing(Cards.Names.OuijaEssence);
+			const inst = foe.newThing(ctx.Cards.Names.OuijaEssence);
 			ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
 			foe.addCard(inst);
 		}
@@ -1439,7 +1445,9 @@ const Skills = {
 		const e = ctx.upto(6),
 			list = e & 1 ? etg.PillarList : etg.PendList,
 			inst = c.owner.newThing(
-				c.card.as(Cards.Codes[list[e < 4 ? c.owner.mark : c.owner.foe.mark]]),
+				c.card.as(
+					ctx.Cards.Codes[list[e < 4 ? c.owner.mark : c.owner.foe.mark]],
+				),
 			);
 		ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
 		c.owner.addPerm(inst);
@@ -1472,7 +1480,7 @@ const Skills = {
 	},
 	parallel: (ctx, c, t) => {
 		ctx.effect({ x: 'Text', text: 'Parallel', id: t.id });
-		if (t.card.isOf(Cards.Names.Chimera)) {
+		if (t.card.isOf(ctx.Cards.Names.Chimera)) {
 			Skills.chimera(ctx, c);
 			return;
 		}
@@ -1499,7 +1507,7 @@ const Skills = {
 	},
 	phoenix: (ctx, c, t, data) => {
 		if (!c.owner.creatures[data.index]) {
-			const ash = c.owner.newThing(c.card.as(Cards.Names.Ash));
+			const ash = c.owner.newThing(c.card.as(ctx.Cards.Names.Ash));
 			ash.type = etg.Creature;
 			const creatures = new Uint32Array(c.owner.creatureIds);
 			creatures[data.index] = ash.id;
@@ -1623,16 +1631,16 @@ const Skills = {
 		t.die();
 		if (
 			!t.owner.creatures[index] ||
-			t.owner.creatures[index].card !== Cards.Names.MalignantCell
+			t.owner.creatures[index].card !== ctx.Cards.Names.MalignantCell
 		) {
-			const skele = t.owner.newThing(t.card.as(Cards.Names.Skeleton));
+			const skele = t.owner.newThing(t.card.as(ctx.Cards.Names.Skeleton));
 			skele.atk = atk;
 			skele.maxhp = skele.hp = hp;
 			t.owner.setCrea(index, skele.id);
 		}
 	},
 	rebirth: (ctx, c, t) => {
-		c.transform(c.card.as(Cards.Names.Phoenix));
+		c.transform(c.card.as(ctx.Cards.Names.Phoenix));
 	},
 	reducemaxhp: (ctx, c, t, dmg) => {
 		t.maxhp = Math.max(t.maxhp - dmg, 1);
@@ -1683,7 +1691,7 @@ const Skills = {
 	},
 	ricochet: (ctx, c, t, data) => {
 		if (t.type !== etg.Spell || t.card.type !== etg.Spell) return;
-		const tgting = Cards.Targeting[data.active.castName];
+		const tgting = ctx.Cards.Targeting[data.active.castName];
 		if (tgting) {
 			function tgttest(x) {
 				if (x) {
@@ -1821,7 +1829,7 @@ const Skills = {
 			Skills.parallel(ctx, c, c);
 		} else if (r > 0.1) {
 			c.owner.setWeapon(
-				c.owner.newThing(Cards.Names.Dagger.asShiny(c.card.shiny)),
+				c.owner.newThing(ctx.Cards.Names.Dagger.asShiny(c.card.shiny)),
 			);
 		}
 	},
@@ -1894,7 +1902,7 @@ const Skills = {
 		c.owner.spend(etg.Death, -3);
 	},
 	spores: (ctx, c, t) => {
-		const spore = c.card.as(Cards.Names.Spore);
+		const spore = c.card.as(ctx.Cards.Names.Spore);
 		for (let i = 0; i < 2; i++) {
 			const inst = c.owner.newThing(spore);
 			ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
@@ -1963,7 +1971,7 @@ const Skills = {
 	},
 	summon: name => {
 		return (ctx, c, t) => {
-			const inst = c.owner.newThing(c.card.as(Cards.Names[name]));
+			const inst = c.owner.newThing(c.card.as(ctx.Cards.Names[name]));
 			ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
 			c.owner.addCrea(inst);
 		};
@@ -2016,7 +2024,7 @@ const Skills = {
 		deckIds.splice(
 			ctx.upto(t.owner.deckIds.length),
 			0,
-			t.owner.newThing(c.card.as(Cards.Names.ThrowRock)).id,
+			t.owner.newThing(c.card.as(ctx.Cards.Names.ThrowRock)).id,
 		);
 		t.owner.deckIds = deckIds;
 	},
@@ -2292,17 +2300,17 @@ const Skills = {
 		}
 	},
 	skull: (ctx, c, t) => {
-		if (t.type === etg.Creature && !t.card.isOf(Cards.Names.Skeleton)) {
+		if (t.type === etg.Creature && !t.card.isOf(ctx.Cards.Names.Skeleton)) {
 			const thp = t.truehp();
 			if (thp <= 0 || c.rng() < 0.5 / thp) {
 				const index = t.getIndex();
 				t.die();
 				if (
 					!t.owner.creatures[index] ||
-					t.owner.creatures[index].card !== Cards.Names.MalignantCell
+					t.owner.creatures[index].card !== ctx.Cards.Names.MalignantCell
 				) {
 					sfx.playSound('skelify');
-					const skele = t.owner.newThing(t.card.as(Cards.Names.Skeleton));
+					const skele = t.owner.newThing(t.card.as(ctx.Cards.Names.Skeleton));
 					t.owner.setCrea(index, skele.id);
 				}
 			}
@@ -2341,4 +2349,9 @@ function unsummon(t) {
 }
 for (const key in Skills) {
 	exports[key] = new Skill([key], Skills[key], passiveSet.has(Skills[key]));
+}
+
+import vSkills from './vanilla/Skills.js';
+for (const key in vSkills) {
+	exports['v_' + key] = vSkills[key];
 }

@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import * as sock from '../sock.js';
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
 import * as Components from '../Components/index.js';
 

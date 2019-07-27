@@ -1,5 +1,5 @@
 import * as etg from '../etg.js';
-import * as Cards from '../Cards';
+import Cards from '../Cards.js';
 
 export default function mulligan(pl) {
 	return (

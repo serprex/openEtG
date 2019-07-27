@@ -1,5 +1,5 @@
 import * as etgutil from './etgutil.js';
-import * as Cards from './Cards.js';
+import Cards from './Cards.js';
 import Decks from './Decks.json';
 import RngMock from './RngMock.js';
 import * as sock from './sock.js';

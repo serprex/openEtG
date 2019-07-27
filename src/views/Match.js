@@ -9,7 +9,6 @@ import * as ui from '../ui.js';
 import * as etg from '../etg.js';
 import * as mkAi from '../mkAi.js';
 import * as sock from '../sock.js';
-import * as Cards from '../Cards.js';
 import Skills from '../Skills.js';
 import aiSearch from '../ai/search.js';
 import aiMulligan from '../ai/mulligan.js';
@@ -1287,7 +1286,7 @@ export default connect(({ user }) => ({ user }))(
 						: pl.getStatus('sanctuary')
 						? 'ico sanctuary'
 						: pl.getStatus('nova') >= 3 &&
-						  pl.hand.some(c => c.card.isOf(Cards.Names.Nova))
+						  pl.hand.some(c => c.card.isOf(game.Cards.Names.Nova))
 						? 'ico singularity'
 						: '';
 				children.push(

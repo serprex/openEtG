@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
 import * as userutil from '../userutil.js';

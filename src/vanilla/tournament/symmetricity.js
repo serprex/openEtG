@@ -6,7 +6,7 @@ export default function(deck) {
 	for (var i = 0; i < deck.length; i++) {
 		var card = deck[i];
 		if (card.upped) return 'No upgrades allowed';
-		if (card.type == etg.PillarEnum) continue;
+		if (card.type == etg.Pillar) continue;
 		if (cards.length && cards[cards.length - 1][0] == card)
 			cards[cards.length - 1][1]++;
 		else cards.push([card, 1]);

@@ -1,5 +1,5 @@
 import * as ui from './ui.js';
-import * as Cards from './Cards.js';
+import Cards from './Cards.js';
 import * as etgutil from './etgutil.js';
 const cssPrefix = "<style type='text/css'><![CDATA[text{font:12px sans-serif}",
 	svgPrefix = "<svg xmlns='http://www.w3.org/2000/svg'";

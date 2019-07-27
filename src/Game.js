@@ -4,7 +4,8 @@ import * as imm from './immutable.js';
 
 import * as etg from './etg.js';
 import Effect from './Effect.js';
-import * as Cards from './Cards.js';
+import OriginalCards from './vanilla/Cards.js';
+import StandardCards from './Cards.js';
 import Player from './Player.js';
 import Thing from './Thing.js';
 
@@ -15,6 +16,7 @@ export default function Game(data) {
 		1,
 		new imm.Map({
 			id: 2,
+			Cards: data.set === 'Original' ? OriginalCards : StandardCards,
 			phase: 0,
 			turn: 2,
 			players: [],
@@ -77,6 +79,7 @@ defineProp('bonusstats');
 defineProp('data');
 defineProp('turn');
 defineProp('winner');
+defineProp('Cards');
 
 Game.prototype.clone = function() {
 	const obj = Object.create(Game.prototype);
@@ -109,8 +112,8 @@ Game.prototype.choose = function(x) {
 	return x[this.upto(x.length)];
 };
 Game.prototype.randomcard = function(upped, filter) {
-	const keys = Cards.filter(upped, filter);
-	return keys && keys.length && Cards.Codes[this.choose(keys)];
+	const keys = this.Cards.filter(upped, filter);
+	return keys && keys.length && this.Cards.Codes[this.choose(keys)];
 };
 Game.prototype.shuffle = function(array) {
 	let counter = array.length;
@@ -336,7 +339,7 @@ Game.prototype.expectedDamage = function() {
 	return expectedDamage;
 };
 Game.prototype.targetFilter = function(src, active) {
-	const targetingFilter = Cards.Targeting[active.castName];
+	const targetingFilter = this.Cards.Targeting[active.castName];
 	return (
 		targetingFilter &&
 		(t =>

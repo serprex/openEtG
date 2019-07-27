@@ -1,6 +1,6 @@
 import * as Rng from '../rng.wasm';
 import deck from './deck.js';
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 
 export default function(url, stime) {
 	let hash = 0;

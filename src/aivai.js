@@ -1,10 +1,10 @@
 import Effect from './Effect.js';
-import * as Cards from './Cards.js';
 import Game from './Game.js';
 import * as etg from './etg.js';
 import * as etgutil from './etgutil.js';
 import aiSearch from './ai/search.js';
 import * as util from './util.js';
+import RngMock from './RngMock.js';
 Effect.disable = true;
 const deckeles = [
 	document.getElementById('deck1'),
@@ -16,31 +16,6 @@ const seedput = document.getElementById('seed'),
 	fight1000 = document.getElementById('fight1000');
 fight.addEventListener('click', fightItOut);
 fight1000.addEventListener('click', fightItOut);
-function mkGame(seed, decks) {
-	const game = new Game(seed, 0);
-	let idx, code;
-	for (let j = 0; j < 2; j++) {
-		const pl = j ? game.byId(game.turn) : game.byId(game.turn).foe,
-			deck = [];
-		for (let i = 0; i < decks[j].length; i++) {
-			if (Cards.Codes[(code = decks[j][i])]) {
-				const cardinst = game.newThing(Cards.Codes[code]);
-				cardinst.ownerId = pl.id;
-				deck.push(cardinst.id);
-			} else if (~(idx = etgutil.fromTrueMark(code))) {
-				pl.mark = idx;
-			} else {
-				result.textContent = 'Unknown card code: ' + code.toString(32);
-				return;
-			}
-		}
-		pl.deckIds = deck;
-	}
-	game.byId(game.turn).drawhand();
-	game.byId(game.turn).foe.drawhand();
-	game.set(game.id, 'phase', etg.PlayPhase);
-	return game;
-}
 let stopFight = false;
 function fightItOut() {
 	const start = Date.now();
@@ -55,10 +30,17 @@ function fightItOut() {
 			fight1000.value = 'Stop';
 		}
 	}
-	const decks = deckeles.map(item => etgutil.decodedeck(item.value));
+	const decks = deckeles.map(item => item.value);
 	const seed = parseInt(seedput.value) || util.randint();
-	let game = mkGame(seed, decks),
-		realp1 = game.player1Id;
+	let game = new Game({
+			seed,
+			players: RngMock.shuffle(
+				decks.map((deck, i) => {
+					idx: i, deck;
+				}),
+			),
+		}),
+		realp1 = game.getByIdx(0);
 	result.textContent = '';
 	let aiState = undefined;
 	const cmds = {

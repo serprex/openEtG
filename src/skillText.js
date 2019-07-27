@@ -1,7 +1,6 @@
 import * as etg from './etg.js';
 import Card from './Card.js';
 import Thing from './Thing.js';
-import { Names } from './Cards.js';
 
 export default function skillText(c) {
 	if (c instanceof Card && c.type === etg.Spell) {
@@ -424,7 +423,8 @@ const data = {
 	stoneform: 'Gain 0|20 & become a golem',
 	storm: x =>
 		`Deals ${x} spell damage to target player's creatures. Removes cloak`,
-	summon: x => c => `Summon a ${Names[x].name}`,
+	summon: x => c =>
+		`Summon a ${(c instanceof Card ? c.Cards : c.game.Cards).Names[x].name}`,
 	swarm: 'Base health is equal to count of ally scarabs',
 	swave:
 		'Deals 4 spell damage to target. Instantly kill creature or destroy weapon if frozen',

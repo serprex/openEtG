@@ -19,8 +19,8 @@ export default function(deck) {
 		if (~bannedCards.indexOf(card)) return card.name + ' is banned';
 		if (card.isOf(Cards.Names.Mindgate)) mindGateCount++;
 		else if (
-			(card.type == etg.SpellEnum && !card.isOf(Cards.Names.Chimera)) ||
-			card.type == etg.PermanentEnum
+			(card.type == etg.Spell && !card.isOf(Cards.Names.Chimera)) ||
+			card.type == etg.Permanent
 		) {
 			if (cardCount[card.code]) {
 				cardCount[card.code]++;

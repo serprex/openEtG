@@ -11,7 +11,6 @@ export default function Thing(game, id) {
 import * as etg from './etg.js';
 import Skill from './Skill.js';
 import * as sfx from './audio.js';
-import * as Cards from './Cards.js';
 import Skills from './Skills.js';
 import skillText from './skillText.js';
 import parseSkill from './parseSkill.js';
@@ -173,9 +172,12 @@ Thing.prototype.die = function() {
 		this.proc('discard');
 	} else if (this.type === etg.Creature && !this.trigger('predeath')) {
 		if (
-			this.status.get('aflatoxin') & !this.card.isOf(Cards.Names.MalignantCell)
+			this.status.get('aflatoxin') &
+			!this.card.isOf(this.game.Cards.Names.MalignantCell)
 		) {
-			const cell = this.game.newThing(this.card.as(Cards.Names.MalignantCell));
+			const cell = this.game.newThing(
+				this.card.as(this.game.Cards.Names.MalignantCell),
+			);
 			const creatures = new Uint32Array(this.owner.creatureIds);
 			creatures[idx] = cell.id;
 			this.game.set(this.ownerId, 'creatures', creatures);

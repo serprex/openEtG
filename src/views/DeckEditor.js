@@ -1,13 +1,13 @@
 import { connect } from 'react-redux';
 import React from 'react';
 
-import * as etgutil from '../etgutil';
-import * as Cards from '../Cards';
-import * as Tutor from '../Components/Tutor';
-import * as sock from '../sock';
-import * as store from '../store';
+import * as etgutil from '../etgutil.js';
+import Cards from '../Cards.js';
+import * as Tutor from '../Components/Tutor.js';
+import * as sock from '../sock.js';
+import * as store from '../store.js';
 import { chain } from '../util.js';
-import Editor from '../Components/Editor';
+import Editor from '../Components/Editor.js';
 
 function processDeck(pool, dcode) {
 	let mark = 0,

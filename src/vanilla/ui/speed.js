@@ -1,4 +1,4 @@
-import * as Cards from '../Cards';
+import Cards from '../Cards.js';
 const infobox = document.getElementById('infobox');
 function prValue(id, sid) {
 	document.getElementById(id).addEventListener('input', function() {

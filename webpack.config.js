@@ -2,11 +2,9 @@ module.exports = {
 	entry: {
 		aivai: './src/aivai.js',
 		art: './src/ui/art.js',
-		cia: './src/vanilla/ui/cia.js',
 		deck: './src/ui/deck.js',
 		main: './src/ui/main.js',
 		mosaic: './src/ui/mosaic.js',
-		vanilla: './src/vanilla/ui/main.js',
 		vaivai: './src/vanilla/ui/aivai.js',
 		vdeckinfo: './src/vanilla/ui/deckinfo.js',
 		vnamegame: './src/vanilla/ui/namegame.js',

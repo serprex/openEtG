@@ -2,7 +2,6 @@ import * as imm from './immutable.js';
 import * as etg from './etg.js';
 import * as util from './util.js';
 import Skill from './Skill.js';
-import { Codes } from './Cards.js';
 import * as etgutil from './etgutil.js';
 import skillText from './skillText.js';
 import parseSkill from './parseSkill.js';
@@ -22,7 +21,8 @@ function readCost(coststr, defaultElement) {
 }
 
 export default class Card {
-	constructor(type, info) {
+	constructor(Cards, type, info) {
+		this.Cards = Cards;
 		this.type = type;
 		this.element = info.E;
 		this.name = info.Name;
@@ -131,13 +131,13 @@ export default class Card {
 	asUpped(upped) {
 		return this.upped === !!upped
 			? this
-			: Codes[etgutil.asUpped(this.code, upped)];
+			: this.Cards.Codes[etgutil.asUpped(this.code, upped)];
 	}
 
 	asShiny(shiny) {
 		return this.shiny === !!shiny
 			? this
-			: Codes[etgutil.asShiny(this.code, shiny)];
+			: this.Cards.Codes[etgutil.asShiny(this.code, shiny)];
 	}
 
 	isOf(card) {

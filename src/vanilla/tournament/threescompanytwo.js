@@ -7,10 +7,10 @@ export default function(deck) {
 		var card = deck[i];
 		if (card.upped) return card.name + ' is an upgraded card';
 		if (~etg.ShardList.indexOf(card.code)) return card.name + ' is a shard';
-		if (card.type == etg.PillarEnum) continue;
+		if (card.type == etg.Pillar) continue;
 		var type = Math.max(
-			card == Cards.Chimera ? etg.CreatureEnum : card.type,
-			etg.PermanentEnum,
+			card == Cards.Chimera ? etg.Creature : card.type,
+			etg.Permanent,
 		);
 		if (!cardtypes[type]) {
 			cardtypes[type] = 1;

@@ -1,5 +1,3 @@
-import * as Cards from '../Cards';
-
 export default function(game) {
 	let limit = 333,
 		cmdct,
@@ -35,7 +33,7 @@ export default function(game) {
 					}
 				}
 			}
-			if (active && active.name[0] in Cards.Targeting) {
+			if (active && active.name[0] in game.Cards.Targeting) {
 				game.getTarget(c, active);
 				if (c.owner.shield && c.owner.shield.status.get('reflect'))
 					evalIter(c.owner);

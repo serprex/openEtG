@@ -35,7 +35,7 @@
   },
   "scripts": {
     "start": "node --experimental-modules --experimental-wasm-modules ./server.js",
-    "test": "node --experimental-modules ./scripts/tests.js && node --experimental-modules ./src/vanilla/_tests.js",
+    "test": "node --experimental-modules --experimental-wasm-modules ./scripts/tests.js && node --experimental-modules --experimental-wasm-modules ./src/vanilla/_tests.js",
     "dev": "webpack --mode=development --watch",
     "build": "webpack -p",
     "build-dev": "webpack --mode=development",

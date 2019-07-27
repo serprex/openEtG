@@ -1,8 +1,7 @@
-import * as etg from '../etg.js';
-import * as Cards from '../Cards.js';
-import Skills from '../Skills';
-import evalGame from './eval';
-import lethal from './lethal';
+import * as etg from '../../etg.js';
+import Skills from '../Skills.js';
+import evalGame from './eval.js';
+import lethal from './lethal.js';
 
 function getWorstCard(game) {
 	let worstcard = 0,
@@ -92,7 +91,7 @@ export default class AiSearch {
 				casthash.add(ch);
 				var active =
 					c.type === etg.Spell
-						? c.card.type == etg.SpellEnum && c.card.active.get('cast')
+						? c.card.type == etg.Spell && c.card.active.get('cast')
 						: c.active.get('cast');
 				var cbits = game.tgtToBits(c) ^ 8,
 					tgthash = new Set();
@@ -144,7 +143,7 @@ export default class AiSearch {
 					}
 				}
 				var preEval = currentEval;
-				if (active && active.name[0] in Cards.Targeting) {
+				if (active && active.name[0] in game.Cards.Targeting) {
 					game.getTarget(c, active);
 					for (var j = 0; j < 2; j++) {
 						var pl = j == 0 ? c.owner : c.owner.foe;

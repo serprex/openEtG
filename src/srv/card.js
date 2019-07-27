@@ -1,5 +1,5 @@
 import gzip from './gzip.js';
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 import * as svg from '../svg.js';
 
 export default async function card(url, stime) {

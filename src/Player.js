@@ -2,7 +2,6 @@ import * as imm from './immutable.js';
 import Thing from './Thing.js';
 import * as etg from './etg.js';
 import * as etgutil from './etgutil.js';
-import * as Cards from './Cards.js';
 
 export default function Player(game, id) {
 	if (!id || typeof id !== 'number') throw new Error(`Invalid id: ${id}`);
@@ -196,8 +195,8 @@ Player.prototype.init = function(data) {
 	const deck = [];
 	for (const code of etgutil.iterdeck(data.deck)) {
 		let idx;
-		if (code in Cards.Codes) {
-			deck.push(Cards.Codes[code]);
+		if (code in this.game.Cards.Codes) {
+			deck.push(this.game.Cards.Codes[code]);
 		} else if (~(idx = etgutil.fromTrueMark(code))) {
 			this.mark = idx;
 		}
@@ -240,11 +239,11 @@ Player.prototype.addCrea = function(x, fromhand) {
 		if (fromhand && this.game.bonusstats) {
 			this.game.updateIn(
 				[this.game.id, 'bonusstats', 'creaturesplaced'],
-				creaturesplaced => {
-					creaturesplaced = new Map(creaturesplaced);
-					creaturesplaced.set(this.id, (creaturesplaced.get(this.id) | 0) + 1);
-					return creaturesplaced;
-				},
+				creaturesplaced =>
+					new Map(creaturesplaced).set(
+						this.id,
+						(creaturesplaced.get(this.id) | 0) + 1,
+					),
 			);
 		}
 		x.place(this, etg.Creature, fromhand);

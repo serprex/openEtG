@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 import Game from '../Game.js';
 import * as sock from '../sock.js';
 import * as store from '../store.js';
@@ -48,7 +48,11 @@ function RenderInfo(props) {
 					y={y}
 				/>
 				<Components.Text
-					style={{ position: 'absolute', left: '100px', top: 4 + y + 'px' }}
+					style={{
+						position: 'absolute',
+						left: '100px',
+						top: 4 + y + 'px',
+					}}
 					text={
 						`W-L: ${info.win || 0} - ${info.loss || 0}` +
 						`, Rank: ${info.rank == undefined ? 'Inactive' : info.rank + 1}` +
@@ -66,19 +70,35 @@ function RenderInfo(props) {
 					value={adeck}
 				/>
 				<span
-					style={{ position: 'absolute', left: '400px', top: 224 + y + 'px' }}>
+					style={{
+						position: 'absolute',
+						left: '400px',
+						top: 224 + y + 'px',
+					}}>
 					Age: {info.day}
 				</span>
 				<span
-					style={{ position: 'absolute', left: '100px', top: 224 + y + 'px' }}>
+					style={{
+						position: 'absolute',
+						left: '100px',
+						top: 224 + y + 'px',
+					}}>
 					HP: {info.curhp} / {info.hp}
 				</span>
 				<span
-					style={{ position: 'absolute', left: '200px', top: 224 + y + 'px' }}>
+					style={{
+						position: 'absolute',
+						left: '200px',
+						top: 224 + y + 'px',
+					}}>
 					Mark: {info.mark}
 				</span>
 				<span
-					style={{ position: 'absolute', left: '300px', top: 224 + y + 'px' }}>
+					style={{
+						position: 'absolute',
+						left: '300px',
+						top: 224 + y + 'px',
+					}}>
 					Draw: {info.draw}
 				</span>
 				<input
@@ -166,7 +186,11 @@ export default connect(({ user }) => ({
 			return (
 				<>
 					<Components.Text
-						style={{ position: 'absolute', left: '96px', top: '560px' }}
+						style={{
+							position: 'absolute',
+							left: '96px',
+							top: '560px',
+						}}
 						text={
 							'Earn 5$ when your deck is faced, & another 10$ when it wins\nEarn 25$ per age of current deck for a new deck, or 250$ if over a week old'
 						}

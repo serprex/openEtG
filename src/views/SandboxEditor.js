@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 
 import * as etgutil from '../etgutil.js';
 import * as store from '../store.js';
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 import Editor from '../Components/Editor.js';
 
 function processDeck(dcode) {

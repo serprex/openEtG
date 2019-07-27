@@ -18,11 +18,11 @@ export default function(deck) {
 		var card = deck[i];
 		if (~etg.ShardList.indexOf(card.code)) return 'Shards are banned';
 		if (card.upped) 'Upgraded cards are banned';
-		if (card == Cards.Chimera || card.type == etg.CreatureEnum) creatures++;
+		if (card == Cards.Chimera || card.type == etg.Creature) creatures++;
 		if (
-			card.type == etg.PermanentEnum ||
-			card.type == etg.WeaponEnum ||
-			card.type == etg.ShieldEnum
+			card.type == etg.Permanent ||
+			card.type == etg.Weapon ||
+			card.type == etg.Shield
 		) {
 			perms[card.code] = (perms[card.code] || 0) + 1;
 		}

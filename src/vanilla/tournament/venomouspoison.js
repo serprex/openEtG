@@ -10,7 +10,7 @@ export default function(deck) {
 		var card = deck[i];
 		if (
 			free.indexOf(card.code) == -1 &&
-			(card.type != etg.PillarEnum || card.name.match(/^Mark of/))
+			(card.type != etg.Pillar || card.name.match(/^Mark of/))
 		) {
 			if (card.upped) return card.name + ' is upgraded. Upgrades are banned';
 			if (~etg.ShardList.indexOf(card.code))
@@ -21,15 +21,15 @@ export default function(deck) {
 				card == Cards.Names.NymphTears
 			)
 				return card.name + ' is banned';
-			if (card.type <= etg.PermanentEnum && !perms--) {
+			if (card.type <= etg.Permanent && !perms--) {
 				return card.name + ' would be your 4th non listed permanent';
 			} else if (
-				(card.type == etg.CreatureEnum || card == Cards.Names.Chimera) &&
+				(card.type == etg.Creature || card == Cards.Names.Chimera) &&
 				!creas--
 			) {
 				return card.name + ' would be your 4th non listed creature';
 			} else if (
-				card.type == etg.SpellEnum &&
+				card.type == etg.Spell &&
 				card != Cards.Names.Chimera &&
 				!spells--
 			) {

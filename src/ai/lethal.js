@@ -1,5 +1,3 @@
-import * as Cards from '../Cards.js';
-
 export default function lethal(game) {
 	let limit = 333,
 		cmdct,
@@ -32,7 +30,7 @@ export default function lethal(game) {
 					}
 				}
 			}
-			if (active && active.castName in Cards.Targeting) {
+			if (active && active.castName in game.Cards.Targeting) {
 				const targetFilter = game.targetFilter(c, active);
 				if (c.owner.shield && c.owner.shield.getStatus('reflective'))
 					evalIter(c.owner, targetFilter);

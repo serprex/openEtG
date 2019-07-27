@@ -1,6 +1,6 @@
 import React from 'react';
 
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
 import * as userutil from '../userutil.js';
 import * as Components from '../Components/index.js';
@@ -36,7 +36,9 @@ export default class Reward extends React.Component {
 					codedone: data => {
 						const { user } = store.store.getState();
 						store.store.dispatch(
-							store.updateUser({ pool: etgutil.addcard(user.pool, data.card) }),
+							store.updateUser({
+								pool: etgutil.addcard(user.pool, data.card),
+							}),
 						);
 						store.store.dispatch(
 							store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System'),

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import * as Cards from './Cards.js';
+import Cards from './Cards.js';
 import * as etgutil from './etgutil.js';
 import Game from './Game.js';
 import * as store from './store.js';

@@ -4,7 +4,7 @@ import * as store from './store.js';
 import * as util from './util.js';
 import RngMock from './RngMock.js';
 import * as etgutil from './etgutil.js';
-import * as Cards from './Cards.js';
+import Cards from './Cards.js';
 import Game from './Game.js';
 
 export function requireQuest(quest, user) {

@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 
 import * as etg from '../etg.js';
 import * as sock from '../sock.js';
-import * as Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
 import RngMock from '../RngMock.js';
 import * as userutil from '../userutil.js';
@@ -142,7 +141,7 @@ const BonusList = [
 		func: (game, p1, p2) => {
 			let unupnu = 0;
 			for (const [code, count] of etgutil.iterraw(p1.data.deck)) {
-				const card = Cards.Codes[code];
+				const card = game.Cards.Codes[code];
 				if (card && !card.upped) unupnu += count;
 			}
 			return unupnu / 300;
@@ -316,14 +315,14 @@ export default connect(({ user }) => ({ user }))(
 					if (state.cardreward === undefined && foedeck) {
 						const foeDeck = etgutil.decodedeck(foedeck.deck);
 						let winnable = foeDeck.filter(code => {
-								const card = Cards.Codes[code];
+								const card = game.Cards.Codes[code];
 								return card && card.rarity > 0 && card.rarity < 3;
 							}),
 							cardwon;
 						if (winnable.length) {
 							cardwon = RngMock.choose(winnable);
 						} else {
-							const elewin = Cards.Codes[RngMock.choose(foeDeck)];
+							const elewin = game.Cards.Codes[RngMock.choose(foeDeck)];
 							cardwon = RngMock.randomcard(
 								elewin.upped,
 								x =>
@@ -341,7 +340,10 @@ export default connect(({ user }) => ({ user }))(
 							if (game.data.daily === undefined) {
 								const streak = (this.props.streakback || 0) + 1;
 								if (streak !== this.props.user.streak[level]) {
-									sock.userExec('setstreak', { l: level, n: streak });
+									sock.userExec('setstreak', {
+										l: level,
+										n: streak,
+									});
 								}
 								streakrate = Math.min((streak200[level] * streak) / 200, 1);
 								lefttext.push(

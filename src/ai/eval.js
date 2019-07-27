@@ -1,5 +1,4 @@
 import * as etg from '../etg.js';
-import * as Cards from '../Cards.js';
 import Skills from '../Skills.js';
 import parseSkill from '../parseSkill.js';
 
@@ -199,7 +198,7 @@ const SkillsValues = {
 	neuroify: c => (c.owner.foe.getStatus('neuro') ? 1 : 5),
 	nightmare: c => {
 		const n = c.owner.hand.reduce(
-			(n, inst) => n + !!inst.card.isOf(Cards.Names.Nightmare),
+			(n, inst) => n + !!inst.card.isOf(c.game.Cards.Names.Nightmare),
 			0,
 		);
 		return (24 - c.owner.foe.handIds.length) >> n;

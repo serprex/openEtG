@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
 import * as userutil from '../userutil.js';
 import * as Components from '../Components/index.js';
@@ -208,7 +208,9 @@ export default connect(({ user }) => ({ user }))(
 									code in cardpool &&
 									!(code in cardminus && cardminus[code] >= cardpool[code])
 								) {
-									this.setState({ deck: this.state.deck.concat([code]) });
+									this.setState({
+										deck: this.state.deck.concat([code]),
+									});
 								}
 							}}
 						/>

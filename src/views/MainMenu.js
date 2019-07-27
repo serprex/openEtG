@@ -5,7 +5,7 @@ import * as audio from '../audio.js';
 import Chat from '../Components/Chat.js';
 import * as sock from '../sock.js';
 import * as mkAi from '../mkAi.js';
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
 import * as store from '../store.js';
 import RngMock from '../RngMock.js';

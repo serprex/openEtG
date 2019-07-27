@@ -1,7 +1,7 @@
-import Effect from '../Effect.js';
-import * as Cards from '../Cards.js';
-import Game from '../Game.js';
-import * as etg from '../etg.js';
+import Effect from '../../Effect.js';
+import Cards from '../Cards.js';
+import Game from '../../Game.js';
+import * as etg from '../../etg.js';
 import * as etgutil from '../../etgutil.js';
 import aiSearch from '../ai/search.js';
 import * as util from '../../util.js';

@@ -25,18 +25,9 @@ export default function forkcore(req, res) {
 			if (func === lut.collection) cache.rm(url);
 		} else if (
 			!~url.indexOf('..') &&
-			url.match(/^(vanilla\/|cia\/)?$|\.(js(on|\.map)?|html?|css|csv|png|ogg)$/)
+			url.match(/^$|\.(js(on|\.map)?|html?|css|csv|png|ogg)$/)
 		) {
-			cache.add(
-				res,
-				url,
-				ifmod,
-				url.match(/^(vanilla\/|cia\/)?$/) ? url + 'index.html' : url,
-				file,
-			);
-		} else if (url == 'vanilla' || url == 'cia') {
-			res.writeHead(302, { Location: `/${url}/` });
-			res.end();
+			cache.add(res, url, ifmod, url || 'index.html', file);
 		} else if (url == 'speed') {
 			res.writeHead(302, { Location: `/speed/${util.readint()}` });
 			res.end();

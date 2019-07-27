@@ -1,12 +1,8 @@
-import * as etg from '../etg.js';
-import * as Cards from '../Cards.js';
+import * as etg from '../../etg.js';
 import Actives from '../Skills.js';
-import * as smth from '../Thing.js';
 
 function pillarval(c) {
-	return c instanceof smth.CardInstance
-		? 0.1
-		: Math.sqrt(c.getStatus('charges'));
+	return c.type === etg.Spell ? 0.1 : Math.sqrt(c.getStatus('charges'));
 }
 const ActivesValues = Object.freeze({
 	ablaze: 3,
@@ -20,7 +16,7 @@ const ActivesValues = Object.freeze({
 	aggroskele: 2,
 	air: 1,
 	alphawolf: function(c) {
-		return c instanceof smth.CardInstance ? 3 : 0;
+		return c.type === etg.Spell ? 3 : 0;
 	},
 	animateweapon: 4,
 	antimatter: 12,
@@ -57,7 +53,7 @@ const ActivesValues = Object.freeze({
 	deployblobs: function(c) {
 		return (
 			2 +
-			(c instanceof smth.CardInstance
+			(c.type === etg.Spell
 				? Math.min(c.card.attack, c.card.health)
 				: Math.min(c.trueatk(), c.truehp())) /
 				4
@@ -66,7 +62,7 @@ const ActivesValues = Object.freeze({
 	destroy: 8,
 	destroycard: 1,
 	devour: function(c) {
-		return 2 + (c instanceof smth.CardInstance ? c.card.health : c.truehp());
+		return 2 + (c.type === etg.Spell ? c.card.health : c.truehp());
 	},
 	drawcopy: 1,
 	disarm: function(c) {
@@ -79,7 +75,7 @@ const ActivesValues = Object.freeze({
 	disfield: 8,
 	disshield: 7,
 	dive: function(c, ttatk) {
-		return c instanceof smth.CardInstance
+		return c.type === etg.Spell
 			? c.card.attack
 			: ttatk - (c.getStatus('dive') || 0) / 1.5;
 	},
@@ -127,7 +123,7 @@ const ActivesValues = Object.freeze({
 		return dmg;
 	},
 	gpull: function(c) {
-		return c instanceof smth.CardInstance || c !== c.owner.gpull ? 2 : 0;
+		return c.type === etg.Spell || c.id !== c.owner.gpull ? 2 : 0;
 	},
 	gpullspell: 3,
 	gratitude: function(c) {
@@ -138,7 +134,7 @@ const ActivesValues = Object.freeze({
 	guard: 4,
 	halveatk: function(c) {
 		var atk;
-		return c instanceof smth.CardInstance
+		return c.type === etg.Spell
 			? -c.card.attack / 4
 			: ((atk = c.trueatk()) < 0) - (atk > 0);
 	},
@@ -184,7 +180,7 @@ const ActivesValues = Object.freeze({
 	nightmare: function(c) {
 		var val = 24 - c.owner.foe.hand.length;
 		c.owner.hand.forEach(function(inst) {
-			if (inst.card.isOf(Cards.Names.Nightmare)) val /= 2;
+			if (inst.card.isOf(inst.game.Cards.Names.Nightmare)) val /= 2;
 		});
 		return val;
 	},
@@ -215,7 +211,7 @@ const ActivesValues = Object.freeze({
 	powerdrain: 6,
 	precognition: 1,
 	predator: function(c, tatk) {
-		return !(c instanceof smth.CardInstance) && c.owner.foe.hand.length > 4
+		return !(c.type === etg.Spell) && c.owner.foe.hand.length > 4
 			? tatk + Math.max(c.owner.foe.hand.length - 6, 1)
 			: 1;
 	},
@@ -269,10 +265,10 @@ const ActivesValues = Object.freeze({
 	upkeep: -0.5,
 	upload: 3,
 	vampire: function(c, ttatk) {
-		return (c instanceof smth.CardInstance ? c.card.attack : ttatk) * 0.7;
+		return (c.type === etg.Spell ? c.card.attack : ttatk) * 0.7;
 	},
 	virtue: function(c) {
-		return c instanceof smth.CardInstance
+		return c.type === etg.Spell
 			? c.owner.foe.shield
 				? Math.min(c.owner.foe.shield.dr, c.card.attack)
 				: 0
@@ -288,9 +284,7 @@ const ActivesValues = Object.freeze({
 	quantagift: 4,
 	web: 1,
 	wind: function(c) {
-		return c instanceof smth.CardInstance
-			? -2
-			: c.getStatus('storedAtk') / 2 - 2;
+		return c.type === etg.Spell ? -2 : c.getStatus('storedAtk') / 2 - 2;
 	},
 	wisdom: 4,
 	pillar: pillarval,
@@ -485,7 +479,7 @@ function evalactive(c, active, extra) {
 function checkpassives(c) {
 	let score = 0;
 	for (const [status, val] of c.status) {
-		if (uniqueStatuses[status] && !(c instanceof smth.CardInstance)) {
+		if (uniqueStatuses[status] && !(c.type === etg.Spell)) {
 			if (!uniquesActive.has(status)) {
 				uniquesActive.add(status);
 			} else {
@@ -507,8 +501,8 @@ function evalthing(c) {
 		hp,
 		poison,
 		score = 0;
-	var isCreature = c instanceof smth.Creature,
-		isWeapon = c instanceof smth.Weapon;
+	var isCreature = c.type === etg.Creature,
+		isWeapon = c.type === etg.Weapon;
 	var adrenalinefactor = c.getStatus('adrenaline')
 		? etg.countAdrenaline(c.trueatk())
 		: 1;
@@ -716,18 +710,6 @@ export default function(game) {
 		}
 		for (var i = 0; i < player.hand.length; i++) {
 			pscore += evalcardinstance(player.hand[i]);
-		}
-		// Remove this if logic is updated to call endturn
-		if (
-			player !== game.turn &&
-			player.hand.length < 8 &&
-			player.deck.length > 0
-		) {
-			var code = player.deck.pop();
-			player.hand.push(new smth.CardInstance(code, player));
-			pscore += evalcardinstance(player.hand[player.hand.length - 1]);
-			player.hand.pop();
-			player.deck.push(code);
 		}
 		pscore += Math.min(8 - player.hand.length, player.drawpower) * 2;
 		pscore += Math.sqrt(player.hp) * 4;

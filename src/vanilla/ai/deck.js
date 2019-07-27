@@ -1,6 +1,6 @@
-import * as etg from '../etg';
+import * as etg from '../../etg';
 import * as Cards from '../Cards.js';
-import Actives from '../Skills.js';
+import Actives from '../../Skills.js';
 import * as etgutil from '../../etgutil.js';
 import RngMock from '../RngMock.js';
 
@@ -135,10 +135,10 @@ export default function(level) {
 			var card = RngMock.randomcard(Math.random() < uprate, function(x) {
 				return (
 					x.element == ele &&
-					x.type != etg.PillarEnum &&
+					x.type != etg.Pillar &&
 					cardcount[x.code] != 6 &&
-					!(x.type == etg.ShieldEnum && anyshield == 3) &&
-					!(x.type == etg.WeaponEnum && anyweapon == 3) &&
+					!(x.type == etg.Shield && anyshield == 3) &&
+					!(x.type == etg.Weapon && anyweapon == 3) &&
 					!x.isOf(Cards.Names.Precognition)
 				);
 			});
@@ -146,8 +146,8 @@ export default function(level) {
 			cardcount[card.code] = (cardcount[card.code] || 0) + 1;
 			if (
 				!(
-					((card.type == etg.WeaponEnum && !anyweapon) ||
-						(card.type == etg.ShieldEnum && !anyshield)) &&
+					((card.type == etg.Weapon && !anyweapon) ||
+						(card.type == etg.Shield && !anyshield)) &&
 					cardcount[card.code]
 				)
 			) {
@@ -160,14 +160,14 @@ export default function(level) {
 				for (var k = 1; k < 13; k++) {
 					ecost[k] -= card.upped ? 2 : 1;
 				}
-			} else if (card.type == etg.CreatureEnum) {
+			} else if (card.type == etg.Creature) {
 				var auto = card.active.auto;
 				if (auto == Actives.light) ecost[etg.Light] -= 2;
 				else if (auto == Actives.fire) ecost[etg.Fire] -= 2;
 				else if (auto == Actives.air) ecost[etg.Air] -= 2;
 				else if (auto == Actives.earth) ecost[etg.Earth] -= 2;
-			} else if (card.type == etg.ShieldEnum) anyshield++;
-			else if (card.type == etg.WeaponEnum) anyweapon++;
+			} else if (card.type == etg.Shield) anyshield++;
+			else if (card.type == etg.Weapon) anyweapon++;
 		}
 	});
 	for (var i = deck.length - 1; ~i; i--) {

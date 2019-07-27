@@ -1,4 +1,4 @@
-import * as Cards from './Cards.js';
+import Cards from './Cards.js';
 import * as etgutil from './etgutil.js';
 
 function transmute(user, oldcard, func, use) {

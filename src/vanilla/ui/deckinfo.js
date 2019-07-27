@@ -2,7 +2,7 @@ const infobox = document.getElementById('infobox');
 function setInfo(x) {
 	infobox.appendChild(typeof x === 'string' ? document.createTextNode(x) : x);
 }
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 document.getElementById('deckinput').addEventListener('keydown', printstat);
 function mkTable() {
 	var tbl = document.createElement('table');

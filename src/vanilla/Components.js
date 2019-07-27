@@ -1,9 +1,9 @@
 import React from 'react';
 
-import * as ui from './ui.js';
-import * as etg from './etg.js';
-import * as Cards from './Cards';
-import * as etgutil from '../etgutil';
+import * as ui from '../ui.js';
+import * as etg from '../etg.js';
+import Cards from './Cards.js';
+import * as etgutil from '../etgutil.js';
 
 export function Box(props) {
 	return (
@@ -390,9 +390,9 @@ export function CardSelectorCore(props) {
 			i > 2,
 			x =>
 				x.element == props.element &&
-				((i % 3 == 0 && x.type == etg.CreatureEnum) ||
-					(i % 3 == 1 && x.type <= etg.PermanentEnum) ||
-					(i % 3 == 2 && x.type == etg.SpellEnum)),
+				((i % 3 == 0 && x.type == etg.Creature) ||
+					(i % 3 == 1 && x.type <= etg.Permanent) ||
+					(i % 3 == 2 && x.type == etg.Spell)),
 			Cards.cardCmp,
 		);
 		children.push(

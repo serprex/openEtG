@@ -326,7 +326,6 @@ Weapon.prototype.freeze = Creature.prototype.freeze = function(x) {
 		!this.active.has('ownfreeze') ||
 		this.active.get('ownfreeze').func(this)
 	) {
-		Effect.mkText('Freeze', this);
 		this.defstatus('frozen', 0);
 		if (x > this.status.get('frozen')) this.setStatus('frozen', x);
 		if (this.status.get('voodoo')) this.owner.foe.freeze(x);
@@ -370,10 +369,6 @@ Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(
 ) {
 	this.trigger('death', this, index);
 	this.proc('death', [index]);
-	if (index >= 0)
-		Effect.mkDeath(
-			ui.creaturePos(this.owner == this.owner.game.player1 ? 0 : 1, index),
-		);
 };
 Creature.prototype.die = function() {
 	var index = this.remove();
@@ -611,7 +606,6 @@ Thing.prototype.useactive = function(t) {
 	if (!t || !t.evade(this.owner)) {
 		this.active.get('cast').func(this, t);
 		this.proc('spell');
-	} else if (t) Effect.mkText('Evade', t);
 	this.owner.spend(castele, cast);
 	this.owner.game.updateExpectedDamage();
 };
@@ -755,11 +749,9 @@ CardInstance.prototype.isMaterial = function(type) {
 	return type === undefined || type == etg.Spell;
 };
 
-import * as ui from './ui.js';
 import * as util from '../util.js';
-import Effect from './Effect.js';
 import Actives from './Skills.js';
 import Skill from '../Skill.js';
 import skillText from './skillText.js';
-import * as Cards from './Cards.js';
-import * as etg from './etg.js';
+import Cards from './Cards.js';
+import * as etg from '../../etg.js';

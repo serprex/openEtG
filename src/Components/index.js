@@ -1,7 +1,7 @@
 import React from 'react';
 
 import * as audio from '../audio.js';
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
 import * as store from '../store.js';

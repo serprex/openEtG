@@ -1,13 +1,12 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import * as etg from '../etg.js';
-import * as Cards from '../Cards.js';
+import * as etg from '../../etg.js';
+import Cards from '../Cards.js';
 import * as Components from '../Components.js';
-import * as mkAi from '../mkAi.js';
-import mkGame from '../mkGame.js';
+import { ExitBtn } from '../../Components/index.js';
 import * as etgutil from '../../etgutil.js';
-import * as store from '../store.js';
+import * as store from '../../store.js';
 import * as util from '../../util.js';
 
 function sumCardMinus(cardminus, code) {
@@ -89,6 +88,7 @@ export default connect(state => ({
 			}
 			return (
 				<>
+					<ExitBtn x={8} y={140} />
 					<input
 						type="text"
 						value={this.props.deck}
@@ -104,72 +104,16 @@ export default connect(state => ({
 						}}
 					/>
 					<input
-						type="text"
-						value={this.props.aideck}
-						onChange={e =>
-							this.props.dispatch(store.setOpt('aideck', e.target.value))
-						}
-						placeholder="AI Deck"
-						style={{
-							left: '0px',
-							top: '624px',
-							width: '900px',
-							position: 'absolute',
-						}}
-					/>
-					<input
 						type="button"
 						value="Clear"
-						style={{ position: 'absolute', left: '8px', top: '32px' }}
+						style={{
+							position: 'absolute',
+							left: '8px',
+							top: '32px',
+						}}
 						onClick={() => {
 							this.props.dispatch(store.setOptTemp('deck', ''));
 						}}
-					/>
-					<input
-						type="button"
-						style={{ position: 'absolute', left: '8px', top: '80px' }}
-						value="Custom"
-						onClick={() =>
-							mkAi.run(
-								mkGame(
-									{
-										deck: this.props.aideck
-											.split(' ')
-											.map(x => parseInt(x, 32)),
-										urdeck: this.props.deck
-											.split(' ')
-											.map(x => parseInt(x, 32)),
-										seed: util.randint(),
-										foename: 'Custom',
-									},
-									true,
-								),
-							)
-						}
-					/>
-					<input
-						type="button"
-						style={{ position: 'absolute', left: '8px', top: '110px' }}
-						value="Commoner"
-						onClick={() => mkAi.run(mkAi.mkAi(0))}
-					/>
-					<input
-						type="button"
-						style={{ position: 'absolute', left: '8px', top: '140px' }}
-						value="Mage"
-						onClick={() => mkAi.run(mkAi.mkAi(1))}
-					/>
-					<input
-						type="button"
-						style={{ position: 'absolute', left: '8px', top: '170px' }}
-						value="Champion"
-						onClick={() => mkAi.run(mkAi.mkAi(2))}
-					/>
-					<input
-						type="button"
-						style={{ position: 'absolute', left: '8px', top: '200px' }}
-						value="False God"
-						onClick={() => mkAi.run(mkAi.mkPremade())}
 					/>
 					{ebuttons}
 					<span
@@ -194,9 +138,9 @@ export default connect(state => ({
 						onClick={code => {
 							if (deck.length < 60) {
 								const card = Cards.Codes[code];
-								if (card.type != etg.PillarEnum) {
+								if (card.type != etg.Pillar) {
 									if (
-										Cards.Codes[code].type != etg.PillarEnum &&
+										Cards.Codes[code].type != etg.Pillar &&
 										sumCardMinus(cardminus, code) >= 6
 									) {
 										return;

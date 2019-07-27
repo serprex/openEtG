@@ -5,7 +5,6 @@ import * as ui from '../ui.js';
 import * as etg from '../etg.js';
 import * as sock from '../sock.js';
 import Card from '../Card.js';
-import * as Cards from '../Cards.js';
 import Effect from '../Effect.js';
 import aiSearch from '../ai/search.js';
 import * as Components from '../Components.js';
@@ -501,7 +500,9 @@ export default connect()(
 							shiny: c.card.shiny,
 						};
 					}
-					this.setState({ foeplays: this.state.foeplays.concat([play]) });
+					this.setState({
+						foeplays: this.state.foeplays.concat([play]),
+					});
 					c.useactive(t);
 				},
 				resign: data => {
@@ -671,7 +672,8 @@ export default connect()(
 					? 'ico silence'
 					: pl.sanctuary
 					? 'ico sanctuary'
-					: pl.nova >= 3 && pl.hand.some(c => c.card.isOf(Cards.Names.Nova))
+					: pl.nova >= 3 &&
+					  pl.hand.some(c => c.card.isOf(game.Cards.Names.Nova))
 					? 'ico singularity'
 					: '';
 				children.push(

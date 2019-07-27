@@ -2,7 +2,6 @@ import RngModule from '../rng.js';
 const Rng = RngModule.exports;
 import * as etg from './etg.js';
 import * as Cards from './Cards.js';
-import Effect from './Effect.js';
 import Player from './Player.js';
 
 export default function Game(seed, flip) {
@@ -66,7 +65,6 @@ Game.prototype.updateExpectedDamage = function() {
 	if (this.expectedDamage) {
 		this.expectedDamage[0] = this.expectedDamage[1] = 0;
 		if (!this.winner) {
-			Effect.disable = true;
 			for (var i = 0; i < 3; i++) {
 				var gclone = this.clone();
 				gclone.player1.permanents.forEach(removeSoPa);
@@ -77,7 +75,6 @@ Game.prototype.updateExpectedDamage = function() {
 				this.expectedDamage[0] += this.player1.hp - gclone.player1.hp;
 				this.expectedDamage[1] += this.player2.hp - gclone.player2.hp;
 			}
-			Effect.disable = false;
 			this.expectedDamage[0] = Math.round(this.expectedDamage[0] / 3);
 			this.expectedDamage[1] = Math.round(this.expectedDamage[1] / 3);
 		}

@@ -30,7 +30,7 @@ export default function(deck) {
 		var card = deck[i];
 		if (card.upped) return 'Upgraded cards are banned';
 		if (~bannedCards.indexOf(card)) return card.name + ' is banned';
-		if (card.type == etg.PillarEnum && card.element) pillCount++;
+		if (card.type == etg.Pillar && card.element) pillCount++;
 		if (~rngCards.indexOf(card)) rngCount++;
 	}
 	if (pillCount > 5) return 'Too many non-quantum pillars';

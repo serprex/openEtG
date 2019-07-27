@@ -1,7 +1,6 @@
 import * as imm from '../immutable.js';
 import * as etg from './etg.js';
 import * as Cards from './Cards.js';
-import Effect from './Effect.js';
 import Actives from './Skills.js';
 import { Thing, CardInstance } from './Thing.js';
 
@@ -278,8 +277,6 @@ Player.prototype.drawcard = function() {
 		if (this.deck.length > 0) {
 			this.hand[this.hand.length] = new CardInstance(this.deck.pop(), this);
 			this.proc('draw');
-			if (this.deck.length == 0 && this.game.player1 == this)
-				Effect.mkSpriteFadeText('Last card!', { x: 450, y: 300 });
 		} else this.game.setWinner(this.foe);
 	}
 };

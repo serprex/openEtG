@@ -45,6 +45,8 @@ export default function parseChat(e) {
 			);
 		} else if (msg == '/who') {
 			sock.emit({ x: 'who' });
+		} else if (msg === '/vanilla') {
+			store.store.dispatch(store.doNav(import('./vanilla/views/Editor.js')));
 		} else if (msg === '/importaccount') {
 			store.store.dispatch(store.doNav(import('./views/ImportAccount.js')));
 		} else if (msg.match(/^\/roll( |$)\d*d?\d*$/)) {

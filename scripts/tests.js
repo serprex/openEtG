@@ -5,7 +5,7 @@ const assert = assertSoft.strict;
 
 import * as etg from '../src/etg.js';
 import Game from '../src/Game.js';
-import * as Cards from '../src/Cards.js';
+import Cards from '../src/Cards.js';
 import parseSkill from '../src/parseSkill.js';
 import * as etgutil from '../src/etgutil.js';
 import Cjson from '../src/Cards.json';
@@ -60,7 +60,7 @@ M = new TestModule('Cards', {
 	beforeEach() {
 		const data = {
 			seed: 5489,
-			players: [{ user: 'p1', deck: '104vc' }, { user: 'p2', deck: '104vc' }],
+			players: [{ idx: 1, deck: '104vc' }, { idx: 2, deck: '104vc' }],
 		};
 		this.game = new Game(data);
 		this.cast = (skill, ...args) => parseSkill(skill).func(this.game, ...args);
@@ -141,7 +141,6 @@ M.test('Deckout', function() {
 	assert.equal(this.game.winner, this.player1Id);
 });
 M.test('Destroy', function() {
-	this.game.turn = this.player1Id;
 	this.player1.setQuanta(etg.Death, 10);
 	initHand(
 		this.player1,
@@ -262,7 +261,7 @@ M.test('Gpull', function() {
 		'dmg redirected',
 	);
 	assert.equal(
-		this.game.byId(this.player2.gpull).getStatus('poison'),
+		this.game.getStatus(this.player2.gpull, 'poison'),
 		1,
 		'psn redirected',
 	);

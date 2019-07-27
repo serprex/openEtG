@@ -1,4 +1,4 @@
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 
 const infobox = document.getElementById('infobox');
 document.getElementById('nameinput').addEventListener('keydown', printstat);

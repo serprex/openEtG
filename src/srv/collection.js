@@ -1,5 +1,5 @@
 import gzip from './gzip.js';
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 import * as Us from './Us.js';
 import * as etgutil from '../etgutil.js';
 

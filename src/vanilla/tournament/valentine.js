@@ -25,12 +25,12 @@ export default function(deck) {
 			~unuppedbans.indexOf(card.code)
 		)
 			return card.name + ' is banned';
-		if (card.type == etg.PillarEnum) continue;
+		if (card.type == etg.Pillar) continue;
 		var nymph = etg.NymphList.indexOf(card.asUpped(false).code);
 		if (~nymph) {
 			if (nymphs[nymph]) return 'You may only have 1 ' + card.name;
 			nymphs[nymph] = 1;
-		} else if (card.type == etg.CreatureEnum || card.isOf(Cards.Chimera))
+		} else if (card.type == etg.Creature || card.isOf(Cards.Chimera))
 			cards[card.asUpped(false).code] =
 				(cards[card.asUpped(false).code] || 0) + 1;
 	}

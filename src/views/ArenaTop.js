@@ -1,6 +1,6 @@
 import React from 'react';
 
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 import * as Components from '../Components/index.js';
 import * as sock from '../sock.js';
 import * as store from '../store.js';

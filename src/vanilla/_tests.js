@@ -3,18 +3,20 @@
 import assertSoft from 'assert';
 const assert = assertSoft.strict;
 
-import * as etg from './etg.js';
-import * as smth from './Thing.js';
-import Game from './Game.js';
+import * as etg from '../etg.js';
+import Game from '../Game.js';
 import * as etgutil from '../etgutil.js';
-import Actives from './Skills.js';
-import * as Cards from './Cards.js';
+import Cards from './Cards.js';
 import Cjson from './Cards.json';
 
 function initHand(pl, ...args) {
+	const hand = [];
 	for (let i = 0; i < args.length; i++) {
-		pl.hand[i] = new smth.CardInstance(args[i], pl);
+		const cardinst = pl.newThing(args[i]);
+		cardinst.type = etg.Spell;
+		hand[i] = cardinst.id;
 	}
+	pl.handIds = hand;
 }
 class TestModule {
 	constructor(name, opts) {
@@ -55,47 +57,42 @@ M.test('Upped Alignment', function() {
 });
 M = new TestModule('Cards', {
 	beforeEach() {
-		this.game = new Game(5489);
-		this.player1 = this.game.player1;
-		this.player2 = this.game.player2;
-		this.game.turn = this.player1;
+		const data = {
+			seed: 5489,
+			set: 'Original',
+			players: [{ idx: 1, deck: '104vc' }, { idx: 2, deck: '104vc' }],
+		};
+		this.game = new Game(data);
+		this.cast = (skill, ...args) => parseSkill(skill).func(this.game, ...args);
+		this.initDeck = (pl, ...args) =>
+			(pl.deckIds = args.map(x => pl.newThing(x).id));
+		this.player1 = this.game.byId(this.game.players[0]);
+		this.player2 = this.game.byId(this.game.players[1]);
+		this.player1.handIds = this.player2.handIds = [];
+		this.player1Id = this.player1.id;
+		this.player2Id = this.player2.id;
+		this.game.phase = etg.PlayPhase;
 		this.player1.mark = this.player2.mark = etg.Entropy;
-		this.player1.deck = [
-			Cards.Names.AmethystPillar,
-			Cards.Names.AmethystPillar,
-			Cards.Names.AmethystPillar,
-		];
-		this.player2.deck = [
-			Cards.Names.BonePillar,
-			Cards.Names.BonePillar,
-			Cards.Names.BonePillar,
-		];
 	},
 });
 M.test('Adrenaline', function() {
-	(this.player1.creatures[0] = new smth.Creature(
-		Cards.Names.Devourer,
-		this.player1,
-	)).setStatus('adrenaline', 1);
-	(this.player1.creatures[1] = new smth.Creature(
-		Cards.Names.HornedFrog,
-		this.player1,
-	)).setStatus('adrenaline', 1);
-	(this.player1.creatures[2] = new smth.Creature(
-		Cards.Names.CrimsonDragon.asUpped(true),
-		this.player1,
-	)).setStatus('adrenaline', 1);
-	this.player2.quanta[etg.Life] = 3;
+	this.player1.addCrea(this.player1.newThing(Cards.Names.Devourer));
+	this.player1.addCrea(this.player1.newThing(Cards.Names.HornedFrog));
+	this.player1.addCrea(
+		this.player1.newThing(Cards.Names.CrimsonDragon.asUpped(true)),
+	);
+	for (let i = 0; i < 3; i++)
+		this.player1.creatures[i].setStatus('adrenaline', 1);
+	this.player2.setQuanta(etg.Life, 3);
 	this.player1.endturn();
-	assert.equal(this.player2.hp, 68, 'dmg ' + this.player2.hp);
+	assert.equal(this.player2.hp, 68, 'dmg');
+	console.log(this.player1.quanta);
 	assert.equal(this.player1.quanta[etg.Darkness], 2, 'Absorbed');
 	assert.equal(this.player2.quanta[etg.Life], 1, 'Lone Life');
 });
 M.test('Aflatoxin', function() {
-	(this.player1.creatures[0] = new smth.Creature(
-		Cards.Names.Devourer,
-		this.player1,
-	)).setStatus('aflatoxin', 1);
+	this.player1.addCrea(this.player1.newThing(Cards.Names.Devourer));
+	this.cast('aflatoxin', this.player1, this.player1.creatures[0]);
 	this.player1.creatures[0].die();
 	assert.ok(this.player1.creatures[0], 'Something');
 	assert.equal(
@@ -103,14 +100,23 @@ M.test('Aflatoxin', function() {
 		Cards.Names.MalignantCell,
 		'Malignant',
 	);
+	this.player1.addCrea(this.player1.newThing(Cards.Names.Phoenix));
+	this.cast('aflatoxin', this.player1, this.player1.creatures[1]);
+	this.player1.creatures[1].die();
+	assert.equal(
+		this.player1.creatures[1].card,
+		Cards.Names.MalignantCell,
+		'Malignant, not Ash',
+	);
 });
 M.test('BoneWall', function() {
-	this.player1.quanta[etg.Death] = 10;
+	this.player1.setQuanta(etg.Death, 8);
 	initHand(this.player1, Cards.Names.BoneWall);
 	this.player1.hand[0].useactive();
-	new smth.Creature(Cards.Names.CrimsonDragon, this.player2).place();
-	new smth.Creature(Cards.Names.CrimsonDragon, this.player2).place();
-	new smth.Creature(Cards.Names.CrimsonDragon, this.player2).place();
+	this.player2.addCrea(this.player2.newThing(Cards.Names.CrimsonDragon));
+	this.player2.addCrea(this.player2.newThing(Cards.Names.CrimsonDragon));
+	this.player2.addCrea(this.player2.newThing(Cards.Names.CrimsonDragon));
+	assert.ok(this.player1.shield, 'BW exists?');
 	this.player1.endturn();
 	this.player2.endturn();
 	assert.ok(this.player1.shield, 'BW exists');
@@ -119,8 +125,8 @@ M.test('BoneWall', function() {
 	assert.equal(this.player1.shield.status.get('charges'), 6, '6 charges');
 });
 M.test('Boneyard', function() {
-	new smth.Creature(Cards.Names.Devourer, this.player1).place();
-	new smth.Permanent(Cards.Names.Boneyard, this.player1).place();
+	this.player1.addCrea(this.player1.newThing(Cards.Names.Devourer));
+	this.player1.addPerm(this.player1.newThing(Cards.Names.Boneyard));
 	this.player1.creatures[0].die();
 	assert.ok(this.player1.creatures[0], 'Something');
 	assert.equal(
@@ -130,12 +136,12 @@ M.test('Boneyard', function() {
 	);
 });
 M.test('Deckout', function() {
-	this.player2.deck.length = 0;
+	this.player2.deckIds = [];
 	this.player1.endturn();
-	assert.equal(this.game.winner, this.player1);
+	assert.equal(this.game.winner, this.player1Id);
 });
 M.test('Destroy', function() {
-	this.player1.quanta[etg.Death] = 10;
+	this.player1.setQuanta(etg.Death, 10);
 	initHand(
 		this.player1,
 		Cards.Names.AmethystPillar,
@@ -152,36 +158,36 @@ M.test('Destroy', function() {
 		2,
 		'2 charges',
 	);
-	Actives.destroy.func(this.player2, this.player1.permanents[0]);
+	this.cast('destroy', this.player2, this.player1.permanents[0]);
 	assert.equal(this.player1.permanents[0].status.get('charges'), 1, '1 charge');
-	Actives.destroy.func(this.player2, this.player1.permanents[0]);
+	this.cast('destroy', this.player2, this.player1.permanents[0]);
 	assert.ok(!this.player1.permanents[0], 'poof');
 	assert.equal(
 		this.player1.permanents[1].card,
 		Cards.Names.SoulCatcher,
 		'SoulCatcher',
 	);
-	Actives.destroy.func(this.player2, this.player1.permanents[1]);
+	this.cast('destroy', this.player2, this.player1.permanents[1]);
 	assert.ok(!this.player1.permanents[1], 'SoulCatcher gone');
 	assert.equal(this.player1.shield.card, Cards.Names.Shield, 'Shield');
-	Actives.destroy.func(this.player2, this.player1.shield);
+	this.cast('destroy', this.player2, this.player1.shield);
 	assert.ok(!this.player1.shield, 'Shield gone');
 	assert.equal(this.player1.weapon.card, Cards.Names.Dagger, 'Dagger');
-	Actives.destroy.func(this.player2, this.player1.weapon);
+	this.cast('destroy', this.player2, this.player1.weapon);
 	assert.ok(!this.player1.weapon, 'Dagger gone');
 	initHand(this.player1, Cards.Names.BoneWall);
 	this.player1.hand[0].useactive();
 	assert.equal(this.player1.shield.status.get('charges'), 7, '7 bones');
-	Actives.destroy.func(this.player2, this.player1.shield);
+	this.cast('destroy', this.player2, this.player1.shield);
 	assert.equal(this.player1.shield.status.get('charges'), 6, '6 bones');
 	for (let i = 0; i < 6; i++) {
-		Actives.destroy.func(this.player2, this.player1.shield);
+		this.cast('destroy', this.player2, this.player1.shield);
 	}
 	assert.ok(!this.player1.shield, 'This town is all in hell');
 });
 M.test('Devourer', function() {
-	new smth.Creature(Cards.Names.Devourer, this.player1).place();
-	this.player2.quanta[etg.Light] = 1;
+	this.player1.addCrea(this.player1.newThing(Cards.Names.Devourer));
+	this.player2.setQuanta(etg.Light, 1);
 	this.player1.endturn();
 	assert.equal(this.player2.quanta[etg.Light], 0, 'Light');
 	assert.equal(this.player1.quanta[etg.Darkness], 1, 'Darkness');
@@ -205,27 +211,35 @@ M.test('Earthquake', function() {
 	const pillars = this.player1.permanents[0];
 	assert.ok(pillars && pillars.card.type === etg.Pillar, 'ispillar');
 	assert.equal(pillars.status.get('charges'), 5, '5 charges');
-	Actives.earthquake.func(this.player2, pillars);
+	this.cast('earthquake', this.player2, pillars);
 	assert.equal(pillars.status.get('charges'), 2, '2 charges');
-	Actives.earthquake.func(this.player2, pillars);
+	this.cast('earthquake', this.player2, pillars);
 	assert.ok(!this.player1.permanents[0], 'poof');
 });
 M.test('Eclipse', function() {
-	this.player1.deck = [Cards.Names.Ash, Cards.Names.Ash, Cards.Names.Ash];
-	this.player2.deck = [Cards.Names.Ash, Cards.Names.Ash, Cards.Names.Ash];
+	this.initDeck(
+		this.player1,
+		Cards.Names.Ash,
+		Cards.Names.Ash,
+		Cards.Names.Ash,
+	);
+	this.initDeck(
+		this.player2,
+		Cards.Names.Ash,
+		Cards.Names.Ash,
+		Cards.Names.Ash,
+	);
 	for (let i = 0; i < 2; i++)
-		new smth.Creature(
-			Cards.Names.MinorVampire.asUpped(true),
-			this.player1,
-		).place();
+		this.player1.addCrea(
+			this.player1.newThing(Cards.Names.MinorVampire.asUpped(true)),
+		);
 	this.player1.hp = 50;
 	this.player1.endturn();
 	this.player2.endturn();
 	assert.equal(this.player2.hp, 92, "Noclipse dmg'd");
 	assert.equal(this.player1.hp, 58, "Noclipse vamp'd");
-	this.player1.permanents[0] = new smth.Permanent(
-		Cards.Names.Nightfall.asUpped(true),
-		this.player1,
+	this.player1.addPerm(
+		this.player1.newThing(Cards.Names.Nightfall.asUpped(true)),
 	);
 	this.player1.endturn();
 	assert.equal(this.player2.hp, 80, "Eclipse dmg'd");
@@ -233,37 +247,40 @@ M.test('Eclipse', function() {
 	assert.equal(this.player1.creatures[0].truehp(), 4, "hp buff'd");
 });
 M.test('Gpull', function() {
-	new smth.Creature(
-		Cards.Names.ColossalDragon.asUpped(true),
-		this.player2,
-	).place();
-	this.player2.gpull = this.player2.creatures[0];
-	new smth.Creature(Cards.Names.ForestScorpion, this.player1).place();
+	this.player2.addCrea(this.player2.newThing(Cards.Names.ColossalDragon));
+	this.player2.gpull = this.player2.creatureIds[0];
+	this.player1.addCrea(this.player1.newThing(Cards.Names.Scorpion));
 	this.player1.endturn();
-	assert.equal(this.player2.gpull.hp, 29, 'dmg redirected');
 	assert.equal(
-		this.player2.gpull.status.get('poison'),
-		undefined,
+		this.game.get(this.player2.gpull).get('hp'),
+		29,
+		'dmg redirected',
+	);
+	assert.equal(
+		this.game.getStatus(this.player2.gpull, 'poison'),
+		0,
 		'psn not redirected',
 	);
-	this.player2.gpull.die();
+	this.game.byId(this.player2.gpull).die();
 	assert.ok(!this.player2.gpull, 'gpull death poof');
 });
 M.test('Hope', function() {
-	this.player1.shield = new smth.Shield(Cards.Names.Hope, this.player1);
-	new smth.Creature(Cards.Names.Photon, this.player1).place();
+	this.player1.setShield(this.player1.newThing(Cards.Names.Hope));
+	this.player1.addCrea(this.player1.newThing(Cards.Names.Photon));
 	for (let i = 0; i < 3; i++) {
-		new smth.Creature(Cards.Names.Photon.asUpped(true), this.player1).place();
+		this.player1.addCrea(
+			this.player1.newThing(Cards.Names.Photon.asUpped(true)),
+		);
 	}
 	this.player1.endturn();
 	assert.equal(this.player1.shield.dr, 3, 'DR');
 	assert.equal(this.player1.quanta[etg.Light], 3, 'RoL');
 });
 M.test('Lobotomize', function() {
-	const dev = new smth.Creature(Cards.Names.Devourer, this.player1);
+	this.player1.addCrea(this.player1.newThing(Cards.Names.Devourer));
 	assert.ok(dev.active.get('auto'), 'Siphon');
 	assert.ok(dev.active.get('cast'), 'Burrow');
-	Actives.lobotomize.func(this.player1, dev);
+	this.cast('lobotomize', this.player1, dev);
 	assert.ok(dev.active.get('auto'), 'Siphon');
 	assert.ok(!dev.active.get('cast'), 'No Burrow');
 });
@@ -279,70 +296,55 @@ M.test('Obsession', function() {
 		Cards.Names.GhostofthePast,
 		Cards.Names.GhostofthePast,
 	);
-	this.player1.endturn(0);
+	this.player1.endturn(this.player1.handIds[0]);
 	assert.equal(this.player1.hp, 90, 'Damage');
 	assert.equal(this.player1.hand.length, 7, 'Discarded');
 });
 M.test('Parallel', function() {
-	const damsel = new smth.Creature(
-		Cards.Names.Dragonfly.asUpped(true),
-		this.player1,
-	);
-	damsel.place();
-	Actives.parallel.func(this.player1, damsel);
-	assert.equal(
-		this.player1.creatures[1].card,
-		Cards.Names.Dragonfly.asUpped(true),
-		"PU'd",
-	);
-	Actives.web.func(this.player1, damsel);
+	this.player1.addCrea(this.player1.newThing(Cards.Names.Dragonfly));
+	const damsel = this.player1.creatures[0];
+	this.cast('parallel', damsel, damsel);
+	assert.equal(this.player1.creatures[1].card, Cards.Names.Dragonfly, "PU'd");
+	this.cast('web', this.player1, damsel);
 	assert.ok(
-		!damsel.status.get('airborne') &&
-			this.player1.creatures[1].status.get('airborne'),
+		!damsel.getStatus('airborne') &&
+			this.player1.creatures[1].getStatus('airborne'),
 		"Web'd",
 	);
 });
 M.test('Phoenix', function() {
-	const phoenix = new smth.Creature(Cards.Names.Phoenix, this.player1);
-	phoenix.place();
-	Actives.lightning.func(this.player1, phoenix);
-	assert.equal(this.player1.creatures[0].card, Cards.Names.Ash, 'Ash');
+	this.player1.addCrea(this.player1.newThing(Cards.Names.Phoenix));
+	const phoenix = this.player1.creatures[0];
+	assert.equal(this.player1.creatures[0].card, Cards.Names.Phoenix, 'Phoenix');
+	this.cast('lightning', this.player1, phoenix);
 });
 M.test('Purify', function() {
-	Actives.poison3.func(this.player1);
+	this.cast('poison3', this.player1);
 	assert.equal(this.player2.status.get('poison'), 3, '3');
-	Actives.poison3.func(this.player1, this.player2);
+	this.cast('poison3', this.player1, this.player2);
 	assert.equal(this.player2.status.get('poison'), 6, '6');
-	Actives.purify.func(this.player1, this.player2);
+	this.cast('purify', this.player1, this.player2);
 	assert.equal(this.player2.status.get('poison'), -2, '-2');
-	Actives.purify.func(this.player1, this.player2);
+	this.cast('purify', this.player1, this.player2);
 	assert.equal(this.player2.status.get('poison'), -4, '-4');
 });
 M.test('Reflect', function() {
-	Actives.lightning.func(this.player1, this.player2);
+	this.cast('lightning', this.player1, this.player2);
 	assert.ok(this.player1.hp == 100 && this.player2.hp == 95, 'Plain spell');
-	this.player2.shield = new smth.Shield(
-		Cards.Names.ReflectiveShield,
-		this.player2,
-	);
-	Actives.lightning.func(this.player1, this.player2);
+	this.player2.setShield(this.player2.newThing(Cards.Names.MirrorShield));
+	this.cast('lightning', this.player1, this.player2);
 	assert.ok(this.player1.hp == 95 && this.player2.hp == 95, 'Reflected spell');
-	this.player1.shield = new smth.Shield(
-		Cards.Names.ReflectiveShield,
-		this.player1,
-	);
-	Actives.lightning.func(this.player1, this.player2);
+	this.player1.setShield(this.player1.newThing(Cards.Names.MirrorShield));
+	this.cast('lightning', this.player1, this.player2);
 	assert.ok(
 		this.player1.hp == 90 && this.player2.hp == 95,
 		'Unreflected reflected spell',
 	);
 });
 M.test('Steal', function() {
-	(this.player1.shield = new smth.Shield(
-		Cards.Names.BoneWall,
-		this.player1,
-	)).setStatus('charges', 3);
-	Actives.steal.func(this.player2, this.player1.shield);
+	this.player1.setShield(this.player1.newThing(Cards.Names.BoneWall));
+	this.player1.shield.setStatus('charges', 3);
+	this.cast('steal', this.player2, this.player1.shield);
 	assert.ok(
 		this.player1.shield && this.player1.shield.status.get('charges') == 2,
 		'Wish bones',
@@ -351,7 +353,7 @@ M.test('Steal', function() {
 		this.player2.shield && this.player2.shield.status.get('charges') == 1,
 		'stole 1',
 	);
-	Actives.steal.func(this.player2, this.player1.shield);
+	this.cast('steal', this.player2, this.player1.shield);
 	assert.ok(
 		this.player1.shield && this.player1.shield.status.get('charges') == 1,
 		'Lone bone',
@@ -360,7 +362,7 @@ M.test('Steal', function() {
 		this.player2.shield && this.player2.shield.status.get('charges') == 2,
 		'stole 2',
 	);
-	Actives.steal.func(this.player2, this.player1.shield);
+	this.cast('steal', this.player2, this.player1.shield);
 	assert.ok(!this.player1.shield, 'This town is all in hell');
 	assert.ok(
 		this.player2.shield && this.player2.shield.status.get('charges') == 3,
@@ -368,9 +370,10 @@ M.test('Steal', function() {
 	);
 });
 M.test('Steam', function() {
-	const steam = new smth.Creature(Cards.Names.SteamMachine, this.player1);
-	steam.casts = 1;
-	steam.place();
+	this.player1.addCrea(this.player1.newThing(Cards.Names.SteamMachine));
+	const steam = this.player1.creatures[0];
+	this.player1.setQuanta(etg.Fire, 8);
+	steam.usedactive = false;
 	assert.equal(steam.trueatk(), 0, '0');
 	steam.useactive();
 	assert.equal(steam.trueatk(), 5, '5');
@@ -378,32 +381,31 @@ M.test('Steam', function() {
 	assert.equal(steam.trueatk(), 4, '4');
 });
 M.test('Voodoo', function() {
-	const voodoo = new smth.Creature(Cards.Names.VoodooDoll, this.player1);
-	voodoo.place();
-	Actives.lightning.func(this.player1, voodoo);
-	Actives.infect.func(this.player1, voodoo);
+	this.player1.addCrea(this.player1.newThing(Cards.Names.SteamMachine));
+	this.cast('lightning', this.player1, voodoo);
+	this.cast('infect', this.player1, voodoo);
 	assert.equal(voodoo.hp, 11, 'dmg');
 	assert.equal(this.player2.hp, 95, 'foe dmg');
 	assert.equal(voodoo.status.get('poison'), 1, 'psn');
 	assert.equal(this.player2.status.get('poison'), 1, 'foe psn');
-	Actives.holylight.func(this.player1, voodoo);
+	this.cast('holylight', this.player1, voodoo);
 	assert.equal(voodoo.hp, 1, 'holy dmg');
 	assert.equal(this.player2.hp, 85, 'foe holy dmg');
 });
 M.test('Scarab', function() {
 	const scarabs = [
-		new smth.Creature(Cards.Names.Scarab, this.player1),
-		new smth.Creature(Cards.Names.Scarab, this.player1),
-		new smth.Creature(Cards.Names.Scarab, this.player1),
+		this.player1.newThing(Cards.Names.Scarab),
+		this.player1.newThing(Cards.Names.Scarab),
+		this.player1.newThing(Cards.Names.Scarab),
 	];
-	scarabs[0].place();
-	scarabs[1].place();
+	this.player1.addCrea(scarabs[0]);
+	this.player1.addCrea(scarabs[1]);
 	assert.equal(scarabs[0].truehp(), 1);
 	this.player1.endturn();
 	assert.equal(scarabs[0].truehp(), 2);
-	scarabs[2].place();
+	this.player1.addCrea(scarabs[2]);
 	assert.equal(scarabs[0].truehp(), 2);
-	Actives.devour.func(scarabs[0], scarabs[2]);
+	this.cast('devour', scarabs[0], scarabs[2]);
 	assert.equal(scarabs[0].truehp(), 3);
 	this.player1.endturn();
 	assert.equal(scarabs[0].truehp(), 3);

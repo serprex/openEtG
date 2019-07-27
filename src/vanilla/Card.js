@@ -2,10 +2,10 @@ import * as imm from '../immutable.js';
 import * as etg from './etg.js';
 import * as util from '../util.js';
 import Skill from '../Skill.js';
-import * as Cards from './Cards.js';
+import Cards from './Cards.js';
 import * as etgutil from '../etgutil.js';
 import skillText from './skillText.js';
-import Actives from './Skills.js';
+import Skills from './Skills.js';
 
 const statuscache = {},
 	activecache = {},
@@ -26,7 +26,7 @@ export default function Card(type, info) {
 	}
 	if (info.Active) {
 		if (this.type === etg.Spell) {
-			this.active = new imm.Map({ cast: Actives[info.Active] });
+			this.active = new imm.Map({ cast: Skills[info.Active] });
 			this.cast = this.cost;
 			this.castele = this.costele;
 		} else if (info.Active in activecache) {
@@ -42,7 +42,7 @@ export default function Card(type, info) {
 				const a0 = ~eqidx ? active.substr(0, eqidx) : 'auto';
 				const cast = readCost(a0, this.element);
 				this.active = this.active.update(cast ? 'cast' : a0, a =>
-					Skill.combine(a, Actives[active.substr(eqidx + 1)]),
+					Skill.combine(a, Skills[active.substr(eqidx + 1)]),
 				);
 				if (cast) {
 					[this.cast, this.castele] = cast;
@@ -96,7 +96,7 @@ Card.prototype.asUpped = function(upped) {
 		: Cards.Codes[etgutil.asUpped(this.code, upped)];
 };
 Card.prototype.isOf = function(card) {
-	return card.code == etgutil.asUpped(this.code, false);
+	return card.code === etgutil.asUpped(this.code, false);
 };
 Card.prototype.getStatus = function(key) {
 	return this.status.get(key) || 0;
