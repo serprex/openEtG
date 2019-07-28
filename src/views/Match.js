@@ -210,17 +210,15 @@ class ThingInstCore extends React.Component {
 		super(props);
 
 		this.state = {
-			instprops: null,
-			isgpull: null,
+			gameProps: null,
 			instdom: null,
 		};
 	}
 
 	static getDerivedStateFromProps(props, state) {
-		const { game, obj } = props;
-		const instprops = game.props.get(obj.id),
-			isgpull = obj.id === obj.owner.gpull;
-		if (instprops !== state.instprops || isgpull !== state.isgpull) {
+		const { game, obj } = props,
+			gameProps = game.props;
+		if (gameProps !== state.gameProps) {
 			const children = [],
 				isSpell = obj.type === etg.Spell,
 				{ card } = obj,
@@ -301,8 +299,7 @@ class ThingInstCore extends React.Component {
 				statText = `${card.cost}:${card.costele}`;
 			}
 			return {
-				instprops,
-				isgpull,
+				gameProps,
 				instdom: (
 					<div
 						style={{
