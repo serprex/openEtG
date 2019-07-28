@@ -45,8 +45,8 @@ export function mkPremade(level, daily, datafn = null) {
 		players: [
 			{
 				idx: 1,
-				name: user && user.name,
-				user: user ? user.name : '',
+				name: user.name,
+				user: user.name,
 				deck: urdeck,
 			},
 			{
@@ -106,7 +106,7 @@ export function mkAi(level, daily, datafn = null) {
 		return;
 	}
 	const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
-	if (user && cost && user.gold < cost) {
+	if (cost && user.gold < cost) {
 		store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
 		return;
 	}

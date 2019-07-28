@@ -168,8 +168,7 @@ export default connect(({ user, opts }) => ({
 		constructor(props) {
 			super(props);
 			this.state = {
-				showcard:
-					props.nymph || (props.user && !props.user.daily && props.user.ocard),
+				showcard: props.nymph || (!props.user.daily && props.user.ocard),
 				showsettings: false,
 				changepass: false,
 				newpass: '',
@@ -193,11 +192,7 @@ export default connect(({ user, opts }) => ({
 		}
 
 		componentDidMount() {
-			if (
-				this.props.user &&
-				this.props.user.daily == 0 &&
-				this.props.user.ocard
-			) {
+			if (this.props.user.daily == 0 && this.props.user.ocard) {
 				this.props.dispatch(store.updateUser({ daily: 128 }));
 			}
 			document.addEventListener('mousemove', this.resetTip);
@@ -374,125 +369,123 @@ export default connect(({ user, opts }) => ({
 								}}
 							/>
 						</Rect>
-						{self.props.user && (
-							<>
+						<input
+							type="button"
+							value="Settings"
+							style={{
+								position: 'absolute',
+								left: '620px',
+								top: '558px',
+							}}
+							onClick={() => {
+								this.setState({
+									showsettings: !this.state.showsettings,
+									changepass: false,
+									newpass: '',
+									newpass2: '',
+								});
+							}}
+						/>
+						<Rect x={86} y={92} wid={196} hei={120}>
+							<TitleText text="Stats" />
+							<Components.Text
+								text={
+									`${self.props.user.gold}$ ${self.props.user.name}` +
+									`\nPvE ${self.props.user.aiwins} - ${self.props.user.ailosses}` +
+									`\nPvP ${self.props.user.pvpwins} - ${self.props.user.pvplosses}`
+								}
+							/>
+						</Rect>
+						<Rect x={304} y={380} wid={292} hei={130}>
+							<TitleText text="??" />
+							<div
+								style={{
+									width: '45%',
+									float: 'left',
+									textAlign: 'right',
+								}}>
 								<input
 									type="button"
-									value="Settings"
-									style={{
-										position: 'absolute',
-										left: '620px',
-										top: '558px',
-									}}
+									value="Colosseum"
 									onClick={() => {
-										this.setState({
-											showsettings: !this.state.showsettings,
-											changepass: false,
-											newpass: '',
-											newpass2: '',
-										});
+										this.props.dispatch(store.doNav(import('./Colosseum')));
 									}}
+									onMouseOver={this.mkSetTip(
+										'Try some daily challenges in the Colosseum',
+									)}
 								/>
-								<Rect x={86} y={92} wid={196} hei={120}>
-									<TitleText text="Stats" />
-									<Components.Text
-										text={
-											`${self.props.user.gold}$ ${self.props.user.name}` +
-											`\nPvE ${self.props.user.aiwins} - ${self.props.user.ailosses}` +
-											`\nPvP ${self.props.user.pvpwins} - ${self.props.user.pvplosses}`
-										}
+							</div>
+							<div
+								style={{
+									width: '45%',
+									float: 'right',
+								}}>
+								<input
+									type="button"
+									value="Quests"
+									onClick={() => {
+										this.props.dispatch(store.doNav(import('./Quest')));
+									}}
+									onMouseOver={this.mkSetTip('Go on an adventure')}
+								/>
+							</div>
+							<div
+								style={{
+									marginTop: '12px',
+									width: '45%',
+									float: 'left',
+									textAlign: 'right',
+								}}>
+								<input
+									type="button"
+									value="Arena Deck"
+									onClick={() => {
+										this.props.dispatch(store.doNav(import('./ArenaInfo')));
+									}}
+									onMouseOver={this.mkSetTip(
+										'Check how your arena decks are doing',
+									)}
+								/>
+							</div>
+							<div
+								style={{
+									marginTop: '12px',
+									width: '45%',
+									float: 'right',
+								}}>
+								<input
+									type="button"
+									value="Custom"
+									onClick={() => {
+										this.props.dispatch(
+											store.doNav(import('./Challenge'), {
+												pvp: false,
+											}),
+										);
+									}}
+									onMouseOver={this.mkSetTip(
+										'Setup custom games vs AI or other players',
+									)}
+								/>
+							</div>
+						</Rect>
+						{this.state.showcard ? (
+							<Components.Card x={92} y={340} code={this.state.showcard} />
+						) : (
+							!this.props.hideMainchat && (
+								<>
+									<Chat channel="Main" style={chatStyle} />
+									<input
+										placeholder="Chat"
+										onKeyDown={parseChat}
+										style={{
+											position: 'absolute',
+											left: '99px',
+											top: '532px',
+										}}
 									/>
-								</Rect>
-								<Rect x={304} y={380} wid={292} hei={130}>
-									<TitleText text="??" />
-									<div
-										style={{
-											width: '45%',
-											float: 'left',
-											textAlign: 'right',
-										}}>
-										<input
-											type="button"
-											value="Colosseum"
-											onClick={() => {
-												this.props.dispatch(store.doNav(import('./Colosseum')));
-											}}
-											onMouseOver={this.mkSetTip(
-												'Try some daily challenges in the Colosseum',
-											)}
-										/>
-									</div>
-									<div
-										style={{
-											width: '45%',
-											float: 'right',
-										}}>
-										<input
-											type="button"
-											value="Quests"
-											onClick={() => {
-												this.props.dispatch(store.doNav(import('./Quest')));
-											}}
-											onMouseOver={this.mkSetTip('Go on an adventure')}
-										/>
-									</div>
-									<div
-										style={{
-											marginTop: '12px',
-											width: '45%',
-											float: 'left',
-											textAlign: 'right',
-										}}>
-										<input
-											type="button"
-											value="Arena Deck"
-											onClick={() => {
-												this.props.dispatch(store.doNav(import('./ArenaInfo')));
-											}}
-											onMouseOver={this.mkSetTip(
-												'Check how your arena decks are doing',
-											)}
-										/>
-									</div>
-									<div
-										style={{
-											marginTop: '12px',
-											width: '45%',
-											float: 'right',
-										}}>
-										<input
-											type="button"
-											value="Custom"
-											onClick={() => {
-												this.props.dispatch(
-													store.doNav(import('./Challenge'), { pvp: false }),
-												);
-											}}
-											onMouseOver={this.mkSetTip(
-												'Setup custom games vs AI or other players',
-											)}
-										/>
-									</div>
-								</Rect>
-								{this.state.showcard ? (
-									<Components.Card x={92} y={340} code={this.state.showcard} />
-								) : (
-									!this.props.hideMainchat && (
-										<>
-											<Chat channel="Main" style={chatStyle} />
-											<input
-												placeholder="Chat"
-												onKeyDown={parseChat}
-												style={{
-													position: 'absolute',
-													left: '99px',
-													top: '532px',
-												}}
-											/>
-										</>
-									)
-								)}
-							</>
+								</>
+							)
 						)}
 						<Rect x={626} y={420} wid={196} hei={120}>
 							<TitleText text="Leaderboards" />
@@ -549,7 +542,7 @@ export default connect(({ user, opts }) => ({
 									'Demigods are extremely powerful. Come prepared for anything',
 								)}
 							/>
-							{self.props.user && arenac}
+							{arenac}
 						</CostRewardHeaders>
 						<Rect x={620} y={92} wid={196} hei={176}>
 							<TitleText text="Cards" />
@@ -572,64 +565,60 @@ export default connect(({ user, opts }) => ({
 									top: '108px',
 								}}
 							/>
-							{self.props.user && (
-								<>
-									<LabelText
-										text={'Deck: ' + self.props.user.selectedDeck}
-										style={{
-											width: '180px',
-											overflow: 'hidden',
-											textOverflow: 'ellipsis',
-											whiteSpace: 'nowrap',
-											marginLeft: '16px',
-										}}
-									/>
-									<div style={{ textAlign: 'center' }}>{quickslots}</div>
-									<input
-										type="button"
-										value="Shop"
-										onClick={() => {
-											this.props.dispatch(store.doNav(import('./Shop')));
-										}}
-										onMouseOver={this.mkSetTip(
-											'Buy booster packs which contain cards from the elements you choose',
-										)}
-										style={{
-											position: 'absolute',
-											left: '14px',
-											top: '132px',
-										}}
-									/>
-									<input
-										type="button"
-										value="Upgrade"
-										onClick={() => {
-											this.props.dispatch(store.doNav(import('./Upgrade')));
-										}}
-										onMouseOver={this.mkSetTip('Upgrade or sell cards')}
-										style={{
-											position: 'absolute',
-											left: '102px',
-											top: '108px',
-										}}
-									/>
-									<input
-										type="button"
-										value="Bazaar"
-										onClick={() => {
-											this.props.dispatch(store.doNav(import('./Bazaar')));
-										}}
-										onMouseOver={this.mkSetTip(
-											"Put up cards for sale & review other players' offers",
-										)}
-										style={{
-											position: 'absolute',
-											left: '102px',
-											top: '132px',
-										}}
-									/>
-								</>
-							)}
+							<LabelText
+								text={'Deck: ' + self.props.user.selectedDeck}
+								style={{
+									width: '180px',
+									overflow: 'hidden',
+									textOverflow: 'ellipsis',
+									whiteSpace: 'nowrap',
+									marginLeft: '16px',
+								}}
+							/>
+							<div style={{ textAlign: 'center' }}>{quickslots}</div>
+							<input
+								type="button"
+								value="Shop"
+								onClick={() => {
+									this.props.dispatch(store.doNav(import('./Shop')));
+								}}
+								onMouseOver={this.mkSetTip(
+									'Buy booster packs which contain cards from the elements you choose',
+								)}
+								style={{
+									position: 'absolute',
+									left: '14px',
+									top: '132px',
+								}}
+							/>
+							<input
+								type="button"
+								value="Upgrade"
+								onClick={() => {
+									this.props.dispatch(store.doNav(import('./Upgrade')));
+								}}
+								onMouseOver={this.mkSetTip('Upgrade or sell cards')}
+								style={{
+									position: 'absolute',
+									left: '102px',
+									top: '108px',
+								}}
+							/>
+							<input
+								type="button"
+								value="Bazaar"
+								onClick={() => {
+									this.props.dispatch(store.doNav(import('./Bazaar')));
+								}}
+								onMouseOver={this.mkSetTip(
+									"Put up cards for sale & review other players' offers",
+								)}
+								style={{
+									position: 'absolute',
+									left: '102px',
+									top: '132px',
+								}}
+							/>
 						</Rect>
 						<Rect x={616} y={300} wid={206} hei={130}>
 							<TitleText text="Players" />
@@ -647,9 +636,7 @@ export default connect(({ user, opts }) => ({
 								type="button"
 								value="Library"
 								onClick={() => {
-									const name =
-										self.props.foename ||
-										(self.props.user && self.props.user.name);
+									const name = self.props.foename || self.props.user.name;
 									if (name)
 										this.props.dispatch(
 											store.doNav(import('./Library'), {
@@ -666,54 +653,50 @@ export default connect(({ user, opts }) => ({
 									top: '64px',
 								}}
 							/>
-							{self.props.user && (
-								<>
-									<input
-										type="button"
-										value="PvP"
-										onClick={() => {
-											sock.sendChallenge(self.props.foename);
-										}}
-										style={{
-											position: 'absolute',
-											left: '10px',
-											top: '88px',
-										}}
-									/>
-									<input
-										type="button"
-										value="Trade"
-										onClick={foe =>
-											sock.offerTrade(
-												typeof foe === 'string' ? foe : self.props.foename,
-											)
-										}
-										onMouseOver={this.mkSetTip(
-											'Initiate trading cards with another player',
-										)}
-										style={{
-											position: 'absolute',
-											left: '10px',
-											top: '64px',
-										}}
-									/>
-									<input
-										type="button"
-										value="Reward"
-										onClick={() => {
-											sock.userEmit('codesubmit', {
-												code: self.props.foename,
-											});
-										}}
-										onMouseOver={this.mkSetTip('Redeem a reward code')}
-										style={{
-											position: 'absolute',
-											left: '112px',
-											top: '88px',
-										}}
-									/>
-								</>
-							)}
+							<input
+								type="button"
+								value="PvP"
+								onClick={() => {
+									sock.sendChallenge(self.props.foename);
+								}}
+								style={{
+									position: 'absolute',
+									left: '10px',
+									top: '88px',
+								}}
+							/>
+							<input
+								type="button"
+								value="Trade"
+								onClick={foe =>
+									sock.offerTrade(
+										typeof foe === 'string' ? foe : self.props.foename,
+									)
+								}
+								onMouseOver={this.mkSetTip(
+									'Initiate trading cards with another player',
+								)}
+								style={{
+									position: 'absolute',
+									left: '10px',
+									top: '64px',
+								}}
+							/>
+							<input
+								type="button"
+								value="Reward"
+								onClick={() => {
+									sock.userEmit('codesubmit', {
+										code: self.props.foename,
+									});
+								}}
+								onMouseOver={this.mkSetTip('Redeem a reward code')}
+								style={{
+									position: 'absolute',
+									left: '112px',
+									top: '88px',
+								}}
+							/>
 						</Rect>
 						{typeof kongregateAPI === 'undefined' && (
 							<input

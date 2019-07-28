@@ -32,7 +32,9 @@ if (typeof kongregateAPI === 'undefined') {
 								}
 								if (!data.accountbound && !data.pool) {
 									this.props.dispatch(
-										store.doNav(import('./ElementSelect'), { user: data }),
+										store.doNav(import('./ElementSelect'), {
+											user: data,
+										}),
 									);
 								} else {
 									this.props.dispatch(store.setOptTemp('deck', sock.getDeck()));
@@ -108,7 +110,11 @@ if (typeof kongregateAPI === 'undefined') {
 							onChange={e =>
 								this.props.dispatch(store.setOpt('username', e.target.value))
 							}
-							style={{ position: 'absolute', left: '270px', top: '350px' }}
+							style={{
+								position: 'absolute',
+								left: '270px',
+								top: '350px',
+							}}
 						/>
 						<input
 							onChange={e => this.setState({ password: e.target.value })}
@@ -117,10 +123,18 @@ if (typeof kongregateAPI === 'undefined') {
 							placeholder="Password"
 							tabIndex="2"
 							onKeyPress={e => this.maybeLogin(e)}
-							style={{ position: 'absolute', left: '270px', top: '380px' }}
+							style={{
+								position: 'absolute',
+								left: '270px',
+								top: '380px',
+							}}
 						/>
 						<label
-							style={{ position: 'absolute', left: '430px', top: '380px' }}>
+							style={{
+								position: 'absolute',
+								left: '430px',
+								top: '380px',
+							}}>
 							<input
 								type="checkbox"
 								checked={!!this.props.remember}
@@ -142,20 +156,22 @@ if (typeof kongregateAPI === 'undefined') {
 							type="button"
 							value="Login"
 							onClick={e => this.loginClick()}
-							style={{ position: 'absolute', left: '430px', top: '350px' }}
+							style={{
+								position: 'absolute',
+								left: '430px',
+								top: '350px',
+							}}
 						/>
 						<a
 							target="_blank"
 							href="forum/?topic=267"
-							style={{ position: 'absolute', left: '270px', top: '424px' }}>
+							style={{
+								position: 'absolute',
+								left: '270px',
+								top: '424px',
+							}}>
 							Tutorial
 						</a>
-						<input
-							type="button"
-							value="Sandbox"
-							onClick={() => this.props.dispatch(store.doNav(MainMenu))}
-							style={{ position: 'absolute', left: '530px', top: '350px' }}
-						/>
 						{this.state.commit}
 					</div>
 				);

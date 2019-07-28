@@ -106,8 +106,8 @@ const sockEvents = {
 			players: RngMock.shuffle([
 				{
 					idx: 1,
-					name: user && user.name,
-					user: user ? user.name : '',
+					name: user.name,
+					user: user.name,
 					deck: getDeck(),
 				},
 				{

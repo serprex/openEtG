@@ -93,9 +93,10 @@ export default class Cards {
 	}
 
 	isDeckLegal(deck, user, minsize = 30) {
-		let pool =
-			user &&
-			etgutil.deck2pool(user.accountbound, etgutil.deck2pool(user.pool));
+		let pool = etgutil.deck2pool(
+			user.accountbound,
+			etgutil.deck2pool(user.pool),
+		);
 		const cardMinus = [];
 		let dlen = 0;
 		for (let i = deck.length - 1; i >= 0; i--) {
