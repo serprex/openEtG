@@ -47,13 +47,25 @@ function mkDaily(type) {
 	mkAi.run(game);
 }
 export default connect(({ user }) => ({ user }))(function Colosseum({ user }) {
-	const magename = Decks.mage[user.dailymage][0],
-		dgname = Decks.demigod[user.dailydg][0];
+	const [magename, magedeck] = Decks.mage[user.dailymage],
+		[dgname, dgdeck] = Decks.demigod[user.dailydg];
 	const events = [
 		'Novice Endurance Fight 3 Commoners in a row without healing in between. May try until you win.',
 		'Expert Endurance: Fight 2 Champions in a row. May try until you win.',
-		`Novice Duel: Fight ${magename}. Only one attempt allowed.`,
-		`Expert Duel: Fight ${dgname}. Only one attempt allowed.`,
+		<>
+			Novice Duel: Fight{' '}
+			<a href={`/deck/${magedeck}`} target="_blank">
+				{magename}
+			</a>
+			. Only one attempt allowed.
+		</>,
+		<>
+			Expert Duel: Fight{' '}
+			<a href={`/deck/${dgdeck}`} target="_blank">
+				{dgname}
+			</a>
+			. Only one attempt allowed.
+		</>,
 	];
 	const eventui = [];
 	for (let i = 1; i < 5; i++) {
@@ -98,7 +110,11 @@ export default connect(({ user }) => ({ user }))(function Colosseum({ user }) {
 					<input
 						type="button"
 						value="Nymph!"
-						style={{ position: 'absolute', left: '50px', top: '280px' }}
+						style={{
+							position: 'absolute',
+							left: '50px',
+							top: '280px',
+						}}
 						onClick={() => {
 							const nymph = etg.NymphList[RngMock.upto(12) + 1];
 							sock.userExec('donedaily', { daily: 6, c: nymph });
@@ -107,14 +123,23 @@ export default connect(({ user }) => ({ user }))(function Colosseum({ user }) {
 							);
 						}}
 					/>
-					<span style={{ position: 'absolute', left: '130px', top: '280px' }}>
+					<span
+						style={{
+							position: 'absolute',
+							left: '130px',
+							top: '280px',
+						}}>
 						You successfully completed all tasks.
 					</span>
 				</>
 			) : (
 				typeof user.ostreak === 'number' && (
 					<Components.Text
-						style={{ position: 'absolute', left: '56px', top: '300px' }}
+						style={{
+							position: 'absolute',
+							left: '56px',
+							top: '300px',
+						}}
 						text={
 							'Completing any colosseum event contributes to a 5 day reward cycle.\n' +
 							'At the end of the cycle, your streak is reset.\n\n' +
