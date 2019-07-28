@@ -9,6 +9,7 @@ import * as Components from '../Components/index.js';
 import * as store from '../store.js';
 import RngMock from '../RngMock.js';
 import aiDecks from '../Decks.json';
+import deckgen from '../deckgen/index.js';
 
 class PremadePicker extends React.Component {
 	constructor(props) {
@@ -18,17 +19,17 @@ class PremadePicker extends React.Component {
 
 	render() {
 		const { onClick } = this.props;
-		const { mage, demigod } = aiDecks;
+		const { mage, demigod, falsegod } = aiDecks;
 		return (
 			<div
 				className="bgbox"
 				style={{
 					position: 'absolute',
 					zIndex: '10',
-					left: '200px',
-					top: '150px',
-					height: '300px',
-					width: '500px',
+					left: '75px',
+					top: '100px',
+					height: '400px',
+					width: '750px',
 					overflow: 'auto',
 				}}>
 				<input
@@ -40,7 +41,7 @@ class PremadePicker extends React.Component {
 				<div
 					style={{
 						display: 'inline-block',
-						width: '50%',
+						width: '33%',
 						verticalAlign: 'top',
 					}}>
 					{mage
@@ -54,10 +55,24 @@ class PremadePicker extends React.Component {
 				<div
 					style={{
 						display: 'inline-block',
-						width: '50%',
+						width: '33%',
 						verticalAlign: 'top',
 					}}>
 					{demigod
+						.filter(x => !this.state.search || ~x[0].indexOf(this.state.search))
+						.map(([name, deck]) => (
+							<div key={name} onClick={() => onClick(name, deck, true)}>
+								{name}
+							</div>
+						))}
+				</div>
+				<div
+					style={{
+						display: 'inline-block',
+						width: '33%',
+						verticalAlign: 'top',
+					}}>
+					{falsegod
 						.filter(x => !this.state.search || ~x[0].indexOf(this.state.search))
 						.map(([name, deck]) => (
 							<div key={name} onClick={() => onClick(name, deck, true)}>
@@ -74,6 +89,7 @@ class PlayerEditor extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			deckgen: props.player.deckgen || '',
 			deck: props.player.deck || '',
 			name: props.player.name || '',
 			hp: props.player.hp || '',
@@ -119,29 +135,75 @@ class PlayerEditor extends React.Component {
 						value="Ok"
 						onClick={() => {
 							const data = {};
-							if (state.name) data.name = state.name;
-							if (state.deck) data.deck = state.deck;
 							parseInput(data, 'hp', state.hp);
 							parseInput(data, 'markpower', state.mark, 1188);
 							parseInput(data, 'drawpower', state.draw, 8);
 							parseInput(data, 'deckpower', state.deckpower);
+							switch (state.deckgen) {
+								case 'mage':
+								case 'demigod':
+								case 'falsegod':
+									[data.name, data.deck] = RngMock.choose(
+										aiDecks[state.deckgen],
+									);
+									break;
+								case 'rng':
+									data.deck = deckgen(
+										state.rnguprate * 100 || 0,
+										data.markpower,
+										state.rngmaxrare | 0 || 9,
+									);
+									break;
+								default:
+									if (state.deck) data.deck = state.deck;
+							}
+							if (state.name) data.name = state.name;
 							props.updatePlayer(data);
 						}}
 					/>
 				</div>
 				<div>
-					<input
-						placeholder="Deck"
-						value={state.deck}
-						onChange={e => this.setState({ deck: e.target.value })}
-					/>
-					&emsp;
-					<input
-						type="button"
-						value="Premade"
-						onClick={() => this.setState({ premade: true })}
-					/>
+					Deck:{' '}
+					<select
+						value={this.state.deckgen}
+						onChange={e => this.setState({ deckgen: e.target.value })}>
+						<option value="">Explicit</option>
+						<option value="mage">Random Mage</option>
+						<option value="demigod">Random Demigod</option>
+						<option value="falsegod">Random False God</option>
+						<option value="rng">Random</option>
+					</select>
 				</div>
+				{this.state.deckgen === '' && (
+					<div>
+						<input
+							placeholder="Deck"
+							value={state.deck}
+							onChange={e => this.setState({ deck: e.target.value })}
+						/>
+						&emsp;
+						<input
+							type="button"
+							value="Premade"
+							onClick={() => this.setState({ premade: true })}
+						/>
+					</div>
+				)}
+				{this.state.deckgen === 'rng' && (
+					<div>
+						<input
+							placeholder="Upgrade %"
+							value={this.state.rnguprate}
+							onChange={e => this.setState({ rnguprate: e.target.value })}
+						/>
+						&emsp;
+						<input
+							placeholder="Max Rarity"
+							value={this.state.rngmaxrare}
+							onChange={e => this.setState({ rnguprate: e.target.value })}
+						/>
+					</div>
+				)}
 				<div>
 					<input
 						placeholder="Name"
@@ -280,6 +342,7 @@ export default connect(({ user, opts }) => ({
 				set: props.set || '',
 				editing: [new Set(), new Set()],
 				replay: '',
+				mydeck: sock.getDeck(),
 			};
 		}
 
@@ -371,7 +434,7 @@ export default connect(({ user, opts }) => ({
 		allReady = () => this.state.groups.every(g => g.every(p => !p.pending));
 
 		aiClick = () => {
-			const deck = this.state.groups[0][0].deck || sock.getDeck();
+			const deck = this.state.groups[0][0].deck || this.state.mydeck;
 			if (etgutil.decklength(deck) < 9) {
 				this.props.dispatch(store.doNav(import('./DeckEditor')));
 				return;
@@ -428,7 +491,9 @@ export default connect(({ user, opts }) => ({
 			}
 			this.toMainMenu();
 		};
+
 		toMainMenu = () => this.props.dispatch(store.doNav(import('./MainMenu')));
+
 		sendConfig = () => {
 			if (this.props.username === this.state.groups[0][0].user) {
 				sock.userEmit('matchconfig', {
@@ -437,6 +502,7 @@ export default connect(({ user, opts }) => ({
 				});
 			}
 		};
+
 		addGroup = () => {
 			this.setState(
 				state => ({
@@ -446,12 +512,14 @@ export default connect(({ user, opts }) => ({
 				this.sendConfig,
 			);
 		};
+
 		updatePlayers = (i, p) =>
 			this.setState(state => {
 				const newgroups = state.groups.slice();
 				newgroups[i] = p;
 				return { groups: newgroups };
 			}, this.sendConfig);
+
 		invitePlayer = u => {
 			sock.userEmit('matchconfig', {
 				data: this.state.groups,
@@ -459,6 +527,7 @@ export default connect(({ user, opts }) => ({
 			});
 			sock.userEmit('matchinvite', { invite: u });
 		};
+
 		removeGroup = i => {
 			this.setState(state => {
 				const newgroups = state.groups.slice(),
@@ -468,6 +537,7 @@ export default connect(({ user, opts }) => ({
 				return { groups: newgroups, editing: newediting };
 			}, this.sendConfig);
 		};
+
 		loadMyData = () => {
 			for (const group of this.state.groups) {
 				for (const player of group) {
@@ -478,6 +548,7 @@ export default connect(({ user, opts }) => ({
 			}
 			return null;
 		};
+
 		isMultiplayer = () =>
 			this.state.groups.some(g =>
 				g.some(p => p.user && p.user !== this.props.username),
@@ -488,6 +559,7 @@ export default connect(({ user, opts }) => ({
 				amhost = this.props.username === this.state.groups[0][0].user,
 				isMultiplayer = this.isMultiplayer(),
 				allReady = amhost && (!isMultiplayer || this.allReady());
+			console.log((mydata && mydata.deck) || this.state.mydeck);
 			return (
 				<>
 					<div
@@ -498,14 +570,24 @@ export default connect(({ user, opts }) => ({
 						}}>
 						Warning: Lobby feature is still in development
 					</div>
-					{mydata && mydata.deck && (
-						<Components.DeckDisplay
-							x={206}
-							y={377}
-							deck={mydata.deck || sock.getDeck()}
-							renderMark
-						/>
-					)}
+					{mydata && mydata.deck && 'You have been assigned a deck'}
+					<input
+						value={this.state.mydeck}
+						onChange={e => this.setState({ mydeck: e.target.value })}
+						style={{
+							position: 'absolute',
+							left: '306px',
+							top: '380px',
+						}}
+					/>
+					<Components.DeckDisplay
+						x={206}
+						y={377}
+						deck={
+							(mydata && mydata.deck) || etgutil.decodedeck(this.state.mydeck)
+						}
+						renderMark
+					/>
 					<input
 						type="button"
 						value="Replay"
@@ -600,7 +682,9 @@ export default connect(({ user, opts }) => ({
 										value="Ready"
 										onClick={() => {
 											sock.userEmit('matchready', {
-												data: { deck: sock.getDeck() },
+												data: {
+													deck: this.state.mydeck,
+												},
 											});
 										}}
 									/>
