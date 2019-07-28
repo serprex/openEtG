@@ -22,7 +22,7 @@ class App extends React.Component {
 					deck={deck}
 					onMouseOver={(i, code) => this.setState({ code })}
 				/>
-				<Card x={636} y={8} code={this.state.code} />
+				<Card x={36} y={206} code={this.state.code} />
 			</>
 		);
 	}
