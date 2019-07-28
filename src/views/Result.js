@@ -197,7 +197,7 @@ export default connect(({ user }) => ({ user }))(
 			const kc = e.which;
 			if (kc === 32 || kc === 13) this.exitFunc();
 			else if (
-				kc === 87 &&
+				(kc === 87 || e.key === 'w') &&
 				this.props.game.data.rematch &&
 				(!this.props.game.data.rematchFilter ||
 					this.props.game.data.rematchFilter(this.props))
