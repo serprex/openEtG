@@ -1086,7 +1086,7 @@ export default connect(({ user }) => ({ user }))(
 		onkeydown = e => {
 			if (e.target.tagName === 'TEXTAREA') return;
 			const kc = e.which,
-				ch = kc < 128 ? String.fromCharCode(kc) : e.key;
+				ch = e.key || String.fromCharCode(kc);
 			let chi;
 			if (kc === 27) {
 				this.resignClick();
@@ -1094,16 +1094,16 @@ export default connect(({ user }) => ({ user }))(
 				this.endClick();
 			} else if (ch === '\b' || ch === '0') {
 				this.cancelClick();
-			} else if (~(chi = 'SW'.indexOf(ch))) {
+			} else if (~(chi = 'sw'.indexOf(ch))) {
 				this.thingClick(
 					this.props.game.byId(chi ? this.state.player2 : this.state.player1),
 				);
-			} else if (~(chi = 'QA'.indexOf(ch))) {
+			} else if (~(chi = 'qa'.indexOf(ch))) {
 				const { shield } = this.props.game.byId(
 					chi ? this.state.player2 : this.state.player1,
 				);
 				if (shield) this.thingClick(shield);
-			} else if (~(chi = 'ED'.indexOf(ch))) {
+			} else if (~(chi = 'ed'.indexOf(ch))) {
 				const { weapon } = this.props.game.byId(
 					chi ? this.state.player2 : this.state.player1,
 				);
@@ -1111,17 +1111,13 @@ export default connect(({ user }) => ({ user }))(
 			} else if (~(chi = '12345678'.indexOf(ch))) {
 				const card = this.props.game.byId(this.state.player1).hand[chi];
 				if (card) this.thingClick(card);
-			} else if (ch === 'P') {
+			} else if (ch === 'p') {
 				if (
 					this.props.game.turn === this.state.player1.id &&
 					this.state.player2.id !== this.state.player1.foeId
 				) {
 					this.applyNext({ x: 'foe', t: this.state.player2.id });
 				}
-			} else if (ch === '-') {
-				this.props.dispatch(
-					store.setOpt('lofiArt', !store.store.getState().opts.lofiArt),
-				);
 			} else if (~(chi = '[]'.indexOf(ch))) {
 				this.setState(state => {
 					const { players } = this.props.game,
