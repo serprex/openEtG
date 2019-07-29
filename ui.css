@@ -22,7 +22,22 @@ input[type="button"]{
 }
 input[type="button"]:hover{background:linear-gradient(to bottom,#ccdde0,#586776)}
 input[type="button"]:hover:active{background:linear-gradient(to bottom,#aabbc0,#485766)}
-input[type="text"],input[type="password"],input[type="number"],input:not([type]){width:150px;border:2px solid rgba(0,0,0,.7777777);border-radius:4px;background-color:rgba(8,8,8,.5);color:#eee}
+select,input[type="text"],input[type="password"],input[type="number"],input:not([type]){width:150px;border:2px solid rgba(0,0,0,.7777777);border-radius:4px;background-color:rgba(8,8,8,.5);color:#eee}
+select{
+	-webkit-appearance:none;
+	-moz-appearance:none;
+	appearance:none;
+	color:#111;
+	background-color:#ddeef0;
+	background-image:url("data:image/svg+xml;utf8,<svg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path d='M0 0l5 5 5-5z'/></svg>");
+	background-repeat:no-repeat;
+	background-position-x:100%;
+	background-position-y:5px;
+	border:solid #000 1px;
+	border-radius:4px;
+}
+select:hover{background-color:#bbcccf}
+select:hover:active{background-color:#99aaaf}
 .bg_main{background-image:url(assets/bg_main.png);width:900px;height:600px}
 .width400{width:400px;margin:0}
 .floatRight{float:right}

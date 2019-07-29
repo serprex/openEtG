@@ -18,7 +18,7 @@ class PremadePicker extends React.Component {
 	}
 
 	render() {
-		const { onClick } = this.props;
+		const { onClick, onClose } = this.props;
 		const { mage, demigod, falsegod } = aiDecks;
 		return (
 			<div
@@ -37,6 +37,12 @@ class PremadePicker extends React.Component {
 					placeholder="Search"
 					value={this.state.search}
 					onChange={e => this.setState({ search: e.target.value })}
+				/>
+				<input
+					className="floatRight"
+					type="button"
+					value="Close"
+					onChange={onClose}
 				/>
 				<div
 					style={{
@@ -213,6 +219,7 @@ class PlayerEditor extends React.Component {
 				</div>
 				{this.state.premade && (
 					<PremadePicker
+						onClose={() => this.setState({ premade: false })}
 						onClick={(name, deck, isdg) => {
 							const state = { name, deck, premade: false };
 							if (isdg) {
@@ -559,7 +566,6 @@ export default connect(({ user, opts }) => ({
 				amhost = this.props.username === this.state.groups[0][0].user,
 				isMultiplayer = this.isMultiplayer(),
 				allReady = amhost && (!isMultiplayer || this.allReady());
-			console.log((mydata && mydata.deck) || this.state.mydeck);
 			return (
 				<>
 					<div
