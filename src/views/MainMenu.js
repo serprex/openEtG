@@ -245,6 +245,7 @@ export default connect(({ user, opts }) => ({
 		}
 
 		render() {
+			if (!this.props.user) return null;
 			const self = this,
 				leadc = [],
 				arenac = [];
@@ -301,11 +302,9 @@ export default connect(({ user, opts }) => ({
 			}
 
 			function logout(cmd) {
-				if (self.props.user) {
-					sock.userEmit(cmd);
-					self.props.dispatch(store.setUser(null));
-					self.props.dispatch(store.setOpt('remember', false));
-				}
+				sock.userEmit(cmd);
+				self.props.dispatch(store.setUser(null));
+				self.props.dispatch(store.setOpt('remember', false));
 				self.props.dispatch(store.doNav(import('./Login')));
 			}
 			const quickslots = [];
