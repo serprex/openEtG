@@ -309,7 +309,7 @@ const data = {
 		'When one of your permanents is destroyed, steal a random permanent from opponent.',
 	losecharge: (c, inst) => {
 		const charges = c.getStatus('charges');
-		return charages
+		return charges
 			? `Lasts for ${charges} more turn${charges == 1 ? '' : 's'}.`
 			: 'Expires at end of turn';
 	},
