@@ -212,11 +212,9 @@ export default class Builder {
 			ecost[0] -= 4;
 		}
 		if (card.type === etg.Creature) {
-			const auto = card.active.get('ownattack');
-			if (auto === Skills.light) ecost[etg.Light] -= 3;
-			else if (auto === Skills.fire) ecost[etg.Fire] -= 3;
-			else if (auto === Skills.air) ecost[etg.Air] -= 3;
-			else if (auto === Skills.earth) ecost[etg.Earth] -= 3;
+			const auto = card.active.get('ownattack'),
+				castText = auto ? auto.castText : '';
+			if (castText.startsWith('quanta ')) ecost[castText.split(' ')[1]] -= 3;
 			else if (auto === Skills.siphon) ecost[etg.Darkness] -= 2;
 		} else if (card.type === etg.Shield) this.anyshield++;
 		else if (card.type === etg.Weapon) this.anyweapon++;

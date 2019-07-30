@@ -46,11 +46,9 @@ const data = {
 	accumulation: 'Increment damage reduction per stack',
 	adrenaline:
 		'Target creature attacks multiple times per turn. Weaker creatures gain more attacks',
-	aether: 'Produce 1:12 on death',
 	aflatoxin:
 		'Apply 2 poison to target. When target dies, it becomes a Malignant Cell',
 	aggroskele: 'Summon a Skeleton. All own skeletons attack target creature',
-	air: 'Produce 1:9 per turn',
 	alphawolf: 'Summon two 2|1 Pack Wolves on play',
 	antimatter: 'Invert strength of target',
 	appease: 'Sacifice own creature & gain 1|1. If not, retaliate',
@@ -139,7 +137,6 @@ const data = {
 		'Deal 1 spell damage to all creatures. Gain 1:7 per damage dealt. Removes cloak',
 	dshield: 'Become immaterial until next turn',
 	duality: "Generate a copy of foe's next draw",
-	earth: 'Produce 1:4 per turn',
 	earthquake: 'Destroy up to 3 stacks from target permanent',
 	eatspell: 'Absorb next spell, gaining 1|1',
 	elf: 'Become Fallen if target of Chaos Seed',
@@ -165,7 +162,6 @@ const data = {
 	feed: 'Poison target creature & gain 3|3, but rematerialize',
 	fickle: 'Swap target card with random affordable card from deck',
 	fiery: 'Increment damage per 5:6 owned',
-	fire: 'Produce 1:6 per turn',
 	firebolt:
 		'Deals 3 spell damage to target. Increment damage per 4:6 owned. Thaws target',
 	firewall: 'Damage non-ranged attackers',
@@ -246,7 +242,6 @@ const data = {
 	jelly:
 		'Target creature becomes a 7|4 Pink Jelly with active Pink Jelly costing 4 of their element',
 	jetstream: 'Target airborne creature gains 3|-1',
-	light: 'Produce 1:8 per turn',
 	lightning: 'Deal 5 spell damage to target',
 	liquid:
 		'Target creature is poisoned & skills are replaced with "Heal owner per damage dealt"',
@@ -257,8 +252,10 @@ const data = {
 	locketshift: "Now produces quanta of target's element",
 	loot: 'Steal a random permanent from foe when own permanent is destroyed',
 	losecharge: (c, inst) => {
-		const charges = c.getStatus('charges');
-		return `Lasts ${charges} turn${charges === 1 ? '' : 's'}`;
+		const charges = inst.getStatus('charges');
+		return charges
+			? `Lasts ${charges} turn${charges === 1 ? '' : 's'}`
+			: 'Expires at end of turn';
 	},
 	luciferin:
 		'All own creatures without skills produce 1:8 per turn. Heal owner 10',
@@ -317,6 +314,7 @@ const data = {
 	phoenix: ['Become an Ash on death', 'Become a Minor Ash on death'],
 	photosynthesis: 'Produce 2:5. May activate multiple times',
 	pillar: c => `Produce ${c.element ? 1 : 3}:${c.element} per turn`,
+	pillar1: c => `Produce ${c.element ? 1 : 3}:${c.element} on play`,
 	pend: c =>
 		`Oscilliate between producing ${c.element ? 1 : 3}:${
 			c.element
@@ -341,6 +339,10 @@ const data = {
 	protectonce: 'Evade next targeting, or prevent next source of spell damage',
 	purify: 'Remove poison & sacrifice. Apply 2 purify',
 	quantagift: 'Gain 2:7 & 2 quanta of mark. Produce only 3:7 if mark is 1:7',
+	quanta: (x, amt = 1) => ({
+		ownattack: `Produce ${amt}:${x} per turn`,
+		ownplay: `Produce ${amt}:${x} on play`,
+	}),
 	quint: 'Target creature becomes immaterial. Thaws',
 	quinttog:
 		'Target immaterial becomes material. Otherwise material targets become immaterial & thaw',

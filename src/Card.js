@@ -115,7 +115,11 @@ export default class Card {
 		} else {
 			const text = [];
 			if (this.type === etg.Shield && this.health)
-				text.push('Reduce damage by ' + this.health);
+				text.push(
+					this.health > 0
+						? `Reduce damage by ${this.health}`
+						: `Increase damage by ${-this.health}`,
+				);
 			else if (this.type === etg.Creature || this.type === etg.Weapon)
 				text.push(`${this.attack}|${this.health}`);
 			const skills = skillText(this);

@@ -72,10 +72,6 @@ const Skills = {
 		ctx.effect({ x: 'Text', text: 'Adrenaline', id: t.id });
 		t.setStatus('adrenaline', 1);
 	},
-	aether: (ctx, c, t) => {
-		ctx.effect({ x: 'Text', text: '1:12', id: c.id });
-		c.owner.spend(etg.Aether, -1);
-	},
 	aflatoxin: (ctx, c, t) => {
 		ctx.effect({ x: 'Text', text: 'Aflatoxin', id: t.id });
 		t.addpoison(2);
@@ -89,10 +85,6 @@ const Skills = {
 			0,
 		);
 		t.dmg(dmg);
-	},
-	air: (ctx, c, t) => {
-		ctx.effect({ x: 'Text', text: '1:9', id: c.id });
-		c.owner.spend(etg.Air, -1);
 	},
 	alphawolf: (ctx, c, t) => {
 		const pwolf = c.card.as(ctx.Cards.Names.PackWolf);
@@ -583,10 +575,6 @@ const Skills = {
 			);
 		}
 	},
-	earth: (ctx, c, t) => {
-		ctx.effect({ x: 'Text', text: '1:4', id: c.id });
-		c.owner.spend(etg.Earth, -1);
-	},
 	earthquake: (ctx, c, t) => {
 		ctx.effect({ x: 'Text', text: 'Earthquake', id: t.id });
 		if (t.getStatus('charges') > 3) {
@@ -693,10 +681,6 @@ const Skills = {
 	},
 	fiery: (ctx, c, t) => {
 		return Math.floor(c.owner.quanta[etg.Fire] / 5);
-	},
-	fire: (ctx, c, t) => {
-		ctx.effect({ x: 'Text', text: '1:6', id: c.id });
-		c.owner.spend(etg.Fire, -1);
 	},
 	firebolt: (ctx, c, t) => {
 		t.spelldmg(3 + Math.floor(c.owner.quanta[etg.Fire] / 4));
@@ -919,7 +903,7 @@ const Skills = {
 	},
 	hope: (ctx, c, t) => {
 		return c.owner.creatures.reduce(
-			(dr, cr) => (cr && cr.hasactive('ownattack', 'light') ? dr + 1 : dr),
+			(dr, cr) => (cr && cr.hasactive('ownattack', 'quanta 8') ? dr + 1 : dr),
 			0,
 		);
 	},
@@ -1109,7 +1093,7 @@ const Skills = {
 			[[0, 'buff', 'fiery']],
 			[[0, '', 'aquatic'], [2, 'hit', 'regen']],
 			[
-				[0, 'ownattack', 'light'],
+				[0, 'ownattack', 'quanta 8'],
 				[1, 'blocked', 'virtue'],
 				[2, 'owndmg', 'martyr'],
 				[3, 'ownfreeze', 'growth 2'],
@@ -1164,10 +1148,6 @@ const Skills = {
 	jetstream: (ctx, c, t) => {
 		t.dmg(1);
 		t.incrAtk(3);
-	},
-	light: (ctx, c, t) => {
-		ctx.effect({ x: 'Text', text: '1:8', id: c.id });
-		c.owner.spend(etg.Light, -1);
 	},
 	lightning: (ctx, c, t) => {
 		t.spelldmg(5);
@@ -1226,7 +1206,7 @@ const Skills = {
 				)
 					return;
 			}
-			x.addactive('ownattack', exports.light);
+			x.addactive('ownattack', parseSkill('quanta 8'));
 		});
 	},
 	lycanthropy: (ctx, c, t) => {
@@ -1583,6 +1563,15 @@ const Skills = {
 		t.setStatus('neuro', 0);
 		if (t.type === etg.Player) t.setStatus('sosa', 0);
 	},
+	quanta: (e, amt = 1) => {
+		const namt = -amt,
+			ne = e | 0,
+			text = `${amt}:${e}`;
+		return (ctx, c, t) => {
+			ctx.effect({ x: 'Text', text, id: c.id });
+			c.owner.spend(ne, namt);
+		};
+	},
 	quint: (ctx, c, t) => {
 		ctx.effect({ x: 'Text', text: 'Immaterial', id: t.id });
 		t.setStatus('immaterial', 1);
@@ -1595,7 +1584,7 @@ const Skills = {
 		} else Skills.quint(ctx, c, t);
 	},
 	randomdr: (ctx, c, t) => {
-		if (c.id === t.id) c.maxhp = c.hp = ctx.upto(c.card.upped ? 4 : 3);
+		c.maxhp = c.hp = ctx.upto(c.card.upped ? 4 : 3);
 	},
 	rage: (ctx, c, t) => {
 		const dmg = c.card.upped ? 6 : 5;
@@ -2214,6 +2203,9 @@ const Skills = {
 			c.card.element,
 			c.getStatus('charges') * (c.card.element > 0 ? -1 : -3),
 		);
+	},
+	pillar1: (ctx, c, t) => {
+		c.owner.spend(c.card.element, c.card.element > 0 ? -1 : -3);
 	},
 	pend: (ctx, c, t) => {
 		const pendstate = c.getStatus('pendstate');

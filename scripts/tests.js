@@ -278,7 +278,7 @@ M.test('Hope', function() {
 	}
 	this.player1.endturn();
 	assert.equal(this.player1.shield.truedr(), 3, 'DR');
-	assert.equal(this.player1.quanta[etg.Light], 3, 'RoL');
+	assert.equal(this.player1.quanta[etg.Light], 4, 'RoL');
 });
 M.test('Lobotomize', function() {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Devourer));
