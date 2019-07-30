@@ -214,7 +214,8 @@ export default class Builder {
 		if (card.type === etg.Creature) {
 			const auto = card.active.get('ownattack'),
 				castText = auto ? auto.castText : '';
-			if (castText.startsWith('quanta ')) ecost[castText.split(' ')[1]] -= 3;
+			if (castText && castText.startsWith('quanta '))
+				ecost[castText.split(' ')[1]] -= 3;
 			else if (auto === Skills.siphon) ecost[etg.Darkness] -= 2;
 		} else if (card.type === etg.Shield) this.anyshield++;
 		else if (card.type === etg.Weapon) this.anyweapon++;
