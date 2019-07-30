@@ -344,10 +344,11 @@ Game.prototype.targetFilter = function(src, active) {
 		targetingFilter &&
 		(t =>
 			(t.type === etg.Player ||
-				t.type === etg.Spell ||
-				t.ownerId === this.turn ||
-				t.getStatus('cloak') ||
-				!t.owner.isCloaked()) &&
+				(~t.getIndex() &&
+					(t.type === etg.Spell ||
+						t.ownerId === this.turn ||
+						t.getStatus('cloak') ||
+						!t.owner.isCloaked()))) &&
 			targetingFilter(src, t))
 	);
 };
