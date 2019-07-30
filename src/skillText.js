@@ -27,9 +27,7 @@ export default function skillText(c) {
 				if (entry === undefined) return;
 				pushEntry(ret, c, k, entry);
 				if (k === 'cast')
-					ret[ret.length - 1] = `${c.cast}:${c.castele} ${
-						ret[ret.length - 1]
-					}`;
+					ret[ret.length - 1] = `${c.cast}:${c.castele} ${ret[ret.length - 1]}`;
 			});
 		}
 		return ret.join('\n');
@@ -63,8 +61,7 @@ const data = {
 	axedraw:
 		'Gains 1 strength for every card drawn by any player. Strength gained is removed after attack.',
 	bblood: 'Give target creature 0|20 and delay it for 5 turns.',
-	becomearctic:
-		'If frozen, this creature instead turns into an Arctic Squid.',
+	becomearctic: 'If frozen, this creature instead turns into an Arctic Squid.',
 	beguile: 'Steal target creature until next turn.',
 	beguilestop:
 		'Return this creature to its original owner at the beginning of next turn.',
@@ -77,9 +74,7 @@ const data = {
 	bolsterintodeck:
 		'Add 3 copies of target creature on top of your deck. Cannot ricochet.',
 	boneyard: c =>
-		`Whenever a creature dies, summon a ${
-			c.upped ? '2|2' : '1|1'
-		} Skeleton.`,
+		`Whenever a creature dies, summon a ${c.upped ? '2|2' : '1|1'} Skeleton.`,
 	bounce:
 		"When this creature dies, it returns to its owner's hand. Modified stats and statuses remain on the card when it is played again.",
 	bravery:
@@ -152,8 +147,7 @@ const data = {
 		'When this creature damages opponent, return their weapon to their hand. Modified stats and statuses remain on the card when it is played again.',
 	discping:
 		'Deal 1 damage to target creature and return this card to your hand. Modified stats and statuses remain on the card when it is played again.',
-	disfield:
-		'Block all damage from attackers. Consumes 1:0 per damage blocked.',
+	disfield: 'Block all damage from attackers. Consumes 1:0 per damage blocked.',
 	disshield:
 		'Block all damage from attackers.. Consume 1:1 per 3 damage blocked.',
 	divinity: 'Add 24 to maximum health and heal yourself 16.',
@@ -184,8 +178,7 @@ const data = {
 	empathy:
 		'At the end of your turn, heal 1 for each creature you own. For every 8 creatures you own (rounded down), pay 1:5 at the end of your turn.',
 	enchant: 'Target permanent becomes immaterial.',
-	endow:
-		'Gain the strength, skills, and statuses of target weapon. Gain 0|2.',
+	endow: 'Gain the strength, skills, and statuses of target weapon. Gain 0|2.',
 	envenom:
 		'Target weapon gains "Apply 1 poison on hit. Throttled (only triggers at most twice from Adrenaline),” or target shield gains "25% chance to poison non-ranged attackers."',
 	epidemic:
@@ -277,8 +270,7 @@ const data = {
 		`When your opponent plays a creature from their hand, put a ${
 			c.upped ? 'Ball Lightning' : 'Spark'
 		} into play.`,
-	hitownertwice:
-		'When this creature attacks, it also attacks its owner twice.',
+	hitownertwice: 'When this creature attacks, it also attacks its owner twice.',
 	holylight:
 		'Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature.',
 	hope:
@@ -372,8 +364,8 @@ const data = {
 	pairproduce: 'Your pillars, pendulums, and towers produce quanta.',
 	paleomagnetism: {
 		ownattack: [
-			"Summon a pillar or pendulum every turn. 67% chance it matches your mark, 33% chance it matches your opponent's mark.",
-			"Summon a tower or pendulum every turn and when this card is played. 67% chance it matches your mark, 33% chance it matches your opponent's mark.",
+			"Summon a pillar or pendulum every turn. ⅔ chance it matches your mark, ⅓ chance it matches your opponent's mark.",
+			"Summon a tower or pendulum every turn and when this card is played. ⅔ chance it matches your mark, ⅓ chance it matches your opponent's mark.",
 		],
 	},
 	pandemonium:
@@ -388,8 +380,7 @@ const data = {
 		'When this creature dies, transform it into an Ash.',
 		'When this creature dies, transform it into a Minor Ash.',
 	],
-	photosynthesis:
-		'Gain 2:5. This ability may be used multiple times per turn.',
+	photosynthesis: 'Gain 2:5. This ability may be used multiple times per turn.',
 	pillar: c => `Gain ${c.element ? 1 : 3}:${c.element} every turn.`,
 	pillar1: c => `Gain ${c.element ? 1 : 3}:${c.element} when played`,
 	pend: c =>
