@@ -455,7 +455,11 @@ Thing.prototype.hasactive = function(type, name) {
 	return !!(atype && ~atype.name.indexOf(name));
 };
 Thing.prototype.canactive = function(spend) {
-	if (this.game.turn !== this.ownerId || this.game.phase !== etg.PlayPhase) {
+	if (
+		this.game.turn !== this.ownerId ||
+		this.game.phase !== etg.PlayPhase ||
+		this.getIndex() === -1
+	) {
 		return false;
 	} else if (this.type === etg.Spell) {
 		return (
