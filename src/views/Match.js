@@ -428,23 +428,27 @@ class ThingInstCore extends React.Component {
 
 const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 	function ThingInst(props) {
+		const obj = props.game.byId(props.id);
 		const idtrack = React.useContext(TrackIdCtx).value,
-			pos = ui.tgtToPos(props.obj, props.p1id);
+			pos = ui.tgtToPos(obj, props.p1id) || idtrack.get(props.id) || null;
+		console.log(props.id, pos);
 		return (
-			<TrackIdPos id={props.obj.id} pos={pos}>
-				<Motion
-					defaultStyle={
-						props.startpos === -1
-							? {
-									x: 103,
-									y: props.obj.ownerId === props.p1id ? 551 : 258,
-							  }
-							: idtrack.get(props.startpos)
-					}
-					style={{ x: spring(pos.x), y: spring(pos.y) }}>
-					{pos => <ThingInstCore {...props} pos={pos} />}
-				</Motion>
-			</TrackIdPos>
+			pos && (
+				<TrackIdPos id={props.id} pos={pos}>
+					<Motion
+						defaultStyle={
+							props.startpos === -1
+								? {
+										x: 103,
+										y: obj.ownerId === props.p1id ? 551 : 258,
+								  }
+								: idtrack.get(props.startpos)
+						}
+						style={{ x: spring(pos.x), y: spring(pos.y) }}>
+						{pos => <ThingInstCore {...props} obj={obj} pos={pos} />}
+					</Motion>
+				</TrackIdPos>
+			)
 		);
 	},
 );
@@ -1344,25 +1348,22 @@ export default connect(({ user }) => ({ user }))(
 						/>
 					),
 				);
-				for (let i = 0; i < pl.handIds.length; i++) {
-					const inst = pl.hand[i];
-					things.push(inst);
-				}
+				things.push(...pl.handIds);
 				for (let i = j ? 22 : 0; i >= 0 && i < 23; i += j ? -1 : 1) {
-					const cr = pl.creatures[i];
+					const cr = pl.creatureIds[i];
 					if (cr && !(j === 1 && cloaked)) {
 						things.push(cr);
 					}
 				}
 				for (let i = 0; i < 16; i++) {
-					const pr = pl.permanents[i];
-					if (pr && pr.getStatus('flooding')) floodvisible = true;
-					if (pr && !(j === 1 && cloaked && !pr.getStatus('cloak'))) {
+					const pr = pl.permanentIds[i];
+					if (pr && game.getStatus(pr, 'flooding')) floodvisible = true;
+					if (pr && !(j === 1 && cloaked && !game.getStatus(pr, 'cloak'))) {
 						things.push(pr);
 					}
 				}
-				const wp = pl.weapon,
-					sh = pl.shield;
+				const wp = pl.weaponId,
+					sh = pl.shieldId;
 				if (wp && !(j === 1 && cloaked)) {
 					things.push(wp);
 				}
@@ -1515,12 +1516,12 @@ export default connect(({ user }) => ({ user }))(
 					{children}
 					<TransitionMotion
 						defaultStyles={things.map(t => ({
-							key: `${t.id}`,
+							key: `${t}`,
 							style: { opacity: 0 },
 							data: t,
 						}))}
 						styles={things.map(t => ({
-							key: `${t.id}`,
+							key: `${t}`,
 							style: { opacity: spring(1) },
 							data: t,
 						}))}
@@ -1531,9 +1532,9 @@ export default connect(({ user }) => ({ user }))(
 									<ThingInst
 										key={item.key}
 										game={game}
-										obj={item.data}
+										id={item.data}
 										p1id={player1.id}
-										startpos={this.state.startPos.get(item.data.id)}
+										startpos={this.state.startPos.get(item.data)}
 										setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 										onMouseOut={this.clearCard}
 										onClick={this.thingClick}

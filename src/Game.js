@@ -343,7 +343,7 @@ Game.prototype.targetFilter = function(src, active) {
 	return (
 		targetingFilter &&
 		(t =>
-			(t.type === etg.Player ||
+			((t.type === etg.Player && !t.out) ||
 				(~t.getIndex() &&
 					(t.type === etg.Spell ||
 						t.ownerId === this.turn ||
