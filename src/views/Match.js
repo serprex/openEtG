@@ -431,7 +431,6 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 		const obj = props.game.byId(props.id);
 		const idtrack = React.useContext(TrackIdCtx).value,
 			pos = ui.tgtToPos(obj, props.p1id) || idtrack.get(props.id) || null;
-		console.log(props.id, pos);
 		return (
 			pos && (
 				<TrackIdPos id={props.id} pos={pos}>

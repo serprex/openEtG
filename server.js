@@ -16,7 +16,7 @@ import qs from 'querystring';
 import httpoly from 'httpolyglot';
 import ws from 'ws';
 import * as etg from './src/etg.js';
-import * as Cards from './src/Cards.js';
+import Cards from './src/Cards.js';
 import RngMock from './src/RngMock.js';
 import * as etgutil from './src/etgutil.js';
 import * as usercmd from './src/usercmd.js';

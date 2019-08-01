@@ -1,5 +1,5 @@
 #!/bin/node --experimental-modules
-import * as Cards from '../src/Cards.js';
+import Cards from '../src/Cards.js';
 import * as etgutil from '../src/etgutil.js';
 import decks from '../src/Decks.json';
 let pool = '';

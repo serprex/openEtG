@@ -1,5 +1,5 @@
 import * as etg from '../../etg';
-import * as Cards from '../Cards.js';
+import Cards from '../Cards.js';
 import Actives from '../../Skills.js';
 import * as etgutil from '../../etgutil.js';
 import RngMock from '../RngMock.js';

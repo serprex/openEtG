@@ -1,0 +1,16 @@
+{
+  "short_name": "oetg",
+  "name": "openEtG",
+  "icons": [
+    {
+      "src": "/Cards/5p0.png",
+      "type": "image/png",
+      "sizes": "128x128"
+    }
+  ],
+  "start_url": "/index.html",
+  "background_color": "#000",
+  "display": "minimal-ui",
+  "scope": "/",
+  "theme_color": "#369"
+}
