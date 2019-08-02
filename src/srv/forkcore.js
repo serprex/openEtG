@@ -1,4 +1,4 @@
-import * as util from '../util.js';
+import { randint } from '../util.js';
 import * as cache from './cache.js';
 import file from './file.js';
 import card from './card.js';
@@ -29,7 +29,7 @@ export default function forkcore(req, res) {
 		) {
 			cache.add(res, url, ifmod, url || 'index.html', file);
 		} else if (url == 'speed') {
-			res.writeHead(302, { Location: `/speed/${util.readint()}` });
+			res.writeHead(302, { Location: `/speed/${randint()}` });
 			res.end();
 		} else {
 			res.writeHead(404, { Connection: 'close' });

@@ -1,0 +1,7 @@
+{
+	"listen": 8080,
+	"wsport": 8080,
+	"wssport": 443,
+	"redisport": 6379,
+	"certs": null
+}

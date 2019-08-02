@@ -5,6 +5,7 @@ import RngMock from './RngMock.js';
 import * as sock from './sock.js';
 import * as store from './store.js';
 
+let guestname;
 function chatmute() {
 	const state = store.store.getState();
 	store.store.dispatch(

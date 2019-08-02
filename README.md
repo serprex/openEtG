@@ -20,7 +20,7 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
 
 1. Start redis server in the background: `redis-server &`
   * To stop the redis server run `pkill redis`, then press ctrl+c
-1. Start node http server and open the game: `open http://127.0.0.1:13602 && npm start`
+1. Start node http server and open the game: `open http://127.0.0.1:8080 && npm start`
   * Since we open the page before the server has fully started, you may need to refresh the page
   * To stop the server, press ctrl+c in the Terminal
 
@@ -39,4 +39,4 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
   1. Leave this command window open for later
   1. Run `npm run dev`
   1. Download [atlas.js](https://etg.dek.im/assets/atlas.js), [atlas.png](https://etg.dek.im/assets/atlas.png) and [atlas.css](https://etg.dek.im/assets/atlas.css) and move them to the `assets` folder
-1. Browse to [http://127.0.0.1:13602](http://127.0.0.1:13602) and the game should work!
+1. Browse to [http://127.0.0.1:8080](http://127.0.0.1:8080) and the game should work!

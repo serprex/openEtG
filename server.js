@@ -29,15 +29,18 @@ import starter from './src/srv/starter.json';
 import forkcore from './src/srv/forkcore.js';
 import login from './src/srv/login.js';
 import Lock from './src/srv/Lock.js';
+import config from './config.json';
 
 const MAX_INT = 0x100000000;
 const sockmeta = new WeakMap();
 const importlocks = new Map();
 (async () => {
-	const [keypem, certpem] = await Promise.all([
-		fs.readFile('../certs/oetg-key.pem'),
-		fs.readFile('../certs/oetg-cert.pem'),
-	]).catch(() => []);
+	const [keypem, certpem] = config.certs
+		? await Promise.all([
+				fs.readFile(`../certs/oetg-key.pem`),
+				fs.readFile(`../certs/oetg-cert.pem`),
+		  ])
+		: [];
 	function activeUsers() {
 		const activeusers = [];
 		for (let [name, sock] of Us.socks) {
@@ -1399,7 +1402,7 @@ const importlocks = new Map();
 			},
 			forkcore,
 		)
-		.listen(13602)
+		.listen(config.listen)
 		.on('clientError', () => {});
 	const wss = new ws.Server({
 		server: app,

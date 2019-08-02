@@ -28,5 +28,5 @@ export default function(url, stime) {
 	for (let i = 0; i < cards.length; i++) {
 		code += '01' + cards[i].toString(32);
 	}
-	return deck(code, stime);
+	return deck(code + '.svg', stime);
 }

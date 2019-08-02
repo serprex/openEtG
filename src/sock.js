@@ -6,9 +6,12 @@ import Game from './Game.js';
 import * as store from './store.js';
 import * as userutil from './userutil.js';
 import RngMock from './RngMock.js';
+import config from '../config.json';
 
 const endpoint = `${location.protocol === 'http:' ? 'ws://' : 'wss://'}
-	${location.hostname}:13602`;
+	${location.hostname}:${
+	location.protocol === 'http:' ? config.wsport : config.wssport
+}`;
 const buffer = [];
 let socket = new WebSocket(endpoint),
 	attempts = 0,
