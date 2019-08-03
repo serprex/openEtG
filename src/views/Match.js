@@ -161,51 +161,7 @@ function PagedModal(props) {
 	);
 }
 
-const TrackIdCtx = React.createContext({
-	update: (id, pos) => {},
-	value: new Map(),
-});
-class IdTracker extends React.Component {
-	constructor(props) {
-		super(props);
-
-		this._ctx = {
-			update: (id, pos) => this._ctx.value.set(id, pos),
-			value: new Map(),
-		};
-		this.state = { game: props.game, ctx: this._ctx };
-	}
-
-	static getDerivedStateFromProps(props, state) {
-		if (props.game !== state.game) {
-			state.ctx.value.clear();
-			return { game: props.game };
-		}
-		return null;
-	}
-
-	render() {
-		return (
-			<TrackIdCtx.Provider value={this._ctx}>
-				{this.props.children}
-			</TrackIdCtx.Provider>
-		);
-	}
-}
-function TrackIdPos({ id, pos, children }) {
-	const { value, update } = React.useContext(TrackIdCtx);
-	const v = value.get(id);
-	if (!v || v.x !== pos.x || v.y !== pos.y) {
-		update(id, pos);
-	}
-	return children || null;
-}
-function GetIdPos(props) {
-	const { value } = React.useContext(TrackIdCtx);
-	return props.children(value.get(props.id) || null);
-}
-
-class ThingInstCore extends React.Component {
+class ThingInst extends React.Component {
 	constructor(props) {
 		super(props);
 
@@ -426,32 +382,6 @@ class ThingInstCore extends React.Component {
 	}
 }
 
-const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
-	function ThingInst(props) {
-		const obj = props.game.byId(props.id);
-		const idtrack = React.useContext(TrackIdCtx).value,
-			pos = ui.tgtToPos(obj, props.p1id) || idtrack.get(props.id) || null;
-		return (
-			pos && (
-				<TrackIdPos id={props.id} pos={pos}>
-					<Motion
-						defaultStyle={
-							props.startpos === -1
-								? {
-										x: 103,
-										y: obj.ownerId === props.p1id ? 551 : 258,
-								  }
-								: idtrack.get(props.startpos)
-						}
-						style={{ x: spring(pos.x), y: spring(pos.y) }}>
-						{pos => <ThingInstCore {...props} obj={obj} pos={pos} />}
-					</Motion>
-				</TrackIdPos>
-			)
-		);
-	},
-);
-
 function addNoHealData(game, newdata) {
 	const dataNext = {
 		...game.data.dataNext,
@@ -483,8 +413,14 @@ function tgtclass(p1id, obj, targeting) {
 	return '';
 }
 
-function FoePlays({ foeplays, setCard, setLine, clearCard, showGame }) {
-	const idtrack = React.useContext(TrackIdCtx).value;
+function FoePlays({
+	idtrack,
+	foeplays,
+	setCard,
+	setLine,
+	clearCard,
+	showGame,
+}) {
 	return (
 		!!foeplays && (
 			<div
@@ -514,13 +450,14 @@ function FoePlays({ foeplays, setCard, setLine, clearCard, showGame }) {
 	);
 }
 
-export default connect(({ user }) => ({ user }))(
+export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 	class Match extends React.Component {
 		constructor(props) {
 			super(props);
 			this.aiState = null;
 			this.aiDelay = 0;
 			this.streakback = 0;
+			this.idtrack = new Map();
 			const player1 = props.replay
 				? props.game.byId(props.game.turn)
 				: props.game.byUser(props.user ? props.user.name : '');
@@ -537,7 +474,8 @@ export default connect(({ user }) => ({ user }))(
 				player1: player1.id,
 				player2: player1.foeId,
 				fxid: 0,
-				startPos: new imm.Map(),
+				startPos: new Map(),
+				endPos: new Map(),
 				fxTextPos: new imm.Map(),
 				fxStatChange: new imm.Map(),
 				effects: new Set(),
@@ -558,60 +496,54 @@ export default connect(({ user }) => ({ user }))(
 				id,
 				(pos = 0) => (offset = pos) + 16,
 			);
+			const pos = this.idtrack.get(id);
 			return (
-				<GetIdPos id={id} key={fxid}>
-					{pos =>
-						pos && (
-							<Motion
-								defaultStyle={{
-									fade: 1,
-									x: pos.x,
-									y: pos.y + offset,
-								}}
+				pos && (
+					<Motion
+						defaultStyle={{
+							fade: 1,
+							x: pos.x,
+							y: pos.y + offset,
+						}}
+						style={{
+							x: pos.x,
+							y: spring(pos.y - 36, {
+								stiffness: 84,
+								dampen: 12,
+							}),
+							fade: spring(0, {
+								stiffness: 108,
+								dampen: 12,
+							}),
+						}}
+						onRest={() => {
+							this.setState(state => {
+								const effects = new Set(state.effects);
+								effects.delete(Text);
+								const st = {
+									fxTextPos: state.fxTextPos.update(id, pos => pos && pos - 16),
+									effects,
+								};
+								return onRest ? onRest(state, st) : st;
+							});
+						}}>
+						{pos => (
+							<Components.Text
+								text={text}
 								style={{
-									x: pos.x,
-									y: spring(pos.y - 36, {
-										stiffness: 84,
-										dampen: 12,
-									}),
-									fade: spring(0, {
-										stiffness: 108,
-										dampen: 12,
-									}),
+									position: 'absolute',
+									left: `${pos.x}px`,
+									top: `${pos.y}px`,
+									opacity: `${pos.fade}`,
+									transform: 'translate(-50%,-50%)',
+									textAlign: 'center',
+									pointerEvents: 'none',
+									textShadow: '1px 1px 2px #000',
 								}}
-								onRest={() => {
-									this.setState(state => {
-										const effects = new Set(state.effects);
-										effects.delete(Text);
-										const st = {
-											fxTextPos: state.fxTextPos.update(
-												id,
-												pos => pos && pos - 16,
-											),
-											effects,
-										};
-										return onRest ? onRest(state, st) : st;
-									});
-								}}>
-								{pos => (
-									<Components.Text
-										text={text}
-										style={{
-											position: 'absolute',
-											left: `${pos.x}px`,
-											top: `${pos.y}px`,
-											opacity: `${pos.fade}`,
-											transform: 'translate(-50%,-50%)',
-											textAlign: 'center',
-											pointerEvents: 'none',
-											textShadow: '1px 1px 2px #000',
-										}}
-									/>
-								)}
-							</Motion>
-						)
-					}
-				</GetIdPos>
+							/>
+						)}
+					</Motion>
+				)
 			);
 		};
 
@@ -700,16 +632,16 @@ export default connect(({ user }) => ({ user }))(
 				const newstate = {};
 				for (const effect of game.effects) {
 					switch (effect.x) {
-						case 'Draw':
-							newstate.startPos = (newstate.startPos || state.startPos).set(
-								effect.id,
-								-1,
-							);
-							break;
 						case 'StartPos':
 							newstate.startPos = (newstate.startPos || state.startPos).set(
 								effect.id,
 								effect.src,
+							);
+							break;
+						case 'EndPos':
+							newstate.endPos = (newstate.endPos || state.endPos).set(
+								effect.id,
+								effect.tgt,
 							);
 							break;
 						case 'Poison':
@@ -1233,7 +1165,8 @@ export default connect(({ user }) => ({ user }))(
 		}
 
 		render() {
-			const game = this.getGame(),
+			const { props } = this,
+				game = this.getGame(),
 				children = [],
 				player1 = game.byId(this.state.player1),
 				player2 = game.byId(this.state.player2);
@@ -1285,22 +1218,21 @@ export default connect(({ user }) => ({ user }))(
 						  pl.hand.some(c => c.card.isOf(game.Cards.Names.Nova))
 						? 'ico singularity'
 						: '';
+				this.idtrack.set(pl.id, plpos);
 				children.push(
-					<TrackIdPos id={pl.id} pos={plpos}>
-						<div
-							className={tgtclass(player1.id, pl, this.state.targeting)}
-							style={{
-								position: 'absolute',
-								left: `${plpos.x - 48}px`,
-								top: `${plpos.y - 40}px`,
-								width: '96px',
-								height: '80px',
-								border: 'transparent 2px solid',
-							}}
-							onClick={() => this.thingClick(pl)}
-							onMouseOver={e => this.setInfo(e, pl)}
-						/>
-					</TrackIdPos>,
+					<div
+						className={tgtclass(player1.id, pl, this.state.targeting)}
+						style={{
+							position: 'absolute',
+							left: `${plpos.x - 48}px`,
+							top: `${plpos.y - 40}px`,
+							width: '96px',
+							height: '80px',
+							border: 'transparent 2px solid',
+						}}
+						onClick={() => this.thingClick(pl)}
+						onMouseOver={e => this.setInfo(e, pl)}
+					/>,
 					<span
 						className={'ico e' + pl.mark}
 						style={{
@@ -1491,7 +1423,7 @@ export default connect(({ user }) => ({ user }))(
 				);
 			}
 			return (
-				<IdTracker game={game}>
+				<>
 					{this.state.popup && (
 						<PagedModal
 							pages={this.state.popup}
@@ -1505,6 +1437,7 @@ export default connect(({ user }) => ({ user }))(
 						? cloaksvg
 						: this.state.showFoeplays && (
 								<FoePlays
+									idtrack={this.idtrack}
 									foeplays={this.state.foeplays.get(player2.id)}
 									setCard={(e, play) => this.setCard(e, play, e.pageX)}
 									setLine={(line0, line1) => this.setState({ line0, line1 })}
@@ -1514,33 +1447,84 @@ export default connect(({ user }) => ({ user }))(
 						  )}
 					{children}
 					<TransitionMotion
-						defaultStyles={things.map(t => ({
-							key: `${t}`,
-							style: { opacity: 0 },
-							data: t,
-						}))}
-						styles={things.map(t => ({
-							key: `${t}`,
-							style: { opacity: spring(1) },
-							data: t,
-						}))}
-						willLeave={() => ({ opacity: spring(0) })}>
+						styles={things.map(id => {
+							const obj = game.byId(id),
+								pos =
+									ui.tgtToPos(obj, player1.id) || this.idtrack.get(id) || null;
+							return {
+								key: `${id}`,
+								style: {
+									opacity: spring(1),
+									x: pos && spring(pos.x),
+									y: pos && spring(pos.y),
+								},
+								data: obj,
+							};
+						})}
+						willEnter={item => {
+							const startpos = this.state.startPos.get(item.data.id);
+							let pos;
+							if (startpos < 0) {
+								pos = {
+									x: 103,
+									y:
+										(item.data.ownerId === player1.id) === (startpos === -1)
+											? 551
+											: 258,
+								};
+							} else {
+								pos = this.idtrack.get(startpos);
+							}
+							return { opacity: 0, ...pos };
+						}}
+						willLeave={item => {
+							const endpos = this.state.endPos.get(item.data.id);
+							let pos;
+							if (endpos < 0) {
+								pos = {
+									x: 103,
+									y:
+										(item.data.ownerId === player1.id) === (endpos === -1)
+											? 551
+											: 258,
+									opacity: 0,
+								};
+							} else {
+								pos = this.idtrack.get(endpos);
+							}
+							return pos
+								? {
+										x: spring(pos.x),
+										y: spring(pos.y),
+										opacity: spring(0),
+								  }
+								: {
+										opacity: spring(0),
+								  };
+						}}>
 						{interpStyles => (
 							<>
-								{interpStyles.map(item => (
-									<ThingInst
-										key={item.key}
-										game={game}
-										id={item.data}
-										p1id={player1.id}
-										startpos={this.state.startPos.get(item.data)}
-										setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
-										onMouseOut={this.clearCard}
-										onClick={this.thingClick}
-										targeting={this.state.targeting}
-										opacity={item.style.opacity}
-									/>
-								))}
+								{interpStyles.map(
+									item => (
+										this.idtrack.set(item.data.id, item.style),
+										(
+											<ThingInst
+												key={item.key}
+												lofiArt={props.lofiArt}
+												game={game}
+												id={item.data.id}
+												obj={item.data}
+												p1id={player1.id}
+												setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
+												onMouseOut={this.clearCard}
+												onClick={this.thingClick}
+												targeting={this.state.targeting}
+												pos={item.style}
+												opacity={item.style.opacity}
+											/>
+										)
+									),
+								)}
 							</>
 						)}
 					</TransitionMotion>
@@ -1645,7 +1629,7 @@ export default connect(({ user }) => ({ user }))(
 							top: '15px',
 						}}
 					/>
-					{!this.props.replay &&
+					{!props.replay &&
 						!game.data.spectate &&
 						(game.turn === player1.id || game.winner) && (
 							<>
@@ -1675,7 +1659,7 @@ export default connect(({ user }) => ({ user }))(
 								)}
 							</>
 						)}
-					{this.props.replay && (
+					{props.replay && (
 						<>
 							<span
 								style={{
@@ -1691,7 +1675,7 @@ export default connect(({ user }) => ({ user }))(
 									left: '860px',
 									top: '520px',
 								}}>
-								{this.props.replay.moves.length}
+								{props.replay.moves.length}
 							</span>
 							<span
 								style={{
@@ -1755,7 +1739,7 @@ export default connect(({ user }) => ({ user }))(
 							)}
 						</>
 					)}
-				</IdTracker>
+				</>
 			);
 		}
 	},

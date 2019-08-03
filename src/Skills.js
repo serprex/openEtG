@@ -712,10 +712,10 @@ const Skills = {
 	},
 	foedraw: (ctx, c, t) => {
 		if (c.owner.handIds.length < 8) {
-			const inst = c.owner.foe._draw();
-			if (inst) {
-				c.owner.deckpush(inst);
-				c.owner.drawcard();
+			const id = c.owner.foe._draw();
+			if (id && ~c.owner.addCard(id)) {
+				ctx.effect({ x: 'StartPos', id, src: -2 });
+				c.owner.proc('draw', false);
 			}
 		}
 	},
@@ -878,7 +878,7 @@ const Skills = {
 	},
 	hatch: (ctx, c, t) => {
 		ctx.effect({ x: 'Text', text: 'Hatch', id: c.id });
-		c.transform(c.randomcard(c.card.upped, x => x.type === etg.Creature));
+		c.transform(ctx.randomcard(c.card.upped, x => x.type === etg.Creature));
 	},
 	heal: (ctx, c, t) => {
 		t.dmg(-20);
@@ -929,7 +929,7 @@ const Skills = {
 	improve: (ctx, c, t) => {
 		ctx.effect({ x: 'Text', text: 'Improve', id: t.id });
 		t.setStatus('mutant', 1);
-		t.transform(t.randomcard(false, x => x.type === etg.Creature));
+		t.transform(ctx.randomcard(false, x => x.type === etg.Creature));
 	},
 	inertia: (ctx, c, t, data) => {
 		if (data.tgt && c.ownerId === ctx.get(data.tgt).get('owner')) {
@@ -1646,6 +1646,7 @@ const Skills = {
 		c.owner.spend(t.card.element, -1);
 	},
 	reinforce: (ctx, c, t) => {
+		ctx.effect({ x: 'EndPos', id: c.id, tgt: t.id });
 		const atk = c.trueatk(),
 			hp = c.truehp();
 		t.incrAtk(atk);
@@ -1666,6 +1667,7 @@ const Skills = {
 	},
 	rewind: (ctx, c, t) => {
 		ctx.effect({ x: 'Text', text: 'Rewind', id: t.id });
+		ctx.effect({ x: 'EndPos', id: t.id, tgt: -1 });
 		t.remove();
 		t.owner.deckpush(t.owner.newThing(t.card).id);
 	},
@@ -1741,7 +1743,7 @@ const Skills = {
 		const num = Math.min(8 - c.owner.handIds.length, 3);
 		let anyentro = false;
 		for (let i = num - 1; ~i; i--) {
-			const card = c.randomcard(
+			const card = ctx.randomcard(
 				c.card.upped,
 				x =>
 					x.type !== etg.Pillar &&

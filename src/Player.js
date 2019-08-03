@@ -265,6 +265,7 @@ Player.prototype.addPerm = function(x, fromhand) {
 			if (pr && etgutil.asShiny(pr.card.code, false) === dullcode) {
 				pr.incrStatus('charges', x.getStatus('charges'));
 				pr.place(this, etg.Permanent, fromhand);
+				this.game.effect({ x: 'EndPos', id: x.id, tgt: pr.id });
 				return;
 			}
 		}
@@ -297,7 +298,9 @@ Player.prototype.addCard = function(x) {
 		const hand = Array.from(this.game.get(this.id).get('hand'));
 		hand.push(x.id);
 		this.game.set(this.id, 'hand', hand);
+		return hand.length - 1;
 	}
+	return -1;
 };
 Player.prototype.forEach = function(func, dohand) {
 	func(this.weapon);
@@ -560,7 +563,7 @@ Player.prototype.drawcard = function(drawstep) {
 	if (this.handIds.length < 8) {
 		const id = this._draw();
 		if (id && ~this.addCard(id)) {
-			this.game.effect({ x: 'Draw', id });
+			this.game.effect({ x: 'StartPos', id, src: -1 });
 			this.proc('draw', drawstep);
 		}
 	}
