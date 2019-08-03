@@ -1,5 +1,6 @@
 #!/usr/bin/node --experimental-modules
 import fs from 'fs';
+import assets from '../assets/atlas.json';
 let pngw = 0,
 	pngh = 0,
 	pngp = 0;
@@ -17,10 +18,10 @@ png.on('end', function() {
 	const bgstrx = [
 		`background-size:${(pngw / 2).toFixed(2)}px;`,
 		`background-size:${(pngw / 3).toFixed(2)}px;`,
+		`background-size:${(pngw / 4).toFixed(2)}px;`,
 	];
 	const out = fs.createWriteStream(process.argv[2]);
 	out.write(".ico{display:inline-block;background:url('atlas.png')}");
-	const assets = require('../assets/atlas.js');
 	const rules = {};
 	for (const asset in assets) {
 		const data = assets[asset];
@@ -30,10 +31,10 @@ png.on('end', function() {
 			`width:${data[2]}px;height:${data[3]}px`,
 			`background-position:-${data[0]}px -${data[1]}px`,
 		);
-		if (asset.match(/e\d+/)) {
-			for (let i = 0; i < 2; i++) {
+		if (asset.match(/e\d+|cback/)) {
+			for (let i = 0; i < 3; i++) {
 				const dati = data.map(x => +(x / (2 + i)).toFixed(2)),
-					name = (i ? 't' : 'c') + asset;
+					name = (i === 2 ? 's' : i === 1 ? 't' : 'c') + asset;
 				addRule(
 					rules,
 					name,

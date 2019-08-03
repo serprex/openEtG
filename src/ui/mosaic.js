@@ -1,4 +1,4 @@
-import atlas from '../../assets/atlas';
+import atlas from '../../assets/atlas.json';
 const aname = document.getElementById('aname');
 const a2n = {
 	e: 'Timpa & Ravi',
@@ -15,7 +15,6 @@ const a2n = {
 	sacrifice: 'Kae',
 	protection: 'Kae',
 	singularity: 'Kae',
-	shinyborder: 'Kae',
 	gold: 'Kae',
 };
 let oldkey;

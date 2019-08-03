@@ -276,7 +276,7 @@ class ThingInst extends React.Component {
 							{topText && (
 								<Components.Text
 									text={topText}
-									icoprefix="te"
+									icoprefix="se"
 									style={{
 										width: '64px',
 										whiteSpace: 'nowrap',
@@ -288,7 +288,7 @@ class ThingInst extends React.Component {
 							{statText && (
 								<Components.Text
 									text={statText}
-									icoprefix="te"
+									icoprefix="se"
 									style={{
 										float: 'right',
 										backgroundColor: bgcolor,
@@ -298,7 +298,7 @@ class ThingInst extends React.Component {
 							{!isSpell && (
 								<Components.Text
 									text={card.name}
-									icoprefix="te"
+									icoprefix="se"
 									style={{
 										position: 'absolute',
 										top: '54px',
@@ -349,7 +349,7 @@ class ThingInst extends React.Component {
 						top: pos.y - 36 + 'px',
 						opacity: props.opacity,
 					}}
-					onMouseOut={props.onMouseOut}
+					onMouseLeave={props.onMouseOut}
 					onClick={() => props.onClick(obj)}>
 					<div
 						className="ico cback"
@@ -374,7 +374,7 @@ class ThingInst extends React.Component {
 					zIndex: !isSpell && obj.getStatus('cloak') ? '2' : undefined,
 				}}
 				onMouseOver={props.setInfo && (e => props.setInfo(e, obj, pos.x))}
-				onMouseOut={props.onMouseOut}
+				onMouseLeave={props.onMouseOut}
 				onClick={() => props.onClick(obj)}>
 				{this.state.instdom}
 			</div>
@@ -439,6 +439,8 @@ function FoePlays({
 							else clearCard();
 							if (play.t) {
 								setLine(idtrack.get(play.c), idtrack.get(play.t));
+							} else {
+								setLine(null, null);
 							}
 						}}
 						onClick={() => showGame(play.game)}
@@ -639,9 +641,9 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 							);
 							break;
 						case 'EndPos':
-							newstate.startPos = (newstate.startPos || state.startPos).delete(
-								effect.id,
-							);
+							if (!newstate.startPos)
+								newstate.startPos = new Map(state.startPos);
+							newstate.startPos.delete(effect.id);
 							newstate.endPos = (newstate.endPos || state.endPos).set(
 								effect.id,
 								effect.tgt,
@@ -1214,13 +1216,13 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 				const pl = j ? player2 : player1,
 					plpos = ui.tgtToPos(pl, player1.id),
 					handOverlay = pl.usedactive
-						? 'ico silence'
+						? 12
 						: pl.getStatus('sanctuary')
-						? 'ico sanctuary'
+						? 8
 						: pl.getStatus('nova') >= 3 &&
 						  pl.hand.some(c => c.card.isOf(game.Cards.Names.Nova))
-						? 'ico singularity'
-						: '';
+						? 1
+						: null;
 				this.idtrack.set(pl.id, plpos);
 				children.push(
 					<div
@@ -1266,18 +1268,23 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 							className="ico sabbath"
 							style={{
 								position: 'absolute',
-								left: j ? '792px' : '0',
-								top: j ? '80px' : '288px',
+								left: '0',
+								top: j ? '96px' : '300px',
 							}}
 						/>
 					),
 					handOverlay && (
 						<span
-							className={handOverlay}
 							style={{
+								zIndex: '1',
 								position: 'absolute',
-								left: '60px',
-								top: j ? '5px' : '305px',
+								left: '101px',
+								top: j ? '0px' : '300px',
+								width: '66px',
+								height: '263px',
+								backgroundColor: ui.strcols[handOverlay],
+								opacity: '.3',
+								borderRadius: '4px',
 							}}
 						/>
 					),
@@ -1408,18 +1415,16 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 						}}
 					/>,
 					<div
-						className={pl.deckIds.length ? 'ico cback' : ''}
+						className={pl.deckIds.length ? 'ico ccback' : ''}
 						style={{
 							position: 'absolute',
 							left: '103px',
 							top: j ? '258px' : '551px',
 							textAlign: 'center',
-							paddingTop: '14px',
+							paddingTop: '7px',
 							pointerEvents: 'none',
 							fontSize: '18px',
 							textShadow: '2px 2px 1px #000,2px 2px 2px #000',
-							width: '32px',
-							height: '36px',
 						}}>
 						{pl.deckIds.length || '0!!'}
 					</div>,

@@ -31,6 +31,7 @@ export function CardImage(props) {
 		<div
 			className="cardslot"
 			onMouseOver={props.onMouseOver}
+			onMouseLeave={props.onMouseOut}
 			onClick={props.onClick}
 			onContextMenu={props.onContextMenu}
 			style={{
