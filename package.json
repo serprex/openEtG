@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "bufferutil": "^4.0.1",
-    "httpolyglot": "^0.1.2",
     "ioredis": "^4.11.2",
     "ws": "^7.1.1"
   },

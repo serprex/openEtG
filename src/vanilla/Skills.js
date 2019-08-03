@@ -132,7 +132,7 @@ const Actives = {
 		c.owner.gpull = chim.id;
 	},
 	cpower: (ctx, c, t) => {
-		var buff = t.owner.upto(25);
+		var buff = ctx.upto(25);
 		t.buffhp(Math.floor(buff / 5) + 1);
 		t.atk += (buff % 5) + 1;
 	},
@@ -151,7 +151,7 @@ const Actives = {
 				'rewind',
 				'snipe',
 				'swave',
-			][c.owner.upto(12)]
+			][ctx.upto(12)]
 		].func(ctx, c, t);
 	},
 	dagger: (ctx, c, t) => {
@@ -373,9 +373,10 @@ const Actives = {
 			ctx.Cards.Names.Chimera,
 		];
 		c.transform(
-			c.owner.randomcard(c.card.upped, function(x) {
-				return x.type == etg.Creature && !bans.some(ban => x.isOf(ban));
-			}),
+			ctx.randomcard(
+				c.card.upped,
+				x => x.type == etg.Creature && !bans.some(ban => x.isOf(ban)),
+			),
 		);
 		if (c.status.get('ready')) Actives.parallel.func(ctx, c, c);
 	},
@@ -403,7 +404,7 @@ const Actives = {
 	icebolt: (ctx, c, t) => {
 		var bolts = Math.floor(c.owner.quanta[etg.Water] / 10);
 		t.spelldmg(2 + bolts * 2);
-		if (c.owner.rng() < 0.35 + bolts / 10) {
+		if (ctx.rng() < 0.35 + bolts / 10) {
 			t.freeze(c.card.upped ? 4 : 3);
 		}
 	},
@@ -436,12 +437,10 @@ const Actives = {
 			ctx.Cards.Names.Chimera,
 		];
 		t.transform(
-			c.owner.randomcard(false, function(x) {
-				return x.type == etg.Creature && !~bans.indexOf(x);
-			}),
+			ctx.randomcard(false, x => x.type == etg.Creature && !~bans.indexOf(x)),
 		);
-		t.buffhp(c.owner.upto(5));
-		t.atk += c.owner.upto(5);
+		t.buffhp(ctx.upto(5));
+		t.atk += ctx.upto(5);
 		t.status = t.status.set('mutant', true);
 		t.mutantactive();
 	},
@@ -665,22 +664,24 @@ const Actives = {
 				ctx.Cards.Names.DevonianDragon,
 				ctx.Cards.Names.Chimera,
 			]);
-			var rnd = c.owner.randomcard(false, function(x) {
-				return x.type == etg.Creature && !bans.has(x);
-			});
+			var rnd = ctx.randomcard(
+				false,
+				x => x.type == etg.Creature && !bans.has(x),
+			);
 			while (!rnd.active.get('cast')) {
-				rnd = c.owner.randomcard(false, function(x) {
-					return x.type == etg.Creature && !bans.has(x);
-				});
+				rnd = ctx.randomcard(
+					false,
+					x => x.type == etg.Creature && !bans.has(x),
+				);
 			}
 			c.active = c.active.set('cast', rnd.active.get('cast'));
-			c.cast = c.owner.upto(2) + 1;
+			c.cast = ctx.upto(2) + 1;
 		}
-		c.castele = c.owner.upto(13);
+		c.castele = ctx.upto(13);
 		c.setStatus('mutant', 1);
 	},
 	mutation: (ctx, c, t) => {
-		var rnd = c.owner.rng();
+		var rnd = ctx.rng();
 		if (rnd < 0.1) {
 			t.die();
 		} else if (rnd < 0.5) {
@@ -721,8 +722,7 @@ const Actives = {
 	},
 	nymph: (ctx, c, t) => {
 		var e =
-			(!t.card.name.match(/^Mark of /) && t.card.element) ||
-			c.owner.upto(12) + 1;
+			(!t.card.name.match(/^Mark of /) && t.card.element) || ctx.upto(12) + 1;
 		Actives.destroy.func(ctx, c, t, false, true);
 		const nymph = t.owner.newThing(
 			t.card.as(ctx.Cards.Codes[etg.NymphList[e]]),
@@ -756,7 +756,7 @@ const Actives = {
 		c.owner.addCrea(copy);
 		copy.setStatus('airborne', copy.card.status.get('airborne'));
 		if (copy.status.get('mutant')) {
-			const buff = t.owner.upto(25);
+			const buff = ctx.upto(25);
 			t.buffhp(Math.floor(buff / 5));
 			t.atk += buff % 5;
 			t.mutantactive();
@@ -785,8 +785,7 @@ const Actives = {
 		c.owner.foe.masscc(c, Actives.infect.func);
 	},
 	platearmor: (ctx, c, t) => {
-		var buff = c.card.upped ? 6 : 3;
-		t.buffhp(buff);
+		t.buffhp(c.card.upped ? 6 : 3);
 	},
 	poison: vadrenathrottle((ctx, c, t) => {
 		(t || c.owner.foe).addpoison(1);
@@ -820,8 +819,8 @@ const Actives = {
 		t.setStatus('frozen', 0);
 	},
 	rage: (ctx, c, t) => {
-		var dmg = c.card.upped ? 6 : 5;
-		t.atk += dmg;
+		const dmg = c.card.upped ? 6 : 5;
+		t.incrAtk(dmg);
 		t.dmg(dmg);
 	},
 	readiness: (ctx, c, t) => {
@@ -904,25 +903,24 @@ const Actives = {
 		}
 	},
 	serendipity: (ctx, c, t) => {
-		var cards = [],
-			num = Math.min(8 - c.owner.hand.length, 3),
-			anyentro = false;
-		for (var i = num - 1; i >= 0; i--) {
+		const num = Math.min(8 - c.owner.hand.length, 3);
+		let anyentro = false;
+		for (let i = num - 1; ~i; i--) {
 			// Don't accept Marks/Nymphs
-			cards[i] = c.owner.randomcard(c.card.upped, function(x) {
-				return (
+			const card = ctx.randomcard(
+				c.card.upped,
+				x =>
 					(x.type != etg.Pillar || !x.name.match(/^Mark/)) &&
 					!x.isOf(ctx.Cards.Names.Relic) &&
 					!x.isOf(ctx.Cards.Names.Miracle) &&
 					!etg.ShardList.some(shard => shard && x.isOf(shard)) &&
 					!etg.NymphList.some(nymph => nymph && x.isOf(nymph)) &&
-					(i > 0 || anyentro || x.element == etg.Entropy)
-				);
-			});
-			anyentro |= cards[i].element == etg.Entropy;
-		}
-		for (var i = 0; i < num; i++) {
-			c.owner.addCard(c.owner.newThing(cards[i]));
+					(i > 0 || anyentro || x.element == etg.Entropy),
+			);
+			anyentro |= card.element === etg.Entropy;
+			const inst = c.owner.newThing(card);
+			ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
+			c.owner.addCard(inst);
 		}
 	},
 	silence: (ctx, c, t) => {
@@ -935,7 +933,7 @@ const Actives = {
 			Actives.antimatter.func(ctx, c, c);
 			return;
 		}
-		const r = c.owner.upto(12);
+		const r = ctx.upto(12);
 		if (r === 0) {
 			Actives.nova.func(ctx, c.owner.foe);
 			c.owner.foe.nova = 0;
@@ -944,7 +942,7 @@ const Actives = {
 		} else if (r < 5) {
 			Actives.quint.func(ctx, c, c);
 		} else if (r < 7) {
-			const buff = c.owner.upto(25);
+			const buff = ctx.upto(25);
 			c.buffhp(Math.floor(buff / 5) + 1);
 			c.atk -= (buff % 5) + 1;
 		} else if (r < 9) {
@@ -1123,7 +1121,7 @@ const Actives = {
 		return true;
 	},
 	cold: (ctx, c, t) => {
-		if (t.type === etg.Creature && c.owner.rng() < 0.3) {
+		if (t.type === etg.Creature && ctx.rng() < 0.3) {
 			t.freeze(3);
 		}
 	},
@@ -1131,10 +1129,10 @@ const Actives = {
 		return true;
 	},
 	evade40: (ctx, c, t) => {
-		return c.owner.rng() < 0.4;
+		return ctx.rng() < 0.4;
 	},
 	evade50: (ctx, c, t) => {
-		return c.owner.rng() < 0.5;
+		return ctx.rng() < 0.5;
 	},
 	firewall: (ctx, c, t) => {
 		if (t.type === etg.Creature) {
@@ -1144,7 +1142,7 @@ const Actives = {
 	skull: (ctx, c, t) => {
 		if (t.type === etg.Creature && !t.card.isOf(ctx.Cards.Names.Skeleton)) {
 			var thp = t.truehp();
-			if (thp == 0 || (thp > 0 && c.owner.rng() < 0.5 / thp)) {
+			if (thp == 0 || (thp > 0 && ctx.rng() < 0.5 / thp)) {
 				var index = t.getIndex();
 				t.die();
 				if (
@@ -1166,7 +1164,7 @@ const Actives = {
 		if (!c.owner.sanctuary) c.owner.spend(etg.Light, -1);
 	},
 	thorn: (ctx, c, t) => {
-		if (t.type === etg.Creature && c.owner.rng() < 0.75) {
+		if (t.type === etg.Creature && ctx.rng() < 0.75) {
 			t.addpoison(1);
 		}
 	},

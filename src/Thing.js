@@ -94,7 +94,7 @@ Thing.prototype.transform = function(card) {
 	this.status = status;
 	this.active = card.active;
 	if (this.status.get('mutant')) {
-		const buff = this.upto(25);
+		const buff = this.game.upto(25);
 		this.buffhp(Math.floor(buff / 5));
 		this.incrAtk(buff % 5);
 		this.mutantactive();
@@ -394,7 +394,7 @@ const mutantabilities = [
 ];
 Thing.prototype.mutantactive = function() {
 	this.lobo();
-	const index = this.upto(mutantabilities.length + 2) - 2;
+	const index = this.game.upto(mutantabilities.length + 2) - 2;
 	if (index < 0) {
 		this.setStatus(['momentum', 'immaterial'][~index], 1);
 	} else {
@@ -403,7 +403,7 @@ Thing.prototype.mutantactive = function() {
 			this.addactive('death', active);
 		} else {
 			this.active = this.active.set('cast', active);
-			this.cast = 1 + this.upto(2);
+			this.cast = 1 + this.game.upto(2);
 			this.castele = this.card.element;
 			return true;
 		}
@@ -652,7 +652,7 @@ Thing.prototype.v_attack = function(stasis, freedomChance) {
 		if (
 			this.status.get('airborne') &&
 			freedomChance &&
-			this.owner.rng() < freedomChance
+			this.game.rng() < freedomChance
 		) {
 			momentum = true;
 			trueatk = Math.ceil(trueatk * 1.5);
@@ -720,21 +720,6 @@ Thing.prototype.v_attack = function(stasis, freedomChance) {
 	}
 };
 
-Thing.prototype.rng = function() {
-	return this.game.rng();
-};
-Thing.prototype.upto = function(x) {
-	return this.game.upto(x);
-};
-Thing.prototype.choose = function(x) {
-	return this.game.choose(x);
-};
-Thing.prototype.randomcard = function(upped, filter) {
-	return this.game.randomcard(upped, filter);
-};
-Thing.prototype.shuffle = function(array) {
-	return this.game.shuffle(array);
-};
 Thing.prototype.buffhp = function(x) {
 	if (this.type !== etg.Weapon) {
 		if (this.type === etg.Player && this.maxhp <= 500)

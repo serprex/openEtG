@@ -303,8 +303,8 @@ quarks.spirit4 = {
 quarks.spirit5 = {
 	deck: '0b606015ur025us035up025uu025v2035vb015uo025uv015v8025ul018pi',
 	name: 'Spirit of the Dark Maiden',
-	morph: (inst, card) =>
-		inst.randomcard(
+	morph: (ctx, card) =>
+		ctx.randomcard(
 			card.upped,
 			x => x.element === etg.Darkness && x.type === card.type,
 		),
@@ -815,7 +815,7 @@ export function mkQuestAi(quest, datafn) {
 	const game = new Game(datafn ? datafn(data) : data);
 	if (quest.morph) {
 		const pl = game.byUser(user.name);
-		pl.deckIds = pl.deck.map(x => pl.newThing(quest.morph(x.card)).id);
+		pl.deckIds = pl.deck.map(x => pl.newThing(quest.morph(game, x.card)).id);
 	}
 	return game;
 }

@@ -23,7 +23,7 @@ function quadPillarCore(ctx, ele, c, n) {
 	for (let i = 0; i < n; i++) {
 		const r = ctx.upto(16);
 		c.owner.spend((ele >> ((r & 3) << 2)) & 15, -1);
-		if (c.rng() < 2 / 3) {
+		if (ctx.rng() < 2 / 3) {
 			c.owner.spend((ele >> (r & 12)) & 15, -1);
 		}
 	}
@@ -331,7 +331,7 @@ const Skills = {
 	},
 	cseed: (ctx, c, t) => {
 		Skills[
-			c.choose([
+			ctx.choose([
 				'drainlife',
 				'firebolt',
 				'freeze',
@@ -348,7 +348,7 @@ const Skills = {
 		](ctx, c, t);
 	},
 	cseed2: (ctx, c, t) => {
-		const choice = c.choose(
+		const choice = ctx.choose(
 			ctx.Cards.filter(ctx.upto(2), c => {
 				if (c.type !== etg.Spell) return false;
 				const tgting = ctx.Cards.Targeting[c.active.get('cast').castName];
@@ -667,7 +667,7 @@ const Skills = {
 			}
 		});
 		if (cards.length) {
-			const pick = t.choose(cards);
+			const pick = ctx.choose(cards);
 			const card = t.owner.deck[pick];
 			const hand = Array.from(t.owner.handIds);
 			hand[t.getIndex()] = card.id;
@@ -737,7 +737,7 @@ const Skills = {
 				tgttest(pl);
 				pl.forEach(tgttest, true);
 			}
-			return tgts.length === 0 ? undefined : c.choose(tgts);
+			return tgts.length === 0 ? undefined : ctx.choose(tgts);
 		}
 		let tgting, tgt;
 		if (t.type === etg.Spell) {
@@ -787,7 +787,7 @@ const Skills = {
 			tgt.ownerId !== t.ownerId &&
 			tgt.getStatus('airborne') &&
 			!tgt.getStatus('frozen') &&
-			c.rng() > 0.8
+			ctx.rng() > 0.8
 		) {
 			data.evade = true;
 		}
@@ -909,7 +909,7 @@ const Skills = {
 	},
 	icebolt: (ctx, c, t) => {
 		const bolts = Math.floor(c.owner.quanta[etg.Water] / 5);
-		if (c.rng() < 0.35 + bolts / 20) {
+		if (ctx.rng() < 0.35 + bolts / 20) {
 			t.freeze(c.card.upped ? 4 : 3);
 		}
 		t.spelldmg(2 + bolts);
@@ -1068,7 +1068,7 @@ const Skills = {
 				shlist.push(i);
 			}
 		}
-		const active = shardSkills[c.choose(shlist) - 1][Math.min(num - 1, 5)];
+		const active = shardSkills[ctx.choose(shlist) - 1][Math.min(num - 1, 5)];
 		const shardgolem = {
 			stat: Math.floor(stat),
 			status: new imm.Map({ golem: 1 }),
@@ -1184,7 +1184,7 @@ const Skills = {
 			if (foe.shield && foe.shield.isMaterial()) perms.push(foe.shield);
 			if (perms.length) {
 				ctx.effect({ x: 'Text', text: 'Looted', id: c.id });
-				Skills.steal(ctx, c, foe.choose(perms));
+				Skills.steal(ctx, c, ctx.choose(perms));
 				c.addactive('turnstart', exports.salvageoff);
 			}
 		}
@@ -1290,7 +1290,7 @@ const Skills = {
 		c.setStatus('mutant', 1);
 	},
 	mutation: (ctx, c, t) => {
-		const rnd = c.rng();
+		const rnd = ctx.rng();
 		if (rnd < 0.1) {
 			ctx.effect({ x: 'Text', text: 'Oops', id: t.id });
 			t.die();
@@ -1378,11 +1378,11 @@ const Skills = {
 		const e =
 			t.card.element ||
 			(tauto === exports.pillmat
-				? c.choose([etg.Earth, etg.Fire, etg.Water, etg.Air])
+				? ctx.choose([etg.Earth, etg.Fire, etg.Water, etg.Air])
 				: tauto === exports.pillspi
-				? c.choose([etg.Death, etg.Life, etg.Light, etg.Darkness])
+				? ctx.choose([etg.Death, etg.Life, etg.Light, etg.Darkness])
 				: tauto === exports.pillcar
-				? c.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether])
+				? ctx.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether])
 				: ctx.upto(12) + 1);
 		Skills.destroy(ctx, c, t, true, true);
 		const nymph = t.owner.newThing(
@@ -1503,7 +1503,7 @@ const Skills = {
 		});
 	},
 	poisonfoe: (ctx, c) => {
-		if (c.rng() < 0.7) c.owner.foe.addpoison(1);
+		if (ctx.rng() < 0.7) c.owner.foe.addpoison(1);
 	},
 	powerdrain: (ctx, c, t) => {
 		const ti = [];
@@ -1511,7 +1511,7 @@ const Skills = {
 			if (c.owner.creatures[i]) ti.push(i);
 		}
 		if (!ti.length) return;
-		const tgt = c.owner.creatures[c.choose(ti)],
+		const tgt = c.owner.creatures[ctx.choose(ti)],
 			halfatk = Math.floor(t.trueatk() / 2),
 			halfhp = Math.floor(t.truehp() / 2);
 		t.incrAtk(-halfatk);
@@ -1685,7 +1685,7 @@ const Skills = {
 				pl.forEach(tgttest, true);
 			}
 			if (tgts.length) {
-				const tgt = c.choose(tgts),
+				const tgt = ctx.choose(tgts),
 					town = t.ownerId;
 				t.ownerId = tgt[1];
 				t.castSpell(tgt[0], data.active, true);
@@ -1741,13 +1741,13 @@ const Skills = {
 		const num = Math.min(8 - c.owner.handIds.length, 3);
 		let anyentro = false;
 		for (let i = num - 1; ~i; i--) {
-			const card = c.randomcard(c.card.upped, x => {
-				return (
+			const card = c.randomcard(
+				c.card.upped,
+				x =>
 					x.type !== etg.Pillar &&
 					x.rarity < 4 &&
-					(i > 0 || anyentro || x.element === etg.Entropy)
-				);
-			});
+					(i > 0 || anyentro || x.element === etg.Entropy),
+			);
 			anyentro |= card.element === etg.Entropy;
 			const inst = c.owner.newThing(card.asShiny(c.card.shiny));
 			ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
@@ -1788,7 +1788,7 @@ const Skills = {
 			Skills.antimatter(ctx, c, c);
 			return;
 		}
-		const r = c.rng();
+		const r = ctx.rng();
 		if (r > 0.9) {
 			c.setStatus('adrenaline', 1);
 		} else if (r > 0.8) {
@@ -1987,7 +1987,7 @@ const Skills = {
 				if (ctx.byId(deckIds[j]).card.type === etg.Creature) candidates.push(j);
 			}
 			if (candidates.length) {
-				const idx = pl.choose(candidates),
+				const idx = ctx.choose(candidates),
 					[crid] = deckIds.splice(idx, 1),
 					cr = ctx.byId(crid);
 				ctx.effect({ x: 'StartPos', id: cr.id, src: c.id });
@@ -2037,7 +2037,7 @@ const Skills = {
 			if (pl.weaponId && pl.weapon.isMaterial()) perms.push(pl.weapon);
 			if (pl.shieldId && pl.shield.isMaterial()) perms.push(pl.shield);
 			if (perms.length) {
-				const pr = pl.choose(perms);
+				const pr = ctx.choose(perms);
 				ctx.effect({ x: 'Text', text: 'Shuffled', id: pr.id });
 				const newpl = ctx.upto(2) ? pl : pl.foe;
 				const deckIds = Array.from(newpl.deckIds);
@@ -2063,7 +2063,7 @@ const Skills = {
 			}
 		});
 		if (cards.length) {
-			const pick = t.choose(cards);
+			const pick = ctx.choose(cards);
 			t.owner.setCrea(t.getIndex(), t.owner.deckIds[pick]);
 			const deck = Array.from(t.owner.deckIds);
 			deck[pick] = t.id;
@@ -2232,7 +2232,7 @@ const Skills = {
 		data.dmg = 0;
 	},
 	chaos: (ctx, c, t) => {
-		const randomchance = c.rng();
+		const randomchance = ctx.rng();
 		if (randomchance < 0.3) {
 			if (t.type === etg.Creature && !t.getStatus('ranged')) {
 				Skills.cseed(ctx, c, t);
@@ -2240,7 +2240,7 @@ const Skills = {
 		} else return c.card.upped && randomchance < 0.5;
 	},
 	cold: (ctx, c, t) => {
-		if (!t.getStatus('ranged') && c.rng() < 0.3) {
+		if (!t.getStatus('ranged') && ctx.rng() < 0.3) {
 			t.freeze(3);
 		}
 	},
@@ -2249,7 +2249,7 @@ const Skills = {
 			const chance = c.owner.creatures.reduce((chance, cr) => {
 				return cr && cr.hasactive('ownattack', 'siphon') ? chance + 1 : chance;
 			}, 0);
-			if (c.rng() < 1.4 - Math.pow(0.95, chance)) {
+			if (ctx.rng() < 1.4 - Math.pow(0.95, chance)) {
 				t.incrAtk(-1);
 				t.dmg(1);
 			}
@@ -2261,7 +2261,7 @@ const Skills = {
 	evade: x => {
 		const n = +x / 100;
 		return (ctx, c, t, data) => {
-			if (c.rng() < n) data.dmg = 0;
+			if (ctx.rng() < n) data.dmg = 0;
 		};
 	},
 	evadespell: (ctx, c, t, data) => {
@@ -2285,7 +2285,7 @@ const Skills = {
 	skull: (ctx, c, t) => {
 		if (t.type === etg.Creature && !t.card.isOf(ctx.Cards.Names.Skeleton)) {
 			const thp = t.truehp();
-			if (thp <= 0 || c.rng() < 0.5 / thp) {
+			if (thp <= 0 || ctx.rng() < 0.5 / thp) {
 				const index = t.getIndex();
 				t.die();
 				if (
@@ -2306,12 +2306,12 @@ const Skills = {
 		c.owner.spend(etg.Light, -1);
 	},
 	thorn: (ctx, c, t) => {
-		if (!t.getStatus('ranged') && c.rng() < 0.75) {
+		if (!t.getStatus('ranged') && ctx.rng() < 0.75) {
 			t.addpoison(1);
 		}
 	},
 	thornweak: (ctx, c, t) => {
-		if (!t.getStatus('ranged') && c.rng() < 0.25) {
+		if (!t.getStatus('ranged') && ctx.rng() < 0.25) {
 			t.addpoison(1);
 		}
 	},

@@ -355,7 +355,8 @@ Player.prototype.spend = function(qtype, x, scramble) {
 	if (!qtype) {
 		const b = x < 0 ? -1 : 1;
 		for (let i = x * b; i > 0; i--) {
-			const q = b === -1 ? 1 + this.upto(12) : randomquanta(this.game, quanta);
+			const q =
+				b === -1 ? 1 + this.game.upto(12) : randomquanta(this.game, quanta);
 			quanta[q] = Math.min(quanta[q] - b, 99);
 		}
 	} else quanta[qtype] = Math.min(quanta[qtype] - x, 99);
@@ -565,7 +566,7 @@ Player.prototype.drawcard = function(drawstep) {
 	}
 };
 Player.prototype.drawhand = function(x) {
-	const deckIds = this.shuffle(this.deckIds.concat(this.handIds));
+	const deckIds = this.game.shuffle(this.deckIds.concat(this.handIds));
 	this.handIds = [];
 	const toHand = deckIds.splice(0, x);
 	this.deckIds = deckIds;

@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import * as etg from '../../etg.js';
 import Cards from '../Cards.js';
 import * as Components from '../Components.js';
-import { ExitBtn } from '../../Components/index.js';
+import { IconBtn, ExitBtn } from '../../Components/index.js';
 import * as etgutil from '../../etgutil.js';
 import * as store from '../../store.js';
 import * as util from '../../util.js';
@@ -77,7 +77,7 @@ export default connect(state => ({
 				ebuttons = [];
 			for (let i = 0; i < 13; i++) {
 				ebuttons.push(
-					<Components.IconBtn
+					<IconBtn
 						key={i}
 						e={'e' + i}
 						x={100 + i * 32}

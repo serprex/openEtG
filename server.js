@@ -1,4 +1,4 @@
-#!/usr/bin/node --experimental-modules
+#!/usr/bin/node
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -13,7 +13,6 @@ import crypto from 'crypto';
 import http from 'http';
 import https from 'https';
 import qs from 'querystring';
-import httpoly from 'httpolyglot';
 import ws from 'ws';
 import * as etg from './src/etg.js';
 import Cards from './src/Cards.js';
@@ -1394,14 +1393,16 @@ const importlocks = new Map();
 		sockmeta.set(socket, {});
 		socket.on('close', onSocketClose).on('message', onSocketMessage);
 	}
-	const app = httpoly
-		.createServer(
-			{
-				key: keypem,
-				cert: certpem,
-			},
-			forkcore,
-		)
+	const app = (config.certs
+		? https.createServer(
+				{
+					key: keypem,
+					cert: certpem,
+				},
+				forkcore,
+		  )
+		: http.createServer(forkcore)
+	)
 		.listen(config.listen)
 		.on('clientError', () => {});
 	const wss = new ws.Server({
