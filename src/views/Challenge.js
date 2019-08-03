@@ -206,7 +206,7 @@ class PlayerEditor extends React.Component {
 						<input
 							placeholder="Max Rarity"
 							value={this.state.rngmaxrare}
-							onChange={e => this.setState({ rnguprate: e.target.value })}
+							onChange={e => this.setState({ rngmaxrare: e.target.value })}
 						/>
 					</div>
 				)}

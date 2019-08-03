@@ -4,7 +4,6 @@ cia/Cards/*
 atlas.js
 atlas.css
 atlas.png
-favicon.png
 .ninja_log
 .ninja_deps
 *.sh

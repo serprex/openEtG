@@ -341,6 +341,7 @@ const data = {
 	quantagift: 'Gain 2:7 & 2 quanta of mark. Produce only 3:7 if mark is 1:7',
 	quanta: (x, amt = 1) => ({
 		ownattack: `Produce ${amt}:${x} per turn`,
+		owndeath: `Produce ${amt}:${x} on death`,
 		ownplay: `Produce ${amt}:${x} on play`,
 	}),
 	quint: 'Target creature becomes immaterial. Thaws',
