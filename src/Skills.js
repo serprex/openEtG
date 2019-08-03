@@ -1992,7 +1992,7 @@ const Skills = {
 				const idx = ctx.choose(candidates),
 					[crid] = deckIds.splice(idx, 1),
 					cr = ctx.byId(crid);
-				ctx.effect({ x: 'StartPos', id: cr.id, src: c.id });
+				ctx.effect({ x: 'StartPos', id: cr.id, src: -1 });
 				pl.addCrea(cr);
 				cr.freeze(Math.ceil(cr.card.cost / 4));
 				pl.deckIds = deckIds;
@@ -2070,6 +2070,8 @@ const Skills = {
 			const deck = Array.from(t.owner.deckIds);
 			deck[pick] = t.id;
 			t.owner.deckIds = deck;
+			ctx.effect({ x: 'StartPos', id: t.owner.deckIds[pick], src: -1 });
+			ctx.effect({ x: 'EndPos', id: t.id, tgt: -1 });
 		}
 	},
 	turngolem: (ctx, c, t) => {

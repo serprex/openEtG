@@ -203,6 +203,14 @@ Player.prototype.init = function(data) {
 	}
 	this.deckIds = this.instantiateDeck(deck);
 	this.drawhand(7);
+	if (this.game.Cards.Names.Relic && !this.hand.some(c => !c.cost)) {
+		const deckIds = this.deckIds.concat(this.handIds);
+		const toHand2 = deckIds.splice(0, x);
+		this.deckIds = deckIds;
+		for (let i = 0; i < 7; i++) {
+			this.addCard(toHand2[i]);
+		}
+	}
 	return this;
 };
 Player.prototype.instantiateDeck = function(deck) {
@@ -569,19 +577,16 @@ Player.prototype.drawcard = function(drawstep) {
 	}
 };
 Player.prototype.drawhand = function(x) {
+	for (const id of this.handIds) {
+		this.game.effect({ x: 'EndPos', id, tgt: -1 });
+	}
 	const deckIds = this.game.shuffle(this.deckIds.concat(this.handIds));
 	this.handIds = [];
 	const toHand = deckIds.splice(0, x);
 	this.deckIds = deckIds;
 	for (let i = 0; i < toHand.length; i++) {
+		this.game.effect({ x: 'StartPos', id: toHand[i], src: -1 });
 		this.addCard(toHand[i]);
-	}
-	if (this.game.Cards.Names.Relic && !this.hand.some(c => !c.cost)) {
-		this.deckIds = this.deckIds.concat(this.handIds);
-		const toHand2 = deckIds.splice(0, x);
-		for (let i = 0; i < 7; i++) {
-			this.addCard(toHand2[i]);
-		}
 	}
 };
 function destroyCloak(id) {

@@ -6,6 +6,8 @@ openEtG is an open source fork of the Flash ccg [Elements](http://elementsthegam
 
 ## Developer Instructions
 
+Copy `config-sample.json` to `config.json`
+
 ### Mac Installation
 
 Open Terminal. All `commands` will be done in Terminal. You must have [XCode](https://developer.apple.com/xcode) installed.

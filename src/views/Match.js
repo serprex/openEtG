@@ -639,6 +639,9 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 							);
 							break;
 						case 'EndPos':
+							newstate.startPos = (newstate.startPos || state.startPos).delete(
+								effect.id,
+							);
 							newstate.endPos = (newstate.endPos || state.endPos).set(
 								effect.id,
 								effect.tgt,
@@ -1472,7 +1475,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 											? 551
 											: 258,
 								};
-							} else {
+							} else if (startpos) {
 								pos = this.idtrack.get(startpos);
 							}
 							return { opacity: 0, ...pos };
@@ -1489,7 +1492,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 											: 258,
 									opacity: 0,
 								};
-							} else {
+							} else if (endpos) {
 								pos = this.idtrack.get(endpos);
 							}
 							return pos
