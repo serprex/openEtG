@@ -36,8 +36,8 @@ const importlocks = new Map();
 (async () => {
 	const [keypem, certpem] = config.certs
 		? await Promise.all([
-				fs.readFile(`../certs/oetg-key.pem`),
-				fs.readFile(`../certs/oetg-cert.pem`),
+				fs.readFile(`${config.certs}/oetg-key.pem`),
+				fs.readFile(`${config.certs}/oetg-cert.pem`),
 		  ])
 		: [];
 	function activeUsers() {
