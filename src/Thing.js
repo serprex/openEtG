@@ -189,11 +189,10 @@ Thing.prototype.die = function() {
 				[this.game.id, 'bonusstats', 'creatureskilled'],
 				creatureskilled => {
 					creatureskilled = new Map(creatureskilled);
-					creatureskilled.set(
+					return creatureskilled.set(
 						this.game.turn,
 						(creatureskilled.get(this.game.turn) | 0) + 1,
 					);
-					return creatureskilled;
 				},
 			);
 		}
@@ -580,7 +579,9 @@ Thing.prototype.attack = function(target, attackPhase) {
 		let momentum =
 			this.status.get('momentum') ||
 			(this.status.get('burrowed') &&
-				this.owner.permanents.some(pr => pr && pr.status.get('tunnel')));
+				this.owner.permanentIds.some(
+					id => id && this.game.getStatus(id, 'tunnel'),
+				));
 		const psionic = this.status.get('psionic');
 		if (freedom) {
 			if (momentum || psionic || (!target.shield && !target.gpull)) {
