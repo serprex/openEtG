@@ -1,7 +1,7 @@
 node_modules/*
 Cards/*
 cia/Cards/*
-atlas.js
+atlas.json
 atlas.css
 atlas.png
 .ninja_log

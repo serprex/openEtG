@@ -371,7 +371,7 @@ class ThingInst extends React.Component {
 					color: faceDown ? undefined : obj.card.upped ? '#000' : '#fff',
 					zIndex:
 						!faceDown && !isSpell && obj.getStatus('cloak') ? '2' : undefined,
-					pointerEvents: props.inactive ? 'none' : undefined,
+					pointerEvents: ~obj.getIndex() ? undefined : 'none',
 				}}
 				onMouseOver={
 					!faceDown && props.setInfo && (e => props.setInfo(e, obj, pos.x))
@@ -1508,11 +1508,9 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 										x: spring(pos.x),
 										y: spring(pos.y),
 										opacity: spring(0),
-										inactive: true,
 								  }
 								: {
 										opacity: spring(0),
-										inactive: true,
 								  };
 						}}>
 						{interpStyles => (
@@ -1534,7 +1532,6 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 												targeting={this.state.targeting}
 												pos={item.style}
 												opacity={item.style.opacity}
-												inactive={item.style.inactive}
 											/>
 										)
 									),

@@ -15,7 +15,7 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
 1. Install [Homebrew](https://brew.sh)
 1. Install required software: `brew install git node redis`
 1. Clone the repository: `git clone https://github.com/serprex/openEtG && cd openEtG`
-1. Install atlas files: `curl --compressed 'https://etg.dek.im/assets/{atlas.js,atlas.png,atlas.css}' -o 'assets/#1'`
+1. Install atlas files: `curl --compressed 'https://etg.dek.im/assets/{atlas.json,atlas.png,atlas.css}' -o 'assets/#1'`
 1. Install npm modules and build project: `npm install && npm run dev`
 
 #### Mac Start/Stop OpenEtG
@@ -40,5 +40,5 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
   1. Run the command: `npm install; npm start`
   1. Leave this command window open for later
   1. Run `npm run dev`
-  1. Download [atlas.js](https://etg.dek.im/assets/atlas.js), [atlas.png](https://etg.dek.im/assets/atlas.png) and [atlas.css](https://etg.dek.im/assets/atlas.css) and move them to the `assets` folder
+  1. Download [atlas.json](https://etg.dek.im/assets/atlas.json), [atlas.png](https://etg.dek.im/assets/atlas.png) and [atlas.css](https://etg.dek.im/assets/atlas.css) and move them to the `assets` folder
 1. Browse to [http://127.0.0.1:8080](http://127.0.0.1:8080) and the game should work!
