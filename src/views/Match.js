@@ -1460,15 +1460,15 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 					<TransitionMotion
 						styles={things.map(id => {
 							const obj = game.byId(id),
-								pos =
-									ui.tgtToPos(obj, player1.id) && this.idtrack.get(id) && null;
+								pos = ui.tgtToPos(obj, player1.id) || this.idtrack.get(id);
+							const style = { opacity: spring(1) };
+							if (pos) {
+								style.x = spring(pos.x);
+								style.y = spring(pos.y);
+							}
 							return {
 								key: `${id}`,
-								style: {
-									opacity: spring(1),
-									x: pos && spring(pos.x),
-									y: pos && spring(pos.y),
-								},
+								style,
 								data: obj,
 							};
 						})}
