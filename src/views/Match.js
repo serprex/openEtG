@@ -172,13 +172,32 @@ class ThingInst extends React.Component {
 	}
 
 	static getDerivedStateFromProps(props, state) {
-		const { game, obj } = props,
+		const { game, obj, p1id } = props,
 			gameProps = game.props;
 		if (gameProps !== state.gameProps) {
 			const children = [],
 				isSpell = obj.type === etg.Spell,
 				{ card } = obj,
 				bgcolor = ui.maybeLightenStr(card);
+			const faceDown =
+				isSpell &&
+				obj.ownerId !== p1id &&
+				!game.getStatus(p1id, 'precognition');
+			if (faceDown) {
+				return {
+					gameProps,
+					faceDown: true,
+					instdom: (
+						<div
+							className="ico cback"
+							style={{
+								left: '2px',
+								top: '2px',
+							}}
+						/>
+					),
+				};
+			}
 			let statText, topText;
 			if (!isSpell) {
 				const visible = [
@@ -256,6 +275,7 @@ class ThingInst extends React.Component {
 			}
 			return {
 				gameProps,
+				faceDown: false,
 				instdom: (
 					<div
 						style={{
@@ -318,7 +338,7 @@ class ThingInst extends React.Component {
 								style={{
 									position: 'absolute',
 									left: '0',
-									top: isSpell ? '0' : '10px',
+									top: '0',
 									width: '64px',
 									height: '64px',
 								}}
@@ -334,33 +354,9 @@ class ThingInst extends React.Component {
 	render() {
 		const { props } = this,
 			{ game, obj, p1id, pos } = props,
-			isSpell = obj.type === etg.Spell;
-		if (
-			isSpell &&
-			obj.ownerId !== p1id &&
-			!game.getStatus(p1id, 'precognition')
-		) {
-			return (
-				<div
-					className={'inst handinst ' + tgtclass(p1id, obj, props.targeting)}
-					style={{
-						position: 'absolute',
-						left: pos.x - 32 + 'px',
-						top: pos.y - 36 + 'px',
-						opacity: props.opacity,
-					}}
-					onMouseLeave={props.onMouseOut}
-					onClick={() => props.onClick(obj)}>
-					<div
-						className="ico cback"
-						style={{
-							left: '2px',
-							top: '2px',
-						}}
-					/>
-				</div>
-			);
-		}
+			isSpell = obj.type === etg.Spell,
+			{ faceDown } = this.state;
+
 		return (
 			<div
 				className={`inst ${isSpell ? 'handinst ' : ''}
@@ -369,11 +365,17 @@ class ThingInst extends React.Component {
 					position: 'absolute',
 					left: pos.x - 32 + 'px',
 					top: pos.y - 32 + 'px',
-					opacity: (obj.isMaterial() ? 1 : 0.7) * props.opacity,
-					color: obj.card.upped ? '#000' : '#fff',
-					zIndex: !isSpell && obj.getStatus('cloak') ? '2' : undefined,
+					opacity: faceDown
+						? props.opacity
+						: (obj.isMaterial() ? 1 : 0.7) * props.opacity,
+					color: faceDown ? undefined : obj.card.upped ? '#000' : '#fff',
+					zIndex:
+						!faceDown && !isSpell && obj.getStatus('cloak') ? '2' : undefined,
+					pointerEvents: props.inactive ? 'none' : undefined,
 				}}
-				onMouseOver={props.setInfo && (e => props.setInfo(e, obj, pos.x))}
+				onMouseOver={
+					!faceDown && props.setInfo && (e => props.setInfo(e, obj, pos.x))
+				}
 				onMouseLeave={props.onMouseOut}
 				onClick={() => props.onClick(obj)}>
 				{this.state.instdom}
@@ -1285,6 +1287,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 								backgroundColor: ui.strcols[handOverlay],
 								opacity: '.3',
 								borderRadius: '4px',
+								pointerEvents: 'none',
 							}}
 						/>
 					),
@@ -1458,7 +1461,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 						styles={things.map(id => {
 							const obj = game.byId(id),
 								pos =
-									ui.tgtToPos(obj, player1.id) || this.idtrack.get(id) || null;
+									ui.tgtToPos(obj, player1.id) && this.idtrack.get(id) && null;
 							return {
 								key: `${id}`,
 								style: {
@@ -1505,9 +1508,11 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 										x: spring(pos.x),
 										y: spring(pos.y),
 										opacity: spring(0),
+										inactive: true,
 								  }
 								: {
 										opacity: spring(0),
+										inactive: true,
 								  };
 						}}>
 						{interpStyles => (
@@ -1529,6 +1534,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 												targeting={this.state.targeting}
 												pos={item.style}
 												opacity={item.style.opacity}
+												inactive={item.style.inactive}
 											/>
 										)
 									),
