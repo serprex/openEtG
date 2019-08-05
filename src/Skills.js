@@ -529,7 +529,11 @@ const Skills = {
 		}
 	},
 	drawcopy: (ctx, c, t) => {
-		if (c.ownerId !== t.ownerId) c.owner.addCard(t.clone(c.ownerId));
+		if (c.ownerId !== t.ownerId) {
+			const inst = t.clone(c.ownerId);
+			c.owner.addCard(inst);
+			ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
+		}
 	},
 	drawequip: (ctx, c, t) => {
 		const deck = c.owner.deck;
@@ -570,9 +574,11 @@ const Skills = {
 	}),
 	duality: (ctx, c, t) => {
 		if (c.owner.foe.deckIds.length && c.owner.handIds.length < 8) {
-			c.owner.addCard(
-				c.owner.foe.deck[c.owner.foe.deckIds.length - 1].clone(c.ownerId),
+			const inst = c.owner.foe.deck[c.owner.foe.deckIds.length - 1].clone(
+				c.ownerId,
 			);
+			c.owner.addCard(inst);
+			ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
 		}
 	},
 	earthquake: (ctx, c, t) => {

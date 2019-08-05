@@ -374,7 +374,9 @@ class ThingInst extends React.Component {
 					pointerEvents: ~obj.getIndex() ? undefined : 'none',
 				}}
 				onMouseOver={
-					!faceDown && props.setInfo && (e => props.setInfo(e, obj, pos.x))
+					!faceDown && props.setInfo
+						? e => props.setInfo(e, obj, pos.x)
+						: undefined
 				}
 				onMouseLeave={props.onMouseOut}
 				onClick={() => props.onClick(obj)}>
@@ -1460,7 +1462,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 					<TransitionMotion
 						styles={things.map(id => {
 							const obj = game.byId(id),
-								pos = ui.tgtToPos(obj, player1.id) || this.idtrack.get(id);
+								pos = ui.tgtToPos(obj, player1.id);
 							const style = { opacity: spring(1) };
 							if (pos) {
 								style.x = spring(pos.x);
@@ -1486,7 +1488,12 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 							} else if (startpos) {
 								pos = this.idtrack.get(startpos);
 							}
-							return { opacity: 0, ...pos };
+							return {
+								x: item.style.x.val,
+								y: item.style.y.val,
+								opacity: 0,
+								...pos,
+							};
 						}}
 						willLeave={item => {
 							const endpos = this.state.endPos.get(item.data.id);
