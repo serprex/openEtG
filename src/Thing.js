@@ -362,7 +362,6 @@ Thing.prototype.lobo = function() {
 	for (const [k, v] of this.active) {
 		v.name.forEach(name => {
 			if (!parseSkill(name).passive) {
-				console.log(k, name);
 				this.rmactive(k, name);
 			}
 		});

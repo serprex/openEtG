@@ -173,7 +173,6 @@ const sockEvents = {
 		);
 	},
 	matchgive: data => {
-		console.log(data);
 		store.store.dispatch(
 			store.doNav(import('./views/Challenge'), {
 				groups: data.groups,
