@@ -26,7 +26,15 @@ export default class WealthTop extends React.Component {
 			for (let i = 0; i < top.length; i += 2) {
 				const ol = i < 50 ? ol1c : ol2c;
 				ol.push(
-					<li key={i}>
+					<li
+						key={i}
+						onClick={() =>
+							store.store.dispatch(
+								store.doNav(import('./Library'), {
+									name: top[i],
+								}),
+							)
+						}>
 						{top[i]}
 						<span className="floatRight">{Math.round(top[i + 1])}</span>
 					</li>,
