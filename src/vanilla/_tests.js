@@ -20,9 +20,9 @@ function initHand(pl, ...args) {
 	pl.handIds = hand;
 }
 class TestModule {
-	constructor(name, opts) {
+	constructor(name, opts = {}) {
 		this.name = name;
-		this.opts = opts || {};
+		this.opts = opts;
 	}
 	test(name, func) {
 		const ctx = {};
@@ -62,8 +62,8 @@ M = new TestModule('Cards', {
 			seed: 5489,
 			set: 'Original',
 			players: [
-				{ idx: 1, deck: '104vc' },
-				{ idx: 2, deck: '104vc' },
+				{ idx: 1, deck: '1012c' },
+				{ idx: 2, deck: '1012c' },
 			],
 		};
 		this.game = new Game(data);
@@ -99,16 +99,16 @@ M.test('Aflatoxin', function () {
 	this.player1.creatures[0].die();
 	assert.ok(this.player1.creatures[0], 'Something');
 	assert.equal(
-		this.player1.creatures[0].card,
-		Cards.Names.MalignantCell,
+		this.player1.creatures[0].card.code,
+		Cards.Names.MalignantCell.code,
 		'Malignant',
 	);
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Phoenix));
 	this.cast('v_aflatoxin', this.player1, this.player1.creatures[1]);
 	this.player1.creatures[1].die();
 	assert.equal(
-		this.player1.creatures[1].card,
-		Cards.Names.MalignantCell,
+		this.player1.creatures[1].card.code,
+		Cards.Names.MalignantCell.code,
 		'Malignant, not Ash',
 	);
 });
@@ -377,7 +377,7 @@ M.test('Steam', function () {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.SteamMachine));
 	const steam = this.player1.creatures[0];
 	this.player1.setQuanta(etg.Fire, 8);
-	steam.usedactive = false;
+	steam.casts = 1;
 	assert.equal(steam.trueatk(), 0, '0');
 	steam.useactive();
 	assert.equal(steam.trueatk(), 5, '5');

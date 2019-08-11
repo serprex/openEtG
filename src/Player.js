@@ -177,8 +177,8 @@ Player.prototype.init = function (data) {
 			break;
 		}
 	}
-	this.hp = data.hp || 100;
-	this.maxhp = data.maxhp || this.hp;
+	this.hp = data.hp ?? 100;
+	this.maxhp = data.maxhp ?? this.hp;
 	this.atk = 0;
 	this.status = new imm.Map();
 	this.active = new imm.Map();
@@ -187,7 +187,7 @@ Player.prototype.init = function (data) {
 	this.handIds = [];
 	this.quanta = new Int8Array(13);
 	this.drawpower = data.drawpower === undefined ? 1 : data.drawpower;
-	this.deckpower = data.deckpower || (this.drawpower > 1 ? 2 : 1);
+	this.deckpower = data.deckpower ?? (this.drawpower > 1 ? 2 : 1);
 	this.markpower = data.markpower === undefined ? 1 : data.markpower;
 	this.mark = 0;
 	this.shardgolem = null;
@@ -205,7 +205,8 @@ Player.prototype.init = function (data) {
 	this.drawhand(7);
 	if (this.game.Cards.Names.Relic && !this.hand.some(c => !c.cost)) {
 		const deckIds = this.deckIds.concat(this.handIds);
-		const toHand2 = deckIds.splice(0, x);
+		this.handIds = [];
+		const toHand2 = deckIds.splice(0, 7);
 		this.deckIds = deckIds;
 		for (let i = 0; i < 7; i++) {
 			this.addCard(toHand2[i]);
@@ -326,7 +327,7 @@ Player.prototype.info = function () {
 	for (const [k, v] of this.status) {
 		plinfocore(info, k, v);
 	}
-	plinfocore(info, 'usedactive', this.usedactive);
+	if (this.casts === 0) info.push('silenced');
 	if (this.gpull) info.push('gpull');
 	return info.join('\n');
 };
@@ -420,7 +421,7 @@ Player.prototype.o_endturn = function (discard) {
 	for (const p of this.permanents) {
 		if (p) {
 			p.trigger('ownattack', attackData);
-			p.usedactive = false;
+			p.casts = 1;
 			p.maybeDecrStatus('frozen');
 		}
 	}
@@ -430,11 +431,11 @@ Player.prototype.o_endturn = function (discard) {
 		}
 	}
 	if (this.shieldId) {
-		this.game.set(this.shieldId, 'usedactive', false);
+		this.game.set(this.shieldId, 'casts', 1);
 		this.game.trigger(this.shieldId, 'ownattack');
 	}
 	if (this.weaponId) this.weapon.attack(attackData);
-	this.usedactive = false;
+	this.casts = 1;
 	this.setStatus('flatline', 0);
 };
 Player.prototype.v_endturn = function (discard) {
@@ -518,15 +519,7 @@ Player.prototype.v_endturn = function (discard) {
 		this.foe.sosa--;
 	}
 	this.nova = this.nova2 = 0;
-	for (
-		let i = this.foe.drawpower !== undefined ? this.foe.drawpower : 1;
-		i > 0;
-		i--
-	) {
-		this.foe.drawcard();
-	}
-
-	this.silence = false;
+	this.casts = 1;
 	this.foe.precognition = this.foe.sanctuary = false;
 };
 Player.prototype.die = function () {

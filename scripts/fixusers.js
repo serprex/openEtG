@@ -1,6 +1,5 @@
 #!/bin/node --experimental-modules
-import redis from 'ioredis';
-const db = new redis();
+import db from '../src/srv/db.js';
 
 db.hgetall('Users').then(users => {
 	for (const name in users) {

@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 
 import * as audio from '../audio.js';
@@ -163,7 +163,7 @@ export default connect(({ user, opts }) => ({
 	lofiArt: !!opts.lofiArt,
 	playByPlayMode: opts.playByPlayMode || '',
 }))(
-	class MainMenu extends React.Component {
+	class MainMenu extends Component {
 		constructor(props) {
 			super(props);
 			this.state = {
@@ -398,79 +398,118 @@ export default connect(({ user, opts }) => ({
 						</Rect>
 						<Rect x={304} y={380} wid={292} hei={130}>
 							<TitleText text="Miscellaneous" />
-							<div
-								style={{
-									width: '45%',
-									float: 'left',
-									textAlign: 'right',
-								}}>
-								<input
-									type="button"
-									value="Colosseum"
-									onClick={() => {
-										this.props.dispatch(store.doNav(import('./Colosseum.js')));
-									}}
-									onMouseOver={this.mkSetTip(
-										'Try some daily challenges in the Colosseum',
-									)}
-								/>
+							<div>
+								<div
+									style={{
+										display: 'inline-block',
+										width: '49%',
+										textAlign: 'center',
+									}}>
+									<input
+										type="button"
+										value="Colosseum"
+										onClick={() => {
+											this.props.dispatch(
+												store.doNav(import('./Colosseum.js')),
+											);
+										}}
+										onMouseOver={this.mkSetTip(
+											'Try some daily challenges in the Colosseum',
+										)}
+									/>
+								</div>
+								<div
+									style={{
+										display: 'inline-block',
+										width: '49%',
+										textAlign: 'center',
+									}}>
+									<input
+										type="button"
+										value="Quests"
+										onClick={() => {
+											this.props.dispatch(store.doNav(import('./Quest.js')));
+										}}
+										onMouseOver={this.mkSetTip('Go on an adventure')}
+									/>
+								</div>
 							</div>
 							<div
 								style={{
-									width: '45%',
-									float: 'right',
+									marginTop: '4px',
 								}}>
-								<input
-									type="button"
-									value="Quests"
-									onClick={() => {
-										this.props.dispatch(store.doNav(import('./Quest.js')));
-									}}
-									onMouseOver={this.mkSetTip('Go on an adventure')}
-								/>
+								<div
+									style={{
+										display: 'inline-block',
+										width: '49%',
+										textAlign: 'center',
+									}}>
+									<input
+										type="button"
+										value="Arena Deck"
+										onClick={() => {
+											this.props.dispatch(
+												store.doNav(import('./ArenaInfo.js')),
+											);
+										}}
+										onMouseOver={this.mkSetTip(
+											'Check how your arena decks are doing',
+										)}
+									/>
+								</div>
+								<div
+									style={{
+										display: 'inline-block',
+										width: '49%',
+										textAlign: 'center',
+									}}>
+									<input
+										type="button"
+										value="Custom"
+										onClick={() => {
+											this.props.dispatch(
+												store.doNav(import('./Challenge.js'), {
+													pvp: false,
+												}),
+											);
+										}}
+										onMouseOver={this.mkSetTip(
+											'Setup custom games vs AI or other players',
+										)}
+									/>
+								</div>
 							</div>
 							<div
 								style={{
-									marginTop: '12px',
-									width: '45%',
-									float: 'left',
-									textAlign: 'right',
+									marginTop: '4px',
 								}}>
-								<input
-									type="button"
-									value="Arena Deck"
-									onClick={() => {
-										this.props.dispatch(store.doNav(import('./ArenaInfo.js')));
-									}}
-									onMouseOver={this.mkSetTip(
-										'Check how your arena decks are doing',
-									)}
-								/>
-							</div>
-							<div
-								style={{
-									marginTop: '12px',
-									width: '45%',
-									float: 'right',
-								}}>
-								<input
-									type="button"
-									value="Custom"
-									onClick={() => {
-										this.props.dispatch(
-											store.doNav(import('./Challenge.js'), {
-												pvp: false,
-											}),
-										);
-									}}
-									onMouseOver={this.mkSetTip(
-										'Setup custom games vs AI or other players',
-									)}
-								/>
+								<div
+									style={{
+										display: 'inline-block',
+										width: '49%',
+										textAlign: 'center',
+									}}>
+									<input
+										type="button"
+										value="Legacy"
+										onClick={() => {
+											this.props.dispatch(
+												store.doNav(import('../vanilla/views/Login.js')),
+											);
+										}}
+										onMouseOver={this.mkSetTip(
+											'A mode attempting to imitate the original EtG',
+										)}
+									/>
+								</div>
 							</div>
 						</Rect>
 						{this.state.showcard ? (
-							<Components.Card x={92} y={340} code={this.state.showcard} />
+							<Components.Card
+								x={92}
+								y={340}
+								card={Cards.Codes[this.state.showcard]}
+							/>
 						) : (
 							!this.props.hideMainchat && (
 								<>
@@ -630,7 +669,7 @@ export default connect(({ user, opts }) => ({
 								type="button"
 								value="Library"
 								onClick={() => {
-									const name = self.props.foename || self.props.user.name;
+									const name = self.props.foename ?? self.props.user.name;
 									if (name)
 										this.props.dispatch(
 											store.doNav(import('./Library.js'), {
@@ -706,7 +745,7 @@ export default connect(({ user, opts }) => ({
 							/>
 						)}
 						{this.state.showsettings && (
-							<Components.Box x={585} y={340} width={272} height={196}>
+							<Components.Box x={585} y={380} width={272} height={156}>
 								{this.state.changepass ? (
 									<>
 										<input

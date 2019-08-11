@@ -1,4 +1,4 @@
-import React from 'react';
+import { Fragment } from 'react';
 import * as redux from 'redux';
 
 import * as usercmd from './usercmd.js';
@@ -72,6 +72,12 @@ export function userCmd(cmd, data) {
 export function updateUser(data) {
 	return { type: 'USER_UPDATE', data };
 }
+export function setOrig(user) {
+	return { type: 'ORIG_SET', user };
+}
+export function updateOrig(data) {
+	return { type: 'ORIG_UPDATE', data };
+}
 
 export const store = redux.createStore(
 	(state, action) => {
@@ -110,6 +116,16 @@ export const store = redux.createStore(
 						...action.data,
 					},
 				};
+			case 'ORIG_SET':
+				return { ...state, orig: action.user };
+			case 'ORIG_UPDATE':
+				return {
+					...state,
+					orig: {
+						...state.orig,
+						...action.data,
+					},
+				};
 			case 'MUTE': {
 				const muted = new Set(state.muted);
 				muted.add(action.name);
@@ -127,9 +143,9 @@ export const store = redux.createStore(
 			}
 			case 'CHAT': {
 				const chat = new Map(state.chat),
-					name = action.name || state.opts.channel,
+					name = action.name ?? state.opts.channel,
 					span = (
-						<React.Fragment key={state.chatid}>{action.span}</React.Fragment>
+						<Fragment key={state.chatid}>{action.span}</Fragment>
 					);
 				chat.set(name, (chat.get(name) || []).concat([span]));
 				if (action.name === 'System')

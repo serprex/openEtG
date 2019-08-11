@@ -1,13 +1,13 @@
-import React from 'react';
+import { createRef, PureComponent } from 'react';
 import { connect } from 'react-redux';
 
 export default connect(state => ({
 	chat: state.chat,
 }))(
-	class Chat extends React.PureComponent {
+	class Chat extends PureComponent {
 		constructor(props) {
 			super(props);
-			this.chatRef = React.createRef();
+			this.chatRef = createRef();
 		}
 
 		getSnapshotBeforeUpdate(prevProps, prevState) {

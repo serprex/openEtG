@@ -1,7 +1,8 @@
-import React from 'react';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 
 import * as sock from '../sock.js';
+import Cards from '../Cards.js';
 import { parseInput, randint } from '../util.js';
 import Game from '../Game.js';
 import * as etgutil from '../etgutil.js';
@@ -11,7 +12,7 @@ import RngMock from '../RngMock.js';
 import aiDecks from '../Decks.json';
 import deckgen from '../deckgen/index.js';
 
-class PremadePicker extends React.Component {
+class PremadePicker extends Component {
 	constructor(props) {
 		super(props);
 		this.state = { search: '' };
@@ -91,7 +92,7 @@ class PremadePicker extends React.Component {
 	}
 }
 
-class PlayerEditor extends React.Component {
+class PlayerEditor extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -238,7 +239,7 @@ class PlayerEditor extends React.Component {
 	}
 }
 
-class Group extends React.Component {
+class Group extends Component {
 	constructor(props) {
 		super(props);
 		this.state = { invite: '' };
@@ -336,7 +337,7 @@ class Group extends React.Component {
 export default connect(({ user, opts }) => ({
 	username: user.name,
 }))(
-	class Challenge extends React.Component {
+	class Challenge extends Component {
 		constructor(props) {
 			super(props);
 
@@ -588,6 +589,7 @@ export default connect(({ user, opts }) => ({
 						}}
 					/>
 					<Components.DeckDisplay
+						cards={Cards}
 						x={206}
 						y={377}
 						deck={

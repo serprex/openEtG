@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import React from 'react';
+import { PureComponent, Component, createRef } from 'react';
 
 import * as etgutil from '../etgutil.js';
 import Cards from '../Cards.js';
@@ -27,7 +27,7 @@ function processDeck(pool, dcode) {
 }
 
 const Qecks = connect(({ user }) => ({ user }))(
-	class Qecks extends React.PureComponent {
+	class Qecks extends PureComponent {
 		state = {
 			setQeck: false,
 		};
@@ -208,7 +208,7 @@ const DeckNames = connect(({ user }) => ({ user }))(function DeckNames({
 });
 
 const DeckSelector = connect(({ user }) => ({ user }))(
-	class DeckSelector extends React.Component {
+	class DeckSelector extends Component {
 		constructor(props) {
 			super(props);
 			this.state = {
@@ -285,7 +285,7 @@ const DeckSelector = connect(({ user }) => ({ user }))(
 export default connect(({ user }) => ({
 	user,
 }))(
-	class DeckEditor extends React.Component {
+	class DeckEditor extends Component {
 		constructor(props) {
 			super(props);
 
@@ -295,10 +295,10 @@ export default connect(({ user }) => ({
 				etgutil.iterraw(props.user.accountbound),
 			)) {
 				if (code in Cards.Codes) {
-					pool[code] = (pool[code] || 0) + count;
+					pool[code] = (pool[code] ?? 0) + count;
 				}
 			}
-			this.deckRef = React.createRef();
+			this.deckRef = createRef();
 			this.state = {
 				pool: pool,
 				deckname: '',
@@ -349,6 +349,7 @@ export default connect(({ user }) => ({
 			return (
 				<>
 					<Editor
+						cards={Cards}
 						deck={this.state.deck}
 						mark={this.state.mark}
 						pool={this.state.pool}

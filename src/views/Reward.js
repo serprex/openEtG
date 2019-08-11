@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
@@ -7,7 +7,7 @@ import * as Components from '../Components/index.js';
 import * as sock from '../sock.js';
 import * as store from '../store.js';
 
-export default class Reward extends React.Component {
+export default class Reward extends Component {
 	constructor(props) {
 		super(props);
 		let reward = props.type,
@@ -58,7 +58,7 @@ export default class Reward extends React.Component {
 	render() {
 		const props = this.props,
 			reward = props.type,
-			numberofcopies = props.amount || 1,
+			numberofcopies = props.amount ?? 1,
 			code = props.code;
 		return (
 			this.state.rewardList && (
@@ -115,7 +115,11 @@ export default class Reward extends React.Component {
 							onClick={() => this.setState({ chosenReward: reward })}
 						/>
 					))}
-					<Components.Card x={233} y={10} code={this.state.chosenReward} />
+					<Components.Card
+						x={233}
+						y={10}
+						card={Cards.Codes[this.state.chosenReward]}
+					/>
 				</>
 			)
 		);

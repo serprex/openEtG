@@ -5,7 +5,6 @@ module.exports = {
 		deck: './src/ui/deck.js',
 		main: './src/ui/main.js',
 		mosaic: './src/ui/mosaic.js',
-		vaivai: './src/vanilla/ui/aivai.js',
 		vdeckinfo: './src/vanilla/ui/deckinfo.js',
 		vnamegame: './src/vanilla/ui/namegame.js',
 		vspeed: './src/vanilla/ui/speed.js',
@@ -27,7 +26,13 @@ module.exports = {
 					loader: 'babel-loader',
 					query: {
 						presets: [
-							'@babel/preset-react',
+							[
+								'@babel/preset-react',
+								{
+									runtime: 'automatic',
+									useSpread: true,
+								}
+							],
 							[
 								'@babel/preset-env',
 								{
@@ -46,7 +51,6 @@ module.exports = {
 							],
 						],
 						plugins: [
-							'@babel/plugin-transform-react-jsx',
 							'@babel/plugin-proposal-class-properties',
 							'@babel/plugin-proposal-object-rest-spread',
 						],

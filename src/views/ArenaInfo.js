@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 
 import Cards from '../Cards.js';
@@ -45,6 +45,7 @@ function RenderInfo(props) {
 			<>
 				{adeck && (
 					<Components.DeckDisplay
+						cards={Cards}
 						deck={etgutil.decodedeck(adeck)}
 						renderMark
 						y={y}
@@ -57,9 +58,9 @@ function RenderInfo(props) {
 						top: 4 + y + 'px',
 					}}
 					text={
-						`W-L: ${info.win || 0} - ${info.loss || 0}` +
-						`, Rank: ${info.rank == undefined ? 'Inactive' : info.rank + 1}` +
-						`, ${(info.win || 0) * 15 + (info.loss || 0) * 5}$`
+						`W-L: ${info.win ?? 0} - ${info.loss ?? 0}` +
+						`, Rank: ${info.rank == undefined ? 'Inactive' : info.rank}` +
+						`, ${(info.win ?? 0) * 15 + (info.loss ?? 0) * 5}$`
 					}
 				/>
 				<input
@@ -70,7 +71,7 @@ function RenderInfo(props) {
 						top: 4 + y + 'px',
 						width: '190px',
 					}}
-					value={adeck || ''}
+					value={adeck ?? ''}
 				/>
 				<span
 					style={{
@@ -141,7 +142,7 @@ function RenderInfo(props) {
 	}
 }
 function ArenaCard(props) {
-	const { info, y, code } = props;
+	const { info, y, card } = props;
 	return (
 		<>
 			<input
@@ -156,14 +157,14 @@ function ArenaCard(props) {
 					store.store.dispatch(
 						store.doNav(import('./ArenaEditor.js'), {
 							adeck: '',
-							acard: Cards.Codes[code],
+							acard: card,
 							ainfo: { day: info ? info.day : 0 },
 							acreate: true,
 						}),
 					);
 				}}
 			/>
-			<Components.Card x={734} y={y} code={code} />
+			<Components.Card x={734} y={y} card={card} />
 		</>
 	);
 }
@@ -172,7 +173,7 @@ export default connect(({ user }) => ({
 	name: user.name,
 	ocard: user.ocard,
 }))(
-	class ArenaInfo extends React.Component {
+	class ArenaInfo extends Component {
 		constructor(props) {
 			super(props);
 			this.state = {};
@@ -208,12 +209,12 @@ export default connect(({ user }) => ({
 							<ArenaCard
 								info={this.state.A}
 								y={8}
-								code={etgutil.asUpped(this.props.ocard, false)}
+								card={Cards.Codes[etgutil.asUpped(this.props.ocard, false)]}
 							/>
 							<ArenaCard
 								info={this.state.B}
 								y={300}
-								code={etgutil.asUpped(this.props.ocard, true)}
+								card={Cards.Codes[etgutil.asUpped(this.props.ocard, true)]}
 							/>
 						</>
 					)}

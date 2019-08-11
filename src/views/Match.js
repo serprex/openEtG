@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 import { Motion, TransitionMotion, spring } from 'react-motion';
 import * as imm from '../immutable.js';
@@ -304,7 +304,7 @@ function ArrowLine({ x0, y0, x1, y1 }) {
 	);
 }
 
-class ThingInst extends React.Component {
+class ThingInst extends Component {
 	constructor(props) {
 		super(props);
 
@@ -540,14 +540,12 @@ function addNoHealData(game, newdata) {
 	if (dataNext.noheal) {
 		for (let gi = 0; gi < game.data.players.length; gi++) {
 			const { user } = game.data.players[gi];
-			if (user) {
-				for (let i = 0; i < newdata.players.length; i++) {
-					const pldata = newdata.players[i];
-					if (pldata.user === user) {
-						const pl = game.byId(game.players[gi]);
-						pldata.hp = Math.max(pl.hp, 1);
-						pldata.maxhp = pl.maxhp;
-					}
+			for (let i = 0; i < newdata.players.length; i++) {
+				const pldata = newdata.players[i];
+				if (pldata.user === user) {
+					const pl = game.byId(game.players[gi]);
+					pldata.hp = Math.max(pl.hp, 1);
+					pldata.maxhp = pl.maxhp;
 				}
 			}
 		}
@@ -607,7 +605,7 @@ export default connect(({ user, opts }) => ({
 	lofiArt: opts.lofiArt,
 	playByPlayMode: opts.playByPlayMode,
 }))(
-	class Match extends React.Component {
+	class Match extends Component {
 		constructor(props) {
 			super(props);
 			this.aiState = null;
@@ -636,7 +634,7 @@ export default connect(({ user, opts }) => ({
 				fxStatChange: new imm.Map(),
 				effects: new Set(),
 				effectId: 0,
-				hovercode: 0,
+				hovercard: null,
 				hoverx: null,
 				hovery: null,
 				line0: null,
@@ -651,7 +649,7 @@ export default connect(({ user, opts }) => ({
 		Text = (key, state, newstate, { id, text, onRest }) => {
 			let offset;
 			const { fxid } = newstate;
-			newstate.fxTextPos = (newstate.fxTextPos || state.fxTextPos).update(
+			newstate.fxTextPos = (newstate.fxTextPos ?? state.fxTextPos).update(
 				id,
 				(pos = 0) => (offset = pos) + 16,
 			);
@@ -811,14 +809,14 @@ export default connect(({ user, opts }) => ({
 					switch (effect.x) {
 						case 'StartPos':
 							newstate.startPos = (
-								newstate.startPos || new Map(state.startPos)
+								newstate.startPos ?? new Map(state.startPos)
 							).set(effect.id, effect.src);
 							break;
 						case 'EndPos':
 							if (!newstate.startPos)
 								newstate.startPos = new Map(state.startPos);
 							newstate.startPos.delete(effect.id);
-							newstate.endPos = (newstate.endPos || new Map(state.endPos)).set(
+							newstate.endPos = (newstate.endPos ?? new Map(state.endPos)).set(
 								effect.id,
 								effect.tgt,
 							);
@@ -912,8 +910,8 @@ export default connect(({ user, opts }) => ({
 								<Components.Delay
 									key={effectId}
 									ms={3210}
-									first={() => <LastCard opacity={1} name={playerName} />}
-									second={() => (
+									first={<LastCard opacity={1} name={playerName} />}
+									second={
 										<Motion
 											key={newstate.fxid}
 											defaultStyle={{ opacity: 1 }}
@@ -929,7 +927,7 @@ export default connect(({ user, opts }) => ({
 												<LastCard opacity={opacity} name={playerName} />
 											)}
 										</Motion>
-									)}
+									}
 								/>
 							);
 							newstate.effects.add(LastCardEffect);
@@ -979,7 +977,7 @@ export default connect(({ user, opts }) => ({
 					history.push(gclone);
 				}
 			}
-			const game = (newstate.replayhistory || state.replayhistory)[idx];
+			const game = (newstate.replayhistory ?? state.replayhistory)[idx];
 			newstate.player1 = game.turn;
 			newstate.player2 = game.get(game.turn).get('foe');
 			return newstate;
@@ -1012,56 +1010,62 @@ export default connect(({ user, opts }) => ({
 		getGame = () =>
 			this.props.replay
 				? this.state.replayhistory[this.state.replayindex]
-				: this.state.game || this.props.game;
+				: this.state.game ?? this.props.game;
 
 		gotoResult = () => {
 			const { game, user } = this.props;
-			if (user) {
-				if (game.data.arena) {
-					sock.userEmit('modarena', {
-						aname: game.data.arena,
-						won: game.winner !== this.state.player1,
-						lv: game.data.level - 4,
-					});
-				}
-				if (game.winner === this.state.player1) {
-					if (game.data.quest !== undefined) {
-						if (game.data.quest.autonext) {
-							mkAi.run(
-								mkQuestAi(game.data.quest.autonext, qdata =>
-									addNoHealData(game, qdata),
-								),
-							);
-							return;
-						} else if (!user.quests[game.data.quest.key]) {
-							sock.userExec('setquest', {
-								quest: game.data.quest.key,
-							});
-						}
-					} else if (game.data.daily) {
-						const endurance = game.data.endurance;
-						if (endurance !== undefined && endurance > 0) {
-							mkAi.run(
-								mkAi.mkAi(game.data.level, true, gdata =>
-									addNoHealData(game, gdata),
-								),
-							);
-							return;
-						} else {
-							const daily = game.data.daily;
-							sock.userExec('donedaily', {
-								daily: daily === 4 ? 5 : daily === 3 ? 0 : daily,
-							});
-						}
+			if (game.data.arena) {
+				sock.userEmit('modarena', {
+					aname: game.data.arena,
+					won: game.winner !== this.state.player1,
+					lv: game.data.level - 4,
+				});
+			}
+			if (game.winner === this.state.player1) {
+				if (game.data.quest !== undefined) {
+					if (game.data.quest.autonext) {
+						mkAi.run(
+							mkQuestAi(game.data.quest.autonext, qdata =>
+								addNoHealData(game, qdata),
+							),
+						);
+						return;
+					} else if (!user.quests[game.data.quest.key]) {
+						sock.userExec('setquest', {
+							quest: game.data.quest.key,
+						});
+					}
+				} else if (game.data.daily) {
+					const endurance = game.data.endurance;
+					if (endurance !== undefined && endurance > 0) {
+						mkAi.run(
+							mkAi.mkAi(game.data.level, true, gdata =>
+								addNoHealData(game, gdata),
+							),
+						);
+						return;
+					} else {
+						const daily = game.data.daily;
+						sock.userExec('donedaily', {
+							daily: daily === 4 ? 5 : daily === 3 ? 0 : daily,
+						});
 					}
 				}
 			}
-			this.props.dispatch(
-				store.doNav(import('./Result.js'), {
-					game: game,
-					streakback: this.streakback,
-				}),
-			);
+			if (game.Cards.Names.Relic) {
+				this.props.dispatch(
+					store.doNav(import('../vanilla/views/Result.js'), {
+						game: game,
+					}),
+				);
+			} else {
+				this.props.dispatch(
+					store.doNav(import('./Result.js'), {
+						game: game,
+						streakback: this.streakback,
+					}),
+				);
+			}
 		};
 
 		endClick = (discard = 0) => {
@@ -1211,7 +1215,7 @@ export default connect(({ user, opts }) => ({
 		onkeydown = e => {
 			if (e.target.tagName === 'TEXTAREA') return;
 			const kc = e.which,
-				ch = e.key || String.fromCharCode(kc);
+				ch = e.key ?? String.fromCharCode(kc);
 			let chi;
 			if (kc === 27) {
 				this.resignClick();
@@ -1356,7 +1360,7 @@ export default connect(({ user, opts }) => ({
 
 		clearCard = () => {
 			this.setState({
-				hovercode: 0,
+				hovercard: null,
 				tooltip: null,
 				line0: null,
 				line1: null,
@@ -1365,7 +1369,7 @@ export default connect(({ user, opts }) => ({
 
 		setCard(e, card, x) {
 			this.setState({
-				hovercode: card.code,
+				hovercard: card,
 				hoverx: 734,
 				hovery: e.pageY > 300 ? 44 : 300,
 			});
@@ -1417,15 +1421,16 @@ export default connect(({ user, opts }) => ({
 			for (let j = 0; j < 2; j++) {
 				const pl = j ? player2 : player1,
 					plpos = ui.tgtToPos(pl, player1.id),
-					handOverlay = pl.usedactive
-						? 12
-						: pl.getStatus('sanctuary')
-						? 8
-						: pl.getStatus('nova') >= 3 &&
-						  (pl.id !== player1.id ||
-								pl.hand.some(c => c.card.isOf(game.Cards.Names.Nova)))
-						? 1
-						: null;
+					handOverlay =
+						pl.casts === 0
+							? 12
+							: pl.getStatus('sanctuary')
+							? 8
+							: pl.getStatus('nova') >= 3 &&
+							  (pl.id !== player1.id ||
+									pl.hand.some(c => c.card.isOf(game.Cards.Names.Nova)))
+							? 1
+							: null;
 				this.idtrack.set(pl.id, plpos);
 				children.push(
 					<div
@@ -1710,7 +1715,7 @@ export default connect(({ user, opts }) => ({
 								pos = this.idtrack.get(startpos);
 							}
 							if (!startpos || !pos) {
-								pos = { x: item.style.x.val || 0, y: item.style.y.val || 0 };
+								pos = { x: item.style.x.val ?? 0, y: item.style.y.val ?? 0 };
 							}
 
 							return {
@@ -1822,7 +1827,7 @@ export default connect(({ user, opts }) => ({
 					<Components.Card
 						x={this.state.hoverx}
 						y={this.state.hovery}
-						code={this.state.hovercode}
+						card={this.state.hovercard}
 					/>
 					{this.state.tooltip}
 					{this.state.foeplays.has(player2.id) &&

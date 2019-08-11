@@ -56,7 +56,7 @@ export default class Cards {
 		let sum = 0;
 		for (let i = 0; i < 4; i++) {
 			sum +=
-				cardMinus[etgutil.asShiny(etgutil.asUpped(code, i & 1), i & 2)] || 0;
+				cardMinus[etgutil.asShiny(etgutil.asUpped(code, i & 1), i & 2)] ?? 0;
 		}
 		return sum;
 	}
@@ -73,16 +73,16 @@ export default class Cards {
 				}
 			}
 			if (!card.isFree()) {
-				if ((cardMinus[code] || 0) < (pool[code] || 0)) {
-					cardMinus[code] = (cardMinus[code] || 0) + 1;
+				if ((cardMinus[code] ?? 0) < (pool[code] ?? 0)) {
+					cardMinus[code] = (cardMinus[code] ?? 0) + 1;
 				} else {
 					code = etgutil.asShiny(code, !card.shiny);
 					card = this.Codes[code];
 					if (card.isFree()) {
 						deck[i] = code;
-					} else if ((cardMinus[code] || 0) < (pool[code] || 0)) {
+					} else if ((cardMinus[code] ?? 0) < (pool[code] ?? 0)) {
 						deck[i] = code;
-						cardMinus[code] = (cardMinus[code] || 0) + 1;
+						cardMinus[code] = (cardMinus[code] ?? 0) + 1;
 					} else if (!preserve) {
 						deck.splice(i, 1);
 					}
@@ -111,8 +111,8 @@ export default class Cards {
 				return false;
 			}
 			if (!card.isFree() && pool) {
-				if ((cardMinus[code] || 0) < (pool[code] || 0)) {
-					cardMinus[code] = (cardMinus[code] || 0) + 1;
+				if ((cardMinus[code] ?? 0) < (pool[code] ?? 0)) {
+					cardMinus[code] = (cardMinus[code] ?? 0) + 1;
 				} else {
 					return false;
 				}
@@ -137,9 +137,10 @@ export default class Cards {
 				keys.forEach((key, i) => {
 					cardinfo[key] = carddata[i];
 				});
-				const cardcode = cardinfo.Code;
-				this.Codes[cardcode] = new Card(this, type, cardinfo);
-				if (cardcode < 7000)
+				const cardcode = cardinfo.Code,
+					card = new Card(this, type, cardinfo);
+				this.Codes[cardcode] = card;
+				if (!card.upped)
 					this.Names[cardinfo.Name.replace(/\W/g, '')] = this.Codes[cardcode];
 				cardinfo.Code = etgutil.asShiny(cardcode, true);
 				this.Codes[cardinfo.Code] = new Card(this, type, cardinfo);
@@ -168,6 +169,8 @@ const TargetFilters = {
 		t.isMaterial(etg.Permanent) && !t.getStatus('stackable'),
 	stack: (c, t) => t.isMaterial(etg.Permanent) && t.getStatus('stackable'),
 	crea: (c, t) => t.isMaterial(etg.Creature),
+	creacrea: (c, t) =>
+		t.isMaterial(etg.Creature) && t.card.type === etg.Creature,
 	play: (c, t) => t.type === etg.Player,
 	notplay: (c, t) => t.type !== etg.Player,
 	sing: (c, t) =>

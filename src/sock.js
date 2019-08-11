@@ -1,5 +1,3 @@
-import React from 'react';
-
 import Cards from './Cards.js';
 import * as etgutil from './etgutil.js';
 import Game from './Game.js';
@@ -212,7 +210,7 @@ socket.onmessage = function (msg) {
 	const data = JSON.parse(msg.data),
 		state = store.store.getState();
 	if (data.u && state.muted.has(data.u)) return;
-	const func = sockEvents[data.x] || state.cmds[data.x];
+	const func = sockEvents[data.x] ?? state.cmds[data.x];
 	if (func) func.call(this, data);
 };
 socket.onopen = function () {

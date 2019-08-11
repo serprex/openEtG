@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 
 import Cards from '../Cards.js';
@@ -20,7 +20,7 @@ function attrval(x, d) {
 function AttrUi({ y, name, value, sumscore, arpts, onChange }) {
 	const top = `${128 + y * 20}px`;
 	const data = artable[name];
-	const incr = data.incr || 1;
+	const incr = data.incr ?? 1;
 	return (
 		<>
 			<div
@@ -31,7 +31,7 @@ function AttrUi({ y, name, value, sumscore, arpts, onChange }) {
 				}}>
 				{name}
 			</div>
-			{value - incr >= (data.min || 0) && (
+			{value - incr >= (data.min ?? 0) && (
 				<input
 					type="button"
 					value="-"
@@ -71,7 +71,7 @@ function AttrUi({ y, name, value, sumscore, arpts, onChange }) {
 }
 
 export default connect(({ user }) => ({ user }))(
-	class ArenaEditor extends React.Component {
+	class ArenaEditor extends Component {
 		constructor(props) {
 			super(props);
 			const baseacard = props.acard.asUpped(false).asShiny(false);
@@ -86,7 +86,7 @@ export default connect(({ user }) => ({ user }))(
 						(!Cards.Codes[code].isOf(baseacard) &&
 							(props.acard.upped || !Cards.Codes[code].upped)))
 				) {
-					pool[code] = (pool[code] || 0) + count;
+					pool[code] = (pool[code] ?? 0) + count;
 				}
 			}
 			pool[this.props.acard.code] = 5;
@@ -129,6 +129,7 @@ export default connect(({ user }) => ({ user }))(
 			return (
 				<>
 					<Editor
+						cards={Cards}
 						deck={[acode, acode, acode, acode, acode].concat(this.state.deck)}
 						mark={this.state.dmark}
 						pool={this.state.pool}

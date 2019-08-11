@@ -22,8 +22,11 @@ export default async function (url) {
 	if (url.startsWith('Cards/') && !existsSync(url)) {
 		const code = url.match(/^Cards\/([a-v\d]{3})\.png$/);
 		if (code) {
-			const icode = parseInt(code[1], 32),
+			let icode = parseInt(code[1], 32),
 				isShiny = icode & 0x4000;
+			if ((icode & 0x3fff) < 5000) {
+				icode += 4000;
+			}
 			if (isShiny) {
 				return {
 					status: '302',

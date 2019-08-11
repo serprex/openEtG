@@ -20,10 +20,10 @@ import * as etgutil from './src/etgutil.js';
 import * as usercmd from './src/usercmd.js';
 import * as userutil from './src/userutil.js';
 import * as sutil from './src/srv/sutil.js';
-import db from './src/srv/db.js';
+import * as pg from './src/srv/pg.js';
 import * as Us from './src/srv/Us.js';
-import * as Bz from './src/srv/Bz.js';
 import starter from './src/srv/starter.json';
+import originalstarter from './src/srv/original-starter.json';
 import forkcore from './src/srv/forkcore.js';
 import login from './src/srv/login.js';
 import config from './config.json';
@@ -83,9 +83,12 @@ const sockmeta = new WeakMap();
 		}
 	}
 	function roleck(key, func) {
-		return async function (data, user, meta) {
-			const ismem = await db.sismember(key, data.u);
-			if (ismem) {
+		return async function (data, user, meta, userid) {
+			const ismem = await pg.pool.query({
+				text: `select exists(select * from user_role ur join roles r on ur.role_id = r.id where ur.user_id = $1 and r.val = $2) res`,
+				values: [userid, key],
+			});
+			if (ismem.rows[0].res) {
 				return func.call(this, data, user, meta);
 			} else {
 				sockEmit(this, 'chat', {
@@ -95,37 +98,71 @@ const sockmeta = new WeakMap();
 			}
 		};
 	}
+	function addRoleHandler(role) {
+		return roleck(role, function addRole(data, user) {
+			return pg.pool.query({
+				text: `insert into user_role (user_id, role_id) select u.id, r.id from users u, roles r where u.name = $1 and r.val = $2 on conflict do nothing`,
+				values: [data.m, role],
+			});
+		});
+	}
+	function rmRoleHandler(role) {
+		return roleck(role, function rmRole(data, user) {
+			return pg.pool.query({
+				text: `delete from user_role ur using users u, roles r where ur.user_id = u.id and ur.role_id = r.id and u.name = $1 and r.val = $2`,
+				values: [data.m, role],
+			});
+		});
+	}
+	function listRoleHandler(role) {
+		return async function listRole(data) {
+			const ms = await pg.pool.query({
+				text: `select u.name from user_role ur join users u on u.id = ur.user_id join roles r on r.id = ur.role_id where r.val = $1 order by u.name`,
+				values: [role],
+			});
+			sockEmit(this, 'chat', {
+				mode: 1,
+				msg: ms.rows.map(x => x.name).join(),
+			});
+		};
+	}
 	const userEvents = {
-		modadd: roleck('Mods', function (data, user) {
-			return db.sadd('Mods', data.m);
+		modadd: addRoleHandler('Mod'),
+		modrm: rmRoleHandler('Mod'),
+		codesmithadd: addRoleHandler('Codesmith'),
+		codesmithrm: rmRoleHandler('Codesmith'),
+		modguest: roleck('Mod', function (data, user) {
+			if (data.m === 'off') {
+				return pg.pool.query({
+					text: `insert into strings (key, val) values ('GuestsBanned', '') on conflict do nothing`,
+				});
+			} else {
+				return pg.pool.query({
+					text: `delete from strings where key = 'GuestsBanned'`,
+				});
+			}
 		}),
-		modrm: roleck('Mods', function (data, user) {
-			return db.srem('Mods', data.m);
-		}),
-		codesmithadd: roleck('Codesmiths', function (data, user) {
-			return db.sadd('Codesmiths', data.m);
-		}),
-		codesmithrm: roleck('Codesmiths', function (data, user) {
-			return db.srem('Codesmiths', data.m);
-		}),
-		modguest: roleck('Mods', function (data, user) {
-			return db.set('GuestsBanned', data.m === 'off' ? '1' : '');
-		}),
-		modmute: roleck('Mods', function (data, user) {
+		modmute: roleck('Mod', function (data, user) {
 			broadcast({ x: 'mute', m: data.m });
 		}),
-		modclear: roleck('Mods', function (data, user) {
+		modclear: roleck('Mod', function (data, user) {
 			broadcast({ x: 'clear' });
 		}),
-		modmotd: roleck('Mods', function (data, user) {
+		modmotd: roleck('Mod', function (data, user) {
 			const match = data.m.match(/^(\d+) ?(.*)$/);
 			if (match) {
 				const num = match[1],
 					text = match[2];
 				if (text) {
-					return db.zadd('Motd', num, text);
+					return pg.pool.query({
+						text: `insert into motd (id, val) values ($1, $2) on conflict (id) do update set val = $2`,
+						values: [num, text],
+					});
 				} else {
-					return db.zremrangebyscore('Motd', num, num);
+					return pg.pool.query({
+						text: `delete from motd where id = $1`,
+						values: [num],
+					});
 				}
 			} else {
 				sockEmit(this, 'chat', { mode: 1, msg: 'Invalid format' });
@@ -148,106 +185,158 @@ const sockmeta = new WeakMap();
 			};
 			user.quests = {};
 			user.streak = [];
-			sockEvents.login.call(this, { u: user.name, a: user.auth });
+			return sockEvents.login.call(this, { u: user.name, a: user.auth });
 		},
-		async logout({ u }, user) {
-			await db.hset('Users', u, JSON.stringify(user));
+		async loginoriginal(data, user, meta, userId) {
+			const result = await pg.pool.query({
+				text: 'select data from user_data where user_id = $1 and type_id = 2',
+				values: [userId],
+			});
+			sockEmit(
+				this,
+				'originaldata',
+				result.rows.length ? result.rows[0].data : {},
+			);
+		},
+		async initoriginal(data, user, meta, userId) {
+			if (data.e < 1 || data.e > 13) return;
+			const sid = (data.e - 1) * 2;
+			const originaldata = {
+				pool: originalstarter[sid],
+				deck: originalstarter[sid + 1],
+				electrum: 0,
+			};
+			await pg.pool.query({
+				text:
+					'insert into user_data (user_id, type_id, name, data) values ($1, $2, $3, $4)',
+				values: [userId, 2, data.name, originaldata],
+			});
+			sockEmit(this, 'originaldata', originaldata);
+		},
+		async logout({ u }, user, meta, userId) {
+			await Us.save(user);
 			Us.users.delete(u);
 			Us.socks.delete(u);
 			sockmeta.set(this, {});
 		},
-		async delete({ u }, user) {
-			await db.hdel('Users', u);
+		async delete({ u }, user, meta, userId) {
+			await pg.trx(async sql => {
+				for (const table of ['arena', 'bazaar', 'user_data']) {
+					await sql.query({
+						text: `delete from ${table} where user_id = $1`,
+						values: [userId],
+					});
+				}
+				await sql.query({
+					text: `delete from users where id = $1`,
+					values: [userId],
+				});
+			});
 			Us.users.delete(u);
 			Us.socks.delete(u);
 			sockmeta.set(this, {});
 		},
-		async setarena(data, user) {
+		async setarena(data, user, meta, userId) {
 			if (!user.ocard || !data.d) {
 				return;
 			}
 			const au = `${data.lv ? 'B:' : 'A:'}${data.u}`;
 			if (data.mod) {
-				return db.hmset(au, {
-					deck: data.d,
-					hp: data.hp,
-					draw: data.draw,
-					mark: data.mark,
+				return pg.pool.query({
+					text: `update arena set deck = $3, hp = $4, draw = $5, mark = $6 where user_id = $1 and arena_id = $2`,
+					values: [
+						userId,
+						data.lv ? 2 : 1,
+						data.d,
+						data.hp,
+						data.draw,
+						data.mark,
+					],
 				});
 			} else {
-				const today = sutil.getDay(),
-					res = await db.hmget(au, 'day');
-				if (res && res[0]) {
-					const age = today - res[0];
+				const res = await pg.pool.query({
+					text: `select day from arena where user_id = $1 and arena_id = $2`,
+					values: [userId, data.lv ? 2 : 1],
+				});
+				const today = sutil.getDay();
+				if (res.rowCount) {
+					const age = today - res.rows[0].day;
 					if (age > 0) {
 						user.gold += Math.min(age * 25, 350);
 					}
 				}
-				return db
-					.multi()
-					.hmset(au, {
-						day: today,
-						deck: data.d,
-						card: user.ocard,
-						win: 0,
-						loss: 0,
-						hp: data.hp,
-						draw: data.draw,
-						mark: data.mark,
-					})
-					.zadd(`arena${data.lv ? '1' : ''}`, 250, data.u)
-					.exec();
+				return await pg.pool.query({
+					text: `insert into arena (user_id, arena_id, day, deck, code, won, loss, hp, draw, mark, score) values ($1, $2, $3, $4, $5, 0, 0, $6, $7, $8, 250)
+on conflict (user_id, arena_id) do update set day = $3, deck = $4, code = $5, won = 0, loss = 0, hp = $6, draw = $7, mark = $8, score = 250`,
+					values: [
+						userId,
+						data.lv ? 2 : 1,
+						today,
+						data.d,
+						user.ocard,
+						data.hp,
+						data.draw,
+						data.mark,
+					],
+				});
 			}
 		},
-		async arenainfo(data, user) {
-			const res = await db
-				.pipeline([
-					['hgetall', `A:${data.u}`],
-					['hgetall', `B:${data.u}`],
-					['zrevrank', 'arena', data.u],
-					['zrevrank', 'arena1', data.u],
-				])
-				.exec();
+		async arenainfo(data, user, meta, userId) {
 			const day = sutil.getDay();
-			function process(obj, rank) {
-				if (!obj || !obj.day) return null;
-				obj.day = day - obj.day;
-				obj.curhp = getAgedHp(obj.hp, obj.day);
-				if (rank !== null) obj.rank = rank;
-				for (const key of ['draw', 'hp', 'loss', 'mark', 'win', 'card']) {
-					obj[key] = +obj[key];
-				}
-				return obj;
-			}
-			sockEmit(this, 'arenainfo', {
-				A: process(res[0][1], res[2][1]),
-				B: process(res[1][1], res[3][1]),
+			const res = await pg.pool.query({
+				text: `select arena_id, ($2 - arena.day) "day", draw, mark, hp, won, loss, code, deck, "rank" from (
+select *, (rank() over (partition by arena_id order by score))::int "rank" from arena
+) arena where user_id = $1`,
+				values: [userId, day],
 			});
+			const info = {};
+			for (const row of res.rows) {
+				info[row.arena_id === 1 ? 'A' : 'B'] = {
+					rank: row.rank,
+					day: row.day,
+					hp: row.hp,
+					curhp: getAgedHp(row.hp, row.day),
+					mark: row.mark,
+					draw: row.draw,
+					win: row.won,
+					loss: row.loss,
+					card: row.code,
+					deck: row.deck,
+				};
+			}
+			sockEmit(this, 'arenainfo', info);
 		},
 		async modarena(data, user) {
 			Us.load(data.aname)
 				.then(user => (user.gold += data.won ? 15 : 5))
 				.catch(() => {});
-			const arena = `arena${data.lv ? '1' : ''}`,
-				akey = (data.lv ? 'B:' : 'A:') + data.aname;
-			const score = await db.zscore(arena, data.aname);
-			if (score === null) return;
-			const [incr, mget] = await Promise.all([
-				db.hincrby(akey, data.won ? 'win' : 'loss', 1),
-				db.hmget(akey, data.won ? 'loss' : 'win', 'day'),
-			]);
-			const won = +(data.won ? incr : mget[0]),
-				loss = +(data.won ? mget[0] : incr),
-				day = +mget[1];
-			return db.zadd(
-				arena,
-				wilson(won + 1, won + loss + 1) * 1000 - (sutil.getDay() - day) * 2,
-				data.aname,
-			);
+			const arenaId = data.lv ? 2 : 1;
+			const res = await pg.pool.query({
+				text: `select a.user_id, a.won, a.loss, ($3 - a.day) "day" from arena a join users u on a.user_id = u.id and a.arena_id = $1 where u.name = $2`,
+				values: [arenaId, data.aname, sutil.getDay()],
+			});
+			if (res.rows.length === 0) return;
+			const row = res.rows[0],
+				won = row.won + (data.won ? 1 : 0),
+				loss = row.loss + (data.won ? 0 : 1),
+				wlfield = data.won ? 'won' : 'loss';
+			return pg.pool.query({
+				text: `update arena set ${wlfield} = ${wlfield} + 1, score = $3 where user_id = $1 and arena_id = $2`,
+				values: [
+					row.user_id,
+					arenaId,
+					((wilson(won + 1, won + loss + 1) * 1000) | 0) - row.day * 2,
+				],
+			});
 		},
 		async foearena(data, user) {
-			const len = await db.zcard(`arena${data.lv ? '1' : ''}`);
-			if (!len) return;
+			const arenaId = data.lv ? 2 : 1;
+			const reslen = await pg.pool.query({
+					text: `select count(*) len from arena where arena_id = $1`,
+					values: [arenaId],
+				}),
+				len = +reslen.rows[0].len;
+			if (len === 0) return;
 			let r = Math.random(),
 				p = 0.07,
 				p0 = 1 - p,
@@ -259,13 +348,15 @@ const sockmeta = new WeakMap();
 			if (idx === len) {
 				idx = RngMock.upto(len);
 			}
-			const anames = await db.zrevrange(`arena${data.lv ? '1' : ''}`, idx, idx);
-			if (!anames || !anames.length) {
+			const ares = await pg.pool.query({
+				text: `select u.name, a.score, a.deck, a.hp, a.mark, a.draw, a.day, a.won, a.loss, a.code from arena a join users u on u.id = a.user_id where a.arena_id = $1 order by a.score desc limit 1 offset $2`,
+				values: [arenaId, idx],
+			});
+			if (ares.rows.length == 0) {
 				console.log('No arena', idx);
 				return;
 			}
-			const aname = anames[0];
-			const adeck = await db.hgetall(`${data.lv ? 'B:' : 'A:'}${aname}`);
+			const adeck = ares.rows[0];
 			adeck.card = +adeck.card;
 			if (data.lv) adeck.card = etgutil.asUpped(adeck.card, true);
 			adeck.hp = +adeck.hp || 200;
@@ -275,17 +366,20 @@ const sockmeta = new WeakMap();
 			const curhp = getAgedHp(adeck.hp, age);
 			sockEmit(this, 'foearena', {
 				seed: (Math.random() * MAX_INT) | 0,
-				name: aname,
+				name: adeck.name,
 				hp: curhp,
 				age: age,
 				rank: idx,
 				mark: adeck.mark,
 				draw: adeck.draw,
-				deck: `${adeck.deck}05${adeck.card.toString(32)}`,
+				deck: `${adeck.deck}05${(data.lv
+					? etgutil.asUpped(adeck.card, true)
+					: adeck.code
+				).toString(32)}`,
 				lv: data.lv,
 			});
 		},
-		setgold: roleck('Codesmiths', async function (data, user) {
+		setgold: roleck('Codesmith', async function (data, user) {
 			const tgt = await Us.load(data.t);
 			sockEmit(this, 'chat', {
 				mode: 1,
@@ -293,79 +387,114 @@ const sockmeta = new WeakMap();
 			});
 			tgt.gold = data.g;
 		}),
-		codecreate: roleck('Codesmiths', async function (data, user) {
+		codecreate: roleck('Codesmith', async function (data, user) {
 			if (!data.t) {
 				return sockEmit(this, 'chat', {
 					mode: 1,
 					msg: `Invalid type ${data.t}`,
 				});
 			}
-			const code = await db.eval(
-				"math.randomseed(ARGV[1])local c repeat c=''for i=1,8 do c=c..string.char(math.random(33,126))end until redis.call('hexists','CodeHash',c)==0 redis.call('hset','CodeHash',c,ARGV[2])return c",
-				0,
-				Math.random() * MAX_INT,
-				data.t,
-			);
+			let code = '';
+			for (let i = 0; i < 8; i++) {
+				code += String.fromCharCode(33 + ((Math.random() * 93) | 0));
+			}
+			try {
+				await pg.pool.query({
+					text: `insert into codes values ($1, $2)`,
+					values: [code, data.t],
+				});
+			} catch {
+				return sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `Failed to create code`,
+				});
+			}
 			sockEmit(this, 'chat', { mode: 1, msg: `${data.t} ${code}` });
 		}),
-		async codesubmit(data, user) {
-			const type = await db.hget('CodeHash', data.code || '');
-			if (!type) {
-				sockEmit(this, 'chat', { mode: 1, msg: 'Code does not exist' });
-			} else if (type.charAt(0) === 'G') {
-				const g = +type.slice(1);
-				if (isNaN(g)) {
+		codesubmit(data, user) {
+			return pg.trx(async sql => {
+				await sql.query({ text: 'lock codes in row exclusive mode' });
+				const obj = await sql.query({
+						text: `select val from codes where code = $1`,
+						values: [data.code],
+					}),
+					type = obj.rows[0].val;
+				if (!type) {
 					sockEmit(this, 'chat', {
 						mode: 1,
-						msg: `Invalid gold code type: ${type}`,
+						msg: 'Code does not exist',
 					});
-				} else {
-					user.gold += g;
-					sockEmit(this, 'codegold', { g });
-					return db.hdel('CodeHash', data.code);
-				}
-			} else if (type.charAt(0) === 'C') {
-				const c = parseInt(type.slice(1), 32);
-				if (c in Cards.Codes) {
-					user.pool = etgutil.addcard(user.pool, c);
-					sockEmit(this, 'codecode', { card: c });
-					return db.hdel('CodeHash', data.code);
+				} else if (type.charAt(0) === 'G') {
+					const g = +type.slice(1);
+					if (isNaN(g)) {
+						sockEmit(this, 'chat', {
+							mode: 1,
+							msg: `Invalid gold code type: ${type}`,
+						});
+					} else {
+						user.gold += g;
+						sockEmit(this, 'codegold', { g });
+						return sql.query({
+							text: `delete from codes where code = $1`,
+							values: [data.code],
+						});
+					}
+				} else if (type.charAt(0) === 'C') {
+					const c = parseInt(type.slice(1), 32);
+					if (c in Cards.Codes) {
+						user.pool = etgutil.addcard(user.pool, c);
+						sockEmit(this, 'codecode', { card: c });
+						return sql.query({
+							text: `delete from codes where code = $1`,
+							values: [data.code],
+						});
+					} else {
+						sockEmit(this, 'chat', {
+							mode: 1,
+							msg: `Unknown card: ${type}`,
+						});
+					}
+				} else if (type.replace(/^!?(upped)?/, '') in userutil.rewardwords) {
+					sockEmit(this, 'codecard', { type });
 				} else {
 					sockEmit(this, 'chat', {
 						mode: 1,
-						msg: `Unknown card: ${type}`,
+						msg: `Unknown code type: ${type}`,
 					});
 				}
-			} else if (type.replace(/^!?(upped)?/, '') in userutil.rewardwords) {
-				sockEmit(this, 'codecard', { type });
-			} else {
-				sockEmit(this, 'chat', {
-					mode: 1,
-					msg: `Unknown code type: ${type}`,
-				});
-			}
+			});
 		},
-		async codesubmit2(data, user) {
-			const type = await db.hget('CodeHash', data.code || '');
-			if (!type) {
-				sockEmit(this, 'chat', { mode: 1, msg: 'Code does not exist' });
-			} else if (type.replace(/^!/, '') in userutil.rewardwords) {
-				const card = Cards.Codes[data.card];
-				if (
-					card &&
-					card.rarity === userutil.rewardwords[type.replace(/^!/, '')] &&
-					card.shiny ^ (type.charAt(0) !== '!')
-				) {
-					user.pool = etgutil.addcard(user.pool, data.card);
-					sockEmit(this, 'codedone', { card: data.card });
-					return db.hdel('CodeHash', data.code);
+		codesubmit2(data, user) {
+			return pg.trx(async sql => {
+				await sql.query({ text: 'lock codes in row exclusive mode' });
+				const obj = await sql.query({
+						text: `select val from codes where code = $1`,
+						values: [data.code],
+					}),
+					type = obj.rows[0].val;
+				if (!type) {
+					sockEmit(this, 'chat', { mode: 1, msg: 'Code does not exist' });
+				} else if (type.replace(/^!/, '') in userutil.rewardwords) {
+					const card = Cards.Codes[data.card];
+					if (
+						card &&
+						card.rarity === userutil.rewardwords[type.replace(/^!/, '')] &&
+						card.shiny ^ (type.charAt(0) !== '!')
+					) {
+						user.pool = etgutil.addcard(user.pool, data.card);
+						sockEmit(this, 'codedone', { card: data.card });
+						return sql.query({
+							text: `delete from codes where code = $1`,
+							values: [data.code],
+						});
+					}
+				} else {
+					sockEmit(this, 'chat', {
+						mode: 1,
+						msg: 'Unknown code type: ' + type,
+					});
 				}
-			} else {
-				sockEmit(this, 'chat', {
-					mode: 1,
-					msg: 'Unknown code type: ' + type,
-				});
-			}
+			});
 		},
 		foewant(data, user, thismeta) {
 			const { u, f } = data;
@@ -552,40 +681,40 @@ const sockmeta = new WeakMap();
 				genericChat(this, data);
 			}
 		},
-		bzcancel(data, user) {
-			Bz.load().then(bz => {
-				const code = data.c | 0,
-					bids = bz[code];
-				if (bids) {
-					for (let i = bids.length - 1; i >= 0; i--) {
-						const bid = bids[i];
-						if (bid.u === user.name) {
-							const { q, p } = bid;
-							if (p > 0) {
-								user.gold += p * q;
-							} else {
-								user.pool = etgutil.addcard(user.pool, code, q);
-							}
-							bids.splice(i, 1);
-						}
-					}
-					sockEmit(this, 'bzbid', {
-						bz,
-						g: user.gold,
-						pool: user.pool,
-					});
-					Bz.store();
+		async bzcancel(data, user, meta, userId) {
+			const code = data.c | 0;
+			const bids = await pg.pool.query({
+				text:
+					'delete from bazaar where user_id = $1 and code = $2 returning q, p',
+				values: [userId, code],
+			});
+			const rm = {};
+			for (const bid of bids.rows) {
+				const { q, p } = bid;
+				if (p > 0) {
+					user.gold += p * q;
+				} else {
+					user.pool = etgutil.addcard(user.pool, code, q);
 				}
+				if (!rm[code]) rm[code] = [];
+				rm[code].push({ u: user.name, q: bid.q, p: bid.p });
+			}
+			sockEmit(this, 'bzbid', {
+				rm,
+				g: user.gold,
+				pool: user.pool,
 			});
 		},
-		bzbid(data, user) {
+		async bzbid(data, user, meta, userId) {
 			data.price |= 0;
 			if (!data.price) return;
-			Bz.load().then(bz => {
+			const add = {},
+				rm = {};
+			await pg.trx(async sql => {
+				await sql.query({ text: 'lock bazaar in row exclusive mode' });
 				for (let [code, count] of etgutil.iterraw(data.cards)) {
 					const card = Cards.Codes[code];
 					if (!card) continue;
-					const bc = bz[code] || (bz[code] = []);
 					const sellval = userutil.sellValue(card);
 					let codeCount = data.price > 0 ? 0 : etgutil.count(user.pool, code);
 					if (data.price > 0) {
@@ -601,20 +730,25 @@ const sockmeta = new WeakMap();
 							continue;
 						}
 					}
-					for (let i = 0; i < bc.length; i++) {
-						const bci = bc[i],
-							amt = Math.min(bci.q, count);
+					const bids = await sql.query({
+						text:
+							'select b.id, u.name u, b.p, b.q from bazaar b join users u on b.user_id = u.id where b.code = $1 order by sign(b.p), abs(b.p)',
+						values: [code],
+					});
+					const ops = [];
+					for (const bid of bids.rows) {
+						const amt = Math.min(bid.q, count);
 						let happened = 0;
 						if (data.price > 0) {
-							if (bci.p < 0 && -bci.p <= data.price) {
+							if (bid.p < 0 && -bid.p <= data.price) {
 								happened = amt;
 							}
 						} else {
-							if (bci.p > 0 && bci.p <= -data.price) {
+							if (bid.p > 0 && bid.p <= -data.price) {
 								happened = -amt;
 							}
 						}
-						const cost = Math.abs(bci.p) * happened;
+						const cost = Math.abs(bid.p) * happened;
 						if (
 							happened &&
 							(data.price > 0 ? user.gold >= cost : codeCount >= happened)
@@ -627,11 +761,11 @@ const sockmeta = new WeakMap();
 								if (data.price > 0) {
 									msg.msg = `${user.name} bought ${amt} of ${
 										card.name
-									} @ ${-bci.p} from you.`;
+									} @ ${-bid.p} from you.`;
 									msg.g = cost;
 									seller.gold += cost;
 								} else {
-									msg.msg = `${user.name} sold you ${amt} of ${card.name} @ ${bci.p}`;
+									msg.msg = `${user.name} sold you ${amt} of ${card.name} @ ${bid.p}`;
 									msg.c = etgutil.encodeCount(amt) + code.toString(32);
 									seller.pool = etgutil.addcard(seller.pool, code, amt);
 								}
@@ -640,20 +774,19 @@ const sockmeta = new WeakMap();
 									sockEmit(sellerSock, 'bzgive', msg);
 								}
 							};
-							if (bci.u === user.name) {
+							if (bid.u === user.name) {
 								SellFunc(user);
 							} else {
-								Us.load(bci.u)
+								Us.load(bid.u)
 									.then(SellFunc)
 									.catch(() => {});
 							}
-							if (bci.q > count) {
-								bci.q -= count;
+							if (bid.q > count) {
+								ops.push({ op: 'UPDATE', bid, q: bid.q - count });
 								count = 0;
 							} else {
-								bc.splice(i--, 1);
-								if (!bc.length) delete bz[code];
-								count -= bci.q;
+								ops.push({ op: 'DELETE', bid });
+								count -= bid.q;
 							}
 							if (!count) break;
 						}
@@ -674,34 +807,64 @@ const sockmeta = new WeakMap();
 						}
 						if (bidmade) {
 							let hadmerge = false;
-							for (let i = 0; i < bc.length; i++) {
-								const bci = bc[i];
-								if (bci.u === user.name && bci.p === data.price) {
-									bci.q += count;
+							for (const bid of bids.rows) {
+								if (bid.u === user.name && bid.p === data.price) {
+									ops.push({ op: 'UPDATE', bid, q: bid.q + count });
 									hadmerge = true;
 									break;
 								}
 							}
 							if (!hadmerge) {
-								bc.push({
+								ops.push({
+									op: 'INSERT',
 									q: count,
-									u: user.name,
 									p: data.price,
 								});
-								bc.sort(
-									(a, b) =>
-										(a.p > 0) - (b.p > 0) || Math.abs(a.p) - Math.abs(b.p),
-								);
 							}
 						}
 					}
+					const queries = [];
+					for (const op of ops) {
+						if (op.op === 'DELETE') {
+							queries.push(
+								sql.query({
+									text: 'delete from bazaar where id = $1',
+									values: [op.bid.id],
+								}),
+							);
+							if (!rm[code]) rm[code] = [];
+							rm[code].push({ u: op.bid.u, q: op.bid.q, p: op.bid.p });
+						} else if (op.op === 'INSERT') {
+							queries.push(
+								sql.query({
+									text:
+										'insert into bazaar (user_id, code, q, p) values ($1, $2, $3, $4)',
+									values: [userId, code, op.q, op.p],
+								}),
+							);
+							if (!add[code]) add[code] = [];
+							add[code].push({ u: user.name, q: op.q, p: op.p });
+						} else if (op.op === 'UPDATE') {
+							queries.push(
+								sql.query({
+									text: 'update bazaar set q = $2 where id = $1',
+									values: [op.bid.id, op.q],
+								}),
+							);
+							if (!rm[code]) rm[code] = [];
+							if (!add[code]) add[code] = [];
+							rm[code].push({ u: op.bid.u, q: op.bid.q, p: op.bid.p });
+							add[code].push({ u: op.bid.u, q: op.q, p: op.bid.p });
+						}
+					}
+					await Promise.all(queries);
 				}
-				sockEmit(this, 'bzbid', {
-					bz,
-					g: user.gold,
-					pool: user.pool,
-				});
-				Bz.store();
+			});
+			sockEmit(this, 'bzbid', {
+				rm,
+				add,
+				g: user.gold,
+				pool: user.pool,
 			});
 		},
 		booster(data, user) {
@@ -1011,17 +1174,41 @@ const sockmeta = new WeakMap();
 				}
 			}
 		},
+		async updateorig(data, user, meta, userId) {
+			const result = await pg.pool.query({
+				text: 'select data from user_data where user_id = $1 and type_id = 2',
+				values: [userId],
+			});
+			if (result.rows.length) {
+				return await pg.pool.query({
+					text:
+						'update user_data set data = $2 where user_id = $1 and type_id = 2',
+					values: [
+						userId,
+						{
+							...result.rows[0].data,
+							...data,
+							x: undefined,
+							u: undefined,
+						},
+					],
+				});
+			}
+		},
 	};
 	const sockEvents = {
 		login: login(sockEmit),
 		async konglogin(data) {
-			const key = await db.get('kongapi');
-			if (!key) {
+			const keyresult = await pg.pool.query({
+				text: `select val from strings where key = 'kongapi'`,
+			});
+			if (keyresult.rows.length === 0) {
 				sockEmit(this, 'login', {
 					err: 'Global error: no kong api in db',
 				});
 				return;
 			}
+			const key = keyresult.rows[0].val;
 			https
 				.get(
 					`https://api.kongregate.com/api/authenticate.json?user_id=${data.u}&game_auth_token=${data.g}&api_key=${key}`,
@@ -1041,10 +1228,6 @@ const sockmeta = new WeakMap();
 								Us.load(name)
 									.then(user => {
 										user.auth = data.g;
-										sockEvents.login.call(this, {
-											u: name,
-											a: data.g,
-										});
 										const req = https
 											.request({
 												hostname: 'www.kongregate.com',
@@ -1060,6 +1243,10 @@ const sockmeta = new WeakMap();
 											}`,
 										);
 										req.end();
+										return sockEvents.login.call(this, {
+											u: name,
+											a: data.g,
+										});
 									})
 									.catch(() => {
 										Us.users.set(name, {
@@ -1067,7 +1254,7 @@ const sockmeta = new WeakMap();
 											gold: 0,
 											auth: data.g,
 										});
-										sockEvents.login.call(this, {
+										return sockEvents.login.call(this, {
 											u: name,
 											a: data.g,
 										});
@@ -1083,8 +1270,10 @@ const sockmeta = new WeakMap();
 				.on('error', e => console.log(e));
 		},
 		async guestchat(data) {
-			const isBanned = await db.get('GuestsBanned');
-			if (!isBanned) {
+			const isBanned = await pg.pool.query({
+				text: `select 1 from strings where key = 'GuestsBanned'`,
+			});
+			if (isBanned.rows.length === 0) {
 				data.guest = true;
 				data.u = `Guest_${data.u}`;
 				genericChat(this, data);
@@ -1101,22 +1290,16 @@ const sockmeta = new WeakMap();
 			broadcast(data);
 		},
 		async motd(data) {
-			const ms = await db.zrange('Motd', 0, -1, 'withscores');
-			for (let i = 0; i < ms.length; i += 2) {
+			const ms = await pg.pool.query(`select id, val from motd order by id`);
+			for (const row of ms.rows) {
 				sockEmit(this, 'chat', {
 					mode: 1,
-					msg: `motd ${ms[i + 1]} ${ms[i]}`,
+					msg: `motd ${row.id} ${row.val}`,
 				});
 			}
 		},
-		async mod(data) {
-			const mods = await db.smembers('Mods');
-			sockEmit(this, 'chat', { mode: 1, msg: mods.join() });
-		},
-		async codesmith(data) {
-			const mods = await db.smembers('Codesmiths');
-			sockEmit(this, 'chat', { mode: 1, msg: mods.join() });
-		},
+		mod: listRoleHandler('Mod'),
+		codesmith: listRoleHandler('Codesmith'),
 		librarywant(data) {
 			return Us.load(data.f)
 				.then(user => {
@@ -1133,38 +1316,32 @@ const sockmeta = new WeakMap();
 				.catch(() => {});
 		},
 		async arenatop(data) {
-			const obj = await db.zrevrange(
-				`arena${data.lv ? '1' : ''}`,
-				0,
-				29,
-				'withscores',
-			);
-			const tasks = [];
-			for (let i = 0; i < obj.length; i += 2) {
-				tasks.push(
-					db.hmget(
-						`${data.lv ? 'B:' : 'A:'}${obj[i]}`,
-						'win',
-						'loss',
-						'day',
-						'card',
-					),
-				);
-			}
-			const res = await Promise.all(tasks),
-				t20 = [],
-				day = sutil.getDay();
-			for (let i = 0; i < res.length; i++) {
-				const wl = res[i];
-				wl[2] = day - wl[2];
-				wl[3] = +wl[3];
-				t20.push([obj[i * 2], Math.floor(obj[i * 2 + 1])].concat(wl));
-			}
-			sockEmit(this, 'arenatop', { top: t20, lv: data.lv });
+			const day = sutil.getDay();
+			const obj = await pg.pool.query({
+				text: `select u.name, a.code, ($1 - a.day) "day", a.won, a.loss, a.score from arena a join users u on u.id = a.user_id where a.arena_id = $2 order by a.score desc limit 30`,
+				values: [day, data.lv ? 2 : 1],
+			});
+			sockEmit(this, 'arenatop', {
+				top: obj.rows.map(row => [
+					row.name,
+					row.score,
+					row.won,
+					row.loss,
+					row.day,
+					row.code,
+				]),
+				lv: data.lv,
+			});
 		},
 		async wealthtop(data) {
-			const obj = await db.zrevrange('wealth', 0, 49, 'withscores');
-			sockEmit(this, 'wealthtop', { top: obj });
+			const obj = await pg.pool.query({
+				text: `select name, wealth from users order by wealth desc limit 50`,
+			});
+			const top = [];
+			for (const row of obj.rows) {
+				top.push(row.name, row.wealth);
+			}
+			sockEmit(this, 'wealthtop', { top });
 		},
 		chatus(data) {
 			const thismeta = sockmeta.get(this);
@@ -1176,7 +1353,20 @@ const sockmeta = new WeakMap();
 			sockEmit(this, 'chat', { mode: 1, msg: activeUsers().join(', ') });
 		},
 		async bzread(data) {
-			const bz = await Bz.load();
+			const bids = await pg.pool.query({
+				text:
+					'select u.name, b.code, b.q, b.p from bazaar b join users u on b.user_id = u.id',
+			});
+			const bz = {};
+			for (const bid of bids.rows) {
+				if (!bz[bid.code]) bz[bid.code] = [];
+				bz[bid.code].push({ u: bid.name, q: bid.q, p: bid.p });
+			}
+			for (const code in bz) {
+				bz[code].sort(
+					(a, b) => (a.p > 0) - (b.p > 0) || Math.abs(a.p) - Math.abs(b.p),
+				);
+			}
 			sockEmit(this, 'bzread', { bz });
 		},
 		challrecv(data) {
@@ -1254,17 +1444,24 @@ const sockmeta = new WeakMap();
 			if (func) {
 				const { u } = data;
 				if (typeof u === 'string') {
-					const user = await Us.load(u);
-					if (data.a === user.auth) {
-						const meta = sockmeta.get(this);
-						meta.name = u;
-						Us.socks.set(u, this);
-						delete data.a;
-						const res = await Promise.resolve(
-							func.call(this, data, user, meta),
-						);
-						if (res && func === usercmd[data.x]) {
-							Object.assign(user, res);
+					const result = await pg.pool.query({
+						text: 'select id, auth from users where name = $1',
+						values: [u],
+					});
+					if (result.rows.length) {
+						const [row] = result.rows;
+						if (data.a === row.auth) {
+							const user = await Us.load(u);
+							const meta = sockmeta.get(this);
+							meta.name = u;
+							Us.socks.set(u, this);
+							delete data.a;
+							const res = await Promise.resolve(
+								func.call(this, data, user, meta, row.id),
+							);
+							if (res && func === usercmd[data.x]) {
+								Object.assign(user, res);
+							}
 						}
 					}
 				}
@@ -1302,7 +1499,9 @@ const sockmeta = new WeakMap();
 		console.log('Shutting down');
 		app.close();
 		wss.close();
-		Us.stop();
+		Us.stop()
+			.then(() => pg.pool.end())
+			.catch(err => console.error(err));
 	});
 })().catch(e =>
 	setImmediate(() => {

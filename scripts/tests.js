@@ -414,7 +414,7 @@ M.test('Steam', function () {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.SteamMachine));
 	const steam = this.player1.creatures[0];
 	this.player1.setQuanta(etg.Fire, 8);
-	steam.usedactive = false;
+	steam.casts = 1;
 	assert.equal(steam.trueatk(), 0, '0');
 	steam.useactive();
 	assert.equal(steam.trueatk(), 5, '5');
@@ -443,7 +443,7 @@ M.test('Transform No Sick', function () {
 	this.player1.setQuanta(etg.Entropy, 8);
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Pixie));
 	const pixie = this.player1.creatures[0];
-	pixie.usedactive = false;
+	pixie.casts = 1;
 	pixie.transform(Cards.Names.Pixie);
 	assert.ok(pixie.canactive(), 'canactive');
 });

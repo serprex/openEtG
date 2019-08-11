@@ -23,7 +23,7 @@ const pool2 = etgutil.deck2pool(pool),
 pool2.forEach((code, count) => {
 	if (etgutil.asUpped(code, true) == code)
 		pool2[etgutil.asUpped(code, false)] =
-			(pool2[etgutil.asUpped(code, false)] || 0) + count;
+			(pool2[etgutil.asUpped(code, false)] ?? 0) + count;
 });
 pool2.forEach((code, count) => {
 	const card = Cards.Codes[code];

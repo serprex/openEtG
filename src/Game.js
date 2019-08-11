@@ -167,7 +167,7 @@ Game.prototype.get = function (key) {
 	return this.props.get(key);
 };
 Game.prototype.set = function (id, key, val) {
-	const ent = this.props.get(id) || new imm.Map();
+	const ent = this.props.get(id) ?? new imm.Map();
 	this.props = this.props.set(id, ent.set(key, val));
 };
 Game.prototype.setIn = function (path, val) {
@@ -284,7 +284,7 @@ const nextHandler = {
 		let left = new Set();
 		for (let i = 0; i < players.length; i++) {
 			if (players[i] !== data.c && !this.get(players[i]).get('out')) {
-				left.add(players[i].leader || i);
+				left.add(players[i].leader ?? i);
 			}
 		}
 		if (left.size === 1) {

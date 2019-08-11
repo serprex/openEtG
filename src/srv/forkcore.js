@@ -15,7 +15,7 @@ async function forkcorelogic(req, res) {
 	res.on('error', () => {});
 	const qidx = req.url.indexOf('?'),
 		url = ~qidx ? req.url.slice(1, qidx) : req.url.slice(1);
-	const ifmod = new Date(req.headers['if-modified-since'] || '').getTime();
+	const ifmod = new Date(req.headers['if-modified-since'] ?? '').getTime();
 	if (await cache._try(res, url, ifmod)) return;
 	const idx = url.indexOf('/'),
 		func = ~idx && lut[url.slice(0, idx)];

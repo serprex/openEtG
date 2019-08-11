@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 
 import * as sock from '../sock.js';
@@ -7,7 +7,7 @@ import * as etgutil from '../etgutil.js';
 import * as Components from '../Components/index.js';
 
 export default connect(({ user }) => ({ user }))(
-	class Upgrade extends React.Component {
+	class Upgrade extends Component {
 		constructor(props) {
 			super(props);
 			this.state = {};
@@ -65,8 +65,8 @@ export default connect(({ user }) => ({ user }))(
 			}
 			function eventWrap(func) {
 				return () => {
-					const error = self.state.code1
-						? func(Cards.Codes[self.state.code1])
+					const error = self.state.card1
+						? func(self.state.card1)
 						: 'Pick a card, any card.';
 					if (error) self.setState({ error });
 				};
@@ -168,16 +168,17 @@ export default connect(({ user }) => ({ user }))(
 							top: '170px',
 						}}
 					/>
-					<Components.Card x={534} y={8} code={this.state.code1} />
-					<Components.Card x={734} y={8} code={this.state.code2} />
+					<Components.Card x={534} y={8} card={this.state.card1} />
+					<Components.Card x={734} y={8} card={this.state.card2} />
 					<Components.CardSelector
+						cards={Cards}
 						cardpool={this.state.cardpool}
 						maxedIndicator
-						onClick={code => {
-							const card = Cards.Codes[code];
+						onClick={card => {
+							const code = card.code;
 							const newstate = {
-								code1: code,
-								code2: etgutil.asUpped(code, true),
+								card1: card,
+								card2: card.asUpped(true),
 								error: '',
 								canGrade: true,
 								canLish: true,

@@ -1,18 +1,18 @@
-import React from 'react';
+import { PureComponent } from 'react';
 
 import * as Components from '../Components/index.js';
 import * as etgutil from '../etgutil.js';
 
-export default class Editor extends React.PureComponent {
+export default class Editor extends PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {
-			card: 0,
+			card: null,
 		};
 	}
 
-	setCardArt = code => {
-		if (this.state.card !== code) this.setState({ card: code });
+	setCardArt = card => {
+		if (this.state.card !== card) this.setState({ card });
 	};
 
 	addCard = code => {
@@ -53,8 +53,9 @@ export default class Editor extends React.PureComponent {
 		return (
 			<>
 				<Components.DeckDisplay
-					onMouseOver={(_, code) => this.setCardArt(code)}
-					onClick={(i, code) => {
+					cards={this.props.cards}
+					onMouseOver={(_, card) => this.setCardArt(card)}
+					onClick={(i, card) => {
 						const newdeck = this.props.deck.slice();
 						newdeck.splice(i, 1);
 						this.props.setDeck(newdeck);
@@ -63,6 +64,7 @@ export default class Editor extends React.PureComponent {
 					pool={this.props.pool}
 				/>
 				<Components.CardSelector
+					cards={this.props.cards}
 					onMouseOver={this.setCardArt}
 					onClick={this.addCard}
 					onContextMenu={this.rmCard}
@@ -90,7 +92,7 @@ export default class Editor extends React.PureComponent {
 					}}
 				/>
 				{marksel}
-				<Components.Card x={734} y={8} code={this.state.card} />
+				<Components.Card x={734} y={8} card={this.state.card} />
 			</>
 		);
 	}

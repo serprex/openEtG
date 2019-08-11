@@ -88,7 +88,7 @@ export default class Card {
 	}
 
 	get upped() {
-		return (this.code & 0x3fff) > 6999;
+		return ((this.code & 0x3fff) - 1000) % 4000 > 1999;
 	}
 
 	hashCode() {

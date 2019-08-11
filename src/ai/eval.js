@@ -380,6 +380,201 @@ const SkillsValues = {
 	vend: 2,
 	weight: 5,
 	wings: c => (!c.getStatus('charges') && c.ownerId === c.game.turn ? 0 : 6),
+	v_ablaze: 3,
+	v_accelerationspell: 5,
+	v_acceleration: c => c.truehp() - 2,
+	v_accretion: 8,
+	v_adrenaline: 8,
+	v_aflatoxin: 5,
+	v_aggroskele: 2,
+	v_air: 1,
+	v_animateweapon: 4,
+	v_antimatter: 12,
+	v_bblood: 7,
+	v_blackhole: function (c) {
+		let a = 0;
+		const fq = c.owner.foe.quanta;
+		for (let i = 1; i < 13; i++) {
+			a += Math.min(fq[i], 3) / 3;
+		}
+		return a;
+	},
+	v_bless: 4,
+	v_boneyard: 3,
+	v_bravery: 3,
+	v_burrow: 1,
+	v_butterfly: 12,
+	v_catapult: 6,
+	v_chimera: 4,
+	v_clear: 2,
+	v_corpseexplosion: 1,
+	v_counter: 3,
+	v_countimmbur: 1,
+	v_cpower: 4,
+	v_darkness: 1,
+	v_deadalive: 2,
+	v_deja: 4,
+	v_destroy: 8,
+	v_devour: c => 2 + (c.type === etg.Spell ? c.card.health : c.truehp()),
+	v_disfield: 8,
+	v_disshield: 7,
+	v_dive: function (c, ttatk) {
+		return c.type === etg.Spell
+			? c.card.attack
+			: ttatk - (c.getStatus('dive') || 0) / 1.5;
+	},
+	v_divinity: 3,
+	v_drainlife: 10,
+	v_dryspell: 5,
+	v_dshield: 4,
+	v_duality: 4,
+	v_earth: 1,
+	v_earthquake: 4,
+	v_empathy: function (c) {
+		return c.owner.countcreatures();
+	},
+	v_enchant: 6,
+	v_endow: 4,
+	v_evolve: 2,
+	v_fire: 1,
+	v_firebolt: 10,
+	v_flyingweapon: 7,
+	v_fractal: function (c) {
+		return 9 - c.owner.hand.length;
+	},
+	v_freeze: [3, 3.5],
+	v_gas: 5,
+	v_gpull: function (c) {
+		return c.type === etg.Spell || c.id !== c.owner.gpull ? 2 : 0;
+	},
+	v_gpullspell: 3,
+	v_gratitude: c => (c.status ? c.getStatus('charges') * 4 : 4),
+	v_growth1: 3,
+	v_growth: 5,
+	v_guard: 4,
+	v_hasten: function (c) {
+		return Math.min(c.owner.deck.length / 4, 10);
+	},
+	v_hatch: 3,
+	v_heal: 8,
+	v_holylight: 3,
+	v_hope: 2,
+	v_icebolt: 10,
+	v_ignite: 4,
+	v_immolate: 5,
+	v_improve: 6,
+	v_inertia: 2,
+	v_infect: 4,
+	v_integrity: 4,
+	v_light: 1,
+	v_lightning: 7,
+	v_liquid: 5,
+	v_lobotomize: 6,
+	v_luciferin: 3,
+	v_lycanthropy: 4,
+	v_mend: 3,
+	v_miracle: c => c.owner.maxhp / 8,
+	v_mitosis: c => 4 + c.card.cost,
+	v_mitosisspell: 6,
+	v_momentum: 2,
+	v_mutation: 4,
+	v_neuro: c => {
+		return c.owner.foe.neuro ? evalactive(c, Actives.poison) + 0.1 : 6;
+	},
+	v_nightmare: c => {
+		const n = c.owner.hand.reduce(
+			(n, inst) => n + !!inst.card.isOf(c.game.Cards.Names.Nightmare),
+			0,
+		);
+	},
+	v_nova: 4,
+	v_nova2: 6,
+	v_nymph: 7,
+	v_ouija: 3,
+	v_overdrive: c => c.truehp() - 1,
+	v_overdrivespell: 5,
+	v_pandemonium: 3,
+	v_pandemonium2: 4,
+	v_paradox: 5,
+	v_parallel: 8,
+	v_phoenix: 3,
+	v_photosynthesis: 2,
+	v_plague: 5,
+	v_platearmor: 1,
+	v_poison: 2,
+	v_poison2: 3,
+	v_poison3: 4,
+	v_precognition: 1,
+	v_purify: 2,
+	v_queen: 7,
+	v_quint: 6,
+	v_rage: [5, 6],
+	v_readiness: 3,
+	v_rebirth: [5, 2],
+	v_regenerate: 5,
+	v_rewind: 6,
+	v_salvage: 2,
+	v_sanctuary: 6,
+	v_scarab: 4,
+	v_scramble: function (c) {
+		var a = 0,
+			fq = c.owner.foe.quanta;
+		for (var i = 1; i < 13; i++) {
+			if (!fq[i]) a++;
+		}
+		return a;
+	},
+	v_serendipity: 4,
+	v_silence: 1,
+	v_singularity: -20,
+	v_siphon: 4,
+	v_skyblitz: 10,
+	v_snipe: 7,
+	v_sosa: 6,
+	v_soulcatch: 2,
+	v_sskin: 5,
+	v_steal: 6,
+	v_steam: 6,
+	v_stoneform: 1,
+	v_storm2: 6,
+	v_storm3: 12,
+	v_swave: 6,
+	v_upkeep: -0.5,
+	v_vampire: (c, ttatk) => (c.type === etg.Spell ? c.card.attack : ttatk) * 0.7,
+	v_virusplague: 1,
+	v_void: c => (c.status ? c.getStatus('charges') * 5 : 5),
+	v_web: 1,
+	v_wisdom: 4,
+	v_pillar: pillarval,
+	v_pend: pillarval,
+	v_blockwithcharge: c =>
+		c.getStatus('charges') / (1 + c.owner.foe.countcreatures() * 2),
+	v_cold: 7,
+	v_evade100: function (c) {
+		return c.status
+			? c.getStatus('charges') === 0 && c.owner === c.owner.game.turn
+				? 0
+				: 1
+			: 1;
+	},
+	v_evade40: 1,
+	v_evade50: 1,
+	firewall: 7,
+	v_skull: 5,
+	v_slow: 6,
+	v_solar: function (c) {
+		const coq = c.owner.quanta[etg.Light];
+		return 5 - (4 * coq) / (4 + coq);
+	},
+	v_thorn: 5,
+	v_weight: 5,
+	v_wings: function (c) {
+		return c.status
+			? c.getStatus('charges') === 0 && c.owner === c.owner.game.turn
+				? 0
+				: 6
+			: 6;
+	},
 };
 const statusValues = {
 	airborne: 0.2,
@@ -390,10 +585,12 @@ const statusValues = {
 	cloak: c => (!c.getStatus('charges') && c.ownerId === c.game.turn ? 0 : 4),
 	patience: c => 1 + c.owner.countcreatures() * 2,
 	reflective: 1,
+	// oetg-v
+	freedom: c => Math.min(c.getStatus('charges'), 4) * 5 || 5,
 };
 
 function getDamage(game, c) {
-	return damageHash.get(c.id) || 0;
+	return damageHash.get(c.id) ?? 0;
 }
 function estimateDamage(
 	game,
@@ -453,9 +650,11 @@ function estimateDamage(
 	if (!momentum && fshactive) {
 		atk *= ~fshactive.name.indexOf('evade100')
 			? 0
-			: ~fshactive.name.indexOf('evade 50')
+			: ~fshactive.name.indexOf('evade 50') ||
+			  ~fshactive.name.indexOf('evade50')
 			? 0.5
-			: ~fshactive.name.indexOf('evade 40')
+			: ~fshactive.name.indexOf('evade 40') ||
+			  ~fshactive.name.indexOf('evade40')
 			? 0.6
 			: ~fshactive.name.indexOf('chaos') && fsh.card.upped
 			? 0.8
@@ -851,7 +1050,7 @@ export default function (game) {
 		}
 		pscore += Math.sqrt(pl.hp) * 4 - pl.getStatus('poison');
 		if (pl.getStatus('precognition')) pscore += 0.5;
-		if (pl.usedactive)
+		if (pl.casts === 0)
 			pscore -= (pl.handIds.length + (pl.handIds.length > 6 ? 7 : 4)) / 4;
 		if (pl.getStatus('flatline')) pscore -= 1;
 		if (pl.getStatus('neuro')) pscore -= 5 - pl.handIds.length / 2;

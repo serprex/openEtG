@@ -10,8 +10,6 @@ var data = {
 		"Destroy target permanent & gain 0|15. Return to owner's hand as a Blackhole if health exceeds 45",
 	v_adrenaline:
 		'Target creature attacks multiple times per turn. Weaker creatures gain more attacks',
-	v_affinity: c =>
-		'Cost is lowered by 1 for each 1:' + c.element + ' pillar you control',
 	v_aflatoxin:
 		'Apply 2 poison to target. When target dies, it turns into a malignant cell',
 	v_air: 'Produce 1:9',
@@ -54,8 +52,6 @@ var data = {
 		'Deal 1 damage to all creatures. Gain 1:7 per damage dealt. Removes cloak',
 	v_dshield: 'Become immaterial until next turn',
 	v_duality: "Generate a copy of foe's next draw",
-	v_durability:
-		'Your current shield will gain the abilities of the next shield played instead of being replaced. Works only once per shield',
 	v_earth: 'Produce 1:4',
 	v_earthquake: 'Destroy up to 3 stacks from target permanent',
 	v_empathy: 'Heal owner per creature owned per turn. Upkeep per 8 creatures',

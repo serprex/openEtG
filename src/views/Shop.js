@@ -1,7 +1,8 @@
 import { connect } from 'react-redux';
-import React from 'react';
+import { Component } from 'react';
 
 import * as sock from '../sock.js';
+import Cards from '../Cards.js';
 import * as Tutor from '../Components/Tutor.js';
 import * as etgutil from '../etgutil.js';
 import { parseInput } from '../util.js';
@@ -26,10 +27,10 @@ const packdata = [
 	{ cost: 250, type: 'Nymph', info: '1 Nymph', color: '#69b' },
 ];
 
-class PackDisplay extends React.Component {
+class PackDisplay extends Component {
 	constructor(props) {
 		super(props);
-		this.state = { hovercode: 0 };
+		this.state = { hovercard: null };
 	}
 
 	render() {
@@ -39,9 +40,10 @@ class PackDisplay extends React.Component {
 		if (dlen < 51) {
 			cardchildren = (
 				<Components.DeckDisplay
+					cards={Cards}
 					x={64}
 					deck={etgutil.decodedeck(cards)}
-					onMouseOver={(i, code) => this.setState({ hovercode: code })}
+					onMouseOver={(i, card) => this.setState({ hovercard: card })}
 				/>
 			);
 		} else {
@@ -49,22 +51,24 @@ class PackDisplay extends React.Component {
 			cardchildren = (
 				<>
 					<Components.DeckDisplay
+						cards={Cards}
 						x={64}
 						deck={deck.slice(0, 50)}
-						onMouseOver={(i, code) => this.setState({ hovercode: code })}
+						onMouseOver={(i, card) => this.setState({ hovercard: card })}
 					/>
 					<Components.DeckDisplay
+						cards={Cards}
 						x={-97}
 						y={244}
 						deck={deck.slice(50)}
-						onMouseOver={(i, code) => this.setState({ hovercode: code })}
+						onMouseOver={(i, card) => this.setState({ hovercard: card })}
 					/>
 				</>
 			);
 		}
 		return (
 			<Components.Box x={40} y={16} width={710} height={568}>
-				<Components.Card code={this.state.hovercode} x={2} y={2} />
+				<Components.Card card={this.state.hovercard} x={2} y={2} />
 				{cardchildren}
 			</Components.Box>
 		);
@@ -75,7 +79,7 @@ export default connect(({ user, opts }) => ({
 	user,
 	bulk: typeof opts.bulk === 'string' ? opts.bulk : '1',
 }))(
-	class Shop extends React.Component {
+	class Shop extends Component {
 		constructor(props) {
 			super(props);
 			this.state = {

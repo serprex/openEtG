@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 
 import * as sock from '../sock.js';
@@ -11,7 +11,7 @@ if (typeof kongregateAPI === 'undefined') {
 		remember: opts.remember,
 		username: opts.username,
 	}))(
-		class Login extends React.Component {
+		class Login extends Component {
 			constructor(props) {
 				super(props);
 				this.state = { commit: null, password: '' };
@@ -184,7 +184,7 @@ if (typeof kongregateAPI === 'undefined') {
 	);
 } else {
 	View = connect()(
-		class Login extends React.Component {
+		class Login extends Component {
 			componentDidMount() {
 				kongregateAPI.loadAPI(() => {
 					const kong = kongregateAPI.getAPI();

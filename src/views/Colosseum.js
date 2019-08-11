@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import React from 'react';
+import { Fragment } from 'react';
 import * as etg from '../etg.js';
 import * as mkAi from '../mkAi.js';
 import * as sock from '../sock.js';
@@ -71,7 +71,7 @@ export default connect(({ user }) => ({ user }))(function Colosseum({ user }) {
 	for (let i = 1; i < 5; i++) {
 		const active = !(user.daily & (1 << i));
 		eventui.push(
-			<React.Fragment key={i}>
+			<Fragment key={i}>
 				{active && (
 					<input
 						type="button"
@@ -98,7 +98,7 @@ export default connect(({ user }) => ({ user }))(function Colosseum({ user }) {
 							: 'You failed this today. Better luck tomorrow!'
 						: 'Completed.'}
 				</span>
-			</React.Fragment>,
+			</Fragment>,
 		);
 	}
 	return (

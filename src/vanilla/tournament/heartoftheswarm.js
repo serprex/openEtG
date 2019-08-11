@@ -24,10 +24,10 @@ export default function (deck) {
 			card.type == etg.Weapon ||
 			card.type == etg.Shield
 		) {
-			perms[card.code] = (perms[card.code] || 0) + 1;
+			perms[card.code] = (perms[card.code] ?? 0) + 1;
 		}
 		if (~spellList.indexOf(card.code)) {
-			spells[card.code] = (spells[card.code] || 0) + 1;
+			spells[card.code] = (spells[card.code] ?? 0) + 1;
 		}
 	}
 	if (deck.length > 45) return 'Deck too large';

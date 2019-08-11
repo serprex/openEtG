@@ -1,6 +1,7 @@
-import React from 'react';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 
+import Cards from '../Cards.js';
 import * as etg from '../etg.js';
 import * as sock from '../sock.js';
 import * as etgutil from '../etgutil.js';
@@ -163,7 +164,7 @@ const BonusList = [
 ];
 
 export default connect(({ user }) => ({ user }))(
-	class Result extends React.Component {
+	class Result extends Component {
 		constructor(props) {
 			super(props);
 			this.state = {
@@ -338,7 +339,7 @@ export default connect(({ user }) => ({ user }))(
 						let agetax = 0;
 						if (level !== undefined) {
 							if (game.data.daily === undefined) {
-								const streak = (this.props.streakback || 0) + 1;
+								const streak = (this.props.streakback ?? 0) + 1;
 								if (streak !== this.props.user.streak[level]) {
 									sock.userExec('setstreak', {
 										l: level,
@@ -442,7 +443,12 @@ export default connect(({ user }) => ({ user }))(
 				let x0 = 470 - etgutil.decklength(cardreward) * 20 - 80;
 				for (const code of etgutil.iterdeck(cardreward)) {
 					cards.push(
-						<Components.Card key={cards.length} x={x0} y={170} code={code} />,
+						<Components.Card
+							key={cards.length}
+							x={x0}
+							y={170}
+							card={Cards.Codes[code]}
+						/>,
 					);
 					x0 += 40;
 				}

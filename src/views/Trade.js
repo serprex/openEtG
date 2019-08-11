@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 
 import Cards from '../Cards.js';
@@ -9,13 +9,13 @@ import * as sock from '../sock.js';
 import * as store from '../store.js';
 
 export default connect(({ user }) => ({ user }))(
-	class Trade extends React.Component {
+	class Trade extends Component {
 		constructor(props) {
 			super(props);
 			this.state = {
 				canconfirm: false,
 				confirm: 0,
-				code: 0,
+				card: null,
 				deck: [],
 				gold: 0,
 				offer: [],
@@ -60,7 +60,7 @@ export default connect(({ user }) => ({ user }))(
 		render() {
 			const cardminus = [];
 			for (const code of this.state.deck) {
-				cardminus[code] = (cardminus[code] || 0) + 1;
+				cardminus[code] = (cardminus[code] ?? 0) + 1;
 			}
 			const cardpool = etgutil.deck2pool(this.props.user.pool);
 			return (
@@ -117,7 +117,7 @@ export default connect(({ user }) => ({ user }))(
 					)}
 					<Components.DeckDisplay
 						deck={this.state.deck}
-						onMouseOver={(i, code) => this.setState({ code })}
+						onMouseOver={(i, card) => this.setState({ card })}
 						onClick={i => {
 							const newdeck = this.state.deck.slice();
 							newdeck.splice(i, 1);
@@ -127,7 +127,7 @@ export default connect(({ user }) => ({ user }))(
 					<Components.DeckDisplay
 						deck={this.state.offer}
 						x={450}
-						onMouseOver={(i, code) => this.setState({ code })}
+						onMouseOver={(i, card) => this.setState({ card })}
 					/>
 					<Components.Text
 						text={`${
@@ -199,11 +199,12 @@ export default connect(({ user }) => ({ user }))(
 					/>
 					{!this.state.confirm && (
 						<Components.CardSelector
+							cards={Cards}
 							cardpool={cardpool}
 							cardminus={cardminus}
 							onMouseOver={code => this.setState({ code })}
-							onClick={code => {
-								const card = Cards.Codes[code];
+							onClick={card => {
+								const code = card.code;
 								if (
 									this.state.deck.length < 30 &&
 									!card.isFree() &&
@@ -217,7 +218,7 @@ export default connect(({ user }) => ({ user }))(
 							}}
 						/>
 					)}
-					<Components.Card x={734} y={8} code={this.state.code} />
+					<Components.Card x={734} y={8} card={this.state.card} />
 				</>
 			);
 		}

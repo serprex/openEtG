@@ -1,11 +1,11 @@
-import React from 'react';
+import { Component } from 'react';
 
 import Cards from '../Cards.js';
 import * as Components from '../Components/index.js';
 import * as sock from '../sock.js';
 import * as store from '../store.js';
 
-export default class ArenaTop extends React.Component {
+export default class ArenaTop extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {};
@@ -21,7 +21,7 @@ export default class ArenaTop extends React.Component {
 	}
 
 	render() {
-		const info = this.state.top || [];
+		const info = this.state.top ?? [];
 		return (
 			<>
 				<ol
@@ -60,7 +60,7 @@ export default class ArenaTop extends React.Component {
 				<Components.ExitBtn x={8} y={300} />
 				{this.state.card && (
 					<Components.Card
-						code={this.state.card}
+						card={this.state.card}
 						x={this.state.cardx}
 						y={this.state.cardy}
 					/>

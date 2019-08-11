@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 import { Text } from './index.js';
 
@@ -26,7 +26,7 @@ function mkTutor(data) {
 		</div>
 	);
 	return connector(
-		class Tutor extends React.Component {
+		class Tutor extends Component {
 			constructor(props) {
 				super(props);
 				this.state = { showtut: false };

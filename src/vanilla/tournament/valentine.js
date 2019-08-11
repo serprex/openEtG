@@ -26,7 +26,7 @@ export default function (deck) {
 			nymphs[nymph] = 1;
 		} else if (card.type == etg.Creature || card.isOf(Cards.Chimera))
 			cards[card.asUpped(false).code] =
-				(cards[card.asUpped(false).code] || 0) + 1;
+				(cards[card.asUpped(false).code] ?? 0) + 1;
 	}
 	for (var code in cards) {
 		if (cards[code] > 2)

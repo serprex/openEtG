@@ -1,4 +1,3 @@
-import React from 'react';
 import { connect } from 'react-redux';
 
 import * as Quest from '../Quest.js';
@@ -26,7 +25,7 @@ function QuestButton({ sel, x, y, area, user, onClick }) {
 export default connect(({ user, opts }) => ({ user, oquest: opts.quest }))(
 	function QuestView({ user, oquest, dispatch }) {
 		const questAreas = [],
-			quest = oquest || [];
+			quest = oquest ?? [];
 		let qbag = Quest.root;
 		for (let qi = 0; qi < quest.length + 1; qi++) {
 			let y = 162;

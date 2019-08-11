@@ -8,6 +8,10 @@ openEtG is an open source fork of the Flash ccg [Elements](http://elementsthegam
 
 Copy `config-sample.json` to `config.json`
 
+Configure `config.json` to connect your instance of redis & postgresql.
+
+_Note: following instructions have not been updated to include postgresql_
+
 ### Mac Installation
 
 Open Terminal. All `commands` will be done in Terminal. You must have [XCode](https://developer.apple.com/xcode) installed.
@@ -27,6 +31,8 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
   * To stop the server, press ctrl+c in the Terminal
 
 ### Windows Installation
+
+_serprex prefers to use [WSL2](https://aka.ms/wsl2) to bypass Windows & have a Debian development experience_
 
 1. Download & Install the following:
   * [node.js](https://nodejs.org)

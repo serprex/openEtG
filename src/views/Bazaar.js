@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 
 import Cards from '../Cards.js';
@@ -88,7 +88,7 @@ const CardOrders = connect(({ user }) => ({ uname: user.name }))(
 );
 
 const OrderSummary = connect(({ user }) => ({ uname: user.name }))(
-	class OrderSummary extends React.Component {
+	class OrderSummary extends Component {
 		constructor(props) {
 			super(props);
 
@@ -280,12 +280,12 @@ const OrderBook = connect(({ opts }) => ({
 });
 
 export default connect(({ user }) => ({ user }))(
-	class Bazaar extends React.Component {
+	class Bazaar extends Component {
 		constructor(props) {
 			super(props);
 			this.state = {
 				bz: null,
-				bcode: 0,
+				bcard: null,
 				sell: 0,
 				buy: 0,
 				sellq: 0,
@@ -306,7 +306,29 @@ export default connect(({ user }) => ({ user }))(
 						this.setState({ bz: data.bz });
 					},
 					bzbid: data => {
-						this.setState({ bz: data.bz });
+						this.setState(({ bz }) => {
+							const newbz = { ...bz };
+							for (const code in data.rm) {
+								if (newbz[code]) {
+									newbz[code] = newbz[code].filter(
+										bid =>
+											!data.rm[code].some(
+												rm =>
+													rm.u === bid.u && rm.q === bid.q && rm.p === bid.p,
+											),
+									);
+								}
+							}
+							for (const code in data.add) {
+								newbz[code] = newbz[code] ? newbz[code].slice() : [];
+								newbz[code].push(...data.add[code]);
+								newbz[code].sort(
+									(a, b) =>
+										(a.p > 0) - (b.p > 0) || Math.abs(a.p) - Math.abs(b.p),
+								);
+							}
+							return { bz: newbz };
+						});
 						this.props.dispatch(
 							store.updateUser({
 								gold: data.g,
@@ -336,7 +358,7 @@ export default connect(({ user }) => ({ user }))(
 							left: '8px',
 						}}
 					/>
-					{!!this.state.bcode && this.state.bz && (
+					{!!this.state.bcard && this.state.bz && (
 						<>
 							<input
 								type="button"
@@ -346,7 +368,7 @@ export default connect(({ user }) => ({ user }))(
 										price: -this.state.sell,
 										cards:
 											etgutil.encodeCount(this.state.sellq || 1) +
-											this.state.bcode.toString(32),
+											this.state.bcard.code.toString(32),
 									});
 								}}
 								style={{
@@ -387,7 +409,7 @@ export default connect(({ user }) => ({ user }))(
 										price: this.state.buy,
 										cards:
 											etgutil.encodeCount(this.state.buyq || 1) +
-											this.state.bcode.toString(32),
+											this.state.bcard.code.toString(32),
 									});
 								}}
 								style={{
@@ -424,10 +446,10 @@ export default connect(({ user }) => ({ user }))(
 								}}
 								onClick={() =>
 									this.setState({
-										sell: userutil.sellValue(Cards.Codes[this.state.bcode]),
+										sell: userutil.sellValue(this.state.bcard),
 									})
 								}>
-								Autosell: {userutil.sellValue(Cards.Codes[this.state.bcode])}
+								Autosell: {userutil.sellValue(this.state.bcard)}
 								<span className="ico g" />
 							</div>
 							<div
@@ -436,17 +458,16 @@ export default connect(({ user }) => ({ user }))(
 									right: '144px',
 									top: '40px',
 								}}>
-								Wealth value:{' '}
-								{userutil.cardValue(Cards.Codes[this.state.bcode])}
+								Wealth value: {userutil.cardValue(this.state.bcard)}
 								<span className="ico g" />
 							</div>
 							<CardOrders
-								bc={this.state.bz[this.state.bcode]}
+								bc={this.state.bz[this.state.bcard.code]}
 								onClickBuy={(sell, sellq) => this.setState({ sell, sellq })}
 								onClickSell={(buy, buyq) => this.setState({ buy, buyq })}
 								onClickCancel={() =>
 									sock.userEmit('bzcancel', {
-										c: this.state.bcode,
+										c: this.state.bcard.code,
 									})
 								}
 							/>
@@ -460,14 +481,14 @@ export default connect(({ user }) => ({ user }))(
 							top: '240px',
 						}}
 					/>
-					<Components.Card x={768} y={8} code={this.state.bcode} />
+					<Components.Card x={768} y={8} card={this.state.bcard} />
 					<Components.CardSelector
+						cards={Cards}
 						cardpool={this.state.cardpool}
 						maxedIndicator
-						onClick={code => {
-							const card = Cards.Codes[code];
+						onClick={card => {
 							if (~card.rarity && card.type !== etg.Pillar && !card.isFree()) {
-								this.setState({ bcode: code });
+								this.setState({ bcard: card });
 							}
 						}}
 					/>
@@ -475,7 +496,7 @@ export default connect(({ user }) => ({ user }))(
 						<OrderBook
 							bz={this.state.bz}
 							onClick={code => {
-								this.setState({ bcode: code });
+								this.setState({ bcard: Cards.Codes[code] });
 							}}
 						/>
 					)}

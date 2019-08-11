@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 
 import Cards from '../Cards.js';
 import * as sock from '../sock.js';
@@ -7,11 +7,11 @@ import * as etgutil from '../etgutil.js';
 import * as userutil from '../userutil.js';
 import * as Components from '../Components/index.js';
 
-export default class Library extends React.Component {
+export default class Library extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			code: 0,
+			card: null,
 			showbound: false,
 			pool: '',
 			bound: '',
@@ -33,9 +33,9 @@ export default class Library extends React.Component {
 			codeprog = code => {
 				const upcode = etgutil.asUpped(code, true);
 				return Math.min(
-					(cardpool[code] || 0) +
-						(boundpool[code] || 0) +
-						((cardpool[upcode] || 0) + (boundpool[upcode] || 0)) * 6,
+					(cardpool[code] ?? 0) +
+						(boundpool[code] ?? 0) +
+						((cardpool[upcode] ?? 0) + (boundpool[upcode] ?? 0)) * 6,
 					42,
 				);
 			};
@@ -49,8 +49,8 @@ export default class Library extends React.Component {
 				progressmax += 42;
 				const prog = codeprog(code);
 				const idx = card.rarity * 13 + card.element;
-				reprog[idx] = (reprog[idx] || 0) + prog;
-				reprogmax[idx] = (reprogmax[idx] || 0) + 42;
+				reprog[idx] = (reprog[idx] ?? 0) + prog;
+				reprogmax[idx] = (reprogmax[idx] ?? 0) + 42;
 				progress += prog;
 				shinyprogress += codeprog(etgutil.asShiny(code, true));
 			}
@@ -91,7 +91,7 @@ export default class Library extends React.Component {
 							textShadow:
 								reprog[idx] === reprogmax[idx] ? '1px 1px 2px #fff' : undefined,
 						}}>
-						{reprog[idx] || 0} / {reprogmax[idx] || 0}
+						{reprog[idx] ?? 0} / {reprogmax[idx] ?? 0}
 					</span>,
 				);
 			}
@@ -129,7 +129,7 @@ export default class Library extends React.Component {
 					}}>
 					{`PvE ${this.state.aiwins} - ${this.state.ailosses}\nPvP ${this.state.pvpwins} - ${this.state.pvplosses}`}
 				</span>
-				<Components.Card x={734} y={8} code={this.state.code} />
+				<Components.Card x={734} y={8} card={this.state.card} />
 				<input
 					type="button"
 					value="Toggle Bound"
@@ -154,10 +154,11 @@ export default class Library extends React.Component {
 					onClick={() => open('/collection/' + this.props.name, '_blank')}
 				/>
 				<Components.CardSelector
+					cards={Cards}
 					cardpool={this.state.showbound ? boundpool : cardpool}
 					filterboth
-					onMouseOver={code => {
-						code !== this.state.code && this.setState({ code });
+					onMouseOver={card => {
+						card !== this.state.card && this.setState({ card });
 					}}
 				/>
 				{children}

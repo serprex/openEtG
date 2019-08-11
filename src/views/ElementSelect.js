@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 
 import * as ui from '../ui.js';
@@ -8,103 +8,104 @@ import RngMock from '../RngMock.js';
 import { Card, ExitBtn } from '../Components/index.js';
 import * as store from '../store.js';
 import { mkQuestAi, quarks } from '../Quest.js';
+import Cards from '../Cards.js';
 
 const descriptions = [
 	<>
-		<Card x={168} y={48} code={5116} />
-		<Card x={332} y={48} code={5106} />
-		<Card x={168} y={324} code={5123} />
-		<Card x={332} y={324} code={5122} />
-		<Card x={496} y={324} code={5109} />
-		<Card x={660} y={324} code={5111} />
+		<Card x={168} y={48} card={Cards.Names.SpiderCow} />
+		<Card x={332} y={48} card={Cards.Names.ChaosSeed} />
+		<Card x={168} y={324} card={Cards.Names.Alchemist} />
+		<Card x={332} y={324} card={Cards.Names.UnstableShapeshifter} />
+		<Card x={496} y={324} card={Cards.Names.Discord} />
+		<Card x={660} y={324} card={Cards.Names.Antimatter} />
 	</>,
 	<>
-		<Card x={168} y={48} code={5208} />
-		<Card x={332} y={48} code={5209} />
-		<Card x={168} y={324} code={5217} />
-		<Card x={332} y={324} code={5211} />
-		<Card x={496} y={324} code={5204} />
-		<Card x={660} y={324} code={5210} />
+		<Card x={168} y={48} card={Cards.Names.Poison} />
+		<Card x={332} y={48} card={Cards.Names.Plague} />
+		<Card x={168} y={324} card={Cards.Names.CommandSkeletons} />
+		<Card x={332} y={324} card={Cards.Names.BoneWall} />
+		<Card x={496} y={324} card={Cards.Names.Vulture} />
+		<Card x={660} y={324} card={Cards.Names.Arsenic} />
 	</>,
 	<>
-		<Card x={168} y={48} code={5302} />
-		<Card x={332} y={48} code={5313} />
-		<Card x={168} y={324} code={5306} />
-		<Card x={332} y={324} code={5314} />
-		<Card x={496} y={324} code={5327} />
-		<Card x={660} y={324} code={5307} />
+		<Card x={168} y={48} card={Cards.Names.Armagio} />
+		<Card x={332} y={48} card={Cards.Names.Catapult} />
+		<Card x={168} y={324} card={Cards.Names.Momentum} />
+		<Card x={332} y={324} card={Cards.Names.Acceleration} />
+		<Card x={496} y={324} card={Cards.Names.Boar} />
+		<Card x={660} y={324} card={Cards.Names.Otyugh} />
 	</>,
 	<>
-		<Card x={168} y={48} code={5428} />
-		<Card x={332} y={48} code={5410} />
-		<Card x={168} y={324} code={5404} />
-		<Card x={332} y={324} code={5407} />
-		<Card x={496} y={324} code={5412} />
-		<Card x={660} y={324} code={5413} />
+		<Card x={168} y={48} card={Cards.Names.IroncladBlacksmith} />
+		<Card x={332} y={48} card={Cards.Names.ProtectArtifact} />
+		<Card x={168} y={324} card={Cards.Names.TitaniumShield} />
+		<Card x={332} y={324} card={Cards.Names.Pulverizer} />
+		<Card x={496} y={324} card={Cards.Names.StoneSkin} />
+		<Card x={660} y={324} card={Cards.Names.BasiliskBlood} />
 	</>,
 	<>
-		<Card x={168} y={48} code={5531} />
-		<Card x={332} y={48} code={5510} />
-		<Card x={168} y={324} code={5513} />
-		<Card x={332} y={324} code={5507} />
-		<Card x={496} y={324} code={5511} />
-		<Card x={660} y={324} code={5512} />
+		<Card x={168} y={48} card={Cards.Names.AlphaWolf} />
+		<Card x={332} y={48} card={Cards.Names.EmpathicBond} />
+		<Card x={168} y={324} card={Cards.Names.Mitosis} />
+		<Card x={332} y={324} card={Cards.Names.ThornCarapace} />
+		<Card x={496} y={324} card={Cards.Names.Adrenaline} />
+		<Card x={660} y={324} card={Cards.Names.Scorpion} />
 	</>,
 	<>
-		<Card x={168} y={48} code={5612} />
-		<Card x={332} y={48} code={5604} />
-		<Card x={168} y={324} code={5606} />
-		<Card x={332} y={324} code={5607} />
-		<Card x={496} y={324} code={5608} />
-		<Card x={660} y={324} code={5601} />
+		<Card x={168} y={48} card={Cards.Names.Phoenix} />
+		<Card x={332} y={48} card={Cards.Names.FireBolt} />
+		<Card x={168} y={324} card={Cards.Names.Deflagration} />
+		<Card x={332} y={324} card={Cards.Names.Fahrenheit} />
+		<Card x={496} y={324} card={Cards.Names.RainofFire} />
+		<Card x={660} y={324} card={Cards.Names.AshEater} />
 	</>,
 	<>
-		<Card x={168} y={48} code={5707} />
-		<Card x={332} y={48} code={5705} />
-		<Card x={168} y={324} code={5706} />
-		<Card x={332} y={324} code={5710} />
-		<Card x={496} y={324} code={5708} />
-		<Card x={660} y={324} code={5701} />
+		<Card x={168} y={48} card={Cards.Names.ArcticSquid} />
+		<Card x={332} y={48} card={Cards.Names.IceShield} />
+		<Card x={168} y={324} card={Cards.Names.Purify} />
+		<Card x={332} y={324} card={Cards.Names.Toadfish} />
+		<Card x={496} y={324} card={Cards.Names.Trident} />
+		<Card x={660} y={324} card={Cards.Names.Chrysaora} />
 	</>,
 	<>
-		<Card x={168} y={48} code={5810} />
-		<Card x={332} y={48} code={5827} />
-		<Card x={168} y={324} code={5811} />
-		<Card x={332} y={324} code={5812} />
-		<Card x={496} y={324} code={5803} />
-		<Card x={660} y={324} code={5807} />
+		<Card x={168} y={48} card={Cards.Names.Miracle} />
+		<Card x={332} y={48} card={Cards.Names.Byakko} />
+		<Card x={168} y={324} card={Cards.Names.Luciferin} />
+		<Card x={332} y={324} card={Cards.Names.Hope} />
+		<Card x={496} y={324} card={Cards.Names.Pegasus} />
+		<Card x={660} y={324} card={Cards.Names.Blessing} />
 	</>,
 	<>
-		<Card x={168} y={48} code={5907} />
-		<Card x={332} y={48} code={5908} />
-		<Card x={168} y={324} code={5912} />
-		<Card x={332} y={324} code={5913} />
-		<Card x={496} y={324} code={5916} />
-		<Card x={660} y={324} code={5906} />
+		<Card x={168} y={48} card={Cards.Names.FireflyQueen} />
+		<Card x={332} y={48} card={Cards.Names.Firefly} />
+		<Card x={168} y={324} card={Cards.Names.Wings} />
+		<Card x={332} y={324} card={Cards.Names.SkyBlitz} />
+		<Card x={496} y={324} card={Cards.Names.Whim} />
+		<Card x={660} y={324} card={Cards.Names.FlyingWeapon} />
 	</>,
 	<>
-		<Card x={168} y={48} code={6012} />
-		<Card x={332} y={48} code={6010} />
-		<Card x={168} y={324} code={6005} />
-		<Card x={332} y={324} code={6017} />
-		<Card x={496} y={324} code={6008} />
-		<Card x={660} y={324} code={6023} />
+		<Card x={168} y={48} card={Cards.Names.Pharaoh} />
+		<Card x={332} y={48} card={Cards.Names.Scarab} />
+		<Card x={168} y={324} card={Cards.Names.GoldenHourglass} />
+		<Card x={332} y={324} card={Cards.Names.Innovation} />
+		<Card x={496} y={324} card={Cards.Names.Eternity} />
+		<Card x={660} y={324} card={Cards.Names.MidassTouch} />
 	</>,
 	<>
-		<Card x={168} y={48} code={6109} />
-		<Card x={332} y={48} code={6102} />
-		<Card x={168} y={324} code={6106} />
-		<Card x={332} y={324} code={6105} />
-		<Card x={496} y={324} code={6108} />
-		<Card x={660} y={324} code={6126} />
+		<Card x={168} y={48} card={Cards.Names.MinorVampire} />
+		<Card x={332} y={48} card={Cards.Names.Devourer} />
+		<Card x={168} y={324} card={Cards.Names.Nightfall} />
+		<Card x={332} y={324} card={Cards.Names.Steal} />
+		<Card x={496} y={324} card={Cards.Names.DrainLife} />
+		<Card x={660} y={324} card={Cards.Names.ShankOfVoid} />
 	</>,
 	<>
-		<Card x={168} y={48} code={6213} />
-		<Card x={332} y={48} code={6210} />
-		<Card x={168} y={324} code={6205} />
-		<Card x={332} y={324} code={6202} />
-		<Card x={496} y={324} code={6211} />
-		<Card x={660} y={324} code={6206} />
+		<Card x={168} y={48} card={Cards.Names.Psion} />
+		<Card x={332} y={48} card={Cards.Names.Fractal} />
+		<Card x={168} y={324} card={Cards.Names.PhaseShield} />
+		<Card x={332} y={324} card={Cards.Names.Lightning} />
+		<Card x={496} y={324} card={Cards.Names.Mindgate} />
+		<Card x={660} y={324} card={Cards.Names.Lobotomizer} />
 	</>,
 	<span style={{ position: 'absolute', left: '200px', top: '508px' }}>
 		Start without any cards, but gain several extra boosters instead!
@@ -115,7 +116,7 @@ const descriptions = [
 ];
 
 export default connect(({ user }) => ({ user }))(
-	class ElementSelect extends React.Component {
+	class ElementSelect extends Component {
 		constructor(props) {
 			super(props);
 

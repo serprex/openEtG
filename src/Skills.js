@@ -566,8 +566,9 @@ const Skills = {
 	},
 	drawpillar: (ctx, c, t) => {
 		const deck = c.owner.deck;
-		if (deck.length && deck[deck.length - 1].card.type === etg.Pillar)
-			Skills.hasten(ctx, c, t);
+		if (deck.length && deck[deck.length - 1].card.type === etg.Pillar) {
+			c.owner.drawcard();
+		}
 	},
 	dryspell: (ctx, c, t) => {
 		c.owner.foe.masscc(
@@ -914,7 +915,7 @@ const Skills = {
 		}
 	},
 	halveatk: (ctx, c, t) => {
-		t = t || c;
+		t = t ?? c;
 		const storedatk = Math.ceil(t.atk / 2);
 		t.incrStatus('storedAtk', storedatk);
 		t.incrAtk(-storedatk);
@@ -1285,7 +1286,7 @@ const Skills = {
 		if (t.getStatus('stackable') && t.getStatus('charges') > 1) {
 			Skills.destroy(ctx, c, t, true);
 			const relic = t.owner.newThing(t.card.as(ctx.Cards.Names.GoldenRelic));
-			relic.usedactive = false;
+			relic.casts = 1;
 			t.owner.addPerm(relic);
 		} else {
 			t.clearStatus();
@@ -1563,7 +1564,7 @@ const Skills = {
 	photosynthesis: (ctx, c, t) => {
 		ctx.effect({ x: 'Text', text: '2:5', id: c.id });
 		c.owner.spend(etg.Life, -2);
-		if (c.cast > 0) c.usedactive = false;
+		if (c.cast > 0) c.casts = 1;
 	},
 	plague: (ctx, c, t) => {
 		t.masscc(c, Skills.infect);
@@ -1674,7 +1675,7 @@ const Skills = {
 		ctx.effect({ x: 'Text', text: 'Ready', id: t.id });
 		if (t.active.has('cast')) {
 			t.cast = 0;
-			t.usedactive = false;
+			t.casts = 1;
 		}
 	},
 	reap: (ctx, c, t) => {
@@ -1812,7 +1813,7 @@ const Skills = {
 	},
 	scramblespam: (ctx, c, t) => {
 		Skills.scramble(ctx, c, t);
-		c.usedactive = false;
+		c.casts = 1;
 	},
 	serendipity: (ctx, c) => {
 		const num = Math.min(8 - c.owner.handIds.length, 3);
@@ -1833,7 +1834,7 @@ const Skills = {
 	},
 	shardgolem: (ctx, c, t) => {
 		if (!ctx.get(c.id).get('maxhp')) {
-			const golem = ctx.get(c.ownerId).get('shardgolem') || defaultShardGolem;
+			const golem = ctx.get(c.ownerId).get('shardgolem') ?? defaultShardGolem;
 			ctx.set(c.id, 'cast', golem.get('cast'));
 			ctx.set(c.id, 'castele', etg.Earth);
 			const stat = golem.get('stat');
@@ -1858,7 +1859,7 @@ const Skills = {
 		c.owner.deckIds = deckIds;
 	},
 	silence: (ctx, c, t) => {
-		if (t.type !== etg.Player || !t.getStatus('sanctuary')) t.usedactive = true;
+		if (t.type !== etg.Player || !t.getStatus('sanctuary')) t.casts = 0;
 	},
 	singularity: (ctx, c, t) => {
 		if (c.trueatk() > 0) {
@@ -1901,7 +1902,7 @@ const Skills = {
 		t.setSkill('cast', exports.burrow);
 		t.cast = c.card.upped ? 2 : 1;
 		t.castele = etg.Earth;
-		t.usedactive = true;
+		t.casts = 0;
 	},
 	siphon: passive(
 		adrenathrottle((ctx, c, t) => {
@@ -1922,7 +1923,7 @@ const Skills = {
 		}
 		c.cast = t.cast;
 		c.castele = t.castele;
-		c.usedactive = false;
+		c.casts = 1;
 		t.lobo();
 	},
 	siphonstrength: (ctx, c, t) => {
@@ -1997,7 +1998,7 @@ const Skills = {
 		} else {
 			t.remove();
 		}
-		t.usedactive = true;
+		t.casts = 0;
 		if (t.type === etg.Permanent) c.owner.addPerm(t);
 		else if (t.type === etg.Weapon) c.owner.setWeapon(t);
 		else c.owner.setShield(t);

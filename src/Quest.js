@@ -124,7 +124,7 @@ quarks.basic_permanents = {
 	],
 	wintext:
 		"Well done! You're getting the hang of this.\n\n" +
-		"But I bet you miss getting to attack every turn. Don't worry, though. Even though I said permanets don't attack every turn, there are special types of permanents that do.",
+		"But I bet you miss getting to attack every turn. Don't worry, though. Even though I said permanents don't attack every turn, there are special types of permanents that do.",
 };
 quarks.basic_equipment = {
 	name: 'Equipment',
@@ -768,10 +768,10 @@ export const root = {
 	],
 };
 export function mkQuestAi(quest, datafn) {
-	const markpower = quest.markpower || 1;
-	const drawpower = quest.drawpower || 1;
-	const hp = quest.hp || 100;
-	const playerHPstart = quest.urhp || 100;
+	const markpower = quest.markpower ?? 1;
+	const drawpower = quest.drawpower ?? 1;
+	const hp = quest.hp ?? 100;
+	const playerHPstart = quest.urhp ?? 100;
 	const { user } = store.store.getState();
 	let urdeck = quest.urdeck;
 	if (!urdeck) {
@@ -783,7 +783,7 @@ export function mkQuestAi(quest, datafn) {
 	}
 	const data = {
 		quest,
-		wintext: quest.wintext || '',
+		wintext: quest.wintext ?? '',
 		noheal: quest.noheal,
 		seed: util.randint(),
 		players: [

@@ -183,7 +183,7 @@ export default class Builder {
 	addCard(card) {
 		const { deck, cardcount, ecost } = this;
 		deck.push(card.code);
-		cardcount[card.code] = (cardcount[card.code] || 0) + 1;
+		cardcount[card.code] = (cardcount[card.code] ?? 0) + 1;
 		if (
 			!(
 				((card.type === etg.Weapon && !this.anyweapon) ||

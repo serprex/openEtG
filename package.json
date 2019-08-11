@@ -10,13 +10,13 @@
   "dependencies": {
     "bufferutil": "^4.0.1",
     "ioredis": "^4.17.3",
+    "pg": "^8.3.3",
     "ws": "^7.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.11.6",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
     "@babel/plugin-proposal-object-rest-spread": "^7.11.0",
-    "@babel/plugin-transform-react-jsx": "^7.10.4",
     "@babel/preset-env": "^7.11.5",
     "@babel/preset-react": "^7.10.4",
     "@babel/runtime-corejs3": "^7.11.2",
@@ -24,7 +24,7 @@
     "core-js": "^3.6.5",
     "optipng-bin": "^7.0.0",
     "prettier": "^2.1.2",
-    "react": "^16.13.1",
+    "react": "^17.0.0-rc.2",
     "react-dom": "^16.13.1",
     "react-motion": "^0.5.2",
     "react-redux": "^7.2.1",

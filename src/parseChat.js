@@ -1,5 +1,3 @@
-import React from 'react';
-
 import * as etgutil from './etgutil.js';
 import RngMock from './RngMock.js';
 import * as sock from './sock.js';

@@ -1,100 +1,161 @@
-import React from 'react';
+import { createRef, Component } from 'react';
 import { connect } from 'react-redux';
 
 import * as etg from '../../etg.js';
 import Cards from '../Cards.js';
-import * as Components from '../Components.js';
-import { IconBtn, ExitBtn } from '../../Components/index.js';
+import * as Components from '../../Components/index.js';
+import Editor from '../../Components/Editor.js';
 import * as etgutil from '../../etgutil.js';
 import * as store from '../../store.js';
 import * as util from '../../util.js';
+import { userEmit } from '../../sock.js';
 
-function sumCardMinus(cardminus, code) {
-	let sum = 0;
-	for (let i = 0; i < 2; i++) {
-		sum += cardminus[etgutil.asUpped(code, i == 0)] || 0;
+function processDeck(pool, dcode) {
+	let mark = 0,
+		deck = etgutil.decodedeck(dcode);
+	for (let i = deck.length - 1; i >= 0; i--) {
+		if (!Cards.Codes[deck[i]]) {
+			const index = etgutil.fromTrueMark(deck[i]);
+			if (~index) {
+				mark = index;
+			}
+			deck.splice(i, 1);
+		}
 	}
-	return sum;
+	deck.sort(Cards.codeCmp).splice(60);
+	const cardMinus = Cards.filterDeck(deck, pool, true);
+	return { mark, deck, cardMinus };
 }
 
-export default connect(state => ({
-	deck: state.opts.deck,
-	aideck: state.opts.aideck,
-}))(
-	class Editor extends React.Component {
-		state = {
-			deckstr: '',
-			deck: [],
-			mark: 0,
-			cardminus: [],
-		};
+export default connect(({ orig }) => ({ orig }))(
+	class OriginalEditor extends Component {
+		constructor(props) {
+			super(props);
 
-		static getDerivedStateFromProps(nextProps, prevState) {
-			if (nextProps.deck == prevState.deckstr) return null;
-			const cardminus = [],
-				deck = nextProps.deck.split(' ');
-			let mark = 0;
-			for (let i = deck.length - 1; i >= 0; i--) {
-				const code = parseInt(deck[i], 32);
-				if (!code || !(code in Cards.Codes)) {
-					const index = etgutil.fromTrueMark(code);
-					if (~index) {
-						mark = index;
-					}
-					deck.splice(i, 1);
-				} else {
-					cardminus[code] = (cardminus[code] || 0) + 1;
-					deck[i] = code;
+			const pool = [];
+			for (const [code, count] of etgutil.iterraw(props.orig.pool)) {
+				if (code in Cards.Codes) {
+					pool[code] = (pool[code] ?? 0) + count;
 				}
 			}
-			if (deck.length > 60) {
-				deck.length = 60;
-			}
-			return { cardminus, mark, deck, deckstr: nextProps.deck };
+
+			this.deckRef = createRef();
+			this.state = {
+				pool: pool,
+				selectedDeck: '',
+				deck: [],
+				mark: 0,
+			};
 		}
 
-		setCardArt = code => {
-			if (!this.state.card || this.state.card.code !== code)
-				this.setState({ card: Cards.Codes[code] });
+		static getDerivedStateFromProps(nextProps, prevState) {
+			if (nextProps.orig.deck === prevState.selectedDeck) return null;
+			return {
+				selectedDeck: nextProps.orig.deck,
+				...processDeck(prevState.pool, nextProps.orig.deck),
+			};
+		}
+
+		setCardArt = card => {
+			if (this.state.card !== card) this.setState({ card });
 		};
 
-		saveDeck = (deck, mark) => {
-			this.props.dispatch(
-				store.setOpt(
-					'deck',
-					deck
-						.sort(Cards.codeCmp)
-						.map(x => x.toString(32))
-						.join(' ') +
-						' ' +
-						etgutil.toTrueMark(mark).toString(32),
-				),
+		componentDidMount() {
+			this.deckRef.current.setSelectionRange(0, 999);
+		}
+
+		currentDeckCode() {
+			return (
+				etgutil.encodedeck(this.state.deck) +
+				etgutil.toTrueMarkSuffix(this.state.mark)
 			);
+		}
+
+		saveDeck = () => {
+			const update = { deck: this.currentDeckCode() };
+			userEmit('updateorig', update);
+			this.props.dispatch(store.updateOrig(update));
 		};
 
 		render() {
-			const { deck, mark, cardminus } = this.state,
-				ebuttons = [];
-			for (let i = 0; i < 13; i++) {
-				ebuttons.push(
-					<IconBtn
-						key={i}
-						e={'e' + i}
-						x={100 + i * 32}
-						y={234}
-						click={() => this.saveDeck(deck.slice(), i)}
-					/>,
-				);
-			}
+			const { deck, mark, cardMinus } = this.state;
 			return (
 				<>
-					<ExitBtn x={8} y={140} />
+					<Editor
+						cards={Cards}
+						deck={this.state.deck}
+						mark={this.state.mark}
+						pool={this.state.pool}
+						cardMinus={this.state.cardMinus}
+						setDeck={deck => {
+							deck.sort(Cards.codeCmp);
+							const cardMinus = Cards.filterDeck(deck, this.state.pool, true);
+							this.setState({ deck, cardMinus });
+						}}
+						setMark={mark => this.setState({ mark })}
+					/>
+					<input
+						type="button"
+						value="Exit"
+						onClick={() => {
+							this.saveDeck();
+							this.props.dispatch(store.doNav(import('./MainMenu.js')));
+						}}
+						style={{
+							position: 'absolute',
+							left: '8px',
+							top: '110px',
+						}}
+					/>
+					<label
+						style={{
+							position: 'absolute',
+							left: '536px',
+							top: '238px',
+						}}>
+						Deck&nbsp;
+						<input
+							autoFocus
+							value={this.currentDeckCode()}
+							onChange={e => {
+								let dcode = e.target.value.trim();
+								if (~dcode.indexOf(' ')) {
+									const dsplit = dcode.split(' ').sort();
+									dcode = '';
+									let i = 0;
+									while (i < dsplit.length) {
+										const di = dsplit[i],
+											dicode = parseInt(di, 32),
+											i0 = i++;
+										while (i < dsplit.length && dsplit[i] == di) {
+											i++;
+										}
+										dcode += etgutil.encodeCount(i - i0);
+										dcode += ~etgutil.fromTrueMark(dicode)
+											? di
+											: ('0' + (dicode - 4000).toString(32)).slice(-3);
+									}
+								}
+								this.setState(processDeck(this.state.pool, dcode));
+							}}
+							ref={this.deckRef}
+							onClick={e => {
+								e.target.setSelectionRange(0, 999);
+							}}
+						/>
+					</label>
 					<input
 						type="text"
 						value={this.props.deck}
-						onChange={e =>
-							this.props.dispatch(store.setOptTemp('deck', e.target.value))
-						}
+						onChange={e => {
+							let dcode = e.target.value.trim();
+							if (dcode.charAt(3) === ' ') {
+								dcode = etgutil.encodedeck(
+									dcode.split(' ').map(c => parseInt(c, 32) - 4000),
+								);
+							}
+							this.props.dispatch(store.setOptTemp('deck', dcode));
+						}}
 						placeholder="Deck"
 						style={{
 							left: '0px',
@@ -103,19 +164,6 @@ export default connect(state => ({
 							position: 'absolute',
 						}}
 					/>
-					<input
-						type="button"
-						value="Clear"
-						style={{
-							position: 'absolute',
-							left: '8px',
-							top: '32px',
-						}}
-						onClick={() => {
-							this.props.dispatch(store.setOptTemp('deck', ''));
-						}}
-					/>
-					{ebuttons}
 					<span
 						className={'ico e' + this.state.mark}
 						style={{
@@ -124,33 +172,6 @@ export default connect(state => ({
 							top: '200px',
 						}}
 					/>
-					<Components.DeckDisplay
-						deck={deck}
-						onMouseOver={(_, code) => this.setCardArt(code)}
-						onClick={(i, code) => {
-							const newdeck = deck.slice();
-							newdeck.splice(i, 1);
-							this.saveDeck(newdeck, mark);
-						}}
-					/>
-					<Components.CardSelector
-						onMouseOver={this.setCardArt}
-						onClick={code => {
-							if (deck.length < 60) {
-								const card = Cards.Codes[code];
-								if (card.type !== etg.Pillar) {
-									if (
-										Cards.Codes[code].type !== etg.Pillar &&
-										sumCardMinus(cardminus, code) >= 6
-									) {
-										return;
-									}
-								}
-								this.saveDeck(deck.concat([code]), mark);
-							}
-						}}
-					/>
-					<Components.Card x={734} y={8} card={this.state.card} />
 				</>
 			);
 		}

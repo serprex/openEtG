@@ -1,9 +1,9 @@
-import React from 'react';
+import { Component } from 'react';
 import * as sock from '../sock.js';
 import * as Components from '../Components/index.js';
 import * as store from '../store.js';
 
-export default class WealthTop extends React.Component {
+export default class WealthTop extends Component {
 	constructor(props) {
 		super(props);
 		this.state = { top: null };

@@ -1,7 +1,6 @@
-import React from 'react';
+import { Component, Fragment } from 'react';
 
 import * as audio from '../audio.js';
-import Cards from '../Cards.js';
 import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
 import * as store from '../store.js';
@@ -23,7 +22,7 @@ export function Box(props) {
 	);
 }
 
-export class OnDelay extends React.Component {
+export class OnDelay extends Component {
 	constructor(props) {
 		super(props);
 		this._timeout = 0;
@@ -52,7 +51,7 @@ export class OnDelay extends React.Component {
 	}
 }
 
-export class Delay extends React.Component {
+export class Delay extends Component {
 	constructor(props) {
 		super(props);
 		this.state = { on: false };
@@ -61,9 +60,7 @@ export class Delay extends React.Component {
 	render() {
 		return (
 			<OnDelay ms={this.props.ms} onTimeout={() => this.setState({ on: true })}>
-				{React.createElement(
-					this.state.on ? this.props.second : this.props.first,
-				)}
+				{this.state.on ? this.props.second : this.props.first}
 			</OnDelay>
 		);
 	}
@@ -104,7 +101,7 @@ export function CardImage(props) {
 	);
 }
 
-export class Text extends React.Component {
+export class Text extends Component {
 	constructor(props) {
 		super(props);
 
@@ -130,9 +127,9 @@ export class Text extends React.Component {
 			const piece = reres[0];
 			if (reres.index !== lastindex) {
 				elec.push(
-					<React.Fragment key={elec.length}>
+					<Fragment key={elec.length}>
 						{text.slice(lastindex, reres.index)}
-					</React.Fragment>,
+					</Fragment>,
 				);
 			}
 			if (piece == '\n') {
@@ -143,12 +140,12 @@ export class Text extends React.Component {
 				const parse = piece.split(':');
 				const num = +parse[0];
 				if (num == 0) {
-					elec.push(<React.Fragment key={elec.length}>0</React.Fragment>);
+					elec.push(<Fragment key={elec.length}>0</Fragment>);
 				} else if (num < 4) {
 					const icon = <span className={ico + parse[1]} />;
 					for (let j = 0; j < num; j++) {
 						elec.push(
-							<React.Fragment key={elec.length}>{icon}</React.Fragment>,
+							<Fragment key={elec.length}>{icon}</Fragment>,
 						);
 					}
 				} else {
@@ -162,9 +159,9 @@ export class Text extends React.Component {
 		}
 		if (lastindex !== text.length) {
 			elec.push(
-				<React.Fragment key={elec.length}>
+				<Fragment key={elec.length}>
 					{text.slice(lastindex)}
-				</React.Fragment>,
+				</Fragment>,
 			);
 		}
 		return { text, icoprefix, elec };
@@ -218,7 +215,7 @@ export function ExitBtn(props) {
 }
 
 export function Card(props) {
-	const card = props.card || (props.code && Cards.Codes[props.code]);
+	const { card } = props;
 	if (!card) return null;
 	const textColor = card.upped ? '#000' : '',
 		backColor = ui.maybeLightenStr(card);
@@ -318,16 +315,16 @@ export function DeckDisplay(props) {
 		bcodeCount = [];
 	for (let i = 0; i < props.deck.length; i++) {
 		const code = props.deck[i],
-			card = Cards.Codes[code];
+			card = props.cards.Codes[code];
 		if (card) {
 			j++;
 			let opacity;
 			if (props.pool && !card.isFree()) {
 				const bcode = etgutil.asShiny(etgutil.asUpped(code, 0), 0);
-				codeCount[code] = (codeCount[code] || 0) + 1;
-				bcodeCount[bcode] = (bcodeCount[bcode] || 0) + 1;
+				codeCount[code] = (codeCount[code] ?? 0) + 1;
+				bcodeCount[bcode] = (bcodeCount[bcode] ?? 0) + 1;
 				if (
-					codeCount[code] > (props.pool[code] || 0) ||
+					codeCount[code] > (props.pool[code] ?? 0) ||
 					(card.type !== etg.Pillar && bcodeCount[bcode] > 6)
 				) {
 					opacity = '.5';
@@ -337,12 +334,12 @@ export function DeckDisplay(props) {
 				<CardImage
 					key={j}
 					card={card}
-					onMouseOver={props.onMouseOver && (() => props.onMouseOver(i, code))}
-					onClick={props.onClick && (() => props.onClick(i, code))}
+					onMouseOver={props.onMouseOver && (() => props.onMouseOver(i, card))}
+					onClick={props.onClick && (() => props.onClick(i, card))}
 					style={{
 						position: 'absolute',
-						left: `${(props.x || 0) + 100 + Math.floor(j / 10) * 99}px`,
-						top: `${(props.y || 0) + 32 + (j % 10) * 19}px`,
+						left: `${(props.x ?? 0) + 100 + Math.floor(j / 10) * 99}px`,
+						top: `${(props.y ?? 0) + 32 + (j % 10) * 19}px`,
 						opacity,
 					}}
 				/>,
@@ -360,8 +357,8 @@ export function DeckDisplay(props) {
 					className={'ico e' + mark}
 					style={{
 						position: 'absolute',
-						left: (props.x || 0) + 66 + 'px',
-						top: (props.y || 0) + 188 + 'px',
+						left: `${(props.x ?? 0) + 66}px`,
+						top: `${(props.y ?? 0) + 188}px`,
 					}}
 				/>
 			)}
@@ -402,18 +399,18 @@ export function ElementSelector(props) {
 }
 
 function CardSelectorColumn(props) {
-	function maybeShiny(code) {
+	function maybeShiny(card) {
 		if (props.filterboth && !props.shiny) {
-			const scode = etgutil.asShiny(code, 1);
+			const shiny = card.asShiny(true);
 			if (
-				scode in props.cardpool &&
-				props.cardpool[scode] >
-					((props.cardminus && props.cardminus[scode]) || 0)
+				shiny.code in props.cardpool &&
+				props.cardpool[shiny.code] >
+					((props.cardminus && props.cardminus[shiny.code]) ?? 0)
 			) {
-				return scode;
+				return card.asShiny(true);
 			}
 		}
-		return code;
+		return card;
 	}
 	const children = [],
 		countTexts = [];
@@ -430,7 +427,7 @@ function CardSelectorColumn(props) {
 					top: `${y}px`,
 				}}
 				card={card}
-				onClick={props.onClick && (() => props.onClick(maybeShiny(code)))}
+				onClick={props.onClick && (() => props.onClick(maybeShiny(card)))}
 				onContextMenu={
 					props.onContextMenu &&
 					(e => {
@@ -439,7 +436,7 @@ function CardSelectorColumn(props) {
 					})
 				}
 				onMouseOver={
-					props.onMouseOver && (() => props.onMouseOver(maybeShiny(code)))
+					props.onMouseOver && (() => props.onMouseOver(maybeShiny(card)))
 				}
 			/>,
 		);
@@ -449,12 +446,12 @@ function CardSelectorColumn(props) {
 					? '-'
 					: code in props.cardpool
 					? props.cardpool[code] -
-					  ((props.cardminus && props.cardminus[code]) || 0)
+					  ((props.cardminus && props.cardminus[code]) ?? 0)
 					: 0,
 				shinyAmount =
 					props.filterboth && !props.shiny && scode in props.cardpool
 						? props.cardpool[scode] -
-						  ((props.cardminus && props.cardminus[scode]) || 0)
+						  ((props.cardminus && props.cardminus[scode]) ?? 0)
 						: 0;
 			countTexts.push(
 				<div
@@ -490,7 +487,7 @@ function CardSelectorColumn(props) {
 export function CardSelectorCore(props) {
 	const children = [];
 	for (let i = 0; i < 6; i++) {
-		const cards = Cards.filter(
+		const cards = props.cards.filter(
 			i > 2,
 			x =>
 				(x.element == props.element || props.rarity == 4) &&
@@ -504,7 +501,7 @@ export function CardSelectorCore(props) {
 					props.showall ||
 					x.isFree()) &&
 				(!props.rarity || props.rarity == Math.min(x.rarity, 4)),
-			Cards.cardCmp,
+			props.cards.cardCmp,
 			props.shiny && !props.filterboth,
 		);
 		children.push(
@@ -520,7 +517,7 @@ export function CardSelectorCore(props) {
 	return children;
 }
 
-export class CardSelector extends React.Component {
+export class CardSelector extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {

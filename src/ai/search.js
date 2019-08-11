@@ -31,9 +31,9 @@ const afilter = new Map()
 	.set(Skills.pacify, (c, t) => t.trueatk())
 	.set(
 		Skills.readiness,
-		(c, t) => t.active.get('cast') && (t.cast || t.usedactive),
+		(c, t) => t.active.get('cast') && (t.cast || t.casts === 0),
 	)
-	.set(Skills.silence, (c, t) => t.active.get('cast') && !t.usedactive)
+	.set(Skills.silence, (c, t) => t.active.get('cast') && t.casts !== 0)
 	.set(Skills.lobotomize, (c, t) => {
 		if (!t.getStatus('psionic')) {
 			for (const [key, act] of t.active) {

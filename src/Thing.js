@@ -60,7 +60,7 @@ defineProp('maxhp');
 defineProp('hp');
 defineProp('atk');
 defineProp('status');
-defineProp('usedactive');
+defineProp('casts');
 defineProp('type');
 defineProp('active');
 
@@ -72,7 +72,7 @@ Thing.prototype.init = function (card, owner) {
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
 	this.status = card.status;
-	this.usedactive = true;
+	this.casts = 0;
 	this.type = 0;
 	this.active = card.active;
 	return this;
@@ -436,7 +436,7 @@ Thing.prototype.canactive = function (spend) {
 		return false;
 	} else if (this.type === etg.Spell) {
 		return (
-			!this.owner.usedactive &&
+			this.owner.casts !== 0 &&
 			this.owner[spend ? 'spend' : 'canspend'](
 				this.card.costele,
 				this.card.cost,
@@ -445,7 +445,7 @@ Thing.prototype.canactive = function (spend) {
 	} else {
 		return (
 			this.active.has('cast') &&
-			!this.usedactive &&
+			this.casts !== 0 &&
 			!this.status.get('delayed') &&
 			!this.status.get('frozen') &&
 			this.owner.canspend(this.castele, this.cast)
@@ -480,7 +480,7 @@ Thing.prototype.useactive = function (t) {
 	const { owner } = this;
 	if (this.type === etg.Spell) {
 		if (!this.canactive(true)) {
-			return console.log(`${owner} cannot cast ${this}`);
+			return console.log(`${owner.id} cannot cast ${this.id}`);
 		}
 		this.remove();
 		if (owner.getStatus('neuro')) owner.addpoison(1);
@@ -491,7 +491,7 @@ Thing.prototype.useactive = function (t) {
 				[this.game.id, 'bonusstats', 'cardsplayed'],
 				cardsplayed => {
 					cardsplayed = new Map(cardsplayed);
-					const a = new Int32Array(cardsplayed.get(this.ownerId) || 6);
+					const a = new Int32Array(cardsplayed.get(this.ownerId) ?? 6);
 					a[this.card.type]++;
 					cardsplayed.set(this.ownerId, a);
 					return cardsplayed;
@@ -499,7 +499,7 @@ Thing.prototype.useactive = function (t) {
 			);
 		}
 	} else if (owner.spend(this.castele, this.cast)) {
-		this.usedactive = true;
+		this.casts--;
 		if (this.getStatus('neuro')) this.addpoison(1);
 		this.castSpell(t ? t.id : 0, this.active.get('cast'));
 	}
@@ -546,7 +546,7 @@ Thing.prototype.attack = function (data) {
 			this.proc('attack', flags);
 		}
 		const { target, stasis, freedom } = flags;
-		this.usedactive = false;
+		this.casts = 1;
 		let trueatk;
 		if (
 			!(stasis || frozen || this.status.get('delayed')) &&
@@ -663,7 +663,9 @@ Thing.prototype.v_attack = function (stasis, freedomChance) {
 					this.owner.dmg(-dmg);
 				}
 			} else {
-				const truedr = target.shield ? target.shield.dr : 0;
+				const truedr = target.shield
+					? Math.min(target.shield.truedr(), trueatk)
+					: 0;
 				const tryDmg = Math.max(trueatk - truedr, 0);
 				if (
 					!target.shield ||
