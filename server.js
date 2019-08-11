@@ -373,12 +373,14 @@ const importlocks = new Map();
 						seed: (Math.random() * MAX_INT) | 0,
 						players: RngMock.shuffle([
 							{
+								idx: 1,
 								deck: thismeta.deck,
 								name: u,
 								user: u,
 								markpower: 1,
 							},
 							{
+								idx: 2,
 								deck: foemeta.deck,
 								name: f,
 								user: f,
