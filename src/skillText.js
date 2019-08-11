@@ -65,7 +65,7 @@ const data = {
 	beguile: 'Steal target creature until next turn.',
 	beguilestop:
 		'Return this creature to its original owner at the beginning of next turn.',
-	bellweb: 'Target creature becomes aquatic and loses airborne.',
+	bellweb: 'Target creature becomes aquatic and loses airborne status.',
 	blackhole:
 		'Remove 3 quanta per element from target player. Heal 1 per quanta removed.',
 	bless: 'Target gains 3|3.',
@@ -132,7 +132,7 @@ const data = {
 	deepdive:
 		'Burrow. While burrowed, replace this ability with "2:3 Freeze target permanent." Next turn, unburrow, become airborne, and triple this creature\'s strength until its next attack.',
 	deja: 'Remove this ability and summon a copy of this creature.',
-	deployblobs: 'Summon 3 Blobs and gain -2|-2.',
+	deployblobs: 'Put 3 Blobs into play. Gain -2|-2.',
 	despair:
 		'Non-ranged attackers have a 40% chance plus 5% per 1:11 producing creature you control to gain -1|-1.',
 	destroy: 'Destroy target permanent.',
@@ -189,7 +189,7 @@ const data = {
 		cast: 'Reset your count of cards played this turn.',
 	},
 	evade: x => x + '% chance to evade attacks.',
-	evade100: '100% chance to evade attacks.',
+	evade100: 'Completely block enemy attacks.',
 	evadecrea:
 		"Cannot be directly targeted by opponent's creature's abilities. Still affected by abilities that affect all creatures.",
 	evadespell:
@@ -207,7 +207,7 @@ const data = {
 	flyself:
 		'If this card is equipped as a weapon, it casts Flying Weapon on itself. If this card is a creature, it casts Living Weapon on itself.',
 	flyingweapon:
-		"Target weapon becomes a flying creature. It still counts as a weapon even though it isn't in your weapon slot.",
+		"Target weapon becomes a flying creature. It still counts as a weapon even though it isn't in a weapon slot.",
 	foedraw: "Draw from opponent's deck",
 	forcedraw: 'When this creature damages a player, that player draws a card.',
 	forceplay:
@@ -281,7 +281,7 @@ const data = {
 		'Deal 20 spell damage to opponent. Deal 1 spell damage to each creature.',
 	immolate: c =>
 		`Sacrifice a creature you control. Gain ${
-			c.upped ? 7 : 5
+			c.upped ? 8 : 6
 		}:6 plus 1 quanta of each other element.`,
 	improve:
 		'Transform a target creature into a random mutant creature. Mutant creatures gain a random ability, 0-4 strength, and 0-4 hp.',
@@ -298,13 +298,13 @@ const data = {
 	jetstream: 'Target airborne creature gains 3|-1.',
 	lightning: 'Deal 5 spell damage to target creature or player.',
 	liquid:
-		'Target creature is poisoned. Target creature\'s skills are replaced with "Whenever this creature damages opponent, it heals its owner an equal amount."',
+		'Target creature is poisoned. Target creature\'s skills are replaced with "Heal yourself equal to the damage dealt by this card."',
 	livingweapon:
 		"Equip target creature as a weapon. If target creature's owner already had a weapon equipped, return it to their hand. Heal target creature's owner equal to target creature's HP.",
 	lobotomize: "Remove target creature's abilities.",
 	locket: 'Produces quanta matching your mark each turn.',
 	locketshift:
-		"Switch this card's production to match the element of any target.",
+		"Switch this card's production to match the element of any target, including immaterial and burrowed cards.",
 	loot:
 		'When one of your permanents is destroyed, steal a random permanent from opponent.',
 	losecharge: (c, inst) => {
@@ -403,7 +403,7 @@ const data = {
 		'When this card enters play, 70% chance to apply 1 poison to opponent.',
 	powerdrain:
 		"Remove half of target creature's strength and HP. Add an equal amount of strength and HP to a random creature you control.",
-	precognition: "Reveal opponent's hand until the end of their turn. Draw",
+	precognition: "Reveal opponent's hand until the end of their turn. Draw a card.",
 	predator:
 		'If opponent has more than four cards in their hand, this card attacks a second time and opponent discards the last card in their hand.',
 	protectall:
@@ -456,7 +456,7 @@ const data = {
 	rewind:
 		"Put target creature on top of its owner's deck. Removes all bonuses and modifiers on target creature.",
 	reveal: {
-		ownplay: "Reveal opponent's hand until the end of their turn.",
+		ownplay: "Reveal opponent's hand when played and on attack.",
 	},
 	ricochet:
 		'Any targeted spells cast by either player are copied when played. The copy has a random caster and a random non-player target.',
@@ -569,7 +569,7 @@ const data = {
 	unvindicate:
 		'Cannot activate vindicate again until the start of its next turn.',
 	upkeep: c =>
-		`Whenever a creature attacks, its owner must pay 1:${c.element} or the creature is destroyed.`,
+		`Pay 1:${c.element} at the end of your turn. If you cannot, destroy this card.`,
 	upload: 'Target creature or weapon gains 2|0. This creature loses 0|2.',
 	vampire: 'Heal yourself equal to the damage dealt by this card.',
 	vend: 'Sacrifice this card. Draw a card.',
@@ -587,7 +587,7 @@ const data = {
 	void: "Reduce opponent's maximum HP by 3.",
 	voidshell:
 		'Block all damage from attackers. Reduce your maximum HP equal to the damage blocked by this card.',
-	web: 'Target creature loses airborne.',
+	web: 'Target creature loses airborne status.',
 	weight: 'Evade all attackers that have more than 5 HP.',
 	wind: 'Restore any strentgh lost by halving after attacking.',
 	wings: 'Evade all non-airborne, non-ranged attackers.',
