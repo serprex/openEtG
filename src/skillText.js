@@ -48,21 +48,21 @@ const data = {
 	adrenaline:
 		'Target creature attacks multiple times per turn. Creatures with lower strength attack more times per turn.',
 	aflatoxin:
-		'Apply 2 poison to target. When the target dies, it becomes a Malignant Cell.',
+		'Give target 2 poison counters. When the target dies, it becomes a Malignant Cell.',
 	aggroskele:
-		'Summon a Skeleton. All of your skeletons deal their damage to target creature.',
+		'Summon a Skeleton. All of your skeletons deal damage equal to their strength to target creature.',
 	alphawolf: 'Summon two 2|1 Pack Wolves when this enters play.',
 	antimatter:
 		"If target creature's attack is positive, it becomes negative. If target creature's attack is negative, it becomes positive.",
 	appease:
 		'Sacrifice target creature you own and gain 1|1. If this ability is not used, this creature will attack its owner. This creature attacks normally the turn it is played or if it loses this ability.',
 	atk2hp: "Set target's HP equal to its strength.",
-	autoburrow: 'Until end of turn, creatures with burrow enter play burrowed.',
+	autoburrow: 'Until end of turn, your creatures with burrow enter play burrowed.',
 	axedraw:
 		'Gains 1 strength for every card drawn by any player. Strength gained is removed after attack.',
 	bblood: 'Give target creature 0|20 and delay it for 5 turns.',
 	becomearctic: 'If frozen, this creature instead turns into an Arctic Squid.',
-	beguile: 'Steal target creature until next turn.',
+	beguile: 'Gain control of target creature until next turn.',
 	beguilestop:
 		'Return this creature to its original owner at the beginning of next turn.',
 	bellweb: 'Target creature becomes aquatic and loses airborne status.',
@@ -81,7 +81,7 @@ const data = {
 		'Opponent draws up to two cards. Draw cards equal to what opponent drew.',
 	brawl:
 		'Your creatures attack. If a creature exists in opposing creature slot, the two creatures deal their damage to one another instead of opponent. Consumes all remaining 1:3.',
-	brew: 'Add a random Alchemy card to your hand.',
+	brew: 'Add a random Alchemy card to your hand. Possible cards include: Antimatter, Black Hole, Adrenaline, Nymph\'s Tears, Unstable Gas, Liquid Shadow, Aflatoxin, Stone Skin, Rage Potion, Luciferin, Precognition, Quintessence.',
 	brokenmirror: [
 		'When opponent plays a creature from their hand, summon a 1|1 Phantom.',
 		'When opponent plays a creature from their hand, summon a 2|1 Phantom.',
@@ -132,7 +132,7 @@ const data = {
 	deepdive:
 		'Burrow. While burrowed, replace this ability with "2:3 Freeze target permanent." Next turn, unburrow, become airborne, and triple this creature\'s strength until its next attack.',
 	deja: 'Remove this ability and summon a copy of this creature.',
-	deployblobs: 'Put 3 Blobs into play. Gain -2|-2.',
+	deployblobs: 'Summon 3 Blobs. Gain -2|-2.',
 	despair:
 		'Non-ranged attackers have a 40% chance plus 5% per 1:11 producing creature you control to gain -1|-1.',
 	destroy: 'Destroy target permanent.',
@@ -149,9 +149,9 @@ const data = {
 		'Deal 1 damage to target creature and return this card to your hand. Modified stats and statuses remain on the card when it is played again.',
 	disfield: 'Block all damage from attackers. Consumes 1:0 per damage blocked.',
 	disshield:
-		'Block all damage from attackers.. Consume 1:1 per 3 damage blocked.',
+		'Block all damage from attackers.. Consume 1:1 per 3 damage blocked. Not prevented by Sanctuary.',
 	divinity: 'Add 24 to maximum health and heal yourself 16.',
-	dive: 'Double strength through next attack. Does not stack.',
+	dive: 'Double this creature\'s strength through next attack. Does not stack.',
 	dmgproduce: 'Generate 1:0 for each damage dealt by this card.',
 	draft:
 		'If target creature is airborne, it loses airborne and takes 3 spell damage. If target creature is not airborne, it becomes airborne and gains 3|0',
@@ -180,7 +180,7 @@ const data = {
 	enchant: 'Target permanent becomes immaterial.',
 	endow: 'Gain the strength, skills, and statuses of target weapon. Gain 0|2.',
 	envenom:
-		'Target weapon gains "Apply 1 poison on hit. Throttled (only triggers at most twice from Adrenaline),” or target shield gains "25% chance to poison non-ranged attackers."',
+		'Target weapon gains "Give 1 poison on hit. Throttled (only triggers at most twice from Adrenaline),” or target shield gains "25% chance to give non-ranged attackers 1 poison counter."',
 	epidemic:
 		"When any creature dies, give opponent poison counters equal to the dead creature's poison counters.",
 	epoch:
@@ -196,12 +196,12 @@ const data = {
 		"Cannot be directly targeted by opponent's spells. Still affected by spells that affect all creatures.",
 	evolve: 'Transform this card into an unburrowed Shrieker.',
 	feed:
-		'Poison target creature, gain 3|3, and lose immaterial status until the beginning of your next turn.',
+		'Give target creature 1 poison counter, gain 3|3, and lose immaterial status until the beginning of your next turn.',
 	fickle:
 		"Swap target card in either player's hand with a random card from their deck that they have enough quanta to play.",
 	fiery: 'Gains +1 strength for every 5:6 owned.',
 	firebolt:
-		'Deal 3 spell damage plus one per 4:6 owned. If target is frozen, it loses frozen status.',
+		'Deal 3 spell damage plus one per 4:6 you have after playing this card. If target is frozen, it loses frozen status.',
 	firewall: 'Deals 1 damage to each non-ranged attacking creature.',
 	flatline: 'Opponent cannot gain quanta through the end of their next turn.',
 	flyself:
@@ -234,7 +234,7 @@ const data = {
 	},
 	gaintimecharge:
 		'Up to 4 times per turn, gain one stack for every card you draw. Does not gain a stack from your draw at the start of your turn.',
-	gas: 'Put an Unstable Gas into play.',
+	gas: 'Summon an Unstable Gas.',
 	grave:
 		'When another creature dies, unburrow and transform this creature into a fresh copy of the dying creature . This creature retains nocturnal.',
 	give: c =>
@@ -267,16 +267,16 @@ const data = {
 	hatch: 'Transform this creature into a random creature.',
 	heal: 'Heal target creature or player 20.',
 	heatmirror: c =>
-		`When your opponent plays a creature from their hand, put a ${
+		`When your opponent plays a creature from their hand, summon a ${
 			c.upped ? 'Ball Lightning' : 'Spark'
-		} into play.`,
+		}.`,
 	hitownertwice: 'When this creature attacks, it also attacks its owner twice.',
 	holylight:
 		'Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature.',
 	hope:
 		'Blocks one additional damage for each creature you control that produces 1:8 every turn.',
 	icebolt:
-		'Deal 2 spell damage plus one per 5:7 owned. 25% plus 5% per point of damage chance to freeze target.',
+		'Deal 2 spell damage plus one per 5:7 you have after playing this card. 25% plus 5% per point of damage chance to freeze target.',
 	ignite:
 		'Deal 20 spell damage to opponent. Deal 1 spell damage to each creature.',
 	immolate: c =>
@@ -286,19 +286,19 @@ const data = {
 	improve:
 		'Transform a target creature into a random mutant creature. Mutant creatures gain a random ability, 0-4 strength, and 0-4 hp.',
 	inertia: 'When any card you own is targeted by either player, gain 2:3.',
-	infect: 'Poison target creature.',
+	infect: 'Give target creature 1 poison counter.',
 	inflation: 'Increase the cost of all active abilities by 1.',
-	ink: 'Put a Cloak that lasts 1 turn into play.',
+	ink: 'Summon a Cloak that lasts 1 turn.',
 	innovation:
 		"Discard target card in either player's hand. The owner of target card draws three cards. Destroy the top card of your deck.",
 	integrity:
-		'Destroyed all shards in your hand to play a Shard Golem with stats and abilities based on the shards destroyed.',
+		'Destroy all shards in your hand to play a Shard Golem with stats and abilities based on the shards destroyed.',
 	jelly:
-		"Target creature becomes a 7|4 Pink Jelly with an active ability that turns additional creatures into Pink Jellies. That ability costs quanta matching target creature's element.",
+		"Target creature becomes a 7|4 Pink Jelly with an active ability that turns additional creatures into Pink Jellies. That ability costs 4 quanta matching target creature's element.",
 	jetstream: 'Target airborne creature gains 3|-1.',
 	lightning: 'Deal 5 spell damage to target creature or player.',
 	liquid:
-		'Target creature is poisoned. Target creature\'s skills are replaced with "Heal yourself equal to the damage dealt by this card."',
+		'Give target creature 1 poison counter. Target creature\'s skills are replaced with "Heal yourself equal to the damage dealt by this card."',
 	livingweapon:
 		"Equip target creature as a weapon. If target creature's owner already had a weapon equipped, return it to their hand. Heal target creature's owner equal to target creature's HP.",
 	lobotomize: "Remove target creature's abilities.",
@@ -306,7 +306,7 @@ const data = {
 	locketshift:
 		"Switch this card's production to match the element of any target, including immaterial and burrowed cards.",
 	loot:
-		'When one of your permanents is destroyed, steal a random permanent from opponent.',
+		'When one of your permanents is destroyed, gain control of a random permanent from opponent.',
 	losecharge: (c, inst) => {
 		const charges = c.getStatus('charges');
 		return charges
@@ -328,9 +328,9 @@ const data = {
 		'Whenever another creature enters play, transform this card into a fresh copy of that creature. This creature retains this ability.',
 	miracle:
 		'Heal yourself to one below your maximum HP. Consumes all remaining 1:8.',
-	mitosis: 'Put a fresh copy of this creature into play.',
+	mitosis: 'Summon a fresh copy of this creature.',
 	mitosisspell:
-		'Target creature gains 0|1. Target\'s active ability becomes "Put a fresh copy of this creature into play." That ability costs target\'s cost.',
+		'Target creature gains 0|1. Target\'s active ability becomes "Summon a fresh copy of this creature." That ability costs target\'s cost.',
 	momentum: 'Target creature or weapon gains 1|1 and ignores shields.',
 	mummy: 'Becomes a Pharaoh if targeted by Rewind.',
 	mutation:
@@ -338,9 +338,9 @@ const data = {
 	mutant:
 		'When this card enters play, it gains a random active ability with a random activation cost.',
 	neuro:
-		'Apply 1 poison on hit. Apply neurotoxin on hit. Neurotoxin gives 1 poison for every card played by the affected player or active ability used by the affected creature. Throttled (only triggers at most twice from Adrenaline.)',
+		'Give 1 poison counter on hit. Apply neurotoxin on hit. Neurotoxin gives 1 poison counter for every card played by the affected player or active ability used by the affected creature. Throttled (only triggers at most twice from Adrenaline.)',
 	neuroify:
-		"If target creature or player is poisoned, target gains neurotoxin. Neurotoxin gives 1 poison for every card played by the affected player or active ability used by the affected creature. Remove target's purify counters.",
+		"If target creature or player is poisoned, target gains neurotoxin. Neurotoxin gives 1 poison counter for every card played by the affected player or active ability used by the affected creature. Remove target's purify counters.",
 	nightmare: c =>
 		`Fill opponent\'s hand with fresh copies of target creature. Deal ${
 			c.upped ? '2' : '1'
@@ -348,9 +348,9 @@ const data = {
 	nightshade:
 		'Target creature becomes nocturnal, gains 5|5, and loses their active ability.',
 	nova:
-		'Gain 1 quanta of each element. If you play three or more of this card in one turn, put a Singularity into play on your side.',
+		'Gain 1 quanta of each element. If you play three or more of this card in one turn, summon a Singularity on your side.',
 	nova2:
-		'Gain 2 quanta of each element. If you play two or more of this card in one turn, put a Singularity into play on your side.',
+		'Gain 2 quanta of each element. If you play two or more of this card in one turn, summon a Singularity on your side.',
 	nullspell:
 		'Until your next turn, the next spell any player casts is nullified. If this ability nullifies a spell, this creature gains 1|1.',
 	nymph:
@@ -375,7 +375,7 @@ const data = {
 	pandemonium3:
 		'Inflict a random effect on every card in play or any hand. All existing effects are possible. Removes cloak.',
 	paradox: 'Target creature with more strength than HP dies.',
-	parallel: 'Put an exact copy of target creature into play on your side.',
+	parallel: 'Summon an exact copy of target creature on your side.',
 	phoenix: [
 		'When this creature dies, transform it into an Ash.',
 		'When this creature dies, transform it into a Minor Ash.',
@@ -387,20 +387,20 @@ const data = {
 		`Each turn, switches between producing ${c.element ? 1 : 3}:${
 			c.element
 		} and one quanta matching your mark.`,
-	plague: "Poison target player's creatures. Removes cloak.",
+	plague: "Give target player's creatures 1 poison counter each. Removes cloak.",
 	platearmor: [
 		'Target creature gains 0|4, or target player gains 4 maximum HP and heals 4.',
 		'Target creature gains 0|6, or target player gains 6 maximum HP and heals 6.',
 	],
 	poison: x => {
-		x = `Apply ${x === '1' ? '' : x + ' '}poison `;
+		x = `Give ${x === '1' ? '' : x + ' '}poison `;
 		return {
-			hit: `${x} on hit. Throttled (only triggers at most twice from Adrenaline.)`,
-			cast: `${x} to opponent.`,
+			hit: `${x} counters on hit. Throttled (only triggers at most twice from Adrenaline.)`,
+			cast: `${x} counters to opponent.`,
 		};
 	},
 	poisonfoe:
-		'When this card enters play, 70% chance to apply 1 poison to opponent.',
+		'When this card enters play, 70% chance to give 1 poison counter to opponent.',
 	powerdrain:
 		"Remove half of target creature's strength and HP. Add an equal amount of strength and HP to a random creature you control.",
 	precognition: "Reveal opponent's hand until the end of their turn. Draw a card.",
@@ -452,7 +452,7 @@ const data = {
 	reinforce:
 		"Target creature gains strength and HP equal to this creature's strength and HP. Destroy this creature.",
 	ren:
-		"When this creature would die, it is instead returned to its owner's hand. Modified stats and statuses remain on the card when it is played again.",
+		"Target creature gains: \"When this creature would die, it is instead returned to its owner's hand. Modified stats and statuses remain on the card when it is played again.\"",
 	rewind:
 		"Put target creature on top of its owner's deck. Removes all bonuses and modifiers on target creature.",
 	reveal: {
@@ -468,13 +468,13 @@ const data = {
 		'Whenever a permanent is destroyed, gain 1|1. Once per turn, when opponent destroys a permanent, add a copy of that permanent to your hand.',
 	salvageoff: 'Cannot salvage another destroyed permanent until next turn.',
 	sanctify:
-		"During your opponent's turn, your hand and quanta pool cannot be modified. Does not affect Dissipation Field.",
+		"During your opponent's turn, your hand and quanta pool cannot be modified.",
 	unsanctify: {
 		ownplay:
 			"Nullify opponent's sanctuary effect from Sancuary or Dream Catcher.",
 	},
 	scatterhand:
-		'Target player shuffles their hand into their deck and draws an equal number of cards. Draw a card.',
+		'Target player shuffles their hand into their deck and draws an equal number of cards. Cards drawn this way do not trigger effects that occur when a card is drawn. Draw a card.',
 	scramble: {
 		hit:
 			"Randomize up to 9 quanta randomly chosen from opponent's quanta pool on hit.",
@@ -490,7 +490,7 @@ const data = {
 		"Shuffle 3 copies of target creature you control, any target opponent controls, or any target in opponent's hand into your deck.",
 	silence:
 		'Target player cannot play cards until the end of their next turn, or target creature cannot use active abilities until the end of their next turn.',
-	sing: 'Target creature without the Sing ability attacks its owner.',
+	sing: 'Target creature without this ability attacks its owner.',
 	singularity: 'That was a bad idea.',
 	sinkhole: [
 		"Burrow target creature. Replace target creature's abilities with 1:4: unburrow.",
@@ -512,13 +512,13 @@ const data = {
 	snipe: 'Deal 3 damage to target creature.',
 	solar: 'Gain 1:8 for each attacker.',
 	sosa: [
-		'Lose HP equal to 48% of your maximum HP (at least 48 HP). Consume all non-1:2. For two turns, damage heals you and healing damages you.',
-		'Lose HP equal to 40% of your maximum HP (at least 40 HP). Consume all non-1:2. For two turns, damage heals you and healing damages you.',
+		'Lose HP equal to 48% of your maximum HP (at least 48 HP). Consume all non-1:2 quanta. For two turns, damage heals you and healing damages you.',
+		'Lose HP equal to 40% of your maximum HP (at least 40 HP). Consume all non-1:2 quanta. For two turns, damage heals you and healing damages you.',
 	],
 	soulcatch: 'Whenever a creature dies, gain 3:2.',
 	spores: [
-		'When this creature dies, put 2 Spores into play.',
-		'When this creature dies, put 2 Toxic Spores into play.',
+		'When this creature dies, summon 2 Spores.',
+		'When this creature dies, summon 2 Toxic Spores.',
 	],
 	sskin:
 		'Gain maximum HP and heal an amount equal to the 1:4 in your quanta pool after casting this spell.',
@@ -526,14 +526,14 @@ const data = {
 	static: 'Deals 2 spell damage to opponent for each attacker.',
 	steal: 'You gain control of target permanent.',
 	steam:
-		'Gain 5|0. This creature loses 1|0 of the strength gained in this way after each attack.',
+		'Gain 5|0. This creature loses 1|0 of strength gained in this way after each attack.',
 	stoneform: 'Gain 0|20. Become a golem.',
 	storm: x =>
 		`Deal ${x} spell damage to all of target player\'s creatures. Removes cloak.`,
 	summon: x => c =>
-		`Put a ${
+		`Summon a ${
 			(c instanceof Card ? c.Cards : c.game.Cards).Names[x].name
-		} into play.`,
+		}.`,
 	swarm:
 		'Base HP is equal to the number of Scarabs you control, including this one.',
 	swave:
@@ -544,7 +544,7 @@ const data = {
 	],
 	tesseractsummon:
 		'Summon 2 random creatures from your deck. Opponent summons 1 random creature from their deck. Freeze these creatures for a number of turns equal to ¼ of their quanta cost, rounded up.',
-	thorn: '75% chance to poison non-ranged attackers.',
+	thorn: '75% chance to give non-ranged attackers 1 poison counter.',
 	throwrock: [
 		"Deal 3 damage to target creature, then shuffle Throw Rock into its owner's deck.",
 		"Deal 4 damage to target creature, then shuffle Throw Rock into its owner's deck.",
@@ -554,13 +554,13 @@ const data = {
 		"This creature takes 3 damage. If this damage kills the creature, deal 4 spell damage to all of opponent's creatures",
 	],
 	tidalhealing:
-		'Remove poison and freezing from all your creatures. Your aquatic creatures gain "Give 1 purify counter to this card\'s owner on hit. Throttled (only triggers at most twice from Adrenaline.)". This ability does not stack.',
+		'Remove frozen status and poison counters from all your creatures. Your aquatic creatures gain "Give 1 purify counter to this card\'s owner on hit. Throttled (only triggers at most twice from Adrenaline.)". This ability does not stack.',
 	tornado: [
-		"Randomly choose two of opponent's permanents and one of your permanent. Each selected permanent is shuffled into a random player's deck.",
+		"Randomly choose two of opponent's permanents and one of your permanents. Each selected permanent is shuffled into a random player's deck.",
 		"Randomly choose two of opponent's permanents. Each selected permanent is shuffled into a random player's deck.",
 	],
 	trick:
-		"If target creature's owner has creatures in their deck, put target creature into their deck and put a random different creature from their deck into play.",
+		"If target creature's owner has creatures in their deck, put target creature into their deck and summon a random different creature from their deck.",
 	turngolem:
 		"This card becomes a creature with Gravity Pull. Set the creature's HP to the total damage this card blocked while it was a shield. Set the creature's strength to half its HP.",
 	unburrow: 'Unburrow.',
@@ -579,11 +579,11 @@ const data = {
 		'Once per turn, when one of your creatures dies, it attacks an additional time before dying.',
 	virtue:
 		"When this creature attacks, if any damage is blocked by opponent's shield, your maximum HP is increased by the amount of this creature's damage that was blocked.",
-	virusdeath: 'When this creature dies, apply 1 poison to opponent.',
+	virusdeath: 'When this creature dies, give opponent 1 poison counter.',
 	virusinfect:
-		'Sacrifice this creature. Target creature or player gains 1 poison counter.',
+		'Sacrifice this creature. Give target creature or player 1 poison counter.',
 	virusplague:
-		"Sacrifice this creature. Target player's creatures gain 1 poison counter.",
+		"Sacrifice this creature. Give target player's creatures 1 poison counter.",
 	void: "Reduce opponent's maximum HP by 3.",
 	voidshell:
 		'Block all damage from attackers. Reduce your maximum HP equal to the damage blocked by this card.',
@@ -594,7 +594,7 @@ const data = {
 	wisdom:
 		'Target creature or weapon gains 3|0. May target immaterial cards. If it targets an immaterial card, that card gains psionic. Psionic cards deal spell damage and typically bypass shields.',
 	yoink:
-		"Steal target card from target player's hand, or draw from target player's deck.",
+		"Remove target card from target player's hand and add it to your hand, or draw from target player's deck.",
 };
 [
 	['dagger', '1:2 1:11. Gains 1 strength per Cloak you control.'],
