@@ -177,7 +177,7 @@ const importlocks = new Map();
 				});
 			} else {
 				const res = await db.hmget(au, 'day');
-				if (res) {
+				if (res && res[0]) {
 					const day = res[0],
 						today = sutil.getDay(),
 						age = today - day;

@@ -152,7 +152,7 @@ function ArenaCard(props) {
 						store.doNav(import('./ArenaEditor'), {
 							adeck: '',
 							acard: Cards.Codes[code],
-							ainfo: { day: info ? info.day : 8 },
+							ainfo: { day: info ? info.day : 0 },
 							acreate: true,
 						}),
 					);

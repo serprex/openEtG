@@ -199,7 +199,7 @@ export default connect(({ user }) => ({ user }))(
 									store.updateUser({
 										gold:
 											this.props.user.gold +
-											(this.props.ainfo.day > 6 ? 250 : 25),
+											Math.min(this.props.ainfo.day * 25, 350),
 									}),
 								);
 							}
