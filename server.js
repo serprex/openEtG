@@ -177,11 +177,13 @@ const importlocks = new Map();
 				});
 			} else {
 				const res = await db.hmget(au, 'day');
-				const day = res ? res[0] : 0,
-					today = sutil.getDay(),
-					age = today - day;
-				if (age > 0) {
-					user.gold += today - day > 6 ? 250 : age * 25;
+				if (res) {
+					const day = res[0],
+						today = sutil.getDay(),
+						age = today - day;
+					if (age > 0) {
+						user.gold += Math.min(age * 25, 350);
+					}
 				}
 				return db
 					.pipeline()
@@ -195,7 +197,7 @@ const importlocks = new Map();
 						draw: data.draw,
 						mark: data.mark,
 					})
-					.zadd(`arena${data.lv ? '1' : ''}`, 200, data.u)
+					.zadd(`arena${data.lv ? '1' : ''}`, 250, data.u)
 					.exec();
 			}
 		},

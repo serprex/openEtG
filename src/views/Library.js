@@ -105,8 +105,9 @@ export default class Library extends React.Component {
 						top: '8px',
 						whiteSpace: 'pre',
 					}}>
-					`Wealth ${this.state.gold + Math.round(userutil.calcWealth(cardpool))}
-					\nGold ${this.state.gold}`
+					{`Wealth ${this.state.gold +
+						Math.round(userutil.calcWealth(cardpool))}
+					\nGold ${this.state.gold}`}
 				</span>
 				<span
 					style={{

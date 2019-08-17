@@ -357,7 +357,7 @@ export default connect(({ user }) => ({ user }))(
 								);
 								if (game.data.age) {
 									agetax = Math.max(
-										Math.min(game.data.age * 0.1 - 0.5, 0.5),
+										Math.min(game.data.age * 0.1 - 1.4, 0.5),
 										0,
 									);
 									if (agetax > 0) {

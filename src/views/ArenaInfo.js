@@ -192,7 +192,7 @@ export default connect(({ user }) => ({
 							top: '560px',
 						}}
 						text={
-							'Earn 5$ when your deck is faced, & another 10$ when it wins\nEarn 25$ per age of current deck for a new deck, or 250$ if over a week old'
+							'Earn 5$ when your deck is faced, & 10$ more when it wins\nEarn 25$ per age of current deck when creating a new deck, up to 350$'
 						}
 					/>
 					<Components.ExitBtn x={8} y={300} />

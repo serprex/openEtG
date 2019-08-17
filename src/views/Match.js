@@ -1224,7 +1224,8 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 						: pl.getStatus('sanctuary')
 						? 8
 						: pl.getStatus('nova') >= 3 &&
-						  pl.hand.some(c => c.card.isOf(game.Cards.Names.Nova))
+						  (pl.id !== player1.id ||
+								pl.hand.some(c => c.card.isOf(game.Cards.Names.Nova)))
 						? 1
 						: null;
 				this.idtrack.set(pl.id, plpos);
