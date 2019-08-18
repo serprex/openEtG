@@ -549,7 +549,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 							y: pos.y + offset,
 						}}
 						style={{
-							x: pos.x,
+							x: spring(pos.x),
 							y: spring(pos.y - 36, {
 								stiffness: 84,
 								dampen: 12,
