@@ -116,6 +116,43 @@ const activeInfo = {
 		)}`,
 };
 
+const activetexts = [
+	'hit',
+	'death',
+	'owndeath',
+	'buff',
+	'destroy',
+	'draw',
+	'play',
+	'spell',
+	'dmg',
+	'shield',
+	'postauto',
+];
+const activetextsRename = {
+	quanta: x => ui.eleNames[x[1]].toLowerCase(),
+};
+function skillName(sk) {
+	const namelist = [];
+	for (const name of sk.name) {
+		const nsplit = name.split(' ');
+		const rename = activetextsRename[nsplit[0]];
+		if (rename === null) continue;
+		namelist.push(rename ? rename(nsplit) : name);
+	}
+	return namelist.join(' ');
+}
+function activeText(c) {
+	const acast = c.active.get('cast');
+	if (acast) return `${c.cast}:${c.castele}${skillName(acast)}`;
+	for (const akey of activetexts) {
+		const a = c.active.get(akey);
+		if (a) return `${akey} ${skillName(a)}`;
+	}
+	const aauto = c.active.get('ownattack');
+	return aauto ? skillName(aauto) : '';
+}
+
 function PagedModal(props) {
 	return (
 		<div
@@ -248,7 +285,7 @@ class ThingInst extends React.Component {
 					}
 				}
 				const charges = obj.getStatus('charges');
-				topText = obj.activetext();
+				topText = activeText(obj);
 				if (obj.type === etg.Creature) {
 					statText = `${obj.trueatk()} | ${obj.truehp()}${
 						charges ? ` \u00d7${charges}` : ''
@@ -363,8 +400,8 @@ class ThingInst extends React.Component {
 					${tgtclass(p1id, obj, props.targeting)}`}
 				style={{
 					position: 'absolute',
-					left: pos.x - 32 + 'px',
-					top: pos.y - 32 + 'px',
+					left: `${pos.x - 32}px`,
+					top: `${pos.y - 32}px`,
 					opacity: faceDown
 						? props.opacity
 						: (obj.isMaterial() ? 1 : 0.7) * props.opacity,
@@ -639,16 +676,15 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 				for (const effect of game.effects) {
 					switch (effect.x) {
 						case 'StartPos':
-							newstate.startPos = (newstate.startPos || state.startPos).set(
-								effect.id,
-								effect.src,
-							);
+							newstate.startPos = (
+								newstate.startPos || new Map(state.startPos)
+							).set(effect.id, effect.src);
 							break;
 						case 'EndPos':
 							if (!newstate.startPos)
 								newstate.startPos = new Map(state.startPos);
 							newstate.startPos.delete(effect.id);
-							newstate.endPos = (newstate.endPos || state.endPos).set(
+							newstate.endPos = (newstate.endPos || new Map(state.endPos)).set(
 								effect.id,
 								effect.tgt,
 							);

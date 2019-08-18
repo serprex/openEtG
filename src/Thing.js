@@ -283,29 +283,6 @@ Thing.prototype.info = function() {
 	const stext = skillText(this);
 	return !info ? stext : stext ? info + '\n' + stext : info;
 };
-const activetexts = [
-	'hit',
-	'death',
-	'owndeath',
-	'buff',
-	'destroy',
-	'draw',
-	'play',
-	'spell',
-	'dmg',
-	'shield',
-	'postauto',
-];
-Thing.prototype.activetext = function() {
-	const acast = this.active.get('cast');
-	if (acast) return `${this.cast}:${this.castele}${acast.castName}`;
-	for (const akey of activetexts) {
-		const a = this.active.get(akey);
-		if (a) return `${akey} ${a}`;
-	}
-	const aauto = this.active.get('ownattack');
-	return `${aauto || ''}`;
-};
 Thing.prototype.place = function(owner, type, fromhand) {
 	this.game.set(this.id, 'owner', owner.id);
 	this.game.set(this.id, 'type', type);
