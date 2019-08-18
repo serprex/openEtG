@@ -176,11 +176,10 @@ const importlocks = new Map();
 					mark: data.mark,
 				});
 			} else {
-				const res = await db.hmget(au, 'day');
+				const today = sutil.getDay(),
+					res = await db.hmget(au, 'day');
 				if (res && res[0]) {
-					const day = res[0],
-						today = sutil.getDay(),
-						age = today - day;
+					const age = today - res[0];
 					if (age > 0) {
 						user.gold += Math.min(age * 25, 350);
 					}
@@ -243,7 +242,7 @@ const importlocks = new Map();
 				day = +mget[1];
 			return db.zadd(
 				arena,
-				wilson(won + 1, won + loss + 1) * 1000 - (sutil.getDay() - day),
+				wilson(won + 1, won + loss + 1) * 1000 - (sutil.getDay() - day) * 2,
 				data.aname,
 			);
 		},
