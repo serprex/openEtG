@@ -10,18 +10,11 @@ export function card(code) {
 	const card = Cards.Codes[code],
 		textColor = card.upped ? '' : " fill='#fff'";
 	return (
-		`<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' height='256' width='128'>${cssPrefix}]]></style><image xlink:href='../assets/cardBacks.png' x='${(card.element +
-			card.upped * 13) *
-			-128}
-		' width='3328' height='127'/>` +
-		`<image xlink:href='../assets/cardBacks.png' x='${(card.element +
-			card.upped * 13) *
-			-128}
-		' y='128' width='3328' height='127'/>` +
-		`<text x='2' y='15'${textColor}>${card.name}</text>` +
-		`<rect x='0' y='20' width='128' height='128' fill='${ui.maybeLightenStr(
+		`<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' height='256' width='128'>${cssPrefix}]]></style><rect x='0' y='0' width='128' height='256' fill='${ui.maybeLightenStr(
 			card,
-		)}'/><foreignObject width='128' height='256'><p xmlns='http://www.w3.org/1999/xhtml' style='font:10px sans-serif;white-space:pre-wrap${
+		)}'/><text x='2' y='15'${textColor}>${
+			card.name
+		}</text><foreignObject width='128' height='256'><p xmlns='http://www.w3.org/1999/xhtml' style='font:10px sans-serif;white-space:pre-wrap${
 			textColor ? '' : ';color:#000'
 		};position:absolute;left:2px;top:150px;right:2px;height:106px;margin:0'>` +
 		`<img ${

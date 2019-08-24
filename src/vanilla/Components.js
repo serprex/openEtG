@@ -9,7 +9,8 @@ import { CardImage, Text, IconBtn } from '../Components/index.js';
 export function Card(props) {
 	const card = props.card || (props.code && Cards.Codes[props.code]);
 	if (!card) return null;
-	const textColor = card.upped ? '#000' : '';
+	const textColor = card.upped ? '#000' : '',
+		backColor = ui.maybeLightenStr(card);
 	return (
 		<div
 			style={{
@@ -21,10 +22,9 @@ export function Card(props) {
 				pointerEvents: 'none',
 				zIndex: '4',
 				color: textColor,
-				backgroundImage: 'url("../assets/cardBacks.png")',
-				backgroundPosition: `${(card.element + card.upped * 13) * -128}px 0px`,
-				backgroundRepeat: 'no-repeat',
 				overflow: 'hidden',
+				backgroundColor: backColor,
+				borderRadius: '4px',
 			}}>
 			<span
 				style={{
@@ -43,7 +43,6 @@ export function Card(props) {
 					top: '20px',
 					width: '128px',
 					height: '128px',
-					backgroundColor: ui.maybeLightenStr(card),
 				}}
 			/>
 			<Text
@@ -52,13 +51,12 @@ export function Card(props) {
 				style={{
 					position: 'absolute',
 					padding: '2px',
-					top: '148px',
+					bottom: '0',
 					fontSize: '10px',
 					width: '128px',
-					height: '108px',
-					backgroundImage: 'url("/assets/cardBacks.png")',
-					backgroundPosition: `${(card.element + card.upped * 13) *
-						-128}px -20px`,
+					minHeight: '108px',
+					backgroundColor: backColor,
+					borderRadius: '0 0 4px 4px',
 				}}
 			/>
 			{!!card.rarity && (

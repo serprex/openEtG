@@ -254,7 +254,6 @@ const table = document.createElement('table');
 	],
 	[
 		['Ravizant', 'http://elementscommunity.org/forum/profile/?u=8037'],
-		['Card Backgrounds', 'assets/cardBacks.png'],
 		[
 			'4sc',
 			'4tb',

@@ -174,22 +174,22 @@ export function ExitBtn(props) {
 export function Card(props) {
 	const card = props.card || (props.code && Cards.Codes[props.code]);
 	if (!card) return null;
-	const textColor = card.upped ? '#000' : '';
+	const textColor = card.upped ? '#000' : '',
+		backColor = ui.maybeLightenStr(card);
 	return (
 		<div
 			style={{
 				position: 'absolute',
 				left: props.x + 'px',
 				top: props.y + 'px',
-				width: '128px',
+				width: '160px',
 				height: '256px',
 				pointerEvents: 'none',
 				zIndex: '5',
 				color: textColor,
-				backgroundImage: 'url("../assets/cardBacks.png")',
-				backgroundPosition: `${(card.element + card.upped * 13) * -128}px 0px`,
-				backgroundRepeat: 'no-repeat',
 				overflow: 'hidden',
+				backgroundColor: backColor,
+				borderRadius: '4px',
 			}}>
 			<span
 				style={{
@@ -206,9 +206,9 @@ export function Card(props) {
 				style={{
 					position: 'absolute',
 					top: '20px',
+					left: '16px',
 					width: '128px',
 					height: '128px',
-					backgroundColor: ui.maybeLightenStr(card),
 				}}
 			/>
 			<Text
@@ -217,13 +217,12 @@ export function Card(props) {
 				style={{
 					position: 'absolute',
 					padding: '2px',
-					top: '148px',
+					bottom: '0',
 					fontSize: '10px',
-					width: '128px',
-					height: '108px',
-					backgroundImage: 'url("/assets/cardBacks.png")',
-					backgroundPosition: `${(card.element + card.upped * 13) *
-						-128}px -20px`,
+					width: '160px',
+					minHeight: '108px',
+					backgroundColor: backColor,
+					borderRadius: '0 0 4px 4px',
 				}}
 			/>
 			{!!card.rarity && (
@@ -231,7 +230,7 @@ export function Card(props) {
 					className={`ico r${card.rarity}`}
 					style={{
 						position: 'absolute',
-						right: '30px',
+						right: '20px',
 						bottom: '2px',
 					}}
 				/>
@@ -329,7 +328,7 @@ export function RaritySelector(props) {
 				key={i}
 				e={(i ? 'r' : 't') + i}
 				x={props.x}
-				y={props.y + i * 32}
+				y={props.y + i * 24}
 				click={() => props.onChange(i)}
 			/>,
 		);
@@ -507,7 +506,7 @@ export class CardSelector extends React.Component {
 					onClick={() => this.setState({ showall: !this.state.showall })}
 				/>
 				<RaritySelector
-					x={74}
+					x={80}
 					y={338}
 					value={this.state.rarity}
 					onChange={rarity => this.setState({ rarity })}
