@@ -106,8 +106,9 @@ export default class Library extends React.Component {
 						whiteSpace: 'pre',
 					}}>
 					{`Wealth ${this.state.gold +
-						Math.round(userutil.calcWealth(cardpool))}
-					\nGold ${this.state.gold}`}
+						Math.round(userutil.calcWealth(cardpool))}\nGold ${
+						this.state.gold
+					}`}
 				</span>
 				<span
 					style={{
@@ -127,8 +128,7 @@ export default class Library extends React.Component {
 						top: '8px',
 						whiteSpace: 'pre',
 					}}>
-					`PvE ${this.state.aiwins} - ${this.state.ailosses}\nPvP $
-					{this.state.pvpwins} - ${this.state.pvplosses}`
+					{`PvE ${this.state.aiwins} - ${this.state.ailosses}\nPvP ${this.state.pvpwins} - ${this.state.pvplosses}`}
 				</span>
 				<Components.Card x={734} y={8} code={this.state.code} />
 				<input
