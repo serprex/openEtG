@@ -109,7 +109,10 @@ export default connect(({ user, opts }) => ({
 						this.props.dispatch(store.updateUser(userdelta));
 						const dlen = etgutil.decklength(data.cards);
 						if (dlen < 121) {
-							this.setState({ cards: data.cards, showbuy: false });
+							this.setState({
+								cards: data.cards,
+								showbuy: false,
+							});
 						} else {
 							this.setState({ showbuy: true });
 						}
@@ -220,7 +223,11 @@ export default connect(({ user, opts }) => ({
 							type="button"
 							value="Take Cards"
 							onClick={() => {
-								this.setState({ showbuy: true, hideget: true, cards: '' });
+								this.setState({
+									showbuy: true,
+									hideget: true,
+									cards: '',
+								});
 							}}
 							style={{
 								position: 'absolute',
@@ -232,16 +239,39 @@ export default connect(({ user, opts }) => ({
 					{this.state.showbuy &&
 						!!~this.state.packele &&
 						!!~this.state.packrarity && (
-							<input
-								type="button"
-								value="Buy Pack"
-								onClick={this.buyPack}
-								style={{
-									position: 'absolute',
-									left: '775px',
-									top: '156px',
-								}}
-							/>
+							<>
+								<input
+									type="button"
+									value="Max Buy"
+									onClick={() => {
+										const pack = packdata[this.state.packrarity];
+										this.props.dispatch(
+											store.setOptTemp(
+												'bulk',
+												Math.min(
+													Math.floor(this.props.user.gold / pack.cost),
+													99,
+												).toString(),
+											),
+										);
+									}}
+									style={{
+										position: 'absolute',
+										left: '775px',
+										top: '128px',
+									}}
+								/>
+								<input
+									type="button"
+									value="Buy Pack"
+									onClick={this.buyPack}
+									style={{
+										position: 'absolute',
+										left: '775px',
+										top: '156px',
+									}}
+								/>
+							</>
 						)}
 					{packdata.map((pack, n) => (
 						<div

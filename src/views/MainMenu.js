@@ -388,15 +388,11 @@ export default connect(({ user, opts }) => ({
 						<Rect x={86} y={92} wid={196} hei={120}>
 							<TitleText text="Stats" />
 							<Components.Text
-								text={
-									`${self.props.user.gold}$ ${self.props.user.name}` +
-									`\nPvE ${self.props.user.aiwins} - ${self.props.user.ailosses}` +
-									`\nPvP ${self.props.user.pvpwins} - ${self.props.user.pvplosses}`
-								}
+								text={`${self.props.user.name}\n${self.props.user.gold}$\nPvE ${self.props.user.aiwins} - ${self.props.user.ailosses}\nPvP ${self.props.user.pvpwins} - ${self.props.user.pvplosses}`}
 							/>
 						</Rect>
 						<Rect x={304} y={380} wid={292} hei={130}>
-							<TitleText text="??" />
+							<TitleText text="Miscellaneous" />
 							<div
 								style={{
 									width: '45%',
@@ -711,34 +707,7 @@ export default connect(({ user, opts }) => ({
 							/>
 						)}
 						{this.state.showsettings && (
-							<Components.Box x={585} y={380} width={267} height={156}>
-								<input
-									type="button"
-									value="Wipe Account"
-									onClick={() => {
-										if (
-											this.props.foename ==
-											self.props.user.name + 'yesdelete'
-										) {
-											logout('delete');
-										} else {
-											this.props.dispatch(
-												store.chatMsg(
-													`Input '${this.props.user.name}yesdelete' into Trade/Library to delete your account`,
-													'System',
-												),
-											);
-										}
-									}}
-									onMouseOver={this.mkSetTip(
-										'Click here to permanently remove your account',
-									)}
-									style={{
-										position: 'absolute',
-										left: '172px',
-										top: '8px',
-									}}
-								/>
+							<Components.Box x={585} y={380} width={272} height={156}>
 								{this.state.changepass ? (
 									<>
 										<input
@@ -754,8 +723,9 @@ export default connect(({ user, opts }) => ({
 											}}
 											style={{
 												position: 'absolute',
-												left: '8px',
+												left: '136px',
 												top: '4px',
+												width: '128px',
 											}}
 										/>
 										<input
@@ -771,37 +741,57 @@ export default connect(({ user, opts }) => ({
 											}}
 											style={{
 												position: 'absolute',
-												left: '8px',
+												left: '136px',
 												top: '32px',
+												width: '128px',
 											}}
 										/>
 										<input
 											type="button"
-											value="Change Pass"
+											value="Change Password"
 											onClick={changeFunc}
 											style={{
 												position: 'absolute',
 												left: '8px',
-												top: '56px',
+												top: '8px',
+												width: '120px',
+											}}
+										/>
+										<input
+											type="button"
+											value="Cancel Change"
+											onClick={() =>
+												this.setState({
+													changepass: false,
+													newpass: '',
+													newpass2: '',
+												})
+											}
+											style={{
+												position: 'absolute',
+												left: '8px',
+												top: '32px',
+												width: '120px',
 											}}
 										/>
 									</>
 								) : (
 									<input
 										type="button"
-										value="Change Pass"
+										value="Change Password"
 										onClick={() => this.setState({ changepass: true })}
 										style={{
 											position: 'absolute',
 											left: '8px',
 											top: '8px',
+											width: '120px',
 										}}
 									/>
 								)}
 								<label
 									style={{
 										position: 'absolute',
-										left: '135px',
+										left: '136px',
 										top: '88px',
 									}}>
 									<input
@@ -819,7 +809,7 @@ export default connect(({ user, opts }) => ({
 								<label
 									style={{
 										position: 'absolute',
-										left: '135px',
+										left: '136px',
 										top: '53px',
 									}}>
 									<input
@@ -888,7 +878,7 @@ export default connect(({ user, opts }) => ({
 								<label
 									style={{
 										position: 'absolute',
-										left: '135px',
+										left: '136px',
 										top: '123px',
 									}}>
 									<input

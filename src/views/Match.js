@@ -1204,7 +1204,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 		setCard(e, card, x) {
 			this.setState({
 				hovercode: card.code,
-				hoverx: x - 64,
+				hoverx: Math.max(x - 64, 172),
 				hovery: e.pageY > 300 ? 44 : 300,
 			});
 		}

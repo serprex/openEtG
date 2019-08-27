@@ -360,24 +360,25 @@ export default connect(({ user }) => ({
 						setMark={mark => this.setState({ mark })}
 					/>
 					<Tutor.Editor x={4} y={220} />
-					<input
-						placeholder="Deck"
-						autoFocus
-						value={this.currentDeckCode()}
+					<label
 						style={{
 							position: 'absolute',
-							left: '520px',
+							left: '536px',
 							top: '238px',
-							width: '190px',
-						}}
-						onChange={e =>
-							this.setState(processDeck(this.state.pool, e.target.value))
-						}
-						ref={this.deckRef}
-						onClick={e => {
-							e.target.setSelectionRange(0, 999);
-						}}
-					/>
+						}}>
+						Deck&nbsp;
+						<input
+							autoFocus
+							value={this.currentDeckCode()}
+							onChange={e =>
+								this.setState(processDeck(this.state.pool, e.target.value))
+							}
+							ref={this.deckRef}
+							onClick={e => {
+								e.target.setSelectionRange(0, 999);
+							}}
+						/>
+					</label>
 					<div
 						style={{
 							position: 'absolute',

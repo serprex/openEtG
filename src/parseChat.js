@@ -35,6 +35,7 @@ export default function parseChat(e) {
 				mod: 'List mods',
 				mute: 'If no user specified, mute chat entirely',
 				unmute: 'If no user specified, unmute chat entirely',
+				deleteme: 'Delete account',
 				w: 'Whisper',
 			};
 			for (const cmd in cmds) {
@@ -46,6 +47,21 @@ export default function parseChat(e) {
 			);
 		} else if (msg == '/who') {
 			sock.emit({ x: 'who' });
+		} else if (msg == '/deleteme') {
+			const { opts, user } = store.store.getState();
+			if (opts.foename == user.name + 'yesdelete') {
+				sock.userEmit('delete');
+				store.store.dispatch(store.setUser(null));
+				store.store.dispatch(store.setOpt('remember', false));
+				store.store.dispatch(store.doNav(import('./views/Login')));
+			} else {
+				store.store.dispatch(
+					store.chatMsg(
+						`Input '${user.name}yesdelete' into Trade/Library to delete your account`,
+						'System',
+					),
+				);
+			}
 		} else if (msg === '/vanilla') {
 			store.store.dispatch(store.doNav(import('./vanilla/views/Editor.js')));
 		} else if (msg === '/importaccount') {
