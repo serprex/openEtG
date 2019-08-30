@@ -349,13 +349,12 @@ const statusValues = {
 	swarm: 1,
 	tunnel: 3,
 	cloak: c => (!c.getStatus('charges') && c.ownerId === c.game.turn ? 0 : 4),
-	flooding: c => c.owner.foe.countcreatures() - 3,
 	patience: c => 1 + c.owner.countcreatures() * 2,
 	reflective: 1,
 };
 
 function getDamage(game, c) {
-	return damageHash.get(game.props.get(c.id).hashCode()) || 0;
+	return damageHash.get(c.id) || 0;
 }
 function estimateDamage(game, c, freedomChance, wallCharges, wallIndex) {
 	if (!c || c.getStatus('frozen') || c.getStatus('delayed')) {
@@ -413,7 +412,7 @@ function estimateDamage(game, c, freedomChance, wallCharges, wallIndex) {
 		atk += Math.ceil(atk / 2) * freedomChance;
 	}
 	if (c.owner.foe.getStatus('sosa')) atk *= -1;
-	damageHash.set(game.props.get(c.id).hashCode(), atk);
+	damageHash.set(c.id, atk);
 	return atk;
 }
 function calcExpectedDamage(pl, wallCharges, wallIndex) {
@@ -443,9 +442,6 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 		}
 	}
 	if (freedomChance) freedomChance = 1 - Math.pow(0.7, freedomChance);
-	if (pl.foe.shieldId && pl.foe.shield.hasactive('shield', 'blockwithcharge')) {
-		wallCharges[wallIndex] = pl.foe.shield.getStatus('charges');
-	}
 	if (!stasisFlag) {
 		pl.creatures.forEach(c => {
 			if (c) {
@@ -525,7 +521,7 @@ const throttled = new Set([
 	'siphon',
 ]);
 
-function evalthing(game, c, inHand) {
+function evalthing(game, c, inHand, floodingFlag) {
 	if (!c) return 0;
 	const { card } = c;
 	if (inHand && !caneventuallyactive(card.costele, card.cost, c.owner)) {
@@ -557,7 +553,7 @@ function evalthing(game, c, inHand) {
 		ttatk = getDamage(game, c);
 		if (
 			c.getStatus('psionic') &&
-			c.owner.foe.shield &&
+			c.owner.foe.shieldId &&
 			c.owner.foe.shield.getStatus('reflective')
 		)
 			ttatk *= -1;
@@ -574,6 +570,13 @@ function evalthing(game, c, inHand) {
 		} else if (poison < 0) {
 			hp = Math.max(Math.min(hp - poison, c.maxhp), 0);
 		}
+		if (
+			floodingFlag &&
+			!c.getStatus('aquatic') &&
+			c.isMaterial() &&
+			c.getIndex() > 4
+		)
+			hp = 0;
 		if (hp === 0) {
 			if (c.active.get('owndeath')) {
 				score += evalactive(c, c.active.get('owndeath'), ttatk) * 3;
@@ -696,13 +699,34 @@ export default function(game) {
 	const expectedDamage = new Map();
 	for (let j = 0; j < game.players.length; j++) {
 		const pl = game.byId(game.players[(playerIdx + j) % game.players.length]);
-		expectedDamage.set(pl.id, calcExpectedDamage(pl, wallCharges, j));
+		if (pl.shieldId && pl.shield.hasactive('shield', 'blockwithcharge')) {
+			wallCharges[j] = pl.shield.getStatus('charges');
+		}
+	}
+	for (let j = 0; j < game.players.length; j++) {
+		const pl = game.byId(game.players[(playerIdx + j) % game.players.length]);
+		expectedDamage.set(
+			pl.id,
+			calcExpectedDamage(pl, wallCharges, pl.foe.getIndex()),
+		);
 	}
 	if (expectedDamage.get(player.id) > foe.hp) {
 		return (expectedDamage.get(player.id) - foe.hp) * 999;
 	}
 	if (player.deckIds.length === 0 && player.handIds.length < 8) {
 		return -99999980;
+	}
+	let floodingFlag = false;
+	for (let j = 0; j < game.players.length; j++) {
+		const pl = game.byId(game.players[(playerIdx + j) % game.players.length]),
+			perms = pl.permanentIds;
+		for (let i = 0; i < 16; i++) {
+			if (perms[i] && game.getStatus(perms[i], 'flooding')) {
+				floodingFlag = true;
+				break;
+			}
+		}
+		if (floodingFlag) break;
 	}
 	let gamevalue = 0;
 	for (let j = 0; j < game.players.length; j++) {
@@ -712,10 +736,11 @@ export default function(game) {
 			uniquesSkill.delete('patience');
 			uniquesSkill.delete('cloak');
 		}
-		const pl = game.byId(game.players[(playerIdx + j) % game.players.length]),
-			expectedDamageToTake = expectedDamage.get(pl.foeId);
+		const pl = game.byId(game.players[(playerIdx + j) % game.players.length]);
 		if (pl.out) continue;
-		let pscore = wallCharges[j] * 4 + pl.markpower - expectedDamageToTake;
+		const expectedDamageToTake = expectedDamage.get(pl.foeId);
+		let pscore =
+			wallCharges[j] * 4 + Math.log(pl.markpower + 1) - expectedDamageToTake;
 		if (expectedDamageToTake > player.hp)
 			pscore -= (expectedDamageToTake - player.hp) * 99;
 		pscore += evalthing(game, pl.weapon) + evalthing(game, pl.shield);
