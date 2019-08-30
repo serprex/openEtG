@@ -184,7 +184,7 @@ export function Card(props) {
 				width: '128px',
 				height: '256px',
 				pointerEvents: 'none',
-				zIndex: '4',
+				zIndex: '5',
 				color: textColor,
 				backgroundImage: 'url("../assets/cardBacks.png")',
 				backgroundPosition: `${(card.element + card.upped * 13) * -128}px 0px`,

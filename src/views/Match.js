@@ -469,7 +469,7 @@ function FoePlays({
 					position: 'absolute',
 					left: '8px',
 					top: '300px',
-					zIndex: 5,
+					zIndex: '6',
 				}}>
 				{foeplays.map((play, i) => (
 					<Components.CardImage
@@ -1592,6 +1592,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 							left: '780px',
 							top: '40px',
 							width: '120px',
+							zIndex: '3',
 						}}>
 						{`${[
 							'Commoner\n',
@@ -1627,7 +1628,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 								position: 'absolute',
 								left: '0',
 								top: '0',
-								zIndex: '3',
+								zIndex: '4',
 								pointerEvents: 'none',
 							}}>
 							<defs>
@@ -1682,6 +1683,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 							position: 'absolute',
 							left: '816px',
 							top: '15px',
+							zIndex: '4',
 						}}
 					/>
 					{!props.replay &&
