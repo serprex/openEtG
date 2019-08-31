@@ -224,7 +224,7 @@ export function Card(props) {
 					padding: '2px',
 					bottom: '0',
 					fontSize: '10px',
-					minHeight: '108px',
+					minHeight: '102px',
 					backgroundColor: backColor,
 					borderRadius: '0 0 4px 4px',
 				}}
