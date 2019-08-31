@@ -1291,7 +1291,7 @@ const importlocks = new Map();
 			const foesock = Us.socks.get(data.f);
 			if (foesock && foesock.readyState === 1) {
 				const info = sockmeta.get(foesock),
-					foename = data.pvp ? info.duel : info.trade ? info.trade.foe : '';
+					foename = data.pvp ? info.duelwant : info.trade ? info.trade.foe : '';
 				sockEmit(foesock, 'chat', {
 					mode: 1,
 					msg: `You have sent a ${
