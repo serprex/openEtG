@@ -27,7 +27,8 @@ export default connect(({ user }) => ({ user }))(
 			function upgradeCard(card) {
 				if (!card.isFree()) {
 					if (card.upped) return 'You cannot upgrade upgraded cards.';
-					const use = card.rarity != -1 ? 6 : 1;
+					const use =
+						~card.rarity && !(card.rarity === 5 && card.shiny) ? 6 : 1;
 					if (self.state.cardpool[card.code] >= use) {
 						sock.userExec('upgrade', { card: card.code });
 					} else
