@@ -368,7 +368,9 @@ const importlocks = new Map();
 			const foesock = Us.socks.get(f);
 			if (foesock && foesock.readyState === 1) {
 				const foemeta = sockmeta.get(foesock);
-				if (foemeta.duel === u) {
+				if (foemeta.duelwant === u) {
+					foemeta.duelwant = null;
+					foemeta.duel = u;
 					thismeta.duel = f;
 					const data = {
 						seed: (Math.random() * MAX_INT) | 0,
@@ -392,21 +394,9 @@ const importlocks = new Map();
 					sockEmit(this, 'pvpgive', { data });
 					sockEmit(foesock, 'pvpgive', { data });
 				} else {
-					thismeta.duel = f;
+					thismeta.duelwant = f;
 					sockEmit(foesock, 'challenge', { f: u, pvp: true });
 				}
-			}
-		},
-		spectate(data, user) {
-			const tgt = Us.socks.get(data.f),
-				tgtmeta = sockmeta.get(tgt);
-			if (tgt && tgtmeta.duel) {
-				sockEmit(tgt, 'chat', {
-					mode: 1,
-					msg: `${data.u} is spectating.`,
-				});
-				if (!tgtmeta.spectators) tgtmeta.spectators = [];
-				tgtmeta.spectators.push(data.u);
 			}
 		},
 		canceltrade(data, user, info) {
