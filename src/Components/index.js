@@ -190,6 +190,8 @@ export function Card(props) {
 				overflow: 'hidden',
 				backgroundColor: backColor,
 				borderRadius: '4px',
+				borderWidth: '3px',
+				borderStyle: 'double',
 			}}>
 			<span
 				style={{
@@ -206,9 +208,12 @@ export function Card(props) {
 				style={{
 					position: 'absolute',
 					top: '20px',
-					left: '16px',
+					left: '8px',
 					width: '128px',
 					height: '128px',
+					borderWidth: '1px',
+					borderColor: '#000',
+					borderStyle: 'solid',
 				}}
 			/>
 			<Text
@@ -230,8 +235,8 @@ export function Card(props) {
 					className={`ico r${card.rarity}`}
 					style={{
 						position: 'absolute',
-						right: '20px',
-						bottom: '2px',
+						right: '2px',
+						top: '40px',
 					}}
 				/>
 			)}
@@ -254,7 +259,7 @@ export function Card(props) {
 				style={{
 					position: 'absolute',
 					right: '2px',
-					bottom: '2px',
+					top: '22px',
 				}}
 			/>
 		</div>

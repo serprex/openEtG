@@ -43,6 +43,7 @@ const SkillsValues = {
 	brew: 4,
 	brokenmirror: c =>
 		c.owner.foe.shield && c.owner.foe.shield.getStatus('reflective') ? -3 : 2,
+	bubbleclear: 3,
 	burrow: 1,
 	butterfly: 12,
 	catapult: 6,

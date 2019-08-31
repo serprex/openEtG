@@ -345,9 +345,8 @@ Game.prototype.targetFilter = function(src, active) {
 		(t =>
 			((t.type === etg.Player && !t.out) ||
 				(~t.getIndex() &&
-					(t.type === etg.Spell ||
-						t.ownerId === this.turn ||
-						t.getStatus('cloak') ||
+					(t.ownerId === this.turn ||
+						(t.type !== etg.Spell && t.getStatus('cloak')) ||
 						!t.owner.isCloaked()))) &&
 			targetingFilter(src, t))
 	);

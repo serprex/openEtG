@@ -98,8 +98,9 @@ const Skills = {
 		t.incrAtk(t.trueatk() * -2);
 	},
 	appease: (ctx, c, t) => {
-		Skills.devour(ctx, c, t);
 		c.setStatus('appeased', 1);
+		ctx.effect({ x: 'Text', text: 'Appeased', id: c.id });
+		Skills.devour(ctx, c, t);
 	},
 	atk2hp: (ctx, c, t) => {
 		t.buffhp(t.trueatk() - t.hp);
@@ -214,6 +215,11 @@ const Skills = {
 			ctx.effect({ x: 'StartPos', id: phantom.id, src: c.id });
 			c.owner.addCrea(phantom);
 		}
+	},
+	bubbleclear: (ctx, c, t) => {
+		Skills.clear(ctx, c, t);
+		t.addactive('prespell', exports.protectonce);
+		t.addactive('spelldmg', exports.protectoncedmg);
 	},
 	burrow: (ctx, c, t) => {
 		c.setStatus('burrowed', 1);
@@ -904,6 +910,7 @@ const Skills = {
 		}
 	},
 	holylight: (ctx, c, t) => {
+		if (c.card.upped) c.owner.spend(etg.Light, -1);
 		if (t.getStatus('nocturnal')) t.spelldmg(10);
 		else t.dmg(-10);
 	},
@@ -1882,7 +1889,7 @@ const Skills = {
 		ctx.set(c.ownerId, 'quanta', quanta);
 		const n = c.card.upped ? 40 : 48;
 		c.owner.setStatus('sosa', 0);
-		c.owner.dmg(Math.max(Math.ceil((c.owner.maxhp * n) / 100), n));
+		c.owner.dmg(Math.ceil((c.owner.maxhp * n) / 100));
 		c.owner.setStatus('sosa', 2);
 	},
 	soulcatch: (ctx, c, t) => {
@@ -2289,7 +2296,7 @@ const Skills = {
 	},
 	firewall: (ctx, c, t) => {
 		if (!t.getStatus('ranged')) {
-			t.dmg(1);
+			t.spelldmg(1);
 		}
 	},
 	skull: (ctx, c, t) => {

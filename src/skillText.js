@@ -57,7 +57,8 @@ const data = {
 	appease:
 		'Sacrifice target creature you own and gain 1|1. If this ability is not used, this creature will attack its owner. This creature attacks normally the turn it is played or if it loses this ability.',
 	atk2hp: "Set target's HP equal to its strength.",
-	autoburrow: 'Until end of turn, your creatures with burrow enter play burrowed.',
+	autoburrow:
+		'Until end of turn, your creatures with burrow enter play burrowed.',
 	axedraw:
 		'Gains 1 strength for every card drawn by any player. Strength gained is removed after attack.',
 	bblood: 'Give target creature 0|20 and delay it for 5 turns.',
@@ -81,11 +82,14 @@ const data = {
 		'Opponent draws up to two cards. Draw cards equal to what opponent drew.',
 	brawl:
 		'Your creatures attack. If a creature exists in opposing creature slot, the two creatures deal their damage to one another instead of opponent. Consumes all remaining 1:3.',
-	brew: 'Add a random Alchemy card to your hand. Possible cards include: Antimatter, Black Hole, Adrenaline, Nymph\'s Tears, Unstable Gas, Liquid Shadow, Aflatoxin, Stone Skin, Rage Potion, Luciferin, Precognition, Quintessence.',
+	brew:
+		"Add a random Alchemy card to your hand. Possible cards include: Antimatter, Black Hole, Adrenaline, Nymph's Tears, Unstable Gas, Liquid Shadow, Aflatoxin, Stone Skin, Rage Potion, Luciferin, Precognition, Quintessence.",
 	brokenmirror: [
 		'When opponent plays a creature from their hand, summon a 1|1 Phantom.',
 		'When opponent plays a creature from their hand, summon a 2|1 Phantom.',
 	],
+	bubbleclear:
+		"Remove statuses (positive and negative) from target creature, reduce target creature's delay by 1, and heal target creature 1.\nTarget gains a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages the affected card.",
 	butterfly:
 		'Target creature with either strength or HP less than 3 has its skills replaced with "3:1 Destroy target permanent."',
 	burrow:
@@ -151,7 +155,7 @@ const data = {
 	disshield:
 		'Block all damage from attackers.. Consume 1:1 per 3 damage blocked. Not prevented by Sanctuary.',
 	divinity: 'Add 24 to maximum health and heal yourself 16.',
-	dive: 'Double this creature\'s strength through next attack. Does not stack.',
+	dive: "Double this creature's strength through next attack. Does not stack.",
 	dmgproduce: 'Generate 1:0 for each damage dealt by this card.',
 	draft:
 		'If target creature is airborne, it loses airborne and takes 3 spell damage. If target creature is not airborne, it becomes airborne and gains 3|0',
@@ -271,8 +275,10 @@ const data = {
 			c.upped ? 'Ball Lightning' : 'Spark'
 		}.`,
 	hitownertwice: 'When this creature attacks, it also attacks its owner twice.',
-	holylight:
+	holylight: [
 		'Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature.',
+		'Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature.\nGain 1:8 when played',
+	],
 	hope:
 		'Blocks one additional damage for each creature you control that produces 1:8 every turn.',
 	icebolt:
@@ -387,7 +393,8 @@ const data = {
 		`Each turn, switches between producing ${c.element ? 1 : 3}:${
 			c.element
 		} and one quanta matching your mark.`,
-	plague: "Give target player's creatures 1 poison counter each. Removes cloak.",
+	plague:
+		"Give target player's creatures 1 poison counter each. Removes cloak.",
 	platearmor: [
 		'Target creature gains 0|4, or target player gains 4 maximum HP and heals 4.',
 		'Target creature gains 0|6, or target player gains 6 maximum HP and heals 6.',
@@ -403,7 +410,8 @@ const data = {
 		'When this card enters play, 70% chance to give 1 poison counter to opponent.',
 	powerdrain:
 		"Remove half of target creature's strength and HP. Add an equal amount of strength and HP to a random creature you control.",
-	precognition: "Reveal opponent's hand until the end of their turn. Draw a card.",
+	precognition:
+		"Reveal opponent's hand until the end of their turn. Draw a card.",
 	predator:
 		'If opponent has more than four cards in their hand, this card attacks a second time and opponent discards the last card in their hand.',
 	protectall:
@@ -453,7 +461,7 @@ const data = {
 	reinforce:
 		"Target creature gains strength and HP equal to this creature's strength and HP. Destroy this creature.",
 	ren:
-		"Target creature gains: \"When this creature would die, it is instead returned to its owner's hand. Modified stats and statuses remain on the card when it is played again.\"",
+		'Target creature gains: "When this creature would die, it is instead returned to its owner\'s hand. Modified stats and statuses remain on the card when it is played again."',
 	rewind:
 		"Put target creature on top of its owner's deck. Removes all bonuses and modifiers on target creature.",
 	reveal: {
@@ -532,9 +540,7 @@ const data = {
 	storm: x =>
 		`Deal ${x} spell damage to all of target player\'s creatures. Removes cloak.`,
 	summon: x => c =>
-		`Summon a ${
-			(c instanceof Card ? c.Cards : c.game.Cards).Names[x].name
-		}.`,
+		`Summon a ${(c instanceof Card ? c.Cards : c.game.Cards).Names[x].name}.`,
 	swarm:
 		'Base HP is equal to the number of Scarabs you control, including this one.',
 	swave:
@@ -628,7 +634,7 @@ function auraText(tgts, bufftext, upbufftext) {
 }
 const statusData = {
 	cloak:
-		'Cloaks your play field. Opponent cannot see your actions or directly target your other cards.',
+		'Cloaks your field. Opponent cannot see your actions or directly target your other cards.',
 	charges: (c, inst) =>
 		c !== inst ||
 		Thing.prototype.hasactive.call(c, 'ownattack', 'losecharge') ||

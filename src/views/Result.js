@@ -426,7 +426,7 @@ export default connect(({ user }) => ({ user }))(
 				{ cardreward } = this.state,
 				cards = [];
 			if (cardreward) {
-				let x0 = 470 - etgutil.decklength(cardreward) * 20 - 64;
+				let x0 = 470 - etgutil.decklength(cardreward) * 20 - 80;
 				for (const code of etgutil.iterdeck(cardreward)) {
 					cards.push(
 						<Components.Card key={cards.length} x={x0} y={170} code={code} />,

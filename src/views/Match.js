@@ -83,9 +83,9 @@ const cloaksvg = (
 	<div
 		style={{
 			position: 'absolute',
-			left: '172px',
+			left: '0',
 			top: '0',
-			width: '728px',
+			width: '900px',
 			height: '299px',
 			backgroundColor: '#000',
 			zIndex: '1',
@@ -1204,7 +1204,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 		setCard(e, card, x) {
 			this.setState({
 				hovercode: card.code,
-				hoverx: Math.max(x - 64, 172),
+				hoverx: Math.max(x - 80, 172),
 				hovery: e.pageY > 300 ? 44 : 300,
 			});
 		}
@@ -1417,6 +1417,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 										width: `${x1}px`,
 										height: '20px',
 										pointerEvents: 'none',
+										zIndex: '2',
 									}}
 								/>
 								{!cloaked && expectedDamage !== 0 && (
@@ -1436,6 +1437,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 											width: Math.max(x1, x2) - Math.min(x1, x2) + 'px',
 											height: '20px',
 											pointerEvents: 'none',
+											zIndex: '2',
 										}}
 									/>
 								)}
@@ -1454,6 +1456,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 							left: '0',
 							top: j ? '40px' : '535px',
 							textShadow: '1px 1px 1px #000,2px 2px 2px #000',
+							zIndex: '2',
 						}}
 					/>,
 					<div
@@ -1467,6 +1470,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 							pointerEvents: 'none',
 							fontSize: '18px',
 							textShadow: '2px 2px 1px #000,2px 2px 2px #000',
+							zIndex: '2',
 						}}>
 						{pl.deckIds.length || '0!!'}
 					</div>,
