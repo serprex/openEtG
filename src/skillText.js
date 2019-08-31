@@ -521,8 +521,8 @@ const data = {
 	snipe: 'Deal 3 damage to target creature.',
 	solar: 'Gain 1:8 for each attacker.',
 	sosa: [
-		'Lose HP equal to 48% of your maximum HP (at least 48 HP). Consume all non-1:2 quanta. For two turns, damage heals you and healing damages you.',
-		'Lose HP equal to 40% of your maximum HP (at least 40 HP). Consume all non-1:2 quanta. For two turns, damage heals you and healing damages you.',
+		'Lose HP equal to 48% of your maximum HP. Consume all non-1:2 quanta. For two turns, damage heals you and healing damages you.',
+		'Lose HP equal to 40% of your maximum HP. Consume all non-1:2 quanta. For two turns, damage heals you and healing damages you.',
 	],
 	soulcatch: 'Whenever a creature dies, gain 3:2.',
 	spores: [
