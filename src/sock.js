@@ -143,19 +143,19 @@ const sockEvents = {
 				userEmit('foearena', { lv: data.lv });
 			},
 		});
-		store.store.dispatch(store.doNav(import('./views/Match'), { game }));
+		store.store.dispatch(store.doNav(import('./views/Match.js'), { game }));
 	},
 	tradegive: data => {
 		if (trade) {
 			trade = false;
-			store.store.dispatch(store.doNav(import('./views/Trade')));
+			store.store.dispatch(store.doNav(import('./views/Trade.js')));
 		}
 	},
 	pvpgive: data => {
 		if (pvp) {
 			pvp = null;
 			store.store.dispatch(
-				store.doNav(import('./views/Match'), {
+				store.doNav(import('./views/Match.js'), {
 					game: new Game(data.data),
 				}),
 			);
@@ -174,7 +174,7 @@ const sockEvents = {
 	},
 	matchgive: data => {
 		store.store.dispatch(
-			store.doNav(import('./views/Challenge'), {
+			store.doNav(import('./views/Challenge.js'), {
 				groups: data.groups,
 				set: data.set,
 			}),
@@ -290,6 +290,6 @@ export function offerTrade(f) {
 export function cancelTrade() {
 	if (trade) {
 		trade = null;
-		sock.userEmit('canceltrade');
+		userEmit('canceltrade');
 	}
 }

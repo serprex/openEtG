@@ -14,7 +14,7 @@ window.onerror = function() {
 	}
 };
 
-import('../views/App').then(App =>
+import('../views/App.js').then(App =>
 	reactDOM.render(
 		<Provider store={store.store}>
 			<App.default />
@@ -22,7 +22,7 @@ import('../views/App').then(App =>
 		document.getElementById('leftpane'),
 	),
 );
-import('../views/Rightpane').then(Rightpane =>
+import('../views/Rightpane.js').then(Rightpane =>
 	reactDOM.render(
 		<Provider store={store.store}>
 			<Rightpane.default />

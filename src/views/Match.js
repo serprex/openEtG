@@ -909,7 +909,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 				}
 			}
 			this.props.dispatch(
-				store.doNav(import('./Result'), {
+				store.doNav(import('./Result.js'), {
 					game: game,
 					streakback: this.streakback,
 				}),
@@ -971,7 +971,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 
 		resignClick = () => {
 			if (this.props.replay) {
-				this.props.dispatch(store.doNav(import('./Challenge'), {}));
+				this.props.dispatch(store.doNav(import('./Challenge.js'), {}));
 				return;
 			}
 			if (this.state.resigning) {

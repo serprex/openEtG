@@ -44,10 +44,10 @@ export default connect(({ user }) => ({ user }))(
 								gold: this.props.user.gold + data.g,
 							}),
 						);
-						this.props.dispatch(store.doNav(import('./MainMenu')));
+						this.props.dispatch(store.doNav(import('./MainMenu.js')));
 					},
 					tradecanceled: () => {
-						this.props.dispatch(store.doNav(import('./MainMenu')));
+						this.props.dispatch(store.doNav(import('./MainMenu.js')));
 					},
 				}),
 			);
@@ -168,7 +168,7 @@ export default connect(({ user }) => ({ user }))(
 						value="Cancel"
 						onClick={() => {
 							sock.userEmit('canceltrade');
-							this.props.dispatch(store.doNav(import('./MainMenu')));
+							this.props.dispatch(store.doNav(import('./MainMenu.js')));
 						}}
 						style={{
 							position: 'absolute',

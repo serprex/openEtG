@@ -227,18 +227,18 @@ export default connect(({ user }) => ({ user }))(
 			if (game.data.quest) {
 				if (game.winner === this.state.player1.id && game.data.choicerewards) {
 					this.props.dispatch(
-						store.doNav(import('./Reward'), {
+						store.doNav(import('./Reward.js'), {
 							type: game.data.choicerewards,
 							amount: game.data.rewardamount,
 						}),
 					);
 				} else {
-					this.props.dispatch(store.doNav(import('./Quest')));
+					this.props.dispatch(store.doNav(import('./Quest.js')));
 				}
 			} else if (game.data.daily !== undefined) {
-				this.props.dispatch(store.doNav(import('./Colosseum')));
+				this.props.dispatch(store.doNav(import('./Colosseum.js')));
 			} else {
-				this.props.dispatch(store.doNav(import('./MainMenu')));
+				this.props.dispatch(store.doNav(import('./MainMenu.js')));
 			}
 		};
 

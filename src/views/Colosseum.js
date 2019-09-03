@@ -119,7 +119,7 @@ export default connect(({ user }) => ({ user }))(function Colosseum({ user }) {
 							const nymph = etg.NymphList[RngMock.upto(12) + 1];
 							sock.userExec('donedaily', { daily: 6, c: nymph });
 							store.store.dispatch(
-								store.doNav(import('./MainMenu'), { nymph }),
+								store.doNav(import('./MainMenu.js'), { nymph }),
 							);
 						}}
 					/>

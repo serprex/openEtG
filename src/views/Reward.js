@@ -43,7 +43,7 @@ export default class Reward extends React.Component {
 						store.store.dispatch(
 							store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System'),
 						);
-						store.store.dispatch(store.doNav(import('./MainMenu')));
+						store.store.dispatch(store.doNav(import('./MainMenu.js')));
 					},
 				}),
 			);
@@ -51,7 +51,7 @@ export default class Reward extends React.Component {
 			store.store.dispatch(
 				store.chatMsg('Unknown reward ${this.props.type}', 'System'),
 			);
-			store.store.dispatch(store.doNav(import('./MainMenu')));
+			store.store.dispatch(store.doNav(import('./MainMenu.js')));
 		}
 	}
 
@@ -74,7 +74,7 @@ export default class Reward extends React.Component {
 											etgutil.encodeCount(numberofcopies) +
 											this.state.chosenReward.toString(32),
 									});
-									store.store.dispatch(store.doNav(import('./MainMenu')));
+									store.store.dispatch(store.doNav(import('./MainMenu.js')));
 								} else {
 									sock.userEmit('codesubmit2', {
 										code: code,

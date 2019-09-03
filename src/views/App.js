@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import Login from './Login';
+import Login from './Login.js';
 
 export default connect(state => ({
 	view: state.nav.view || Login,

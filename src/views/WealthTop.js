@@ -30,7 +30,7 @@ export default class WealthTop extends React.Component {
 						key={i}
 						onClick={() =>
 							store.store.dispatch(
-								store.doNav(import('./Library'), {
+								store.doNav(import('./Library.js'), {
 									name: top[i],
 								}),
 							)

@@ -7,7 +7,7 @@ import * as sock from '../sock.js';
 import * as store from '../store.js';
 import * as util from '../util.js';
 import * as etgutil from '../etgutil.js';
-import * as Components from '../Components';
+import * as Components from '../Components/index.js';
 import RngMock from '../RngMock.js';
 
 function RenderInfo(props) {
@@ -36,7 +36,7 @@ function RenderInfo(props) {
 					},
 				]),
 			});
-			store.store.dispatch(store.doNav(import('./Match'), { game }));
+			store.store.dispatch(store.doNav(import('./Match.js'), { game }));
 		};
 		const card = y ? etgutil.asUpped(info.card, true) : info.card;
 		const adeck = '05' + card.toString(32) + info.deck;
@@ -111,7 +111,7 @@ function RenderInfo(props) {
 					}}
 					onClick={() => {
 						store.store.dispatch(
-							store.doNav(import('./ArenaEditor'), {
+							store.doNav(import('./ArenaEditor.js'), {
 								adeck: info.deck,
 								acard: Cards.Codes[card],
 								ainfo: info,
@@ -149,7 +149,7 @@ function ArenaCard(props) {
 				}}
 				onClick={() => {
 					store.store.dispatch(
-						store.doNav(import('./ArenaEditor'), {
+						store.doNav(import('./ArenaEditor.js'), {
 							adeck: '',
 							acard: Cards.Codes[code],
 							ainfo: { day: info ? info.day : 0 },

@@ -206,7 +206,7 @@ export default connect(({ user }) => ({ user }))(
 							this.props.dispatch(
 								store.chatMsg('Arena deck submitted', 'System'),
 							);
-							this.props.dispatch(store.doNav(import('../views/MainMenu')));
+							this.props.dispatch(store.doNav(import('../views/MainMenu.js')));
 						}}
 						style={{
 							position: 'absolute',
@@ -218,7 +218,7 @@ export default connect(({ user }) => ({ user }))(
 						type="button"
 						value="Exit"
 						onClick={() => {
-							this.props.dispatch(store.doNav(import('../views/ArenaInfo')));
+							this.props.dispatch(store.doNav(import('../views/ArenaInfo.js')));
 						}}
 						style={{
 							position: 'absolute',

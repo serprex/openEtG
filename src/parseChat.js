@@ -53,7 +53,7 @@ export default function parseChat(e) {
 				sock.userEmit('delete');
 				store.store.dispatch(store.setUser(null));
 				store.store.dispatch(store.setOpt('remember', false));
-				store.store.dispatch(store.doNav(import('./views/Login')));
+				store.store.dispatch(store.doNav(import('./views/Login.js')));
 			} else {
 				store.store.dispatch(
 					store.chatMsg(

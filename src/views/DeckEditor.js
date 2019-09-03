@@ -414,7 +414,7 @@ export default connect(({ user }) => ({
 						value="Exit"
 						onClick={() => {
 							this.saveDeck(this.props.user.selectedDeck, true);
-							this.props.dispatch(store.doNav(import('../views/MainMenu')));
+							this.props.dispatch(store.doNav(import('../views/MainMenu.js')));
 						}}
 						style={{
 							position: 'absolute',

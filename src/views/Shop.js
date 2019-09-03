@@ -26,40 +26,49 @@ const packdata = [
 	{ cost: 250, type: 'Nymph', info: '1 Nymph', color: '#69b' },
 ];
 
-function PackDisplay({ cards }) {
-	const dlen = etgutil.decklength(cards);
-	let cardchildren;
-	if (dlen < 11) {
-		cardchildren = [];
-		for (const code of etgutil.iterdeck(cards)) {
-			const i = cardchildren.length,
-				x = i % 5,
-				y = Math.floor(i / 5);
-			cardchildren.push(
-				<Components.Card
-					key={i}
-					x={7 + x * 140}
-					y={y ? 298 : 14}
-					code={code}
-				/>,
+class PackDisplay extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = { hovercode: 0 };
+	}
+
+	render() {
+		const { cards } = this.props;
+		const dlen = etgutil.decklength(cards);
+		let cardchildren;
+		if (dlen < 51) {
+			cardchildren = (
+				<Components.DeckDisplay
+					x={64}
+					deck={etgutil.decodedeck(cards)}
+					onMouseOver={(i, code) => this.setState({ hovercode: code })}
+				/>
+			);
+		} else {
+			const deck = etgutil.decodedeck(cards);
+			cardchildren = (
+				<>
+					<Components.DeckDisplay
+						x={64}
+						deck={deck.slice(0, 50)}
+						onMouseOver={(i, code) => this.setState({ hovercode: code })}
+					/>
+					<Components.DeckDisplay
+						x={-97}
+						y={244}
+						deck={deck.slice(50)}
+						onMouseOver={(i, code) => this.setState({ hovercode: code })}
+					/>
+				</>
 			);
 		}
-	} else if (dlen < 61) {
-		cardchildren = <Components.DeckDisplay deck={etgutil.decodedeck(cards)} />;
-	} else {
-		const deck = etgutil.decodedeck(cards);
-		cardchildren = (
-			<>
-				<Components.DeckDisplay deck={deck.slice(0, 60)} />
-				<Components.DeckDisplay y={244} deck={deck.slice(60)} />
-			</>
+		return (
+			<Components.Box x={40} y={16} width={710} height={568}>
+				<Components.Card code={this.state.hovercode} x={2} y={2} />
+				{cardchildren}
+			</Components.Box>
 		);
 	}
-	return (
-		<Components.Box x={40} y={16} width={710} height={568}>
-			{cardchildren}
-		</Components.Box>
-	);
 }
 
 export default connect(({ user, opts }) => ({

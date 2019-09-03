@@ -159,7 +159,7 @@ export function ExitBtn(props) {
 			onClick={
 				props.onClick ||
 				(() => {
-					store.store.dispatch(store.doNav(import('../views/MainMenu')));
+					store.store.dispatch(store.doNav(import('../views/MainMenu.js')));
 				})
 			}
 			style={{

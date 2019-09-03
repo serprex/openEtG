@@ -358,7 +358,7 @@ export default connect(({ user, opts }) => ({
 				store.setCmds({
 					matchbegin: data => {
 						this.props.dispatch(
-							store.doNav(import('./Match'), {
+							store.doNav(import('./Match.js'), {
 								game: new Game(data.data),
 							}),
 						);
@@ -443,7 +443,7 @@ export default connect(({ user, opts }) => ({
 		aiClick = () => {
 			const deck = this.state.groups[0][0].deck || this.state.mydeck;
 			if (etgutil.decklength(deck) < 9) {
-				this.props.dispatch(store.doNav(import('./DeckEditor')));
+				this.props.dispatch(store.doNav(import('./DeckEditor.js')));
 				return;
 			}
 			const gameData = {
@@ -454,7 +454,7 @@ export default connect(({ user, opts }) => ({
 			};
 			RngMock.shuffle(gameData.players);
 			this.props.dispatch(
-				store.doNav(import('./Match'), { game: new Game(gameData) }),
+				store.doNav(import('./Match.js'), { game: new Game(gameData) }),
 			);
 		};
 
@@ -481,7 +481,7 @@ export default connect(({ user, opts }) => ({
 				players: replay.players,
 			};
 			this.props.dispatch(
-				store.doNav(import('./Match'), {
+				store.doNav(import('./Match.js'), {
 					replay,
 					game: new Game(data),
 				}),
@@ -499,7 +499,8 @@ export default connect(({ user, opts }) => ({
 			this.toMainMenu();
 		};
 
-		toMainMenu = () => this.props.dispatch(store.doNav(import('./MainMenu')));
+		toMainMenu = () =>
+			this.props.dispatch(store.doNav(import('./MainMenu.js')));
 
 		sendConfig = () => {
 			if (this.props.username === this.state.groups[0][0].user) {

@@ -1,10 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import Chat from '../Components/Chat';
-import * as sock from '../sock';
-import * as store from '../store';
-import parseChat from '../parseChat';
+import Chat from '../Components/Chat.js';
+import * as sock from '../sock.js';
+import * as store from '../store.js';
+import parseChat from '../parseChat.js';
 
 const ChannelTab = connect(({ opts }) => ({ selected: opts.channel }))(
 	function ChannelTab(props) {

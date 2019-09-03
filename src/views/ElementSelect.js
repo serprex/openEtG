@@ -42,7 +42,7 @@ export default class ElementSelect extends React.Component {
 					store.store.dispatch(store.setUser(data));
 					store.store.dispatch(store.setOptTemp('deck', sock.getDeck()));
 					if (this.state.skiptut) {
-						store.store.dispatch(store.doNav(import('./MainMenu')));
+						store.store.dispatch(store.doNav(import('./MainMenu.js')));
 					} else {
 						store.store.dispatch(store.setOptTemp('quest', [0]));
 						run(mkQuestAi(quarks.basic_damage));
@@ -96,7 +96,7 @@ export default class ElementSelect extends React.Component {
 						sock.userEmit('delete');
 						store.store.dispatch(store.setUser(null));
 						store.store.dispatch(store.setOpt('remember', false));
-						store.store.dispatch(store.doNav(import('./Login')));
+						store.store.dispatch(store.doNav(import('./Login.js')));
 					}}
 				/>
 				<label

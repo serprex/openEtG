@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Text } from './index';
+import { Text } from './index.js';
 
 const connector = connect(({ opts }) => ({ disableTut: opts.disableTut }));
 const mkTutor = function(data) {

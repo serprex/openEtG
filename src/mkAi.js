@@ -11,7 +11,7 @@ import Game from './Game.js';
 
 export function run(game) {
 	if (game) {
-		store.store.dispatch(store.doNav(import('./views/Match'), { game }));
+		store.store.dispatch(store.doNav(import('./views/Match.js'), { game }));
 	}
 }
 

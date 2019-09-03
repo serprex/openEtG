@@ -1,9 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import * as sock from '../sock';
-import * as store from '../store';
-const MainMenu = import('./MainMenu');
+import * as sock from '../sock.js';
+import * as store from '../store.js';
+const MainMenu = import('./MainMenu.js');
 
 let View;
 if (typeof kongregateAPI === 'undefined') {
@@ -32,7 +32,7 @@ if (typeof kongregateAPI === 'undefined') {
 								}
 								if (!data.accountbound && !data.pool) {
 									this.props.dispatch(
-										store.doNav(import('./ElementSelect'), {
+										store.doNav(import('./ElementSelect.js'), {
 											user: data,
 										}),
 									);
@@ -199,7 +199,7 @@ if (typeof kongregateAPI === 'undefined') {
 										delete data.x;
 										this.props.dispatch(store.setUser(data));
 										if (!data.accountbound && !data.pool) {
-											import('./ElementSelect').then(ElementSelect =>
+											import('./ElementSelect.js').then(ElementSelect =>
 												this.props.dispatch(
 													store.doNav(ElementSelect.default, { user: data }),
 												),

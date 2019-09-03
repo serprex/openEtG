@@ -1,8 +1,8 @@
 import React from 'react';
 import * as redux from 'redux';
 
-import * as usercmd from './usercmd';
-import * as sfx from './audio';
+import * as usercmd from './usercmd.js';
+import * as sfx from './audio.js';
 
 const opts = { channel: 'Main' };
 let hasLocalStorage = true;
@@ -86,7 +86,10 @@ export const store = redux.createStore(
 					},
 				};
 			case 'OPT':
-				return { ...state, opts: { ...state.opts, [action.key]: action.val } };
+				return {
+					...state,
+					opts: { ...state.opts, [action.key]: action.val },
+				};
 			case 'CMD':
 				return { ...state, cmds: action.cmds };
 			case 'USER_SET':

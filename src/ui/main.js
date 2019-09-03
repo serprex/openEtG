@@ -2,7 +2,7 @@ import React from 'react';
 import reactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
-import { store, chatMsg } from '../store';
+import { store, chatMsg } from '../store.js';
 
 let lastError = 0;
 window.onerror = function(...args) {
@@ -13,10 +13,10 @@ window.onerror = function(...args) {
 	}
 };
 
-import { emit } from '../sock';
+import { emit } from '../sock.js';
 emit({ x: 'motd' });
 
-import('../views/App').then(App =>
+import('../views/App.js').then(App =>
 	reactDOM.render(
 		<Provider store={store}>
 			<App.default />
@@ -24,7 +24,7 @@ import('../views/App').then(App =>
 		document.getElementById('leftpane'),
 	),
 );
-import('../views/Rightpane').then(Rightpane =>
+import('../views/Rightpane.js').then(Rightpane =>
 	reactDOM.render(
 		<Provider store={store}>
 			<Rightpane.default />

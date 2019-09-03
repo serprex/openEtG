@@ -75,7 +75,7 @@ export default connect(state => ({
 							this.props.dispatch(
 								store.setOptTemp('deck', this.currentDeckCode()),
 							);
-							this.props.dispatch(store.doNav(import('../views/MainMenu')));
+							this.props.dispatch(store.doNav(import('../views/MainMenu.js')));
 						}}
 						style={{
 							position: 'absolute',

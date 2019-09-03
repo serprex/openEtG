@@ -200,7 +200,7 @@ export default connect(({ user, opts }) => ({
 				store.setCmds({
 					codecard: data => {
 						this.props.dispatch(
-							store.doNav(import('./Reward'), {
+							store.doNav(import('./Reward.js'), {
 								type: data.type,
 								amount: data.num,
 								code: this.props.foename,
@@ -288,7 +288,9 @@ export default connect(({ user, opts }) => ({
 						key={i}
 						value={`Arena${i + 1} T20`}
 						onClick={() => {
-							this.props.dispatch(store.doNav(import('./ArenaTop'), { lv: i }));
+							this.props.dispatch(
+								store.doNav(import('./ArenaTop.js'), { lv: i }),
+							);
 						}}
 						onMouseOver={this.mkSetTip(
 							'See who the top players in arena are right now',
@@ -305,7 +307,7 @@ export default connect(({ user, opts }) => ({
 				sock.userEmit(cmd);
 				self.props.dispatch(store.setUser(null));
 				self.props.dispatch(store.setOpt('remember', false));
-				self.props.dispatch(store.doNav(import('./Login')));
+				self.props.dispatch(store.doNav(import('./Login.js')));
 			}
 			const quickslots = [];
 			if (self.props.user) {
@@ -403,7 +405,7 @@ export default connect(({ user, opts }) => ({
 									type="button"
 									value="Colosseum"
 									onClick={() => {
-										this.props.dispatch(store.doNav(import('./Colosseum')));
+										this.props.dispatch(store.doNav(import('./Colosseum.js')));
 									}}
 									onMouseOver={this.mkSetTip(
 										'Try some daily challenges in the Colosseum',
@@ -419,7 +421,7 @@ export default connect(({ user, opts }) => ({
 									type="button"
 									value="Quests"
 									onClick={() => {
-										this.props.dispatch(store.doNav(import('./Quest')));
+										this.props.dispatch(store.doNav(import('./Quest.js')));
 									}}
 									onMouseOver={this.mkSetTip('Go on an adventure')}
 								/>
@@ -435,7 +437,7 @@ export default connect(({ user, opts }) => ({
 									type="button"
 									value="Arena Deck"
 									onClick={() => {
-										this.props.dispatch(store.doNav(import('./ArenaInfo')));
+										this.props.dispatch(store.doNav(import('./ArenaInfo.js')));
 									}}
 									onMouseOver={this.mkSetTip(
 										'Check how your arena decks are doing',
@@ -453,7 +455,7 @@ export default connect(({ user, opts }) => ({
 									value="Custom"
 									onClick={() => {
 										this.props.dispatch(
-											store.doNav(import('./Challenge'), {
+											store.doNav(import('./Challenge.js'), {
 												pvp: false,
 											}),
 										);
@@ -488,7 +490,7 @@ export default connect(({ user, opts }) => ({
 								type="button"
 								value="Wealth T50"
 								onClick={() => {
-									this.props.dispatch(store.doNav(import('./WealthTop')));
+									this.props.dispatch(store.doNav(import('./WealthTop.js')));
 								}}
 								onMouseOver={this.mkSetTip(
 									"See who's collected the most wealth",
@@ -548,8 +550,8 @@ export default connect(({ user, opts }) => ({
 									this.props.dispatch(
 										store.doNav(
 											self.props.user
-												? import('./DeckEditor')
-												: import('./SandboxEditor'),
+												? import('./DeckEditor.js')
+												: import('./SandboxEditor.js'),
 										),
 									);
 								}}
@@ -575,7 +577,7 @@ export default connect(({ user, opts }) => ({
 								type="button"
 								value="Shop"
 								onClick={() => {
-									this.props.dispatch(store.doNav(import('./Shop')));
+									this.props.dispatch(store.doNav(import('./Shop.js')));
 								}}
 								onMouseOver={this.mkSetTip(
 									'Buy booster packs which contain cards from the elements you choose',
@@ -590,7 +592,7 @@ export default connect(({ user, opts }) => ({
 								type="button"
 								value="Upgrade"
 								onClick={() => {
-									this.props.dispatch(store.doNav(import('./Upgrade')));
+									this.props.dispatch(store.doNav(import('./Upgrade.js')));
 								}}
 								onMouseOver={this.mkSetTip('Upgrade or sell cards')}
 								style={{
@@ -603,7 +605,7 @@ export default connect(({ user, opts }) => ({
 								type="button"
 								value="Bazaar"
 								onClick={() => {
-									this.props.dispatch(store.doNav(import('./Bazaar')));
+									this.props.dispatch(store.doNav(import('./Bazaar.js')));
 								}}
 								onMouseOver={this.mkSetTip(
 									"Put up cards for sale & review other players' offers",
@@ -634,7 +636,7 @@ export default connect(({ user, opts }) => ({
 									const name = self.props.foename || self.props.user.name;
 									if (name)
 										this.props.dispatch(
-											store.doNav(import('./Library'), {
+											store.doNav(import('./Library.js'), {
 												name,
 											}),
 										);
