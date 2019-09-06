@@ -97,6 +97,7 @@
 "blackhole":"play",
 "bless":"crea+weap",
 "bolsterintodeck":"crea",
+"bubbleclear":"crea",
 "butterfly":"butterfly",
 "catapult":"own:crea",
 "clear":"crea",
