@@ -1166,7 +1166,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 			this.props.dispatch(store.setCmds({}));
 		}
 
-		setInfo(e, obj, x) {
+		setInfo = (e, obj, x) => {
 			const actinfo =
 				this.state.targeting &&
 				this.state.targeting.filter(obj) &&
@@ -1190,7 +1190,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 			if (obj.type !== etg.Player) {
 				this.setCard(e, obj.card, x);
 			}
-		}
+		};
 
 		clearCard = () => {
 			this.setState({
@@ -1530,8 +1530,8 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 								pos = this.idtrack.get(startpos);
 							}
 							return {
-								x: item.style.x.val,
-								y: item.style.y.val,
+								x: item.style.x.val || 0,
+								y: item.style.y.val || 0,
 								opacity: 0,
 								...pos,
 							};
@@ -1546,12 +1546,11 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 										(item.data.ownerId === player1.id) === (endpos === -1)
 											? 551
 											: 258,
-									opacity: 0,
 								};
 							} else if (endpos) {
 								pos = this.idtrack.get(endpos);
 							}
-							return pos
+							return pos && pos.x !== undefined && pos.y !== undefined
 								? {
 										x: spring(pos.x),
 										y: spring(pos.y),
@@ -1563,27 +1562,25 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 						}}>
 						{interpStyles => (
 							<>
-								{interpStyles.map(
-									item => (
-										this.idtrack.set(item.data.id, item.style),
-										(
-											<ThingInst
-												key={item.key}
-												lofiArt={props.lofiArt}
-												game={game}
-												id={item.data.id}
-												obj={item.data}
-												p1id={player1.id}
-												setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
-												onMouseOut={this.clearCard}
-												onClick={this.thingClick}
-												targeting={this.state.targeting}
-												pos={item.style}
-												opacity={item.style.opacity}
-											/>
-										)
-									),
-								)}
+								{interpStyles.map(item => {
+									this.idtrack.set(item.data.id, item.style);
+									return (
+										<ThingInst
+											key={item.key}
+											lofiArt={props.lofiArt}
+											game={game}
+											id={item.data.id}
+											obj={item.data}
+											p1id={player1.id}
+											setInfo={this.setInfo}
+											onMouseOut={this.clearCard}
+											onClick={this.thingClick}
+											targeting={this.state.targeting}
+											pos={item.style}
+											opacity={item.style.opacity}
+										/>
+									);
+								})}
 							</>
 						)}
 					</TransitionMotion>
