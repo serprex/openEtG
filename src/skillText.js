@@ -91,7 +91,7 @@ const data = {
 	bubbleclear:
 		"Remove statuses (positive and negative) from target creature, reduce target creature's delay by 1, and heal target creature 1.\nTarget gains a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages the affected card.",
 	butterfly:
-		'Target creature with either strength or HP less than 3 has its skills replaced with "3:1 Destroy target permanent."',
+		'Target creature or weapon with either strength or HP less than 3 has its skills replaced with "3:1 Destroy target permanent."',
 	burrow:
 		"Burrow this creature. Burrowed creatures' strength is halved while burrowed.",
 	catapult:
