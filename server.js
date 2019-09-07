@@ -693,7 +693,7 @@ const importlocks = new Map();
 			data.price |= 0;
 			if (!data.price) return;
 			Bz.load().then(bz => {
-				for (const [code, count] of etgutil.iterraw(data.cards)) {
+				for (let [code, count] of etgutil.iterraw(data.cards)) {
 					const card = Cards.Codes[code];
 					if (!card) continue;
 					const bc = bz[code] || (bz[code] = []);
@@ -1376,7 +1376,7 @@ const importlocks = new Map();
 					}
 				}
 			} else if ((func = sockEvents[data.x])) {
-				func.call(this, data);
+				await Promise.resolve(func.call(this, data));
 			}
 		} catch (err) {
 			console.log(err);
