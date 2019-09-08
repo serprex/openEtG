@@ -1155,6 +1155,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 			if (!this.props.replay) {
 				if (!this.props.game.data.spectate) {
 					document.addEventListener('keydown', this.onkeydown);
+					window.addEventListener('beforeunload', this.onbeforeunload);
 				}
 				this.startMatch(this.props);
 			}
@@ -1163,8 +1164,20 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 		componentWillUnmount() {
 			clearInterval(this.gameInterval);
 			document.removeEventListener('keydown', this.onkeydown);
+			window.removeEventListener('beforeunload', this.onbeforeunload);
 			this.props.dispatch(store.setCmds({}));
 		}
+
+		onbeforeunload = e => {
+			if (
+				this.props.game.data.players.some(
+					pl => pl.user && pl.user !== this.props.user.name,
+				)
+			) {
+				e.preventDefault();
+				e.returnValue = '';
+			}
+		};
 
 		setInfo = (e, obj, x) => {
 			const actinfo =
