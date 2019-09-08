@@ -38,7 +38,7 @@ export default class Cards {
 			for (const key in this.Codes) {
 				const card = this.Codes[key];
 				if (
-					card.upped === upped &&
+					!card.upped === !upped &&
 					!card.shiny === !showshiny &&
 					!card.getStatus('token')
 				) {
