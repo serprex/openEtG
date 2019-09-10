@@ -208,7 +208,7 @@ function defVal(x, y) {
 	return x === undefined ? y : x;
 }
 const OrderBook = connect(({ opts }) => ({
-	deal: defVal(opts.orderFilter_Deal, true),
+	deal: defVal(opts.orderFilter_Deal, false),
 	buy: defVal(opts.orderFilter_Buy, true),
 	sell: defVal(opts.orderFilter_Sell, true),
 	mine: defVal(opts.orderFilter_Mine, false),
@@ -358,7 +358,7 @@ export default connect(({ user }) => ({ user }))(
 							<input
 								placeholder="Price"
 								value={this.state.sell || ''}
-								onChange={e => this.setState({ sell: +e.target.value | 0 })}
+								onChange={e => this.setState({ sell: e.target.value | 0 })}
 								style={{
 									position: 'absolute',
 									left: '200px',
@@ -370,7 +370,7 @@ export default connect(({ user }) => ({ user }))(
 								value={this.state.sellq || ''}
 								onChange={e =>
 									this.setState({
-										sellq: +e.target.value | 0,
+										sellq: e.target.value | 0,
 									})
 								}
 								style={{
@@ -399,7 +399,7 @@ export default connect(({ user }) => ({ user }))(
 							<input
 								placeholder="Price"
 								value={this.state.buy || ''}
-								onChange={e => this.setState({ buy: +e.target.value | 0 })}
+								onChange={e => this.setState({ buy: e.target.value | 0 })}
 								style={{
 									position: 'absolute',
 									left: '200px',
@@ -409,7 +409,7 @@ export default connect(({ user }) => ({ user }))(
 							<input
 								placeholder="Quantity"
 								value={this.state.buyq || ''}
-								onChange={e => this.setState({ buyq: +e.target.value | 0 })}
+								onChange={e => this.setState({ buyq: e.target.value | 0 })}
 								style={{
 									position: 'absolute',
 									left: '360px',

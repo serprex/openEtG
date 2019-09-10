@@ -354,13 +354,11 @@ const Skills = {
 		](ctx, c, t);
 	},
 	cseed2: (ctx, c, t) => {
-		const choice = ctx.choose(
-			ctx.Cards.filter(ctx.upto(2), card => {
-				if (card.type !== etg.Spell) return false;
-				const tgting = ctx.Cards.Targeting[card.active.get('cast').castName];
-				return tgting && tgting(c, t);
-			}),
-		);
+		const choice = ctx.randomcard(ctx.upto(2), card => {
+			if (card.type !== etg.Spell) return false;
+			const tgting = ctx.Cards.Targeting[card.active.get('cast').castName];
+			return tgting && tgting(c, t);
+		});
 		ctx.effect({ x: 'Text', text: choice.name, id: t.id });
 		c.castSpell(t.id, choice.active.get('cast'));
 	},

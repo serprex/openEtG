@@ -1288,6 +1288,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 							width: '96px',
 							height: '80px',
 							border: 'transparent 2px solid',
+							zIndex: '4',
 						}}
 						onClick={() => this.thingClick(pl)}
 						onMouseOver={e => this.setInfo(e, pl)}

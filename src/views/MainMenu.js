@@ -620,7 +620,7 @@ export default connect(({ user, opts }) => ({
 						<Rect x={616} y={300} wid={206} hei={130}>
 							<TitleText text="Players" />
 							<input
-								placeholder="Trade/Library"
+								placeholder="Player's Name"
 								value={this.props.foename}
 								onChange={e =>
 									this.props.dispatch(

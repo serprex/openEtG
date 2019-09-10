@@ -11,6 +11,7 @@ a{
 	color:#69f;
 	text-decoration:none;
 }
+a:hover{text-decoration:underline;}
 tr,td{padding:0}
 input[type="button"]{
 	background:linear-gradient(to bottom,#ddeef0,#8999a9);

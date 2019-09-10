@@ -488,7 +488,7 @@ const data = {
 		hit:
 			"Randomize up to 9 quanta randomly chosen from opponent's quanta pool on hit.",
 		cast:
-			"Randomize up to 9 quanta randomly chosen from opponent's quanta pool.",
+			"Randomize up to 9 quanta randomly chosen from target player's quanta pool.",
 	},
 	serendipity: [
 		'Add 3 random non-pillar cards to your hand. At least one will be 1:1.',
