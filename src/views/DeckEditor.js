@@ -370,9 +370,24 @@ export default connect(({ user }) => ({
 						<input
 							autoFocus
 							value={this.currentDeckCode()}
-							onChange={e =>
-								this.setState(processDeck(this.state.pool, e.target.value))
-							}
+							onChange={e => {
+								let dcode = e.target.value.trim();
+								if (~dcode.indexOf(' ')) {
+									const dsplit = dcode.split(' ').sort();
+									dcode = '';
+									let i = 0;
+									while (i < dsplit.length) {
+										const di = dsplit[i],
+											i0 = i++;
+										while (i < dsplit.length && dsplit[i] == di) {
+											i++;
+										}
+										dcode += etgutil.encodeCount(i - i0);
+										dcode += di;
+									}
+								}
+								this.setState(processDeck(this.state.pool, dcode));
+							}}
 							ref={this.deckRef}
 							onClick={e => {
 								e.target.setSelectionRange(0, 999);

@@ -38,15 +38,18 @@ function RenderInfo(props) {
 			});
 			store.store.dispatch(store.doNav(import('./Match.js'), { game }));
 		};
-		const card = y ? etgutil.asUpped(info.card, true) : info.card;
-		const adeck = '05' + card.toString(32) + info.deck;
+		const card =
+			info.card && (y ? etgutil.asUpped(info.card, true) : info.card);
+		const adeck = card && '05' + card.toString(32) + info.deck;
 		return (
 			<>
-				<Components.DeckDisplay
-					deck={etgutil.decodedeck(adeck)}
-					renderMark
-					y={y}
-				/>
+				{adeck && (
+					<Components.DeckDisplay
+						deck={etgutil.decodedeck(adeck)}
+						renderMark
+						y={y}
+					/>
+				)}
 				<Components.Text
 					style={{
 						position: 'absolute',
@@ -67,7 +70,7 @@ function RenderInfo(props) {
 						top: 4 + y + 'px',
 						width: '190px',
 					}}
-					value={adeck}
+					value={adeck || ''}
 				/>
 				<span
 					style={{
@@ -119,16 +122,18 @@ function RenderInfo(props) {
 						);
 					}}
 				/>
-				<input
-					type="button"
-					value="Test"
-					style={{
-						position: 'absolute',
-						left: '600px',
-						top: 224 + y + 'px',
-					}}
-					onClick={testDeck}
-				/>
+				{adeck && (
+					<input
+						type="button"
+						value="Test"
+						style={{
+							position: 'absolute',
+							left: '600px',
+							top: 224 + y + 'px',
+						}}
+						onClick={testDeck}
+					/>
+				)}
 			</>
 		);
 	} else {

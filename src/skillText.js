@@ -83,7 +83,7 @@ const data = {
 	brawl:
 		'Your creatures attack. If a creature exists in opposing creature slot, the two creatures deal their damage to one another instead of opponent. Consumes all remaining 1:3.',
 	brew:
-		"Add a random Alchemy card to your hand. Possible cards include: Antimatter, Black Hole, Adrenaline, Nymph's Tears, Unstable Gas, Liquid Shadow, Aflatoxin, Stone Skin, Rage Potion, Luciferin, Precognition, Quintessence.",
+		"Add a random Alchemy card to your hand. Possible cards include: Antimatter, Black Hole, Adrenaline, Nymph's Tears, Unstable Gas, Liquid Shadow, Aflatoxin, Basilisk Blood, Rage Potion, Luciferin, Precognition, Quintessence.",
 	brokenmirror: [
 		'When opponent plays a creature from their hand, summon a 1|1 Phantom.',
 		'When opponent plays a creature from their hand, summon a 2|1 Phantom.',
