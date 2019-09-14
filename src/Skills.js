@@ -222,10 +222,14 @@ const Skills = {
 		t.addactive('spelldmg', exports.protectoncedmg);
 	},
 	burrow: (ctx, c, t) => {
-		c.setStatus('burrowed', 1);
-		c.setStatus('airborne', 0);
-		c.setSkill('cast', exports.unburrow);
-		c.cast = 0;
+		if (c.getStatus('burrowed')) {
+			c.setStatus('burrowed', 0);
+			c.cast = 1;
+		} else {
+			c.setStatus('airborne', 0);
+			c.setStatus('burrowed', 1);
+			c.cast = 0;
+		}
 	},
 	butterfly: (ctx, c, t) => {
 		t.lobo();
@@ -1831,10 +1835,10 @@ const Skills = {
 	},
 	sinkhole: (ctx, c, t) => {
 		ctx.effect({ x: 'Text', text: 'Sinkhole', id: c.id });
-		t.setStatus('burrowed', 1);
 		t.setStatus('airborne', 0);
+		t.setStatus('burrowed', 1);
 		t.lobo();
-		t.setSkill('cast', exports.unburrow);
+		t.setSkill('cast', exports.burrow);
 		t.cast = c.card.upped ? 2 : 1;
 		t.castele = etg.Earth;
 		t.usedactive = true;
@@ -2097,11 +2101,6 @@ const Skills = {
 	},
 	unappease: (ctx, c, t) => {
 		c.setStatus('appeased', 0);
-	},
-	unburrow: (ctx, c, t) => {
-		c.setStatus('burrowed', 0);
-		c.setSkill('cast', exports.burrow);
-		c.cast = 1;
 	},
 	unsummon: (ctx, c, t) => {
 		if (t.owner.handIds.length < 8) {

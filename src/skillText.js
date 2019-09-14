@@ -63,9 +63,10 @@ const data = {
 		'Gains 1 strength for every card drawn by any player. Strength gained is removed after attack.',
 	bblood: 'Give target creature 0|20 and delay it for 5 turns.',
 	becomearctic: 'If frozen, this creature instead turns into an Arctic Squid.',
-	beguile: 'Gain control of target creature until next turn.',
+	beguile:
+		"Target creature's opponent gains control of target creature until next turn.",
 	beguilestop:
-		'Return this creature to its original owner at the beginning of next turn.',
+		'Return this creature to its original owner at beginning of next turn.',
 	bellweb: 'Target creature becomes aquatic and loses airborne status.',
 	blackhole:
 		'Remove 3 quanta per element from target player. Heal 1 per quanta removed.',
@@ -92,8 +93,10 @@ const data = {
 		"Remove statuses (positive and negative) from target creature, reduce target creature's delay by 1, and heal target creature 1.\nTarget gains a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages the affected card.",
 	butterfly:
 		'Target creature or weapon with either strength or HP less than 3 has its skills replaced with "3:1 Destroy target permanent."',
-	burrow:
-		"Burrow this creature. Burrowed creatures' strength is halved while burrowed.",
+	burrow: c =>
+		c.getStatus('burrowed')
+			? "Burrow this creature. Burrowed creatures' strength is halved while burrowed."
+			: 'Unburrow.',
 	catapult:
 		"Sacrifice target creature you control to damage opponent for 100 * Creature's HP / (100 + Creature's HP). Frozen creautres deal 1.5x more. Poisoned creatures transfer their poison to opponent.",
 	catlife:
@@ -570,7 +573,6 @@ const data = {
 		"If target creature's owner has creatures in their deck, put target creature into their deck and summon a random different creature from their deck.",
 	turngolem:
 		"This card becomes a creature with Gravity Pull. Set the creature's HP to the total damage this card blocked while it was a shield. Set the creature's strength to half its HP.",
-	unburrow: 'Unburrow.',
 	unsummon:
 		"Return target creature to its owner's hand. Remove any modifiers and statuses on target creature. If owner's hand is full, instead return target creature to the top of its owner's deck.",
 	unvindicate:

@@ -130,27 +130,28 @@ const activetexts = [
 	'postauto',
 ];
 const activetextsRename = {
-	quanta: x => ui.eleNames[x[1]].toLowerCase(),
+	quanta: (c, x) => ui.eleNames[x[1]].toLowerCase(),
+	burrow: (c, x) => (c.getStatus('burrowed') ? 'unburrow' : 'burrow'),
 };
-function skillName(sk) {
+function skillName(c, sk) {
 	const namelist = [];
 	for (const name of sk.name) {
 		const nsplit = name.split(' ');
 		const rename = activetextsRename[nsplit[0]];
 		if (rename === null) continue;
-		namelist.push(rename ? rename(nsplit) : name);
+		namelist.push(rename ? rename(c, nsplit) : name);
 	}
 	return namelist.join(' ');
 }
 function activeText(c) {
 	const acast = c.active.get('cast');
-	if (acast) return `${c.cast}:${c.castele}${skillName(acast)}`;
+	if (acast) return `${c.cast}:${c.castele}${skillName(c, acast)}`;
 	for (const akey of activetexts) {
 		const a = c.active.get(akey);
-		if (a) return `${akey} ${skillName(a)}`;
+		if (a) return `${akey} ${skillName(c, a)}`;
 	}
 	const aauto = c.active.get('ownattack');
-	return aauto ? skillName(aauto) : '';
+	return aauto ? skillName(c, aauto) : '';
 }
 
 function PagedModal(props) {
@@ -1196,6 +1197,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 							position: 'absolute',
 							left: `${e.pageX}px`,
 							top: `${e.pageY}px`,
+							zIndex: '5',
 						}}
 					/>
 				),
