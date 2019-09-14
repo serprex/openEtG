@@ -68,17 +68,18 @@ export default connect(({ user, opts }) => ({ user, oquest: opts.quest }))(
 			<>
 				<Components.Box x={8} y={8} width={880} height={108} />
 				<Components.ExitBtn x={750} y={120} />
-				{selectedQuest && selectedQuest.info && (
-					<Components.Text
-						text={selectedQuest.info}
-						style={{
-							position: 'absolute',
-							left: '26px',
-							top: '26px',
-							maxWidth: '850px',
-						}}
-					/>
-				)}
+				<Components.Text
+					text={
+						selectedQuest.info ||
+						"Click the list items to see the quest lines, & the FIGHT button to challenge them!\nNames in red are the ones you haven't yet completed."
+					}
+					style={{
+						position: 'absolute',
+						left: '26px',
+						top: '26px',
+						maxWidth: '850px',
+					}}
+				/>
 				{selectedQuest && selectedQuest.key && (
 					<input
 						type="button"
