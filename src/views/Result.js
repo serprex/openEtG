@@ -414,6 +414,19 @@ export default connect(({ user }) => ({ user }))(
 						'Stats',
 					),
 				);
+				const { opts } = store.store.getState();
+				if (opts.runcount) {
+					if (opts.runcountcur === opts.runcount) {
+						this.props.dispatch(
+							store.chatMsg(`${opts.runcount} runs completed`, 'System'),
+						);
+						this.props.dispatch(store.setOptTemp('runcountcur', 1));
+					} else {
+						this.props.dispatch(
+							store.setOptTemp('runcountcur', opts.runcountcur + 1),
+						);
+					}
+				}
 			}
 		}
 

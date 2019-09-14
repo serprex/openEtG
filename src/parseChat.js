@@ -137,6 +137,10 @@ export default function parseChat(e) {
 		} else if (msg.match(/^\/setgold /)) {
 			const [t, g] = msg.slice(9).split(' ');
 			sock.userEmit('setgold', { t, g: g | 0 });
+		} else if (msg.match(/^\/runcount /)) {
+			store.store.dispatch(store.setOptTemp('runcount', msg.slice(10) | 0));
+			store.store.dispatch(store.setOptTemp('runcountcur', 1));
+			store.store.dispatch(store.chatMsg(msg.slice(1), 'System'));
 		} else if (!msg.match(/^\/[^/]/) || (user && msg.match(/^\/w( |")/))) {
 			msg = msg.replace(/^\/\//, '/');
 			if (user) {
