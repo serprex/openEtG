@@ -53,7 +53,7 @@ const data = {
 		'Summon a Skeleton. All of your skeletons deal damage equal to their strength to target creature.',
 	alphawolf: 'Summon two 2|1 Pack Wolves when this enters play.',
 	antimatter:
-		"If target creature's attack is positive, it becomes negative. If target creature's attack is negative, it becomes positive.",
+		"If target creature or weapon's attack is positive, it becomes negative. Otherwise, it becomes positive.",
 	appease:
 		'Sacrifice target creature you own and gain 1|1. If this ability is not used, this creature will attack its owner. This creature attacks normally the turn it is played or if it loses this ability.',
 	atk2hp: "Set target's HP equal to its strength.",
@@ -543,7 +543,9 @@ const data = {
 	storm: x =>
 		`Deal ${x} spell damage to all of target player\'s creatures. Removes cloak.`,
 	summon: x => c =>
-		`Summon a ${(c instanceof Card ? c.Cards : c.game.Cards).Names[x].name}.`,
+		`Summon a ${
+			asCard(c).as((c instanceof Card ? c.Cards : c.game.Cards).Names[x]).name
+		}.`,
 	swarm:
 		'Base HP is equal to the number of Scarabs you control, including this one.',
 	swave:
