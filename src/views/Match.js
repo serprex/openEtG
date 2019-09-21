@@ -263,6 +263,7 @@ class ThingInst extends React.Component {
 									bottom: '-8px',
 									left: [32, 8, 8, 0, 24, 16, 8][k] + 'px',
 									opacity: '.6',
+									zIndex: '1',
 								}}
 							/>,
 						);
@@ -325,6 +326,19 @@ class ThingInst extends React.Component {
 								? undefined
 								: `url(/Cards/${card.code.toString(32)}.png)`,
 						}}>
+						{children}
+						{obj.hasactive('prespell', 'protectonce') && (
+							<div
+								className="ico protection"
+								style={{
+									position: 'absolute',
+									left: '0',
+									top: '0',
+									width: '64px',
+									height: '64px',
+								}}
+							/>
+						)}
 						<div
 							style={{
 								position: 'absolute',
@@ -369,19 +383,6 @@ class ThingInst extends React.Component {
 								/>
 							)}
 						</div>
-						{children}
-						{obj.hasactive('prespell', 'protectonce') && (
-							<div
-								className="ico protection"
-								style={{
-									position: 'absolute',
-									left: '0',
-									top: '0',
-									width: '64px',
-									height: '64px',
-								}}
-							/>
-						)}
 					</div>
 				),
 			};
