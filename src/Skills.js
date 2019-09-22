@@ -1156,7 +1156,7 @@ const Skills = {
 		const tcard = t.card;
 		t.transform(tcard.as(ctx.Cards.Names.PinkJelly));
 		t.castele = tcard.element;
-		t.cast = 4;
+		t.cast = tcard.element ? 4 : 12;
 		t.atk = 7;
 		t.maxhp = t.hp = 4;
 	},

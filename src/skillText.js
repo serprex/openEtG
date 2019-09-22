@@ -303,7 +303,7 @@ const data = {
 	integrity:
 		'Destroy all shards in your hand to play a Shard Golem with stats and abilities based on the shards destroyed.',
 	jelly:
-		"Target creature becomes a 7|4 Pink Jelly with an active ability that turns additional creatures into Pink Jellies. That ability costs 4 quanta matching target creature's element.",
+		"Target creature becomes a 7|4 Pink Jelly with an active ability that turns additional creatures into Pink Jellies. That ability costs 4 quanta matching target creature's element. 1:0 creatures have an ability cost of 12:0",
 	jetstream: 'Target airborne creature gains 3|-1.',
 	lightning: 'Deal 5 spell damage to target creature or player.',
 	liquid:
@@ -472,10 +472,7 @@ const data = {
 	},
 	ricochet:
 		'Any targeted spells cast by either player are copied when played. The copy has a random caster and a random non-player target.',
-	sadism: [
-		'Whenever any of your creatures are damaged, heal yourself an equal amount.',
-		'Whenever any creatures are damaged, heal yourself an equal amount.',
-	],
+	sadism: 'Whenever any creatures are damaged, heal yourself an equal amount.',
 	salvage:
 		'Whenever a permanent is destroyed, gain 1|1. Once per turn, when opponent destroys a permanent, add a copy of that permanent to your hand.',
 	salvageoff: 'Cannot salvage another destroyed permanent until next turn.',
