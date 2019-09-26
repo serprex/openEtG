@@ -45,13 +45,13 @@ export function CardImage(props) {
 				<span
 					style={{
 						position: 'absolute',
-						right: '2px',
+						right: '0',
+						paddingRight: '2px',
+						paddingTop: '2px',
 						backgroundColor: bgcol,
 					}}>
 					{card.cost}
-					{card.costele !== card.element && (
-						<span className={'ico te' + card.costele} />
-					)}
+					<span className={'ico te' + card.costele} />
 				</span>
 			)}
 		</div>
@@ -243,14 +243,13 @@ export function Card(props) {
 				<span
 					style={{
 						position: 'absolute',
-						right: '2px',
-						top: '2px',
+						right: '0',
+						paddingRight: '2px',
+						paddingTop: '2px',
 						fontSize: '12px',
 					}}>
 					{card.cost}
-					{card.element != card.costele && (
-						<span className={`ico ce${card.costele}`} />
-					)}
+					<span className={`ico te${card.costele}`} />
 				</span>
 			)}
 			<span
