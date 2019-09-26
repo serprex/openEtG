@@ -249,27 +249,29 @@ export default connect(({ user, opts }) => ({
 						!!~this.state.packele &&
 						!!~this.state.packrarity && (
 							<>
-								<input
-									type="button"
-									value="Max Buy"
-									onClick={() => {
-										const pack = packdata[this.state.packrarity];
-										this.props.dispatch(
-											store.setOptTemp(
-												'bulk',
-												Math.min(
-													Math.floor(this.props.user.gold / pack.cost),
-													99,
-												).toString(),
-											),
-										);
-									}}
-									style={{
-										position: 'absolute',
-										left: '775px',
-										top: '128px',
-									}}
-								/>
+								{!hasFreePacks && (
+									<input
+										type="button"
+										value="Max Buy"
+										onClick={() => {
+											const pack = packdata[this.state.packrarity];
+											this.props.dispatch(
+												store.setOptTemp(
+													'bulk',
+													Math.min(
+														Math.floor(this.props.user.gold / pack.cost),
+														99,
+													).toString(),
+												),
+											);
+										}}
+										style={{
+											position: 'absolute',
+											left: '775px',
+											top: '128px',
+										}}
+									/>
+								)}
 								<input
 									type="button"
 									value="Buy Pack"

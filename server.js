@@ -883,12 +883,14 @@ const importlocks = new Map();
 				const foesock = Us.socks.get(info.duel);
 				if (foesock) {
 					const foemeta = sockmeta.get(foesock);
-					sockEmit(foesock, 'foeleft', { name: data.u });
 					sockEmit(foesock, 'chat', {
 						mode: 1,
 						msg: `${data.u} has canceled the duel.`,
 					});
-					if (foemeta.duel === data.u) delete foemeta.duel;
+					if (foemeta.duel === data.u) {
+						sockEmit(foesock, 'foeleft', { name: data.u });
+						delete foemeta.duel;
+					}
 				}
 				delete info.duel;
 				delete info.spectators;

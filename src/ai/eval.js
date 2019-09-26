@@ -341,6 +341,7 @@ const SkillsValues = {
 		return 5 - (4 * coq) / (4 + coq);
 	},
 	thorn: 5,
+	vend: 2,
 	weight: 5,
 	wings: c => (!c.getStatus('charges') && c.ownerId === c.game.turn ? 0 : 6),
 };

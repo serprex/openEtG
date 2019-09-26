@@ -253,7 +253,7 @@ const data = {
 	gpull:
 		"Creatures attacking this creature's owner instead attack this creature.",
 	gpullspell:
-		"Creatures attacking target creature's owner instead attack target creature.",
+		"Creatures attacking target creature's owner instead attack target creature.\nIf target is a player, creatures attack that player when attacking that player.",
 	gratitude: 'Heal yourself 4 at the end of your turn.',
 	growth: (atk, hp = atk) => {
 		const x = `${atk}|${hp}`;
@@ -445,7 +445,7 @@ const data = {
 	readiness:
 		"Target creature's active ability becomes free. If target creature's active ability has already been used this turn, it can be used again this turn.",
 	readyequip:
-		'Your weapons and shields can use their active abilities the same turn they come into play.',
+		'All weapons and shields can use their active abilities the same turn they come into play.',
 	reap:
 		"Target creature dies and is replaced with a Skeleton with target creature's current strength and HP, but no other active abilities or statuses.",
 	rebirth: [
