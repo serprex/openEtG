@@ -165,7 +165,9 @@ const Skills = {
 		);
 	},
 	boneyard: (ctx, c, t) => {
-		c.owner.addCrea(c.owner.newThing(c.card.as(ctx.Cards.Names.Skeleton)));
+		if (!t.card.isOf(ctx.Cards.Names.Skeleton)) {
+			c.owner.addCrea(c.owner.newThing(c.card.as(ctx.Cards.Names.Skeleton)));
+		}
 	},
 	bow: (ctx, c, t) => {
 		return c.owner.mark === etg.Air || c.owner.mark === etg.Light ? 1 : 0;
@@ -284,11 +286,11 @@ const Skills = {
 		ctx.set(c.ownerId, 'creatures', newCreatures);
 		c.owner.gpull = chim.id;
 	},
-	chromastat: (ctx, c, t) => {
+	chromastat: passive((ctx, c, t) => {
 		const n = c.truehp() + c.trueatk();
 		ctx.effect({ x: 'Text', text: `${n}:0`, id: c.id });
 		c.owner.spend(0, -n);
-	},
+	}),
 	clear: (ctx, c, t) => {
 		ctx.effect({ x: 'Text', text: 'Clear', id: c.id });
 		t.setStatus('poison', 0);
@@ -544,17 +546,22 @@ const Skills = {
 		}
 	},
 	drawequip: (ctx, c, t) => {
-		const deck = c.owner.deck;
-		for (let i = c.owner.deckIds.length - 1; i > -1; i--) {
-			const card = deck[i];
-			if (card.card.type === etg.Weapon || card.card.type === etg.Shield) {
-				if (~c.owner.addCard(card)) {
-					const deckIds = Array.from(c.owner.deckIds);
-					deckIds.splice(i, 1);
-					c.owner.deckIds = deckIds;
-					c.owner.proc('draw');
+		for (let p = 0; p < 2; p++) {
+			const pl = p ? c.owner.foe : c.owner,
+				deck = pl.deck;
+			if (p && pl.getStatus('sanctuary')) return;
+			for (let i = pl.deckIds.length - 1; i > -1; i--) {
+				const card = deck[i];
+				if (card.card.type === etg.Weapon || card.card.type === etg.Shield) {
+					if (~pl.addCard(card)) {
+						ctx.effect({ x: 'StartPos', id: card.id, src: -1 });
+						const deckIds = Array.from(pl.deckIds);
+						deckIds.splice(i, 1);
+						pl.deckIds = deckIds;
+						pl.proc('draw');
+					}
+					break;
 				}
-				return;
 			}
 		}
 	},
@@ -571,8 +578,8 @@ const Skills = {
 		);
 	},
 	dshield: (ctx, c, t) => {
-		c.setStatus('immaterial', 1);
-		c.addactive('turnstart', exports.dshieldoff);
+		t.setStatus('immaterial', 1);
+		t.addactive('turnstart', exports.dshieldoff);
 	},
 	dshieldoff: passive((ctx, c, t) => {
 		if (c.ownerId === t.id) {
@@ -1227,7 +1234,7 @@ const Skills = {
 	lycanthropy: (ctx, c, t) => {
 		c.buffhp(5);
 		c.incrAtk(5);
-		c.active = c.active.delete('cast');
+		c.lobo();
 		c.setStatus('nocturnal', 1);
 	},
 	martyr: passive((ctx, c, t, dmg) => {
@@ -1279,6 +1286,7 @@ const Skills = {
 		child.play(c);
 	},
 	mitosisspell: (ctx, c, t) => {
+		t.lobo();
 		t.setSkill('cast', exports.mitosis);
 		t.castele = t.card.costele;
 		t.cast = t.card.cost;
@@ -1407,7 +1415,7 @@ const Skills = {
 		t.owner.addCrea(nymph);
 	},
 	obsession: passive((ctx, c, t) => {
-		c.owner.spelldmg(c.card.upped ? 10 : 8);
+		c.owner.spelldmg(c.card.upped ? 13 : 10);
 	}),
 	ouija: (ctx, c, t) => {
 		const { foe } = c.owner;
@@ -1551,13 +1559,15 @@ const Skills = {
 	}),
 	protectall: (ctx, c, t) => {
 		function protect(p) {
-			if (p && p.isMaterial()) {
+			if (p) {
 				p.addactive('prespell', exports.protectonce);
 				p.addactive('spelldmg', exports.protectoncedmg);
 			}
 		}
 		c.owner.creatures.forEach(protect);
 		c.owner.permanents.forEach(protect);
+		protect(c.owner.shield);
+		protect(c.owner.weapon);
 	},
 	protectonce: passive((ctx, c, t, data) => {
 		if (data.tgt === c.id && c.ownerId !== t.ownerId) {
@@ -1754,6 +1764,10 @@ const Skills = {
 			}
 		}
 	},
+	scramblespam: (ctx, c, t) => {
+		Skills.scramble(ctx, c, t);
+		c.usedactive = false;
+	},
 	serendipity: (ctx, c) => {
 		const num = Math.min(8 - c.owner.handIds.length, 3);
 		let anyentro = false;
@@ -1843,15 +1857,17 @@ const Skills = {
 		t.castele = etg.Earth;
 		t.usedactive = true;
 	},
-	siphon: adrenathrottle((ctx, c, t) => {
-		if (
-			!c.owner.foe.getStatus('sanctuary') &&
-			c.owner.foe.spend(etg.Chroma, 1)
-		) {
-			ctx.effect({ x: 'Text', text: '1:11', id: c.id });
-			c.owner.spend(etg.Darkness, -1);
-		}
-	}),
+	siphon: passive(
+		adrenathrottle((ctx, c, t) => {
+			if (
+				!c.owner.foe.getStatus('sanctuary') &&
+				c.owner.foe.spend(etg.Chroma, 1)
+			) {
+				ctx.effect({ x: 'Text', text: '1:11', id: c.id });
+				c.owner.spend(etg.Darkness, -1);
+			}
+		}),
+	),
 	siphonactive: (ctx, c, t) => {
 		ctx.effect({ x: 'Text', text: 'Siphon', id: c.id });
 		c.lobo();
@@ -1957,7 +1973,7 @@ const Skills = {
 	},
 	stoneform: (ctx, c, t) => {
 		c.buffhp(20);
-		c.active = c.active.delete('cast');
+		c.lobo();
 		c.setStatus('golem', 1);
 	},
 	storm: x => {
@@ -2184,7 +2200,7 @@ const Skills = {
 	quantagift: (ctx, c, t) => {
 		if (c.owner.mark !== etg.Water) {
 			c.owner.spend(etg.Water, -2);
-			c.owner.spend(c.owner.mark, -2);
+			c.owner.spend(c.owner.mark, c.owner.mark ? -2 : -6);
 		} else c.owner.spend(etg.Water, -3);
 	},
 	web: (ctx, c, t) => {

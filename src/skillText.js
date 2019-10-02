@@ -76,7 +76,9 @@ const data = {
 	bolsterintodeck:
 		'Add 3 copies of target creature on top of your deck. Cannot ricochet.',
 	boneyard: c =>
-		`Whenever a creature dies, summon a ${c.upped ? '2|2' : '1|1'} Skeleton.`,
+		`Whenever a creature which is not a Skeleton dies, summon a ${
+			c.upped ? '2|2' : '1|1'
+		} Skeleton.`,
 	bounce:
 		"When this creature dies, it returns to its owner's hand. Modified stats and statuses remain on the card when it is played again.",
 	bravery:
@@ -166,12 +168,12 @@ const data = {
 		'Deal 2 spell damage plus one per 5:11 you have after playing this card. Heal for the amount of damage done.',
 	drawcopy:
 		'When opponent discards a card, add a copy of that card to your hand.',
-	drawequip: 'Draw the next weapon or shield in your deck.',
+	drawequip: 'Both players draw the next weapon or shield in their deck.',
 	drawpillar:
 		'When this card is played, if the top card of your deck is a pillar, tower, or pendulum, draw it.',
 	dryspell:
 		'Deal 1 spell damage to all creatures. Gain 1:7 for each damage dealt. Removes cloak.',
-	dshield: 'Gain immaterial until next turn.',
+	dshield: 'Target creature gains immaterial until next turn.',
 	duality: "Add a copy of the top card of opponent's deck to your hand.",
 	earthquake:
 		'Destroy up to 3 copies of target pillar, pendum, tower, or other stacking permanent.',
@@ -324,7 +326,7 @@ const data = {
 	},
 	luciferin:
 		'Your creatures without skills gain “Produces 1:8 when it attacks.” Heal yourself 10.',
-	lycanthropy: 'Gain 5|5 and become nocturnal.',
+	lycanthropy: 'Remove this ability and gain 5|5 and become nocturnal.',
 	martyr: 'Gains 1|0 for every point of damage this card receives.',
 	mend: 'Heal target creature 10.',
 	metamorph:
@@ -355,7 +357,7 @@ const data = {
 			c.upped ? '2' : '1'
 		} damage per card added in this way. Heal yourself an equal amount.`,
 	nightshade:
-		'Target creature becomes nocturnal, gains 5|5, and loses their active ability.',
+		'Target creature becomes nocturnal, gains 5|5, and loses abilities.',
 	nova:
 		'Gain 1 quanta of each element. If you play three or more of this card in one turn, summon a Singularity on your side.',
 	nova2:
@@ -365,8 +367,8 @@ const data = {
 	nymph:
 		"Transform target pillar, pendulum, or tower into a Nymph matching target's element.",
 	obsession: [
-		'When this card is discarded, the discarding player receives 8 spell damage.',
 		'When this card is discarded, the discarding player receives 10 spell damage.',
+		'When this card is discarded, the discarding player receives 13 spell damage.',
 	],
 	ouija: "Whenever a creature dies, add an Ouija Essence to opponent's hand.",
 	pacify: "Set target creature or weapon's strength to 0.",
@@ -418,13 +420,13 @@ const data = {
 	predator:
 		'If opponent has more than four cards in their hand, this card attacks a second time and opponent discards the last card in their hand.',
 	protectall:
-		'All your creatures and permanents gain a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages the affected card.',
+		'All your creatures and permanents and weapon and shield gain a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages the affected card.',
 	protectonce:
 		'Nullify the next spell, ability, or spell damage used by opponent that targets or damages this card.',
 	purify:
 		'Remove all poison counters and sacrifice status from target creature or player. Target creature or player gains two purify counters.',
 	quantagift:
-		'Gain 2:7 and 2 quanta matching your mark. If your mark is 1:7, instead gain only 3:7 total.',
+		'Gain 2:7 and 2 quanta matching your mark. If your mark is 1:7, instead gain only 3:7 total. If your mark is 1:0, produce an additional 4:0',
 	quanta: (x, amt = 1) => ({
 		ownattack: `Gain ${amt}:${x} every turn`,
 		owndeath: `When this creature dies, gain ${amt}:${x}`,
@@ -490,6 +492,8 @@ const data = {
 		cast:
 			"Randomize up to 9 quanta randomly chosen from target player's quanta pool.",
 	},
+	scramblespam:
+		"Randomize up to 9 quanta randomly chosen from target player's quanta pool. This ability may be used multiple times per turn.",
 	serendipity: [
 		'Add 3 random non-pillar cards to your hand. At least one will be 1:1.',
 		'Add 3 random upgraded non-pillar cards to your hand. At least one will be 1:1.',
