@@ -954,7 +954,11 @@ const Skills = {
 		t.transform(ctx.randomcard(false, x => x.type === etg.Creature));
 	},
 	inertia: (ctx, c, t, data) => {
-		if (data.tgt && c.ownerId === ctx.get(data.tgt).get('owner')) {
+		if (
+			data.tgt &&
+			c.ownerId === ctx.get(data.tgt).get('owner') &&
+			data.tgt !== c.ownerId
+		) {
 			c.owner.spend(etg.Gravity, -2);
 		}
 	},
