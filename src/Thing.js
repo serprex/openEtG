@@ -386,14 +386,13 @@ Thing.prototype.mutantactive = function() {
 };
 Thing.prototype.isMaterial = function(type) {
 	return (
-		this.type === etg.Spell ||
-		((type === etg.Permanent
+		(type === etg.Permanent
 			? this.type <= type
 			: type
 			? this.type === type
 			: this.type !== etg.Player) &&
-			!this.status.get('immaterial') &&
-			!this.status.get('burrowed'))
+		(this.type === etg.Spell ||
+			(!this.status.get('immaterial') && !this.status.get('burrowed')))
 	);
 };
 Thing.prototype.addactive = function(type, active) {
