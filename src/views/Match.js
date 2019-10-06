@@ -199,6 +199,26 @@ function PagedModal(props) {
 	);
 }
 
+function LastCard({ opacity, name }) {
+	return (
+		<div
+			style={{
+				position: 'absolute',
+				left: '450px',
+				top: '300px',
+				transform: 'translate(-50%,-50%)',
+				fontSize: '16px',
+				color: '#fff',
+				backgroundColor: '#000',
+				padding: '18px',
+				opacity: opacity,
+				zIndex: '8',
+			}}>
+			{`Last card for ${name}`}
+		</div>
+	);
+}
+
 class ThingInst extends React.Component {
 	constructor(props) {
 		super(props);
@@ -758,35 +778,30 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 						case 'LastCard':
 							newstate.fxid = (newstate.fxid || state.fxid) + 1;
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							const playerName =
+								game.data.players[game.byId(effect.id).getIndex()].name;
 							newstate.effects.add(
-								<Motion
-									key={newstate.fxid}
-									defaultStyle={{ fade: 1 }}
-									style={{ fade: spring(0) }}
-									onRest={() => {
-										this.setState(state => {
-											const effects = new Set(state.effects);
-											effects.delete(Text);
-											return { effects };
-										});
-									}}>
-									{({ fade }) => (
-										<div
-											style={{
-												position: 'absolute',
-												left: '450px',
-												top: '300px',
-												transform: 'translate(-50%,-50%)',
-												fontSize: '16px',
-												color: '#fff',
-												backgroundColor: '#000',
-												padding: '18px',
-												opacity: `${fade}`,
+								<Components.Delay
+									ms={3210}
+									first={() => <LastCard opacity={1} name={playerName} />}
+									second={() => (
+										<Motion
+											key={newstate.fxid}
+											defaultStyle={{ opacity: 1 }}
+											style={{ opacity: spring(0) }}
+											onRest={() => {
+												this.setState(state => {
+													const effects = new Set(state.effects);
+													effects.delete(Text);
+													return { effects };
+												});
 											}}>
-											Last card for {game.byId(effect.id).name}
-										</div>
+											{({ opacity }) => (
+												<LastCard opacity={opacity} name={playerName} />
+											)}
+										</Motion>
 									)}
-								</Motion>,
+								/>,
 							);
 							break;
 						default:

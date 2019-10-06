@@ -224,7 +224,7 @@ const data = {
 	fractal:
 		'Add 6 copies of target creature to your hand. Remove all remaining 1:12. Add an additional copy for every 2:12 removed.',
 	freeevade:
-		"If your opponent has a shield, your creatures have a 30% chance to bypass the shield. Otherwise, your creatures have a 30% chance to deal 50% more damage. Your creatures have 20% chance to evade opponent's targeted spells and abilities.",
+		"If your opponent has a shield, your airborne creatures have a 30% chance to bypass the shield. Otherwise, your creatures have a 30% chance to deal 50% more damage. Your creatures have 20% chance to evade opponent's targeted spells and abilities.",
 	freeze: [
 		'Freeze target creature or weapon for 3 turns. Frozen cards cannot attack or use abilities, and do not activate per-turn abilities.',
 		'Freeze target creature or weapon for 4 turns. Frozen cards cannot attack or use abilities, and do not activate per-turn abilities.',

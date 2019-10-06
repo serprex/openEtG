@@ -23,6 +23,36 @@ export function Box(props) {
 	);
 }
 
+export class Delay extends React.Component {
+	constructor(props) {
+		super(props);
+		this._mounted = false;
+		this.state = { on: false };
+	}
+
+	componentDidMount() {
+		this._timeout = setTimeout(() => {
+			if (this._timeout) {
+				this._timeout = 0;
+				this.setState({ on: true });
+			}
+		}, this.props.ms);
+	}
+
+	componentWillUnmount() {
+		if (this._timeout) {
+			clearTimeout(this._timeout);
+			this._timeout = 0;
+		}
+	}
+
+	render() {
+		return React.createElement(
+			this.state.on ? this.props.second : this.props.first,
+		);
+	}
+}
+
 export function CardImage(props) {
 	const { card } = props,
 		bordcol = card.shiny ? '#daa520' : '#222',
