@@ -23,18 +23,19 @@ export function Box(props) {
 	);
 }
 
-export class Delay extends React.Component {
+export class OnDelay extends React.Component {
 	constructor(props) {
 		super(props);
-		this._mounted = false;
-		this.state = { on: false };
+		this._timeout = 0;
 	}
 
 	componentDidMount() {
 		this._timeout = setTimeout(() => {
 			if (this._timeout) {
 				this._timeout = 0;
-				this.setState({ on: true });
+				if (this.props.onTimeout) {
+					this.props.onTimeout();
+				}
 			}
 		}, this.props.ms);
 	}
@@ -47,8 +48,23 @@ export class Delay extends React.Component {
 	}
 
 	render() {
-		return React.createElement(
-			this.state.on ? this.props.second : this.props.first,
+		return this.props.children || null;
+	}
+}
+
+export class Delay extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = { on: false };
+	}
+
+	render() {
+		return (
+			<OnDelay ms={this.props.ms} onTimeout={() => this.setState({ on: true })}>
+				{React.createElement(
+					this.state.on ? this.props.second : this.props.first,
+				)}
+			</OnDelay>
 		);
 	}
 }

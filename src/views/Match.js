@@ -219,6 +219,88 @@ function LastCard({ opacity, name }) {
 	);
 }
 
+function SpellDisplay(props) {
+	return (
+		<TransitionMotion
+			styles={props.spells.map((spell, i) => ({
+				key: `${spell.c}`,
+				style: {
+					y: spring(540 - (props.spells.length - i) * 20),
+					opacity: spring(1),
+				},
+				data: spell,
+			}))}
+			willEnter={item => ({ y: 0, opacity: 0 })}
+			willLeave={() => ({ opacity: spring(0) })}>
+			{styles => (
+				<>
+					{styles.map(item => {
+						const p1 = props.idtrack.get(item.data.t);
+						return (
+							<Components.OnDelay
+								key={item.key}
+								ms={1984}
+								onTimeout={() => props.removeSpell(item.data)}>
+								<Components.CardImage
+									card={item.data}
+									style={{
+										position: 'absolute',
+										left: '800px',
+										top: `${item.style.y}px`,
+										opacity: item.style.opacity,
+									}}
+								/>
+								{p1 && (
+									<ArrowLine
+										x0={800}
+										y0={item.style.y + 10}
+										x1={p1.x}
+										y1={p1.y}
+									/>
+								)}
+							</Components.OnDelay>
+						);
+					})}
+				</>
+			)}
+		</TransitionMotion>
+	);
+}
+
+function ArrowLine({ x0, y0, x1, y1 }) {
+	return (
+		<svg
+			width="900"
+			height="600"
+			style={{
+				position: 'absolute',
+				left: '0',
+				top: '0',
+				zIndex: '4',
+				pointerEvents: 'none',
+			}}>
+			<defs>
+				<marker
+					id="h"
+					orient="auto"
+					markerWidth="3"
+					markerHeight="4"
+					refX="0.1"
+					refY="2">
+					<path d="M0 0L1 2L0 4L3 2Z" fill="#f84" />
+				</marker>
+			</defs>
+			<path
+				markerEnd="url(#h)"
+				d={`M${x0} ${y0}L${x1} ${y1}`}
+				stroke="#f84"
+				strokeWidth="4"
+				opacity="0.7"
+			/>
+		</svg>
+	);
+}
+
 class ThingInst extends React.Component {
 	constructor(props) {
 		super(props);
@@ -489,8 +571,8 @@ function FoePlays({
 			<div
 				style={{
 					position: 'absolute',
-					left: '8px',
-					top: '300px',
+					left: '800px',
+					top: `${540 - foeplays.length * 20}px`,
 					zIndex: '6',
 				}}>
 				{foeplays.map((play, i) => (
@@ -549,6 +631,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 				hovery: null,
 				line0: null,
 				line1: null,
+				spells: [],
 				popup: props.game.data.quest && props.game.data.quest.opentext,
 				popupidx: 0,
 			};
@@ -685,7 +768,11 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 					const foeplays = new Map(state.foeplays);
 					if (!foeplays.has(turn)) foeplays.set(turn, []);
 					foeplays.set(turn, foeplays.get(turn).concat([play]));
-					return { foeplays };
+					const delta = { foeplays };
+					if (data.x === 'cast' && iscmd) {
+						delta.spells = state.spells.concat([play]);
+					}
+					return delta;
 				});
 			}
 			if (data.x === 'mulligan') {
@@ -1575,10 +1662,19 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 								pos = {
 									x: 103,
 									y:
-										(item.data.ownerId === player1.id) === (endpos === -1)
+										(item.data.ownerId === player1.id) ===
+										(endpos === -1 || endpos === -3)
 											? 551
 											: 258,
+									faceUp: endpos < -2,
 								};
+								pos.opacity = spring(
+									endpos < -2 &&
+										item.style.y.val &&
+										Math.abs(item.style.y.val - pos.y) > 2
+										? 1
+										: 0,
+								);
 							} else if (endpos) {
 								pos = this.idtrack.get(endpos);
 							}
@@ -1595,7 +1691,12 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 						{interpStyles => (
 							<>
 								{interpStyles.map(item => {
-									this.idtrack.set(item.data.id, item.style);
+									if (
+										item.style.x !== undefined &&
+										item.style.y !== undefined
+									) {
+										this.idtrack.set(item.data.id, item.style);
+									}
 									return (
 										<ThingInst
 											key={item.key}
@@ -1653,36 +1754,25 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 						{turntell}
 					</span>
 					{this.state.effects}
+					{!this.state.showFoeplays && (
+						<SpellDisplay
+							idtrack={this.idtrack}
+							game={game}
+							spells={this.state.spells}
+							removeSpell={spell => {
+								this.setState(state => ({
+									spells: state.spells.filter(x => x !== spell),
+								}));
+							}}
+						/>
+					)}
 					{this.state.line0 && this.state.line1 && (
-						<svg
-							width="900"
-							height="600"
-							style={{
-								position: 'absolute',
-								left: '0',
-								top: '0',
-								zIndex: '4',
-								pointerEvents: 'none',
-							}}>
-							<defs>
-								<marker
-									id="h"
-									orient="auto"
-									markerWidth="3"
-									markerHeight="4"
-									refX="0.1"
-									refY="2">
-									<path d="M0 0L1 2L0 4L3 2Z" fill="#f84" />
-								</marker>
-							</defs>
-							<path
-								markerEnd="url(#h)"
-								d={`M${this.state.line0.x} ${this.state.line0.y}L${this.state.line1.x} ${this.state.line1.y}`}
-								stroke="#f84"
-								strokeWidth="4"
-								opacity="0.7"
-							/>
-						</svg>
+						<ArrowLine
+							x0={this.state.line0.x}
+							y0={this.state.line0.y}
+							x1={this.state.line1.x}
+							y1={this.state.line1.y}
+						/>
 					)}
 					<Components.Card
 						x={this.state.hoverx}
