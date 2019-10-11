@@ -222,8 +222,8 @@ function LastCard({ opacity, name }) {
 function SpellDisplay(props) {
 	return (
 		<TransitionMotion
-			styles={props.spells.map((spell, i) => ({
-				key: `${spell.c}`,
+			styles={props.spells.map(({ id, spell }, i) => ({
+				key: `${id}`,
 				style: {
 					y: spring(540 - (props.spells.length - i) * 20),
 					opacity: spring(1),
@@ -240,7 +240,7 @@ function SpellDisplay(props) {
 							<Components.OnDelay
 								key={item.key}
 								ms={1984}
-								onTimeout={() => props.removeSpell(item.data)}>
+								onTimeout={() => props.removeSpell(+item.key)}>
 								<Components.CardImage
 									card={item.data}
 									style={{
@@ -631,6 +631,7 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 				hovery: null,
 				line0: null,
 				line1: null,
+				spellid: 0,
 				spells: [],
 				popup: props.game.data.quest && props.game.data.quest.opentext,
 				popupidx: 0,
@@ -770,7 +771,10 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 					foeplays.set(turn, foeplays.get(turn).concat([play]));
 					const delta = { foeplays };
 					if (data.x === 'cast' && iscmd) {
-						delta.spells = state.spells.concat([play]);
+						delta.spells = state.spells.concat([
+							{ id: state.spellid, spell: play },
+						]);
+						delta.spellid = state.spellid + 1;
 					}
 					return delta;
 				});
@@ -1606,18 +1610,29 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 						/>
 					)}
 					{svgbg}
-					{cloaked
-						? cloaksvg
-						: this.state.showFoeplays && (
-								<FoePlays
-									idtrack={this.idtrack}
-									foeplays={this.state.foeplays.get(player2.id)}
-									setCard={(e, play) => this.setCard(e, play, e.pageX)}
-									setLine={(line0, line1) => this.setState({ line0, line1 })}
-									clearCard={this.clearCard}
-									showGame={game => this.setState({ game })}
-								/>
-						  )}
+					{cloaked ? (
+						cloaksvg
+					) : this.state.showFoeplays ? (
+						<FoePlays
+							idtrack={this.idtrack}
+							foeplays={this.state.foeplays.get(player2.id)}
+							setCard={(e, play) => this.setCard(e, play, e.pageX)}
+							setLine={(line0, line1) => this.setState({ line0, line1 })}
+							clearCard={this.clearCard}
+							showGame={game => this.setState({ game })}
+						/>
+					) : (
+						<SpellDisplay
+							idtrack={this.idtrack}
+							game={game}
+							spells={this.state.spells}
+							removeSpell={id => {
+								this.setState(state => ({
+									spells: state.spells.filter(x => x.id !== id),
+								}));
+							}}
+						/>
+					)}
 					{children}
 					<TransitionMotion
 						styles={things.map(id => {
@@ -1754,18 +1769,6 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 						{turntell}
 					</span>
 					{this.state.effects}
-					{!this.state.showFoeplays && (
-						<SpellDisplay
-							idtrack={this.idtrack}
-							game={game}
-							spells={this.state.spells}
-							removeSpell={spell => {
-								this.setState(state => ({
-									spells: state.spells.filter(x => x !== spell),
-								}));
-							}}
-						/>
-					)}
 					{this.state.line0 && this.state.line1 && (
 						<ArrowLine
 							x0={this.state.line0.x}
