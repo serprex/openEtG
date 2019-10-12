@@ -6,9 +6,11 @@ function writetd(...args) {
 	for (const arg of args) if (arg !== undefined) write(`[td]${arg}[/td]`);
 	write('[/tr]');
 }
+import * as etg from '../src/etg.js';
+import Cards from '../src/Cards.js';
+import decks from '../src/Decks.json';
+import { eleNames } from '../src/ui.js';
 if (process.argv.length < 3) {
-	const etg = require('../etg'),
-		Cards = require('../Cards');
 	write('[right][table]');
 	writetd('Tot', 'E', 'C', 'P', 'S', '|', 'R', 'U', 'C', '', '');
 	for (let i = 0; i < 13; i++) {
@@ -29,7 +31,7 @@ if (process.argv.length < 3) {
 		});
 		writetd(
 			ofele.length,
-			':' + require('../ui').eleNames[i].toLowerCase(),
+			':' + eleNames[i].toLowerCase(),
 			creas,
 			perms,
 			spels,
@@ -42,9 +44,8 @@ if (process.argv.length < 3) {
 		);
 	}
 	write('[/table][/right]\n');
-} else {
-	const decks = require('../Decks')[process.argv[2]];
-	if (decks) {
-		decks.forEach(deck => write(`[deck title=${deck[0]}]${deck[1]}[/deck]`));
-	}
+} else if (process.argv[2]) {
+	decks[process.argv[2]].forEach(deck =>
+		write(`[deck title=${deck[0]}]${deck[1]}[/deck]`),
+	);
 }
