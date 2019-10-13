@@ -32,9 +32,7 @@ if (typeof kongregateAPI === 'undefined') {
 								}
 								if (!data.accountbound && !data.pool) {
 									this.props.dispatch(
-										store.doNav(import('./ElementSelect.js'), {
-											user: data,
-										}),
+										store.doNav(import('./ElementSelect.js')),
 									);
 								} else {
 									this.props.dispatch(store.setOptTemp('deck', sock.getDeck()));
@@ -76,6 +74,10 @@ if (typeof kongregateAPI === 'undefined') {
 							});
 						});
 				}
+			}
+
+			registerClick() {
+				this.props.dispatch(store.doNav(import('./ElementSelect.js')));
 			}
 
 			loginClick(auth) {
@@ -132,8 +134,8 @@ if (typeof kongregateAPI === 'undefined') {
 						<label
 							style={{
 								position: 'absolute',
-								left: '430px',
-								top: '380px',
+								left: '270px',
+								top: '410px',
 							}}>
 							<input
 								type="checkbox"
@@ -160,18 +162,20 @@ if (typeof kongregateAPI === 'undefined') {
 								position: 'absolute',
 								left: '430px',
 								top: '350px',
+								width: '100px',
 							}}
 						/>
-						<a
-							target="_blank"
-							href="forum/?topic=267"
+						<input
+							type="button"
+							value="New Account"
+							onClick={e => this.registerClick()}
 							style={{
 								position: 'absolute',
-								left: '270px',
-								top: '424px',
-							}}>
-							Tutorial
-						</a>
+								left: '430px',
+								top: '380px',
+								width: '100px',
+							}}
+						/>
 						{this.state.commit}
 					</div>
 				);
@@ -199,10 +203,8 @@ if (typeof kongregateAPI === 'undefined') {
 										delete data.x;
 										this.props.dispatch(store.setUser(data));
 										if (!data.accountbound && !data.pool) {
-											import('./ElementSelect.js').then(ElementSelect =>
-												this.props.dispatch(
-													store.doNav(ElementSelect.default, { user: data }),
-												),
+											this.props.dispatch(
+												store.doNav(import('./ElementSelect.js')),
 											);
 										} else {
 											this.props.dispatch(store.doNav(MainMenu));

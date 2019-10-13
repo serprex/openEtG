@@ -230,6 +230,7 @@ const DeckSelector = connect(({ user }) => ({ user }))(
 						height: '330px',
 					}}>
 					<input
+						autoFocus
 						placeholder="Name"
 						value={this.state.name}
 						onChange={e => this.setState({ name: e.target.value })}
