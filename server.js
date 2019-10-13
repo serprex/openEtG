@@ -157,13 +157,13 @@ const importlocks = new Map();
 			await db.hset('Users', u, JSON.stringify(user));
 			Us.users.delete(u);
 			Us.socks.delete(u);
-			sockmeta.delete(socket);
+			sockmeta.delete(this);
 		},
 		async delete({ u }, user) {
 			await db.hdel('Users', u);
 			Us.users.delete(u);
 			Us.socks.delete(u);
-			sockmeta.delete(socket);
+			sockmeta.delete(this);
 		},
 		async setarena(data, user) {
 			if (!user.ocard || !data.d) {
