@@ -157,13 +157,13 @@ const importlocks = new Map();
 			await db.hset('Users', u, JSON.stringify(user));
 			Us.users.delete(u);
 			Us.socks.delete(u);
-			sockmeta.delete(this);
+			sockmeta.set(this, {});
 		},
 		async delete({ u }, user) {
 			await db.hdel('Users', u);
 			Us.users.delete(u);
 			Us.socks.delete(u);
-			sockmeta.delete(this);
+			sockmeta.set(this, {});
 		},
 		async setarena(data, user) {
 			if (!user.ocard || !data.d) {
@@ -1315,7 +1315,7 @@ const importlocks = new Map();
 	};
 	function onSocketClose() {
 		const info = sockmeta.get(this);
-		sockmeta.delete(this);
+		sockmeta.set(this, {});
 		if (info) {
 			if (info.name) {
 				Us.socks.delete(info.name);
