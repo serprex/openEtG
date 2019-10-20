@@ -18,24 +18,24 @@ async function respond(url, res, datathunk, ifmod) {
 		cache.delete(url);
 		try {
 			res.writeHead('404');
-			res.end(err);
-		} catch {
-			console.error(err);
+			res.end(typeof err === 'string' ? err : err.message);
+		} catch (ex) {
+			console.error('404', err, ex);
 		}
 	}
 }
 export function rm(url) {
 	return cache.delete(url);
 }
-export function _try(res, url, ifmod) {
+export async function _try(res, url, ifmod) {
 	const data = cache.get(url);
 	if (!data) return false;
-	respond(url, res, data, ifmod);
+	await respond(url, res, data, ifmod);
 	return true;
 }
 
 export function add(res, url, ifmod, path, func) {
 	const datathunk = func(path, stime);
 	cache.set(url, datathunk);
-	respond(url, res, datathunk, ifmod);
+	return respond(url, res, datathunk, ifmod);
 }

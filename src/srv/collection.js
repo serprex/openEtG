@@ -32,6 +32,5 @@ export default async function(url, stime) {
 	return {
 		buf: await gzip(result.join('\n'), { level: 1 }),
 		head: { 'Content-Encoding': 'gzip', 'Content-Type': 'text/plain' },
-		date: new Date(),
 	};
 }

@@ -163,6 +163,7 @@ export default connect(({ user, opts }) => ({
 	hideMainchat: !!opts.hideMainchat,
 	disableTut: !!opts.disableTut,
 	lofiArt: !!opts.lofiArt,
+	playByPlayMode: opts.playByPlayMode || '',
 }))(
 	class MainMenu extends React.Component {
 		constructor(props) {
@@ -176,16 +177,16 @@ export default connect(({ user, opts }) => ({
 				tipNumber: RngMock.upto(tipjar.length),
 				tipText: '',
 			};
-
-			this.resetTip = e => {
-				if (e.target.tagName && e.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) {
-					const tipText = this.props.user
-						? tipjar[this.state.tipNumber]
-						: "To register, just type desired username & password in the fields to the right, then click 'Login'";
-					if (tipText !== this.state.tipText) this.setState({ tipText });
-				}
-			};
 		}
+
+		resetTip = e => {
+			if (e.target.tagName && e.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) {
+				const tipText = this.props.user
+					? tipjar[this.state.tipNumber]
+					: "To register, just type desired username & password in the fields to the right, then click 'Login'";
+				if (tipText !== this.state.tipText) this.setState({ tipText });
+			}
+		};
 
 		componentWillUnmount() {
 			document.removeEventListener('mousemove', this.resetTip);
@@ -243,6 +244,10 @@ export default connect(({ user, opts }) => ({
 				}
 			};
 		}
+
+		setPbpSetting = e => {
+			this.props.dispatch(store.setOpt('playByPlayMode', e.target.value));
+		};
 
 		render() {
 			if (!this.props.user) return null;
@@ -709,7 +714,7 @@ export default connect(({ user, opts }) => ({
 							/>
 						)}
 						{this.state.showsettings && (
-							<Components.Box x={585} y={380} width={272} height={156}>
+							<Components.Box x={585} y={340} width={272} height={196}>
 								{this.state.changepass ? (
 									<>
 										<input
@@ -875,7 +880,7 @@ export default connect(({ user, opts }) => ({
 											)
 										}
 									/>
-									Disable tutorial
+									Hide help
 								</label>
 								<label
 									style={{
@@ -894,6 +899,44 @@ export default connect(({ user, opts }) => ({
 									/>
 									Lofi Art
 								</label>
+								<span
+									style={{
+										position: 'absolute',
+										left: '8px',
+										top: '158px',
+									}}>
+									Play by play
+									<label>
+										<input
+											type="radio"
+											name="settings-pbp"
+											value=""
+											checked={this.props.playByPlayMode === ''}
+											onChange={this.setPbpSetting}
+										/>
+										On
+									</label>
+									<label>
+										<input
+											type="radio"
+											name="settings-pbp"
+											value="noline"
+											checked={this.props.playByPlayMode === 'noline'}
+											onChange={this.setPbpSetting}
+										/>
+										No line
+									</label>
+									<label>
+										<input
+											type="radio"
+											name="settings-pbp"
+											value="disabled"
+											checked={this.props.playByPlayMode === 'disabled'}
+											onChange={this.setPbpSetting}
+										/>
+										Off
+									</label>
+								</span>
 							</Components.Box>
 						)}
 					</>

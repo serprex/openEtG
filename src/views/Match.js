@@ -250,7 +250,7 @@ function SpellDisplay(props) {
 										opacity: item.style.opacity,
 									}}
 								/>
-								{p1 && (
+								{p1 && props.playByPlayMode !== 'noline' && (
 									<ArrowLine
 										x0={800}
 										y0={item.style.y + 10}
@@ -597,7 +597,11 @@ function FoePlays({
 	);
 }
 
-export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
+export default connect(({ user, opts }) => ({
+	user,
+	lofiArt: opts.lofiArt,
+	playByPlayMode: opts.playByPlayMode,
+}))(
 	class Match extends React.Component {
 		constructor(props) {
 			super(props);
@@ -1622,16 +1626,19 @@ export default connect(({ user, opts }) => ({ user, lofiArt: opts.lofiArt }))(
 							showGame={game => this.setState({ game })}
 						/>
 					) : (
-						<SpellDisplay
-							idtrack={this.idtrack}
-							game={game}
-							spells={this.state.spells}
-							removeSpell={id => {
-								this.setState(state => ({
-									spells: state.spells.filter(x => x.id !== id),
-								}));
-							}}
-						/>
+						this.props.playByPlayMode !== 'disabled' && (
+							<SpellDisplay
+								playByPlayMode={this.props.playByPlayMode}
+								idtrack={this.idtrack}
+								game={game}
+								spells={this.state.spells}
+								removeSpell={id => {
+									this.setState(state => ({
+										spells: state.spells.filter(x => x.id !== id),
+									}));
+								}}
+							/>
+						)
 					)}
 					{children}
 					<TransitionMotion
