@@ -22,9 +22,9 @@ const ActivesValues = Object.freeze({
 	antimatter: 12,
 	bblood: 7,
 	blackhole: function(c) {
-		var a = 0,
-			fq = c.owner.foe.quanta;
-		for (var i = 1; i < 13; i++) {
+		let a = 0;
+		const fq = c.owner.foe.quanta;
+		for (let i = 1; i < 13; i++) {
 			a += Math.min(fq[i], 3) / 3;
 		}
 		return a;
@@ -107,16 +107,16 @@ const ActivesValues = Object.freeze({
 	fungusrebirth: 1,
 	gas: 5,
 	golemhit: function(c) {
-		var dmg = 0;
-		for (var i = 0; i < 23; i++) {
-			var cr = c.owner.creatures[i];
+		let dmg = 0;
+		for (let i = 0; i < 23; i++) {
+			const cr = c.owner.creatures[i];
 			if (
 				cr &&
 				cr.getStatus('golem') &&
 				!cr.getStatus('delayed') &&
 				!cr.getStatus('frozen')
 			) {
-				var atk = getDamage(cr);
+				const atk = getDamage(cr);
 				if (atk > dmg) dmg = atk;
 			}
 		}
@@ -133,7 +133,7 @@ const ActivesValues = Object.freeze({
 	'growth 2': 5,
 	guard: 4,
 	halveatk: function(c) {
-		var atk;
+		let atk;
 		return c.type === etg.Spell
 			? -c.card.attack / 4
 			: ((atk = c.trueatk()) < 0) - (atk > 0);
@@ -165,21 +165,17 @@ const ActivesValues = Object.freeze({
 	lycanthropy: 4,
 	mend: 3,
 	metamorph: 2,
-	miracle: function(c) {
-		return c.owner.maxhp / 8;
-	},
-	mitosis: function(c) {
-		return 4 + c.card.cost;
-	},
+	miracle: c => c.owner.maxhp / 8,
+	mitosis: c => 4 + c.card.cost,
 	mitosisspell: 6,
 	momentum: 2,
 	mutation: 4,
-	neuro: function(c) {
+	neuro: c => {
 		return c.owner.foe.neuro ? evalactive(c, Actives.poison) + 0.1 : 6;
 	},
-	nightmare: function(c) {
-		var val = 24 - c.owner.foe.hand.length;
-		c.owner.hand.forEach(function(inst) {
+	nightmare: c => {
+		let val = 24 - c.owner.foe.hand.length;
+		c.owner.hand.forEach(inst => {
 			if (inst.card.isOf(inst.game.Cards.Names.Nightmare)) val /= 2;
 		});
 		return val;
@@ -189,9 +185,7 @@ const ActivesValues = Object.freeze({
 	nullspell: 4,
 	nymph: 7,
 	ouija: 3,
-	overdrive: function(c) {
-		return c.truehp() - 1;
-	},
+	overdrive: c => c.truehp() - 1,
 	overdrivespell: 5,
 	pacify: 5,
 	pairproduce: 2,
@@ -259,14 +253,12 @@ const ActivesValues = Object.freeze({
 	steal: 6,
 	steam: 6,
 	stoneform: 1,
-	storm2: 6,
-	storm3: 12,
+	'storm 2': 6,
+	'storm 3': 12,
 	swave: 6,
 	upkeep: -0.5,
 	upload: 3,
-	vampire: function(c, ttatk) {
-		return (c.type === etg.Spell ? c.card.attack : ttatk) * 0.7;
-	},
+	vampire: (c, ttatk) => (c.type === etg.Spell ? c.card.attack : ttatk) * 0.7,
 	virtue: function(c) {
 		return c.type === etg.Spell
 			? c.owner.foe.shield
@@ -275,17 +267,11 @@ const ActivesValues = Object.freeze({
 			: (c.trueatk() - getDamage(c)) / 1.5;
 	},
 	virusplague: 1,
-	void: function(c) {
-		return c.status ? c.getStatus('charges') * 5 : 5;
-	},
-	voidshell: function(c) {
-		return (c.owner.maxhp - c.owner.hp) / 10;
-	},
+	void: c => (c.status ? c.getStatus('charges') * 5 : 5),
+	voidshell: c => (c.owner.maxhp - c.owner.hp) / 10,
 	quantagift: 4,
 	web: 1,
-	wind: function(c) {
-		return c.type === etg.Spell ? -2 : c.getStatus('storedAtk') / 2 - 2;
-	},
+	wind: c => (c.type === etg.Spell ? -2 : c.getStatus('storedAtk') / 2 - 2),
 	wisdom: 4,
 	pillar: pillarval,
 	pend: pillarval,
@@ -293,9 +279,8 @@ const ActivesValues = Object.freeze({
 	pillspi: pillarval,
 	pillcar: pillarval,
 	absorber: 5,
-	blockwithcharge: function(c) {
-		return c.getStatus('charges') / (1 + c.owner.foe.countcreatures() * 2);
-	},
+	blockwithcharge: c =>
+		c.getStatus('charges') / (1 + c.owner.foe.countcreatures() * 2),
 	cold: 7,
 	despair: 5,
 	evade100: function(c) {
@@ -312,7 +297,7 @@ const ActivesValues = Object.freeze({
 	skull: 5,
 	slow: 6,
 	solar: function(c) {
-		var coq = c.owner.quanta[etg.Light];
+		const coq = c.owner.quanta[etg.Light];
 		return 5 - (4 * coq) / (4 + coq);
 	},
 	thorn: 5,

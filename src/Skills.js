@@ -257,10 +257,9 @@ const Skills = {
 			const lives = c.maybeDecrStatus('lives');
 			if (!lives) return;
 			ctx.effect({ x: 'Text', text: `${lives - 1} lives`, id: c.id });
-			const cl = c.clone(c.ownerId);
-			cl.hp = cl.maxhp = c.card.health;
-			cl.atk = c.card.attack;
-			c.owner.setCrea(data.index, cl.id);
+			c.hp = c.maxhp = c.card.health;
+			c.atk = c.card.attack;
+			c.owner.setCrea(data.index, c.id);
 		}
 	}),
 	cell: passive((ctx, c, t) => {

@@ -251,7 +251,17 @@ const importlocks = new Map();
 		async foearena(data, user) {
 			const len = await db.zcard(`arena${data.lv ? '1' : ''}`);
 			if (!len) return;
-			const idx = RngMock.upto(Math.min(len, 20));
+			let r = Math.random(),
+				p = 0.07,
+				p0 = 1 - p,
+				idx = 0;
+			for (; idx < len && r > p; idx++) {
+				r -= p;
+				p *= p0;
+			}
+			if (idx === len) {
+				idx = RngMock.upto(len);
+			}
 			const anames = await db.zrevrange(`arena${data.lv ? '1' : ''}`, idx, idx);
 			if (!anames || !anames.length) {
 				console.log('No arena', idx);
@@ -1248,7 +1258,7 @@ const importlocks = new Map();
 			const obj = await db.zrevrange(
 				`arena${data.lv ? '1' : ''}`,
 				0,
-				19,
+				29,
 				'withscores',
 			);
 			const tasks = [];
@@ -1263,8 +1273,8 @@ const importlocks = new Map();
 					),
 				);
 			}
-			const res = await Promise.all(tasks);
-			let t20 = [],
+			const res = await Promise.all(tasks),
+				t20 = [],
 				day = sutil.getDay();
 			for (let i = 0; i < res.length; i++) {
 				const wl = res[i];

@@ -29,7 +29,7 @@ export default class ArenaTop extends React.Component {
 					style={{
 						position: 'absolute',
 						left: '90px',
-						top: '50px',
+						top: '16px',
 					}}>
 					{info.map((data, i) => {
 						const lic = [<span className="atoptext">{data[0]}</span>];
