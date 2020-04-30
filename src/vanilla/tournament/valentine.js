@@ -1,5 +1,5 @@
-export default function(deck) {
-	deck.sort(function(x, y) {
+export default function (deck) {
+	deck.sort(function (x, y) {
 		return (x.code > y.code) - (x.code < y.code);
 	});
 	var bans = '4vd 4vl 4vo 4vp 52i 52l 52p 52s 534 55m 55r 55t 561 562 58v 593 596 5c3 5f4 5f5 5f6 5f8 5f9 5fb 5fk 5i8 5ic 5if 5ig 5ih 5ij 5io 5lc 5oh 5ol 5om 5on 5p0 5rq 5rs 5un 5us 5uu 5v8 61q 61t 61u'.split(
@@ -12,16 +12,10 @@ export default function(deck) {
 		return 'Deck may be only 35 cards at most, not ' + deck.length;
 	for (var i = 0; i < deck.length; i++) {
 		var card = deck[i];
-		if (
-			etg.ShardList.some(function(x) {
-				return x && card.asUpped(false).code == x;
-			})
-		)
+		if (etg.ShardList.some(x => x && card.asUpped(false).code == x))
 			return 'Shards are banned';
 		if (
-			bans.some(function(x) {
-				return card.asUpped(false).code == x;
-			}) ||
+			bans.some(x => card.asUpped(false).code == x) ||
 			~unuppedbans.indexOf(card.code)
 		)
 			return card.name + ' is banned';

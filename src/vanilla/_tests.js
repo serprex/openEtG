@@ -32,7 +32,7 @@ class TestModule {
 	}
 }
 let M = new TestModule('Card Codes');
-M.test('Codes Unique', function() {
+M.test('Codes Unique', function () {
 	const codes = new Set();
 	for (let i = 0; i < 6; i++) {
 		let cdata = Cjson[i];
@@ -47,7 +47,7 @@ M.test('Codes Unique', function() {
 		}
 	}
 });
-M.test('Upped Alignment', function() {
+M.test('Upped Alignment', function () {
 	for (let key in Cards.Codes) {
 		key |= 0;
 		if (!key) continue;
@@ -61,7 +61,10 @@ M = new TestModule('Cards', {
 		const data = {
 			seed: 5489,
 			set: 'Original',
-			players: [{ idx: 1, deck: '104vc' }, { idx: 2, deck: '104vc' }],
+			players: [
+				{ idx: 1, deck: '104vc' },
+				{ idx: 2, deck: '104vc' },
+			],
 		};
 		this.game = new Game(data);
 		this.cast = (skill, ...args) => parseSkill(skill).func(this.game, ...args);
@@ -76,7 +79,7 @@ M = new TestModule('Cards', {
 		this.player1.mark = this.player2.mark = etg.Entropy;
 	},
 });
-M.test('Adrenaline', function() {
+M.test('Adrenaline', function () {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Devourer));
 	this.player1.addCrea(this.player1.newThing(Cards.Names.HornedFrog));
 	this.player1.addCrea(
@@ -90,7 +93,7 @@ M.test('Adrenaline', function() {
 	assert.equal(this.player1.quanta[etg.Darkness], 2, 'Absorbed');
 	assert.equal(this.player2.quanta[etg.Life], 1, 'Lone Life');
 });
-M.test('Aflatoxin', function() {
+M.test('Aflatoxin', function () {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Devourer));
 	this.cast('v_aflatoxin', this.player1, this.player1.creatures[0]);
 	this.player1.creatures[0].die();
@@ -109,7 +112,7 @@ M.test('Aflatoxin', function() {
 		'Malignant, not Ash',
 	);
 });
-M.test('BoneWall', function() {
+M.test('BoneWall', function () {
 	this.player1.setQuanta(etg.Death, 8);
 	initHand(this.player1, Cards.Names.BoneWall);
 	this.player1.hand[0].useactive();
@@ -124,7 +127,7 @@ M.test('BoneWall', function() {
 	this.player2.creatures[0].die();
 	assert.equal(this.player1.shield.status.get('charges'), 6, '6 charges');
 });
-M.test('Boneyard', function() {
+M.test('Boneyard', function () {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Devourer));
 	this.player1.addPerm(this.player1.newThing(Cards.Names.Boneyard));
 	this.player1.creatures[0].die();
@@ -135,12 +138,12 @@ M.test('Boneyard', function() {
 		'Skeleton',
 	);
 });
-M.test('Deckout', function() {
+M.test('Deckout', function () {
 	this.player2.deckIds = [];
 	this.player1.endturn();
 	assert.equal(this.game.winner, this.player1Id);
 });
-M.test('Destroy', function() {
+M.test('Destroy', function () {
 	this.player1.setQuanta(etg.Death, 10);
 	initHand(
 		this.player1,
@@ -185,14 +188,14 @@ M.test('Destroy', function() {
 	}
 	assert.ok(!this.player1.shield, 'This town is all in hell');
 });
-M.test('Devourer', function() {
+M.test('Devourer', function () {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Devourer));
 	this.player2.setQuanta(etg.Light, 1);
 	this.player1.endturn();
 	assert.equal(this.player2.quanta[etg.Light], 0, 'Light');
 	assert.equal(this.player1.quanta[etg.Darkness], 1, 'Darkness');
 });
-M.test('Earthquake', function() {
+M.test('Earthquake', function () {
 	initHand(
 		this.player1,
 		Cards.Names.AmethystPillar,
@@ -216,7 +219,7 @@ M.test('Earthquake', function() {
 	this.cast('v_earthquake', this.player2, pillars);
 	assert.ok(!this.player1.permanents[0], 'poof');
 });
-M.test('Eclipse', function() {
+M.test('Eclipse', function () {
 	this.initDeck(
 		this.player1,
 		Cards.Names.Ash,
@@ -246,7 +249,7 @@ M.test('Eclipse', function() {
 	assert.equal(this.player1.hp, 70, "Eclipse vamp'd");
 	assert.equal(this.player1.creatures[0].truehp(), 4, "hp buff'd");
 });
-M.test('Gpull', function() {
+M.test('Gpull', function () {
 	this.player2.addCrea(this.player2.newThing(Cards.Names.ColossalDragon));
 	this.player2.gpull = this.player2.creatureIds[0];
 	this.player1.addCrea(this.player1.newThing(Cards.Names.ForestScorpion));
@@ -264,7 +267,7 @@ M.test('Gpull', function() {
 	this.game.byId(this.player2.gpull).die();
 	assert.ok(!this.player2.gpull, 'gpull death poof');
 });
-M.test('Hope', function() {
+M.test('Hope', function () {
 	this.player1.setShield(this.player1.newThing(Cards.Names.Hope));
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Photon));
 	for (let i = 0; i < 3; i++) {
@@ -276,7 +279,7 @@ M.test('Hope', function() {
 	assert.equal(this.player1.shield.truedr(), 3, 'DR');
 	assert.equal(this.player1.quanta[etg.Light], 3, 'RoL');
 });
-M.test('Lobotomize', function() {
+M.test('Lobotomize', function () {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Devourer));
 	const dev = this.player1.creatures[0];
 	assert.ok(dev.active.get('ownattack'), 'Siphon');
@@ -285,7 +288,7 @@ M.test('Lobotomize', function() {
 	assert.ok(dev.active.get('ownattack'), 'Siphon');
 	assert.ok(!dev.active.get('cast'), 'No Burrow');
 });
-M.test('Obsession', function() {
+M.test('Obsession', function () {
 	initHand(
 		this.player1,
 		Cards.Names.GhostofthePast,
@@ -301,7 +304,7 @@ M.test('Obsession', function() {
 	assert.equal(this.player1.hp, 90, 'Damage');
 	assert.equal(this.player1.hand.length, 7, 'Discarded');
 });
-M.test('Parallel', function() {
+M.test('Parallel', function () {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Dragonfly));
 	const damsel = this.player1.creatures[0];
 	this.cast('v_parallel', damsel, damsel);
@@ -313,13 +316,13 @@ M.test('Parallel', function() {
 		"Web'd",
 	);
 });
-M.test('Phoenix', function() {
+M.test('Phoenix', function () {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Phoenix));
 	const phoenix = this.player1.creatures[0];
 	assert.equal(this.player1.creatures[0].card, Cards.Names.Phoenix, 'Phoenix');
 	this.cast('v_lightning', this.player1, phoenix);
 });
-M.test('Purify', function() {
+M.test('Purify', function () {
 	this.cast('v_poison3', this.player1);
 	assert.equal(this.player2.status.get('poison'), 3, '3');
 	this.cast('v_poison3', this.player1, this.player2);
@@ -329,7 +332,7 @@ M.test('Purify', function() {
 	this.cast('v_purify', this.player1, this.player2);
 	assert.equal(this.player2.status.get('poison'), -4, '-4');
 });
-M.test('Reflect', function() {
+M.test('Reflect', function () {
 	this.cast('v_lightning', this.player1, this.player2);
 	assert.ok(this.player1.hp == 100 && this.player2.hp == 95, 'Plain spell');
 	this.player2.setShield(this.player2.newThing(Cards.Names.ReflectiveShield));
@@ -342,7 +345,7 @@ M.test('Reflect', function() {
 		'Unreflected reflected spell',
 	);
 });
-M.test('Steal', function() {
+M.test('Steal', function () {
 	this.player1.setShield(this.player1.newThing(Cards.Names.BoneWall));
 	this.player1.shield.setStatus('charges', 3);
 	this.cast('v_steal', this.player2, this.player1.shield);
@@ -370,7 +373,7 @@ M.test('Steal', function() {
 		'stole 3',
 	);
 });
-M.test('Steam', function() {
+M.test('Steam', function () {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.SteamMachine));
 	const steam = this.player1.creatures[0];
 	this.player1.setQuanta(etg.Fire, 8);
@@ -381,7 +384,7 @@ M.test('Steam', function() {
 	steam.attack();
 	assert.equal(steam.trueatk(), 4, '4');
 });
-M.test('Voodoo', function() {
+M.test('Voodoo', function () {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.VoodooDoll));
 	const voodoo = this.player1.creatures[0];
 	this.cast('v_lightning', this.player1, voodoo);
@@ -394,7 +397,7 @@ M.test('Voodoo', function() {
 	assert.equal(voodoo.hp, 1, 'holy dmg');
 	assert.equal(this.player2.hp, 85, 'foe holy dmg');
 });
-M.test('Scarab', function() {
+M.test('Scarab', function () {
 	const scarabs = [
 		this.player1.newThing(Cards.Names.Scarab),
 		this.player1.newThing(Cards.Names.Scarab),

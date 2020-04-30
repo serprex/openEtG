@@ -1,4 +1,4 @@
-export default function(deck, mark) {
+export default function (deck, mark) {
 	function prevMark() {
 		if (mark == 1) return etg.eleNames[12];
 		return etg.eleNames[mark - 1];

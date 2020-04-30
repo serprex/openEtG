@@ -1107,7 +1107,10 @@ const Skills = {
 		}
 		[
 			[[2, 'hit', 'scramble']],
-			[[0, 'death', 'growth 1'], [0, '', 'nocturnal']],
+			[
+				[0, 'death', 'growth 1'],
+				[0, '', 'nocturnal'],
+			],
 			[[1, '', 'momentum']],
 			[],
 			[
@@ -1116,7 +1119,10 @@ const Skills = {
 				[2, 'ownattack', 'regenerate'],
 			],
 			[[0, 'buff', 'fiery']],
-			[[0, '', 'aquatic'], [2, 'hit', 'regen']],
+			[
+				[0, '', 'aquatic'],
+				[2, 'hit', 'regen'],
+			],
 			[
 				[0, 'ownattack', 'quanta 8'],
 				[1, 'blocked', 'virtue'],

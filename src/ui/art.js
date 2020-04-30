@@ -1,5 +1,5 @@
 function hookRowMouseover(tr) {
-	tr.addEventListener('mouseover', function(e) {
+	tr.addEventListener('mouseover', function (e) {
 		for (let i = 1; i < this.children.length; i++) {
 			const child = this.children[i].children[0];
 			if (child.href && child.href.match(/\/Cards\/...\.png$/)) {

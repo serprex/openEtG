@@ -11,7 +11,7 @@ function printstat(e) {
 	);
 	let letter,
 		ignore = name => name;
-	['Elite', 'Improved', 'Shard', 'Mark'].forEach(function(x) {
+	['Elite', 'Improved', 'Shard', 'Mark'].forEach(function (x) {
 		if (document.getElementById('ignore' + x).checked) {
 			const oldignore = ignore;
 			ignore = name => oldignore(name).replace(new RegExp(`^${x}( of)? `), '');

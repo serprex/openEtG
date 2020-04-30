@@ -1,4 +1,4 @@
-export default function(deck) {
+export default function (deck) {
 	if (deck.length & 3)
 		return 'Deck size must be a multiple of 4. Deck size: ' + deck.length;
 	var banlist = [

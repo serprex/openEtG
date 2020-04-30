@@ -130,8 +130,9 @@ export default connect(({ user }) => ({ user }))(
 						onMouseOver={(i, code) => this.setState({ code })}
 					/>
 					<Components.Text
-						text={`${this.state.gold +
-							userutil.calcWealth(this.state.deck, true)}$`}
+						text={`${
+							this.state.gold + userutil.calcWealth(this.state.deck, true)
+						}$`}
 						style={{
 							position: 'absolute',
 							left: '100px',
@@ -147,8 +148,9 @@ export default connect(({ user }) => ({ user }))(
 						}}
 					/>
 					<Components.Text
-						text={`${this.state.gopher +
-							userutil.calcWealth(this.state.offer, true)}$`}
+						text={`${
+							this.state.gopher + userutil.calcWealth(this.state.offer, true)
+						}$`}
 						style={{
 							position: 'absolute',
 							left: '350px',

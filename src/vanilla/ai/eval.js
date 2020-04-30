@@ -7,7 +7,7 @@ function pillarval(c) {
 const ActivesValues = Object.freeze({
 	ablaze: 3,
 	accelerationspell: 5,
-	acceleration: function(c) {
+	acceleration: function (c) {
 		return c.truehp() - 2;
 	},
 	accretion: 8,
@@ -15,13 +15,13 @@ const ActivesValues = Object.freeze({
 	aflatoxin: 5,
 	aggroskele: 2,
 	air: 1,
-	alphawolf: function(c) {
+	alphawolf: function (c) {
 		return c.type === etg.Spell ? 3 : 0;
 	},
 	animateweapon: 4,
 	antimatter: 12,
 	bblood: 7,
-	blackhole: function(c) {
+	blackhole: function (c) {
 		let a = 0;
 		const fq = c.owner.foe.quanta;
 		for (let i = 1; i < 13; i++) {
@@ -31,7 +31,7 @@ const ActivesValues = Object.freeze({
 	},
 	bless: 4,
 	boneyard: 3,
-	bounce: function(c) {
+	bounce: function (c) {
 		return c.card.cost + (c.card.upped ? 1 : 0);
 	},
 	bravery: 3,
@@ -46,11 +46,11 @@ const ActivesValues = Object.freeze({
 	cpower: 4,
 	darkness: 1,
 	deadalive: 2,
-	deckblast: function(c) {
+	deckblast: function (c) {
 		return c.owner.deck.length / 2;
 	},
 	deja: 4,
-	deployblobs: function(c) {
+	deployblobs: function (c) {
 		return (
 			2 +
 			(c.type === etg.Spell
@@ -61,11 +61,11 @@ const ActivesValues = Object.freeze({
 	},
 	destroy: 8,
 	destroycard: 1,
-	devour: function(c) {
+	devour: function (c) {
 		return 2 + (c.type === etg.Spell ? c.card.health : c.truehp());
 	},
 	drawcopy: 1,
-	disarm: function(c) {
+	disarm: function (c) {
 		return !c.owner.foe.weapon
 			? 0.1
 			: c.owner.foe.hand.length === 8
@@ -74,7 +74,7 @@ const ActivesValues = Object.freeze({
 	},
 	disfield: 8,
 	disshield: 7,
-	dive: function(c, ttatk) {
+	dive: function (c, ttatk) {
 		return c.type === etg.Spell
 			? c.card.attack
 			: ttatk - (c.getStatus('dive') || 0) / 1.5;
@@ -87,7 +87,7 @@ const ActivesValues = Object.freeze({
 	duality: 4,
 	earth: 1,
 	earthquake: 4,
-	empathy: function(c) {
+	empathy: function (c) {
 		return c.owner.countcreatures();
 	},
 	enchant: 6,
@@ -100,13 +100,13 @@ const ActivesValues = Object.freeze({
 	flyingweapon: 7,
 	foedraw: 8,
 	forceplay: 2,
-	fractal: function(c) {
+	fractal: function (c) {
 		return 9 - c.owner.hand.length;
 	},
 	freeze: [3, 3.5],
 	fungusrebirth: 1,
 	gas: 5,
-	golemhit: function(c) {
+	golemhit: function (c) {
 		let dmg = 0;
 		for (let i = 0; i < 23; i++) {
 			const cr = c.owner.creatures[i];
@@ -122,23 +122,23 @@ const ActivesValues = Object.freeze({
 		}
 		return dmg;
 	},
-	gpull: function(c) {
+	gpull: function (c) {
 		return c.type === etg.Spell || c.id !== c.owner.gpull ? 2 : 0;
 	},
 	gpullspell: 3,
-	gratitude: function(c) {
+	gratitude: function (c) {
 		return c.status ? c.getStatus('charges') * 4 : 4;
 	},
 	'growth 1': 3,
 	'growth 2': 5,
 	guard: 4,
-	halveatk: function(c) {
+	halveatk: function (c) {
 		let atk;
 		return c.type === etg.Spell
 			? -c.card.attack / 4
 			: ((atk = c.trueatk()) < 0) - (atk > 0);
 	},
-	hasten: function(c) {
+	hasten: function (c) {
 		return Math.min(c.owner.deck.length / 4, 10);
 	},
 	hatch: 3,
@@ -204,7 +204,7 @@ const ActivesValues = Object.freeze({
 	poison3: 4,
 	powerdrain: 6,
 	precognition: 1,
-	predator: function(c, tatk) {
+	predator: function (c, tatk) {
 		return !(c.type === etg.Spell) && c.owner.foe.hand.length > 4
 			? tatk + Math.max(c.owner.foe.hand.length - 6, 1)
 			: 1;
@@ -229,7 +229,7 @@ const ActivesValues = Object.freeze({
 	salvage: 2,
 	sanctuary: 6,
 	scarab: 4,
-	scramble: function(c) {
+	scramble: function (c) {
 		var a = 0,
 			fq = c.owner.foe.quanta;
 		for (var i = 1; i < 13; i++) {
@@ -259,7 +259,7 @@ const ActivesValues = Object.freeze({
 	upkeep: -0.5,
 	upload: 3,
 	vampire: (c, ttatk) => (c.type === etg.Spell ? c.card.attack : ttatk) * 0.7,
-	virtue: function(c) {
+	virtue: function (c) {
 		return c.type === etg.Spell
 			? c.owner.foe.shield
 				? Math.min(c.owner.foe.shield.dr, c.card.attack)
@@ -283,7 +283,7 @@ const ActivesValues = Object.freeze({
 		c.getStatus('charges') / (1 + c.owner.foe.countcreatures() * 2),
 	cold: 7,
 	despair: 5,
-	evade100: function(c) {
+	evade100: function (c) {
 		return c.status
 			? c.getStatus('charges') === 0 && c.owner === c.owner.game.turn
 				? 0
@@ -296,13 +296,13 @@ const ActivesValues = Object.freeze({
 	chaos: [8, 9],
 	skull: 5,
 	slow: 6,
-	solar: function(c) {
+	solar: function (c) {
 		const coq = c.owner.quanta[etg.Light];
 		return 5 - (4 * coq) / (4 + coq);
 	},
 	thorn: 5,
 	weight: 5,
-	wings: function(c) {
+	wings: function (c) {
 		return c.status
 			? c.getStatus('charges') === 0 && c.owner === c.owner.game.turn
 				? 0
@@ -316,20 +316,20 @@ var statusValues = Object.freeze({
 	voodoo: 1,
 	swarm: 1,
 	tunnel: 3,
-	cloak: function(c) {
+	cloak: function (c) {
 		return c.status
 			? c.getStatus('charges') === 0 && c.owner === c.owner.game.turn
 				? 0
 				: 4
 			: 0;
 	},
-	flooding: function(c) {
+	flooding: function (c) {
 		return c.owner.foe.countcreatures() - 3;
 	},
-	patience: function(c) {
+	patience: function (c) {
 		return 1 + c.owner.countcreatures() * 2;
 	},
-	freedom: function(c) {
+	freedom: function (c) {
 		return Math.min(c.getStatus('charges'), 4) * 5 || 5;
 	},
 	reflect: 1,
@@ -364,7 +364,7 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 		c.getStatus('momentum') ||
 		c.getStatus('psionic') ||
 		(c.getStatus('burrowed') &&
-			c.owner.permanents.some(function(pr) {
+			c.owner.permanents.some(function (pr) {
 				return pr && pr.getStatus('tunnel');
 			}));
 	var dr = momentum ? 0 : fsh.dr,
@@ -420,7 +420,7 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 		wallCharges[wallIndex] = pl.foe.shield.getStatus('charges');
 	}
 	if (!stasisFlag) {
-		pl.creatures.forEach(function(c) {
+		pl.creatures.forEach(function (c) {
 			var dmg = estimateDamage(c, freedomChance, wallCharges, wallIndex);
 			if (
 				dmg &&
@@ -607,7 +607,7 @@ function evalcardinstance(cardInst) {
 			score += c.attack;
 			if (
 				cardInst.owner.weapon ||
-				cardInst.owner.hand.some(function(cinst) {
+				cardInst.owner.hand.some(function (cinst) {
 					return cinst.card.type === etg.Weapon;
 				})
 			)
@@ -616,7 +616,7 @@ function evalcardinstance(cardInst) {
 			score += c.health * c.health;
 			if (
 				cardInst.owner.shield ||
-				cardInst.owner.hand.some(function(cinst) {
+				cardInst.owner.hand.some(function (cinst) {
 					return cinst.card.type === etg.Shield;
 				})
 			)
@@ -642,11 +642,11 @@ function caneventuallyactive(element, cost, pl) {
 		pl.mark === element
 	)
 		return true;
-	return pl.permanents.some(function(pr) {
+	return pl.permanents.some(function (pr) {
 		return (
 			pr &&
-			(pr.card.type === etg.Pillar &&
-				(!pr.card.element || pr.card.element === element))
+			pr.card.type === etg.Pillar &&
+			(!pr.card.element || pr.card.element === element)
 		);
 	});
 }
@@ -660,7 +660,7 @@ var uniqueStatuses = Object.freeze({
 });
 var uniquesActive, damageHash;
 
-export default function(game) {
+export default function (game) {
 	if (game.winner) {
 		return game.winner === game.player1 ? 99999999 : -99999999;
 	}

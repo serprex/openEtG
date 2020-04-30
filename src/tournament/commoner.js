@@ -1,4 +1,4 @@
-export default function(deck) {
+export default function (deck) {
 	for (let i = 0; i < deck.length; i++) {
 		const card = deck[i];
 		if (card.rarity > 1) return card.name + ' is too high in rarity';

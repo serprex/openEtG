@@ -10,7 +10,7 @@ const bannedCards = new Set([
 	'5ig',
 	'5io',
 ]);
-export default function(deck) {
+export default function (deck) {
 	const elementList = [];
 	let eleCount, rareElement;
 	for (let i = 0; i < deck.length; i++) {

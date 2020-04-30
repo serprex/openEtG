@@ -1,10 +1,8 @@
-export default function(deck) {
-	deck.sort(function(x, y) {
-		return (x.code > y.code) - (x.code < y.code);
-	});
-	var cards = [];
-	for (var i = 0; i < deck.length; i++) {
-		var card = deck[i];
+export default function (deck) {
+	deck.sort((x, y) => (x.code > y.code) - (x.code < y.code));
+	const cards = [];
+	for (let i = 0; i < deck.length; i++) {
+		const card = deck[i];
 		if (card.upped) return 'No upgrades allowed';
 		if (card.type == etg.Pillar) continue;
 		if (cards.length && cards[cards.length - 1][0] == card)
@@ -12,7 +10,7 @@ export default function(deck) {
 		else cards.push([card, 1]);
 	}
 	if (cards.length < 4) return 'Need at least 4 non pillar card kinds';
-	for (var i = 0; i < cards.length / 2; i++) {
+	for (let i = 0; i < cards.length / 2; i++) {
 		if (cards[i][1] != cards[cards.length - 1 - i][1])
 			return (
 				cards[i][0].name +

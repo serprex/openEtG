@@ -2,7 +2,7 @@ import Skill from './Skill.js';
 import Skills from './Skills.js';
 
 const cache = new Map();
-export default function(name) {
+export default function (name) {
 	if (name in Skills) {
 		return Skills[name];
 	} else if (cache.has(name)) {

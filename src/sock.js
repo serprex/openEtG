@@ -208,14 +208,14 @@ const sockEvents = {
 		store.store.dispatch(store.chatMsg(data.msg, 'System'));
 	},
 };
-socket.onmessage = function(msg) {
+socket.onmessage = function (msg) {
 	const state = store.store.getState();
 	const data = JSON.parse(msg.data);
 	if (data.u && state.muted.has(data.u)) return;
 	const func = sockEvents[data.x] || state.cmds[data.x];
 	if (func) func.call(this, data);
 };
-socket.onopen = function() {
+socket.onopen = function () {
 	attempts = 0;
 	if (attemptTimeout) {
 		clearTimeout(attemptTimeout);
@@ -233,7 +233,7 @@ socket.onopen = function() {
 	buffer.length = 0;
 	store.store.dispatch(store.chatMsg('Connected', 'System'));
 };
-socket.onclose = function() {
+socket.onclose = function () {
 	if (attemptTimeout) return;
 	if (attempts < 8) attempts++;
 	const timeout = 99 + Math.floor(99 * Math.random()) * attempts;

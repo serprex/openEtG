@@ -201,15 +201,12 @@ function getTargetFilter(str) {
 	} else {
 		const splitIdx = str.lastIndexOf(':');
 		const prefixes = ~splitIdx
-				? str
-						.substr(0, splitIdx)
-						.split(':')
-						.map(getFilterFunc)
+				? str.substr(0, splitIdx).split(':').map(getFilterFunc)
 				: [],
 			filters = (~splitIdx ? str.substr(splitIdx + 1) : str)
 				.split('+')
 				.map(getFilterFunc);
-		return (TargetFilters[str] = function(c, t) {
+		return (TargetFilters[str] = (c, t) => {
 			function check(f) {
 				return f(c, t);
 			}

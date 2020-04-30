@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Text } from './index.js';
 
 const connector = connect(({ opts }) => ({ disableTut: opts.disableTut }));
-const mkTutor = function(data) {
+function mkTutor(data) {
 	const splash = (
 		<div className="tutorialbg">
 			{data.map((info, i) => {
@@ -56,7 +56,7 @@ const mkTutor = function(data) {
 			}
 		},
 	);
-};
+}
 
 export const Editor = mkTutor([
 	[

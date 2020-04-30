@@ -1,4 +1,4 @@
-export default function(deck) {
+export default function (deck) {
 	var free = '4vj 52o 52i 52q 52u 52p 52s 534 55q 5c8 5c7 5c3 5i5 5ie 5lf 5rt 5un 5uq 5uu 5v8'.split(
 		' ',
 	);

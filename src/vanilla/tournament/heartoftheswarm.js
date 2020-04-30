@@ -1,4 +1,4 @@
-export default function(deck) {
+export default function (deck) {
 	var spellList = [
 		'4vo',
 		'4vn',

@@ -1,4 +1,4 @@
-export default function(deck) {
+export default function (deck) {
 	var cardList = {},
 		upped = deck.length,
 		eleCount = [],

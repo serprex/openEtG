@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import { store, chatMsg } from '../store.js';
 
 let lastError = 0;
-window.onerror = function(...args) {
+window.onerror = function (...args) {
 	const now = Date.now();
 	if (lastError + 999 < now) {
 		store.dispatch(chatMsg(args.join(', '), 'System'));

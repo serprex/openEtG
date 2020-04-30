@@ -1,7 +1,7 @@
 import Cards from '../Cards.js';
 const infobox = document.getElementById('infobox');
 function prValue(id, sid) {
-	document.getElementById(id).addEventListener('input', function() {
+	document.getElementById(id).addEventListener('input', function () {
 		document.getElementById(sid).textContent = this.value;
 	});
 }

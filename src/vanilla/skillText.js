@@ -113,9 +113,9 @@ var data = {
 	v_liquid:
 		'Target creature is poisoned & skills replaced with "Heal owner per damage dealt"',
 	v_lobotomize: 'Remove skills from target creature',
-	v_losecharge: function(c, inst) {
-		var charges = c.getStatus('charges');
-		return 'Lasts ' + charges + ' turn' + (charges == 1 ? '' : 's');
+	v_losecharge: (c, inst) => {
+		const charges = c.getStatus('charges');
+		return `Lasts ${charges} turn ${charges == 1 ? '' : 's'}`;
 	},
 	v_luciferin: 'All your creatures without skills produce 1:8. Heal owner 10',
 	v_lycanthropy: 'Gain 5|5',
@@ -143,33 +143,23 @@ var data = {
 	v_obsession: ['Damage owner 10 on discard', 'Damage owner 13 on discard'],
 	v_overdrivespell:
 		'Replaces target creature\'s skills with "Overdrive: gain +3|-1 per turn"',
-	v_pandemonium2: function(c) {
+	v_pandemonium2: c =>
 		`Random effects are inflicted to ${
 			c.upped ? "oppenent's" : 'all'
-		} creatures. Removes cloak`;
-	},
+		} creatures. Removes cloak`,
 	v_pandemonium: 'Random effects are inflicted to all creatures. Removes cloak',
 	v_paradox: 'Kill target creature which is stronger than it is large',
 	v_parallel: 'Duplicate target creature',
 	v_phoenix: ['Become an Ash on death', 'Become a Minor Ash on death'],
 	v_photosynthesis: 'Produce 2:5. May activate multiple times',
 	v_pillar: {
-		auto: function(c) {
-			return 'Produce ' + (c.element ? 1 : 3) + ':' + c.element;
-		},
-		play: function(c) {
-			return 'Produce ' + (c.element ? 1 : 3) + ':' + c.element + ' on play';
-		},
+		auto: c => `Produce ${c.element ? 1 : 3}:${c.element}`,
+		play: c => `Produce ${c.element ? 1 : 3}:${c.element} on play`,
 	},
-	v_pend: function(c) {
-		return (
-			'Oscilliate between producing ' +
-			(c.element ? 1 : 3) +
-			':' +
-			c.element +
-			' & quanta of mark'
-		);
-	},
+	v_pend: c =>
+		`Oscilliate between producing ${c.element ? 1 : 3}:${
+			c.element
+		} & quanta of mark`,
 	v_plague: "Poison foe's creatures. Removes cloak",
 	v_platearmor: ['Target gains 0|3', 'Target gains 0|6'],
 	v_poison: {
@@ -243,11 +233,13 @@ var data = {
 	v_wings: 'Evade non-airborne & non-ranged attackers',
 	v_wisdom: 'Target gains 4|0. May target immaterial, granting psionic',
 };
-[['v_dagger', '1:2 1:11'], ['v_hammer', '1:3 1:4'], ['v_bow', '1:9']].forEach(
-	x => {
-		data[x[0]] = 'Increment damage if mark is ' + x[1];
-	},
-);
+[
+	['v_dagger', '1:2 1:11'],
+	['v_hammer', '1:3 1:4'],
+	['v_bow', '1:9'],
+].forEach(x => {
+	data[x[0]] = 'Increment damage if mark is ' + x[1];
+});
 function auraText(tgts, bufftext, upbufftext) {
 	return c =>
 		`${tgts} gain ${c.upped ? upbufftext : bufftext} while ${

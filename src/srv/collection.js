@@ -3,7 +3,7 @@ import Cards from '../Cards.js';
 import * as Us from './Us.js';
 import * as etgutil from '../etgutil.js';
 
-export default async function(url, stime) {
+export default async function (url, stime) {
 	const user = await Us.load(url),
 		result = [],
 		pool = etgutil.deck2pool(user.pool),

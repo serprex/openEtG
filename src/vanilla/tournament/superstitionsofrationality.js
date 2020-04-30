@@ -3,7 +3,7 @@ function superstitious(deck) {
 			' ',
 		),
 		sups = 0;
-	deck.forEach(function(card) {
+	deck.forEach(function (card) {
 		if (~superset.indexOf(card.asUpped(false).code)) sups++;
 	});
 	return (
@@ -19,7 +19,7 @@ function rationality(deck) {
 		creas = 0,
 		perms = 0;
 	if (deck.length != 31) return '. Rational needs 31 cards';
-	deck.forEach(function(card) {
+	deck.forEach(function (card) {
 		if (~etg.ShardList.indexOf(card.asUpped(false).code)) unupped += 4;
 		if (!card.upped) unupped--;
 		if (card.type == etg.Shield) shields++;
@@ -37,7 +37,7 @@ function rationality(deck) {
 		return '. Must have 2 non-weapon, non-shield, non-pillar permanents';
 	return true;
 }
-export default function(deck) {
+export default function (deck) {
 	var sup = superstitious(deck),
 		rat = rationality(deck);
 	return sup === true && rat === true

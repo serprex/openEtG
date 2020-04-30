@@ -31,7 +31,7 @@ function printstat(e) {
 		pillars = 0,
 		ups = 0,
 		total = 0;
-	this.value.split(' ').forEach(function(code32) {
+	this.value.split(' ').forEach(code32 => {
 		const code = parseInt(code32, 32);
 		if (code in Cards.Codes) {
 			var card = Cards.Codes[code],

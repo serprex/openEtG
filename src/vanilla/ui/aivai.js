@@ -60,14 +60,14 @@ function fightItOut() {
 	var aiState = undefined;
 	var realp1 = game.player1;
 	var cmds = {
-		end: function(data) {
+		end: function (data) {
 			if (mode == fight) {
 				result.textContent +=
 					(game.turn == realp1 ? 1 : 2) + '\tEND TURN' + game.ply + '\n';
 			}
 			game.player2.endturn(data.bits);
 		},
-		cast: function(data) {
+		cast: function (data) {
 			var bits = data.bits,
 				c = game.bitsToTgt(bits & 511),
 				t = game.bitsToTgt((bits >> 9) & 511);

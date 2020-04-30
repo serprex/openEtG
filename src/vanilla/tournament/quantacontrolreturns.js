@@ -1,4 +1,4 @@
-export default function(deck) {
+export default function (deck) {
 	function pushElement(ele) {
 		if (!~elements.indexOf(ele)) {
 			elements.push(ele);
@@ -17,11 +17,7 @@ export default function(deck) {
 	];
 	var elements = [];
 	for (var i = 0; i < deck.length; i++) {
-		if (
-			bannedCards.some(function(ban) {
-				return deck[i].isOf(ban);
-			})
-		)
+		if (bannedCards.some(ban => deck[i].isOf(ban)))
 			return deck[i].name + ' banned';
 		pushElement(deck[i].element);
 		if (deck[i].active.cast && deck[i].cast) {
@@ -30,19 +26,9 @@ export default function(deck) {
 	}
 	if (elements.length > 3)
 		return (
-			'Illegal. Elements used: ' +
-			elements
-				.map(function(x) {
-					return etg.eleNames[x];
-				})
-				.join(' ')
+			'Illegal. Elements used: ' + elements.map(x => etg.eleNames[x]).join(' ')
 		);
 	return (
-		'Legal if elements include ' +
-		elements
-			.map(function(x) {
-				return etg.eleNames[x];
-			})
-			.join(' ')
+		'Legal if elements include ' + elements.map(x => etg.eleNames[x]).join(' ')
 	);
 }

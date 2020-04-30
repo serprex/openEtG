@@ -32,8 +32,9 @@ const svgbg = (() => {
 	for (let j = 0; j < 2; j++) {
 		let path = '';
 		for (let i = 0; i < redhor.length; i += 3) {
-			path += `M${redhor[i + 1]} ${redhor[i] - j}L${redhor[i + 2]} ${redhor[i] -
-				j}`;
+			path += `M${redhor[i + 1]} ${redhor[i] - j}L${redhor[i + 2]} ${
+				redhor[i] - j
+			}`;
 		}
 		for (let i = 0; i < redver.length; i += 3) {
 			path += `M${redver[i] + j} ${redver[i + 1]}L${redver[i] + j} ${
@@ -1751,18 +1752,22 @@ export default connect(({ user, opts }) => ({
 							width: '120px',
 							zIndex: '3',
 						}}>
-						{`${[
-							'Commoner\n',
-							'Mage\n',
-							'Champion\n',
-							'Demigod\n',
-							'Arena1\n',
-							'Arena2\n',
-						][game.data.level] ||
+						{`${
+							[
+								'Commoner\n',
+								'Mage\n',
+								'Champion\n',
+								'Demigod\n',
+								'Arena1\n',
+								'Arena2\n',
+							][game.data.level] ||
 							(player2.data.leader !== undefined
-								? `${game.playerDataByIdx(player2.data.leader).name ||
-										player2.data.leader}\n`
-								: '')}${player2.data.name || '-'}`}
+								? `${
+										game.playerDataByIdx(player2.data.leader).name ||
+										player2.data.leader
+								  }\n`
+								: '')
+						}${player2.data.name || '-'}`}
 					</div>
 					<span
 						style={{

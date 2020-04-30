@@ -6,7 +6,7 @@ import chat from '../chat.js';
 import * as store from '../store.js';
 
 let lastError = 0;
-window.onerror = function() {
+window.onerror = function () {
 	const now = Date.now();
 	if (lastError + 999 < now) {
 		chat(Array.apply(null, arguments).join(', '));

@@ -3,7 +3,7 @@ import Skill from '../Skill.js';
 import * as etg from '../etg.js';
 
 function vadrenathrottle(f) {
-	return function(ctx, c, ...args) {
+	return function (ctx, c, ...args) {
 		if (c.getStatus('adrenaline') < 3) {
 			return f(c, ...args);
 		}
@@ -413,7 +413,7 @@ const Actives = {
 		c.owner.foe.spelldmg(20);
 		c.owner.foe.masscc(
 			c,
-			function(ctx, c, x) {
+			function (ctx, c, x) {
 				x.dmg(1);
 			},
 			true,
@@ -612,7 +612,7 @@ const Actives = {
 	luciferin: (ctx, c, t) => {
 		c.owner.dmg(-10);
 		// TODO Fix salvagers & other passive-active-still-luciable
-		c.owner.masscc(c, function(ctx, c, x) {
+		c.owner.masscc(c, function (ctx, c, x) {
 			for (var key of x.active.keys()) {
 				if (
 					key != 'ownplay' &&
@@ -1024,7 +1024,7 @@ const Actives = {
 		c.active = c.active.delete('cast');
 	},
 	storm2: (ctx, c, t) => {
-		c.owner.foe.masscc(c, function(ctx, c, x) {
+		c.owner.foe.masscc(c, function (ctx, c, x) {
 			x.dmg(2);
 		});
 	},

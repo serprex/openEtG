@@ -1,4 +1,4 @@
-export default function(deck) {
+export default function (deck) {
 	var bannedCards = [
 		Cards.Names.Blackhole,
 		Cards.Names.AmberNymph,

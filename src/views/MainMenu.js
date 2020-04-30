@@ -291,7 +291,7 @@ export default connect(({ user, opts }) => ({
 					<input
 						type="button"
 						key={i}
-						value={`Arena${i + 1} T20`}
+						value={`Arena${i + 1} T30`}
 						onClick={() => {
 							this.props.dispatch(
 								store.doNav(import('./ArenaTop.js'), { lv: i }),

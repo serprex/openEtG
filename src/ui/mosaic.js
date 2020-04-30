@@ -18,7 +18,7 @@ const a2n = {
 	gold: 'Kae',
 };
 let oldkey;
-document.getElementById('codeimg').addEventListener('mousemove', function(e) {
+document.getElementById('codeimg').addEventListener('mousemove', function (e) {
 	const x = e.pageX - this.offsetLeft,
 		y = e.pageY - this.offsetTop;
 	for (const key in atlas) {

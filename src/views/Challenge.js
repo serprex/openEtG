@@ -42,7 +42,7 @@ class PremadePicker extends React.Component {
 					className="floatRight"
 					type="button"
 					value="Close"
-					onChange={onClose}
+					onClick={onClose}
 				/>
 				<div
 					style={{
@@ -697,7 +697,7 @@ export default connect(({ user, opts }) => ({
 									/>
 							  )}
 					</div>
-					{amhost ? (
+					{/*amhost ? (
 						<select
 							value={this.state.set}
 							style={{
@@ -720,7 +720,7 @@ export default connect(({ user, opts }) => ({
 							}}>
 							{this.state.set || 'Standard'}
 						</div>
-					)}
+					)*/}
 					<input
 						style={{
 							position: 'absolute',

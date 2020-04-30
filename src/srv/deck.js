@@ -13,7 +13,7 @@ const deckhtml = gzip(
 		{ level: 9 },
 	),
 	start = new Date();
-export default async function(url, stime) {
+export default async function (url, stime) {
 	const deck = url.replace(/\.svg$/, '');
 	if (url.endsWith('.svg')) {
 		if (deck.length % 5) {

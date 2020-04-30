@@ -150,7 +150,7 @@ export default class Card {
 		);
 	}
 
-	getStatus = function(key) {
+	getStatus(key) {
 		return this.status.get(key);
-	};
+	}
 }

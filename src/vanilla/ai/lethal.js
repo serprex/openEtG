@@ -1,4 +1,4 @@
-export default function(game) {
+export default function (game) {
 	let limit = 333,
 		cmdct,
 		currentEval = game.player1.hp;

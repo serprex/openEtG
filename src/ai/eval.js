@@ -686,7 +686,7 @@ const uniqueStatuses = new Set([
 const uniquesSkill = new Set(),
 	damageHash = new Map();
 
-export default function(game) {
+export default function (game) {
 	const player = game.byId(game.turn),
 		playerIdx = player.getIndex(),
 		foe = player.foe;

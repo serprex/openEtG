@@ -1,4 +1,4 @@
-export default function(deck) {
+export default function (deck) {
 	var elements = [],
 		anyupped = false,
 		disco = false;

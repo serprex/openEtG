@@ -2,7 +2,7 @@ import * as Rng from '../rng.wasm';
 import deck from './deck.js';
 import Cards from '../Cards.js';
 
-export default function(url, stime) {
+export default function (url, stime) {
 	let hash = 0;
 	for (let i = 0; i < url.length; i++) {
 		hash = (hash * 31 + url.charCodeAt(i)) & 0x7fffffff;

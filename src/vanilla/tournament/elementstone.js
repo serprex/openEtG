@@ -1,4 +1,4 @@
-export default function(deck, mark) {
+export default function (deck, mark) {
 	bannedCards = [
 		Cards.Names.ShardofFocus,
 		Cards.Names.ShardofPatience,
@@ -20,7 +20,7 @@ export default function(deck, mark) {
 		if (card.type != etg.Creature && card.element != mark)
 			return 'Spells and Permanents must be of your mark element';
 		if (
-			bannedCards.some(function(ban) {
+			bannedCards.some(function (ban) {
 				return card.isOf(ban);
 			}) ||
 			(card.type == etg.Pillar && !~rareCards.indexOf(card.asUpped(false).code))

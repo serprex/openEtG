@@ -16,7 +16,7 @@ const mime = {
 	ogg: 'application/ogg',
 	png: 'image/png',
 };
-export default async function(url) {
+export default async function (url) {
 	const contentType = mime[url.slice(url.lastIndexOf('.') + 1)];
 	if (!contentType) return reject('Unknown MIME');
 	if (url.startsWith('Cards/') && !existsSync(url)) {
@@ -54,7 +54,7 @@ export default async function(url) {
 		fs.readFile(url).then(buf => gzip(buf, { level: 9 })),
 	])
 		.then(([stat, zbuf]) => {
-			watch(url, { persistent: false }, function(_e) {
+			watch(url, { persistent: false }, function (_e) {
 				cache.rm(url);
 				this.close();
 			});

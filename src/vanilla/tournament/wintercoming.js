@@ -1,4 +1,4 @@
-export default function(deck) {
+export default function (deck) {
 	bannedCards = [
 		Cards.Names.ShardofFreedom,
 		Cards.Names.ShardofDivinity,

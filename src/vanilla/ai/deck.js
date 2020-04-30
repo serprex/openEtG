@@ -115,7 +115,7 @@ var filters = {
 	},
 };
 
-export default function(level) {
+export default function (level) {
 	var uprate = level == 0 ? 0 : level == 1 ? 0.1 : 0.3;
 	function upCode(x) {
 		return uprate ? etgutil.asUpped(x, Math.random() < uprate) : x;
@@ -130,9 +130,9 @@ export default function(level) {
 	var deck = [];
 	var anyshield = 0,
 		anyweapon = 0;
-	eles.forEach(function(ele, j) {
+	eles.forEach(function (ele, j) {
 		for (var i = 20 - j * 10; i > 0; i--) {
-			var card = RngMock.randomcard(Math.random() < uprate, function(x) {
+			var card = RngMock.randomcard(Math.random() < uprate, function (x) {
 				return (
 					x.element == ele &&
 					x.type != etg.Pillar &&
