@@ -313,7 +313,8 @@ const data = {
 	livingweapon:
 		"Equip target creature as a weapon. If target creature's owner already had a weapon equipped, return it to their hand. Heal target creature's owner equal to target creature's HP.",
 	lobotomize: "Remove target creature's abilities.",
-	locket: 'Produces quanta matching your mark each turn.',
+	locket:
+		'Produces quanta matching your mark each turn, until set to produce quanta of a specific element.',
 	locketshift:
 		"Switch this card's production to match the element of any target, including immaterial and burrowed cards.",
 	loot:
@@ -558,6 +559,7 @@ const data = {
 	tesseractsummon:
 		'Summon 2 random creatures from your deck. Opponent summons 1 random creature from their deck. Freeze these creatures for a number of turns equal to ¼ of their quanta cost, rounded up.',
 	thorn: '75% chance to give non-ranged attackers 1 poison counter.',
+	thornweak: '25% chance to give non-ranged attackers 1 poison counter.',
 	throwrock: [
 		"Deal 3 damage to target creature, then shuffle Throw Rock into its owner's deck.",
 		"Deal 4 damage to target creature, then shuffle Throw Rock into its owner's deck.",
