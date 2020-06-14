@@ -1,6 +1,7 @@
 function hookRowMouseover(tr) {
 	tr.addEventListener('mouseover', function (e) {
-		for (let i = 1; i < this.children.length; i++) {
+		let i = 1;
+		for (; i < this.children.length; i++) {
 			const child = this.children[i].children[0];
 			if (child.href && child.href.match(/\/Cards\/...\.png$/)) {
 				imgs[i - 1].src = child.href;
@@ -52,7 +53,6 @@ const table = document.createElement('table');
 			'4vr',
 			'55k',
 			'55p',
-			'55s',
 			'5ic',
 			'5m0',
 			'5m3',
@@ -184,7 +184,6 @@ const table = document.createElement('table');
 			'4tg',
 			'4vf',
 			'4vk',
-			'4vl',
 			'4vo',
 			'52i',
 			'52m',
@@ -228,7 +227,6 @@ const table = document.createElement('table');
 			'5ru',
 			'5s1',
 			'5s6',
-			'5s7',
 			'5s9',
 			'5un',
 			'5ur',
@@ -388,7 +386,7 @@ const table = document.createElement('table');
 	],
 	[
 		['sael', 'mailto:animaetmateria@gmail.com'],
-		['58t', '5fp', '5sb', '5up'],
+		['4vl', '55s', '58t', '5fp', '5rp', '5s7', '5sb', '5up'],
 	],
 	[
 		['serprex', 'https://serprex.github.io'],
@@ -404,7 +402,7 @@ const table = document.createElement('table');
 			'5p4',
 			'lrl',
 			'5ro',
-			'5rp',
+			'lrp',
 			'5s0',
 			'lsb',
 			'5sd',
