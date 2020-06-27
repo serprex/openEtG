@@ -13,13 +13,13 @@
     "ws": "^7.3.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.10.2",
+    "@babel/core": "^7.10.3",
     "@babel/plugin-proposal-class-properties": "^7.10.1",
-    "@babel/plugin-proposal-object-rest-spread": "^7.10.1",
-    "@babel/plugin-transform-react-jsx": "^7.10.1",
-    "@babel/preset-env": "^7.10.2",
+    "@babel/plugin-proposal-object-rest-spread": "^7.10.3",
+    "@babel/plugin-transform-react-jsx": "^7.10.3",
+    "@babel/preset-env": "^7.10.3",
     "@babel/preset-react": "^7.10.1",
-    "@babel/runtime-corejs3": "^7.10.2",
+    "@babel/runtime-corejs3": "^7.10.3",
     "babel-loader": "^8.1.0",
     "core-js": "^3.6.5",
     "optipng-bin": "^7.0.0",
@@ -31,7 +31,7 @@
     "redux": "^4.0.5",
     "spritesheet-js": "^1.2.6",
     "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.12"
   },
   "scripts": {
     "start": "node --experimental-modules --experimental-wasm-modules ./server.js",
