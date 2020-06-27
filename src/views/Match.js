@@ -653,54 +653,53 @@ export default connect(({ user, opts }) => ({
 				(pos = 0) => (offset = pos) + 16,
 			);
 			const pos = this.idtrack.get(id);
-			return (
-				pos && (
-					<Motion
-						defaultStyle={{
-							fade: 1,
-							x: pos.x,
-							y: pos.y + offset,
-						}}
-						style={{
-							x: spring(pos.x),
-							y: spring(pos.y - 36, {
-								stiffness: 84,
-								dampen: 12,
-							}),
-							fade: spring(0, {
-								stiffness: 108,
-								dampen: 12,
-							}),
-						}}
-						onRest={() => {
-							this.setState(state => {
-								const effects = new Set(state.effects);
-								effects.delete(Text);
-								const st = {
-									fxTextPos: state.fxTextPos.update(id, pos => pos && pos - 16),
-									effects,
-								};
-								return onRest ? onRest(state, st) : st;
-							});
-						}}>
-						{pos => (
-							<Components.Text
-								text={text}
-								style={{
-									position: 'absolute',
-									left: `${pos.x}px`,
-									top: `${pos.y}px`,
-									opacity: `${pos.fade}`,
-									transform: 'translate(-50%,-50%)',
-									textAlign: 'center',
-									pointerEvents: 'none',
-									textShadow: '1px 1px 2px #000',
-								}}
-							/>
-						)}
-					</Motion>
-				)
+			const TextEffect = pos && (
+				<Motion
+					defaultStyle={{
+						fade: 1,
+						x: pos.x,
+						y: pos.y + offset,
+					}}
+					style={{
+						x: spring(pos.x),
+						y: spring(pos.y - 36, {
+							stiffness: 84,
+							dampen: 12,
+						}),
+						fade: spring(0, {
+							stiffness: 108,
+							dampen: 12,
+						}),
+					}}
+					onRest={() => {
+						this.setState(state => {
+							const effects = new Set(state.effects);
+							effects.delete(TextEffect);
+							const st = {
+								fxTextPos: state.fxTextPos.update(id, pos => pos && pos - 16),
+								effects,
+							};
+							return onRest ? onRest(state, st) : st;
+						});
+					}}>
+					{pos => (
+						<Components.Text
+							text={text}
+							style={{
+								position: 'absolute',
+								left: `${pos.x}px`,
+								top: `${pos.y}px`,
+								opacity: `${pos.fade}`,
+								transform: 'translate(-50%,-50%)',
+								textAlign: 'center',
+								pointerEvents: 'none',
+								textShadow: '1px 1px 2px #000',
+							}}
+						/>
+					)}
+				</Motion>
 			);
+			return TextEffect;
 		};
 
 		StatChange = (state, newstate, id, hp, atk) => {
