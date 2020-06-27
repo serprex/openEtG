@@ -214,8 +214,9 @@ function LastCard({ opacity, name }) {
 				padding: '18px',
 				opacity: opacity,
 				zIndex: '8',
+				pointerEvents: 'none',
 			}}>
-			{`Last card for ${name}`}
+			Last card for {name}
 		</div>
 	);
 }
@@ -877,7 +878,7 @@ export default connect(({ user, opts }) => ({
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							const playerName =
 								game.data.players[game.byId(effect.id).getIndex()].name;
-							newstate.effects.add(
+							const LastCardEffect = (
 								<Components.Delay
 									ms={3210}
 									first={() => <LastCard opacity={1} name={playerName} />}
@@ -889,7 +890,7 @@ export default connect(({ user, opts }) => ({
 											onRest={() => {
 												this.setState(state => {
 													const effects = new Set(state.effects);
-													effects.delete(Text);
+													effects.delete(LastCardEffect);
 													return { effects };
 												});
 											}}>
@@ -898,8 +899,9 @@ export default connect(({ user, opts }) => ({
 											)}
 										</Motion>
 									)}
-								/>,
+								/>
 							);
+							newstate.effects.add(LastCardEffect);
 							break;
 						default:
 							console.log('Unknown effect', effect);
