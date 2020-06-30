@@ -191,8 +191,8 @@ const SkillsValues = {
 	mitosisspell: 6,
 	momentum: 2,
 	mutation: 4,
-	neuro: c => (c.owner.foe.getStatus('neuro') ? 3 : 6),
-	neuroify: c => (c.owner.foe.getStatus('neuro') ? 1 : 5),
+	neuro: c => (c.owner.foe.getStatus('neuro') ? 4 : 6),
+	neuroify: c => (c.owner.foe.getStatus('neuro') ? 2 : 5),
 	nightmare: c => {
 		const n = c.owner.hand.reduce(
 			(n, inst) => n + !!inst.card.isOf(c.game.Cards.Names.Nightmare),
@@ -768,7 +768,7 @@ export default function (game) {
 		if (pl.usedactive)
 			pscore -= (pl.handIds.length + (pl.handIds.length > 6 ? 7 : 4)) / 4;
 		if (pl.getStatus('flatline')) pscore -= 1;
-		if (pl.getStatus('neuro')) pscore -= 5;
+		if (pl.getStatus('neuro')) pscore -= 5 - pl.handIds.length / 2;
 		gamevalue += pscore * (pl.leader === player.leader ? 1 : -1);
 	}
 	return gamevalue;

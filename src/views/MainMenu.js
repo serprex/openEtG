@@ -31,16 +31,14 @@ const tipjar = [
 	"Typing '/who' in chat you will get a list of the users who are online. '/w user message' whispers that user",
 	"Typing '/help' in chat will list all commands",
 	'Keyboard shortcuts: space ends turn, backspace cancels, w targets opponent, s targets yourself, 1 through 8 cast cards in hand',
-	'Remember that you may use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks',
 	'Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped',
-	'Decks submitted to arena lose hp exponentially per day, down to a minimum of a quarter of their original hp',
+	'Decks submitted to arena lose hp quadratically per day, down to a minimum of a quarter of their original hp',
 	"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons",
 	'A ply is half a turn',
 	'Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm',
 	"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
 	'Cards in packs have a (45/packsize)% chance to increment rarity',
 	'At Wealth T50 you can see which players have the highest wealth. Wealth is a combination of current gold & cardpool',
-	'Throttling means that the effect is limited to 2 procs when attacking multiple times with adrenaline',
 ];
 
 function Rect(props) {
@@ -552,13 +550,7 @@ export default connect(({ user, opts }) => ({
 								type="button"
 								value="Editor"
 								onClick={() => {
-									this.props.dispatch(
-										store.doNav(
-											self.props.user
-												? import('./DeckEditor.js')
-												: import('./SandboxEditor.js'),
-										),
-									);
+									this.props.dispatch(store.doNav(import('./DeckEditor.js')));
 								}}
 								onMouseOver={this.mkSetTip('Edit & manage your decks')}
 								style={{
