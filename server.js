@@ -86,7 +86,7 @@ const importlocks = new Map();
 		}
 	}
 	function roleck(key, func) {
-		return async function(data, user, meta) {
+		return async function (data, user, meta) {
 			const ismem = await db.sismember(key, data.u);
 			if (ismem) {
 				return func.call(this, data, user, meta);
@@ -99,28 +99,28 @@ const importlocks = new Map();
 		};
 	}
 	const userEvents = {
-		modadd: roleck('Mods', function(data, user) {
+		modadd: roleck('Mods', function (data, user) {
 			return db.sadd('Mods', data.m);
 		}),
-		modrm: roleck('Mods', function(data, user) {
+		modrm: roleck('Mods', function (data, user) {
 			return db.srem('Mods', data.m);
 		}),
-		codesmithadd: roleck('Codesmiths', function(data, user) {
+		codesmithadd: roleck('Codesmiths', function (data, user) {
 			return db.sadd('Codesmiths', data.m);
 		}),
-		codesmithrm: roleck('Codesmiths', function(data, user) {
+		codesmithrm: roleck('Codesmiths', function (data, user) {
 			return db.srem('Codesmiths', data.m);
 		}),
-		modguest: roleck('Mods', function(data, user) {
+		modguest: roleck('Mods', function (data, user) {
 			return db.set('GuestsBanned', data.m === 'off' ? '1' : '');
 		}),
-		modmute: roleck('Mods', function(data, user) {
+		modmute: roleck('Mods', function (data, user) {
 			broadcast({ x: 'mute', m: data.m });
 		}),
-		modclear: roleck('Mods', function(data, user) {
+		modclear: roleck('Mods', function (data, user) {
 			broadcast({ x: 'clear' });
 		}),
-		modmotd: roleck('Mods', function(data, user) {
+		modmotd: roleck('Mods', function (data, user) {
 			const match = data.m.match(/^(\d+) ?(.*)$/);
 			if (match) {
 				const num = match[1],
@@ -288,7 +288,7 @@ const importlocks = new Map();
 				lv: data.lv,
 			});
 		},
-		setgold: roleck('Codesmiths', async function(data, user) {
+		setgold: roleck('Codesmiths', async function (data, user) {
 			const tgt = await Us.load(data.t);
 			sockEmit(this, 'chat', {
 				mode: 1,
@@ -296,7 +296,7 @@ const importlocks = new Map();
 			});
 			tgt.gold = data.g;
 		}),
-		codecreate: roleck('Codesmiths', async function(data, user) {
+		codecreate: roleck('Codesmiths', async function (data, user) {
 			if (!data.t) {
 				return sockEmit(this, 'chat', {
 					mode: 1,
@@ -542,8 +542,9 @@ const importlocks = new Map();
 							const opts = qs.parse(Buffer.concat(chunks).toString());
 							if (!opts || !opts.decka) {
 								sockEmit(this, 'chat', {
-									msg: `Failed to load cardpool. Error code: ${opts &&
-										opts.error}`,
+									msg: `Failed to load cardpool. Error code: ${
+										opts && opts.error
+									}`,
 									mode: 1,
 								});
 								return;
@@ -1178,8 +1179,9 @@ const importlocks = new Map();
 										req.write(
 											`user_id=${data.u}\ngame_auth_token=${
 												data.g
-											}\napi_key=${key}\nWealth=${user.gold +
-												userutil.calcWealth(user.pool)}`,
+											}\napi_key=${key}\nWealth=${
+												user.gold + userutil.calcWealth(user.pool)
+											}`,
 										);
 										req.end();
 									})

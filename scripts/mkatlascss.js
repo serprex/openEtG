@@ -5,7 +5,7 @@ let pngw = 0,
 	pngh = 0,
 	pngp = 0;
 const png = fs.createReadStream(process.argv[3], { start: 16, end: 23 });
-png.on('data', function(data) {
+png.on('data', function (data) {
 	for (let i = 0; i < data.length; i++) {
 		const b = data.readUInt8(i);
 		if (pngp < 4) pngw += b << ((3 - pngp) << 3);
@@ -13,7 +13,7 @@ png.on('data', function(data) {
 		pngp++;
 	}
 });
-png.on('end', function() {
+png.on('end', function () {
 	console.log(pngw, pngh);
 	const bgstrx = [
 		`background-size:${(pngw / 2).toFixed(2)}px;`,

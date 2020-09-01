@@ -8,7 +8,7 @@ function buildPool(x) {
 }
 decks.mage.forEach(buildPool);
 decks.demigod.forEach(buildPool);
-const a = Cards.filter(false, function(card) {
+const a = Cards.filter(false, function (card) {
 	return (
 		card.rarity > 0 &&
 		card.rarity < 4 &&
