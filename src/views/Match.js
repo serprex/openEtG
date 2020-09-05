@@ -1540,7 +1540,7 @@ export default connect(({ user, opts }) => ({
 					!cloaked && expectedDamage ? `(${expectedDamage})` : ''
 				}\n${poisoninfo ? `\n${poisoninfo}` : ''}${
 					pl.id !== player1.id && pl.id !== player1.foeId
-						? '\n(Not targetted)'
+						? '\n(Not targeted)'
 						: ''
 				}`;
 				children.push(

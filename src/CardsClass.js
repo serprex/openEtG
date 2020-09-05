@@ -185,7 +185,7 @@ const TargetFilters = {
 	shuffle3: (c, t) =>
 		t.isMaterial() && (t.type === etg.Creature || t.ownerId !== c.ownerId),
 	airbornecrea: (c, t) => t.isMaterial(etg.Creature) && t.getStatus('airborne'),
-	golem: (c, t) => t.getStatus('golem') && t.attack,
+	golem: (c, t) => t.type !== etg.Spell && t.getStatus('golem') && t.attack,
 	groundcrea: (c, t) => t.isMaterial(etg.Creature) && !t.getStatus('airborne'),
 	wisdom: (c, t) =>
 		(t.type === etg.Creature || t.type === etg.Weapon) &&
