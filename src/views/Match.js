@@ -772,11 +772,20 @@ export default connect(({ user, opts }) => ({
 					};
 				}
 				this.setState(state => {
-					const foeplays = new Map(state.foeplays);
+					const c = data.x === 'cast' && data.c && game.byId(data.c),
+						t = data.x === 'cast' && data.t && game.byId(data.t);
+					if (c && c.ownerId != this.state.player1 && c.owner.isCloaked()) {
+						return null;
+					}
+					const foeplays = new Map(state.foeplays),
+						delta = { foeplays };
 					if (!foeplays.has(turn)) foeplays.set(turn, []);
 					foeplays.set(turn, foeplays.get(turn).concat([play]));
-					const delta = { foeplays };
-					if (data.x === 'cast' && iscmd) {
+					if (
+						data.x === 'cast' &&
+						iscmd &&
+						this.props.playByPlayMode !== 'disabled'
+					) {
 						delta.spells = state.spells.concat([
 							{ id: state.spellid, spell: play },
 						]);
@@ -1617,9 +1626,8 @@ export default connect(({ user, opts }) => ({
 						/>
 					)}
 					{svgbg}
-					{cloaked ? (
-						cloaksvg
-					) : this.state.showFoeplays ? (
+					{cloaked && cloaksvg}
+					{this.state.showFoeplays ? (
 						<FoePlays
 							idtrack={this.idtrack}
 							foeplays={this.state.foeplays.get(player2.id)}
@@ -1806,6 +1814,7 @@ export default connect(({ user, opts }) => ({
 									position: 'absolute',
 									left: '2px',
 									top: '270px',
+									zIndex: '2',
 								}}
 								onClick={() =>
 									this.setState(state => ({
