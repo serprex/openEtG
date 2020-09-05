@@ -633,6 +633,7 @@ export default connect(({ user, opts }) => ({
 				fxTextPos: new imm.Map(),
 				fxStatChange: new imm.Map(),
 				effects: new Set(),
+				effectId: 0,
 				hovercode: 0,
 				hoverx: null,
 				hovery: null,
@@ -645,7 +646,7 @@ export default connect(({ user, opts }) => ({
 			};
 		}
 
-		Text = (state, newstate, { id, text, onRest }) => {
+		Text = (key, state, newstate, { id, text, onRest }) => {
 			let offset;
 			const { fxid } = newstate;
 			newstate.fxTextPos = (newstate.fxTextPos || state.fxTextPos).update(
@@ -655,6 +656,7 @@ export default connect(({ user, opts }) => ({
 			const pos = this.idtrack.get(id);
 			const TextEffect = pos && (
 				<Motion
+					key={key}
 					defaultStyle={{
 						fade: 1,
 						x: pos.x,
@@ -702,7 +704,7 @@ export default connect(({ user, opts }) => ({
 			return TextEffect;
 		};
 
-		StatChange = (state, newstate, id, hp, atk) => {
+		StatChange = (key, state, newstate, id, hp, atk) => {
 			if (!newstate.fxStatChange) newstate.fxStatChange = state.fxStatChange;
 			let oldentry, newentry;
 			newstate.fxStatChange = newstate.fxStatChange.update(id, e => {
@@ -710,7 +712,7 @@ export default connect(({ user, opts }) => ({
 				newentry = e ? { ...e } : { atk: 0, hp: 0, dom: null };
 				newentry.hp += hp;
 				newentry.atk += atk;
-				newentry.dom = this.Text(state, newstate, {
+				newentry.dom = this.Text(key, state, newstate, {
 					id: id,
 					text: `${newentry.atk > 0 ? '+' : ''}${newentry.atk}|${
 						newentry.hp > 0 ? '+' : ''
@@ -800,8 +802,10 @@ export default connect(({ user, opts }) => ({
 			game.next(data);
 			this.setState(state => {
 				if (!game.effects || !game.effects.length) return {};
-				const newstate = {};
+				const newstate = { effectId: state.effectId + 1 };
+				let { effectId } = state;
 				for (const effect of game.effects) {
+					effectId++;
 					switch (effect.x) {
 						case 'StartPos':
 							newstate.startPos = (
@@ -820,7 +824,7 @@ export default connect(({ user, opts }) => ({
 						case 'Poison':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							newstate.effects.add(
-								this.Text(state, newstate, {
+								this.Text(effectId, state, newstate, {
 									id: effect.id,
 									text: `Poison ${effect.amt}`,
 								}),
@@ -829,7 +833,7 @@ export default connect(({ user, opts }) => ({
 						case 'Death':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							newstate.effects.add(
-								this.Text(state, newstate, {
+								this.Text(effectId, state, newstate, {
 									id: effect.id,
 									text: 'Death',
 								}),
@@ -838,7 +842,7 @@ export default connect(({ user, opts }) => ({
 						case 'Delay':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							newstate.effects.add(
-								this.Text(state, newstate, {
+								this.Text(effectId, state, newstate, {
 									id: effect.id,
 									text: `Delay ${effect.amt}`,
 								}),
@@ -847,7 +851,7 @@ export default connect(({ user, opts }) => ({
 						case 'Dive':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							newstate.effects.add(
-								this.Text(state, newstate, {
+								this.Text(effectId, state, newstate, {
 									id: effect.id,
 									text: 'Dive',
 								}),
@@ -856,7 +860,7 @@ export default connect(({ user, opts }) => ({
 						case 'Free':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							newstate.effects.add(
-								this.Text(state, newstate, {
+								this.Text(effectId, state, newstate, {
 									id: effect.id,
 									text: 'Free',
 								}),
@@ -865,7 +869,7 @@ export default connect(({ user, opts }) => ({
 						case 'Freeze':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							newstate.effects.add(
-								this.Text(state, newstate, {
+								this.Text(effectId, state, newstate, {
 									id: effect.id,
 									text: `Freeze ${effect.amt}`,
 								}),
@@ -873,13 +877,29 @@ export default connect(({ user, opts }) => ({
 							break;
 						case 'Text':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
-							newstate.effects.add(this.Text(state, newstate, effect));
+							newstate.effects.add(
+								this.Text(effectId, state, newstate, effect),
+							);
 							break;
 						case 'Dmg':
-							this.StatChange(state, newstate, effect.id, -effect.amt, 0);
+							this.StatChange(
+								effectId,
+								state,
+								newstate,
+								effect.id,
+								-effect.amt,
+								0,
+							);
 							break;
 						case 'Atk':
-							this.StatChange(state, newstate, effect.id, 0, effect.amt);
+							this.StatChange(
+								effectId,
+								state,
+								newstate,
+								effect.id,
+								0,
+								effect.amt,
+							);
 							break;
 						case 'LastCard':
 							newstate.fxid = (newstate.fxid || state.fxid) + 1;
@@ -888,6 +908,7 @@ export default connect(({ user, opts }) => ({
 								game.data.players[game.byId(effect.id).getIndex()].name;
 							const LastCardEffect = (
 								<Components.Delay
+									key={effectId}
 									ms={3210}
 									first={() => <LastCard opacity={1} name={playerName} />}
 									second={() => (
@@ -915,6 +936,7 @@ export default connect(({ user, opts }) => ({
 							console.log('Unknown effect', effect);
 					}
 				}
+				newstate.effectId = effectId;
 				game.effects.length = 0;
 				return newstate;
 			});
