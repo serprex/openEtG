@@ -1711,7 +1711,7 @@ export default connect(({ user, opts }) => ({
 							} else if (endpos) {
 								pos = this.idtrack.get(endpos);
 							}
-							return pos && pos.x !== undefined && pos.y !== undefined
+							return pos && Number.isFinite(pos.x) && Number.isFinite(pos.y)
 								? {
 										x: spring(pos.x),
 										y: spring(pos.y),
@@ -1725,8 +1725,8 @@ export default connect(({ user, opts }) => ({
 							<>
 								{interpStyles.map(item => {
 									if (
-										item.style.x !== undefined &&
-										item.style.y !== undefined
+										Number.isFinite(item.style.x) &&
+										Number.isFinite(item.style.y)
 									) {
 										this.idtrack.set(item.data.id, item.style);
 									}
