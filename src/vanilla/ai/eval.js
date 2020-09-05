@@ -414,7 +414,7 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 		}
 	}
 	if (freedomChance) {
-		freedomChance = 1 - Math.pow(0.7, freedomChance);
+		freedomChance = Math.min(freedomChance * 0.25, 1);
 	}
 	if (pl.foe.shield && pl.foe.shield.hasactive('shield', 'blockwithcharge')) {
 		wallCharges[wallIndex] = pl.foe.shield.getStatus('charges');

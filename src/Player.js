@@ -358,17 +358,31 @@ Player.prototype.canspend = function (qtype, x) {
 	for (let i = 1; i < 13; i++) x -= this.quanta[i];
 	return x <= 0;
 };
+const p12 = [1, 12, 144, 12 ** 3, 12 ** 4, 12 ** 5, 12 ** 6, 12 ** 7, 12 ** 8];
 Player.prototype.spend = function (qtype, x, scramble) {
 	if (x === 0 || (!scramble && x < 0 && this.getStatus('flatline')))
 		return true;
 	if (!this.canspend(qtype, x)) return false;
 	const quanta = new Int8Array(this.game.get(this.id).get('quanta'));
 	if (!qtype) {
-		const b = x < 0 ? -1 : 1;
-		for (let i = x * b; i > 0; i--) {
-			const q =
-				b === -1 ? 1 + this.game.upto(12) : randomquanta(this.game, quanta);
-			quanta[q] = Math.min(quanta[q] - b, 99);
+		if (x < 0) {
+			if (x < -1188) x = -1188;
+			for (let i = -x; i > 0; i -= 8) {
+				const bundleSize = Math.min(i, 8),
+					n = p12[bundleSize];
+				let r = this.game.upto(n);
+				for (let j = 0; j < bundleSize; j++) {
+					const r12 = (r % 12) + 1;
+					r = (r / 12) | 0;
+					quanta[r12] = Math.min(quanta[r12] + 1, 99);
+				}
+			}
+		} else {
+			if (x > 1188) x = 1188;
+			for (let i = x; i > 0; i--) {
+				const q = randomquanta(this.game, quanta);
+				quanta[q] = Math.min(quanta[q] - 1, 99);
+			}
 		}
 	} else quanta[qtype] = Math.min(quanta[qtype] - x, 99);
 	this.game.set(this.id, 'quanta', quanta);

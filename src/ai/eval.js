@@ -444,7 +444,7 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 			stasisFlag = true;
 		}
 	}
-	if (freedomChance) freedomChance = 1 - Math.pow(0.7, freedomChance);
+	if (freedomChance) freedomChance = 1 - 0.7 ** freedomChance;
 	if (!stasisFlag) {
 		pl.creatures.forEach(c => {
 			if (c) {

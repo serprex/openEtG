@@ -2288,7 +2288,7 @@ const Skills = {
 			const chance = c.owner.creatures.reduce((chance, cr) => {
 				return cr && cr.hasactive('ownattack', 'siphon') ? chance + 1 : chance;
 			}, 0);
-			if (ctx.rng() < 1.4 - Math.pow(0.95, chance)) {
+			if (ctx.rng() < 1.4 - 0.95 ** chance) {
 				t.incrAtk(-1);
 				t.dmg(1);
 			}
