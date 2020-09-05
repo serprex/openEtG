@@ -237,7 +237,7 @@ export default connect(({ user, opts }) => ({
 
 		mkSetTip(text) {
 			return () => {
-				if (this.state.tipText != text) {
+				if (this.state.tipText !== text) {
 					this.setState({ tipText: text });
 				}
 			};

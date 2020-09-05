@@ -37,7 +37,7 @@ export default async function (url) {
 				};
 			} else {
 				const unupped = etgutil.asUpped(icode, false).toString(32);
-				if (unupped != code[1]) {
+				if (unupped !== code[1]) {
 					return {
 						status: '302',
 						head: { Location: `/Cards/${unupped}.png` },

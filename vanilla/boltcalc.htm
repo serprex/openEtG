@@ -39,7 +39,7 @@
 	var costs = [3, 1, 2, 1, 3, 1];
 	uppedcount.appendChild(document.createTextNode(upped.value));
 	function updateTable(e){
-		if (e.keyCode != 13) return;
+		if (e.keyCode !== 13) return;
 		while (infobox.firstChild) infobox.firstChild.remove();
 		var quanta = parseInt(quantainput.value), ups = upped.value;
 		var calcs = [["Fire"], ["Water"], ["Darkness"], ["Fahrenheit Bonus", Math.floor(quanta/5)]];

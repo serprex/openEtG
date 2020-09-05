@@ -620,7 +620,7 @@ Thing.prototype.v_attack = function (stasis, freedomChance) {
 	let trueatk;
 	if (
 		!(stasis || this.status.get('frozen') || this.status.get('delayed')) &&
-		(trueatk = this.trueatk()) != 0
+		(trueatk = this.trueatk()) !== 0
 	) {
 		let momentum = this.getStatus('momentum');
 		if (

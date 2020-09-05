@@ -12,6 +12,6 @@ export default function mulligan(pl) {
 				card.isOf(Cards.Names.GiftofOceanus) ||
 				card.isOf(Cards.Names.QuantumLocket),
 		) ||
-		pl.deck.every(({ card }) => card.type != etg.Pillar)
+		pl.deck.every(({ card }) => card.type !== etg.Pillar)
 	);
 }

@@ -11,7 +11,7 @@ export default function (deck) {
 	}
 	if (cards.length < 4) return 'Need at least 4 non pillar card kinds';
 	for (let i = 0; i < cards.length / 2; i++) {
-		if (cards[i][1] != cards[cards.length - 1 - i][1])
+		if (cards[i][1] !== cards[cards.length - 1 - i][1])
 			return (
 				cards[i][0].name +
 				' counts differently than ' +

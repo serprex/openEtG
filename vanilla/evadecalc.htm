@@ -36,7 +36,7 @@
 		return tbl;
 	}
 	function updateTable(e){
-		if (e.keyCode != 13) return;
+		if (e.keyCode !== 13) return;
 		while (infobox.firstChild) infobox.firstChild.remove();
 		var dmg = [], dmgtext = dmginput.value.split(' ');
 		for (var i=0; i<dmgtext.length; i++) {

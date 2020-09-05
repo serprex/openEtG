@@ -128,7 +128,7 @@ export class Text extends React.Component {
 		const elec = [];
 		while ((reres = sep.exec(text))) {
 			const piece = reres[0];
-			if (reres.index != lastindex) {
+			if (reres.index !== lastindex) {
 				elec.push(
 					<React.Fragment key={elec.length}>
 						{text.slice(lastindex, reres.index)}
@@ -160,7 +160,7 @@ export class Text extends React.Component {
 			}
 			lastindex = reres.index + piece.length;
 		}
-		if (lastindex != text.length) {
+		if (lastindex !== text.length) {
 			elec.push(
 				<React.Fragment key={elec.length}>
 					{text.slice(lastindex)}
@@ -461,7 +461,7 @@ function CardSelectorColumn(props) {
 					key={countTexts.length}
 					className={
 						'selectortext' +
-						(props.maxedIndicator && card.type != etg.Pillar && cardAmount >= 6
+						(props.maxedIndicator && card.type !== etg.Pillar && cardAmount >= 6
 							? cardAmount >= 12
 								? ' beigeback'
 								: ' lightback'

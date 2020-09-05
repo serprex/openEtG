@@ -86,7 +86,7 @@ var filters = {
 		if (Math.abs(ecost[etg.Light]) > 5) return true;
 		var qpe = 0;
 		for (var i = 1; i < 13; i++) {
-			if (i != etg.Light && ecost[i] > 0) qpe++;
+			if (i !== etg.Light && ecost[i] > 0) qpe++;
 		}
 		return qpe > 3;
 	},
@@ -135,8 +135,8 @@ export default function (level) {
 			var card = RngMock.randomcard(Math.random() < uprate, function (x) {
 				return (
 					x.element == ele &&
-					x.type != etg.Pillar &&
-					cardcount[x.code] != 6 &&
+					x.type !== etg.Pillar &&
+					cardcount[x.code] !== 6 &&
 					!(x.type == etg.Shield && anyshield == 3) &&
 					!(x.type == etg.Weapon && anyweapon == 3) &&
 					!x.isOf(Cards.Names.Precognition)

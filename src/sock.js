@@ -64,13 +64,13 @@ const sockEvents = {
 			ms = m < 10 ? '0' + m : m.toString(),
 			style = {},
 			text = [];
-		if (data.mode != 1) style.color = data.mode == 2 ? '#69f' : '#ddd';
+		if (data.mode !== 1) style.color = data.mode == 2 ? '#69f' : '#ddd';
 		if (data.guest) style.fontStyle = 'italic';
 		let decklink = /\b(([01][0-9a-v]{4})+)\b/g,
 			reres,
 			lastindex = 0;
 		while ((reres = decklink.exec(data.msg))) {
-			if (reres.index != lastindex)
+			if (reres.index !== lastindex)
 				text.push(data.msg.slice(lastindex, reres.index));
 			let notlink = false;
 			for (let i = 2; i < reres[0].length; i += 5) {
@@ -91,7 +91,7 @@ const sockEvents = {
 			);
 			lastindex = reres.index + reres[0].length;
 		}
-		if (lastindex != data.msg.length) text.push(data.msg.slice(lastindex));
+		if (lastindex !== data.msg.length) text.push(data.msg.slice(lastindex));
 		store.store.dispatch(
 			store.chat(
 				<div style={style}>

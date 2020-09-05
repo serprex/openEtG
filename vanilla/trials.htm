@@ -96,11 +96,11 @@
 				}
 			}
 			if (eleCount[element] < Math.ceil(0.4 * deck.length)) return "Too few in-element cards (At least 40%)";
-			if (eleCount[element] > Math.ceil(0.75 * deck.length) && eleCount[element] != deck.length) return "Too few off-element cards (At least 25%)";
+			if (eleCount[element] > Math.ceil(0.75 * deck.length) && eleCount[element] !== deck.length) return "Too few off-element cards (At least 25%)";
 			usedElements = "";
 			count = 0;
 			for (var i = 1;i < eleCount.length;i++) {
-				if (eleCount[i] > 0 && i != element) {
+				if (eleCount[i] > 0 && i !== element) {
 					if (eleCount[i] > eleCount[element]) return "You have more " + etg.eleNames[i] + " cards than " + etg.eleNames[element];
 					usedElements += etg.eleNames[i] + " ";
 					count++;

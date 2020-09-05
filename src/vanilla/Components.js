@@ -78,7 +78,7 @@ export function Card(props) {
 						fontSize: '12px',
 					}}>
 					{card.cost}
-					{card.element != card.costele && (
+					{card.element !== card.costele && (
 						<span className={`ico ce${card.costele}`} />
 					)}
 				</span>
@@ -207,7 +207,7 @@ function CardSelectorColumn(props) {
 				<div
 					className={
 						'selectortext' +
-						(props.maxedIndicator && card.type != etg.Pillar && cardAmount >= 6
+						(props.maxedIndicator && card.type !== etg.Pillar && cardAmount >= 6
 							? cardAmount >= 12
 								? ' beigeback'
 								: ' lightback'

@@ -23,14 +23,12 @@ export default function (deck) {
 		var card = deck[i];
 		if (~bannedCards.indexOf(card.code)) return card.name + ' is banned';
 		if (~etg.ShardList.indexOf(card.code)) return 'Shards are banned';
-		if (card.upped) 'Upgraded cards are banned';
-		if (~etg.NymphList.indexOf(card.code) && card.type != etg.Pillar)
+		if (card.upped) return 'Upgraded cards are banned';
+		if (~etg.NymphList.indexOf(card.code) && card.type !== etg.Pillar)
 			return 'Nymphs are banned';
 		legs += addLegs(card.code);
 	}
-	if (legs != 30)
-		return (
-			'You have ' + legs + ' legs. This is too ' + (legs > 30 ? 'many' : 'few')
-		);
+	if (legs !== 30)
+		return `You have ${legs} legs. This is too ${legs > 30 ? 'many' : 'few'}`;
 	return 'Legal';
 }

@@ -112,7 +112,7 @@ function fightItOut() {
 					'\n' +
 					result.textContent;
 			} else {
-				fc[(game.winner != realp1) | 0]++;
+				fc[(game.winner !== realp1) | 0]++;
 				result.textContent =
 					fc[0] +
 					' : ' +

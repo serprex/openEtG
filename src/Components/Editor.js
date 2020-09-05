@@ -12,7 +12,7 @@ export default class Editor extends React.PureComponent {
 	}
 
 	setCardArt = code => {
-		if (this.state.card != code) this.setState({ card: code });
+		if (this.state.card !== code) this.setState({ card: code });
 	};
 
 	addCard = code => {

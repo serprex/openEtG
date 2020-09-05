@@ -19,7 +19,7 @@ function mkTable() {
 	return tbl;
 }
 function printstat(e) {
-	if (e.keyCode != 13) return;
+	if (e.keyCode !== 13) return;
 	document.getElementById('deckpreview').src =
 		'http://dek.im/deck/' + this.value;
 	let summon = 0,

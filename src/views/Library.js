@@ -157,7 +157,7 @@ export default class Library extends React.Component {
 					cardpool={this.state.showbound ? boundpool : cardpool}
 					filterboth
 					onMouseOver={code => {
-						code != this.state.code && this.setState({ code });
+						code !== this.state.code && this.setState({ code });
 					}}
 				/>
 				{children}

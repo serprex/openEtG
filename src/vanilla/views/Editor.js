@@ -54,7 +54,7 @@ export default connect(state => ({
 		}
 
 		setCardArt = code => {
-			if (!this.state.card || this.state.card.code != code)
+			if (!this.state.card || this.state.card.code !== code)
 				this.setState({ card: Cards.Codes[code] });
 		};
 
@@ -138,9 +138,9 @@ export default connect(state => ({
 						onClick={code => {
 							if (deck.length < 60) {
 								const card = Cards.Codes[code];
-								if (card.type != etg.Pillar) {
+								if (card.type !== etg.Pillar) {
 									if (
-										Cards.Codes[code].type != etg.Pillar &&
+										Cards.Codes[code].type !== etg.Pillar &&
 										sumCardMinus(cardminus, code) >= 6
 									) {
 										return;

@@ -3,7 +3,7 @@ import Cards from '../Cards.js';
 const infobox = document.getElementById('infobox');
 document.getElementById('nameinput').addEventListener('keydown', printstat);
 function printstat(e) {
-	if (e.keyCode != 13) return;
+	if (e.keyCode !== 13) return;
 	const hide = new Set(
 		['pillar', 'mark', 'shard', 'rare', 'nymph'].filter(
 			x => document.getElementById('hide' + x).checked,
@@ -19,7 +19,7 @@ function printstat(e) {
 	});
 	const upped = document.querySelector("input[name='upped']:checked").value;
 	function cardfilter(card) {
-		if (ignore(card.name).charAt(0) != letter) return false;
+		if (ignore(card.name).charAt(0) !== letter) return false;
 		if (hide.has('pillar') && !card.type) return false;
 		if (hide.has('mark') && card.name.match(/^Mark of /)) return false;
 		if (hide.has('shard') && card.name.match(/^Shard of /)) return false;

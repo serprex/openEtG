@@ -18,7 +18,7 @@ function rationality(deck) {
 		spells = 0,
 		creas = 0,
 		perms = 0;
-	if (deck.length != 31) return '. Rational needs 31 cards';
+	if (deck.length !== 31) return '. Rational needs 31 cards';
 	deck.forEach(function (card) {
 		if (~etg.ShardList.indexOf(card.asUpped(false).code)) unupped += 4;
 		if (!card.upped) unupped--;
@@ -29,11 +29,11 @@ function rationality(deck) {
 		else if (card.type == etg.Permanent) perms++;
 	});
 	if (unupped > 0) return '. Unupgrade ' + unupped + ' cards';
-	if (shields != 1) return '. Must have 1 shield';
-	if (weapons != 1) return '. Must have 1 weapon';
-	if (spells != 5) return '. Must have 5 spells';
-	if (creas != 9) return '. Must have 9 creatures';
-	if (perms != 2)
+	if (shields !== 1) return '. Must have 1 shield';
+	if (weapons !== 1) return '. Must have 1 weapon';
+	if (spells !== 5) return '. Must have 5 spells';
+	if (creas !== 9) return '. Must have 9 creatures';
+	if (perms !== 2)
 		return '. Must have 2 non-weapon, non-shield, non-pillar permanents';
 	return true;
 }

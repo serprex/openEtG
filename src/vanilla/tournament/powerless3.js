@@ -9,7 +9,7 @@ export default function (deck) {
 		if (!card.element) return card.name + ' is Other';
 		else if (~etg.ShardList.indexOf(card.code))
 			return card.name + ' is a Shard';
-		if (card.type != etg.Pillar) elements[card.element] = 1;
+		if (card.type !== etg.Pillar) elements[card.element] = 1;
 		if (card.upped) anyupped = true;
 		if (card.isOf(Cards.Names.Discord)) disco = true;
 	}

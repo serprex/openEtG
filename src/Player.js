@@ -501,7 +501,7 @@ Player.prototype.v_endturn = function (discard) {
 			if (
 				i > 4 &&
 				floodingFlag &&
-				cr.card.element != etg.Water &&
+				cr.card.element !== etg.Water &&
 				cr.card.element &&
 				!cr.status.get('immaterial') &&
 				!cr.status.get('burrowed') &&

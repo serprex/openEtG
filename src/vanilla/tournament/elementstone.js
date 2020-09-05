@@ -17,7 +17,7 @@ export default function (deck, mark) {
 	for (var i = 0; i < deck.length; i++) {
 		var card = deck[i];
 		if (card.isOf(Cards.Names.QuantumPillar)) continue;
-		if (card.type != etg.Creature && card.element != mark)
+		if (card.type !== etg.Creature && card.element !== mark)
 			return 'Spells and Permanents must be of your mark element';
 		if (
 			bannedCards.some(function (ban) {

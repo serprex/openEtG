@@ -42,7 +42,7 @@ export default function (deck) {
 	if (deck.length <= 40) {
 		for (var s1 in spells) {
 			for (var s2 in spells) {
-				if (s1 != s2 && spells[s1] + spells[s2] >= 7) {
+				if (s1 !== s2 && spells[s1] + spells[s2] >= 7) {
 					races.push('Protoss legal');
 					return races.join(', ');
 				}

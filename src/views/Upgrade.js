@@ -47,7 +47,7 @@ export default connect(({ user }) => ({ user }))(
 				if (!card.isFree()) {
 					if (card.shiny) return 'You cannot polish shiny cards.';
 					if (card.rarity == 5) return 'You cannot polish Nymphs.';
-					const use = card.rarity != -1 ? 6 : 2;
+					const use = card.rarity !== -1 ? 6 : 2;
 					if (self.state.cardpool[card.code] >= use) {
 						sock.userExec('polish', { card: card.code });
 					} else
@@ -185,14 +185,14 @@ export default connect(({ user }) => ({ user }))(
 							if (card.upped) {
 								newstate.info1 = card.isFree()
 									? ''
-									: card.rarity != -1
+									: card.rarity !== -1
 									? 'Convert into 6 downgraded copies.'
 									: 'Convert into a downgraded version.';
 								newstate.downgrade = true;
 							} else {
 								newstate.info1 = card.isFree()
 									? '50$ to upgrade'
-									: card.rarity != -1
+									: card.rarity !== -1
 									? 'Convert 6 into an upgraded version.'
 									: 'Convert into an upgraded version.';
 								newstate.downgrade = false;
@@ -206,7 +206,7 @@ export default connect(({ user }) => ({ user }))(
 							} else if (card.shiny) {
 								newstate.info3 = card.isFree()
 									? ''
-									: card.rarity != -1
+									: card.rarity !== -1
 									? 'Convert into 6 non-shiny copies.'
 									: 'Convert into 2 non-shiny copies.';
 								newstate.downlish = true;
@@ -215,7 +215,7 @@ export default connect(({ user }) => ({ user }))(
 									? '50$ to polish'
 									: card.rarity == 5
 									? 'This card cannot be polished.'
-									: card.rarity != -1
+									: card.rarity !== -1
 									? 'Convert 6 into a shiny version.'
 									: 'Convert 2 into a shiny version.';
 								newstate.downlish = false;

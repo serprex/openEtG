@@ -22,17 +22,17 @@ export default function (deck) {
 			countcount[type]++;
 		} else cardcount[card.code]++;
 	}
-	if (typecount != 2) {
+	if (typecount !== 2) {
 		return 'Must have 2 kinds of cards, have ' + typecount;
 	}
 	for (var key in countcount) {
-		if (countcount[key] != 3)
+		if (countcount[key] !== 3)
 			return 'Must include exactly 3 copies of type ' + key;
 	}
 	var countsame = -1;
 	for (var key in cardcount) {
 		if (countsame == -1) countsame = cardcount[key];
-		else if (countsame != cardcount[key])
+		else if (countsame !== cardcount[key])
 			return (
 				'Card counts off: ' +
 				countsame +

@@ -44,7 +44,7 @@ export default function (deck) {
 			);
 		}
 	}
-	if (eleCount != 4)
+	if (eleCount !== 4)
 		return 'You used ' + eleCount + ' elements. You must only use 4';
 	return 'Legal';
 }

@@ -28,7 +28,7 @@ export default function (deck) {
 		}
 		if (card.rarity >= 3) {
 			if (!rareElement) rareElement = card.element;
-			else if (rareElement != card.element)
+			else if (rareElement !== card.element)
 				return 'Your deck contains rare cards from more than one element';
 		}
 	}

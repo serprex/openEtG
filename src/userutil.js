@@ -44,7 +44,7 @@ export function calcWealth(cardpool, isDecoded) {
 		const card = Cards.Codes[code];
 		if (
 			card &&
-			card.rarity != -1 &&
+			card.rarity !== -1 &&
 			(card.rarity || card.upped || card.shiny)
 		) {
 			wealth += cardValue(card) * count;

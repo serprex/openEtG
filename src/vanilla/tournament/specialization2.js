@@ -2,7 +2,7 @@ export default function (deck) {
 	function countOther(e) {
 		var ret = 0;
 		for (var i = 0; i < 13; i++) {
-			if (i != e && eleCount[i]) {
+			if (i !== e && eleCount[i]) {
 				ret += eleCount[i];
 			}
 		}

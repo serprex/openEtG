@@ -37,7 +37,7 @@ const Actives = {
 	},
 	aflatoxin: (ctx, c, t) => {
 		t.addpoison(2);
-		if (t.type != etg.Player) {
+		if (t.type !== etg.Player) {
 			t.setStatus('aflatoxin', 1);
 		}
 	},
@@ -321,7 +321,7 @@ const Actives = {
 	},
 	freeze: (ctx, c, t) => {
 		t.freeze(
-			c.card.upped && c.card != ctx.Cards.Names.Pandemonium.asUpped(true)
+			c.card.upped && c.card !== ctx.Cards.Names.Pandemonium.asUpped(true)
 				? 4
 				: 3,
 		);
@@ -384,7 +384,7 @@ const Actives = {
 		c.owner.dmg(-20);
 	},
 	holylight: (ctx, c, t) => {
-		t.dmg(t.type != etg.Player && t.status.get('nocturnal') ? 10 : -10);
+		t.dmg(t.type !== etg.Player && t.status.get('nocturnal') ? 10 : -10);
 	},
 	hope: (ctx, c, t) => {
 		let dr = 0;
@@ -615,8 +615,8 @@ const Actives = {
 		c.owner.masscc(c, function (ctx, c, x) {
 			for (var key of x.active.keys()) {
 				if (
-					key != 'ownplay' &&
-					key != 'owndiscard' &&
+					key !== 'ownplay' &&
+					key !== 'owndiscard' &&
 					!x.active.get(key).name.every(name => Actives[name].passive)
 				)
 					return;
@@ -870,10 +870,10 @@ const Actives = {
 	},
 	salvage: (ctx, c, t) => {
 		if (
-			c.owner != t.owner &&
+			c.owner !== t.owner &&
 			!c.status.get('salvaged') &&
 			!t.status.get('salvaged') &&
-			c.owner.game.turn != c.owner
+			c.owner.game.turn !== c.owner
 		) {
 			c.status = c.status.set('salvaged', 1);
 			t.status = t.status.set('salvaged', 1);
@@ -910,7 +910,7 @@ const Actives = {
 			const card = ctx.randomcard(
 				c.card.upped,
 				x =>
-					(x.type != etg.Pillar || !x.name.match(/^Mark/)) &&
+					(x.type !== etg.Pillar || !x.name.match(/^Mark/)) &&
 					!x.isOf(ctx.Cards.Names.Relic) &&
 					!x.isOf(ctx.Cards.Names.Miracle) &&
 					!etg.ShardList.some(shard => shard && x.isOf(shard)) &&
@@ -1147,7 +1147,7 @@ const Actives = {
 				t.die();
 				if (
 					!t.owner.creatures[index] ||
-					t.owner.creatures[index].card != ctx.Cards.Names.MalignantCell
+					t.owner.creatures[index].card !== ctx.Cards.Names.MalignantCell
 				) {
 					const skele = t.owner.newThing(t.card.as(ctx.Cards.Names.Skeleton));
 					t.owner.setCrea(index, skele.id);

@@ -33,7 +33,7 @@ const afilter = new Map()
 	.set(Skills.lobotomize, (c, t) => {
 		if (!t.status.get('momentum') && !t.status.get('psionic')) {
 			for (var key in t.active) {
-				if (t.active.get('key') && key != 'ownplay') {
+				if (t.active.get('key') && key !== 'ownplay') {
 					return true;
 				}
 			}

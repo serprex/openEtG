@@ -774,7 +774,7 @@ export default connect(({ user, opts }) => ({
 				this.setState(state => {
 					const c = data.x === 'cast' && data.c && game.byId(data.c),
 						t = data.x === 'cast' && data.t && game.byId(data.t);
-					if (c && c.ownerId != this.state.player1 && c.owner.isCloaked()) {
+					if (c && c.ownerId !== this.state.player1 && c.owner.isCloaked()) {
 						return null;
 					}
 					const foeplays = new Map(state.foeplays),
@@ -1374,7 +1374,7 @@ export default connect(({ user, opts }) => ({
 						: game.turn === player1.id
 						? 'Accept'
 						: '';
-					if (game.phase != etg.PlayPhase) {
+					if (game.phase !== etg.PlayPhase) {
 						cancelText = game.turn === player1.id ? 'Mulligan' : '';
 					} else {
 						cancelText =
