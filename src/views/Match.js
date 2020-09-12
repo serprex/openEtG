@@ -1677,12 +1677,13 @@ export default connect(({ user, opts }) => ({
 					<TransitionMotion
 						styles={things.map(id => {
 							const obj = game.byId(id),
-								pos = ui.tgtToPos(obj, player1.id);
-							const style = { opacity: spring(1) };
+								pos = ui.tgtToPos(obj, player1.id),
+								style = { opacity: spring(1) };
 							if (pos) {
 								style.x = spring(pos.x);
 								style.y = spring(pos.y);
 							}
+
 							return {
 								key: `${id}`,
 								style,
@@ -1702,10 +1703,11 @@ export default connect(({ user, opts }) => ({
 								};
 							} else if (startpos) {
 								pos = this.idtrack.get(startpos);
+							} else {
+								pos = { x: item.style.x.val || 0, y: item.style.y.val || 0 };
 							}
+
 							return {
-								x: item.style.x.val || 0,
-								y: item.style.y.val || 0,
 								opacity: 0,
 								...pos,
 							};
@@ -1717,31 +1719,22 @@ export default connect(({ user, opts }) => ({
 								pos = {
 									x: 103,
 									y:
-										(item.data.ownerId === player1.id) ===
-										(endpos === -1 || endpos === -3)
+										(item.data.ownerId === player1.id) === (endpos === -1)
 											? 551
 											: 258,
-									faceUp: endpos < -2,
 								};
-								pos.opacity = spring(
-									endpos < -2 &&
-										item.style.y.val &&
-										Math.abs(item.style.y.val - pos.y) > 2
-										? 1
-										: 0,
-								);
 							} else if (endpos) {
 								pos = this.idtrack.get(endpos);
+							} else {
+								pos = this.idtrack.get(item.data.id);
 							}
-							return pos && Number.isFinite(pos.x) && Number.isFinite(pos.y)
+							return pos
 								? {
 										x: spring(pos.x),
 										y: spring(pos.y),
 										opacity: spring(0),
 								  }
-								: {
-										opacity: spring(0),
-								  };
+								: null;
 						}}>
 						{interpStyles => (
 							<>
