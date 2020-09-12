@@ -1723,11 +1723,10 @@ export default connect(({ user, opts }) => ({
 											? 551
 											: 258,
 								};
-							} else if (endpos) {
-								pos = this.idtrack.get(endpos);
 							} else {
-								pos = this.idtrack.get(item.data.id);
+								pos = this.idtrack.get(endpos || item.data.id);
 							}
+
 							return pos
 								? {
 										x: spring(pos.x),
