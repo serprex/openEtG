@@ -73,8 +73,7 @@ const data = {
 	bless: 'Target gains 3|3.',
 	blockwithcharge:
 		'Each stack fully blocks one attacker and is then destroyed.',
-	bolsterintodeck:
-		'Add 3 copies of target creature on top of your deck. Cannot ricochet.',
+	bolsterintodeck: 'Add 3 copies of target creature on top of your deck.',
 	boneyard: c =>
 		`Whenever a creature which is not a Skeleton dies, summon a ${
 			c.upped ? '2|2' : '1|1'

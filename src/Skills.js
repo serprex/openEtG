@@ -1730,9 +1730,7 @@ const Skills = {
 		}
 	},
 	sadism: (ctx, c, t, dmg) => {
-		if (dmg > 0 && (!c.card.upped || c.ownerId === t.ownerId)) {
-			c.owner.dmg(-dmg);
-		}
+		if (dmg > 0) c.owner.dmg(-dmg);
 	},
 	salvage: passive((ctx, c, t, data) => {
 		parseSkill('growth 1').func(ctx, c);
@@ -2032,10 +2030,10 @@ const Skills = {
 				const idx = ctx.choose(candidates),
 					[crid] = deckIds.splice(idx, 1),
 					cr = ctx.byId(crid);
+				pl.deckIds = deckIds;
 				ctx.effect({ x: 'StartPos', id: cr.id, src: -1 });
 				pl.addCrea(cr);
 				cr.freeze(Math.ceil(cr.card.cost / 4));
-				pl.deckIds = deckIds;
 			}
 		}
 	},
