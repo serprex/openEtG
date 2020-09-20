@@ -48,11 +48,11 @@ png.on('end', function () {
 	const newrules = {};
 	for (const rule1 in rules) {
 		const r1 = rules[rule1];
-		if (r1.length == 1) {
+		if (r1.length === 1) {
 			for (const rule2 in rules) {
 				if (rule1 > rule2) {
 					const r2 = rules[rule2];
-					if (r2.length == 1 && r1[0] == r2[0]) {
+					if (r2.length === 1 && r1[0] === r2[0]) {
 						droprule.add(rule1).add(rule2);
 						newrules[`${rule1};${rule2}`] = r1;
 					}

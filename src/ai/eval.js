@@ -92,7 +92,9 @@ const SkillsValues = {
 			if (perms[i]) {
 				const perm = c.owner.game.byId(perms[i]);
 				if (perm.card.type === etg.Pillar) {
-					q += perm.card.element === etg.Chroma ? 3 : 1;
+					q +=
+						(perm.card.element === etg.Chroma ? 3 : 1) *
+						perm.getStatus('charges');
 				}
 			}
 		}
@@ -106,10 +108,11 @@ const SkillsValues = {
 			if (perms[i]) {
 				const perm = c.owner.game.byId(perms[i]);
 				if (perm.card.code === etg.PillarList[etg.Entropy]) {
-					q += 3;
-				}
-				if (perm.card.code === etg.PendList[etg.Entropy]) {
-					q += c.owner.mark === etg.Entropy ? 3 : 1.5;
+					q += 3 * perm.getStatus('charges');
+				} else if (perm.card.code === etg.PendList[etg.Entropy]) {
+					q +=
+						(c.owner.mark === etg.Entropy ? 3 : 1.5) *
+						perm.getStatus('charges');
 				}
 			}
 		}

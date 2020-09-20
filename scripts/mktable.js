@@ -14,7 +14,7 @@ if (process.argv.length < 3) {
 	write('[right][table]');
 	writetd('Tot', 'E', 'C', 'P', 'S', '|', 'R', 'U', 'C', '', '');
 	for (let i = 0; i < 13; i++) {
-		const ofele = Cards.filter(false, x => x.element == i);
+		const ofele = Cards.filter(false, x => x.element === i);
 		let creas = 0,
 			perms = 0,
 			spels = 0,
@@ -22,8 +22,8 @@ if (process.argv.length < 3) {
 			last = 0;
 		ofele.forEach(x => {
 			if (x.type <= etg.Permanent) perms++;
-			else if (x.type == etg.Creature) creas++;
-			else if (x.type == etg.Spell) spels++;
+			else if (x.type === etg.Creature) creas++;
+			else if (x.type === etg.Spell) spels++;
 			if (x.rarity > 0 && x.rarity < 4) {
 				comm[x.rarity - 1]++;
 				if (x.code > last) last = x.code;
