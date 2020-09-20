@@ -658,9 +658,9 @@ export default connect(({ user, opts }) => ({
 				<Motion
 					key={key}
 					defaultStyle={{
-						fade: 1,
 						x: pos.x,
 						y: pos.y + offset,
+						fade: 1,
 					}}
 					style={{
 						x: spring(pos.x),
@@ -1703,7 +1703,8 @@ export default connect(({ user, opts }) => ({
 								};
 							} else if (startpos) {
 								pos = this.idtrack.get(startpos);
-							} else {
+							}
+							if (!startpos || !pos) {
 								pos = { x: item.style.x.val || 0, y: item.style.y.val || 0 };
 							}
 
