@@ -23,14 +23,14 @@
     "babel-loader": "^8.1.0",
     "core-js": "^3.6.5",
     "optipng-bin": "^7.0.0",
-    "prettier": "^2.1.1",
+    "prettier": "^2.1.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-motion": "^0.5.2",
     "react-redux": "^7.2.1",
     "redux": "^4.0.5",
     "spritesheet-js": "^1.2.6",
-    "webpack": "^4.44.1",
+    "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12"
   },
   "scripts": {
