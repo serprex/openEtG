@@ -18,7 +18,7 @@ export default function (url, stime) {
 		for (let j = 0; j < 7; j++) {
 			const codes = Cards.filter(
 				false,
-				x => x.element == ele && x.type && cards.indexOf(x.code) == -1,
+				x => x.element === ele && x.type && cards.indexOf(x.code) === -1,
 			);
 			cards[i * 7 + j] = codes[(codes.length * Rng.next()) | 0];
 		}

@@ -34,7 +34,7 @@ export default class ArenaTop extends React.Component {
 					{info.map((data, i) => {
 						const lic = [<span className="atoptext">{data[0]}</span>];
 						for (let i = 1; i <= 4; i++) {
-							if (i == 3) {
+							if (i === 3) {
 								lic.push(<span className="atopdash">-</span>);
 							}
 							lic.push(<span className={'atop' + i}>{data[i]}</span>);

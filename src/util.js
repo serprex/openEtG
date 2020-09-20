@@ -3,7 +3,7 @@ export function* iterSplit(src, str) {
 	while (true) {
 		const j = src.indexOf(str, i);
 		yield src.slice(i, ~j ? j : src.length);
-		if (j == -1) return;
+		if (j === -1) return;
 		i = j + str.length;
 	}
 }

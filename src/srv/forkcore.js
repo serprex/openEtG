@@ -27,7 +27,7 @@ async function forkcorelogic(req, res) {
 		url.match(/^$|\.(js(on|\.map)?|html?|css|csv|png|ogg)$/)
 	) {
 		await cache.add(res, url, ifmod, url || 'index.html', file);
-	} else if (url == 'speed') {
+	} else if (url === 'speed') {
 		res.writeHead(302, { Location: `/speed/${randint()}` });
 		res.end();
 	} else {

@@ -11,9 +11,9 @@ import * as store from '../store.js';
 function mkDaily(type) {
 	let game;
 	if (type < 3) {
-		game = mkAi.mkAi(type == 1 ? 0 : 2, type, data => {
+		game = mkAi.mkAi(type === 1 ? 0 : 2, type, data => {
 			const dataNext =
-				type == 1
+				type === 1
 					? {
 							goldreward: 200,
 							endurance: 2,
@@ -35,9 +35,9 @@ function mkDaily(type) {
 		});
 		if (!game) return;
 	} else {
-		game = mkAi.mkPremade(type == 3 ? 1 : 3, type, data => {
+		game = mkAi.mkPremade(type === 3 ? 1 : 3, type, data => {
 			data.daily = type;
-			data.colobonus = type == 3 ? 4 : 1;
+			data.colobonus = type === 3 ? 4 : 1;
 			data.rematch = undefined;
 			return data;
 		});
@@ -93,7 +93,7 @@ export default connect(({ user }) => ({ user }))(function Colosseum({ user }) {
 					{active
 						? events[i - 1]
 						: i > 2
-						? user.daily & (i == 3 ? 1 : 32)
+						? user.daily & (i === 3 ? 1 : 32)
 							? 'You defeated this already today.'
 							: 'You failed this today. Better luck tomorrow!'
 						: 'Completed.'}
@@ -105,7 +105,7 @@ export default connect(({ user }) => ({ user }))(function Colosseum({ user }) {
 		<>
 			<Components.ExitBtn x={50} y={50} />
 			{eventui}
-			{user.daily == 191 ? (
+			{user.daily === 191 ? (
 				<>
 					<input
 						type="button"

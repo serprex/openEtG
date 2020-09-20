@@ -641,7 +641,7 @@ Thing.prototype.v_attack = function (stasis, freedomChance) {
 				!momentum &&
 				(fsh = target.shield) &&
 				(fsha = fsh.active.get('shield')) &&
-				(fsha == Skills.v_wings || fsha == Skills.v_weight)
+				(fsha === Skills.v_wings || fsha === Skills.v_weight)
 			) {
 				stillblock = fsha.func(fsh, this);
 			}

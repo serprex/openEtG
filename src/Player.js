@@ -506,7 +506,7 @@ Player.prototype.v_endturn = function (discard) {
 		if (cr) {
 			if (patienceFlag) {
 				const floodbuff =
-					floodingFlag && i > 4 && cr.card.element == etg.Water ? 5 : 2;
+					floodingFlag && i > 4 && cr.card.element === etg.Water ? 5 : 2;
 				cr.atk += floodbuff;
 				cr.buffhp(floodbuff);
 				if (!cr.getStatus('delayed')) cr.delay(1);

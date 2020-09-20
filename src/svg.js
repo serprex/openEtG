@@ -91,7 +91,7 @@ export function deck(deck) {
 			x + 2
 		}' y='${y + 13}'${textColor}>${card.name}</text>`;
 		y += 16;
-		if (y == 160) {
+		if (y === 160) {
 			y = 0;
 			x += 100;
 		}

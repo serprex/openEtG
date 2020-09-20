@@ -10,7 +10,7 @@ const ChannelTab = connect(({ opts }) => ({ selected: opts.channel }))(
 	function ChannelTab(props) {
 		return (
 			<span
-				className={props.selected == props.channel ? 'tabsel' : 'tab'}
+				className={props.selected === props.channel ? 'tabsel' : 'tab'}
 				onClick={e =>
 					props.dispatch(store.setOptTemp('channel', props.channel))
 				}>

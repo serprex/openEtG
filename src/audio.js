@@ -16,7 +16,7 @@ export function playSound(name, dontreset) {
 	}
 }
 export function playMusic(name) {
-	if (name == currentMusic || Effect.disable) return;
+	if (name === currentMusic || Effect.disable) return;
 	let music;
 	if (musicEnabled && (music = musics.get(currentMusic))) music.pause();
 	currentMusic = name;
