@@ -404,7 +404,8 @@ class ThingInst extends React.Component {
 						}\u00d7${charges}`;
 						topText = '';
 					} else if (obj.active.get('ownattack') === Skills.locket) {
-						statText = `1:${obj.getStatus('mode') || obj.owner.mark}`;
+						const mode = obj.getStatus('mode');
+						statText = `1:${~mode ? mode : obj.owner.mark}`;
 					} else {
 						statText = (charges || '').toString();
 					}

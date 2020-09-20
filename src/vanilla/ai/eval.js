@@ -534,9 +534,9 @@ function evalthing(c) {
 				(ttatk ? 1 : c.getStatus('immaterial') ? 0 : 0.3) *
 				adrfactor *
 				delayfactor;
-		} else if (key === 'auto') {
+		} else if (key === 'ownattack') {
 			if (!c.getStatus('frozen')) {
-				score += evalactive(c, c.active.get('auto'), ttatk) * adrfactor;
+				score += evalactive(c, c.active.get('ownattack'), ttatk) * adrfactor;
 			}
 		} else if (key === 'cast') {
 			if (caneventuallyactive(c.castele, c.cast, c.owner)) {

@@ -415,58 +415,25 @@ Player.prototype.endturn = function (discard) {
 };
 Player.prototype.o_endturn = function (discard) {
 	this.spend(this.mark, this.markpower * (this.mark > 0 ? -1 : -3));
-	let patienceFlag = false,
-		floodingFlag = false,
-		floodingPaidFlag = false,
-		permanents = this.permanents,
-		foepermanentIds = this.foe.permanentIds;
-	for (let i = 0; i < 16; i++) {
-		const p = permanents[i];
+	const attackData = { target: this.foe, attackPhase: true };
+	this.proc('beginattack', attackData);
+	for (const p of this.permanents) {
 		if (p) {
-			p.trigger('ownattack');
-			if (~p.getIndex()) {
-				p.usedactive = false;
-				if (p.getStatus('flooding') && !floodingPaidFlag) {
-					floodingPaidFlag = true;
-					floodingFlag = true;
-					if (!this.spend(etg.Water, 1)) {
-						p.die();
-					}
-				}
-				if (p.getStatus('patience')) {
-					patienceFlag = true;
-				}
-				p.maybeDecrStatus('frozen');
-			}
-		}
-		const fp = foepermanentIds[i];
-		if (fp && this.game.getStatus(fp, 'flooding')) {
-			floodingFlag = true;
+			p.trigger('ownattack', attackData);
+			p.usedactive = false;
+			p.maybeDecrStatus('frozen');
 		}
 	}
-	this.creatures.forEach((cr, i) => {
+	for (const cr of this.creatures) {
 		if (cr) {
-			if (patienceFlag) {
-				const floodbuff = floodingFlag && i > 4;
-				cr.incrAtk(floodbuff ? 5 : cr.getStatus('burrowed') ? 4 : 2);
-				cr.buffhp(floodbuff ? 2 : 1);
-			}
-			cr.attack(undefined, true);
-			if (
-				floodingFlag &&
-				!cr.getStatus('aquatic') &&
-				cr.isMaterial() &&
-				cr.getIndex() > 4
-			) {
-				cr.die();
-			}
+			cr.attack(attackData);
 		}
-	});
+	}
 	if (this.shieldId) {
 		this.game.set(this.shieldId, 'usedactive', false);
 		this.game.trigger(this.shieldId, 'ownattack');
 	}
-	if (this.weaponId) this.weapon.attack(undefined, true);
+	if (this.weaponId) this.weapon.attack(attackData);
 	this.usedactive = false;
 	this.setStatus('flatline', 0);
 };
@@ -474,12 +441,12 @@ Player.prototype.v_endturn = function (discard) {
 	this.spend(this.mark, this.markpower * (this.mark > 0 ? -1 : -3));
 	const poison = this.foe.getStatus('poison');
 	if (poison) this.foe.dmg(poison);
-	var patienceFlag = false,
+	let patienceFlag = false,
 		floodingFlag = false,
 		stasisFlag = false,
 		freedomChance = 0;
-	for (var i = 0; i < 16; i++) {
-		var p;
+	for (let i = 0; i < 16; i++) {
+		let p;
 		if ((p = this.permanents[i])) {
 			if (~p.getIndex()) {
 				p.casts = 1;
@@ -552,7 +519,7 @@ Player.prototype.v_endturn = function (discard) {
 	}
 	this.nova = this.nova2 = 0;
 	for (
-		var i = this.foe.drawpower !== undefined ? this.foe.drawpower : 1;
+		let i = this.foe.drawpower !== undefined ? this.foe.drawpower : 1;
 		i > 0;
 		i--
 	) {
@@ -580,6 +547,9 @@ Player.prototype._draw = function () {
 	const id = deckIds[deckIds.length - 1];
 	this.deckIds = deckIds.slice(0, -1);
 	return id;
+};
+Player.prototype.mill = function (x = 1) {
+	for (let i = x * this.drawpower; i > 0; i--) this._draw();
 };
 Player.prototype.drawcard = function (drawstep) {
 	if (this.handIds.length < 8) {

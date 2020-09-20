@@ -55,7 +55,7 @@ const data = {
 	antimatter:
 		"If target creature or weapon's attack is positive, it becomes negative. Otherwise, it becomes positive.",
 	appease:
-		'Sacrifice target creature you own and gain 1|1. If this ability is not used, this creature will attack its owner. This creature attacks normally the turn it is played or if it loses this ability.',
+		"Sacrifice target creature you own and gain 1|1. If this ability isn't used, this creature will attack its owner. This creature attacks normally the turn it is played or if it loses this ability.",
 	atk2hp: "Set target's HP equal to its strength.",
 	autoburrow:
 		'Until end of turn, your creatures with burrow enter play burrowed.',
@@ -75,21 +75,21 @@ const data = {
 		'Each stack fully blocks one attacker and is then destroyed.',
 	bolsterintodeck: 'Add 3 copies of target creature on top of your deck.',
 	boneyard: c =>
-		`Whenever a creature which is not a Skeleton dies, summon a ${
+		`Whenever a creature which isn\'t a Skeleton dies, summon a ${
 			c.upped ? '2|2' : '1|1'
 		} Skeleton.`,
 	bounce:
-		"When this creature dies, it returns to its owner's hand. Modified stats and statuses remain on the card when it is played again.",
+		"When dying instead return to owner's hand. Modified state remains when played again.",
 	bravery:
 		'Opponent draws up to two cards. Draw cards equal to what opponent drew.',
 	brawl:
 		'Your creatures attack. If a creature exists in opposing creature slot, the two creatures deal their damage to one another instead of opponent. Consumes all remaining 1:3.',
 	brew:
 		"Add a random Alchemy card to your hand. Possible cards include: Antimatter, Black Hole, Adrenaline, Nymph's Tears, Unstable Gas, Liquid Shadow, Aflatoxin, Basilisk Blood, Rage Potion, Luciferin, Precognition, Quintessence.",
-	brokenmirror: [
-		'When opponent plays a creature from their hand, summon a 1|1 Phantom.',
-		'When opponent plays a creature from their hand, summon a 2|1 Phantom.',
-	],
+	brokenmirror: c =>
+		`When opponent plays a creature from their hand, summon a ${
+			c.upped ? '2|1' : '1|1'
+		} Phantom.`,
 	bubbleclear:
 		"Remove statuses (positive and negative) from target creature, reduce target creature's delay by 1, and heal target creature 1.\nTarget gains a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages the affected card.",
 	butterfly:
@@ -162,7 +162,7 @@ const data = {
 	dive: "Double this creature's strength through next attack. Does not stack.",
 	dmgproduce: 'Generate 1:0 for each damage dealt by this card.',
 	draft:
-		'If target creature is airborne, it loses airborne and takes 3 spell damage. If target creature is not airborne, it becomes airborne and gains 3|0',
+		"If target creature is airborne, it loses airborne and takes 3 spell damage. If target creature isn't airborne, it becomes airborne and gains 3|0",
 	drainlife:
 		'Deal 2 spell damage plus one per 5:11 you have after playing this card. Heal for the amount of damage done.',
 	drawcopy:
@@ -180,15 +180,15 @@ const data = {
 		'Until your next turn, the next spell any player casts is nullified. If this ability nullifies a spell, this creature gains 1|1.',
 	elf: 'If this card is targeted by Chaos Seed, it becomes a Fallen Elf.',
 	embezzle:
-		'Replaces target creature\'s skills with "When this creature damages a player, that player draws a card. When this creature dies, destroy the top three cards of opponent\'s deck."',
+		'Replaces target creature\'s skills with "When this creature damages a player, that player draws a card. When this creature dies, destroy the top two cards of opponent\'s deck."',
 	embezzledeath:
-		"When this creature dies, destroy the top three cards of opponent's deck.",
+		"When this creature dies, destroy the top two cards of opponent's deck.",
 	empathy:
 		'At the end of your turn, heal 1 for each creature you own. For every 8 creatures you own (rounded down), pay 1:5 at the end of your turn.',
 	enchant: 'Target permanent becomes immaterial.',
 	endow: 'Gain the strength, skills, and statuses of target weapon. Gain 0|2.',
 	envenom:
-		'Target weapon gains "Give 1 poison on hit. Throttled (only triggers at most twice from Adrenaline),” or target shield gains "25% chance to give non-ranged attackers 1 poison counter."',
+		'Target weapon gains "Give 1 poison on hit. Throttled (only triggers at most twice from Adrenaline), or target shield gains "25% chance to give non-ranged attackers 1 poison counter."',
 	epidemic:
 		"When any creature dies, give opponent poison counters equal to the dead creature's poison counters.",
 	epoch:
@@ -196,7 +196,7 @@ const data = {
 	epochreset: {
 		cast: 'Reset your count of cards played this turn.',
 	},
-	evade: x => x + '% chance to evade attacks.',
+	evade: x => `${x}% chance to evade attacks.`,
 	evade100: 'Completely block enemy attacks.',
 	evadecrea:
 		"Cannot be directly targeted by opponent's creature's abilities. Still affected by abilities that affect all creatures.",
@@ -210,6 +210,8 @@ const data = {
 	fiery: 'Gains +1 strength for every 5:6 owned.',
 	firebolt:
 		'Deal 3 spell damage plus one per 4:6 you have after playing this card. If target is frozen, it loses frozen status.',
+	firestorm: x =>
+		`Deal ${x} spell damage to all of target player\'s creatures, thawing them. Removes cloak.`,
 	firewall: 'Deals 1 damage to each non-ranged attacking creature.',
 	flatline: 'Opponent cannot gain quanta through the end of their next turn.',
 	flyself:
@@ -224,18 +226,16 @@ const data = {
 		'Add 6 copies of target creature to your hand. Remove all remaining 1:12. Add an additional copy for every 2:12 removed.',
 	freeevade:
 		"If your opponent has a shield, your airborne creatures have a 30% chance to bypass the shield. Otherwise, your creatures have a 30% chance to deal 50% more damage. Your creatures have 20% chance to evade opponent's targeted spells and abilities.",
-	freeze: [
-		'Freeze target creature or weapon for 3 turns. Frozen cards cannot attack or use abilities, and do not activate per-turn abilities.',
-		'Freeze target creature or weapon for 4 turns. Frozen cards cannot attack or use abilities, and do not activate per-turn abilities.',
-	],
-	freezeperm: [
-		'Freeze target non-stacking permanent for 3 turns. Frozen cards cannot attack or use abilities, and do not activate per-turn abilities.',
-		'Freeze target non-stacking permanent for 4 turns. Frozen cards cannot attack or use abilities, and do not activate per-turn abilities.',
-	],
-	fungusrebirth: [
-		'Transform this card into a Fungus.',
-		'Transform this card into a Toxic Fungus.',
-	],
+	freeze: c =>
+		`Freeze target creature or weapon for ${
+			c.upped ? 4 : 3
+		} turns. Frozen cards cannot attack or use abilities, and do not activate per-turn abilities.`,
+	freezeperm: c =>
+		`Freeze target non-stacking permanent for ${
+			c.upped ? 4 : 3
+		} turns. Frozen cards cannot attack or use abilities, and do not activate per-turn abilities.`,
+	fungusrebirth: c =>
+		`Transform this card into a ${c.upped ? 'Toxic Fungus' : 'Fungus'}.`,
 	gaincharge2: {
 		death: 'Whenever any creature dies, gain two stacks.',
 		destroy: 'Whenever any other permanent is destroyed, gain two stacks.',
@@ -266,7 +266,7 @@ const data = {
 		};
 	},
 	guard:
-		'Delay target creature and this creature. If target creature is not airborne or this creature is airborne, this creature deals damage equal to its strength to target creature.',
+		"Delay target creature and this creature. If target creature isn't airborne or this creature is airborne, this creature deals damage equal to its strength to target creature.",
 	halveatk: "This creature's strength is halved after it attacks.",
 	hasten: {
 		cast: 'Draw a card.',
@@ -281,7 +281,7 @@ const data = {
 	hitownertwice: 'When this creature attacks, it also attacks its owner twice.',
 	holylight: [
 		'Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature.',
-		'Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature.\nGain 1:8 when played',
+		'Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature.\nGain 1:8 when played.',
 	],
 	hope:
 		'Blocks one additional damage for each creature you control that produces 1:8 every turn.',
@@ -313,7 +313,7 @@ const data = {
 		"Equip target creature as a weapon. If target creature's owner already had a weapon equipped, return it to their hand. Heal target creature's owner equal to target creature's HP.",
 	lobotomize: "Remove target creature's abilities.",
 	locket:
-		'Produces quanta matching your mark each turn, until set to produce quanta of a specific element.',
+		"Produces quanta matching your mark each turn, until set to produce quanta of a specific element. Doesn't operate while frozen.",
 	locketshift:
 		"Switch this card's production to match the element of any target, including immaterial and burrowed cards.",
 	loot:
@@ -325,7 +325,7 @@ const data = {
 			: 'Expires at end of turn';
 	},
 	luciferin:
-		'Your creatures without skills gain “Produces 1:8 when it attacks.” Heal yourself 10.',
+		'Your creatures without skills gain "Produces 1:8 when it attacks."\nHeal yourself 10.',
 	lycanthropy: 'Remove this ability and gain 5|5 and become nocturnal.',
 	martyr: 'Gains 1|0 for every point of damage this card receives.',
 	mend: 'Heal target creature 10.',
@@ -333,6 +333,7 @@ const data = {
 		"Change your mark to target's element. Increase your mark power by 1.",
 	midas:
 		'Target permanent becomes a Golden Relic with "2:0: Sacrifice this card and draw a card." If target is a weapon, its strength is 1. If target is a shield, its damage reduction is 1.',
+	mill: "Discard top card of target player's deck",
 	millpillar:
 		"If the top card of target player's deck is a pillar, pendulum, or tower, destroy that card.",
 	mimic:
@@ -375,8 +376,8 @@ const data = {
 	pairproduce: 'Your pillars, pendulums, and towers produce quanta.',
 	paleomagnetism: {
 		ownattack: [
-			"Summon a pillar or pendulum every turn. ⅔ chance it matches your mark, ⅓ chance it matches your opponent's mark.",
-			"Summon a tower or pendulum every turn and when this card is played. ⅔ chance it matches your mark, ⅓ chance it matches your opponent's mark.",
+			"Summon a pillar or pendulum every turn. \u2154 chance it matches your mark, otherwise it matches your opponent's mark.",
+			"Summon a tower or pendulum every turn and when this card is played. \u2154 chance it matches your mark, otherwise it matches your opponent's mark.",
 		],
 	},
 	pandemonium:
@@ -414,7 +415,7 @@ const data = {
 	poisonfoe:
 		'When this card enters play, 70% chance to give 1 poison counter to opponent.',
 	powerdrain:
-		"Remove half of target creature's strength and HP. Add an equal amount of strength and HP to a random creature you control.",
+		"Remove half of target creature's strength and HP, rounded up. Add an equal amount of strength and HP to a random creature you control.",
 	precognition:
 		"Reveal opponent's hand until the end of their turn. Draw a card.",
 	predator:
@@ -435,7 +436,7 @@ const data = {
 	quint:
 		'Target creature becomes immaterial. If target creature is frozen, it loses frozen status.',
 	quinttog:
-		'If target creature is not immaterial, it gains immaterial status, and if it is also frozen, it loses frozen status. If target creature is immaterial, it loses immaterial status. ',
+		"If target creature isn't immaterial, it gains immaterial status, and if it is also frozen, it loses frozen status. If target creature is immaterial, it loses immaterial status. ",
 	rage: [
 		'Target creature gains +5|-5. If target creature is frozen, it loses frozen status.',
 		'Target creature gains +6|-6. If target creature is frozen, it loses frozen status.',
@@ -449,11 +450,9 @@ const data = {
 	readyequip:
 		'All weapons and shields can use their active abilities the same turn they come into play.',
 	reap:
-		"Target creature dies and is replaced with a Skeleton with target creature's current strength and HP, but no other active abilities or statuses.",
-	rebirth: [
-		'Transform this card into a Phoenix.',
-		'Transform this card into a Minor Phoenix.',
-	],
+		"Target non-Skeleton creature dies and is replaced with a Skeleton with target creature's current strength and HP, but no other active abilities or statuses.",
+	rebirth: c =>
+		`Transform this card into a ${c.upped ? 'Minor Phoenix' : 'Phoenix'}.`,
 	reducemaxhp:
 		"Damage dealt by this card also reduces the defender's maximum HP.",
 	regen:
@@ -466,7 +465,7 @@ const data = {
 	reinforce:
 		"Target creature gains strength and HP equal to this creature's strength and HP. Destroy this creature.",
 	ren:
-		'Target creature gains: "When this creature would die, it is instead returned to its owner\'s hand. Modified stats and statuses remain on the card when it is played again."',
+		'Target creature gains: "When dying instead return to owner\'s hand. Modified state remains when played again."',
 	rewind:
 		"Put target creature on top of its owner's deck. Removes all bonuses and modifiers on target creature.",
 	reveal: {
@@ -499,8 +498,7 @@ const data = {
 		'Add 3 random upgraded non-pillar cards to your hand. At least one will be 1:1.',
 	],
 	shtriga: 'Gain immaterial at the start of your next turn.',
-	shuffle3:
-		"Shuffle 3 copies of target creature you control, any target opponent controls, or any target in opponent's hand into your deck.",
+	shuffle3: 'Shuffle 3 copies of target creature into your deck.',
 	silence:
 		'Target player cannot play cards until the end of their next turn, or target creature cannot use active abilities until the end of their next turn.',
 	sing: 'Target creature without this ability attacks its owner.',
@@ -556,7 +554,7 @@ const data = {
 		'Target weapon gains 5 strength. If target weapon is frozen, it loses frozen status.',
 	],
 	tesseractsummon:
-		'Summon 2 random creatures from your deck. Opponent summons 1 random creature from their deck. Freeze these creatures for a number of turns equal to ¼ of their quanta cost, rounded up.',
+		'Summon 2 random creatures from your deck. Opponent summons 1 random creature from their deck. Freeze these creatures for a number of turns equal to \u00bcÂ¼ of their quanta cost, rounded up.',
 	thorn: '75% chance to give non-ranged attackers 1 poison counter.',
 	thornweak: '25% chance to give non-ranged attackers 1 poison counter.',
 	throwrock: [
@@ -579,6 +577,8 @@ const data = {
 		"This card becomes a creature with Gravity Pull. Set the creature's HP to the total damage this card blocked while it was a shield. Set the creature's strength to half its HP.",
 	unsummon:
 		"Return target creature to its owner's hand. Remove any modifiers and statuses on target creature. If owner's hand is full, instead return target creature to the top of its owner's deck.",
+	unsummonquanta:
+		"Return target creature to its owner's hand. Remove any modifiers and statuses on target creature. If owner's hand is full, instead return target creature to the top of its owner's deck. Gain quanta equivalent to target card's cost.",
 	unvindicate:
 		'Cannot activate vindicate again until the start of its next turn.',
 	upkeep: c =>
@@ -625,8 +625,8 @@ const data = {
 	['pillcar', '1:1 1:3 1:10 1:12'],
 ].forEach(x => {
 	data[x[0]] = {
-		ownattack: `Randomly gain 1-2 ${x[1]} each turn. ⅔ chance to gain 2.`,
-		ownplay: `Randomly gain 1-2 ${x[1]} when played. ⅔ chance to gain 2.`,
+		ownattack: `Randomly gain 1-2 ${x[1]} each turn. \u2154 chance to gain 2.`,
+		ownplay: `Randomly gain 1-2 ${x[1]} when played. \u2154 chance to gain 2.`,
 	};
 });
 function auraText(tgts, bufftext, upbufftext) {
@@ -651,11 +651,12 @@ const statusData = {
 			  }`,
 	flooding:
 		"Each player's non-aquatic creatures past their first five creature slots die at the end of that player's turn. Consumes 1:7 each turn. Does not stack.",
+	mode: '',
 	nightfall: auraText('Nocturnal creatures', '1|1', '2|1'),
 	nothrottle:
 		'If any of your creatures have abilities with Throttled, those abilities lose Throttled.',
 	patience:
-		'Prevent your creatures from attacking at the end of your turn. At the end of your turn, your creatures gain 2|1. If they are burrowed, they instead gain 4|1. If they are affected by Flooding, they instead gain 5|2. Does not stack.',
+		"If it isn't frozen, prevents your creatures from attacking at the end of your turn, instead they gain 2|1. If they are burrowed, they instead gain 4|1. If they are affected by Flooding, they instead gain 5|2. Does not stack.",
 	poison: (c, inst) =>
 		c == inst
 			? `Enters play with ${c.getStatus('poison')} poison counters.`

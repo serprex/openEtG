@@ -95,8 +95,8 @@ Thing.prototype.transform = function (card) {
 	this.active = card.active;
 	if (this.status.get('mutant')) {
 		const buff = this.game.upto(25);
-		this.buffhp(Math.floor(buff / 5));
-		this.incrAtk(buff % 5);
+		this.buffhp(1 + Math.floor(buff / 5));
+		this.incrAtk(1 + (buff % 5));
 		this.mutantactive();
 	} else {
 		this.cast = card.cast;
@@ -527,171 +527,179 @@ Thing.prototype.attackCreature = function (target, trueatk) {
 		target.trigger('shield', this, { dmg: dmg, blocked: 0 });
 	}
 };
-Thing.prototype.attack = function (target, attackPhase) {
-	const flags = { attackPhase, stasis: false, freedom: false };
+Thing.prototype.attack = function (data) {
+	let attackAgain;
 	const isCreature = this.type === etg.Creature;
-	if (isCreature) {
-		this.dmg(this.getStatus('poison'), true);
-	}
-	if (target === undefined)
-		target =
-			this.active.get('cast') === Skills.appease && !this.status.get('appeased')
-				? this.owner
-				: this.owner.foe;
-	const frozen = this.status.get('frozen');
-	if (!frozen) {
-		this.proc('attack', flags);
-	}
-	const { stasis, freedom } = flags;
-	this.usedactive = false;
-	let trueatk;
-	if (
-		!(stasis || frozen || this.status.get('delayed')) &&
-		(trueatk = this.trueatk())
-	) {
-		let momentum =
-			this.status.get('momentum') ||
-			(this.status.get('burrowed') &&
-				this.owner.permanentIds.some(
-					id => id && this.game.getStatus(id, 'tunnel'),
-				));
-		const psionic = this.status.get('psionic');
-		if (freedom) {
-			if (momentum || psionic || (!target.shield && !target.gpull)) {
-				trueatk = Math.ceil(trueatk * 1.5);
-			} else {
-				momentum = true;
-			}
+	do {
+		attackAgain = false;
+		const flags = {
+			stasis: false,
+			freedom: false,
+			target: this.owner.foe,
+			...data,
+		};
+		if (isCreature) {
+			this.dmg(this.getStatus('poison'), true);
 		}
-		if (psionic) {
-			target.spelldmg(trueatk);
-		} else if (momentum || trueatk < 0) {
-			target.dmg(trueatk);
-			this.trigger('hit', target, trueatk);
-		} else if (target.gpull) {
-			this.attackCreature(this.game.byId(target.gpull), trueatk);
-		} else {
-			const truedr = target.shield
-				? Math.min(target.shield.truedr(), trueatk)
-				: 0;
-			const data = { dmg: trueatk - truedr, blocked: truedr };
-			if (target.shield) target.shield.trigger('shield', this, data);
-			const dmg = target.dmg(data.dmg);
-			if (dmg > 0) this.trigger('hit', target, dmg);
-			if (dmg !== trueatk)
-				this.trigger('blocked', target.shield, trueatk - dmg);
+		const frozen = this.status.get('frozen');
+		if (!frozen) {
+			this.proc('attack', flags);
 		}
-	}
-	this.maybeDecrStatus('frozen');
-	this.maybeDecrStatus('delayed');
-	this.setStatus('dive', 0);
-	if (~this.getIndex()) {
-		if (isCreature && this.truehp() <= 0) {
-			this.die();
-		} else {
-			if (!frozen) this.trigger('postauto');
-			const adrenaline = this.getStatus('adrenaline');
-			if (adrenaline) {
-				if (adrenaline < etg.countAdrenaline(this.trueatk(0))) {
-					this.incrStatus('adrenaline', 1);
-					this.attack(target, attackPhase);
+		const { target, stasis, freedom } = flags;
+		this.usedactive = false;
+		let trueatk;
+		if (
+			!(stasis || frozen || this.status.get('delayed')) &&
+			(trueatk = this.trueatk())
+		) {
+			let momentum =
+				this.status.get('momentum') ||
+				(this.status.get('burrowed') &&
+					this.owner.permanentIds.some(
+						id => id && this.game.getStatus(id, 'tunnel'),
+					));
+			const psionic = this.status.get('psionic');
+			if (freedom) {
+				if (momentum || psionic || (!target.shield && !target.gpull)) {
+					trueatk = Math.ceil(trueatk * 1.5);
 				} else {
-					this.setStatus('adrenaline', 1);
+					momentum = true;
 				}
 			}
-		}
-	}
-};
-Thing.prototype.v_attack = function (stasis, freedomChance) {
-	const isCreature = this.type === etg.Creature;
-	if (isCreature) {
-		this.dmg(this.getStatus('poison'), true);
-	}
-	const target = this.owner.foe;
-	if (
-		!this.status.get('frozen') ||
-		this.active.get('ownattack') === Skills.v_overdrive ||
-		this.active.get('ownattack') === Skills.v_acceleration
-	) {
-		this.proc('attack');
-	}
-	this.casts = 1;
-	this.setStatus('ready', 0);
-	let trueatk;
-	if (
-		!(stasis || this.status.get('frozen') || this.status.get('delayed')) &&
-		(trueatk = this.trueatk()) !== 0
-	) {
-		let momentum = this.getStatus('momentum');
-		if (
-			this.status.get('airborne') &&
-			freedomChance &&
-			this.game.rng() < freedomChance
-		) {
-			momentum = true;
-			trueatk = Math.ceil(trueatk * 1.5);
-		}
-		if (this.status.get('psion')) {
-			target.spelldmg(trueatk);
-		} else if (momentum || trueatk < 0) {
-			let stillblock = false,
-				fsh,
-				fsha;
-			if (
-				!momentum &&
-				(fsh = target.shield) &&
-				(fsha = fsh.active.get('shield')) &&
-				(fsha === Skills.v_wings || fsha === Skills.v_weight)
-			) {
-				stillblock = fsha.func(fsh, this);
-			}
-			if (!stillblock) {
+			if (psionic) {
+				target.spelldmg(trueatk);
+			} else if (momentum || trueatk < 0) {
 				target.dmg(trueatk);
 				this.trigger('hit', target, trueatk);
-			}
-		} else if (isCreature && target.gpull && trueatk > 0) {
-			const gpull = this.game.byId(target.gpull);
-			const dmg = gpull.dmg(trueatk);
-			if (this.hasactive('hit', 'vampirism')) {
-				this.owner.dmg(-dmg);
-			}
-		} else {
-			const truedr = target.shield ? target.shield.dr : 0;
-			const tryDmg = Math.max(trueatk - truedr, 0);
-			if (
-				!target.shield ||
-				!target.shield.active.get('shield') ||
-				!target.shield.trigger('shield', this, tryDmg)
-			) {
-				if (tryDmg > 0) {
-					const dmg = target.dmg(tryDmg);
-					this.trigger('hit', target, dmg);
-				}
+			} else if (target.gpull) {
+				this.attackCreature(this.game.byId(target.gpull), trueatk);
+			} else {
+				const truedr = target.shield
+					? Math.min(target.shield.truedr(), trueatk)
+					: 0;
+				const data = { dmg: trueatk - truedr, blocked: truedr };
+				if (target.shield) target.shield.trigger('shield', this, data);
+				const dmg = target.dmg(data.dmg);
+				if (dmg > 0) this.trigger('hit', target, dmg);
+				if (dmg !== trueatk)
+					this.trigger('blocked', target.shield, trueatk - dmg);
 			}
 		}
-	}
-	this.maybeDecrStatus('frozen');
-	this.maybeDecrStatus('delayed');
-	if (this.status.get('dive')) {
+		this.maybeDecrStatus('frozen');
+		this.maybeDecrStatus('delayed');
 		this.setStatus('dive', 0);
-	}
-	if (~this.getIndex()) {
-		if (isCreature && this.truehp() <= 0) {
-			this.die();
-		} else {
-			this.trigger('postauto');
-			if (this.status.get('adrenaline')) {
-				if (
-					this.status.get('adrenaline') < etg.countAdrenaline(this.trueatk(0))
-				) {
-					this.incrStatus('adrenaline', 1);
-					this.v_attack(stasis, freedomChance);
-				} else {
-					this.setStatus('adrenaline', 1);
+		if (~this.getIndex()) {
+			if (isCreature && this.truehp() <= 0) {
+				this.die();
+			} else {
+				if (!frozen) this.trigger('postauto');
+				const adrenaline = this.getStatus('adrenaline');
+				if (adrenaline) {
+					if (adrenaline < etg.countAdrenaline(this.trueatk(0))) {
+						this.incrStatus('adrenaline', 1);
+						attackAgain = true;
+					} else {
+						this.setStatus('adrenaline', 1);
+					}
 				}
 			}
 		}
-	}
+	} while (attackAgain);
+};
+Thing.prototype.v_attack = function (stasis, freedomChance) {
+	let attackAgain;
+	do {
+		attackAgain = false;
+		const isCreature = this.type === etg.Creature;
+		if (isCreature) {
+			this.dmg(this.getStatus('poison'), true);
+		}
+		const target = this.owner.foe;
+		if (
+			!this.status.get('frozen') ||
+			this.active.get('ownattack') === Skills.v_overdrive ||
+			this.active.get('ownattack') === Skills.v_acceleration
+		) {
+			this.proc('attack');
+		}
+		this.casts = 1;
+		this.setStatus('ready', 0);
+		let trueatk;
+		if (
+			!(stasis || this.status.get('frozen') || this.status.get('delayed')) &&
+			(trueatk = this.trueatk()) !== 0
+		) {
+			let momentum = this.getStatus('momentum');
+			if (
+				this.status.get('airborne') &&
+				freedomChance &&
+				this.game.rng() < freedomChance
+			) {
+				momentum = true;
+				trueatk = Math.ceil(trueatk * 1.5);
+			}
+			if (this.status.get('psion')) {
+				target.spelldmg(trueatk);
+			} else if (momentum || trueatk < 0) {
+				let stillblock = false,
+					fsh,
+					fsha;
+				if (
+					!momentum &&
+					(fsh = target.shield) &&
+					(fsha = fsh.active.get('shield')) &&
+					(fsha === Skills.v_wings || fsha === Skills.v_weight)
+				) {
+					stillblock = fsha.func(fsh, this);
+				}
+				if (!stillblock) {
+					target.dmg(trueatk);
+					this.trigger('hit', target, trueatk);
+				}
+			} else if (isCreature && target.gpull && trueatk > 0) {
+				const gpull = this.game.byId(target.gpull);
+				const dmg = gpull.dmg(trueatk);
+				if (this.hasactive('hit', 'vampirism')) {
+					this.owner.dmg(-dmg);
+				}
+			} else {
+				const truedr = target.shield ? target.shield.dr : 0;
+				const tryDmg = Math.max(trueatk - truedr, 0);
+				if (
+					!target.shield ||
+					!target.shield.active.get('shield') ||
+					!target.shield.trigger('shield', this, tryDmg)
+				) {
+					if (tryDmg > 0) {
+						const dmg = target.dmg(tryDmg);
+						this.trigger('hit', target, dmg);
+					}
+				}
+			}
+		}
+		this.maybeDecrStatus('frozen');
+		this.maybeDecrStatus('delayed');
+		if (this.status.get('dive')) {
+			this.setStatus('dive', 0);
+		}
+		if (~this.getIndex()) {
+			if (isCreature && this.truehp() <= 0) {
+				this.die();
+			} else {
+				this.trigger('postauto');
+				if (this.status.get('adrenaline')) {
+					if (
+						this.status.get('adrenaline') < etg.countAdrenaline(this.trueatk(0))
+					) {
+						this.incrStatus('adrenaline', 1);
+						attackAgain = true;
+					} else {
+						this.setStatus('adrenaline', 1);
+					}
+				}
+			}
+		}
+	} while (attackAgain);
 };
 
 Thing.prototype.buffhp = function (x) {

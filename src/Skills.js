@@ -458,7 +458,7 @@ const Skills = {
 	},
 	destroycard: (ctx, c, t) => {
 		if (t.type === etg.Player) {
-			t._draw();
+			t.mill(1);
 		} else if (!t.owner.getStatus('sanctuary')) {
 			t.die();
 		}
@@ -618,9 +618,7 @@ const Skills = {
 	},
 	embezzledeath: (ctx, c, t) => {
 		const { foe } = c.owner;
-		foe._draw();
-		foe._draw();
-		foe._draw();
+		foe.mill(2);
 	},
 	empathy: (ctx, c, t) => {
 		const healsum = c.owner.countcreatures();
@@ -651,8 +649,11 @@ const Skills = {
 		c.buffhp(2);
 	},
 	envenom: (ctx, c, t) => {
-		t.addactive('hit', parseSkill('poison 1'));
-		t.addactive('shield', exports.thornweak);
+		if (t.type === etg.Shield) {
+			t.addactive('shield', exports.thornweak);
+		} else {
+			t.addactive('hit', parseSkill('poison 1'));
+		}
 	},
 	epidemic: (ctx, c, t) => {
 		const poison = t.getStatus('poison');
@@ -717,9 +718,37 @@ const Skills = {
 			c.incrStatus('charges', 1);
 		}
 	}),
+	firestorm: x => {
+		const n = +x;
+		return (ctx, c, t) => {
+			t.masscc(c, (ctx, c, x) => {
+				x.setStatus('frozen', 0);
+				x.spelldmg(n);
+			});
+		};
+	},
 	flatline: (ctx, c, t) => {
 		if (!c.owner.foe.getStatus('sanctuary')) {
 			c.owner.foe.setStatus('flatline', 1);
+		}
+	},
+	floodtoll: (ctx, c, t, data) => {
+		if (c.ownerId === t.id) {
+			if (!data.floodpaid && !c.owner.spend(etg.Water, 1)) {
+				c.die();
+			}
+			data.floodpaid = true;
+		}
+		data.flood = true;
+	},
+	flooddeath: (ctx, c, t, data) => {
+		if (
+			t.type === etg.Creature &&
+			!t.getStatus('aquatic') &&
+			t.isMaterial() &&
+			t.getIndex() > 4
+		) {
+			t.die();
 		}
 	},
 	flyself: (ctx, c, t) => {
@@ -913,8 +942,8 @@ const Skills = {
 	hitownertwice: (ctx, c, t) => {
 		if (!c.hasactive('turnstart', 'predatoroff')) {
 			c.addactive('turnstart', exports.predatoroff);
-			c.attack(c.owner);
-			c.attack(c.owner);
+			c.attack({ target: c.owner });
+			c.attack({ target: c.owner });
 		}
 	},
 	holylight: (ctx, c, t) => {
@@ -987,7 +1016,7 @@ const Skills = {
 				town.drawcard();
 			}
 		}
-		c.owner._draw();
+		c.owner.mill(1);
 	},
 	integrity: (ctx, c, t) => {
 		const tally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -1202,7 +1231,9 @@ const Skills = {
 		t.setStatus('psionic', 0);
 	},
 	locket: (ctx, c, t) => {
-		c.owner.spend(c.getStatus('mode') || c.owner.mark, -1);
+		if (c.getStatus('frozen')) return;
+		const mode = c.getStatus('mode');
+		c.owner.spend(~mode ? mode : c.owner.mark, -1);
 	},
 	locketshift: (ctx, c, t) => {
 		c.setStatus('mode', t.type === etg.Player ? t.mark : t.card.element);
@@ -1267,6 +1298,9 @@ const Skills = {
 			t.transform(t.card.as(ctx.Cards.Names.GoldenRelic));
 			t.atk = t.maxhp = t.hp = 1;
 		}
+	},
+	mill: (ctx, c, t) => {
+		t.mill(1);
 	},
 	millpillar: (ctx, c, t) => {
 		if (
@@ -1508,6 +1542,19 @@ const Skills = {
 			}
 		}
 	},
+	patiencebuff: (ctx, c, t, data) => {
+		if (
+			t.type === etg.Creature &&
+			data.attackPhase &&
+			c.ownerId === t.ownerId &&
+			!c.getStatus('frozen')
+		) {
+			const floodbuff = data.flood && t.getIndex() > 4;
+			t.incrAtk(floodbuff ? 5 : t.getStatus('burrowed') ? 4 : 2);
+			t.buffhp(floodbuff ? 2 : 1);
+			data.stasis = true;
+		}
+	},
 	phoenix: (ctx, c, t, data) => {
 		if (!c.owner.creatures[data.index]) {
 			const ash = c.owner.newThing(c.card.as(ctx.Cards.Names.Ash));
@@ -1540,12 +1587,13 @@ const Skills = {
 	powerdrain: (ctx, c, t) => {
 		const ti = [];
 		for (let i = 0; i < 23; i++) {
-			if (c.owner.creatures[i]) ti.push(i);
+			const crid = c.owner.creatureIds[i];
+			if (crid) ti.push(crid);
 		}
 		if (!ti.length) return;
-		const tgt = c.owner.creatures[ctx.choose(ti)],
-			halfatk = Math.floor(t.trueatk() / 2),
-			halfhp = Math.floor(t.truehp() / 2);
+		const tgt = ctx.byId(ctx.choose(ti)),
+			halfatk = Math.ceil(t.trueatk() / 2),
+			halfhp = Math.ceil(t.truehp() / 2);
 		t.incrAtk(-halfatk);
 		t.buffhp(-halfhp);
 		tgt.incrAtk(halfatk);
@@ -1852,7 +1900,7 @@ const Skills = {
 		}
 	},
 	sing: (ctx, c, t) => {
-		t.attack(t.owner);
+		t.attack({ target: t.owner });
 	},
 	sinkhole: (ctx, c, t) => {
 		ctx.effect({ x: 'Text', text: 'Sinkhole', id: c.id });
@@ -1944,15 +1992,6 @@ const Skills = {
 			sfx.playSound('stasis');
 			attackFlags.stasis = true;
 		}
-	},
-	ownstasis: (ctx, c, t, attackFlags) => {
-		if (
-			t.type === etg.Creature &&
-			c.ownerId === t.ownerId &&
-			attackFlags.attackPhase &&
-			!attackFlags.stasis
-		)
-			attackFlags.stasis = true;
 	},
 	static: (ctx, c) => {
 		c.owner.foe.spelldmg(2);
@@ -2122,8 +2161,14 @@ const Skills = {
 		c.owner.addCrea(c);
 		c.owner.gpull = c.id;
 	},
-	unappease: (ctx, c, t) => {
-		c.setStatus('appeased', 0);
+	unappease: (ctx, c, t, flags) => {
+		if (!c.getStatus('appeased')) {
+			if (c.hasactive('cast', 'appease')) {
+				flags.target = c.owner;
+			}
+		} else {
+			c.setStatus('appeased', 0);
+		}
 	},
 	unsummon: (ctx, c, t) => {
 		if (t.owner.handIds.length < 8) {
@@ -2134,6 +2179,10 @@ const Skills = {
 		} else {
 			Skills.rewind(ctx, c, t);
 		}
+	},
+	unsummonquanta: (ctx, c, t) => {
+		c.owner.spend(t.card.costele, -t.card.cost);
+		Skills.unsummon(ctx, c, t);
 	},
 	upkeep: (ctx, c, t) => {
 		if (!c.owner.spend(c.card.element, 1)) c.die();

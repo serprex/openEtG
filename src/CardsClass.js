@@ -180,10 +180,10 @@ const TargetFilters = {
 	v_butterfly: (c, t) => t.isMaterial(etg.Creature) && t.trueatk() < 3,
 	devour: (c, t) => t.isMaterial(etg.Creature) && t.truehp() < c.truehp(),
 	paradox: (c, t) => t.isMaterial(etg.Creature) && t.truehp() < t.trueatk(),
+	notskele: (c, t) =>
+		t.type !== etg.Player && !t.card.isOf(t.owner.game.Cards.Names.Skeleton),
 	forceplay: (c, t) =>
 		t.type === etg.Spell || (t.isMaterial() && t.active.get('cast')),
-	shuffle3: (c, t) =>
-		t.isMaterial() && (t.type === etg.Creature || t.ownerId !== c.ownerId),
 	airbornecrea: (c, t) => t.isMaterial(etg.Creature) && t.getStatus('airborne'),
 	golem: (c, t) => t.type !== etg.Spell && t.getStatus('golem') && t.attack,
 	groundcrea: (c, t) => t.isMaterial(etg.Creature) && !t.getStatus('airborne'),
