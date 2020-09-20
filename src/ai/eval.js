@@ -42,7 +42,7 @@ const SkillsValues = {
 	brawl: 8,
 	brew: 4,
 	brokenmirror: c =>
-		c.owner.foe.shield && c.owner.foe.shield.getStatus('reflective') ? -3 : 2,
+		c.owner.foe.shieldId && c.owner.foe.shield.getStatus('reflective') ? -3 : 2,
 	bubbleclear: 3,
 	burrow: 1,
 	butterfly: 12,
@@ -85,8 +85,37 @@ const SkillsValues = {
 			: c.owner.foe.handIds.length === 8
 			? 0.5
 			: c.owner.foe.weapon.card.cost,
-	disfield: 8,
-	disshield: 7,
+	disfield: c => {
+		let q = 3;
+		const perms = c.owner.permanentIds;
+		for (let i = 0; i < 16; i++) {
+			if (perms[i]) {
+				const perm = c.owner.game.byId(perms[i]);
+				if (perm.card.type === etg.Pillar) {
+					q += perm.card.element === etg.Chroma ? 3 : 1;
+				}
+			}
+		}
+
+		return q;
+	},
+	disshield: c => {
+		let q = 2;
+		const perms = c.owner.permanentIds;
+		for (let i = 0; i < 16; i++) {
+			if (perms[i]) {
+				const perm = c.owner.game.byId(perms[i]);
+				if (perm.card.code === etg.PillarList[etg.Entropy]) {
+					q += 3;
+				}
+				if (perm.card.code === etg.PendList[etg.Entropy]) {
+					q += c.owner.mark === etg.Entropy ? 3 : 1.5;
+				}
+			}
+		}
+
+		return q * 0.8;
+	},
 	dive: (c, ttatk) =>
 		c.type === etg.Spell ? c.card.attack : ttatk - c.getStatus('dive') / 1.5,
 	divinity: 3,
@@ -359,7 +388,15 @@ const statusValues = {
 function getDamage(game, c) {
 	return damageHash.get(c.id) || 0;
 }
-function estimateDamage(game, c, freedomChance, wallCharges, wallIndex) {
+function estimateDamage(
+	game,
+	c,
+	freedomChance,
+	wallIndex,
+	wallCharges,
+	disShield,
+	disField,
+) {
 	if (!c || c.getStatus('frozen') || c.getStatus('delayed')) {
 		return 0;
 	}
@@ -387,6 +424,12 @@ function estimateDamage(game, c, freedomChance, wallCharges, wallIndex) {
 			if (!data.dmg) return 0;
 		} else if (wallCharges[wallIndex]) {
 			wallCharges[wallIndex]--;
+			return 0;
+		} else if (disShield[wallIndex] > 0) {
+			disShield[wallIndex] -= Math.ceil(tatk / 3);
+			return 0;
+		} else if (disField[wallIndex] > 0) {
+			disField[wallIndex] -= tatk;
 			return 0;
 		}
 		return Math.max(tatk - dr, 0);
@@ -418,7 +461,7 @@ function estimateDamage(game, c, freedomChance, wallCharges, wallIndex) {
 	damageHash.set(c.id, atk);
 	return atk;
 }
-function calcExpectedDamage(pl, wallCharges, wallIndex) {
+function calcExpectedDamage(pl, wallIndex, wallCharges, disShield, disField) {
 	let totalDamage = 0,
 		stasisFlag = false,
 		freedomChance = 0;
@@ -452,8 +495,10 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 					pl.game,
 					c,
 					freedomChance,
-					wallCharges,
 					wallIndex,
+					wallCharges,
+					disShield,
+					disField,
 				);
 				if (
 					!(
@@ -468,7 +513,15 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 	}
 	return (
 		totalDamage +
-		estimateDamage(pl.game, pl.weapon, freedomChance, wallCharges, wallIndex) +
+		estimateDamage(
+			pl.game,
+			pl.weapon,
+			freedomChance,
+			wallIndex,
+			wallCharges,
+			disShield,
+			disField,
+		) +
 		pl.foe.getStatus('poison')
 	);
 }
@@ -696,21 +749,37 @@ export default function (game) {
 	if (foe.deckIds.length === 0 && foe.handIds.length < 8) {
 		return 99999990;
 	}
-	const wallCharges = new Int32Array(game.players.length);
+	const wallCharges = new Int32Array(game.players.length),
+		disShield = new Int32Array(game.players.length),
+		disField = new Int32Array(game.players.length);
 	damageHash.clear();
 	uniquesSkill.clear();
 	const expectedDamage = new Map();
 	for (let j = 0; j < game.players.length; j++) {
 		const pl = game.byId(game.players[(playerIdx + j) % game.players.length]);
-		if (pl.shieldId && pl.shield.hasactive('shield', 'blockwithcharge')) {
-			wallCharges[j] = pl.shield.getStatus('charges');
+		if (pl.shieldId) {
+			if (pl.shield.hasactive('shield', 'blockwithcharge')) {
+				wallCharges[j] = pl.shield.getStatus('charges');
+			} else if (pl.shield.hasactive('shield', 'disshield')) {
+				disShield[j] = pl.quanta[etg.Entropy];
+			} else if (pl.shield.hasactive('shield', 'disfield')) {
+				let q = 0;
+				for (let i = 1; i < 13; i++) q += pl.quanta[i];
+				disField[j] = q;
+			}
 		}
 	}
 	for (let j = 0; j < game.players.length; j++) {
 		const pl = game.byId(game.players[(playerIdx + j) % game.players.length]);
 		expectedDamage.set(
 			pl.id,
-			calcExpectedDamage(pl, wallCharges, pl.foe.getIndex()),
+			calcExpectedDamage(
+				pl,
+				pl.foe.getIndex(),
+				wallCharges,
+				disShield,
+				disField,
+			),
 		);
 	}
 	if (expectedDamage.get(player.id) > foe.hp) {
