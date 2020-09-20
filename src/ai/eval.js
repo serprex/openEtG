@@ -181,7 +181,7 @@ const SkillsValues = {
 	'growth 2 0': 3,
 	'growth 2 -1': c => 2 + c.truehp(),
 	'growth 3 -1': c => 4 + c.truehp(),
-	guard: 4,
+	guard: (c, ttatk) => 4 + ttatk + c.getStatus('airborne'),
 	halveatk: c => {
 		let atk;
 		return c.type === etg.Spell
