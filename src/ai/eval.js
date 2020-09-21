@@ -479,7 +479,7 @@ function calcExpectedDamage(pl, wallIndex, wallCharges, disShield, disField) {
 		if ((p = plpermanents[i])) {
 			if (
 				!stasisFlag &&
-				(p.hasactive('attack', 'stasis') || p.getStatus('patience'))
+				(p.hasactive('attack', 'stasis') || p.hasactive('attack', 'patience'))
 			) {
 				stasisFlag = true;
 			} else if (p.hasactive('attack', 'freedom')) {
@@ -556,17 +556,28 @@ function checkpassives(c) {
 		if (
 			val &&
 			uniqueStatuses.has(status) &&
-			c.type === etg.Spell &&
+			c.type !== etg.Spell &&
 			!(
 				status === 'cloak' &&
 				!c.getStatus('charges') &&
 				c.ownerId === c.game.turn
 			)
 		) {
-			if (!uniquesSkill.has(status)) {
-				uniquesSkill.add(status);
-			} else {
+			if (uniquesSkill.has(status)) {
 				continue;
+			}
+			uniquesSkill.add(status);
+		}
+		const sval = statusValues[status];
+		score += !sval ? 0 : sval instanceof Function ? sval(c) : sval;
+	}
+	for (const [status, type] of uniqueSkills) {
+		if (c.hasactive(type, status)) {
+			if (c.type !== etg.Spell) {
+				if (uniquesSkill.has(status)) {
+					continue;
+				}
+				uniquesSkill.add(status);
 			}
 		}
 		const sval = statusValues[status];
@@ -736,14 +747,12 @@ function caneventuallyactive(element, cost, pl) {
 	);
 }
 
-const uniqueStatuses = new Set([
-	'flooding',
-	'nightfall',
-	'tunnel',
-	'patience',
-	'cloak',
-]);
-const uniquesSkill = new Set(),
+const uniqueStatuses = new Set(['nightfall', 'tunnel', 'cloak']),
+	uniqueSkills = new Map([
+		['flooddeath', 'attack'],
+		['patience', 'attack'],
+	]),
+	uniquesSkill = new Set(),
 	damageHash = new Map();
 
 export default function (game) {
@@ -798,9 +807,10 @@ export default function (game) {
 	let floodingFlag = false;
 	for (let j = 0; j < game.players.length; j++) {
 		const pl = game.byId(game.players[(playerIdx + j) % game.players.length]),
-			perms = pl.permanentIds;
+			perms = pl.permanents;
 		for (let i = 0; i < 16; i++) {
-			if (perms[i] && game.getStatus(perms[i], 'flooding')) {
+			const perm = perms[i];
+			if (perm && perm.hasactive('attack', 'flooddeath')) {
 				floodingFlag = true;
 				break;
 			}

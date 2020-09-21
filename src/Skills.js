@@ -1542,7 +1542,7 @@ const Skills = {
 			}
 		}
 	},
-	patiencebuff: (ctx, c, t, data) => {
+	patience: (ctx, c, t, data) => {
 		if (
 			t.type === etg.Creature &&
 			data.attackPhase &&

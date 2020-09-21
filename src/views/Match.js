@@ -1501,10 +1501,12 @@ export default connect(({ user, opts }) => ({
 					}
 				}
 				for (let i = 0; i < 16; i++) {
-					const pr = pl.permanentIds[i];
-					if (pr && game.getStatus(pr, 'flooding')) floodvisible = true;
-					if (pr && !(j === 1 && cloaked && !game.getStatus(pr, 'cloak'))) {
-						things.push(pr);
+					const pr = pl.permanents[i];
+					if (pr) {
+						if (pr.hasactive('attack', 'flooddeath')) floodvisible = true;
+						if (j === 0 || !cloaked || pr.getStatus('cloak')) {
+							things.push(pr.id);
+						}
 					}
 				}
 				const wp = pl.weaponId,

@@ -214,6 +214,8 @@ const data = {
 		`Deal ${x} spell damage to all of target player\'s creatures, thawing them. Removes cloak.`,
 	firewall: 'Deals 1 damage to each non-ranged attacking creature.',
 	flatline: 'Opponent cannot gain quanta through the end of their next turn.',
+	flooddeath:
+		"Each player's non-aquatic creatures past their first five creature slots die at the end of that player's turn. Consumes 1:7 each turn. Does not stack.",
 	flyself:
 		'If this card is equipped as a weapon, it casts Flying Weapon on itself. If this card is a creature, it casts Living Weapon on itself.',
 	flyingweapon:
@@ -325,7 +327,7 @@ const data = {
 			: 'Expires at end of turn';
 	},
 	luciferin:
-		'Your creatures without skills gain "Produces 1:8 when it attacks."\nHeal yourself 10.',
+		'Your creatures without skills gain "Produces 1:8 when it attacks."\nHeal yourself 10.\nRemoves cloak.',
 	lycanthropy: 'Remove this ability and gain 5|5 and become nocturnal.',
 	martyr: 'Gains 1|0 for every point of damage this card receives.',
 	mend: 'Heal target creature 10.',
@@ -388,6 +390,8 @@ const data = {
 		'Inflict a random effect on every card in play or any hand. All existing effects are possible. Removes cloak.',
 	paradox: 'Target creature with more strength than HP dies.',
 	parallel: 'Summon an exact copy of target creature on your side.',
+	patience:
+		"If it isn't frozen, prevents your creatures from attacking at the end of your turn, instead they gain 2|1. If they are burrowed, they instead gain 4|1. If they are affected by Flooding, they instead gain 5|2. Does not stack.",
 	phoenix: [
 		'When this creature dies, transform it into an Ash.',
 		'When this creature dies, transform it into a Minor Ash.',
@@ -649,14 +653,10 @@ const statusData = {
 			: `Enters play with ${c.getStatus('charges')} ${
 					c.getStatus('stackable') ? 'stacks' : 'charges'
 			  }`,
-	flooding:
-		"Each player's non-aquatic creatures past their first five creature slots die at the end of that player's turn. Consumes 1:7 each turn. Does not stack.",
 	mode: '',
 	nightfall: auraText('Nocturnal creatures', '1|1', '2|1'),
 	nothrottle:
 		'If any of your creatures have abilities with Throttled, those abilities lose Throttled.',
-	patience:
-		"If it isn't frozen, prevents your creatures from attacking at the end of your turn, instead they gain 2|1. If they are burrowed, they instead gain 4|1. If they are affected by Flooding, they instead gain 5|2. Does not stack.",
 	poison: (c, inst) =>
 		c == inst
 			? `Enters play with ${c.getStatus('poison')} poison counters.`
