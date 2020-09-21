@@ -451,8 +451,6 @@ const data = {
 		}.`,
 	readiness:
 		"Target creature's active ability becomes free. If target creature's active ability has already been used this turn, it can be used again this turn.",
-	readyequip:
-		'All weapons and shields can use their active abilities the same turn they come into play.',
 	reap:
 		"Target non-Skeleton creature dies and is replaced with a Skeleton with target creature's current strength and HP, but no other active abilities or statuses.",
 	rebirth: c =>

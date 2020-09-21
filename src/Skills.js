@@ -1681,11 +1681,6 @@ const Skills = {
 			t.usedactive = false;
 		}
 	},
-	readyequip: (ctx, c, t) => {
-		if (t.type === etg.Weapon || t.type === etg.Shield) {
-			t.usedactive = false;
-		}
-	},
 	reap: (ctx, c, t) => {
 		const atk = t.trueatk(),
 			hp = t.truehp(),
