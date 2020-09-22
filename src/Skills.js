@@ -1097,15 +1097,13 @@ const Skills = {
 			lobotomize: 2,
 			quint: 2,
 		};
-		let stat = c.card.upped ? 0.5 : 0,
+		let stat = 1,
 			handIds = c.owner.handIds;
 		for (let i = handIds.length - 1; ~i; i--) {
 			const card = ctx.get(handIds[i]).get('card');
 			if (etg.ShardList.some(x => x && card.isOf(ctx.Cards.Codes[x]))) {
-				if (card.upped) {
-					stat += 0.5;
-				}
 				tally[card.element]++;
+				stat += card.upped ? 2 : 1.5;
 				handIds.splice(i, 1);
 			}
 		}
@@ -1113,7 +1111,6 @@ const Skills = {
 		let num = 0,
 			shlist = [];
 		for (let i = 1; i < 13; i++) {
-			stat += tally[i] * 2;
 			if (tally[i] > num) {
 				num = tally[i];
 				shlist.length = 0;
@@ -1188,9 +1185,6 @@ const Skills = {
 				}
 			}
 		});
-		if (tally[etg.Death] > 0) {
-			addSkill('hit', 'poison ' + tally[etg.Death]);
-		}
 		ctx.set(c.ownerId, 'shardgolem', new imm.Map(shardgolem));
 		c.owner.addCrea(
 			c.owner.newThing(c.card.as(ctx.Cards.Names.ShardGolem)),
