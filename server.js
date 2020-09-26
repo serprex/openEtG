@@ -184,7 +184,7 @@ const sockmeta = new WeakMap();
 					}
 				}
 				return db
-					.pipeline()
+					.multi()
 					.hmset(au, {
 						day: today,
 						deck: data.d,
@@ -370,7 +370,6 @@ const sockmeta = new WeakMap();
 		foewant(data, user, thismeta) {
 			const { u, f } = data;
 			if (u === f) return;
-			console.log(`${u} requesting ${f}`);
 			const deck = user.decks[user.selectedDeck];
 			if (!deck) return;
 			thismeta.deck = deck;
@@ -495,7 +494,6 @@ const sockmeta = new WeakMap();
 			if (u === f) {
 				return;
 			}
-			console.log(`${u} requesting ${f}`);
 			const foesock = Us.socks.get(f);
 			if (foesock && foesock.readyState === 1) {
 				thismeta.trade = { foe: f };
@@ -1230,10 +1228,10 @@ const sockmeta = new WeakMap();
 					const { match } = hostinfo,
 						{ name } = info;
 					if (match && name) {
-						match.room.delete(user.name);
+						match.room.delete(name);
 						for (const u of match.room) {
 							const s = Us.socks.get(u);
-							sockEmit(s, 'foeleft', { name: user.name });
+							sockEmit(s, 'foeleft', { name });
 						}
 					}
 				}

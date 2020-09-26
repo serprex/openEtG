@@ -209,10 +209,10 @@ const sockEvents = {
 	},
 };
 socket.onmessage = function (msg) {
-	const state = store.store.getState();
 	const data = JSON.parse(msg.data);
 	if (data.u && state.muted.has(data.u)) return;
-	const func = sockEvents[data.x] || state.cmds[data.x];
+	const state = store.store.getState(),
+		func = sockEvents[data.x] || state.cmds[data.x];
 	if (func) func.call(this, data);
 };
 socket.onopen = function () {

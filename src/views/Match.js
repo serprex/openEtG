@@ -1844,7 +1844,13 @@ export default connect(({ user, opts }) => ({
 						)}
 					<input
 						type="button"
-						value={this.state.resigning ? 'Confirm' : 'Resign'}
+						value={
+							props.replay
+								? 'Exit'
+								: this.state.resigning
+								? 'Confirm'
+								: 'Resign'
+						}
 						onClick={this.resignClick}
 						style={{
 							position: 'absolute',
