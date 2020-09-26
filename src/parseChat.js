@@ -64,8 +64,6 @@ export default function parseChat(e) {
 			}
 		} else if (msg === '/vanilla') {
 			store.store.dispatch(store.doNav(import('./vanilla/views/Editor.js')));
-		} else if (msg === '/importaccount') {
-			store.store.dispatch(store.doNav(import('./views/ImportAccount.js')));
 		} else if (msg.match(/^\/roll( |$)\d*d?\d*$/)) {
 			const data = { u: user ? user.name : '' };
 			const ndn = msg.slice(6).split('d');

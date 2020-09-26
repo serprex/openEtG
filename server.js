@@ -6,8 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 process.chdir(__dirname);
 
-import fsCb from 'fs';
-const fs = fsCb.promises;
+import fs from 'fs/promises';
 
 import crypto from 'crypto';
 import http from 'http';
@@ -27,12 +26,10 @@ import * as Bz from './src/srv/Bz.js';
 import starter from './src/srv/starter.json';
 import forkcore from './src/srv/forkcore.js';
 import login from './src/srv/login.js';
-import Lock from './src/srv/Lock.js';
 import config from './config.json';
 
 const MAX_INT = 0x100000000;
 const sockmeta = new WeakMap();
-const importlocks = new Map();
 (async () => {
 	const [keypem, certpem] = config.certs
 		? await Promise.all([
@@ -510,125 +507,6 @@ const importlocks = new Map();
 					sockEmit(foesock, 'challenge', { f: u });
 				}
 			}
-		},
-		importoriginal(data, user) {
-			if (user.origName && user.origName !== data.name) {
-				sockEmit(this, 'chat', {
-					msg: `Your account is already bound to ${user.origName}`,
-					mode: 1,
-				});
-				return;
-			}
-			const reqdata = `user=${encodeURIComponent(
-				data.name,
-			)}&psw=${encodeURIComponent(data.pass)}&errorcode=%2D1`;
-			const req = http
-				.request(
-					'http://www.elementsthegame.com/testo5.php',
-					{
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/x-www-form-urlencoded',
-							'Content-Length': reqdata.length,
-							Origin: 'http://elementsthegame.com',
-							Referrer: 'http://elementsthegame.com/elt1327.swf',
-						},
-					},
-					res => {
-						const chunks = [];
-						res.on('error', e => console.error(e.message));
-						res.on('data', chunk => chunks.push(chunk));
-						res.on('end', () => {
-							const opts = qs.parse(Buffer.concat(chunks).toString());
-							if (!opts || !opts.decka) {
-								sockEmit(this, 'chat', {
-									msg: `Failed to load cardpool. Error code: ${
-										opts && opts.error
-									}`,
-									mode: 1,
-								});
-								return;
-							}
-							const { decka } = opts;
-							let tobound = '',
-								topool = '';
-							for (let i = 1; i < decka.length; i += 7) {
-								const code = parseInt(decka.substring(i, i + 4), 10) + 5000,
-									count = parseInt(decka.substring(i + 4, i + 7), 10),
-									card = Cards.Codes[code];
-								if (card) {
-									if (~etg.NymphList.indexOf(etgutil.asUpped(code, false))) {
-										tobound +=
-											etgutil.encodeCount(count) +
-											etgutil.encodeCode(etgutil.asShiny(code, true));
-									}
-									if (card.rarity === -1) {
-										topool +=
-											etgutil.encodeCount(count) + etgutil.encodeCode(code);
-									}
-								}
-							}
-							let lock = importlocks.get(data.name);
-							if (!lock) {
-								lock = new Lock();
-								importlocks.set(data.name, lock);
-							}
-							lock
-								.exec(async () => {
-									const oldimport = await db.hget('ImportOriginal', data.name),
-										impdata = sutil.parseJSON(oldimport) || {};
-									let newbound, newpool;
-									if (impdata.name && impdata.name !== user.name) {
-										sockEmit(this, 'chat', {
-											msg: `${data.name} is bound to ${impdata.name}`,
-											mode: 1,
-										});
-										return;
-									} else {
-										newbound = etgutil.removedecks(
-											tobound,
-											impdata.bound || '',
-										);
-										newpool = etgutil.removedecks(topool, impdata.pool || '');
-									}
-									if (false) {
-										user.origName = data.name;
-										user.pool = etgutil.mergedecks(user.pool, newpool);
-										user.accountbound = etgutil.mergedecks(
-											user.accountbound,
-											newbound,
-										);
-										sockEmit(this, 'addpools', {
-											c: newpool,
-											b: newbound,
-											msg: `Imported ${newpool}${newbound}`,
-										});
-										return db.hset(
-											'ImportOriginal',
-											data.name,
-											JSON.stringify({
-												name: user.name,
-												bound: newbound,
-												pool: newpool,
-											}),
-										);
-									} else {
-										sockEmit(this, 'chat', {
-											msg: `Feature in development. Would import: ${newpool} ${newbound}`,
-											mode: 1,
-										});
-									}
-								})
-								.then(() => lock.q.size || importlocks.delete(data.name));
-						});
-					},
-				)
-				.on('error', err => {
-					console.error(err);
-					sockEmit(this, 'chat', { msg: err.message, mode: 1 });
-				});
-			req.write(reqdata);
-			req.end();
 		},
 		passchange(data, user) {
 			user.salt = '';
