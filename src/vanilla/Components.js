@@ -98,37 +98,41 @@ export function Card(props) {
 export function DeckDisplay(props) {
 	let mark = -1,
 		j = -1;
+	const children = [];
+	for (let i = 0; i < props.deck.length; i++) {
+		const code = props.deck[i],
+			card = Cards.Codes[code];
+		if (card) {
+			j++;
+			children.push(
+				<CardImage
+					key={j}
+					card={card}
+					onMouseOver={props.onMouseOver && (() => props.onMouseOver(i, code))}
+					onClick={props.onClick && (() => props.onClick(i, code))}
+					style={{
+						position: 'absolute',
+						left: `${(props.x || 0) + 100 + Math.floor(j / 10) * 99}px`,
+						top: `${(props.y || 0) + 32 + (j % 10) * 19}px`,
+					}}
+				/>,
+			);
+		} else {
+			const ismark = etgutil.fromTrueMark(code);
+			if (~ismark) mark = ismark;
+		}
+	}
 	return (
 		<>
-			{props.deck.map((code, i) => {
-				const card = Cards.Codes[code];
-				if (card) {
-					j++;
-					return (
-						<CardImage
-							key={j}
-							card={card}
-							onMouseOver={
-								props.onMouseOver && (() => props.onMouseOver(i, code))
-							}
-							onClick={props.onClick && (() => props.onClick(i, code))}
-							x={(props.x || 0) + 100 + Math.floor(j / 10) * 99}
-							y={(props.y || 0) + 32 + (j % 10) * 19}
-						/>
-					);
-				} else {
-					const ismark = etgutil.fromTrueMark(code);
-					if (~ismark) mark = ismark;
-				}
-			})}
-			{!!(~mark && props.renderMark) && (
+			{children}
+			{mark !== -1 && props.renderMark && (
 				<span
 					key={children.length}
 					className={'ico e' + mark}
 					style={{
 						position: 'absolute',
 						left: (props.x || 0) + 66 + 'px',
-						top: (props.y || 0) + 200 + 'px',
+						top: (props.y || 0) + 188 + 'px',
 					}}
 				/>
 			)}
@@ -174,8 +178,12 @@ function CardSelectorColumn(props) {
 			code = card.code;
 		children.push(
 			<CardImage
-				x={props.x}
-				y={y}
+				key={code}
+				style={{
+					position: 'absolute',
+					left: `${props.x}px`,
+					top: `${y}px`,
+				}}
 				card={card}
 				onClick={props.onClick && (() => props.onClick(maybeShiny(code)))}
 				onContextMenu={
