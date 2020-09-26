@@ -314,6 +314,10 @@ class ThingInst extends React.Component {
 		};
 	}
 
+	setInfo = e => this.props.setInfo(e, this.props.obj, this.props.pos.x);
+
+	onClick = () => this.props.onClick(props.obj);
+
 	static getDerivedStateFromProps(props, state) {
 		const { game, obj, p1id } = props,
 			gameProps = game.props;
@@ -498,7 +502,7 @@ class ThingInst extends React.Component {
 
 	render() {
 		const { props } = this,
-			{ game, obj, p1id, pos } = props,
+			{ game, obj, p1id, pos, setInfo } = props,
 			isSpell = obj.type === etg.Spell,
 			{ faceDown } = this.state;
 
@@ -518,13 +522,10 @@ class ThingInst extends React.Component {
 						!faceDown && !isSpell && obj.getStatus('cloak') ? '2' : undefined,
 					pointerEvents: ~obj.getIndex() ? undefined : 'none',
 				}}
-				onMouseOver={
-					!faceDown && props.setInfo
-						? e => props.setInfo(e, obj, pos.x)
-						: undefined
-				}
+				onMouseMove={!faceDown && setInfo ? this.setInfo : undefined}
+				onMouseOver={!faceDown && setInfo ? this.setInfo : undefined}
 				onMouseLeave={props.onMouseOut}
-				onClick={() => props.onClick(obj)}>
+				onClick={this.onClick}>
 				{this.state.instdom}
 			</div>
 		);
@@ -1440,6 +1441,7 @@ export default connect(({ user, opts }) => ({
 						}}
 						onClick={() => this.thingClick(pl)}
 						onMouseOver={e => this.setInfo(e, pl)}
+						onMouseMove={e => this.setInfo(e, pl)}
 					/>,
 					<span
 						className={'ico e' + pl.mark}

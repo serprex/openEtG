@@ -14,6 +14,7 @@ import * as sfx from './audio.js';
 import Skills from './Skills.js';
 import skillText from './skillText.js';
 import parseSkill from './parseSkill.js';
+import Card from './Card.js';
 
 const passives = new Set([
 	'airborne',
@@ -270,7 +271,7 @@ Thing.prototype.calcBonusHp = function () {
 };
 Thing.prototype.info = function () {
 	const info =
-		this.type === etg.Creature
+		!(this instanceof Card) || this.type === etg.Creature
 			? `${this.trueatk()}|${this.truehp()}/${this.maxhp}`
 			: this.type === etg.Weapon
 			? this.trueatk().toString()
