@@ -138,6 +138,17 @@ M.test('Boneyard', function () {
 		'Skeleton',
 	);
 });
+M.test('Bounce', function () {
+	const photon = this.player1.newThing(Cards.Names.Photon);
+	this.player1.addCrea(photon);
+	this.cast('acceleration', photon, photon);
+	this.cast('ren', photon, photon);
+	photon.attack();
+	assert.equal(this.player1.handIds[this.player1.hand.length - 1], photon.id);
+	assert.equal(photon.atk, 3);
+	assert.equal(photon.hp, 0);
+	assert.equal(photon.maxhp, 0);
+});
 M.test('Deckout', function () {
 	this.player2.deckIds = [];
 	this.player1.endturn();

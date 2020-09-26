@@ -529,7 +529,6 @@ Thing.prototype.attackCreature = function (target, trueatk) {
 };
 Thing.prototype.attack = function (data) {
 	let attackAgain;
-	const isCreature = this.type === etg.Creature;
 	do {
 		attackAgain = false;
 		const flags = {
@@ -538,7 +537,7 @@ Thing.prototype.attack = function (data) {
 			target: this.owner.foe,
 			...data,
 		};
-		if (isCreature) {
+		if (this.type === etg.Creature) {
 			this.dmg(this.getStatus('poison'), true);
 		}
 		const frozen = this.status.get('frozen');
@@ -589,7 +588,7 @@ Thing.prototype.attack = function (data) {
 		this.maybeDecrStatus('delayed');
 		this.setStatus('dive', 0);
 		if (~this.getIndex()) {
-			if (isCreature && this.truehp() <= 0) {
+			if (this.type === etg.Creature && this.truehp() <= 0) {
 				this.die();
 			} else {
 				if (!frozen) this.trigger('postauto');
@@ -608,9 +607,9 @@ Thing.prototype.attack = function (data) {
 };
 Thing.prototype.v_attack = function (stasis, freedomChance) {
 	let attackAgain;
+	const isCreature = this.type === etg.Creature;
 	do {
 		attackAgain = false;
-		const isCreature = this.type === etg.Creature;
 		if (isCreature) {
 			this.dmg(this.getStatus('poison'), true);
 		}
