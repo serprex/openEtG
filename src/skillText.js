@@ -556,7 +556,7 @@ const data = {
 		'Target weapon gains 5 strength. If target weapon is frozen, it loses frozen status.',
 	],
 	tesseractsummon:
-		'Summon 2 random creatures from your deck. Opponent summons 1 random creature from their deck. Freeze these creatures for a number of turns equal to \u00bcÂ¼ of their quanta cost, rounded up.',
+		'Summon 2 random creatures from your deck. Opponent summons 1 random creature from their deck. Freeze these creatures for a number of turns equal to \u00bc of their quanta cost, rounded up.',
 	thorn: '75% chance to give non-ranged attackers 1 poison counter.',
 	thornweak: '25% chance to give non-ranged attackers 1 poison counter.',
 	throwrock: [
