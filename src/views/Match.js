@@ -316,7 +316,7 @@ class ThingInst extends React.Component {
 
 	setInfo = e => this.props.setInfo(e, this.props.obj, this.props.pos.x);
 
-	onClick = () => this.props.onClick(props.obj);
+	onClick = () => this.props.onClick(this.props.obj);
 
 	static getDerivedStateFromProps(props, state) {
 		const { game, obj, p1id } = props,
