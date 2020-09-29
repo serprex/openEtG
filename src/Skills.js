@@ -1538,7 +1538,7 @@ const Skills = {
 	},
 	patience: (ctx, c, t, data) => {
 		if (
-			data.patience !== t.id &&
+			!data.patience &&
 			t.type === etg.Creature &&
 			data.attackPhase &&
 			c.ownerId === t.ownerId &&
@@ -1548,7 +1548,7 @@ const Skills = {
 			t.incrAtk(floodbuff ? 5 : t.getStatus('burrowed') ? 4 : 2);
 			t.buffhp(floodbuff ? 2 : 1);
 			data.stasis = true;
-			data.patience = t.id;
+			data.patience = true;
 		}
 	},
 	phoenix: (ctx, c, t, data) => {
