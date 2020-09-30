@@ -405,7 +405,7 @@ export default connect(({ user }) => ({ user }))(
 							this.state.player1.maxhp,
 							(state.goldreward | 0) - (game.data.cost | 0),
 							state.cardreward || '-',
-							userutil.calcWealth(this.state.cardreward),
+							userutil.calcWealth(state.cardreward),
 							!this.props.user || level === undefined
 								? -1
 								: this.props.user.streak[level],
