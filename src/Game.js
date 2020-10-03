@@ -113,7 +113,7 @@ Game.prototype.choose = function (x) {
 };
 Game.prototype.randomcard = function (upped, filter) {
 	const keys = this.Cards.filter(upped, filter);
-	return keys && keys.length && this.choose(keys);
+	return keys && this.choose(keys);
 };
 Game.prototype.shuffle = function (array) {
 	let counter = array.length;

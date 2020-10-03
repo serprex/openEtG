@@ -138,13 +138,13 @@ export default class AiSearch {
 							[wc, v] = getWorstCard(gameClone, playerClone);
 						}
 						if (v > currentEval || (v === currentEval && n > this.cdepth)) {
-							this.cmdct = cmdct0 || { c: c.id, t: t && t.id };
+							this.cmdct = cmdct0 || { c: c.id, t: t?.id };
 							this.worstcard = wc;
 							this.cdepth = n;
 							currentEval = v;
 						}
 						if (n && currentEval - v < 24) {
-							iterLoop(gameClone, 0, { c: c.id, t: t && t.id }, new Set());
+							iterLoop(gameClone, 0, { c: c.id, t: t?.id }, new Set());
 						}
 					}
 				};

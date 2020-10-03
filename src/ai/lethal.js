@@ -22,7 +22,7 @@ export default function lethal(game) {
 							? 999
 							: gameClone.byId(foe.id).hp;
 					if (v < currentEval) {
-						cmdct = cmdct0 || { c: c.id, t: t && t.id };
+						cmdct = cmdct0 || { c: c.id, t: t?.id };
 						currentEval = v;
 						if (!gameClone.winner) {
 							iterLoop(gameClone, cmdct);

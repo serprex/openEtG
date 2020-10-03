@@ -578,7 +578,7 @@ export default connect(({ user, opts }) => ({
 						}}>
 						Warning: Lobby feature is still in development
 					</div>
-					{mydata && mydata.deck && 'You have been assigned a deck'}
+					{mydata?.deck && 'You have been assigned a deck'}
 					<input
 						value={this.state.mydeck}
 						onChange={e => this.setState({ mydeck: e.target.value })}

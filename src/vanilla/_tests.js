@@ -212,7 +212,7 @@ M.test('Earthquake', function () {
 	}
 	assert.equal(this.player1.hand.length, 3, 'handlength');
 	const pillars = this.player1.permanents[0];
-	assert.ok(pillars && pillars.card.type === etg.Pillar, 'ispillar');
+	assert.ok(pillars?.card?.type === etg.Pillar, 'ispillar');
 	assert.equal(pillars.status.get('charges'), 5, '5 charges');
 	this.cast('v_earthquake', this.player2, pillars);
 	assert.equal(pillars.status.get('charges'), 2, '2 charges');

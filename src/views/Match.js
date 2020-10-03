@@ -1716,7 +1716,7 @@ export default connect(({ user, opts }) => ({
 								pos = this.idtrack.get(startpos);
 							}
 							if (!startpos || !pos) {
-								pos = { x: item.style.x.val ?? 0, y: item.style.y.val ?? 0 };
+								pos = { x: item.style.x?.val ?? 0, y: item.style.y?.val ?? 0 };
 							}
 
 							return {

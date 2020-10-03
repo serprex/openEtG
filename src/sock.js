@@ -247,7 +247,7 @@ socket.onclose = function () {
 };
 export function emit(data) {
 	const msg = JSON.stringify(data);
-	if (socket && socket.readyState == 1) {
+	if (socket?.readyState === 1) {
 		socket.send(msg);
 	} else {
 		buffer.push(msg);
