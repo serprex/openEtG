@@ -52,7 +52,10 @@ class CacheEntry {
 						'Content-Encoding': encoding,
 					},
 					date: data.date,
-					buf: await encode[encoding](data.buf),
+					buf: await encode[encoding](
+						data.buf,
+						data.head['Cache-Control'] === 'no-store',
+					),
 				});
 			}
 		}
@@ -60,13 +63,19 @@ class CacheEntry {
 }
 async function respond(url, res, datathunk, ifmod) {
 	try {
-		const data = await datathunk;
+		const data = await datathunk,
+			cacheControl = data.head['Cache-Control'];
+		if (cacheControl === 'no-store') {
+			cache.delete(url);
+		}
 		if (data.date.getTime() <= ifmod) {
 			res.writeHead(304);
 		} else {
 			data.head['Last-Modified'] = data.date.toUTCString();
 			data.head['Date'] = new Date().toUTCString();
-			data.head['Cache-Control'] = 'no-cache';
+			if (cacheControl === undefined) {
+				data.head['Cache-Control'] = 'no-cache';
+			}
 			res.writeHead(data.status ?? '200', data.head);
 			res.write(data.buf);
 		}

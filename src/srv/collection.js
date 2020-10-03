@@ -29,7 +29,7 @@ export default async function (url, stime) {
 		}
 	});
 	return {
-		head: { 'Content-Type': 'text/plain' },
+		head: { 'Content-Type': 'text/plain', 'Cache-Control': 'no-store' },
 		date: new Date(),
 		buf: result.join('\n'),
 	};

@@ -35,12 +35,7 @@ async function forkcorelogic(req, res) {
 	if (await cache._try(acceptedEncodings, res, url, ifmod)) return;
 	const idx = url.indexOf('/'),
 		func = ~idx && lut[url.slice(0, idx)];
-	if (func === lut.collection) {
-		const data = func(url.slice(idx + 1), acceptedEncodings, 0);
-		data.head['Cache-Control'] = 'no-store';
-		res.writeHead(data.status ?? '200', data.head);
-		res.write(data.buf);
-	} else if (func) {
+	if (func) {
 		await cache.add(
 			res,
 			url,
