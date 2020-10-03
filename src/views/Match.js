@@ -541,12 +541,14 @@ function addNoHealData(game, newdata) {
 	if (dataNext.noheal) {
 		for (let gi = 0; gi < game.data.players.length; gi++) {
 			const { user } = game.data.players[gi];
-			for (let i = 0; i < newdata.players.length; i++) {
-				const pldata = newdata.players[i];
-				if (pldata.user === user) {
-					const pl = game.byId(game.players[gi]);
-					pldata.hp = Math.max(pl.hp, 1);
-					pldata.maxhp = pl.maxhp;
+			if (user) {
+				for (let i = 0; i < newdata.players.length; i++) {
+					const pldata = newdata.players[i];
+					if (pldata.user === user) {
+						const pl = game.byId(game.players[gi]);
+						pldata.hp = Math.max(pl.hp, 1);
+						pldata.maxhp = pl.maxhp;
+					}
 				}
 			}
 		}

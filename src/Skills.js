@@ -646,7 +646,7 @@ const Skills = {
 			c.cast = t.cast;
 			c.castele = t.castele;
 		}
-		c.incrAtk(t.trueatk());
+		c.incrAtk(t.trueatk() - t.trigger('buff'));
 		c.buffhp(2);
 	},
 	envenom: (ctx, c, t) => {

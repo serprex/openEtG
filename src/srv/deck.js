@@ -1,8 +1,22 @@
-import gzip from './gzip.js';
 import * as svg from '../svg.js';
 
-const deckhtml = gzip(
-		`<!DOCTYPE html>
+const start = new Date();
+export default async function (url, stime) {
+	const deck = url.replace(/\.svg$/, '');
+	if (url.endsWith('.svg')) {
+		if (deck.length % 5) {
+			throw new Error('Unaligned deck');
+		}
+		return {
+			head: { 'Content-Type': 'image/svg+xml' },
+			date: stime,
+			buf: svg.deck(deck),
+		};
+	} else {
+		return {
+			head: { 'Content-Type': 'text/html' },
+			date: start,
+			buf: `<!DOCTYPE html>
 <title>openEtG deck</title>
 <meta charset="UTF-8">
 <link href="/forum/Smileys/default/time.png" rel="shortcut icon">
@@ -10,28 +24,6 @@ const deckhtml = gzip(
 <link href="/assets/atlas.css" rel="stylesheet">
 <div id="deck"></div>
 <script src="/bundle/deck.js"></script>`,
-		{ level: 9 },
-	),
-	start = new Date();
-export default async function (url, stime) {
-	const deck = url.replace(/\.svg$/, '');
-	if (url.endsWith('.svg')) {
-		if (deck.length % 5) {
-			throw 'Unaligned deck';
-		}
-		return {
-			buf: await gzip(svg.deck(deck), { level: 9 }),
-			head: {
-				'Content-Encoding': 'gzip',
-				'Content-Type': 'image/svg+xml',
-			},
-			date: stime,
-		};
-	} else {
-		return {
-			buf: await deckhtml,
-			head: { 'Content-Encoding': 'gzip', 'Content-Type': 'text/html' },
-			date: start,
 		};
 	}
 }

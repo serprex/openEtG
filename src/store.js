@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import * as redux from 'redux';
+import { createStore, applyMiddleware } from 'redux';
 
 import * as usercmd from './usercmd.js';
 import * as sfx from './audio.js';
@@ -79,7 +79,7 @@ export function updateOrig(data) {
 	return { type: 'ORIG_UPDATE', data };
 }
 
-export const store = redux.createStore(
+export const store = createStore(
 	(state, action) => {
 		switch (action.type) {
 			case 'NAV':
@@ -144,9 +144,7 @@ export const store = redux.createStore(
 			case 'CHAT': {
 				const chat = new Map(state.chat),
 					name = action.name ?? state.opts.channel,
-					span = (
-						<Fragment key={state.chatid}>{action.span}</Fragment>
-					);
+					span = <Fragment key={state.chatid}>{action.span}</Fragment>;
 				chat.set(name, (chat.get(name) || []).concat([span]));
 				if (action.name === 'System')
 					chat.set('Main', (chat.get('Main') || []).concat([span]));
@@ -163,7 +161,7 @@ export const store = redux.createStore(
 		chatid: 1,
 		muted: new Set(),
 	},
-	redux.applyMiddleware(({ dispatch, getState }) => next => action =>
+	applyMiddleware(({ dispatch, getState }) => next => action =>
 		typeof action === 'function' ? action(dispatch, getState) : next(action),
 	),
 );

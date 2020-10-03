@@ -1,4 +1,3 @@
-import gzip from './gzip.js';
 import Cards from '../Cards.js';
 import * as Us from './Us.js';
 import * as etgutil from '../etgutil.js';
@@ -30,7 +29,8 @@ export default async function (url, stime) {
 		}
 	});
 	return {
-		buf: await gzip(result.join('\n'), { level: 1 }),
-		head: { 'Content-Encoding': 'gzip', 'Content-Type': 'text/plain' },
+		head: { 'Content-Type': 'text/plain' },
+		date: new Date(),
+		buf: result.join('\n'),
 	};
 }
