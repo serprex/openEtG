@@ -51,16 +51,15 @@ export default async function (url) {
 		}
 		reject('ENOENT');
 	}
-	return Promise.all([fs.stat(url), fs.readFile(url)]).then(([stat, buf]) => {
-		watch(url, { persistent: false }, function (_e) {
-			cache.rm(url);
-			this.close();
-		});
-		stat.mtime.setMilliseconds(0);
-		return {
-			head: { 'Content-Type': contentType },
-			date: stat.mtime,
-			buf,
-		};
+	const [stat, buf] = await Promise.all([fs.stat(url), fs.readFile(url)]);
+	watch(url, { persistent: false }, function (_e) {
+		cache.rm(url);
+		this.close();
 	});
+	stat.mtime.setMilliseconds(0);
+	return {
+		head: { 'Content-Type': contentType },
+		date: stat.mtime,
+		buf,
+	};
 }

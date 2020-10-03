@@ -9,7 +9,11 @@ const cache = new Map(),
 	stime = new Date();
 stime.setMilliseconds(0);
 
-const identityOnlyEncodings = new Set(['application/ogg', 'image/png']);
+const identityOnlyEncodings = new Set([
+	'application/ogg',
+	'image/png',
+	undefined,
+]);
 const encode = {
 	br: (buf, oneshot) =>
 		brotliCompressAsync(buf, {
