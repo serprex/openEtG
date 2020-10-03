@@ -846,7 +846,7 @@ const Actives = {
 				t.owner.foe.addpoison(-t.status.get('poison'));
 			}
 			t.remove();
-			t.owner.deck.push(t.card);
+			t.owner.deckpush(t.owner.newThing(t.card).id);
 		}
 	},
 	salvage: (ctx, c, t) => {
