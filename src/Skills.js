@@ -1142,8 +1142,8 @@ const Skills = {
 			[],
 			[
 				[0, '', 'poisonous'],
-				[0, '', 'adrenaline', 1],
-				[2, 'ownattack', 'regenerate'],
+				[2, '', 'adrenaline', 1],
+				[3, 'ownattack', 'regenerate'],
 			],
 			[[0, 'buff', 'fiery']],
 			[
@@ -1159,7 +1159,7 @@ const Skills = {
 				[5, 'ownattack', 'sanctuary'],
 			],
 			[[0, '', 'airborne']],
-			[[1, 'hit', 'neuro']],
+			[[3, 'hit', 'neuro']],
 			[
 				[0, '', 'nocturnal'],
 				[0, '', 'voodoo'],
@@ -1170,7 +1170,7 @@ const Skills = {
 				[5, 'owndeath', 'catlife'],
 				[5, '', 'lives', 69105],
 			],
-			[[2, '', 'immaterial']],
+			[[3, '', 'immaterial']],
 		].forEach((slist, i) => {
 			const ishards = tally[i + 1];
 			for (let j = 0; j < slist.length; j++) {
