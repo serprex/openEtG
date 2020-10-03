@@ -12,10 +12,10 @@ function vadrenathrottle(f) {
 const Actives = {
 	noluci: ctx => {},
 	ablaze: (ctx, c, t) => {
-		c.atk += 2;
+		c.incrAtk(2);
 	},
 	acceleration: (ctx, c, t) => {
-		c.atk += 2;
+		c.incrAtk(2);
 		c.dmg(1, true);
 	},
 	accelerationspell: (ctx, c, t) => {
@@ -43,7 +43,7 @@ const Actives = {
 		c.owner.spend(etg.Air, -1);
 	},
 	antimatter: (ctx, c, t) => {
-		t.atk -= t.trueatk() * 2;
+		t.incrAtk(t.trueatk() * -2);
 	},
 	bblood: (ctx, c, t) => {
 		t.buffhp(20);
@@ -58,7 +58,7 @@ const Actives = {
 		}
 	},
 	bless: (ctx, c, t) => {
-		t.atk += 3;
+		t.incrAtk(3);
 		t.buffhp(3);
 	},
 	boneyard: (ctx, c, t) => {
@@ -132,7 +132,7 @@ const Actives = {
 	cpower: (ctx, c, t) => {
 		const buff = ctx.upto(25);
 		t.buffhp(Math.floor(buff / 5) + 1);
-		t.atk += (buff % 5) + 1;
+		t.incrAtk((buff % 5) + 1);
 	},
 	cseed: (ctx, c, t) => {
 		return Actives[
@@ -193,8 +193,8 @@ const Actives = {
 	},
 	devour: (ctx, c, t) => {
 		c.buffhp(1);
-		c.atk += 1;
-		if (t.status.get('poisonous')) {
+		c.incrAtk(1);
+		if (t.getStatus('poisonous')) {
 			c.addpoison(1);
 		}
 		t.die();
@@ -271,7 +271,7 @@ const Actives = {
 		c.active = t.active;
 		c.cast = t.cast;
 		c.castele = t.castele;
-		c.atk += t.trueatk() - t.trigger('buff');
+		c.incrAtk(t.trueatk() - t.trigger('buff'));
 		c.buffhp(2);
 	},
 	evolve: (ctx, c, t) => {
@@ -337,10 +337,10 @@ const Actives = {
 	},
 	growth: (ctx, c, t) => {
 		c.buffhp(2);
-		c.atk += 2;
+		c.incrAtk(2);
 	},
 	growth1: (ctx, c, t) => {
-		c.atk += 1;
+		c.incrAtk(1);
 		c.buffhp(1);
 	},
 	guard: (ctx, c, t) => {
@@ -433,7 +433,7 @@ const Actives = {
 			ctx.randomcard(false, x => x.type == etg.Creature && !~bans.indexOf(x)),
 		);
 		t.buffhp(ctx.upto(5));
-		t.atk += ctx.upto(5);
+		t.incrAtk(ctx.upto(5));
 		t.setStatus('mutant', 1);
 		t.mutantactive();
 	},
@@ -596,8 +596,8 @@ const Actives = {
 	},
 	luciferin: (ctx, c, t) => {
 		c.owner.dmg(-10);
-		// TODO Fix salvagers & other passive-active-still-luciable
 		for (const cr of c.creatures) {
+			if (!cr) continue;
 			let givelight = true;
 			for (const key of cr.active.keys()) {
 				if (
@@ -614,7 +614,7 @@ const Actives = {
 	},
 	lycanthropy: (ctx, c, t) => {
 		c.buffhp(5);
-		c.atk += 5;
+		c.incrAtk(5);
 		c.rmactive('cast', 'lycanthropy');
 	},
 	mend: (ctx, c, t) => {
@@ -638,7 +638,7 @@ const Actives = {
 		t.cast = t.card.cost;
 	},
 	momentum: (ctx, c, t) => {
-		t.atk += 1;
+		t.incrAtk(1);
 		t.buffhp(1);
 		t.setStatus('momentum', 1);
 	},
@@ -722,7 +722,7 @@ const Actives = {
 		c.owner.dmg(c.card.upped ? 13 : 10);
 	},
 	overdrive: (ctx, c, t) => {
-		c.atk += 3;
+		c.incrAtk(3);
 		c.dmg(1, true);
 	},
 	overdrivespell: (ctx, c, t) => {
@@ -743,13 +743,13 @@ const Actives = {
 		const copy = t.clone(c.owner);
 		c.owner.addCrea(copy);
 		copy.setStatus('airborne', copy.card.status.get('airborne'));
-		if (copy.status.get('mutant')) {
+		if (copy.getStatus('mutant')) {
 			const buff = ctx.upto(25);
 			t.buffhp(Math.floor(buff / 5));
-			t.atk += buff % 5;
+			t.incrAtk(buff % 5);
 			t.mutantactive();
 		}
-		if (copy.status.get('voodoo')) {
+		if (copy.getStatus('voodoo')) {
 			copy.owner.foe.dmg(copy.maxhp - copy.hp);
 		}
 		copy.casts = 0;
@@ -796,9 +796,7 @@ const Actives = {
 		}
 	},
 	queen: (ctx, c, t) => {
-		c.owner.addCrea(
-			c.owner.newThing(ctx.Cards.Names.Firefly.asUpped(c.card.upped)),
-		);
+		c.owner.addCrea(c.owner.newThing(c.card.as(ctx.Cards.Names.Firefly)));
 	},
 	quint: (ctx, c, t) => {
 		t.setStatus('immaterial', true);
@@ -826,7 +824,7 @@ const Actives = {
 		}
 	},
 	rebirth: (ctx, c, t) => {
-		c.transform(ctx.Cards.Names.Phoenix.asUpped(c.card.upped));
+		c.transform(c.card.as(ctx.Cards.Names.Phoenix));
 	},
 	regenerate: (ctx, c, t) => {
 		if (!c.status.get('delayed')) {
@@ -840,7 +838,7 @@ const Actives = {
 		if (t.card.isOf(ctx.Cards.Names.Skeleton)) {
 			Actives.hatch.func(ctx, t);
 		} else if (t.card.isOf(ctx.Cards.Names.Mummy)) {
-			t.transform(ctx.Cards.Names.Pharaoh.asUpped(t.card.upped));
+			t.transform(t.card.as(ctx.Cards.Names.Pharaoh));
 		} else {
 			if (t.status.get('voodoo') && t.status.get('poison') < 0) {
 				t.owner.foe.addpoison(-t.status.get('poison'));
@@ -866,9 +864,7 @@ const Actives = {
 		c.owner.dmg(-4);
 	},
 	scarab: (ctx, c, t) => {
-		c.owner.addCard(
-			c.owner.newThing(ctx.Cards.Names.Scarab.asUpped(c.card.upped)),
-		);
+		c.owner.addCard(c.owner.newThing(c.card.as(ctx.Cards.Names.Scarab)));
 	},
 	scramble: (ctx, c, t) => {
 		if (t.type == etg.Player && !t.sanctuary) {
@@ -929,7 +925,7 @@ const Actives = {
 		} else if (r < 7) {
 			const buff = ctx.upto(25);
 			c.buffhp(Math.floor(buff / 5) + 1);
-			c.atk -= (buff % 5) + 1;
+			c.incrAtk(-(buff % 5) - 1);
 		} else if (r < 9) {
 			c.setStatus('adrenaline', 1);
 		} else if (r < 11) {
@@ -1077,8 +1073,8 @@ const Actives = {
 		t.setStatus('airborne', 0);
 	},
 	wisdom: (ctx, c, t) => {
-		t.atk += 4;
-		if (t.status.get('immaterial')) {
+		t.incrAtk(4);
+		if (t.getStatus('immaterial')) {
 			t.setStatus('psion', 1);
 		}
 	},
