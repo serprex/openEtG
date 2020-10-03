@@ -1142,7 +1142,7 @@ const Skills = {
 			[],
 			[
 				[0, '', 'poisonous'],
-				[2, '', 'adrenaline', 1],
+				[1, '', 'adrenaline', 1],
 				[3, 'ownattack', 'regenerate'],
 			],
 			[[0, 'buff', 'fiery']],
@@ -1159,7 +1159,7 @@ const Skills = {
 				[5, 'ownattack', 'sanctuary'],
 			],
 			[[0, '', 'airborne']],
-			[[3, 'hit', 'neuro']],
+			[[2, 'hit', 'neuro']],
 			[
 				[0, '', 'nocturnal'],
 				[0, '', 'voodoo'],
@@ -1170,17 +1170,14 @@ const Skills = {
 				[5, 'owndeath', 'catlife'],
 				[5, '', 'lives', 69105],
 			],
-			[[3, '', 'immaterial']],
+			[[2, '', 'immaterial']],
 		].forEach((slist, i) => {
 			const ishards = tally[i + 1];
 			for (let j = 0; j < slist.length; j++) {
 				const data = slist[j];
 				if (ishards <= data[0]) return;
-				if (!data[1]) {
-					shardgolem.status = shardgolem.status.set(
-						data[2],
-						data[3] === undefined ? 1 : data[3],
-					);
+				if (data[1] === '') {
+					shardgolem.status = shardgolem.status.set(data[2], data[3] ?? 1);
 				} else {
 					addSkill(data[1], data[2]);
 				}
