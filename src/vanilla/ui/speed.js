@@ -1,3 +1,4 @@
+import { encodeCode } from '../../etgutil.js';
 import Cards from '../Cards.js';
 const infobox = document.getElementById('infobox');
 function prValue(id, sid) {
@@ -48,7 +49,7 @@ function printstat() {
 			'http://dek.im/deck/' +
 			deck
 				.slice(i, i + 70)
-				.map(x => x.code.toString(32))
+				.map(x => encodeCode(x.code))
 				.join(' ');
 		infobox.appendChild(img);
 	}

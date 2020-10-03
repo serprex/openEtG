@@ -372,10 +372,9 @@ select *, (rank() over (partition by arena_id order by score))::int "rank" from 
 				rank: idx,
 				mark: adeck.mark,
 				draw: adeck.draw,
-				deck: `${adeck.deck}05${(data.lv
-					? etgutil.asUpped(adeck.card, true)
-					: adeck.code
-				).toString(32)}`,
+				deck: `${adeck.deck}05${etgutil.encodeCode(
+					data.lv ? etgutil.asUpped(adeck.card, true) : adeck.code,
+				)}`,
 				lv: data.lv,
 			});
 		},
@@ -766,7 +765,7 @@ select *, (rank() over (partition by arena_id order by score))::int "rank" from 
 									seller.gold += cost;
 								} else {
 									msg.msg = `${user.name} sold you ${amt} of ${card.name} @ ${bid.p}`;
-									msg.c = etgutil.encodeCount(amt) + code.toString(32);
+									msg.c = etgutil.encodeCount(amt) + etguil.encodeCode(code);
 									seller.pool = etgutil.addcard(seller.pool, code, amt);
 								}
 								const sellerSock = Us.socks.get(seller.name);

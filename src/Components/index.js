@@ -144,9 +144,7 @@ export class Text extends Component {
 				} else if (num < 4) {
 					const icon = <span className={ico + parse[1]} />;
 					for (let j = 0; j < num; j++) {
-						elec.push(
-							<Fragment key={elec.length}>{icon}</Fragment>,
-						);
+						elec.push(<Fragment key={elec.length}>{icon}</Fragment>);
 					}
 				} else {
 					elec.push(
@@ -158,11 +156,7 @@ export class Text extends Component {
 			lastindex = reres.index + piece.length;
 		}
 		if (lastindex !== text.length) {
-			elec.push(
-				<Fragment key={elec.length}>
-					{text.slice(lastindex)}
-				</Fragment>,
-			);
+			elec.push(<Fragment key={elec.length}>{text.slice(lastindex)}</Fragment>);
 		}
 		return { text, icoprefix, elec };
 	}
@@ -247,7 +241,7 @@ export function Card(props) {
 			</span>
 			<img
 				className={card.code & 0x4000 ? 'shiny' : ''}
-				src={`/Cards/${card.code.toString(32)}.png`}
+				src={`/Cards/${etgutil.encodeCode(card.code)}.png`}
 				style={{
 					position: 'absolute',
 					top: '20px',

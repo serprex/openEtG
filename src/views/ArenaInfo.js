@@ -40,7 +40,7 @@ function RenderInfo(props) {
 		};
 		const card =
 			info.card && (y ? etgutil.asUpped(info.card, true) : info.card);
-		const adeck = card && '05' + card.toString(32) + info.deck;
+		const adeck = card && '05' + etgutil.encodeCode(card) + info.deck;
 		return (
 			<>
 				{adeck && (

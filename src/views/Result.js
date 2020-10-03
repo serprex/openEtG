@@ -333,7 +333,7 @@ export default connect(({ user }) => ({ user }))(
 							);
 						}
 						state.cardreward =
-							'01' + etgutil.asShiny(cardwon, false).toString(32);
+							'01' + etgutil.encodeCode(etgutil.asShiny(cardwon, false));
 					}
 					if (state.goldreward === undefined) {
 						let agetax = 0;

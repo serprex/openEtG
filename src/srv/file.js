@@ -31,15 +31,15 @@ export default async function (url) {
 				return {
 					status: '302',
 					head: {
-						Location: `/Cards/${etgutil
-							.asShiny(icode, false)
-							.toString(32)}.png`,
+						Location: `/Cards/${etgutil.encodeCode(
+							etgutil.asShiny(icode, false),
+						)}.png`,
 					},
 					date: new Date(),
 					buf: '',
 				};
 			} else {
-				const unupped = etgutil.asUpped(icode, false).toString(32);
+				const unupped = etgutil.encodeCode(etgutil.asUpped(icode, false));
 				if (unupped !== code[1]) {
 					return {
 						status: '302',

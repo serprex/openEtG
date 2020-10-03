@@ -65,6 +65,7 @@ export default connect(({ orig }) => ({ orig }))(
 		}
 
 		currentDeckCode() {
+			console.log(this.state.deck);
 			return (
 				etgutil.encodedeck(this.state.deck) +
 				etgutil.toTrueMarkSuffix(this.state.mark)
@@ -133,7 +134,7 @@ export default connect(({ orig }) => ({ orig }))(
 										dcode += etgutil.encodeCount(i - i0);
 										dcode += ~etgutil.fromTrueMark(dicode)
 											? di
-											: ('0' + (dicode - 4000).toString(32)).slice(-3);
+											: etgutil.encodeCode(dicode - 4000);
 									}
 								}
 								this.setState(processDeck(this.state.pool, dcode));

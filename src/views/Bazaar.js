@@ -368,7 +368,7 @@ export default connect(({ user }) => ({ user }))(
 										price: -this.state.sell,
 										cards:
 											etgutil.encodeCount(this.state.sellq || 1) +
-											this.state.bcard.code.toString(32),
+											etgutil.encodeCode(this.state.bcard.code),
 									});
 								}}
 								style={{
@@ -409,7 +409,7 @@ export default connect(({ user }) => ({ user }))(
 										price: this.state.buy,
 										cards:
 											etgutil.encodeCount(this.state.buyq || 1) +
-											this.state.bcard.code.toString(32),
+											etgutil.encodeCode(this.state.bcard.code),
 									});
 								}}
 								style={{

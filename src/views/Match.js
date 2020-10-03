@@ -7,6 +7,7 @@ import Effect from '../Effect.js';
 import * as sfx from '../audio.js';
 import * as ui from '../ui.js';
 import * as etg from '../etg.js';
+import { encodeCode } from '../etgutil.js';
 import * as mkAi from '../mkAi.js';
 import * as sock from '../sock.js';
 import Skills from '../Skills.js';
@@ -434,7 +435,7 @@ class ThingInst extends Component {
 							backgroundSize: 'contain',
 							backgroundImage: props.lofiArt
 								? undefined
-								: `url(/Cards/${card.code.toString(32)}.png)`,
+								: `url(/Cards/${encodeCode(card.code)}.png)`,
 						}}>
 						{children}
 						{obj.hasactive('prespell', 'protectonce') && (

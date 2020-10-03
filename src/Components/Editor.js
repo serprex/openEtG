@@ -15,9 +15,9 @@ export default class Editor extends PureComponent {
 		if (this.state.card !== card) this.setState({ card });
 	};
 
-	addCard = code => {
+	addCard = card => {
 		if (this.props.deck.length < 60)
-			this.props.setDeck(this.props.deck.concat([code]));
+			this.props.setDeck(this.props.deck.concat([card.code]));
 	};
 
 	rmCard = code => {
