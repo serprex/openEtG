@@ -669,7 +669,7 @@ export default connect(({ user, opts }) => ({
 								type="button"
 								value="Library"
 								onClick={() => {
-									const name = self.props.foename ?? self.props.user.name;
+									const name = self.props.foename || self.props.user.name;
 									if (name)
 										this.props.dispatch(
 											store.doNav(import('./Library.js'), {

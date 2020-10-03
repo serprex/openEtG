@@ -22,7 +22,6 @@
     "@babel/runtime-corejs3": "^7.11.2",
     "babel-loader": "^8.1.0",
     "core-js": "^3.6.5",
-    "optipng-bin": "^7.0.0",
     "prettier": "^2.1.2",
     "react": "^17.0.0-rc.2",
     "react-dom": "^16.13.1",
