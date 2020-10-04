@@ -213,8 +213,10 @@ Game.prototype.nextTurn = function () {
 		const { turn } = this,
 			next = this.byId(this.nextPlayer(turn));
 		if (next.id !== turn) {
-			const poison = next.getStatus('poison');
-			if (poison) next.dmg(poison);
+			if (!this.Cards.Names.Relic) {
+				const poison = next.getStatus('poison');
+				if (poison) next.dmg(poison);
+			}
 			next.maybeDecrStatus('sosa');
 			next.setStatus('nova', 0);
 			next.setStatus('sanctuary', 0);

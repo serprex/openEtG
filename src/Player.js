@@ -515,12 +515,8 @@ Player.prototype.v_endturn = function (discard) {
 		this.game.trigger(this.shieldId, 'ownattack');
 	}
 	if (this.weaponId) this.weapon.attack();
-	if (this.foe.sosa > 0) {
-		this.foe.sosa--;
-	}
 	this.nova = this.nova2 = 0;
 	this.casts = 1;
-	this.foe.precognition = this.foe.sanctuary = false;
 };
 Player.prototype.die = function () {
 	this.out = true;
