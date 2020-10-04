@@ -622,7 +622,10 @@ function estimateDamage(
 		}
 		if (
 			fshactive &&
-			(~fshactive.name.indexOf('weight') || ~fshactive.name.indexOf('wings'))
+			(~fshactive.name.indexOf('weight') ||
+				~fshactive.name.indexOf('wings') ||
+				~fshactive.name.indexOf('v_weight') ||
+				~fshactive.name.indexOf('v_wings'))
 		) {
 			fshactive.func(game, c.owner.foe.shield, c, data);
 			if (!data.dmg) return 0;
@@ -648,17 +651,19 @@ function estimateDamage(
 		c.setStatus('adrenaline', 1);
 	}
 	if (!momentum && fshactive) {
-		atk *= ~fshactive.name.indexOf('evade100')
-			? 0
-			: ~fshactive.name.indexOf('evade 50') ||
-			  ~fshactive.name.indexOf('evade50')
-			? 0.5
-			: ~fshactive.name.indexOf('evade 40') ||
-			  ~fshactive.name.indexOf('evade40')
-			? 0.6
-			: ~fshactive.name.indexOf('chaos') && fsh.card.upped
-			? 0.8
-			: 1;
+		atk *=
+			~fshactive.name.indexOf('evade100') ||
+			~fshactive.name.indexOf('v_evade100')
+				? 0
+				: ~fshactive.name.indexOf('evade 50') ||
+				  ~fshactive.name.indexOf('v_evade50')
+				? 0.5
+				: ~fshactive.name.indexOf('evade 40') ||
+				  ~fshactive.name.indexOf('v_evade40')
+				? 0.6
+				: ~fshactive.name.indexOf('chaos') && fsh.card.upped
+				? 0.8
+				: 1;
 	}
 	if (!fsh && freedomChance && c.getStatus('airborne')) {
 		atk += Math.ceil(atk / 2) * freedomChance;

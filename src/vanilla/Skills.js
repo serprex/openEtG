@@ -973,25 +973,30 @@ const Actives = {
 		if (t.status.get('stackable')) {
 			Actives.destroy.func(ctx, c, t, true);
 			if (t.type === etg.Shield) {
-				if (c.owner.shield && c.owner.shield.card == t.card) {
+				if (c.owner.shield && c.owner.shield.card === t.card) {
 					c.owner.shield.setStatus(
 						'charges',
 						c.owner.shield.status.get('charges') + 1,
 					);
 				} else {
-					c.owner.setShield(c.owner.newThing(t.card));
+					const inst = c.owner.newThing(t.card);
+					ctx.effect({ x: 'StartPos', id: inst.id, src: t.id });
+					c.owner.setShield(inst);
 					c.owner.shield.setStatus('charges', 1);
 				}
 			} else {
-				c.owner.addPerm(c.owner.newThing(t.card));
+				const inst = c.owner.newThing(t.card);
+				ctx.effect({ x: 'StartPos', id: inst.id, src: t.id });
+				c.owner.addPerm(inst);
 			}
 		} else {
 			t.remove();
-			t.ownerId = c.ownerId;
 			t.casts = 0;
 			if (t.card.isOf(ctx.Cards.Names.Sundial))
 				t.setStatus('charges', t.status.get('charges') + 1);
-			c.owner.addPerm(t);
+			if (t.type === etg.Permanent) c.owner.addPerm(t);
+			else if (t.type === etg.Weapon) c.owner.setWeapon(t);
+			else c.owner.setShield(t);
 		}
 	},
 	steam: (ctx, c, t) => {
