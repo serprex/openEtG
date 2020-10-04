@@ -41,7 +41,7 @@ const Qecks = connect(({ user }) => ({ user }))(
 						key={i}
 						value={`${i + 1}`}
 						className={`editbtn${
-							this.props.user.selectedDeck == this.props.user.qecks[i]
+							this.props.user.selectedDeck === this.props.user.qecks[i]
 								? ' selectedbutton'
 								: ''
 						}`}
@@ -153,7 +153,7 @@ const DeckNames = connect(({ user }) => ({ user }))(function DeckNames({
 				<input
 					key={i}
 					type="button"
-					className={`editbtn${i == page ? ' selectedbutton' : ''}`}
+					className={`editbtn${i === page ? ' selectedbutton' : ''}`}
 					value={`${i + 1}`}
 					onClick={() => setPage(i)}
 				/>,
@@ -235,7 +235,7 @@ const DeckSelector = connect(({ user }) => ({ user }))(
 						value={this.state.name}
 						onChange={e => this.setState({ name: e.target.value })}
 						onKeyPress={e => {
-							if (e.which == 13) {
+							if (e.which === 13) {
 								this.props.loadDeck(e.target.value);
 							}
 						}}
@@ -326,7 +326,7 @@ export default connect(({ user }) => ({
 		}
 
 		saveDeck = (name, force) => {
-			if (this.state.deck.length == 0) {
+			if (this.state.deck.length === 0) {
 				sock.userExec('rmdeck', { name });
 				return;
 			}
@@ -381,7 +381,7 @@ export default connect(({ user }) => ({
 									while (i < dsplit.length) {
 										const di = dsplit[i],
 											i0 = i++;
-										while (i < dsplit.length && dsplit[i] == di) {
+										while (i < dsplit.length && dsplit[i] === di) {
 											i++;
 										}
 										dcode += etgutil.encodeCount(i - i0);

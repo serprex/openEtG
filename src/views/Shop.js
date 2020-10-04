@@ -180,7 +180,7 @@ export default connect(({ user, opts }) => ({
 						click={() => {
 							const update = {
 								packele: i,
-								info1: `Selected Element: ${i == 13 ? 'Random' : '1:' + i}`,
+								info1: `Selected Element: ${i === 13 ? 'Random' : '1:' + i}`,
 							};
 							this.setState(update);
 						}}
@@ -341,7 +341,7 @@ export default connect(({ user, opts }) => ({
 								this.props.dispatch(store.setOptTemp('bulk', e.target.value))
 							}
 							onKeyPress={e => {
-								if (e.which == 13) this.buyPack();
+								if (e.which === 13) this.buyPack();
 							}}
 							style={{
 								position: 'absolute',

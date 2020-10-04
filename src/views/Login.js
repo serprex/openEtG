@@ -90,7 +90,7 @@ if (typeof kongregateAPI === 'undefined') {
 			}
 
 			maybeLogin(e) {
-				if (e.which == 13) {
+				if (e.which === 13) {
 					this.loginClick();
 				}
 			}

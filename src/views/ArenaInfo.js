@@ -57,11 +57,9 @@ function RenderInfo(props) {
 						left: '100px',
 						top: 4 + y + 'px',
 					}}
-					text={
-						`W-L: ${info.win ?? 0} - ${info.loss ?? 0}` +
-						`, Rank: ${info.rank == undefined ? 'Inactive' : info.rank}` +
-						`, ${(info.win ?? 0) * 15 + (info.loss ?? 0) * 5}$`
-					}
+					text={`W-L: ${info.win ?? 0} - ${info.loss ?? 0}, Rank: ${
+						info.rank ?? 'Inactive'
+					}, ${(info.win ?? 0) * 15 + (info.loss ?? 0) * 5}$`}
 				/>
 				<input
 					readOnly

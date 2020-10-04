@@ -189,11 +189,30 @@ M.test('Destroy', function () {
 	assert.ok(!this.player1.shield, 'This town is all in hell');
 });
 M.test('Devourer', function () {
-	this.player1.addCrea(this.player1.newThing(Cards.Names.Devourer));
+	const dev = this.player1.newThing(Cards.Names.Devourer);
+	this.player1.addCrea(dev);
 	this.player2.setQuanta(etg.Light, 1);
 	this.player1.endturn();
 	assert.equal(this.player2.quanta[etg.Light], 0, 'Light');
 	assert.equal(this.player1.quanta[etg.Darkness], 1, 'Darkness');
+	this.player1.setQuanta(etg.Earth, 2);
+	this.cast('v_bless', this.player1, dev);
+	assert.equal(dev.trueatk(), 3, 'Blessed to 3|2');
+	dev.useactive();
+	assert.equal(dev.trueatk(), 1, 'Burrow halved to 1|2');
+	dev.casts = 1;
+	dev.useactive();
+	assert.equal(dev.trueatk(), 2, 'Unburrow doubled to 2|2');
+	dev.casts = 1;
+	dev.useactive();
+	assert.equal(dev.trueatk(), 1, 'Burrow halved again to 1|2');
+	this.player1.addPerm(
+		this.player1.newThing(Cards.Names.Nightfall.asUpped(true)),
+	);
+	assert.equal(dev.trueatk(), 3, 'Eclipse brings to 3|2');
+	dev.casts = 1;
+	dev.useactive();
+	assert.equal(dev.trueatk(), 4, 'Eclipse brings to 4|2 after unburrow');
 });
 M.test('Earthquake', function () {
 	initHand(

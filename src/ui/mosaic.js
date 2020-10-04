@@ -24,7 +24,7 @@ document.getElementById('codeimg').addEventListener('mousemove', function (e) {
 	for (const key in atlas) {
 		const v = atlas[key];
 		if (x >= v[0] && x <= v[0] + v[2] && y >= v[1] && y <= v[1] + v[3]) {
-			if (oldkey == key) return;
+			if (oldkey === key) return;
 			oldkey = key;
 			while (aname.firstChild) aname.firstChild.remove();
 			aname.appendChild(

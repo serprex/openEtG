@@ -508,7 +508,7 @@ const table = document.createElement('table');
 		a.appendChild(document.createTextNode(text));
 		td.appendChild(a);
 		tr.appendChild(td);
-		if (++x == 9) {
+		if (++x === 9) {
 			table.appendChild(tr);
 			tr = document.createElement('tr');
 			hookRowMouseover(tr);

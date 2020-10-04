@@ -21,7 +21,7 @@ function fightItOut() {
 	const start = Date.now();
 	let mode = this,
 		fc = new Uint16Array(2);
-	if (mode == fight1000) {
+	if (mode === fight1000) {
 		if (fight1000.value.match(/^Stop/)) {
 			stopFight = true;
 			fight1000.value = 'Stopping..';
@@ -46,14 +46,14 @@ function fightItOut() {
 	const cmds = {
 		end(data) {
 			if (mode === fight) {
-				result.textContent += `${game.turn == realp1 ? 1 : 2}\tEND TURN\n`;
+				result.textContent += `${game.turn === realp1 ? 1 : 2}\tEND TURN\n`;
 			}
 		},
 		cast(data) {
 			const c = game.byId(data.c),
 				t = game.byId(data.t);
-			if (mode == fight) {
-				result.textContent += `${game.turn == realp1 ? 1 : 2}\t${c}${
+			if (mode === fight) {
+				result.textContent += `${game.turn === realp1 ? 1 : 2}\t${c}${
 					t ? ' targets ' + t : ''
 				}\n`;
 			}
@@ -76,7 +76,7 @@ function fightItOut() {
 		}
 		if (!game.winner) setTimeout(gameStep, 0);
 		else {
-			if (mode == fight) {
+			if (mode === fight) {
 				console.log(Date.now() - start);
 				result.textContent = `Player ${game.winner === realp1 ? 1 : 2} wins.\n${
 					result.textContent

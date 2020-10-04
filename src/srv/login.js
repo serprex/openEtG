@@ -53,7 +53,7 @@ export default function login(sockEmit) {
 					false,
 					x => x.type !== etg.Pillar && (x.rarity !== 5) ^ ocardnymph,
 				);
-				const ccode = etgutil.asShiny(card.code, card.rarity == 5);
+				const ccode = etgutil.asShiny(card.code, card.rarity === 5);
 				if (card.rarity > 1) {
 					user.accountbound = etgutil.addcard(user.accountbound, ccode);
 				} else {

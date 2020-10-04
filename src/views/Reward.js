@@ -12,12 +12,12 @@ export default class Reward extends Component {
 		super(props);
 		let reward = props.type,
 			rewardList;
-		if (typeof reward == 'string') {
-			const shiny = reward.charAt(0) == '!';
+		if (typeof reward === 'string') {
+			const shiny = reward.charAt(0) === '!';
 			if (shiny) reward = reward.slice(1);
-			const upped = reward.slice(0, 5) == 'upped';
+			const upped = reward.slice(0, 5) === 'upped';
 			const rarity = userutil.rewardwords[upped ? reward.slice(5) : reward];
-			rewardList = Cards.filter(upped, x => x.rarity == rarity).map(
+			rewardList = Cards.filter(upped, x => x.rarity === rarity).map(
 				card => card.asShiny(shiny).code,
 			);
 		} else if (reward instanceof Array) {

@@ -16,7 +16,7 @@ export function run(game) {
 }
 
 export function mkPremade(level, daily, datafn = null) {
-	const name = level == 1 ? 'mage' : 'demigod';
+	const name = level === 1 ? 'mage' : 'demigod';
 	const urdeck = sock.getDeck(),
 		{ user } = store.store.getState(),
 		minsize = user ? 30 : 10;
@@ -33,7 +33,7 @@ export function mkPremade(level, daily, datafn = null) {
 				return;
 			}
 		} else {
-			foedata = Decks[name][user[level == 1 ? 'dailymage' : 'dailydg']];
+			foedata = Decks[name][user[level === 1 ? 'dailymage' : 'dailydg']];
 		}
 	}
 	if (!foedata) foedata = RngMock.choose(Decks[name]);
@@ -57,7 +57,7 @@ export function mkPremade(level, daily, datafn = null) {
 			},
 		],
 	};
-	if (level == 1) {
+	if (level === 1) {
 		data.players[1].hp = 125;
 	} else {
 		data.players[1].hp = 200;
@@ -110,7 +110,7 @@ export function mkAi(level, daily, datafn = null) {
 		store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
 		return;
 	}
-	const deck = level == 0 ? deckgen(0, 1, 2) : deckgen(0.4, 2, 4);
+	const deck = level === 0 ? deckgen(0, 1, 2) : deckgen(0.4, 2, 4);
 	store.store.dispatch(store.setOptTemp('aideck', deck));
 
 	const data = {

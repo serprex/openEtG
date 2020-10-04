@@ -226,7 +226,7 @@ M.test('Earthquake', function () {
 	}
 	assert.equal(this.player1.handIds.length, 3, 'handlength');
 	const pillars = this.player1.permanents[0];
-	assert.ok(pillars.card.type == etg.Pillar, 'ispillar');
+	assert.ok(pillars.card.type === etg.Pillar, 'ispillar');
 	assert.equal(pillars.getStatus('charges'), 5, '5 charges');
 	this.cast('earthquake', this.player2, pillars);
 	assert.equal(pillars.getStatus('charges'), 2, '2 charges');
@@ -361,14 +361,17 @@ M.test('Purify', function () {
 });
 M.test('Reflect', function () {
 	this.cast('lightning', this.player1, this.player2);
-	assert.ok(this.player1.hp == 100 && this.player2.hp == 95, 'Plain spell');
+	assert.ok(this.player1.hp === 100 && this.player2.hp === 95, 'Plain spell');
 	this.player2.setShield(this.player2.newThing(Cards.Names.MirrorShield));
 	this.cast('lightning', this.player1, this.player2);
-	assert.ok(this.player1.hp == 95 && this.player2.hp == 95, 'Reflected spell');
+	assert.ok(
+		this.player1.hp === 95 && this.player2.hp === 95,
+		'Reflected spell',
+	);
 	this.player1.setShield(this.player1.newThing(Cards.Names.MirrorShield));
 	this.cast('lightning', this.player1, this.player2);
 	assert.ok(
-		this.player1.hp == 90 && this.player2.hp == 95,
+		this.player1.hp === 90 && this.player2.hp === 95,
 		'Unreflected reflected spell',
 	);
 });
@@ -387,26 +390,26 @@ M.test('Steal', function () {
 	this.player1.shield.setStatus('charges', 3);
 	this.cast('steal', this.player2, this.player1.shield);
 	assert.ok(
-		this.player1.shield && this.player1.shield.getStatus('charges') == 2,
+		this.player1.shield && this.player1.shield.getStatus('charges') === 2,
 		'Wish bones',
 	);
 	assert.ok(
-		this.player2.shield && this.player2.shield.getStatus('charges') == 1,
+		this.player2.shield && this.player2.shield.getStatus('charges') === 1,
 		'stole 1',
 	);
 	this.cast('steal', this.player2, this.player1.shield);
 	assert.ok(
-		this.player1.shield && this.player1.shield.getStatus('charges') == 1,
+		this.player1.shield && this.player1.shield.getStatus('charges') === 1,
 		'Lone bone',
 	);
 	assert.ok(
-		this.player2.shield && this.player2.shield.getStatus('charges') == 1,
+		this.player2.shield && this.player2.shield.getStatus('charges') === 1,
 		'stole 2',
 	);
 	this.cast('steal', this.player2, this.player1.shield);
 	assert.ok(!this.player1.shield, 'This town is all in hell');
 	assert.ok(
-		this.player2.shield && this.player2.shield.getStatus('charges') == 1,
+		this.player2.shield && this.player2.shield.getStatus('charges') === 1,
 		'stole 3',
 	);
 });

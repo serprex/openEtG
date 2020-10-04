@@ -517,7 +517,8 @@ Thing.prototype.trueatk = function (adrenaline) {
 		this.getStatus('dive') +
 		this.trigger('buff') +
 		this.calcBonusAtk();
-	if (this.status.get('burrowed')) dmg = Math.ceil(dmg / 2);
+	if (this.status.get('burrowed') && !this.game.Cards.Names.Relic)
+		dmg = Math.ceil(dmg / 2);
 	return etg.calcAdrenaline(adrenaline, dmg);
 };
 Thing.prototype.attackCreature = function (target, trueatk) {

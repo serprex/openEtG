@@ -34,7 +34,7 @@ export default function (deck) {
 				else cardEleCounts[card.element]++;
 			}
 		}
-		if (~etg.ShardList.indexOf(card.code) && ++shardCount == 5)
+		if (~etg.ShardList.indexOf(card.code) && ++shardCount === 5)
 			return 'You may only have at most 4 shards';
 	}
 	for (var ele in cardEleCounts) {

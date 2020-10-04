@@ -191,7 +191,7 @@ export default connect(({ user, opts }) => ({
 		}
 
 		componentDidMount() {
-			if (this.props.user.daily == 0 && this.props.user.ocard) {
+			if (this.props.user.daily === 0 && this.props.user.ocard) {
 				this.props.dispatch(store.updateUser({ daily: 128 }));
 			}
 			document.addEventListener('mousemove', this.resetTip);
@@ -321,7 +321,7 @@ export default connect(({ user, opts }) => ({
 							key={i}
 							value={i + 1}
 							className={`editbtn ${
-								self.props.user.selectedDeck == self.props.user.qecks[i]
+								self.props.user.selectedDeck === self.props.user.qecks[i]
 									? ' selectedbutton'
 									: ''
 							}`}
@@ -754,7 +754,7 @@ export default connect(({ user, opts }) => ({
 												})
 											}
 											onKeyPress={e => {
-												if (e.which == 13) changeFunc();
+												if (e.which === 13) changeFunc();
 											}}
 											style={{
 												position: 'absolute',
@@ -772,7 +772,7 @@ export default connect(({ user, opts }) => ({
 												})
 											}
 											onKeyPress={e => {
-												if (e.which == 13) changeFunc();
+												if (e.which === 13) changeFunc();
 											}}
 											style={{
 												position: 'absolute',

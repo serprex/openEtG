@@ -323,7 +323,7 @@ const data = {
 	losecharge: (c, inst) => {
 		const charges = c.getStatus('charges');
 		return charges
-			? `Lasts for ${charges} more turn${charges == 1 ? '' : 's'}.`
+			? `Lasts for ${charges} more turn${charges === 1 ? '' : 's'}.`
 			: 'Expires at end of turn';
 	},
 	luciferin:
@@ -646,7 +646,7 @@ const statusData = {
 	charges: (c, inst) =>
 		c !== inst ||
 		Thing.prototype.hasactive.call(c, 'ownattack', 'losecharge') ||
-		c.getStatus('charges') == 1
+		c.getStatus('charges') === 1
 			? ''
 			: `Enters play with ${c.getStatus('charges')} ${
 					c.getStatus('stackable') ? 'stacks' : 'charges'
@@ -656,7 +656,7 @@ const statusData = {
 	nothrottle:
 		'If any of your creatures have abilities with Throttled, those abilities lose Throttled.',
 	poison: (c, inst) =>
-		c == inst
+		c === inst
 			? `Enters play with ${c.getStatus('poison')} poison counters.`
 			: inst.getStatus('poison') + ' poison',
 	stackable: '',

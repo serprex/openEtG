@@ -132,14 +132,14 @@ export class Text extends Component {
 					</Fragment>,
 				);
 			}
-			if (piece == '\n') {
+			if (piece === '\n') {
 				elec.push(<br key={elec.length} />);
-			} else if (piece == '$') {
+			} else if (piece === '$') {
 				elec.push(<span key={elec.length} className="ico gold" />);
 			} else if (/^\d\d?:\d\d?$/.test(piece)) {
 				const parse = piece.split(':');
 				const num = +parse[0];
-				if (num == 0) {
+				if (num === 0) {
 					elec.push(<Fragment key={elec.length}>0</Fragment>);
 				} else if (num < 4) {
 					const icon = <span className={ico + parse[1]} />;
@@ -484,17 +484,17 @@ export function CardSelectorCore(props) {
 		const cards = props.cards.filter(
 			i > 2,
 			x =>
-				(x.element == props.element || props.rarity == 4) &&
-				((i % 3 == 0 && x.type == etg.Creature) ||
-					(i % 3 == 1 && x.type <= etg.Permanent) ||
-					(i % 3 == 2 && x.type == etg.Spell)) &&
+				(x.element === props.element || props.rarity === 4) &&
+				((i % 3 === 0 && x.type === etg.Creature) ||
+					(i % 3 === 1 && x.type <= etg.Permanent) ||
+					(i % 3 === 2 && x.type === etg.Spell)) &&
 				(!props.cardpool ||
 					x.code in props.cardpool ||
 					(props.filterboth &&
 						etgutil.asShiny(x.code, true) in props.cardpool) ||
 					props.showall ||
 					x.isFree()) &&
-				(!props.rarity || props.rarity == Math.min(x.rarity, 4)),
+				(!props.rarity || props.rarity === Math.min(x.rarity, 4)),
 			props.cards.cardCmp,
 			props.shiny && !props.filterboth,
 		);

@@ -66,7 +66,7 @@ export default connect(({ user }) => ({ user }))(
 			return (
 				<>
 					{(!this.state.confirm ||
-						(this.state.confirm == 1 && this.state.canconfirm)) && (
+						(this.state.confirm === 1 && this.state.canconfirm)) && (
 						<input
 							type="button"
 							value={this.state.confirm ? 'Confirm' : 'Trade'}

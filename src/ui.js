@@ -53,9 +53,9 @@ function reflectPos(j, pos) {
 }
 function creaturePos(j, i) {
 	const row = i < 8 ? 0 : i < 15 ? 1 : 2;
-	const column = row == 2 ? (i + 1) % 8 : i % 8;
+	const column = row === 2 ? (i + 1) % 8 : i % 8;
 	return reflectPos(j, {
-		x: 204 + column * 90 + (row == 1 ? 45 : 0),
+		x: 204 + column * 90 + (row === 1 ? 45 : 0),
 		y: 334 + row * 44,
 	});
 }
