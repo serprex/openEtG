@@ -504,7 +504,7 @@ select *, (rank() over (partition by arena_id order by score))::int "rank" from 
 			const foesock = Us.socks.get(f);
 			if (foesock && foesock.readyState === 1) {
 				const foemeta = sockmeta.get(foesock);
-				if (foemeta.duelwant === u) {
+				if (foemeta.duelwant === u && !foemeta.origduel) {
 					foemeta.duelwant = null;
 					foemeta.duel = u;
 					thismeta.duel = f;
@@ -531,7 +531,49 @@ select *, (rank() over (partition by arena_id order by score))::int "rank" from 
 					sockEmit(foesock, 'pvpgive', { data });
 				} else {
 					thismeta.duelwant = f;
+					thismeta.origduel = false;
 					sockEmit(foesock, 'challenge', { f: u, pvp: true });
+				}
+			}
+		},
+		origfoewant(data, user, thismeta) {
+			const { u, f, deck } = data;
+			if (u === f || !deck) return;
+			thismeta.deck = deck;
+			const foesock = Us.socks.get(f);
+			if (foesock && foesock.readyState === 1) {
+				const foemeta = sockmeta.get(foesock);
+				if (foemeta.duelwant === u && foemeta.origduel) {
+					foemeta.duelwant = null;
+					foemeta.origduel = false;
+					foemeta.duel = u;
+					thismeta.duel = f;
+					const data = {
+						seed: (Math.random() * MAX_INT) | 0,
+						set: 'Original',
+						players: RngMock.shuffle([
+							{
+								idx: 1,
+								deck: thismeta.deck,
+								name: u,
+								user: u,
+								markpower: 1,
+							},
+							{
+								idx: 2,
+								deck: foemeta.deck,
+								name: f,
+								user: f,
+								markpower: 1,
+							},
+						]),
+					};
+					sockEmit(this, 'pvpgive', { data });
+					sockEmit(foesock, 'pvpgive', { data });
+				} else {
+					thismeta.duelwant = f;
+					thismeta.origduel = true;
+					sockEmit(foesock, 'challenge', { f: u, pvp: true, orig: true });
 				}
 			}
 		},

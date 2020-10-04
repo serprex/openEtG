@@ -147,7 +147,6 @@ export default connect(({ user }) => ({ user }))(
 						} else if (this.props.user) {
 							delete data.x;
 							store.store.dispatch(store.setUser(data));
-							store.store.dispatch(store.setOptTemp('deck', sock.getDeck()));
 							if (this.state.skiptut) {
 								store.store.dispatch(store.doNav(import('./MainMenu.js')));
 							} else {

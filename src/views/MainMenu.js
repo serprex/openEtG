@@ -154,20 +154,20 @@ const chatStyle = {
 
 export default connect(({ user, opts }) => ({
 	user,
-	foename: opts.foename || '',
+	foename: opts.foename ?? '',
 	enableSound: !!opts.enableSound,
 	enableMusic: !!opts.enableMusic,
 	hideRightpane: !!opts.hideRightpane,
 	hideMainchat: !!opts.hideMainchat,
 	disableTut: !!opts.disableTut,
 	lofiArt: !!opts.lofiArt,
-	playByPlayMode: opts.playByPlayMode || '',
+	playByPlayMode: opts.playByPlayMode ?? '',
 }))(
 	class MainMenu extends Component {
 		constructor(props) {
 			super(props);
 			this.state = {
-				showcard: props.nymph || (!props.user.daily && props.user.ocard),
+				showcard: props.nymph ?? (!props.user.daily && props.user.ocard),
 				showsettings: false,
 				changepass: false,
 				newpass: '',
@@ -327,9 +327,8 @@ export default connect(({ user, opts }) => ({
 							}`}
 							onClick={() => {
 								sock.userExec('setdeck', {
-									name: self.props.user.qecks[i] || '',
+									name: self.props.user.qecks[i] ?? '',
 								});
-								self.props.dispatch(store.setOptTemp('deck', sock.getDeck()));
 							}}
 						/>,
 					);
@@ -689,9 +688,7 @@ export default connect(({ user, opts }) => ({
 							<input
 								type="button"
 								value="PvP"
-								onClick={() => {
-									sock.sendChallenge(self.props.foename);
-								}}
+								onClick={() => sock.sendChallenge(self.props.foename)}
 								style={{
 									position: 'absolute',
 									left: '10px',

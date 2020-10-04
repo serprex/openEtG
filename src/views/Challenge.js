@@ -96,13 +96,13 @@ class PlayerEditor extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			deckgen: props.player.deckgen || '',
-			deck: props.player.deck || '',
-			name: props.player.name || '',
-			hp: props.player.hp || '',
-			mark: props.player.markpower || '',
-			draw: props.player.drawpower || '',
-			deckpower: props.player.deckpower || '',
+			deckgen: props.player.deckgen ?? '',
+			deck: props.player.deck ?? '',
+			name: props.player.name ?? '',
+			hp: props.player.hp ?? '',
+			mark: props.player.markpower ?? '',
+			draw: props.player.drawpower ?? '',
+			deckpower: props.player.deckpower ?? '',
 			premade: false,
 		};
 	}

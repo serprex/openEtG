@@ -36,60 +36,60 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 
 		componentDidMount() {
 			const { game, orig } = this.props;
-			const foedecks = game.data.players.filter(pd => !pd.user),
-				foedeck = RngMock.choose(foedecks),
+			if (game.winner !== this.state.player1.id) return;
+			const foedecks = game.data.players.filter(pd => !pd.user);
+			if (foedecks.length === 0) return;
+			const foedeck = RngMock.choose(foedecks),
 				foeDeck = etgutil
 					.decodedeck(foedeck.deck)
 					.map(code => game.Cards.Codes[code])
 					.filter(card => card && !card.isFree());
-			if (game.winner === this.state.player1.id) {
-				let newpool = orig.pool;
-				const cardswon = [];
-				for (let i = 0; i < game.data.spins; i++) {
-					const spins = [];
-					while (spins.length < 4) {
-						let card = RngMock.choose(foeDeck);
-						if (
-							!card ||
-							card.rarity === 15 ||
-							card.rarity === 20 ||
-							card.name.startsWith('Mark of ')
-						) {
-							card = game.Cards.Names.Relic;
-						}
-						spins.push(card);
+			let newpool = orig.pool;
+			const cardswon = [];
+			for (let i = 0; i < game.data.spins; i++) {
+				const spins = [];
+				while (spins.length < 4) {
+					let card = RngMock.choose(foeDeck);
+					if (
+						!card ||
+						card.rarity === 15 ||
+						card.rarity === 20 ||
+						card.name.startsWith('Mark of ')
+					) {
+						card = game.Cards.Names.Relic;
 					}
-					const c0 = RngMock.choose(spins),
-						c1 = RngMock.choose(spins),
-						c2 = RngMock.choose(spins);
-					cardswon.push(
-						<div
-							key={cardswon.length}
-							style={{ opacity: c0 === c1 && c1 === c2 ? undefined : '.3' }}>
-							<Components.Card x={16 + i * 300} y={16} card={c0} />
-							<Components.Card x={48 + i * 300} y={48} card={c1} />
-							<Components.Card x={80 + i * 300} y={80} card={c2} />
-						</div>,
-					);
-					if (c0 === c1 && c1 === c2) {
-						newpool = etgutil.addcard(newpool, c0.code);
-					}
+					spins.push(card);
 				}
-				const electrumwon = Math.floor(
-					(game.data.basereward +
-						game.data.hpreward * (this.state.player1.hp / 100)) *
-						(this.state.player1.hp === this.state.player1.maxhp ? 2 : 1),
+				const c0 = RngMock.choose(spins),
+					c1 = RngMock.choose(spins),
+					c2 = RngMock.choose(spins);
+				cardswon.push(
+					<div
+						key={cardswon.length}
+						style={{ opacity: c0 === c1 && c1 === c2 ? undefined : '.3' }}>
+						<Components.Card x={16 + i * 300} y={16} card={c0} />
+						<Components.Card x={48 + i * 300} y={48} card={c1} />
+						<Components.Card x={80 + i * 300} y={80} card={c2} />
+					</div>,
 				);
-
-				const update = {
-					electrum: orig.electrum + game.data.cost + electrumwon,
-				};
-				if (orig.pool !== newpool) update.pool = newpool;
-				userEmit('updateorig', update);
-				this.props.dispatch(store.updateOrig(update));
-
-				this.setState({ cardswon, electrumwon });
+				if (c0 === c1 && c1 === c2) {
+					newpool = etgutil.addcard(newpool, c0.code);
+				}
 			}
+			const electrumwon = Math.floor(
+				(game.data.basereward +
+					game.data.hpreward * (this.state.player1.hp / 100)) *
+					(this.state.player1.hp === this.state.player1.maxhp ? 2 : 1),
+			);
+
+			const update = {
+				electrum: orig.electrum + game.data.cost + electrumwon,
+			};
+			if (orig.pool !== newpool) update.pool = newpool;
+			userEmit('updateorig', update);
+			this.props.dispatch(store.updateOrig(update));
+
+			this.setState({ cardswon, electrumwon });
 		}
 
 		render() {

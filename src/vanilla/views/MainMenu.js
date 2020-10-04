@@ -10,7 +10,7 @@ import * as store from '../../store.js';
 import { randint } from '../../util.js';
 import * as Components from '../../Components/index.js';
 import Cards from '../Cards.js';
-import { userEmit } from '../../sock.js';
+import { userEmit, sendChallenge } from '../../sock.js';
 
 const ai4names = {
 	[etg.Air]: ['Ari', 'es'],
@@ -27,7 +27,11 @@ const ai4names = {
 	[etg.Water]: ['Aqua', 'rius'],
 };
 
-export default connect(({ user, orig }) => ({ user, orig }))(
+export default connect(({ user, orig, opts }) => ({
+	user,
+	orig,
+	origfoename: opts.origfoename ?? '',
+}))(
 	class OriginalMainMenu extends Component {
 		mkAi4 = () => {
 			const e1 = RngMock.upto(12) + 1,
@@ -129,6 +133,30 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 						onClick={() =>
 							this.props.dispatch(store.doNav(import('./Editor.js')))
 						}
+					/>
+					<input
+						type="button"
+						value="PvP"
+						onClick={() => sendChallenge(this.props.origfoename, true)}
+						style={{
+							position: 'absolute',
+							left: '200px',
+							top: '140px',
+						}}
+					/>
+					<input
+						placeholder="Player's Name"
+						value={this.props.origfoename}
+						onChange={e =>
+							this.props.dispatch(
+								store.setOptTemp('origfoename', e.target.value),
+							)
+						}
+						style={{
+							position: 'absolute',
+							left: '300px',
+							top: '140px',
+						}}
 					/>
 					<Components.ExitBtn x={9} y={140} />
 					<Components.Text

@@ -65,7 +65,6 @@ export default connect(({ orig }) => ({ orig }))(
 		}
 
 		currentDeckCode() {
-			console.log(this.state.deck);
 			return (
 				etgutil.encodedeck(this.state.deck) +
 				etgutil.toTrueMarkSuffix(this.state.mark)
@@ -155,7 +154,7 @@ export default connect(({ orig }) => ({ orig }))(
 									dcode.split(' ').map(c => parseInt(c, 32) - 4000),
 								);
 							}
-							this.props.dispatch(store.setOptTemp('deck', dcode));
+							this.setState({ deck: dcode });
 						}}
 						placeholder="Deck"
 						style={{

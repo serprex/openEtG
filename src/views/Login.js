@@ -108,7 +108,7 @@ if (typeof kongregateAPI === 'undefined') {
 							autoFocus
 							tabIndex="1"
 							onKeyPress={e => this.maybeLogin(e)}
-							value={this.props.username || ''}
+							value={this.props.username ?? ''}
 							onChange={e =>
 								this.props.dispatch(store.setOpt('username', e.target.value))
 							}

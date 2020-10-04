@@ -1,4 +1,5 @@
 import Cards from './Cards.js';
+import OrigCards from './vanilla/Cards.js';
 import * as etgutil from './etgutil.js';
 import Game from './Game.js';
 import * as store from './store.js';
@@ -14,8 +15,8 @@ const buffer = [];
 let socket = new WebSocket(endpoint),
 	attempts = 0,
 	attemptTimeout = 0,
-	pvp = null;
-export let trade = null;
+	pvp = null,
+	trade = null;
 const sockEvents = {
 	clear: () => store.store.dispatch(store.clearChat('Main')),
 	passchange: data => {
@@ -145,7 +146,7 @@ const sockEvents = {
 	},
 	tradegive: data => {
 		if (trade) {
-			trade = false;
+			trade = null;
 			store.store.dispatch(store.doNav(import('./views/Trade.js')));
 		}
 	},
@@ -185,12 +186,13 @@ const sockEvents = {
 					style={{ cursor: 'pointer', color: '#69f' }}
 					onClick={() => {
 						if (data.pvp) {
-							sendChallenge(data.f);
+							sendChallenge(data.f, data.orig);
 						} else {
 							userEmit('tradewant', { f: (trade = data.f) });
 						}
 					}}>
 					{`${data.f} offers to ${data.pvp ? 'duel' : 'trade with'} you!`}
+					{data.orig && <i> (in Legacy mode)</i>}
 				</div>,
 			),
 		);
@@ -266,19 +268,26 @@ export function userExec(x, data = {}) {
 }
 export function getDeck() {
 	const state = store.store.getState();
-	return state.user
-		? state.user.decks[state.user.selectedDeck] || ''
-		: state.opts.deck;
+	return state.user.decks[state.user.selectedDeck] ?? '';
 }
-export function sendChallenge(foe) {
-	const deck = getDeck(),
-		{ user } = store.store.getState();
-	if (!Cards.isDeckLegal(etgutil.decodedeck(deck), user)) {
+export function getOrigDeck() {
+	const state = store.store.getState();
+	return state.orig.deck;
+}
+export function sendChallenge(foe, orig = false) {
+	const deck = orig ? getOrigDeck() : getDeck(),
+		state = store.store.getState();
+	if (
+		!(orig ? OrigCards : Cards).isDeckLegal(
+			etgutil.decodedeck(deck),
+			orig ? state.orig : state.user,
+		)
+	) {
 		store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
 		return;
 	}
-	const msg = { f: foe };
-	userEmit('foewant', msg);
+	const msg = { f: foe, deck };
+	userEmit(orig ? 'origfoewant' : 'foewant', msg);
 	pvp = foe;
 }
 export function offerTrade(f) {

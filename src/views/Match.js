@@ -234,7 +234,7 @@ function SpellDisplay(props) {
 				data: spell,
 			}))}
 			willEnter={item => ({ y: 0, opacity: 0 })}
-			willLeave={() => ({ opacity: spring(0) })}>
+			willLeave={() => ({ y: spring(600), opacity: spring(0) })}>
 			{styles => (
 				<>
 					{styles.map(item => {
@@ -256,6 +256,7 @@ function SpellDisplay(props) {
 								/>
 								{p1 && props.playByPlayMode !== 'noline' && (
 									<ArrowLine
+										opacity={item.style.opacity}
 										x0={800}
 										y0={item.style.y + 10}
 										x1={p1.x}
@@ -271,7 +272,7 @@ function SpellDisplay(props) {
 	);
 }
 
-function ArrowLine({ x0, y0, x1, y1 }) {
+function ArrowLine({ x0, y0, x1, y1, opacity }) {
 	return (
 		<svg
 			width="900"
@@ -282,6 +283,7 @@ function ArrowLine({ x0, y0, x1, y1 }) {
 				top: '0',
 				zIndex: '4',
 				pointerEvents: 'none',
+				opacity,
 			}}>
 			<defs>
 				<marker
@@ -1437,6 +1439,7 @@ export default connect(({ user, opts }) => ({
 				this.idtrack.set(pl.id, plpos);
 				children.push(
 					<div
+						key={j}
 						className={tgtclass(player1.id, pl, this.state.targeting)}
 						style={{
 							position: 'absolute',
@@ -1452,6 +1455,7 @@ export default connect(({ user, opts }) => ({
 						onMouseMove={e => this.setInfo(e, pl)}
 					/>,
 					<span
+						key={`${j}mark`}
 						className={'ico e' + pl.mark}
 						style={{
 							position: 'absolute',
@@ -1465,8 +1469,11 @@ export default connect(({ user, opts }) => ({
 						}}>
 						{pl.markpower !== 1 && pl.markpower}
 					</span>,
-					!!pl.getStatus('sosa') && (
+				);
+				if (pl.getStatus('sosa')) {
+					children.push(
 						<div
+							key={`${j}sosa`}
 							className={'ico sacrifice'}
 							style={{
 								position: 'absolute',
@@ -1474,20 +1481,26 @@ export default connect(({ user, opts }) => ({
 								top: j ? '7px' : '502px',
 								pointerEvents: 'none',
 							}}
-						/>
-					),
-					!!pl.getStatus('flatline') && (
+						/>,
+					);
+				}
+				if (pl.getStatus('flatline')) {
+					children.push(
 						<span
+							key={`${j}flatline`}
 							className="ico sabbath"
 							style={{
 								position: 'absolute',
 								left: '0',
 								top: j ? '96px' : '300px',
 							}}
-						/>
-					),
-					handOverlay && (
+						/>,
+					);
+				}
+				if (handOverlay) {
+					children.push(
 						<span
+							key={`${j}handOverlay`}
 							style={{
 								zIndex: '1',
 								position: 'absolute',
@@ -1500,9 +1513,9 @@ export default connect(({ user, opts }) => ({
 								borderRadius: '4px',
 								pointerEvents: 'none',
 							}}
-						/>
-					),
-				);
+						/>,
+					);
+				}
 				things.push(...pl.handIds);
 				for (let i = j ? 22 : 0; i >= 0 && i < 23; i += j ? -1 : 1) {
 					const cr = pl.creatureIds[i];
@@ -1532,27 +1545,24 @@ export default connect(({ user, opts }) => ({
 				for (let k = 1; k < 13; k++) {
 					children.push(
 						<span
+							key={`${j}q${k}`}
 							className={'ico ce' + k}
 							style={{
 								position: 'absolute',
 								left: `${qx + (k & 1 ? 2 : 48)}px`,
 								top: `${qy + Math.floor((k - 1) / 2) * 18}px`,
-							}}
-						/>,
-						<span
-							style={{
-								position: 'absolute',
-								left: `${qx + (k & 1 ? 20 : 66)}px`,
-								top: `${qy + Math.floor((k - 1) / 2) * 18 - 2}px`,
 								fontSize: '16px',
 								pointerEvents: 'none',
+								paddingLeft: '16px',
 							}}>
+							&nbsp;
 							{pl.quanta[k] || ''}
 						</span>,
 					);
 				}
 				children.push(
 					<div
+						key={`${j}hpbg`}
 						style={{
 							backgroundColor: '#000',
 							position: 'absolute',
@@ -1579,7 +1589,7 @@ export default connect(({ user, opts }) => ({
 						: ''
 				}`;
 				children.push(
-					<Motion style={{ x1: spring(x1), x2: spring(x2) }}>
+					<Motion key={`${j}hp`} style={{ x1: spring(x1), x2: spring(x2) }}>
 						{({ x1, x2 }) => (
 							<>
 								<div
@@ -1619,6 +1629,7 @@ export default connect(({ user, opts }) => ({
 						)}
 					</Motion>,
 					<Components.Text
+						key={`${j}hptext`}
 						text={hptext}
 						style={{
 							textAlign: 'center',
@@ -1634,6 +1645,7 @@ export default connect(({ user, opts }) => ({
 						}}
 					/>,
 					<div
+						key={`${j}deck`}
 						className={pl.deckIds.length ? 'ico ccback' : ''}
 						style={{
 							position: 'absolute',
