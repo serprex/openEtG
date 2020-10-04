@@ -21,6 +21,8 @@ const encode = {
 				[constants.BROTLI_PARAM_QUALITY]: oneshot
 					? constants.BROTLI_MIN_QUALITY
 					: constants.BROTLI_MAX_QUALITY,
+				[constants.BROTLI_PARAM_SIZE_HINT]: buf.length,
+				[constants.BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING]: oneshot,
 			},
 		}),
 	gzip: (buf, oneshot) => gzipAsync(buf, { level: oneshot ? 1 : 9 }),
