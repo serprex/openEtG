@@ -625,10 +625,10 @@ function estimateDamage(
 			(~fshactive.name.indexOf('weight') ||
 				~fshactive.name.indexOf('wings') ||
 				~fshactive.name.indexOf('v_weight') ||
-				~fshactive.name.indexOf('v_wings'))
+				~fshactive.name.indexOf('v_wings')) &&
+			(fshactive.func(game, c.owner.foe.shield, c, data) || !data.dmg)
 		) {
-			fshactive.func(game, c.owner.foe.shield, c, data);
-			if (!data.dmg) return 0;
+			return 0;
 		} else if (wallCharges[wallIndex]) {
 			wallCharges[wallIndex]--;
 			return 0;

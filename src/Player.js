@@ -514,7 +514,7 @@ Player.prototype.v_endturn = function (discard) {
 		this.shield.casts = 1;
 		this.game.trigger(this.shieldId, 'ownattack');
 	}
-	if (this.weaponId) this.weapon.attack();
+	if (this.weaponId) this.weapon.v_attack();
 	this.nova = this.nova2 = 0;
 	this.casts = 1;
 };
