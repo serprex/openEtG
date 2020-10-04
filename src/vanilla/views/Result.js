@@ -43,34 +43,35 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 					.map(code => game.Cards.Codes[code])
 					.filter(card => card && !card.isFree());
 			if (game.winner === this.state.player1.id) {
-				const spins = [];
-				while (spins.length < 4) {
-					let card = RngMock.choose(foeDeck);
-					if (
-						!card ||
-						card.rarity === 15 ||
-						card.rarity === 20 ||
-						card.name.startsWith('Mark of ')
-					) {
-						card = game.Cards.Names.Relic;
-					}
-					spins.push(card);
-				}
 				let newpool = orig.pool;
 				const cardswon = [];
 				for (let i = 0; i < game.data.spins; i++) {
+					const spins = [];
+					while (spins.length < 4) {
+						let card = RngMock.choose(foeDeck);
+						if (
+							!card ||
+							card.rarity === 15 ||
+							card.rarity === 20 ||
+							card.name.startsWith('Mark of ')
+						) {
+							card = game.Cards.Names.Relic;
+						}
+						spins.push(card);
+					}
 					const c0 = RngMock.choose(spins),
 						c1 = RngMock.choose(spins),
 						c2 = RngMock.choose(spins);
+					cardswon.push(
+						<div
+							key={cardswon.length}
+							style={{ opacity: c0 === c1 && c1 === c2 ? undefined : '.3' }}>
+							<Components.Card x={16 + i * 300} y={16} card={c0} />
+							<Components.Card x={48 + i * 300} y={48} card={c1} />
+							<Components.Card x={80 + i * 300} y={80} card={c2} />
+						</div>,
+					);
 					if (c0 === c1 && c1 === c2) {
-						cardswon.push(
-							<Components.Card
-								key={cardswon.length}
-								x={200 + cardswon.length * 100}
-								y={170}
-								card={c0}
-							/>,
-						);
 						newpool = etgutil.addcard(newpool, c0.code);
 					}
 				}
@@ -92,6 +93,7 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 		}
 
 		render() {
+			const { game } = this.props;
 			return (
 				<>
 					<input
@@ -106,6 +108,20 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 							store.store.dispatch(store.doNav(import('./MainMenu.js')));
 						}}
 					/>
+					{game.data.rematch &&
+						(!game.data.rematchFilter ||
+							game.data.rematchFilter(this.props, this.state.player1.id)) && (
+							<input
+								type="button"
+								value="Rematch"
+								onClick={() => game.data.rematch(this.props)}
+								style={{
+									position: 'absolute',
+									left: '412px',
+									top: '490px',
+								}}
+							/>
+						)}
 					{this.state.cardswon}
 					{this.state.electrumwon && (
 						<Components.Text

@@ -68,6 +68,7 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 				basereward,
 				hpreward,
 				spins: level === 'ai2' ? 2 : 3,
+				rematch: () => this.vsAi(level, cost, basereward, hpreward),
 				players: RngMock.shuffle([
 					{
 						idx: 1,
