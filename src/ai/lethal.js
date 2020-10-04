@@ -30,7 +30,7 @@ export default function lethal(game) {
 					}
 				}
 			}
-			if (active && active.castName in game.Cards.Targeting) {
+			if (active?.target) {
 				const targetFilter = game.targetFilter(c, active);
 				if (c.owner.shield && c.owner.shield.getStatus('reflective'))
 					evalIter(c.owner, targetFilter);

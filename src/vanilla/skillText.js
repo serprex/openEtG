@@ -124,7 +124,6 @@ var data = {
 	v_mitosisspell:
 		'Non-weapon creature gains active "Mitosis: Summon a daughter creature" costing target\'s card\'s cost',
 	v_momentum: 'Target ignores shield effects & gains 1|1',
-	v_mutate: 'Enters play with a random ability',
 	v_mutation:
 		'Mutate target creature into an abomination, or maybe something more. Slight chance of death',
 	v_neuro:

@@ -1215,26 +1215,55 @@ select *, (rank() over (partition by arena_id order by score))::int "rank" from 
 				}
 			}
 		},
-		async updateorig(data, user, meta, userId) {
-			const result = await pg.pool.query({
-				text: 'select data from user_data where user_id = $1 and type_id = 2',
-				values: [userId],
-			});
-			if (result.rows.length) {
-				return await pg.pool.query({
+		updateorig(data, user, meta, userId) {
+			return pg.trx(async sql => {
+				const result = await sql.query({
 					text:
-						'update user_data set data = $2 where user_id = $1 and type_id = 2',
-					values: [
-						userId,
-						{
-							...result.rows[0].data,
-							...data,
-							x: undefined,
-							u: undefined,
-						},
-					],
+						'select data from user_data where user_id = $1 and type_id = 2 for update',
+					values: [userId],
 				});
-			}
+				if (result.rows.length) {
+					return await sql.query({
+						text:
+							'update user_data set data = $2 where user_id = $1 and type_id = 2',
+						values: [
+							userId,
+							{
+								...result.rows[0].data,
+								...data,
+								x: undefined,
+								u: undefined,
+							},
+						],
+					});
+				}
+			});
+		},
+		origadd(data, user, meta, userId) {
+			return pg.trx(async sql => {
+				const result = await sql.query({
+					text:
+						'select data from user_data where user_id = $1 and type_id = 2 for update',
+					values: [userId],
+				});
+				if (result.rows.length) {
+					const row = result.rows[0].data;
+					return await sql.query({
+						text:
+							'update user_data set data = $2 where user_id = $1 and type_id = 2',
+						values: [
+							userId,
+							{
+								...row,
+								electrum: row.electrum + (data.electrum | 0),
+								pool: data.pool
+									? etgutil.mergedecks(row.pool, data.pool)
+									: row.pool,
+							},
+						],
+					});
+				}
+			});
 		},
 	};
 	const sockEvents = {

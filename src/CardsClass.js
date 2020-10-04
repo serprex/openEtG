@@ -8,12 +8,8 @@ export default class Cards {
 		this.filtercache = [];
 		this.Codes = [];
 		this.Names = {};
-		this.Targeting = {};
 
-		CardsJson.forEach((cards, type) => {
-			if (type === 6) this.parseTargeting(cards);
-			else this.parseCsv(type, cards);
-		});
+		CardsJson.forEach((cards, type) => this.parseCsv(type, cards));
 	}
 
 	codeCmp = (x, y) => {
@@ -123,12 +119,6 @@ export default class Cards {
 		return true;
 	}
 
-	parseTargeting(data) {
-		for (const key in data) {
-			this.Targeting[key] = getTargetFilter(data[key]);
-		}
-	}
-
 	parseCsv(type, data) {
 		const keys = data[0],
 			cardinfo = {};
@@ -147,74 +137,5 @@ export default class Cards {
 				this.Codes[cardinfo.Code] = new Card(this, type, cardinfo);
 			});
 		}
-	}
-}
-const TargetFilters = {
-	own: (c, t) => c.ownerId === t.ownerId,
-	foe: (c, t) => c.ownerId !== t.ownerId,
-	notself: (c, t) => c.id !== t.id,
-	all: (c, t) => true,
-	card: (c, t) => c.id !== t.id && t.type === etg.Spell,
-	pill: (c, t) => t.isMaterial(etg.Permanent) && t.card.type === etg.Pillar,
-	weap: (c, t) =>
-		t.isMaterial() &&
-		(t.type === etg.Weapon ||
-			(t.type !== etg.Spell && t.card.type === etg.Weapon)),
-	shie: (c, t) =>
-		t.isMaterial() &&
-		(t.type === etg.Shield ||
-			(t.type !== etg.Spell && t.card.type === etg.Shield)),
-	playerweap: (c, t) => t.type === etg.Weapon,
-	perm: (c, t) => t.isMaterial(etg.Permanent),
-	permnonstack: (c, t) =>
-		t.isMaterial(etg.Permanent) && !t.getStatus('stackable'),
-	stack: (c, t) => t.isMaterial(etg.Permanent) && t.getStatus('stackable'),
-	crea: (c, t) => t.isMaterial(etg.Creature),
-	creacrea: (c, t) =>
-		t.isMaterial(etg.Creature) && t.card.type === etg.Creature,
-	play: (c, t) => t.type === etg.Player,
-	notplay: (c, t) => t.type !== etg.Player,
-	sing: (c, t) =>
-		t.isMaterial(etg.Creature) && t.active.get('cast') !== c.active.get('cast'),
-	butterfly: (c, t) =>
-		(t.type === etg.Creature || t.type === etg.Weapon) &&
-		!t.getStatus('immaterial') &&
-		!t.getStatus('burrowed') &&
-		(t.trueatk() < 3 || (t.type === etg.Creature && t.truehp() < 3)),
-	v_butterfly: (c, t) => t.isMaterial(etg.Creature) && t.trueatk() < 3,
-	devour: (c, t) => t.isMaterial(etg.Creature) && t.truehp() < c.truehp(),
-	paradox: (c, t) => t.isMaterial(etg.Creature) && t.truehp() < t.trueatk(),
-	notskele: (c, t) =>
-		t.type !== etg.Player && !t.card.isOf(t.owner.game.Cards.Names.Skeleton),
-	forceplay: (c, t) =>
-		t.type === etg.Spell || (t.isMaterial() && t.active.get('cast')),
-	airbornecrea: (c, t) => t.isMaterial(etg.Creature) && t.getStatus('airborne'),
-	golem: (c, t) => t.type !== etg.Spell && t.getStatus('golem') && t.attack,
-	groundcrea: (c, t) => t.isMaterial(etg.Creature) && !t.getStatus('airborne'),
-	wisdom: (c, t) =>
-		(t.type === etg.Creature || t.type === etg.Weapon) &&
-		!t.getStatus('burrowed'),
-	quinttog: (c, t) => t.type === etg.Creature && !t.getStatus('burrowed'),
-};
-function getTargetFilter(str) {
-	function getFilterFunc(funcname) {
-		return TargetFilters[funcname];
-	}
-	if (str in TargetFilters) {
-		return TargetFilters[str];
-	} else {
-		const splitIdx = str.lastIndexOf(':');
-		const prefixes = ~splitIdx
-				? str.substr(0, splitIdx).split(':').map(getFilterFunc)
-				: [],
-			filters = (~splitIdx ? str.substr(splitIdx + 1) : str)
-				.split('+')
-				.map(getFilterFunc);
-		return (TargetFilters[str] = (c, t) => {
-			function check(f) {
-				return f(c, t);
-			}
-			return prefixes.every(check) && filters.some(check);
-		});
 	}
 }

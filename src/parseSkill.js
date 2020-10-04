@@ -12,7 +12,13 @@ export default function (name) {
 	if (!(base in Skills)) {
 		throw new Error(`Unknown active ${base}`);
 	}
-	const s = new Skill([name], Skills[base].func(...args), false);
+	const baseSkill = Skills[base],
+		s = new Skill(
+			[name],
+			baseSkill.func(...args),
+			baseSkill.passive,
+			baseSkill.target,
+		);
 	cache.set(name, s);
 	return s;
 }

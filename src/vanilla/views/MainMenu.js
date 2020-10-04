@@ -91,9 +91,8 @@ export default connect(({ user, orig, opts }) => ({
 					},
 				]),
 			});
-			const update = { electrum: this.props.orig.electrum - cost };
-			userEmit('updateorig', update);
-			this.props.dispatch(store.updateOrig(update));
+			userEmit('origadd', { electrum: -cost });
+			this.props.dispatch(store.addOrig(-cost));
 			this.props.dispatch(
 				store.doNav(import('../../views/Match.js'), { game }),
 			);

@@ -333,16 +333,15 @@ Game.prototype.expectedDamage = function () {
 	return expectedDamage;
 };
 Game.prototype.targetFilter = function (src, active) {
-	const targetingFilter = this.Cards.Targeting[active.castName];
 	return (
-		targetingFilter &&
+		active.target &&
 		(t =>
 			((t.type === etg.Player && !t.out) ||
 				(~t.getIndex() &&
 					(t.ownerId === this.turn ||
 						(t.type !== etg.Spell && t.getStatus('cloak')) ||
 						!t.owner.isCloaked()))) &&
-			targetingFilter(src, t))
+			active.target(src, t))
 	);
 };
 Game.prototype.effect = function (effect) {

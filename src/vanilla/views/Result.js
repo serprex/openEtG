@@ -44,7 +44,7 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 					.decodedeck(foedeck.deck)
 					.map(code => game.Cards.Codes[code])
 					.filter(card => card && !card.isFree());
-			let newpool = orig.pool;
+			let newpool = '';
 			const cardswon = [];
 			for (let i = 0; i < game.data.spins; i++) {
 				const spins = [];
@@ -83,11 +83,11 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 			);
 
 			const update = {
-				electrum: orig.electrum + game.data.cost + electrumwon,
+				electrum: game.data.cost + electrumwon,
+				pool: newpool || undefined,
 			};
-			if (orig.pool !== newpool) update.pool = newpool;
-			userEmit('updateorig', update);
-			this.props.dispatch(store.updateOrig(update));
+			userEmit('origadd', update);
+			this.props.dispatch(store.addOrig(update.electrum, update.pool));
 
 			this.setState({ cardswon, electrumwon });
 		}
