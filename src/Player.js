@@ -364,7 +364,8 @@ Player.prototype.spend = function (qtype, x, scramble) {
 	if (x === 0 || (!scramble && x < 0 && this.getStatus('flatline')))
 		return true;
 	if (!this.canspend(qtype, x)) return false;
-	const quanta = new Int8Array(this.game.get(this.id).get('quanta'));
+	const quanta = new Int8Array(this.game.get(this.id).get('quanta')),
+		quantaCap = this.game.Cards.Names.Relic ? 75 : 99;
 	if (!qtype) {
 		if (x < 0) {
 			if (x < -1188) x = -1188;
@@ -375,17 +376,17 @@ Player.prototype.spend = function (qtype, x, scramble) {
 				for (let j = 0; j < bundleSize; j++) {
 					const r12 = (r % 12) + 1;
 					r = (r / 12) | 0;
-					quanta[r12] = Math.min(quanta[r12] + 1, 99);
+					quanta[r12] = Math.min(quanta[r12] + 1, quantaCap);
 				}
 			}
 		} else {
 			if (x > 1188) x = 1188;
 			for (let i = x; i > 0; i--) {
 				const q = randomquanta(this.game, quanta);
-				quanta[q] = Math.min(quanta[q] - 1, 99);
+				quanta[q] = Math.min(quanta[q] - 1, quantaCap);
 			}
 		}
-	} else quanta[qtype] = Math.min(quanta[qtype] - x, 99);
+	} else quanta[qtype] = Math.min(quanta[qtype] - x, quantaCap);
 	this.game.set(this.id, 'quanta', quanta);
 	return true;
 };

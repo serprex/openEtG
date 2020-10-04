@@ -98,14 +98,13 @@ const Actives = {
 		t.die();
 		c.owner.foe.dmg(
 			Math.ceil(
-				(t.truehp() * (t.status.get('frozen') ? 150 : 100)) /
-					(t.truehp() + 100),
+				(t.truehp() * (t.getStatus('frozen') ? 150 : 100)) / (t.truehp() + 100),
 			),
 		);
-		if (t.status.get('poison')) {
-			c.owner.foe.addpoison(t.status.get('poison'));
+		if (t.getStatus('poison')) {
+			c.owner.foe.addpoison(t.getStatus('poison'));
 		}
-		if (t.status.get('frozen')) {
+		if (t.getStatus('frozen')) {
 			c.owner.foe.freeze(3);
 		}
 	},
@@ -179,8 +178,8 @@ const Actives = {
 	destroy: (ctx, c, t, dontsalvage, donttalk) => {
 		if (!donttalk) {
 		}
-		if (t.status.get('stackable')) {
-			const charges = t.status.get('charges');
+		if (t.getStatus('stackable')) {
+			const charges = t.getStatus('charges');
 			if (charges <= 1) {
 				t.remove();
 			} else {
@@ -251,8 +250,8 @@ const Actives = {
 		c.owner.spend(etg.Earth, -1);
 	},
 	earthquake: (ctx, c, t) => {
-		if (t.status.get('charges') > 3) {
-			t.setStatus('charges', t.status.get('charges') - 3);
+		if (t.getStatus('charges') > 3) {
+			t.setStatus('charges', t.getStatus('charges') - 3);
 		} else {
 			t.remove();
 		}
@@ -266,8 +265,8 @@ const Actives = {
 		t.setStatus('immaterial', 1);
 	},
 	endow: (ctx, c, t) => {
-		if (t.status.get('momentum')) c.setStatus('momentum', 1);
-		if (t.status.get('ranged')) c.setStatus('ranged', 1);
+		if (t.getStatus('momentum')) c.setStatus('momentum', 1);
+		if (t.getStatus('ranged')) c.setStatus('ranged', 1);
 		c.active = t.active;
 		c.cast = t.cast;
 		c.castele = t.castele;
@@ -332,8 +331,7 @@ const Actives = {
 		Actives.gpull.func(ctx, t);
 	},
 	gratitude: (ctx, c, t) => {
-		const b = (c.owner.mark == etg.Life ? -5 : -3) * c.status.get('charges');
-		c.owner.dmg(b);
+		c.owner.dmg((c.owner.mark == etg.Life ? -5 : -3) * c.getStatus('charges'));
 	},
 	growth: (ctx, c, t) => {
 		c.buffhp(2);
@@ -346,7 +344,7 @@ const Actives = {
 	guard: (ctx, c, t) => {
 		c.delay(1);
 		t.delay(1);
-		if (!t.status.get('airborne')) {
+		if (!t.getStatus('airborne')) {
 			t.dmg(c.trueatk());
 		}
 	},
@@ -371,13 +369,13 @@ const Actives = {
 				x => x.type == etg.Creature && !bans.some(ban => x.isOf(ban)),
 			),
 		);
-		if (c.status.get('ready')) Actives.parallel.func(ctx, c, c);
+		if (c.getStatus('ready')) Actives.parallel.func(ctx, c, c);
 	},
 	heal: (ctx, c, t) => {
 		c.owner.dmg(-20);
 	},
 	holylight: (ctx, c, t) => {
-		t.dmg(t.type !== etg.Player && t.status.get('nocturnal') ? 10 : -10);
+		t.dmg(t.type !== etg.Player && t.getStatus('nocturnal') ? 10 : -10);
 	},
 	hope: (ctx, c, t) => {
 		let dr = 0;
@@ -618,8 +616,7 @@ const Actives = {
 		c.rmactive('cast', 'lycanthropy');
 	},
 	mend: (ctx, c, t) => {
-		const target = t || c;
-		target.dmg(-5);
+		t.dmg(-5);
 	},
 	miracle: (ctx, c, t) => {
 		c.owner.setQuanta(etg.Light);
@@ -742,7 +739,7 @@ const Actives = {
 		}
 		const copy = t.clone(c.owner);
 		c.owner.addCrea(copy);
-		copy.setStatus('airborne', copy.card.status.get('airborne'));
+		copy.setStatus('airborne', copy.card.getStatus('airborne'));
 		if (copy.getStatus('mutant')) {
 			const buff = ctx.upto(25);
 			t.buffhp(Math.floor(buff / 5));
@@ -810,7 +807,7 @@ const Actives = {
 	readiness: (ctx, c, t) => {
 		if (t.active.get('cast')) {
 			t.cast = 0;
-			if (t.card.element == etg.Time && !t.status.get('ready')) {
+			if (t.card.element === etg.Time && !t.getStatus('ready')) {
 				t.setStatus('ready', 1);
 				t.casts = 2;
 				t.addactive('ownspell', Actives.ready);
@@ -818,8 +815,7 @@ const Actives = {
 		}
 	},
 	ready: (ctx, c, t) => {
-		if (c.status.get('ready') > 1) {
-			c.setStatus('ready', c.status.get('ready') - 1);
+		if (c.maybeDecrStatus('ready') > 1) {
 			c.casts++;
 		}
 	},
@@ -827,7 +823,7 @@ const Actives = {
 		c.transform(c.card.as(ctx.Cards.Names.Phoenix));
 	},
 	regenerate: (ctx, c, t) => {
-		if (!c.status.get('delayed')) {
+		if (!c.getStatus('delayed')) {
 			c.owner.dmg(-5);
 		}
 	},
@@ -840,8 +836,8 @@ const Actives = {
 		} else if (t.card.isOf(ctx.Cards.Names.Mummy)) {
 			t.transform(t.card.as(ctx.Cards.Names.Pharaoh));
 		} else {
-			if (t.status.get('voodoo') && t.status.get('poison') < 0) {
-				t.owner.foe.addpoison(-t.status.get('poison'));
+			if (t.getStatus('voodoo') && t.getStatus('poison') < 0) {
+				t.owner.foe.addpoison(-t.getStatus('poison'));
 			}
 			t.remove();
 			t.owner.deckpush(t.owner.newThing(t.card).id);
@@ -850,8 +846,8 @@ const Actives = {
 	salvage: (ctx, c, t) => {
 		if (
 			c.owner !== t.owner &&
-			!c.status.get('salvaged') &&
-			!t.status.get('salvaged') &&
+			!c.getStatus('salvaged') &&
+			!t.getStatus('salvaged') &&
 			c.owner.game.turn !== c.owner
 		) {
 			c.setStatus('salvaged', 1);
@@ -944,7 +940,7 @@ const Actives = {
 		c.owner.setQuanta(etg.Air, 0);
 		for (let i = 0; i < 23; i++) {
 			const cr = c.owner.creatures[i];
-			if (cr && cr.status.get('airborne') && cr.isMaterial(etg.Creature)) {
+			if (cr && cr.getStatus('airborne') && cr.isMaterial(etg.Creature)) {
 				cr.incrStatus('dive', cr.trueatk());
 				const dive = cr.getStatus('dive');
 				cr.setStatus('dive', dive + cr.trueatk());
@@ -970,13 +966,13 @@ const Actives = {
 		c.owner.buffhp(c.owner.quanta[etg.Earth] - c.card.cost);
 	},
 	steal: (ctx, c, t) => {
-		if (t.status.get('stackable')) {
+		if (t.getStatus('stackable')) {
 			Actives.destroy.func(ctx, c, t, true);
 			if (t.type === etg.Shield) {
 				if (c.owner.shield && c.owner.shield.card === t.card) {
 					c.owner.shield.setStatus(
 						'charges',
-						c.owner.shield.status.get('charges') + 1,
+						c.owner.shield.getStatus('charges') + 1,
 					);
 				} else {
 					const inst = c.owner.newThing(t.card);
@@ -993,7 +989,7 @@ const Actives = {
 			t.remove();
 			t.casts = 0;
 			if (t.card.isOf(ctx.Cards.Names.Sundial))
-				t.setStatus('charges', t.status.get('charges') + 1);
+				t.setStatus('charges', t.getStatus('charges') + 1);
 			if (t.type === etg.Permanent) c.owner.addPerm(t);
 			else if (t.type === etg.Weapon) c.owner.setWeapon(t);
 			else c.owner.setShield(t);
@@ -1033,10 +1029,10 @@ const Actives = {
 		return c.getStatus('swarmhp');
 	},
 	swave: (ctx, c, t) => {
-		if (t.status.get('frozen')) {
+		if (t.getStatus('frozen')) {
 			t.die();
 		} else {
-			if (t.type == etg.Player && t.weapon && t.weapon.status.get('frozen')) {
+			if (t.type == etg.Player && t.weapon && t.weapon.getStatus('frozen')) {
 				Actives.destroy.func(ctx, c, t.weapon);
 			}
 			t.spelldmg(4);
@@ -1067,7 +1063,7 @@ const Actives = {
 	void: (ctx, c, t) => {
 		c.owner.foe.maxhp = Math.max(
 			c.owner.foe.maxhp -
-				(c.owner.mark == etg.Darkness ? 3 : 2) * c.status.get('charges'),
+				(c.owner.mark == etg.Darkness ? 3 : 2) * c.getStatus('charges'),
 			1,
 		);
 		if (c.owner.foe.hp > c.owner.foe.maxhp) {
@@ -1087,14 +1083,14 @@ const Actives = {
 		if (!t)
 			c.owner.spend(
 				c.card.element,
-				c.status.get('charges') * (c.card.element > 0 ? -1 : -3),
+				c.getStatus('charges') * (c.card.element > 0 ? -1 : -3),
 			);
 		else if (c == t)
 			c.owner.spend(c.card.element, c.card.element > 0 ? -1 : -3);
 	},
 	pend: (ctx, c, t) => {
 		const ele = c.getStatus('pendstate') ? c.owner.mark : c.card.element;
-		c.owner.spend(ele, -c.status.get('charges') * (ele > 0 ? 1 : 3));
+		c.owner.spend(ele, -c.getStatus('charges') * (ele > 0 ? 1 : 3));
 		c.setStatus('pendstate', +!c.getStatus('pendstate'));
 	},
 	blockwithcharge: (ctx, c, t) => {
@@ -1148,12 +1144,8 @@ const Actives = {
 			t.addpoison(1);
 		}
 	},
-	weight: (ctx, c, t) => {
-		return t.type === etg.Creature && t.truehp() > 5;
-	},
-	wings: (ctx, c, t) => {
-		return !t.status.get('airborne') && !t.status.get('ranged');
-	},
+	weight: (ctx, c, t) => t.type === etg.Creature && t.truehp() > 5,
+	wings: (ctx, c, t) => !t.getStatus('airborne') && !t.getStatus('ranged'),
 };
 const passives = new Set([
 	'decrsteam',
