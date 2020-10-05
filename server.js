@@ -285,7 +285,7 @@ on conflict (user_id, arena_id) do update set day = $3, deck = $4, code = $5, wo
 			const day = sutil.getDay();
 			const res = await pg.pool.query({
 				text: `select arena_id, ($2 - arena.day) "day", draw, mark, hp, won, loss, code, deck, "rank" from (
-select *, (rank() over (partition by arena_id order by score desc))::int "rank" from arena
+select *, (row_number() over (partition by arena_id order by score desc))::int "rank" from arena
 ) arena where user_id = $1`,
 				values: [userId, day],
 			});
