@@ -108,7 +108,8 @@ const Skills = {
 		Skills.devour(ctx, c, t);
 	}),
 	atk2hp: target('crea', (ctx, c, t) => {
-		t.buffhp(t.trueatk() - t.hp);
+		t.maxhp = t.trueatk();
+		t.dmg(t.hp - t.maxhp);
 	}),
 	autoburrow: (ctx, c, t) => {
 		c.addactive('play', exports.autoburrowproc);

@@ -56,7 +56,8 @@ const data = {
 		"If target creature or weapon's attack is positive, it becomes negative. Otherwise, it becomes positive.",
 	appease:
 		"Sacrifice target creature you own and gain 1|1. If this ability isn't used, this creature will attack its owner. This creature attacks normally the turn it is played or if it loses this ability.",
-	atk2hp: "Set target's HP equal to its strength.",
+	atk2hp:
+		"Set target's maximum HP equal to its strength. Set its HP to its maximum HP.",
 	autoburrow:
 		'Until end of turn, your creatures with burrow enter play burrowed.',
 	axedraw:

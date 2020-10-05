@@ -706,7 +706,7 @@ Thing.prototype.v_attack = function (stasis, freedomChance) {
 };
 
 Thing.prototype.buffhp = function (x) {
-	if (this.type !== etg.Weapon) {
+	if (x > 0 && this.type !== etg.Weapon) {
 		if (this.type === etg.Player && this.maxhp <= 500)
 			this.maxhp = Math.min(this.maxhp + x, 500);
 		else this.maxhp += x;
