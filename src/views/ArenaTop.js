@@ -32,29 +32,29 @@ export default class ArenaTop extends Component {
 						top: '16px',
 					}}>
 					{info.map((data, i) => {
-						const lic = [<span className="atoptext">{data[0]}</span>];
-						for (let i = 1; i <= 4; i++) {
-							if (i === 3) {
-								lic.push(<span className="atopdash">-</span>);
-							}
-							lic.push(<span className={'atop' + i}>{data[i]}</span>);
-						}
 						const card = Cards.Codes[data[5]].asUpped(this.props.lv);
-						lic.push(
-							<span
-								className="atoptext"
-								onMouseEnter={e =>
-									this.setState({
-										card: card,
-										cardx: e.pageX + 4,
-										cardy: e.pageY + 4,
-									})
-								}
-								onMouseLeave={() => this.setState({ card: null })}>
-								{card.name}
-							</span>,
+						return (
+							<li key={i}>
+								<span className="atoptext">{data[0]}</span>
+								<span className="atop1">{data[1]}</span>
+								<span className="atop2">{data[2]}</span>
+								<span className="atopdash">-</span>
+								<span className="atop3">{data[3]}</span>
+								<span className="atop4">{data[4]}</span>
+								<span
+									className="atoptext"
+									onMouseEnter={e =>
+										this.setState({
+											card: card,
+											cardx: e.pageX + 4,
+											cardy: e.pageY + 4,
+										})
+									}
+									onMouseLeave={() => this.setState({ card: null })}>
+									{card.name}
+								</span>
+							</li>
 						);
-						return <li>{lic}</li>;
 					})}
 				</ol>
 				<Components.ExitBtn x={8} y={300} />
