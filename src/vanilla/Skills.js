@@ -599,7 +599,7 @@ const Actives = {
 	},
 	luciferin: (ctx, c, t) => {
 		c.owner.dmg(-10);
-		for (const cr of c.creatures) {
+		for (const cr of c.owner.creatures) {
 			if (!cr) continue;
 			let givelight = true;
 			for (const key of cr.active.keys()) {

@@ -776,16 +776,14 @@ function checkpassives(c) {
 		score += !sval ? 0 : sval instanceof Function ? sval(c) : sval;
 	}
 	for (const [status, type] of uniqueSkills) {
-		if (c.hasactive(type, status)) {
-			if (c.type !== etg.Spell) {
-				if (uniquesSkill.has(status)) {
-					continue;
-				}
-				uniquesSkill.add(status);
+		if (c.type !== etg.Spell && c.hasactive(type, status)) {
+			if (uniquesSkill.has(status)) {
+				continue;
 			}
+			uniquesSkill.add(status);
+			const sval = statusValues[status];
+			score += !sval ? 0 : sval instanceof Function ? sval(c) : sval;
 		}
-		const sval = statusValues[status];
-		score += !sval ? 0 : sval instanceof Function ? sval(c) : sval;
 	}
 	return score;
 }
@@ -799,7 +797,7 @@ const throttled = new Set([
 	'siphon',
 ]);
 
-function evalthing(game, c, inHand, floodingFlag) {
+function evalthing(game, c, inHand = false, floodingFlag = false) {
 	if (!c) return 0;
 	const { card } = c;
 	if (inHand && !caneventuallyactive(card.costele, card.cost, c.owner)) {
@@ -930,7 +928,7 @@ function evalthing(game, c, inHand, floodingFlag) {
 	} else {
 		score *= c.getStatus('immaterial') ? 1.35 : 1.25;
 	}
-	if (inHand && card.cost > 0) score *= 0.9;
+	if (inHand) score *= 0.9;
 	return score;
 }
 
@@ -1038,7 +1036,8 @@ export default function (game) {
 		if (expectedDamageToTake >= pl.hp)
 			pscore -= (expectedDamageToTake - pl.hp) * 99 + 33;
 		pscore += evalthing(game, pl.weapon) + evalthing(game, pl.shield);
-		for (const cr of pl.creatures) pscore += evalthing(game, cr);
+		for (const cr of pl.creatures)
+			pscore += evalthing(game, cr, false, floodingFlag);
 		for (const pr of pl.permanents) pscore += evalthing(game, pr);
 		for (const cinst of pl.hand) pscore += evalthing(game, cinst, true);
 		for (let draw = 1; draw <= pl.drawpower; draw++) {
