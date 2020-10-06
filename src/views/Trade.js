@@ -116,6 +116,7 @@ export default connect(({ user }) => ({ user }))(
 						/>
 					)}
 					<Components.DeckDisplay
+						cards={Cards}
 						deck={this.state.deck}
 						onMouseOver={(i, card) => this.setState({ card })}
 						onClick={i => {
@@ -125,6 +126,7 @@ export default connect(({ user }) => ({ user }))(
 						}}
 					/>
 					<Components.DeckDisplay
+						cards={Cards}
 						deck={this.state.offer}
 						x={450}
 						onMouseOver={(i, card) => this.setState({ card })}
@@ -202,7 +204,7 @@ export default connect(({ user }) => ({ user }))(
 							cards={Cards}
 							cardpool={cardpool}
 							cardminus={cardminus}
-							onMouseOver={code => this.setState({ code })}
+							onMouseOver={card => this.setState({ card })}
 							onClick={card => {
 								const code = card.code;
 								if (
