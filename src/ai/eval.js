@@ -911,20 +911,21 @@ function evalthing(game, c, inHand, floodingFlag) {
 		if (c.getStatus('voodoo') && c.isMaterial()) {
 			score += hp / 10;
 		}
-		if (hp && c.owner.gpull === c.id) {
+		if (hp !== 0 && c.owner.gpull === c.id) {
 			if (c.getStatus('voodoo')) score += hp;
 			score = ((score + hp) * Math.log(hp)) / 4;
 			if (c.active.get('shield') && !delaymix) {
 				score += evalactive(c, c.active.get('shield'));
 			}
 		} else {
-			score *= hp
-				? !c.isMaterial()
-					? 1.3
-					: 1 + Math.log(Math.min(hp, 33)) / 7
-				: inHand
-				? 0.4
-				: 0.2;
+			score *=
+				hp !== 0
+					? !c.isMaterial()
+						? 1.3
+						: 1 + Math.log(Math.min(hp, 33)) / 7
+					: inHand
+					? 0.4
+					: 0.2;
 		}
 	} else {
 		score *= c.getStatus('immaterial') ? 1.35 : 1.25;
@@ -1034,8 +1035,8 @@ export default function (game) {
 		const expectedDamageToTake = expectedDamage.get(pl.foeId);
 		let pscore =
 			wallCharges[j] * 4 + Math.log(pl.markpower + 1) - expectedDamageToTake;
-		if (expectedDamageToTake > player.hp)
-			pscore -= (expectedDamageToTake - player.hp) * 99;
+		if (expectedDamageToTake >= pl.hp)
+			pscore -= (expectedDamageToTake - pl.hp) * 99 + 33;
 		pscore += evalthing(game, pl.weapon) + evalthing(game, pl.shield);
 		for (const cr of pl.creatures) pscore += evalthing(game, cr);
 		for (const pr of pl.permanents) pscore += evalthing(game, pr);
@@ -1053,7 +1054,7 @@ export default function (game) {
 				);
 			}
 		}
-		pscore += Math.sqrt(pl.hp) * 4 - pl.getStatus('poison');
+		pscore += Math.sqrt(Math.max(pl.hp, 0)) * 4 - pl.getStatus('poison');
 		if (pl.getStatus('precognition')) pscore += 0.5;
 		if (pl.casts === 0)
 			pscore -= (pl.handIds.length + (pl.handIds.length > 6 ? 7 : 4)) / 4;
