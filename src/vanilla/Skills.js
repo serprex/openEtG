@@ -1,6 +1,7 @@
 import * as imm from '../immutable.js';
-import Skill from '../Skill.js';
 import * as etg from '../etg.js';
+import Skill from '../Skill.js';
+import parseSkill from '../parseSkill.js';
 
 function vadrenathrottle(f) {
 	return function (ctx, c, ...args) {
@@ -606,7 +607,7 @@ const Actives = {
 				if (
 					key !== 'ownplay' &&
 					key !== 'owndiscard' &&
-					!skill.name.every(name => Actives[name].passive)
+					!skill.name.every(name => parseSkill(name).passive)
 				) {
 					givelight = false;
 					break;

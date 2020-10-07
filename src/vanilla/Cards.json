@@ -21,7 +21,7 @@
 	[["Druidic Staff",1509,2,"regenerate",2,7,"",6],["Jade Staff",3509,2,"regenerate",4,7,"",18]],
 	[["Fahrenheit",1607,3,"buff=v_fiery",4,5,"",6],["Fahrenheit",3607,3,"buff=v_fiery",5,5,"",18]],
 	[["Trident",1708,3,"3:4=v_earthquake",4,9,"aquatic",6],["Poseidon",3708,3,"2:4=v_earthquake",4,9,"aquatic",18]],
-	[["Morning Star",1809,5,"v_noluci",7,7,"immaterial",6],["Morning Glory",3809,5,"v_noluci",8,4,"immaterial",18]],
+	[["Morning Star",1809,5,"",7,7,"immaterial",6],["Morning Glory",3809,5,"",8,4,"immaterial",18]],
 	[["Owl's Eye",1909,5,"2=v_snipe",5,7,"ranged",6],["Eagle's Eye",3909,5,"2=v_snipe",7,7,"ranged",18]],
 	[["Eternity",2008,6,"3=v_rewind",4,8,"",6],["Eternity",4008,5,"3=v_rewind",4,8,"",18]],
 	[["Vampire Stiletto",2107,1,"hit=v_vampire",4,4,"nocturnal",6],["Vampire Dagger",4107,2,"hit=v_vampire",6,4,"nocturnal",18]],
