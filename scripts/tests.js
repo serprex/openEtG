@@ -139,15 +139,25 @@ M.test('Boneyard', function () {
 	);
 });
 M.test('Bounce', function () {
-	const photon = this.player1.newThing(Cards.Names.Photon);
-	this.player1.addCrea(photon);
-	this.cast('acceleration', photon, photon);
-	this.cast('ren', photon, photon);
-	photon.attack();
-	assert.equal(this.player1.handIds[this.player1.hand.length - 1], photon.id);
-	assert.equal(photon.atk, 3);
-	assert.equal(photon.hp, 0);
-	assert.equal(photon.maxhp, 0);
+	const dev = this.player1.newThing(Cards.Names.Devourer);
+	this.player1.addCrea(dev);
+	this.cast('acceleration', dev, dev);
+	this.cast('ren', dev, dev);
+	this.player2.setQuanta(etg.Light, 2);
+	dev.attack();
+	dev.attack();
+	assert.equal(this.player1.handIds[this.player1.hand.length - 1], dev.id);
+	assert.equal(dev.atk, 4);
+	assert.equal(dev.hp, 2);
+	assert.equal(dev.maxhp, 2);
+	assert.ok(dev.hasactive('ownattack', 'growth 2 -1'));
+	this.player1.hand[this.player1.hand.length - 1].play();
+	this.cast('pacify', dev, dev);
+	this.cast('atk2hp', dev, dev);
+	assert.equal(this.player1.handIds[this.player1.hand.length - 1], dev.id);
+	assert.equal(dev.atk, 0);
+	assert.equal(dev.hp, 0);
+	assert.equal(dev.maxhp, 0);
 });
 M.test('Deckout', function () {
 	this.player2.deckIds = [];
