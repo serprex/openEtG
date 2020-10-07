@@ -602,11 +602,11 @@ const Actives = {
 		for (const cr of c.owner.creatures) {
 			if (!cr) continue;
 			let givelight = true;
-			for (const key of cr.active.keys()) {
+			for (const [key, skill] of cr.active) {
 				if (
 					key !== 'ownplay' &&
 					key !== 'owndiscard' &&
-					!cr.active.get(key).name.every(name => Actives[name].passive)
+					!skill.name.every(name => Actives[name].passive)
 				) {
 					givelight = false;
 					break;
