@@ -639,7 +639,7 @@ Thing.prototype.v_attack = function (stasis, freedomChance) {
 				momentum = true;
 				trueatk = Math.ceil(trueatk * 1.5);
 			}
-			if (this.status.get('psion')) {
+			if (this.status.get('psionic')) {
 				target.spelldmg(trueatk);
 			} else if (momentum || trueatk < 0) {
 				let stillblock = false,

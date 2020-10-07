@@ -504,7 +504,7 @@ Player.prototype.v_endturn = function (discard) {
 				cr.active.get('cast').castName === 'v_dshield'
 			) {
 				cr.setStatus('immaterial', 0);
-				cr.setStatus('psion', 0);
+				cr.setStatus('psionic', 0);
 			}
 		}
 	});

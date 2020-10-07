@@ -589,7 +589,7 @@ const Actives = {
 	lobotomize: target('crea', (ctx, c, t) => {
 		t.lobo();
 		t.setStatus('momentum', 0);
-		t.setStatus('psion', 0);
+		t.setStatus('psionic', 0);
 		t.setStatus('mutant', 0);
 		t.casts = 0;
 	}),
@@ -1056,7 +1056,7 @@ const Actives = {
 	wisdom: target('quinttog', (ctx, c, t) => {
 		t.incrAtk(4);
 		if (t.getStatus('immaterial')) {
-			t.setStatus('psion', 1);
+			t.setStatus('psionic', 1);
 		}
 	}),
 	pillar: (ctx, c, t) => {
