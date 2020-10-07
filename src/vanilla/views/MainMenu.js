@@ -44,16 +44,16 @@ export default connect(({ user, orig, opts }) => ({
 			}
 			for (let i = 0; i < 40; i++) {
 				const e = i < 30 ? e1 : e2;
-				const card = RngMock.randomcard(RngMock.rng() < 0.3, card => {
-					const pass =
+				const card = RngMock.randomcard(
+					RngMock.rng() < 0.3,
+					card =>
 						card.element === e &&
 						!card.isOf(Cards.Names.Miracle) &&
 						card.rarity !== 15 &&
 						card.rarity !== 20 &&
 						!card.name.match('^Shard of ') &&
-						!card.name.match('^Mark of ');
-					return pass;
-				});
+						!card.name.match('^Mark of '),
+				);
 				deck.push(card.code);
 			}
 			deck.push(etgutil.toTrueMark(e2));

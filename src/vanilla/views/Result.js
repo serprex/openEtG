@@ -60,18 +60,17 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 				foeDeck = etgutil
 					.decodedeck(foedeck.deck)
 					.map(code => game.Cards.Codes[code])
-					.filter(card => card && !card.isFree());
+					.filter(
+						card => card && !card.isFree() && !card.name.startsWith('Mark of '),
+					);
 			let newpool = '';
 			const cardswon = [];
 			for (let i = 0; i < game.data.spins; i++) {
 				const spins = [];
 				while (spins.length < 4) {
 					let card = RngMock.choose(foeDeck);
-					if (
-						card.rarity === 15 ||
-						card.rarity === 20 ||
-						card.name.startsWith('Mark of ')
-					) {
+					if (card.type === etg.Pillar) card = RngMock.choose(foeDeck);
+					if (card.rarity === 15 || card.rarity === 20) {
 						card = game.Cards.Names.Relic;
 					}
 					spins.push(card);
