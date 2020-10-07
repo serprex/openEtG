@@ -34,7 +34,24 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 			return null;
 		}
 
+		canRematch = () =>
+			this.props.game.data.rematch &&
+			(!this.props.game.data.rematchFilter ||
+				this.props.game.data.rematchFilter(this.props, this.state.player1.id));
+
+		exitFunc = () => store.store.dispatch(store.doNav(import('./MainMenu.js')));
+
+		onkeydown = e => {
+			if (e.target.tagName === 'TEXTAREA') return;
+			const kc = e.which;
+			if (kc === 32 || kc === 13) this.exitFunc();
+			else if ((kc === 87 || e.key === 'w') && this.canRematch()) {
+				this.props.game.data.rematch(this.props);
+			}
+		};
+
 		componentDidMount() {
+			document.addEventListener('keydown', this.onkeydown);
 			const { game, orig } = this.props;
 			if (game.winner !== this.state.player1.id) return;
 			const foedecks = game.data.players.filter(pd => !pd.user);
@@ -51,7 +68,6 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 				while (spins.length < 4) {
 					let card = RngMock.choose(foeDeck);
 					if (
-						!card ||
 						card.rarity === 15 ||
 						card.rarity === 20 ||
 						card.name.startsWith('Mark of ')
@@ -92,6 +108,10 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 			this.setState({ cardswon, electrumwon });
 		}
 
+		componentWillUnmount() {
+			document.removeEventListener('keydown', this.onkeydown);
+		}
+
 		render() {
 			const { game } = this.props;
 			return (
@@ -104,24 +124,20 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 							left: '412px',
 							top: '440px',
 						}}
-						onClick={() => {
-							store.store.dispatch(store.doNav(import('./MainMenu.js')));
-						}}
+						onClick={this.exitFunc}
 					/>
-					{game.data.rematch &&
-						(!game.data.rematchFilter ||
-							game.data.rematchFilter(this.props, this.state.player1.id)) && (
-							<input
-								type="button"
-								value="Rematch"
-								onClick={() => game.data.rematch(this.props)}
-								style={{
-									position: 'absolute',
-									left: '412px',
-									top: '490px',
-								}}
-							/>
-						)}
+					{this.canRematch() && (
+						<input
+							type="button"
+							value="Rematch"
+							onClick={() => game.data.rematch(this.props)}
+							style={{
+								position: 'absolute',
+								left: '412px',
+								top: '490px',
+							}}
+						/>
+					)}
 					{this.state.cardswon}
 					{this.state.electrumwon && (
 						<Components.Text

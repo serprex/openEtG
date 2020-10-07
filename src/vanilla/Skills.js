@@ -1074,11 +1074,8 @@ const Actives = {
 		c.setStatus('pendstate', +!c.getStatus('pendstate'));
 	},
 	blockwithcharge: (ctx, c, t) => {
-		const charges = c.getStatus('charges');
-		if (charges <= 1) {
-			c.owner.shield = undefined;
-		} else {
-			c.setStatus('charges', charges - 1);
+		if (c.maybeDecrStatus('charges') < 2) {
+			c.remove();
 		}
 		return true;
 	},

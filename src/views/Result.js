@@ -193,16 +193,16 @@ export default connect(({ user }) => ({ user }))(
 			return null;
 		}
 
+		canRematch = () =>
+			this.props.game.data.rematch &&
+			(!this.props.game.data.rematchFilter ||
+				this.props.game.data.rematchFilter(this.props, this.state.player1.id));
+
 		onkeydown = e => {
 			if (e.target.tagName === 'TEXTAREA') return;
 			const kc = e.which;
 			if (kc === 32 || kc === 13) this.exitFunc();
-			else if (
-				(kc === 87 || e.key === 'w') &&
-				this.props.game.data.rematch &&
-				(!this.props.game.data.rematchFilter ||
-					this.props.game.data.rematchFilter(this.props))
-			) {
+			else if ((kc === 87 || e.key === 'w') && this.canRematch()) {
 				this.props.game.data.rematch(this.props);
 			}
 		};
@@ -456,20 +456,18 @@ export default connect(({ user }) => ({ user }))(
 			return (
 				<>
 					<Components.ExitBtn x={412} y={440} onClick={this.exitFunc} />
-					{game.data.rematch &&
-						(!game.data.rematchFilter ||
-							game.data.rematchFilter(this.props, this.state.player1.id)) && (
-							<input
-								type="button"
-								value="Rematch"
-								onClick={() => game.data.rematch(this.props)}
-								style={{
-									position: 'absolute',
-									left: '412px',
-									top: '490px',
-								}}
-							/>
-						)}
+					{this.canRematch() && (
+						<input
+							type="button"
+							value="Rematch"
+							onClick={() => game.data.rematch(this.props)}
+							style={{
+								position: 'absolute',
+								left: '412px',
+								top: '490px',
+							}}
+						/>
+					)}
 					{this.props.user && (
 						<>
 							{game.winner === this.state.player1.id && (
