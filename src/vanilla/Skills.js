@@ -619,7 +619,7 @@ const Actives = {
 	lycanthropy: (ctx, c, t) => {
 		c.buffhp(5);
 		c.incrAtk(5);
-		c.rmactive('cast', 'lycanthropy');
+		c.rmactive('cast', 'v_lycanthropy');
 	},
 	mend: target('crea', (ctx, c, t) => {
 		t.dmg(-5);
