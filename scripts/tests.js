@@ -54,6 +54,8 @@ M.test('Upped Alignment', function () {
 		const un = etgutil.asUpped(key, false),
 			up = etgutil.asUpped(key, true);
 		assert.ok(Cards.Codes[un] && Cards.Codes[up], key);
+		const card = Cards.Codes[key];
+		if (card.type === etg.Spell) assert.ok(card.active.get('cast'));
 	}
 });
 M = new TestModule('Cards', {

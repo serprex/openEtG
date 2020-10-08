@@ -1,6 +1,6 @@
 module.exports = {
 	entry: {
-		aivai: './src/aivai.js',
+		aivai: './src/ui/aivai.js',
 		art: './src/ui/art.js',
 		deck: './src/ui/deck.js',
 		main: './src/ui/main.js',
