@@ -60,7 +60,7 @@ export default connect(({ user, orig, opts }) => ({
 						}}
 					/>
 					{this.state.deck.length > 0 &&
-						this.props.orig.electrum > this.state.deck.length * 1500 && (
+						(this.props.orig.electrum > this.state.deck.length * 1500 ? (
 							<input
 								type="button"
 								value="Upgrade"
@@ -87,7 +87,23 @@ export default connect(({ user, orig, opts }) => ({
 									this.props.dispatch(store.doNav(import('./MainMenu.js')));
 								}}
 							/>
-						)}
+						) : (
+							<div
+								style={{
+									position: 'absolute',
+									left: '200px',
+									top: '235px',
+								}}>
+								{`You need
+								${
+									this.state.deck.length * 1500 - this.props.orig.electrum
+								} more electrum to afford ${
+									this.state.deck.length === 1
+										? 'this upgrade'
+										: 'these upgrades'
+								}`}
+							</div>
+						))}
 					<input
 						type="button"
 						value="Exit"

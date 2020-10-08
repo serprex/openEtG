@@ -50,11 +50,7 @@ export default function Game(data) {
 	}
 	for (let i = 0; i < players.length; i++) {
 		const pdata = data.players[i];
-		this.set(
-			players[i],
-			'leader',
-			playersByIdx.get(pdata.leader === undefined ? pdata.idx : pdata.leader),
-		);
+		this.set(players[i], 'leader', playersByIdx.get(pdata.leader ?? pdata.idx));
 	}
 	this.players = players;
 	for (let i = 0; i < players.length; i++) {
