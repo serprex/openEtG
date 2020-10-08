@@ -61,6 +61,15 @@ export default connect(({ user, orig, opts }) => ({
 		};
 
 		vsAi = (level, cost, basereward, hpreward) => {
+			if (
+				!Cards.isDeckLegal(
+					etgutil.decodedeck(this.props.orig.deck),
+					this.props.orig,
+				)
+			) {
+				this.props.dispatch(store.chatMsg(`Invalid deck`, 'System'));
+				return;
+			}
 			const [ainame, aideck] =
 				level === 'ai4' ? this.mkAi4() : RngMock.choose(aiDecks[level]);
 			const name = this.props.user.name;
@@ -142,6 +151,16 @@ export default connect(({ user, orig, opts }) => ({
 							position: 'absolute',
 							left: '200px',
 							top: '140px',
+						}}
+					/>
+					<input
+						type="button"
+						value="Sandbox PvP"
+						onClick={() => sendChallenge(this.props.origfoename, true, false)}
+						style={{
+							position: 'absolute',
+							left: '200px',
+							top: '170px',
 						}}
 					/>
 					<input

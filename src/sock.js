@@ -186,13 +186,14 @@ const sockEvents = {
 					style={{ cursor: 'pointer', color: '#69f' }}
 					onClick={() => {
 						if (data.pvp) {
-							sendChallenge(data.f, data.orig);
+							sendChallenge(data.f, data.orig, data.deckcheck);
 						} else {
 							userEmit('tradewant', { f: (trade = data.f) });
 						}
 					}}>
 					{`${data.f} offers to ${data.pvp ? 'duel' : 'trade with'} you!`}
 					{data.orig && <i> (in Legacy mode)</i>}
+					{!data.deckcheck && <i> (without deck checks)</i>}
 				</div>,
 			),
 		);
@@ -274,10 +275,11 @@ export function getOrigDeck() {
 	const state = store.store.getState();
 	return state.orig.deck;
 }
-export function sendChallenge(foe, orig = false) {
+export function sendChallenge(foe, orig = false, deckcheck = true) {
 	const deck = orig ? getOrigDeck() : getDeck(),
 		state = store.store.getState();
 	if (
+		deckcheck &&
 		!(orig ? OrigCards : Cards).isDeckLegal(
 			etgutil.decodedeck(deck),
 			orig ? state.orig : state.user,
@@ -286,7 +288,7 @@ export function sendChallenge(foe, orig = false) {
 		store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
 		return;
 	}
-	const msg = { f: foe, deck };
+	const msg = { f: foe, deck, deckcheck };
 	userEmit(orig ? 'origfoewant' : 'foewant', msg);
 	pvp = foe;
 }

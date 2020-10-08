@@ -573,7 +573,12 @@ select *, (row_number() over (partition by arena_id order by score desc))::int "
 				} else {
 					thismeta.duelwant = f;
 					thismeta.origduel = true;
-					sockEmit(foesock, 'challenge', { f: u, pvp: true, orig: true });
+					sockEmit(foesock, 'challenge', {
+						f: u,
+						pvp: true,
+						orig: true,
+						deckcheck: data.deckcheck,
+					});
 				}
 			}
 		},
