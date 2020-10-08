@@ -102,7 +102,7 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 				pool: newpool || undefined,
 			};
 			userEmit('origadd', update);
-			this.props.dispatch(store.addOrig(update.electrum, update.pool));
+			this.props.dispatch(store.addOrig(update));
 
 			this.setState({ cardswon, electrumwon });
 		}

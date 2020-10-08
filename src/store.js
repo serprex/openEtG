@@ -3,7 +3,7 @@ import { createStore, applyMiddleware } from 'redux';
 
 import * as usercmd from './usercmd.js';
 import * as sfx from './audio.js';
-import { mergedecks } from './etgutil.js';
+import * as etgutil from './etgutil.js';
 
 const opts = { channel: 'Main' };
 let hasLocalStorage = true;
@@ -79,8 +79,8 @@ export function setOrig(user) {
 export function updateOrig(data) {
 	return { type: 'ORIG_UPDATE', data };
 }
-export function addOrig(electrum, pool) {
-	return { type: 'ORIG_ADD', electrum, pool };
+export function addOrig(update) {
+	return { type: 'ORIG_ADD', ...update };
 }
 
 export const store = createStore(
@@ -130,17 +130,19 @@ export const store = createStore(
 						...action.data,
 					},
 				};
-			case 'ORIG_ADD':
+			case 'ORIG_ADD': {
+				let pool = state.orig.pool;
+				if (action.pool) pool = etgutil.mergedecks(pool, action.pool);
+				if (action.rmpool) pool = etgutil.removedecks(pool, action.rmpool);
 				return {
 					...state,
 					orig: {
 						...state.orig,
 						electrum: state.orig.electrum + (action.electrum | 0),
-						pool: action.pool
-							? mergedecks(state.orig.pool, action.pool)
-							: state.orig.pool,
+						pool,
 					},
 				};
+			}
 			case 'MUTE': {
 				const muted = new Set(state.muted);
 				muted.add(action.name);

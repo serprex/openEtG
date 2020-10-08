@@ -91,8 +91,9 @@ export default connect(({ user, orig, opts }) => ({
 					},
 				]),
 			});
-			userEmit('origadd', { electrum: -cost });
-			this.props.dispatch(store.addOrig(-cost));
+			const update = { electrum: -cost };
+			userEmit('origadd', update);
+			this.props.dispatch(store.addOrig(update));
 			this.props.dispatch(
 				store.doNav(import('../../views/Match.js'), { game }),
 			);
@@ -154,6 +155,18 @@ export default connect(({ user, orig, opts }) => ({
 						style={{
 							position: 'absolute',
 							left: '300px',
+							top: '140px',
+						}}
+					/>
+					<input
+						type="button"
+						value="Upgrade"
+						onClick={() =>
+							this.props.dispatch(store.doNav(import('./Upgrade.js')))
+						}
+						style={{
+							position: 'absolute',
+							left: '500px',
 							top: '140px',
 						}}
 					/>

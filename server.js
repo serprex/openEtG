@@ -1248,6 +1248,9 @@ select *, (row_number() over (partition by arena_id order by score desc))::int "
 				});
 				if (result.rows.length) {
 					const row = result.rows[0].data;
+					let pool = row.pool;
+					if (data.pool) pool = etgutil.mergedecks(pool, data.pool);
+					if (data.rmpool) pool = etgutil.removedecks(pool, data.rmpool);
 					return await sql.query({
 						text:
 							'update user_data set data = $2 where user_id = $1 and type_id = 2',
@@ -1256,9 +1259,7 @@ select *, (row_number() over (partition by arena_id order by score desc))::int "
 							{
 								...row,
 								electrum: row.electrum + (data.electrum | 0),
-								pool: data.pool
-									? etgutil.mergedecks(row.pool, data.pool)
-									: row.pool,
+								pool,
 							},
 						],
 					});

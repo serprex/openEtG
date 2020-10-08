@@ -840,7 +840,7 @@ const Actives = {
 		c.owner.dmg(-4);
 	},
 	scarab: (ctx, c, t) => {
-		c.owner.addCard(c.owner.newThing(c.card.as(ctx.Cards.Names.Scarab)));
+		c.owner.addCrea(c.owner.newThing(c.card.as(ctx.Cards.Names.Scarab)));
 	},
 	scramble: (ctx, c, t) => {
 		if (t.type === etg.Player && !t.sanctuary) {
