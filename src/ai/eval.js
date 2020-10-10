@@ -391,7 +391,7 @@ const SkillsValues = {
 	v_animateweapon: 4,
 	v_antimatter: 12,
 	v_bblood: 7,
-	v_blackhole: function (c) {
+	v_blackhole: c => {
 		let a = 0;
 		const fq = c.owner.foe.quanta;
 		for (let i = 1; i < 13; i++) {
@@ -418,11 +418,10 @@ const SkillsValues = {
 	v_devour: c => 2 + (c.type === etg.Spell ? c.card.health : c.truehp()),
 	v_disfield: 8,
 	v_disshield: 7,
-	v_dive: function (c, ttatk) {
-		return c.type === etg.Spell
+	v_dive: (c, ttatk) =>
+		c.type === etg.Spell
 			? c.card.attack
-			: ttatk - (c.getStatus('dive') || 0) / 1.5;
-	},
+			: ttatk - (c.getStatus('dive') || 0) / 1.5,
 	v_divinity: 3,
 	v_drainlife: 10,
 	v_dryspell: 5,
@@ -430,31 +429,23 @@ const SkillsValues = {
 	v_duality: 4,
 	v_earth: 1,
 	v_earthquake: 4,
-	v_empathy: function (c) {
-		return c.owner.countcreatures();
-	},
+	v_empathy: c => c.owner.countcreatures(),
 	v_enchant: 6,
 	v_endow: 4,
 	v_evolve: 2,
 	v_fire: 1,
 	v_firebolt: 10,
 	v_flyingweapon: 7,
-	v_fractal: function (c) {
-		return 9 - c.owner.hand.length;
-	},
+	v_fractal: c => 9 - c.owner.hand.length,
 	v_freeze: [3, 3.5],
 	v_gas: 5,
-	v_gpull: function (c) {
-		return c.type === etg.Spell || c.id !== c.owner.gpull ? 2 : 0;
-	},
+	v_gpull: c => (c.type === etg.Spell || c.id !== c.owner.gpull ? 2 : 0),
 	v_gpullspell: 3,
 	v_gratitude: c => (c.status ? c.getStatus('charges') * 4 : 4),
 	v_growth1: 3,
 	v_growth: 5,
 	v_guard: 4,
-	v_hasten: function (c) {
-		return Math.min(c.owner.deck.length / 4, 10);
-	},
+	v_hasten: c => Math.min(c.owner.deck.length / 4, 10),
 	v_hatch: 3,
 	v_heal: 8,
 	v_holylight: 3,
@@ -478,14 +469,13 @@ const SkillsValues = {
 	v_mitosisspell: 6,
 	v_momentum: 2,
 	v_mutation: 4,
-	v_neuro: c => {
-		return c.owner.foe.neuro ? evalactive(c, Actives.poison) + 0.1 : 6;
-	},
+	v_neuro: c => (c.owner.foe.neuro ? 2.1 : 6),
 	v_nightmare: c => {
 		const n = c.owner.hand.reduce(
 			(n, inst) => n + !!inst.card.isOf(c.game.Cards.Names.Nightmare),
 			0,
 		);
+		return (24 - c.owner.foe.handIds.length) >> n;
 	},
 	v_nova: 4,
 	v_nova2: 6,
@@ -516,10 +506,10 @@ const SkillsValues = {
 	v_salvage: 2,
 	v_sanctuary: 6,
 	v_scarab: 4,
-	v_scramble: function (c) {
-		var a = 0,
+	v_scramble: c => {
+		let a = 0,
 			fq = c.owner.foe.quanta;
-		for (var i = 1; i < 13; i++) {
+		for (let i = 1; i < 13; i++) {
 			if (!fq[i]) a++;
 		}
 		return a;
@@ -550,31 +540,29 @@ const SkillsValues = {
 	v_blockwithcharge: c =>
 		c.getStatus('charges') / (1 + c.owner.foe.countcreatures() * 2),
 	v_cold: 7,
-	v_evade100: function (c) {
-		return c.status
+	v_evade100: c =>
+		c.status
 			? c.getStatus('charges') === 0 && c.owner === c.owner.game.turn
 				? 0
 				: 1
-			: 1;
-	},
+			: 1,
 	v_evade40: 1,
 	v_evade50: 1,
 	firewall: 7,
 	v_skull: 5,
 	v_slow: 6,
-	v_solar: function (c) {
+	v_solar: c => {
 		const coq = c.owner.quanta[etg.Light];
 		return 5 - (4 * coq) / (4 + coq);
 	},
 	v_thorn: 5,
 	v_weight: 5,
-	v_wings: function (c) {
-		return c.status
+	v_wings: c =>
+		c.status
 			? c.getStatus('charges') === 0 && c.owner === c.owner.game.turn
 				? 0
 				: 6
-			: 6;
-	},
+			: 6,
 };
 const statusValues = {
 	airborne: 0.2,

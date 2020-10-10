@@ -14,8 +14,8 @@ function hookRowMouseover(tr) {
 	});
 }
 import CardData from '../Cards.json';
-const Cards = new Map();
-for (let i = 0; i < CardData.length - 1; i++) {
+const Cards = new Map([['4ta', 'Relic']]);
+for (let i = 0; i < CardData.length; i++) {
 	const Cardi = CardData[i];
 	for (let j = 1; j < Cardi.length; j++) {
 		const Cardj = Cardi[j];
@@ -49,6 +49,7 @@ const table = document.createElement('table');
 			'4ss',
 			'4st',
 			'4su',
+			'4ta',
 			'4te',
 			'4vr',
 			'55k',
