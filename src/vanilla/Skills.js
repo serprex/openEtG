@@ -127,7 +127,7 @@ const Actives = {
 		chim.atk = atk;
 		chim.maxhp = hp;
 		chim.hp = hp;
-		chim.active = new imm.Map();
+		chim.active = imm.emptyMap;
 		chim.setStatus('momentum', 1);
 		const newCreatures = new Uint32Array(23);
 		newCreatures[0] = chim.id;
@@ -543,12 +543,12 @@ const Actives = {
 				active = shardSkills[i][num - 1];
 			}
 		}
-		let actives = new imm.Map().set(
+		let actives = imm.emptyMap.set(
 				cost < 0 ? activeType[~cost] : 'cast',
 				Actives[active],
 			),
 			cost = shardCosts[active],
-			status = new imm.Map();
+			status = imm.emptyMap;
 		if (shardTally[etg.Air] > 0) {
 			status = status.set('airborne', true);
 		}
@@ -863,7 +863,7 @@ const Actives = {
 			const card = ctx.randomcard(
 				c.card.upped,
 				x =>
-					(x.type !== etg.Pillar || !x.name.match(/^Mark/)) &&
+					(!x.getStatus('pillar') || !x.name.match(/^Mark/)) &&
 					!x.isOf(ctx.Cards.Names.Relic) &&
 					!x.isOf(ctx.Cards.Names.Miracle) &&
 					!etg.ShardList.some(

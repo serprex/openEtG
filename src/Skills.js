@@ -34,12 +34,12 @@ function quadpillarFactory1(ele) {
 function quadpillarFactory(ele) {
 	return (ctx, c, t) => quadPillarCore(ctx, ele, c, c.getStatus('charges'));
 }
-const defaultShardGolem = new imm.Map({
-	stat: 1,
-	cast: 0,
-	status: new imm.Map(),
-	active: new imm.Map(),
-});
+const defaultShardGolem = new imm.Map([
+	['stat', 1],
+	['cast', 0],
+	['status', imm.emptyMap],
+	['active', imm.emptyMap],
+]);
 const passiveSet = new WeakSet();
 function passive(f) {
 	passiveSet.add(f);
@@ -572,7 +572,7 @@ const Skills = {
 	},
 	drawpillar: (ctx, c, t) => {
 		const deck = c.owner.deck;
-		if (deck.length && deck[deck.length - 1].card.type === etg.Pillar) {
+		if (deck.length && deck[deck.length - 1].getStatus('pillar')) {
 			c.owner.drawcard();
 		}
 	},
@@ -1129,8 +1129,8 @@ const Skills = {
 		const active = shardSkills[ctx.choose(shlist) - 1][Math.min(num - 1, 5)];
 		const shardgolem = {
 			stat: Math.floor(stat),
-			status: new imm.Map({ golem: 1 }),
-			active: new imm.Map({ cast: parseSkill(active) }),
+			status: new imm.Map([['golem', 1]]),
+			active: new imm.Map([['cast', parseSkill(active)]]),
 			cast: shardCosts[active],
 		};
 		function addSkill(event, active) {
@@ -1303,7 +1303,7 @@ const Skills = {
 	millpillar: target('play', (ctx, c, t) => {
 		if (
 			t.deckIds.length &&
-			ctx.get(t.deckIds[t.deckIds.length - 1]).get('card').type === etg.Pillar
+			ctx.getStatus(t.deckIds[t.deckIds.length - 1], 'pillar')
 		)
 			t._draw();
 	}),
@@ -1471,17 +1471,20 @@ const Skills = {
 	}),
 	pairproduce: (ctx, c, t) => {
 		for (const p of c.owner.permanentIds) {
-			if (p && ctx.get(p).get('card').type === etg.Pillar) {
+			if (p && ctx.getStatus(p, 'pillar')) {
 				ctx.trigger(p, 'ownattack');
 			}
 		}
 	},
 	paleomagnetism: (ctx, c, t) => {
-		const e = ctx.upto(6),
-			list = e & 1 ? etg.PillarList : etg.PendList,
+		const e = ctx.upto(3) < 2 ? c.owner.mark : c.owner.foe.mark,
 			inst = c.owner.newThing(
 				c.card.as(
-					ctx.Cards.Codes[list[e < 4 ? c.owner.mark : c.owner.foe.mark]],
+					ctx.randomcard(
+						false,
+						card =>
+							card.element === e && card.getStatus('pillar') && ~card.rarity,
+					),
 				),
 			);
 		ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
@@ -1825,7 +1828,7 @@ const Skills = {
 			const card = ctx.randomcard(
 				c.card.upped,
 				x =>
-					x.type !== etg.Pillar &&
+					x.getStatus('pillar') &&
 					x.rarity < 4 &&
 					(i > 0 || anyentro || x.element === etg.Entropy),
 			);

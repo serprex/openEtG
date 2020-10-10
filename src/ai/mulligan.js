@@ -6,12 +6,12 @@ export default function mulligan(pl) {
 		pl.handIds.length < 6 ||
 		pl.hand.some(
 			({ card }) =>
-				card.type === etg.Pillar ||
+				card.getStatus('pillar') ||
 				card.isOf(Cards.Names.Nova) ||
 				card.isOf(Cards.Names.Immolation) ||
 				card.isOf(Cards.Names.GiftofOceanus) ||
 				card.isOf(Cards.Names.QuantumLocket),
 		) ||
-		pl.deck.every(({ card }) => card.type !== etg.Pillar)
+		pl.deck.every(({ card }) => !card.getStatus('pillar'))
 	);
 }

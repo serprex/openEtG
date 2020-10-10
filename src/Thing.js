@@ -470,8 +470,7 @@ Thing.prototype.play = function (tgt, fromhand) {
 	} else {
 		sfx.playSound(card.type <= etg.Permanent ? 'permPlay' : 'creaturePlay');
 		if (card.type === etg.Creature) owner.addCrea(this, fromhand);
-		else if (card.type === etg.Permanent || card.type === etg.Pillar)
-			owner.addPerm(this, fromhand);
+		else if (card.type === etg.Permanent) owner.addPerm(this, fromhand);
 		else if (card.type === etg.Weapon) owner.setWeapon(this, fromhand);
 		else owner.setShield(this, fromhand);
 	}
@@ -720,7 +719,7 @@ Thing.prototype.setStatus = function (key, val) {
 	return this.game.setStatus(this.id, key, val);
 };
 Thing.prototype.clearStatus = function () {
-	this.game.setIn([this.id, 'status'], new imm.Map());
+	this.game.setIn([this.id, 'status'], imm.emptyMap);
 };
 Thing.prototype.maybeDecrStatus = function (key) {
 	let oldval;

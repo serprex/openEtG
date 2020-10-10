@@ -54,7 +54,7 @@ export default class Skill {
 		notself: (c, t) => c.id !== t.id,
 		all: (c, t) => true,
 		card: (c, t) => c.id !== t.id && t.type === etg.Spell,
-		pill: (c, t) => t.isMaterial(etg.Permanent) && t.card.type === etg.Pillar,
+		pill: (c, t) => t.isMaterial(etg.Permanent) && t.getStatus('pillar'),
 		weap: (c, t) =>
 			t.isMaterial() &&
 			(t.type === etg.Weapon ||

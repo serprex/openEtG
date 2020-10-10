@@ -19,7 +19,7 @@ export default function (deck) {
 			~unuppedbans.indexOf(card.code)
 		)
 			return card.name + ' is banned';
-		if (card.type == etg.Pillar) continue;
+		if (card.getStatus('pillar')) continue;
 		var nymph = etg.NymphList.indexOf(card.asUpped(false).code);
 		if (~nymph) {
 			if (nymphs[nymph]) return 'You may only have 1 ' + card.name;

@@ -69,7 +69,7 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 				const spins = [];
 				while (spins.length < 4) {
 					let card = RngMock.choose(foeDeck);
-					if (card.type === etg.Pillar) card = RngMock.choose(foeDeck);
+					if (card.getStatus('pillar')) card = RngMock.choose(foeDeck);
 					if (card.rarity === 15 || card.rarity === 20) {
 						card = game.Cards.Names.Relic;
 					}

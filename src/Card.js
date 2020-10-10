@@ -40,7 +40,7 @@ export default class Card {
 		this.castele = 0;
 		if (info.Skill) {
 			if (this.type === etg.Spell) {
-				this.active = new imm.Map({ cast: parseSkill(info.Skill) });
+				this.active = new imm.Map([['cast', parseSkill(info.Skill)]]);
 				this.cast = this.cost;
 				this.castele = this.costele;
 			} else if (activecache.has(info.Skill)) {
@@ -50,7 +50,7 @@ export default class Card {
 					[this.cast, this.castele] = castinfo;
 				}
 			} else {
-				this.active = new imm.Map();
+				this.active = imm.emptyMap;
 				for (const active of util.iterSplit(info.Skill, '+')) {
 					const eqidx = active.indexOf('=');
 					const a0 = ~eqidx ? active.substr(0, eqidx) : 'ownattack';
@@ -65,12 +65,12 @@ export default class Card {
 				}
 				activecache.set(info.Skill, this.active);
 			}
-		} else this.active = new imm.Map();
+		} else this.active = imm.emptyMap;
 		if (info.Status) {
 			if (statuscache.has(info.Status)) {
 				this.status = statuscache.get(info.Status);
 			} else {
-				this.status = new imm.Map();
+				this.status = imm.emptyMap;
 				for (const status of util.iterSplit(info.Status, '+')) {
 					const eqidx = status.indexOf('=');
 					this.status = this.status.set(
@@ -80,7 +80,7 @@ export default class Card {
 				}
 				statuscache.set(info.Status, this.status);
 			}
-		} else this.status = new imm.Map();
+		} else this.status = imm.emptyMap;
 	}
 
 	get shiny() {
@@ -105,7 +105,7 @@ export default class Card {
 
 	isFree() {
 		return (
-			this.type === etg.Pillar && !this.upped && !this.rarity && !this.shiny
+			this.getStatus('pillar') && !this.upped && !this.rarity && !this.shiny
 		);
 	}
 

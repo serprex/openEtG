@@ -10,7 +10,7 @@ export default function (deck) {
 		var card = deck[i];
 		if (
 			free.indexOf(card.code) == -1 &&
-			(card.type !== etg.Pillar || card.name.match(/^Mark of/))
+			(!card.getStatus('pillar') || card.name.match(/^Mark of/))
 		) {
 			if (card.upped) return card.name + ' is upgraded. Upgrades are banned';
 			if (~etg.ShardList.indexOf(card.code))

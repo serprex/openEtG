@@ -91,7 +91,7 @@ const SkillsValues = {
 		for (let i = 0; i < 16; i++) {
 			if (perms[i]) {
 				const perm = c.owner.game.byId(perms[i]);
-				if (perm.card.type === etg.Pillar) {
+				if (perm.getStatus('pillar')) {
 					q +=
 						(perm.card.element === etg.Chroma ? 3 : 1) *
 						perm.getStatus('charges');
@@ -107,11 +107,18 @@ const SkillsValues = {
 		for (let i = 0; i < 16; i++) {
 			if (perms[i]) {
 				const perm = c.owner.game.byId(perms[i]);
-				if (perm.card.code === etg.PillarList[etg.Entropy]) {
+				if (
+					perm.element === etg.Entropy &&
+					perm.hasactive('ownattack', 'pillar')
+				) {
 					q += 3 * perm.getStatus('charges');
-				} else if (perm.card.code === etg.PendList[etg.Entropy]) {
+				} else if (
+					(c.owner.mark === etg.Entropy || perm.element === etg.Entropy) &&
+					perm.hasactive('ownattack', 'pend')
+				) {
 					q +=
-						(c.owner.mark === etg.Entropy ? 3 : 1.5) *
+						1.5 *
+						((c.owner.mark === etg.Entropy) + (perm.element === etg.Entropy)) *
 						perm.getStatus('charges');
 				}
 			}
@@ -930,7 +937,7 @@ function caneventuallyactive(element, cost, pl) {
 		pl.permanents.some(
 			pr =>
 				pr &&
-				((pr.card.type === etg.Pillar &&
+				((pr.getStatus('pillar') &&
 					(!pr.card.element || pr.card.element === element)) ||
 					(pr.active.get('cast') === Skills.locket &&
 						pr.getStatus('mode') === element)),

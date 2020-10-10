@@ -55,7 +55,6 @@ export const Air = 9;
 export const Time = 10;
 export const Darkness = 11;
 export const Aether = 12;
-export const Pillar = 0;
 export const Weapon = 1;
 export const Shield = 2;
 export const Permanent = 3;
@@ -79,21 +78,6 @@ export const PillarList = new Uint16Array([
 	6000,
 	6100,
 	6200,
-]);
-export const PendList = new Uint16Array([
-	5004,
-	5150,
-	5250,
-	5350,
-	5450,
-	5550,
-	5650,
-	5750,
-	5850,
-	5950,
-	6050,
-	6150,
-	6250,
 ]);
 export const NymphList = new Uint16Array([
 	0,

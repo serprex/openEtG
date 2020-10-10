@@ -319,7 +319,7 @@ export function DeckDisplay(props) {
 				bcodeCount[bcode] = (bcodeCount[bcode] ?? 0) + 1;
 				if (
 					codeCount[code] > (props.pool[code] ?? 0) ||
-					(card.type !== etg.Pillar && bcodeCount[bcode] > 6)
+					(!card.getStatus('pillar') && bcodeCount[bcode] > 6)
 				) {
 					opacity = '.5';
 				}
@@ -450,14 +450,13 @@ function CardSelectorColumn(props) {
 			countTexts.push(
 				<div
 					key={countTexts.length}
-					className={
-						'selectortext' +
-						(props.maxedIndicator && card.type !== etg.Pillar && cardAmount >= 6
+					className={`selectortext ${
+						props.maxedIndicator && !card.getStatus('pillar') && cardAmount >= 6
 							? cardAmount >= 12
 								? ' beigeback'
 								: ' lightback'
-							: '')
-					}>
+							: ''
+					}`}>
 					{cardAmount + (shinyAmount ? '/' + shinyAmount : '')}
 				</div>,
 			);

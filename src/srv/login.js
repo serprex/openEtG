@@ -51,7 +51,7 @@ export default function login(sockEmit) {
 				const ocardnymph = Math.random() < 0.03;
 				const card = RngMock.randomcard(
 					false,
-					x => x.type !== etg.Pillar && (x.rarity !== 5) ^ ocardnymph,
+					x => !x.getStatus('pillar') && (x.rarity !== 5) ^ ocardnymph,
 				);
 				const ccode = etgutil.asShiny(card.code, card.rarity === 5);
 				if (card.rarity > 1) {

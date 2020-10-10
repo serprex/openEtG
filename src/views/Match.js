@@ -405,7 +405,7 @@ class ThingInst extends Component {
 						charges ? ` \u00d7${charges}` : ''
 					}`;
 				} else if (obj.type === etg.Permanent) {
-					if (card.type === etg.Pillar) {
+					if (card.getStatus('pillar')) {
 						statText = `1:${
 							obj.getStatus('pendstate') ? obj.owner.mark : card.element
 						}\u00d7${charges}`;
@@ -635,8 +635,8 @@ export default connect(({ user, opts }) => ({
 				fxid: 0,
 				startPos: new Map(),
 				endPos: new Map(),
-				fxTextPos: new imm.Map(),
-				fxStatChange: new imm.Map(),
+				fxTextPos: imm.emptyMap,
+				fxStatChange: imm.emptyMap,
 				effects: new Set(),
 				effectId: 0,
 				hovercard: null,

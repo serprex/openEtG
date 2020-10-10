@@ -13,7 +13,7 @@ export default function duo(uprate, markpower, maxRarity) {
 				Math.random() < uprate,
 				x =>
 					x.element === ele &&
-					x.type !== etg.Pillar &&
+					!x.getStatus('pillar') &&
 					x.rarity <= maxRarity &&
 					build.cardcount[x.code] !== 6 &&
 					!(x.type === etg.Shield && build.anyshield >= 3) &&

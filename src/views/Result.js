@@ -328,7 +328,7 @@ export default connect(({ user }) => ({ user }))(
 								elewin.upped,
 								x =>
 									x.element === elewin.element &&
-									x.type !== etg.Pillar &&
+									!x.getStatus('pillar') &&
 									x.rarity <= 3,
 							);
 						}

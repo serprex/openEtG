@@ -24,8 +24,7 @@ export default function (deck) {
 		if (~bannedCards.indexOf(card.code)) return card.name + ' is banned';
 		if (~etg.ShardList.indexOf(card.code)) return 'Shards are banned';
 		if (card.upped) return 'Upgraded cards are banned';
-		if (~etg.NymphList.indexOf(card.code) && card.type !== etg.Pillar)
-			return 'Nymphs are banned';
+		if (~etg.NymphList.indexOf(card.code)) return 'Nymphs are banned';
 		legs += addLegs(card.code);
 	}
 	if (legs !== 30)

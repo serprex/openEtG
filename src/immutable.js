@@ -42,11 +42,8 @@ function update(o, path, idx, f) {
 
 class iMap {
 	constructor(args) {
-		this.data = new Map();
+		this.data = new Map(args);
 		this.hash = null;
-		for (const k in args) {
-			this.data.set(k, args[k]);
-		}
 	}
 
 	clone() {
@@ -118,5 +115,7 @@ class iMap {
 		return this.data[Symbol.iterator]();
 	}
 }
+
+export const emptyMap = new iMap();
 
 export { iMap as Map };

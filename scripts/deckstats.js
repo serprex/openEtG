@@ -8,14 +8,12 @@ function buildPool(x) {
 }
 decks.mage.forEach(buildPool);
 decks.demigod.forEach(buildPool);
-const a = Cards.filter(false, function (card) {
-	return (
-		card.rarity > 0 &&
+const a = Cards.filter(false, card => {
+	card.rarity > 0 &&
 		card.rarity < 4 &&
 		etgutil.count(pool, card.asUpped(false).code) +
 			etgutil.count(pool, card.asUpped(true).code) ==
-			0
-	);
+			0;
 });
 a.forEach(x => console.log(x.name));
 const pool2 = etgutil.deck2pool(pool),

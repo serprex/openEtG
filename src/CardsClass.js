@@ -5,11 +5,35 @@ import CardsJson from './Cards.json';
 
 export default class Cards {
 	constructor(CardsJson) {
-		this.filtercache = [];
+		this.filtercache = [[], [], [], []];
 		this.Codes = [];
 		this.Names = {};
 
-		CardsJson.forEach((cards, type) => this.parseCsv(type, cards));
+		CardsJson.forEach((data, type) => {
+			const keys = data[0],
+				cardinfo = {};
+			for (let i = 1; i < data.length; i++) {
+				cardinfo.E = i - 1;
+				for (const carddata of data[i]) {
+					keys.forEach((key, i) => {
+						cardinfo[key] = carddata[i];
+					});
+					const cardcode = cardinfo.Code,
+						card = new Card(this, type + 1, cardinfo);
+					this.Codes[cardcode] = card;
+					if (!card.upped) this.Names[cardinfo.Name.replace(/\W/g, '')] = card;
+					cardinfo.Code = etgutil.asShiny(cardcode, true);
+					const shiny = new Card(this, type + 1, cardinfo);
+					this.Codes[cardinfo.Code] = shiny;
+					const cacheidx = card.upped ? 1 : 0;
+					this.filtercache[cacheidx].push(card);
+					this.filtercache[cacheidx | 2].push(shiny);
+				}
+			}
+		});
+		for (const fc of this.filtercache) {
+			fc.sort(this.cardCmp, this);
+		}
 	}
 
 	codeCmp = (x, y) => {
@@ -27,25 +51,11 @@ export default class Cards {
 
 	cardCmp = (x, y) => this.codeCmp(x.code, y.code);
 
-	filter(upped, filter, cmp, showshiny) {
-		const cacheidx = (upped ? 1 : 0) | (showshiny ? 2 : 0);
-		if (!this.filtercache[cacheidx]) {
-			this.filtercache[cacheidx] = [];
-			for (const key in this.Codes) {
-				const card = this.Codes[key];
-				if (
-					!card.upped === !upped &&
-					!card.shiny === !showshiny &&
-					!card.getStatus('token')
-				) {
-					this.filtercache[cacheidx].push(card);
-				}
-			}
-			this.filtercache[cacheidx].sort();
-		}
-		const keys = this.filtercache[cacheidx].filter(filter);
-		if (cmp) keys.sort(cmp);
-		return keys;
+	filter(upped, filter, cmp, shiny) {
+		const keys = this.filtercache[(upped ? 1 : 0) | (shiny ? 2 : 0)].filter(
+			filter,
+		);
+		return cmp ? keys.sort(cmp) : keys;
 	}
 
 	sumCardMinus(cardMinus, code) {
@@ -62,7 +72,7 @@ export default class Cards {
 		for (let i = deck.length - 1; i >= 0; i--) {
 			let code = deck[i],
 				card = this.Codes[code];
-			if (card.type !== etg.Pillar) {
+			if (!card.getStatus('pillar')) {
 				if (this.sumCardMinus(cardMinus, code) === 6) {
 					deck.splice(i, 1);
 					continue;
@@ -103,7 +113,7 @@ export default class Cards {
 			const card = this.Codes[code];
 			if (
 				!card ||
-				(card.type !== etg.Pillar && this.sumCardMinus(cardMinus, code) === 6)
+				(!card.getStatus('pillar') && this.sumCardMinus(cardMinus, code) === 6)
 			) {
 				return false;
 			}
@@ -117,25 +127,5 @@ export default class Cards {
 		}
 		if (dlen < minsize || dlen > 60) return false;
 		return true;
-	}
-
-	parseCsv(type, data) {
-		const keys = data[0],
-			cardinfo = {};
-		for (let i = 1; i < data.length; i++) {
-			cardinfo.E = i - 1;
-			data[i].forEach(carddata => {
-				keys.forEach((key, i) => {
-					cardinfo[key] = carddata[i];
-				});
-				const cardcode = cardinfo.Code,
-					card = new Card(this, type, cardinfo);
-				this.Codes[cardcode] = card;
-				if (!card.upped)
-					this.Names[cardinfo.Name.replace(/\W/g, '')] = this.Codes[cardcode];
-				cardinfo.Code = etgutil.asShiny(cardcode, true);
-				this.Codes[cardinfo.Code] = new Card(this, type, cardinfo);
-			});
-		}
 	}
 }

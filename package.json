@@ -33,7 +33,7 @@
   },
   "scripts": {
     "start": "node --experimental-modules --experimental-wasm-modules --experimental-json-modules ./server.js",
-    "test": "node --experimental-modules --experimental-wasm-modules --experimental-json-modules ./scripts/tests.js && node --experimental-modules --experimental-wasm-modules --experimental-json-modules ./src/vanilla/_tests.js",
+    "test": "node --experimental-modules --experimental-wasm-modules --experimental-json-modules ./scripts/tests.js",
     "dev": "webpack --mode=development --watch --config webpack.config.cjs",
     "build": "webpack -p --config webpack.config.cjs",
     "build-dev": "webpack --mode=development --config webpack.config.cjs",

@@ -23,7 +23,7 @@ export default function bow(uprate, markpower, maxRarity) {
 				Math.random() < uprate,
 				x =>
 					x.element === ele &&
-					x.type !== etg.Pillar &&
+					!x.getStatus('pillar') &&
 					x.cost < 7 &&
 					x.rarity <= maxRarity &&
 					build.cardcount[x.code] !== 6 &&

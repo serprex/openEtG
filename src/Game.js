@@ -12,31 +12,39 @@ import Thing from './Thing.js';
 export default function Game(data) {
 	const { seed } = data;
 	Rng.initState(seed);
-	this.props = new imm.Map().set(
-		1,
-		new imm.Map({
-			id: 2,
-			Cards: data.set === 'Original' ? OriginalCards : StandardCards,
-			phase: data.set === 'Original' ? etg.PlayPhase : etg.MulliganPhase,
-			turn: 2,
-			players: [],
-			bonusstats: new imm.Map({
-				ply: 0,
-				cardsplayed: new Map(),
-				creaturesplaced: new Map(),
-				creatureskilled: new Map(),
-				time: Date.now(),
-				replay: [],
-			}),
-			data: data,
-			rng: [
-				Rng.getStateLoLo(),
-				Rng.getStateLoHi(),
-				Rng.getStateHiLo(),
-				Rng.getStateHiHi(),
-			],
-		}),
-	);
+	this.props = new imm.Map([
+		[
+			1,
+			new imm.Map([
+				['id', 2],
+				['Cards', data.set === 'Original' ? OriginalCards : StandardCards],
+				['phase', data.set === 'Original' ? etg.PlayPhase : etg.MulliganPhase],
+				['turn', 2],
+				['players', []],
+				[
+					'bonusstats',
+					new imm.Map([
+						['ply', 0],
+						['cardsplayed', new Map()],
+						['creaturesplaced', new Map()],
+						['creatureskilled', new Map()],
+						['time', Date.now()],
+						['replay', []],
+					]),
+				],
+				['data', data],
+				[
+					'rng',
+					[
+						Rng.getStateLoLo(),
+						Rng.getStateLoHi(),
+						Rng.getStateHiLo(),
+						Rng.getStateHiHi(),
+					],
+				],
+			]),
+		],
+	]);
 	this.cache = new Map([[this.id, this]]);
 	this.effects = [];
 	const players = [];
@@ -163,7 +171,7 @@ Game.prototype.get = function (key) {
 	return this.props.get(key);
 };
 Game.prototype.set = function (id, key, val) {
-	const ent = this.props.get(id) ?? new imm.Map();
+	const ent = this.props.get(id) ?? imm.emptyMap;
 	this.props = this.props.set(id, ent.set(key, val));
 };
 Game.prototype.setIn = function (path, val) {
