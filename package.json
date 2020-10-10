@@ -10,7 +10,7 @@
   "dependencies": {
     "bufferutil": "^4.0.1",
     "ioredis": "^4.17.3",
-    "pg": "^8.3.3",
+    "pg": "^8.4.1",
     "ws": "^7.3.1"
   },
   "devDependencies": {
@@ -22,7 +22,7 @@
     "babel-loader": "^8.1.0",
     "core-js": "^3.6.5",
     "prettier": "^2.1.2",
-    "react": "^17.0.0-rc.2",
+    "react": "^17.0.0-rc.3",
     "react-dom": "^16.13.1",
     "react-motion": "^0.5.2",
     "react-redux": "^7.2.1",
