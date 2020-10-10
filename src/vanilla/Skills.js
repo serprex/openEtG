@@ -117,10 +117,10 @@ const Actives = {
 	chimera: (ctx, c, t) => {
 		let atk = 0,
 			hp = 0;
-		for (let i = 0; i < 23; i++) {
-			if (c.owner.creatures[i]) {
-				atk += c.owner.creatures[i].trueatk();
-				hp += c.owner.creatures[i].truehp();
+		for (const cr of c.owner.creatures) {
+			if (cr) {
+				atk += cr.trueatk();
+				hp += cr.truehp();
 			}
 		}
 		const chim = c.owner.newThing(c.card.as(ctx.Cards.Names.Chimera));
@@ -129,6 +129,7 @@ const Actives = {
 		chim.hp = hp;
 		chim.active = imm.emptyMap;
 		chim.setStatus('momentum', 1);
+		chim.type = etg.Creature;
 		const newCreatures = new Uint32Array(23);
 		newCreatures[0] = chim.id;
 		ctx.set(c.ownerId, 'creatures', newCreatures);

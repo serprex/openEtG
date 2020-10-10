@@ -1729,7 +1729,7 @@ export default connect(({ user, opts }) => ({
 							} else if (startpos) {
 								pos = this.idtrack.get(startpos);
 							}
-							if (!startpos || !pos) {
+							if (!pos) {
 								pos = { x: item.style.x?.val ?? 0, y: item.style.y?.val ?? 0 };
 							}
 

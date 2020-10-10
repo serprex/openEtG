@@ -26,8 +26,10 @@ export default class Cards {
 					const shiny = new Card(this, type + 1, cardinfo);
 					this.Codes[cardinfo.Code] = shiny;
 					const cacheidx = card.upped ? 1 : 0;
-					this.filtercache[cacheidx].push(card);
-					this.filtercache[cacheidx | 2].push(shiny);
+					if (!card.getStatus('token')) {
+						this.filtercache[cacheidx].push(card);
+						this.filtercache[cacheidx | 2].push(shiny);
+					}
 				}
 			}
 		});
