@@ -8,7 +8,7 @@ import * as store from '../../store.js';
 import * as Components from '../../Components/index.js';
 
 export default connect(({ user, orig }) => ({ user, orig }))(
-	class OriginalUpgrade extends Component {
+	class OriginalBazaar extends Component {
 		state = { deck: [] };
 
 		currentDeckCode() {
@@ -16,16 +16,11 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 		}
 
 		render() {
-			const cardminus = [];
+			let cost = 0;
 			for (const code of this.state.deck) {
-				cardminus[code] = (cardminus[code] ?? 0) + 1;
+				const card = Cards.Codes[code];
+				cost += 6 * card.rarity ** 2 + card.cost;
 			}
-			const cardpool = etgutil.deck2pool(this.props.orig.pool);
-			for (const key in cardpool) {
-				const card = Cards.Codes[key];
-				if (card.upped) delete cardpool[key];
-			}
-			const cost = this.state.deck.length * 1500;
 
 			return (
 				<>
@@ -92,9 +87,7 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 								}}>
 								{`You need
 								${cost - this.props.orig.electrum} more electrum to afford ${
-									this.state.deck.length === 1
-										? 'this upgrade'
-										: 'these upgrades'
+									this.state.deck.length === 1 ? 'this card' : 'these cards'
 								}`}
 							</div>
 						))}
@@ -112,18 +105,20 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 					/>
 					<Components.CardSelector
 						cards={Cards}
-						cardpool={cardpool}
-						cardminus={cardminus}
 						filter={card =>
-							!card.isFree() &&
-							card.code in cardpool &&
-							(cardminus[card.code] ?? 0) < cardpool[card.code]
+							card.rarity >= 1 && card.rarity <= 4 && card.name !== 'Relic'
 						}
 						onMouseOver={card => this.setState({ card })}
 						onClick={card => {
 							const code = card.code;
-							if (this.state.deck.length < 60) {
-								this.setState({ deck: this.state.deck.concat([code]) });
+							if (
+								this.state.deck.length < 60 &&
+								!card.upped &&
+								!card.isFree()
+							) {
+								this.setState({
+									deck: this.state.deck.concat([code]),
+								});
 							}
 						}}
 					/>

@@ -486,6 +486,7 @@ export default connect(({ user }) => ({ user }))(
 						cards={Cards}
 						cardpool={this.state.cardpool}
 						maxedIndicator
+						filter={card => !card.isFree()}
 						onClick={card => {
 							if (~card.rarity && !card.getStatus('pillar') && !card.isFree()) {
 								this.setState({ bcard: card });

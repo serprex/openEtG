@@ -8,6 +8,7 @@ import replays from './replays.json';
 
 function bench(name) {
 	const replay = replays[name];
+	if (!replay) return;
 	const game = new Game(replay);
 	game.effects = null;
 	const { moves } = replay;
@@ -39,4 +40,6 @@ function bench(name) {
 	console.log(name, totalTime, totalTime / timing.length);
 }
 
-bench('goose-elf');
+for (const arg of process.argv) {
+	bench(arg);
+}

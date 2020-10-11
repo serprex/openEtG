@@ -13,5 +13,6 @@ bundle/*
 *.gz
 *.rdb
 *.log
+scripts/replays.json
 config.json
 wsconfig.json

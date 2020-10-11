@@ -189,6 +189,18 @@ export default connect(({ user, orig, opts }) => ({
 							top: '140px',
 						}}
 					/>
+					<input
+						type="button"
+						value="Bazaar"
+						onClick={() =>
+							this.props.dispatch(store.doNav(import('./Bazaar.js')))
+						}
+						style={{
+							position: 'absolute',
+							left: '500px',
+							top: '170px',
+						}}
+					/>
 					<Components.ExitBtn x={9} y={140} />
 					<Components.Text
 						text={`${this.props.orig.electrum}$`}

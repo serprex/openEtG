@@ -477,37 +477,71 @@ function CardSelectorColumn(props) {
 		</>
 	);
 }
-export function CardSelectorCore(props) {
-	const children = [];
-	for (let i = 0; i < 6; i++) {
-		const cards = props.cards.filter(
-			i > 2,
-			x =>
-				(x.element === props.element || props.rarity === 4) &&
-				((i % 3 === 0 && x.type === etg.Creature) ||
-					(i % 3 === 1 && x.type <= etg.Permanent) ||
-					(i % 3 === 2 && x.type === etg.Spell)) &&
-				(!props.cardpool ||
-					x.code in props.cardpool ||
-					(props.filterboth &&
-						etgutil.asShiny(x.code, true) in props.cardpool) ||
-					props.showall ||
-					x.isFree()) &&
-				(!props.rarity || props.rarity === Math.min(x.rarity, 4)),
-			props.cards.cardCmp,
-			props.shiny && !props.filterboth,
-		);
-		children.push(
+export class CardSelectorCore extends Component {
+	static getDerivedStateFromProps(props, state) {
+		if (
+			!state ||
+			props.cards !== state.cards ||
+			props.cardpool !== state.cardpool ||
+			props.filter !== state.filter ||
+			props.element !== state.element ||
+			props.rarity !== state.rarity ||
+			props.showall !== state.showall ||
+			props.shiny !== state.shiny ||
+			props.filterboth !== state.filterboth
+		) {
+			const columns = [];
+			for (let i = 0; i < 6; i++) {
+				columns.push(
+					props.cards.filter(
+						i > 2,
+						x =>
+							(!props.filter || props.filter(x)) &&
+							(x.element === props.element || props.rarity === 4) &&
+							((i % 3 === 0 && x.type === etg.Creature) ||
+								(i % 3 === 1 && x.type <= etg.Permanent) ||
+								(i % 3 === 2 && x.type === etg.Spell)) &&
+							(!props.cardpool ||
+								x.code in props.cardpool ||
+								(props.filterboth &&
+									etgutil.asShiny(x.code, true) in props.cardpool) ||
+								props.showall ||
+								x.isFree()) &&
+							(!props.rarity || props.rarity === Math.min(x.rarity, 4)),
+						props.cards.cardCmp,
+						props.shiny && !props.filterboth,
+					),
+				);
+			}
+
+			return {
+				cards: props.cards,
+				cardpool: props.cardpool,
+				filter: props.filter,
+				element: props.element,
+				rarity: props.rarity,
+				showall: props.showall,
+				shiny: props.shiny,
+				filterboth: props.filterboth,
+				columns,
+			};
+		}
+		return null;
+	}
+
+	render() {
+		const props = this.props;
+
+		return this.state.columns.map((cards, i) => (
 			<CardSelectorColumn
 				key={i}
 				{...props}
 				cards={cards}
 				x={props.x + i * 133}
 				y={props.y}
-			/>,
-		);
+			/>
+		));
 	}
-	return children;
 }
 
 export class CardSelector extends Component {
@@ -515,7 +549,7 @@ export class CardSelector extends Component {
 		super(props);
 		this.state = {
 			shiny: false,
-			showall: false,
+			showall: props.showall ?? false,
 			element: 0,
 			rarity: 0,
 		};
