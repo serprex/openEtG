@@ -1935,7 +1935,7 @@ export default connect(({ user, opts }) => ({
 									left: '760px',
 									top: '540px',
 								}}>
-								{game.bonusstats.get('ply')}
+								{game.countPlies()}
 							</span>
 							{!!this.state.replayindex && (
 								<input

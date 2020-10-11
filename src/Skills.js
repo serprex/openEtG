@@ -1127,15 +1127,18 @@ const Skills = {
 			}
 		}
 		const active = shardSkills[ctx.choose(shlist) - 1][Math.min(num - 1, 5)];
-		const shardgolem = {
-			stat: Math.floor(stat),
-			status: new imm.Map([['golem', 1]]),
-			active: new imm.Map([['cast', parseSkill(active)]]),
-			cast: shardCosts[active],
-		};
+		const shardgolem = new Map([
+			['stat', stat | 0],
+			['status', new imm.Map([['golem', 1]])],
+			['active', new imm.Map([['cast', parseSkill(active)]])],
+			['cast', shardCosts[active]],
+		]);
 		function addSkill(event, active) {
-			shardgolem.active = shardgolem.active.update(event, a =>
-				Skill.combine(a, parseSkill(active)),
+			shardgolem.set(
+				'active',
+				shardgolem
+					.get('active')
+					.update(event, a => Skill.combine(a, parseSkill(active))),
 			);
 		}
 		[
@@ -1183,7 +1186,10 @@ const Skills = {
 				const data = slist[j];
 				if (ishards <= data[0]) return;
 				if (data[1] === '') {
-					shardgolem.status = shardgolem.status.set(data[2], data[3] ?? 1);
+					shardgolem.set(
+						'status',
+						shardgolem.get('status').set(data[2], data[3] ?? 1),
+					);
 				} else {
 					addSkill(data[1], data[2]);
 				}

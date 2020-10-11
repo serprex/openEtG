@@ -97,7 +97,7 @@ class iMap {
 	}
 
 	setIn(path, val) {
-		return this.updateIn(path, () => val);
+		return update(this, path, 0, () => val);
 	}
 
 	filter(f) {

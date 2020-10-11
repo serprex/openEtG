@@ -245,16 +245,6 @@ Player.prototype.newThing = function (card) {
 Player.prototype.addCrea = function (x, fromhand) {
 	if (typeof x === 'number') x = this.game.byId(x);
 	if (~this.place('creatures', x.id)) {
-		if (fromhand && this.game.bonusstats) {
-			this.game.updateIn(
-				[this.game.id, 'bonusstats', 'creaturesplaced'],
-				creaturesplaced =>
-					new Map(creaturesplaced).set(
-						this.id,
-						(creaturesplaced.get(this.id) | 0) + 1,
-					),
-			);
-		}
 		x.place(this, etg.Creature, fromhand);
 	}
 };
@@ -402,9 +392,6 @@ Player.prototype.countpermanents = function () {
 	return this.permanentIds.reduce((count, pr) => count + !!pr, 0);
 };
 Player.prototype.endturn = function (discard) {
-	if (this.game.bonusstats) {
-		this.game.updateIn([this.game.id, 'bonusstats', 'ply'], (x = 0) => x + 1);
-	}
 	if (discard) {
 		this.game.byId(discard).die();
 	}

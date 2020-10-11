@@ -17,6 +17,7 @@ export default function Game(data) {
 			1,
 			new imm.Map([
 				['id', 2],
+				['active', imm.emptyMap],
 				['Cards', data.set === 'Original' ? OriginalCards : StandardCards],
 				['phase', data.set === 'Original' ? etg.PlayPhase : etg.MulliganPhase],
 				['turn', 2],
@@ -24,10 +25,6 @@ export default function Game(data) {
 				[
 					'bonusstats',
 					new imm.Map([
-						['ply', 0],
-						['cardsplayed', new Map()],
-						['creaturesplaced', new Map()],
-						['creatureskilled', new Map()],
 						['time', Date.now()],
 						['replay', []],
 					]),
@@ -201,6 +198,14 @@ Game.prototype.cloneInstance = function (inst, ownerId) {
 	);
 	return this.byId(newId);
 };
+Game.prototype.countPlies = function () {
+	if (!this.bonusstats) return -1;
+	let plies = 0;
+	for (const move of this.bonusstats.get('replay')) {
+		if (move.x === 'end') plies++;
+	}
+	return plies;
+};
 Game.prototype.nextPlayer = function (id) {
 	const { players } = this,
 		idx = players.indexOf(id);
@@ -255,7 +260,12 @@ Game.prototype.setWinner = function () {
 				this.winner = id;
 			}
 			this.phase = etg.EndPhase;
-			this.updateIn([this.id, 'bonusstats', 'time'], time => Date.now() - time);
+			if (this.bonusstats) {
+				this.setIn(
+					[this.id, 'bonusstats', 'duration'],
+					Date.now() - this.bonusstats.get('time'),
+				);
+			}
 		}
 	}
 };

@@ -477,6 +477,7 @@ export default connect(({ user, opts }) => ({
 			}
 			const data = {
 				seed: replay.seed,
+				set: replay.set,
 				cardreward: '',
 				goldreward: 0,
 				players: replay.players,

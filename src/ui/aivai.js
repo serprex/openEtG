@@ -66,7 +66,7 @@ function fightItOut() {
 			if (mode === fight) {
 				result.textContent += `${
 					game.turn === realp1 ? 1 : 2
-				}\tEND TURN ${game.bonusstats.get('ply')}\n`;
+				}\tEND TURN ${game.countPlies()}\n`;
 			}
 		},
 		cast(data) {
@@ -105,7 +105,7 @@ function fightItOut() {
 				console.log(Date.now() - start);
 				result.textContent = `Player ${
 					game.winner === realp1 ? 1 : 2
-				} wins. ${game.bonusstats.get('ply')}\n${result.textContent}`;
+				} wins. ${game.countPlies()}\n${result.textContent}`;
 			} else {
 				fc[(game.winner !== realp1) | 0]++;
 				result.textContent = `${fc[0]} : ${fc[1]} (${(

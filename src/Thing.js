@@ -182,18 +182,6 @@ Thing.prototype.die = function () {
 			cell.ownerId = this.ownerId;
 			cell.type = etg.Creature;
 		}
-		if (this.game.bonusstats) {
-			this.game.updateIn(
-				[this.game.id, 'bonusstats', 'creatureskilled'],
-				creatureskilled => {
-					creatureskilled = new Map(creatureskilled);
-					return creatureskilled.set(
-						this.game.turn,
-						(creatureskilled.get(this.game.turn) | 0) + 1,
-					);
-				},
-			);
-		}
 		this.deatheffect(idx);
 	}
 };
@@ -209,10 +197,11 @@ Thing.prototype.trigger = function (name, t, param) {
 	return a ? a.func(this.game, this, t, param) : 0;
 };
 Thing.prototype.proc = function (name, param) {
-	function proc(c) {
-		if (c) this.game.trigger(c, name, this, param);
+	function proc(id) {
+		if (id) this.game.trigger(id, name, this, param);
 	}
 	this.trigger('own' + name, this, param);
+	proc.call(this, this.game.id);
 	for (let i = 0; i < 2; i++) {
 		const pl = i === 0 ? this.owner : this.owner.foe;
 		pl.creatureIds.forEach(proc, this);
@@ -485,18 +474,6 @@ Thing.prototype.useactive = function (t) {
 		if (owner.getStatus('neuro')) owner.addpoison(1);
 		this.play(t, true);
 		this.proc('cardplay');
-		if (this.game.bonusstats) {
-			this.game.updateIn(
-				[this.game.id, 'bonusstats', 'cardsplayed'],
-				cardsplayed => {
-					cardsplayed = new Map(cardsplayed);
-					const a = new Int32Array(cardsplayed.get(this.ownerId) ?? 6);
-					a[this.card.type]++;
-					cardsplayed.set(this.ownerId, a);
-					return cardsplayed;
-				},
-			);
-		}
 	} else if (owner.spend(this.castele, this.cast)) {
 		this.casts--;
 		if (this.getStatus('neuro')) this.addpoison(1);

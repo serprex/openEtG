@@ -1,14 +1,17 @@
 import { Component } from 'react';
 import { connect } from 'react-redux';
 
-import Cards from '../Cards.js';
 import * as etg from '../etg.js';
-import * as sock from '../sock.js';
 import * as etgutil from '../etgutil.js';
-import RngMock from '../RngMock.js';
+import * as imm from '../immutable.js';
+import * as sock from '../sock.js';
+import * as store from '../store.js';
 import * as userutil from '../userutil.js';
 import * as Components from '../Components/index.js';
-import * as store from '../store.js';
+import Game from '../Game.js';
+import Cards from '../Cards.js';
+import RngMock from '../RngMock.js';
+import Skill from '../Skill.js';
 
 const streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
 
@@ -26,120 +29,121 @@ const BonusList = [
 	{
 		name: 'Are we idle yet?',
 		desc: 'Take longer than 3 minutes to win',
-		func: (game, p1, p2) =>
-			game.bonusstats.get('time') > 180000
-				? Math.min((game.bonusstats.get('time') - 180000) / 60000, 0.2)
+		func: (game, p1, p2, stats) =>
+			game.bonusstats.get('duration') > 180000
+				? Math.min((game.bonusstats.get('duration') - 180000) / 60000, 0.2)
 				: 0,
 	},
 	{
 		name: 'Colosseum Bonus',
 		desc: 'Bonus from winning Colosseum Duels',
-		func: (game, p1, p2) => game.data.colobonus,
+		func: (game, p1, p2, stats) => game.data.colobonus,
 	},
 	{
 		name: 'Creature Domination',
 		desc: 'More than twice as many creatures than foe',
-		func: (game, p1, p2) =>
-			p1.countcreatures() > 2 * p2.countcreatures() ? 0.1 : 0,
+		func: (game, p1, p2, stats) =>
+			p1.countcreatures() > 2 * p2.countcreatures() ? 0.05 : 0,
 	},
 	{
 		name: 'Creatureless',
 		desc: 'Never play a creature',
-		func: (game, p1, p2) =>
-			game.bonusstats.get('creaturesplaced').get(p1.id) ? 0 : 0.1,
+		func: (game, p1, p2, stats) =>
+			stats.creaturesPlayed.get(p1.id) === 0 ? 0.1 : 0,
 	},
 	{
 		name: 'Current Health',
 		desc: '1% per 3hp',
-		func: (game, p1, p2) => p1.hp / 300,
+		func: (game, p1, p2, stats) => p1.hp / 300,
 	},
 	{
 		name: 'Deckout',
 		desc: 'Win through deckout',
-		func: (game, p1, p2) => (p2.deckIds.length === 0 && p2.hp > 0 ? 0.5 : 0),
+		func: (game, p1, p2, stats) =>
+			p2.deckIds.length === 0 && p2.hp > 0 ? 0.5 : 0,
 	},
 	{
 		name: 'Double Kill',
 		desc: 'Foe lost with as much negative hp as maxhp',
-		func: (game, p1, p2) => (p2.hp <= -p2.maxhp ? 0.15 : 0),
+		func: (game, p1, p2, stats) => (p2.hp <= -p2.maxhp ? 0.15 : 0),
 	},
 	{
 		name: 'Equipped',
 		desc: 'End match wielding a weapon & shield',
-		func: (game, p1, p2) => (p1.weaponId && p1.shieldId ? 0.05 : 0),
+		func: (game, p1, p2, stats) => (p1.weaponId && p1.shieldId ? 0.05 : 0),
 	},
 	{
 		name: 'First past the post',
 		desc: 'Win with non-positive hp, or foe loses from damage with positive hp',
-		func: (game, p1, p2) =>
+		func: (game, p1, p2, stats) =>
 			p2.deckIds.length && (p1.hp <= 0 || p2.hp > 0) ? 0.1 : 0,
 	},
 	{
 		name: 'Full Health',
 		desc: 'Hp equal to maxhp',
-		func: (game, p1, p2) => (p1.hp === p1.maxhp ? 0.2 : 0),
+		func: (game, p1, p2, stats) => (p1.hp === p1.maxhp ? 0.2 : 0),
 	},
 	{
 		name: 'Grounds Keeper',
-		desc: '2.5% per permanent over 8',
-		func: (game, p1, p2) => (p1.countpermanents() - 8) / 40,
+		desc: '2% per permanent over 8',
+		func: (game, p1, p2, stats) => (p1.countpermanents() - 8) / 50,
 	},
 	{
 		name: 'Head Hunter',
 		desc: "Defeat arena's top 7 decks",
-		func: (game, p1, p2) =>
+		func: (game, p1, p2, stats) =>
 			[1, 1 / 2, 1 / 4, 1 / 8, 1 / 16, 1 / 32, 1 / 64][game.data.rank],
 	},
 	{
 		name: 'Last point',
 		desc: 'End with 1hp',
-		func: (game, p1, p2) => (p1.hp === 1 ? 0.3 : 0),
+		func: (game, p1, p2, stats) => (p1.hp === 1 ? 0.3 : 0),
 	},
 	{
 		name: 'Max Health',
 		desc: '1% per 6 maxhp over 100',
-		func: (game, p1, p2) => (p1.maxhp - 100) / 600,
+		func: (game, p1, p2, stats) => (p1.maxhp - 100) / 600,
 	},
 	{
 		name: 'Mid Turn',
 		desc: 'Defeat foe with game ended still on own turn',
-		func: (game, p1, p2) => (game.bonusstats.get('nomidturn') ? 0 : 0.1),
+		func: (game, p1, p2, stats) => {
+			const replay = game.bonusstats.get('replay');
+			return replay[replay.length - 1].x === 'end' ? 0 : 0.1;
+		},
 	},
 	{
 		name: 'Murderer',
 		desc: 'Kill over 5 creatures',
-		func: (game, p1, p2) =>
-			game.bonusstats.get('creatureskilled').get(p1.id) > 5 ? 0.15 : 0,
+		func: (game, p1, p2, stats) =>
+			stats.creaturesDied.get(p1.id) > 5 ? 0.15 : 0,
 	},
 	{
 		name: 'Perfect Damage',
 		desc: 'Foe lost with 0hp',
-		func: (game, p1, p2) => (p2.hp === 0 ? 0.1 : 0),
+		func: (game, p1, p2, stats) => (p2.hp === 0 ? 0.1 : 0),
 	},
 	{
 		name: 'Pillarless',
 		desc: 'Never play a pillar',
-		func: (game, p1, p2) => {
-			const cardsplayed = game.bonusstats.get('cardsplayed').get(p1.id);
-			return cardsplayed && cardsplayed[0] ? 0 : 0.05;
-		},
+		func: (game, p1, p2, stats) =>
+			stats.pillarsPlayed.get(p1.id) === 0 ? 0.05 : 0,
 	},
 	{
 		name: 'Size matters',
 		desc: '0.666..% per card in deck over 36',
-		func: (game, p1, p2) => {
-			return (etgutil.decklength(p1.data.deck) - 36) / 150;
-		},
+		func: (game, p1, p2, stats) =>
+			(etgutil.decklength(p1.data.deck) - 36) / 150,
 	},
 	{
 		name: 'Toxic',
 		desc: 'Foe lost with 18 poison',
-		func: (game, p1, p2) => (p2.getStatus('poison') > 18 ? 0.1 : 0),
+		func: (game, p1, p2, stats) => (p2.getStatus('poison') > 18 ? 0.1 : 0),
 	},
 	{
 		name: 'Unupped',
 		desc: '0.333..% per unupped card in deck',
-		func: (game, p1, p2) => {
+		func: (game, p1, p2, stats) => {
 			let unupnu = 0;
 			for (const [code, count] of etgutil.iterraw(p1.data.deck)) {
 				const card = game.Cards.Codes[code];
@@ -151,15 +155,13 @@ const BonusList = [
 	{
 		name: 'Waiter',
 		desc: 'Won with 0 cards in deck',
-		func: (game, p1, p2) => (p1.deckIds.length === 0 ? 0.2 : 0),
+		func: (game, p1, p2, stats) => (p1.deckIds.length === 0 ? 0.2 : 0),
 	},
 	{
 		name: 'Weapon Master',
 		desc: 'Play over 2 weapons',
-		func: (game, p1, p2) => {
-			const cardsplayed = game.bonusstats.get('cardsplayed').get(p1.id);
-			return cardsplayed && cardsplayed[1] > 2 ? 0.1 : 0;
-		},
+		func: (game, p1, p2, stats) =>
+			stats.weaponsPlayed.get(p1.id) > 2 ? 0.1 : 0,
 	},
 ];
 
@@ -245,8 +247,59 @@ export default connect(({ user }) => ({ user }))(
 
 		computeBonuses(game, lefttext, streakrate) {
 			if (game.data.endurance !== undefined) return 1;
+			const replay = game.bonusstats.get('replay'),
+				replayGame = new Game({
+					seed: game.data.seed,
+					set: game.data.set,
+					players: game.data.players,
+				}),
+				replayStats = {
+					weaponsPlayed: new Map(),
+					creaturesPlayed: new Map(),
+					creaturesDied: new Map(),
+					pillarsPlayed: new Map(),
+				},
+				incrStat = key => {
+					replayStats[key].set(
+						replayGame.turn,
+						(replayStats[key].get(replayGame.turn) ?? 0) + 1,
+					);
+				};
+
+			replayGame.set(
+				replayGame.id,
+				'active',
+				new imm.Map([
+					[
+						'death',
+						new Skill(
+							'countdeath',
+							(ctx, c, t) => incrStat('creaturesDied'),
+							false,
+							null,
+						),
+					],
+				]),
+			);
+			for (const move of replay) {
+				if (move.x === 'cast') {
+					const c = replayGame.byId(move.c);
+					if (c.type === etg.Spell) {
+						if (c.card.type === etg.Creature) incrStat('creaturesPlayed');
+						if (c.card.type === etg.Weapon) incrStat('weaponsPlayed');
+						if (c.getStatus('pillar')) incrStat('pillarsPlayed');
+					}
+				}
+				replayGame.next(move);
+			}
+
 			const bonus = BonusList.reduce((bsum, bonus) => {
-				const b = bonus.func(game, this.state.player1, this.state.player1.foe);
+				const b = bonus.func(
+					game,
+					this.state.player1,
+					this.state.player1.foe,
+					replayStats,
+				);
 				if (b > 0) {
 					lefttext.push(
 						<TooltipText
@@ -274,9 +327,9 @@ export default connect(({ user }) => ({ user }))(
 				level = game.data.level,
 				winner = game.winner === this.state.player1.id,
 				lefttext = [
-					<div key="0">{game.bonusstats.get('ply')} plies</div>,
+					<div key="0">{game.countPlies()} plies</div>,
 					<div key="1">
-						{(game.bonusstats.get('time') / 1000).toFixed(1)} seconds
+						{(game.bonusstats.get('duration') / 1000).toFixed(1)} seconds
 					</div>,
 				];
 
@@ -400,8 +453,8 @@ export default connect(({ user }) => ({ user }))(
 							level === undefined ? -1 : level,
 							(this.state.player1.foe.data.name || '?').replace(/,/g, ' '),
 							winner ? 'W' : 'L',
-							game.bonusstats.get('ply'),
-							game.bonusstats.get('time'),
+							game.countPlies(),
+							game.bonusstats.get('duration'),
 							this.state.player1.hp,
 							this.state.player1.maxhp,
 							(state.goldreward | 0) - (game.data.cost | 0),
