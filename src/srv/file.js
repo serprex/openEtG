@@ -9,6 +9,7 @@ const mime = {
 	css: 'text/css',
 	htm: 'text/html',
 	html: 'text/html',
+	txt: 'text/plain',
 	js: 'application/javascript',
 	json: 'application/json',
 	map: 'application/octet-stream',

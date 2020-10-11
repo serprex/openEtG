@@ -6,7 +6,7 @@ openEtG is an open source fork of the Flash ccg [Elements](http://elementsthegam
 
 ## Developer Instructions
 
-Copy `config-sample.json` to `config.json`
+Copy `config-sample.json` to `config.json`, & `wsconfig-sample.json` to `wsconfig.json`
 
 Configure `config.json` to connect your instance of redis & postgresql.
 

@@ -142,7 +142,7 @@ const Actives = {
 	}),
 	cseed: target('crea', (ctx, c, t) => {
 		return Actives[
-			[
+			ctx.choose([
 				'drainlife',
 				'firebolt',
 				'freeze',
@@ -155,7 +155,7 @@ const Actives = {
 				'rewind',
 				'snipe',
 				'swave',
-			][ctx.upto(12)]
+			])
 		].func(ctx, c, t);
 	}),
 	dagger: (ctx, c, t) => {

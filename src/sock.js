@@ -5,7 +5,7 @@ import Game from './Game.js';
 import * as store from './store.js';
 import * as userutil from './userutil.js';
 import RngMock from './RngMock.js';
-import config from '../config.json';
+import config from '../wsconfig.json';
 
 const endpoint = `${location.protocol === 'http:' ? 'ws://' : 'wss://'}
 	${location.hostname}:${

@@ -16,15 +16,23 @@ module.exports = {
 		chunkFilename: 'bundle/[name].js',
 		sourceMapFilename: 'bundle/[name].js.map',
 	},
-	devtool: 'cheap-source-map',
+	devtool: 'source-map',
 	module: {
 		rules: [
 			{
-				test: /\.js$/,
+				test: /.m?js$/,
+				type: 'javascript/auto',
+				resolve: {
+					enforceExtension: false,
+					fullySpecified: false
+				}
+			},
+			{
+				test: /\.m?jsx?$/,
 				exclude: /node_modules/,
 				use: {
 					loader: 'babel-loader',
-					query: {
+					options: {
 						presets: [
 							[
 								'@babel/preset-react',

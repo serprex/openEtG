@@ -1,8 +1,5 @@
 {
 	"listen": 8080,
-	"wsport": 8080,
-	"wssport": 443,
-	"redis": 6379,
 	"pg": {
 		"user": "postgres",
 		"host": "localhost",
