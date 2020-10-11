@@ -2,7 +2,7 @@ import * as etg from '../etg.js';
 import Card from '../Card.js';
 import Thing from '../Thing.js';
 // TODO skeleton, mummy
-var data = {
+const data = {
 	v_ablaze: 'Gain 2|0',
 	v_accelerationspell:
 		'Replaces target creature\'s skills with "Acceleration: gain +2|-1 per turn"',
@@ -277,7 +277,7 @@ function asCard(c) {
 	return c instanceof Card ? c : c.card;
 }
 function pushEntry(list, c, event, entry) {
-	var x = processEntry(c, event, entry);
+	const x = processEntry(c, event, entry);
 	if (x) list.push(x);
 }
 export default function skillText(c, event) {

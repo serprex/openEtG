@@ -20,7 +20,7 @@ module.exports = {
 	module: {
 		rules: [
 			{
-				test: /.m?js$/,
+				test: /\.m?js$/,
 				type: 'javascript/auto',
 				resolve: {
 					enforceExtension: false,
