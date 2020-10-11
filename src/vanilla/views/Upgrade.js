@@ -11,10 +11,6 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 	class OriginalUpgrade extends Component {
 		state = { deck: [] };
 
-		currentDeckCode() {
-			return etgutil.encodedeck(this.state.deck);
-		}
-
 		render() {
 			const cardminus = [];
 			for (const code of this.state.deck) {

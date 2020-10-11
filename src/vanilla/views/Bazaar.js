@@ -11,10 +11,6 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 	class OriginalBazaar extends Component {
 		state = { deck: [] };
 
-		currentDeckCode() {
-			return etgutil.encodedeck(this.state.deck);
-		}
-
 		render() {
 			let cost = 0;
 			for (const code of this.state.deck) {
@@ -54,7 +50,7 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 						(this.props.orig.electrum > cost ? (
 							<input
 								type="button"
-								value="Upgrade"
+								value="Buy"
 								style={{
 									position: 'absolute',
 									left: '200px',
@@ -63,14 +59,7 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 								onClick={() => {
 									const update = {
 										electrum: -cost,
-										pool: etgutil.encodedeck(
-											this.state.deck.map(code => code + 2000),
-										),
-										rmpool: etgutil.encodedeck(
-											this.state.deck.filter(
-												code => !Cards.Codes[code].isFree(),
-											),
-										),
+										pool: etgutil.encodedeck(this.state.deck),
 									};
 									userEmit('origadd', update);
 									this.props.dispatch(store.addOrig(update));
