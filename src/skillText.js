@@ -1,10 +1,9 @@
 import * as etg from './etg.js';
 import Card from './Card.js';
 import Thing from './Thing.js';
-import originalSkillText from './vanilla/skillText.js';
+import * as originalText from './vanilla/skillText.js';
 
 export default function skillText(c) {
-	if (asCard(c).Cards.Names.Relic) return originalSkillText(c);
 	if (c instanceof Card && c.type === etg.Spell) {
 		const entry = getDataFromName(c.active.get('cast').castName);
 		return processEntry(c, 'cast', entry);
@@ -13,7 +12,7 @@ export default function skillText(c) {
 			stext = [];
 		for (const [key, val] of c.status) {
 			if (!val) continue;
-			const entry = statusData[key];
+			const entry = statusText[key];
 			if (entry === undefined) {
 				let text = val === 1 ? key : val + key;
 				text = text.charAt(0).toUpperCase() + text.slice(1);
@@ -370,10 +369,10 @@ const data = {
 		'Until your next turn, the next spell any player casts is nullified. If this ability nullifies a spell, this creature gains 1|1.',
 	nymph:
 		"Transform target pillar, pendulum, or tower into a Nymph matching target's element.",
-	obsession: [
-		'When this card is discarded, the discarding player receives 10 spell damage.',
-		'When this card is discarded, the discarding player receives 13 spell damage.',
-	],
+	obsession: c =>
+		`When this card is discarded, the discarding player receives ${
+			c.upped ? 13 : 10
+		} spell damage.`,
 	ouija: "Whenever a creature dies, add an Ouija Essence to opponent's hand.",
 	pacify: "Set target creature or weapon's strength to 0.",
 	pairproduce: 'Your pillars, pendulums, and towers produce quanta.',
@@ -611,6 +610,7 @@ const data = {
 		'Target creature or weapon gains 3|0. May target immaterial cards. If it targets an immaterial card, that card gains psionic. Psionic cards deal spell damage and typically bypass shields.',
 	yoink:
 		"Remove target card from target player's hand and add it to your hand, or draw from target player's deck.",
+	...originalText.skillText,
 };
 [
 	['dagger', '1:2 1:11. Gains 1 strength per Cloak you control.'],
@@ -634,14 +634,11 @@ const data = {
 });
 function auraText(tgts, bufftext, upbufftext) {
 	return c =>
-		tgts +
-		' gain ' +
-		(c.upped ? upbufftext : bufftext) +
-		' while ' +
-		c.name +
-		' is in play. Does not stack.';
+		`${tgts} gain ${c.upped ? upbufftext : bufftext} while ${
+			c.name
+		} is in play. Does not stack.`;
 }
-const statusData = {
+const statusText = {
 	cloak:
 		'Cloaks your field. Opponent cannot see your actions or directly target your other cards.',
 	charges: (c, inst) =>
@@ -665,6 +662,7 @@ const statusData = {
 	voodoo:
 		'Whenever this creature takes non-lethal damage or is affected by any status, that status or damage is also applied to opponent.',
 	whetstone: auraText('Weapons and golems', '1|1', '1|2'),
+	...originalText.statusText,
 };
 function processEntry(c, event, entry) {
 	return typeof entry === 'string'

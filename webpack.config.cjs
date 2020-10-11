@@ -1,4 +1,5 @@
 module.exports = {
+	devtool: 'source-map',
 	entry: {
 		aivai: './src/ui/aivai.js',
 		art: './src/ui/art.js',
@@ -16,15 +17,13 @@ module.exports = {
 		chunkFilename: 'bundle/[name].js',
 		sourceMapFilename: 'bundle/[name].js.map',
 	},
-	devtool: 'source-map',
 	module: {
 		rules: [
 			{
 				test: /\.m?js$/,
 				type: 'javascript/auto',
 				resolve: {
-					enforceExtension: false,
-					fullySpecified: false
+					fullySpecified: false,
 				}
 			},
 			{
@@ -48,7 +47,7 @@ module.exports = {
 									corejs: 3,
 									targets: {
 										browsers: [
-											'firefox esr',
+											'last 1 firefox version',
 											'last 1 chrome version',
 											'last 1 ios version',
 											'last 1 and_chr version',

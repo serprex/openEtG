@@ -1,8 +1,7 @@
 import * as etg from '../etg.js';
 import Card from '../Card.js';
-import Thing from '../Thing.js';
-// TODO skeleton, mummy
-const data = {
+
+export const skillText = {
 	v_ablaze: 'Gain 2|0',
 	v_accelerationspell:
 		'Replaces target creature\'s skills with "Acceleration: gain +2|-1 per turn"',
@@ -19,10 +18,8 @@ const data = {
 		'Absorb 3 quanta per element from target player. Heal 1 per absorbed quantum',
 	v_bless: 'Target gains 3|3',
 	v_blockwithcharge: 'Block attack per stack',
-	v_boneyard: [
-		'When a creature dies, summon a 1|1 Skeleton',
-		'When a creature dies, summon a 2|2 Skeleton',
-	],
+	v_boneyard: c =>
+		`When a creature dies, summon a ${c.upped ? '1|1' : '2|2'} Skeleton`,
 	v_bravery:
 		'Foe draws 2, 3 if own mark is 1:6, cards, you draw an equal amount of cards',
 	v_burrow: 'Burrow. Burrowed creatures attack with half strength',
@@ -46,10 +43,12 @@ const data = {
 	v_disfield: 'Absorb damage. Consume 1:0 per damage absorbed',
 	v_disshield: 'Absorb damage. Consume 1:1 per 3 damage absorbed',
 	v_divinity: 'Add 24 to maximum health if mark 1:8, otherwise 16 & heal same',
-	v_dive: 'Double strength until next attack. Does not stack',
-	v_drainlife: 'Drains 2HP from target. Increment drain per 5:11 owned',
-	v_dryspell:
+	v_dive: 'Double strength until next attack',
+	v_drainlife: 'Drattins 2HP from target. Increment drain per 5:11 owned',
+	v_dryspell: [
 		'Deal 1 damage to all creatures. Gain 1:7 per damage dealt. Removes cloak',
+		"Deal 2 damage to all opponent's creatures. Gain 1:7 per damage dealt. Removes cloak",
+	],
 	v_dshield: 'Become immaterial until next turn',
 	v_duality: "Generate a copy of foe's next draw",
 	v_earth: 'Produce 1:4',
@@ -63,16 +62,15 @@ const data = {
 	v_evolve: 'Become an unburrowed Shrieker',
 	v_fiery: 'Increment damage per 5:6 owned',
 	v_fire: 'Produce 1:6',
-	v_firebolt:
-		'Deals 3 damage to target. Increment damage per 4:6 owned. Thaws target',
+	v_firebolt: 'Deals 3 damage to target. Deal 3 more per 10:6 remaining',
 	v_firewall: 'Damage attackers',
 	v_flyingweapon: 'Own weapon becomes a flying creature',
 	v_fractal:
 		"Fill hand with copies of target creature's card. Consumes remaining 1:12",
-	v_freeze: [
-		'Freeze target for 3 turns. Being frozen disables attacking & per turn skills',
-		'Freeze target for 4 turns. Being frozen disables attacking & per turn skills',
-	],
+	v_freeze: c =>
+		`Freeze target for ${
+			c.upped ? 4 : 3
+		} turns. Being frozen disables attacking & per turn skills`,
 	v_gaincharge2: 'Gain 2 stacks per death',
 	v_gas: 'Summon an Unstable Gas',
 	v_gpull: 'Intercept attacks directed to owner',
@@ -88,9 +86,10 @@ const data = {
 	v_hatch: 'Become a random creature',
 	v_heal: 'Heal self 20',
 	v_holylight: 'Heal target 10. Nocturnal targets are damaged instead',
-	v_hope: 'Increment damage reduction per own 1:8 producing creature',
+	v_hope:
+		'Blocks one additional damage for each creature you control that produces 1:8 every turn.',
 	v_icebolt:
-		'Deal 2 damage to target. Increment damage per 5:7 owned. May freeze target',
+		'Deal 2 damage to target, plus an additional 2 per 10:7 remaining. 25% plus 5% per point of damage chance to freeze target',
 	v_ignite: 'Deal 20 spell damage to foe & 1 damage to all creatures',
 	v_immolate: c =>
 		`Sacrifice a creature to produce ${
@@ -98,14 +97,13 @@ const data = {
 		}:6 & 1 quanta of each other element`,
 	v_improve: 'Mutate target creature',
 	v_infect: 'Poison target creature',
-	v_inflation: 'Increase cost of all actives by 1',
 	v_ink: 'Summon a Cloak which lasts 1 turn',
 	v_integrity: 'Combine all shards in hand to form a Shard Golem',
 	v_light: {
 		auto: 'Produce 1:8',
 		ownplay: 'Produce 1:8 on play',
 	},
-	v_lightning: 'Deal 5 damage to target',
+	v_lightning: 'Deal 5 spell damage to target',
 	v_liquid:
 		'Target creature is poisoned & skills replaced with "Heal owner per damage dealt"',
 	v_lobotomize: 'Remove skills from target creature',
@@ -113,12 +111,9 @@ const data = {
 		const charges = c.getStatus('charges');
 		return `Lasts ${charges} turn ${charges == 1 ? '' : 's'}`;
 	},
-	v_luciferin: 'All your creatures without skills produce 1:8. Heal owner 10',
+	v_luciferin: 'All your creatures without skills produce 1:8. Heal self 10',
 	v_lycanthropy: 'Gain 5|5',
-	v_mend: {
-		cast: 'Heal target creature 5',
-		auto: 'Heal self 5 each turn',
-	},
+	v_mend: 'Heal target creature 5',
 	v_miracle: 'Heal self to one below maximum HP. Consumes remaining 1:8',
 	v_mitosis: 'Summon a daughter creature',
 	v_mitosisspell:
@@ -135,14 +130,13 @@ const data = {
 	v_nova2:
 		'Produce 2 quanta of each element. Increment singularity danger by 3. Summon singularity if danger exceeds 5',
 	v_nymph: 'Turn target pillar into a Nymph of same element',
-	v_obsession: ['Damage owner 10 on discard', 'Damage owner 13 on discard'],
+	v_obsession: c => `Damage owner ${c.upped ? 13 : 10} on discard`,
 	v_overdrivespell:
 		'Replaces target creature\'s skills with "Overdrive: gain +3|-1 per turn"',
-	v_pandemonium2: c =>
+	v_pandemonium: c =>
 		`Random effects are inflicted to ${
 			c.upped ? "oppenent's" : 'all'
 		} creatures. Removes cloak`,
-	v_pandemonium: 'Random effects are inflicted to all creatures. Removes cloak',
 	v_paradox: 'Kill target creature which is stronger than it is large',
 	v_parallel: 'Duplicate target creature',
 	v_phoenix: ['Become an Ash on death', 'Become a Minor Ash on death'],
@@ -173,26 +167,24 @@ const data = {
 	v_purify: 'Replace poison statuses with 2 purify. Removes sacrifice',
 	v_queen: 'Summon a Firefly',
 	v_quint: 'Target creature becomes immaterial. Thaws',
-	v_rage: [
-		'Target creature gains +5|-5. Thaws',
-		'Target creature gains +6|-6. Thaws',
-	],
+	v_rage: c => `Target creature gains ${c.upped ? '+6|-6' : '+5|-5'}`,
 	v_readiness:
 		"Target creature's active becomes costless. Skill can be reactivated",
-	v_rebirth: ['Become a Phoenix', 'Become a Minor Phoenix'],
+	v_rebirth: c => `Become a ${c.upped ? 'Minor Phoenix' : 'Phoenix'}`,
 	v_regenerate: 'Heal owner 5',
 	v_relic: 'Worthless',
-	v_rewind: "Remove target creature to top of owner's deck",
+	v_rewind:
+		"Remove target creature to top of owner's deck. If target is a Skeleton, transform it into a random creature. If target is a Mummy, transform it into a Pharaoh.",
 	v_salvage: 'Restore permanents destroyed by foe to hand once per turn',
 	v_salvageoff: 'Become ready to salvage again at start of next turn',
 	v_sanctuary:
 		"Heal 4 per turn. Protection during foe's turn from hand & quanta control",
 	v_scarab: 'Summon a Scarab',
 	v_scramble: "Randomly scramble foe's quanta on hit",
-	v_serendipity: [
-		'Generate 3 random non-pillar cards in hand. One will be 1:1',
-		'Generate 3 random non-pillar upgraded cards in hand. One will be 1:1',
-	],
+	v_serendipity: c =>
+		`Generate 3 random${
+			c.upped ? ' upgraded' : ''
+		} cards in hand. One will be 1:1`,
 	v_silence:
 		'foe cannot play cards during their next turn, or target creature gains summoning sickness',
 	v_singularity: 'Not well behaved',
@@ -203,10 +195,10 @@ const data = {
 	v_slow: 'Delay attackers',
 	v_snipe: 'Deal 3 damage to target creature',
 	v_solar: 'Produce 1:8 per attacker',
-	v_sosa: [
-		'Sacrifice 48HP & consume all non 1:2 to invert damage for 2 turns',
-		'Sacrifice 40HP & consume all non 1:2 to invert damage for 2 turns',
-	],
+	v_sosa: c =>
+		`Sacrifice ${
+			c.upped ? 40 : 48
+		}HP & consume all non 1:2 to invert damage for 2 turns`,
 	v_soulcatch: c => `When a creature dies, produce ${c.upped ? 3 : 2}:2`,
 	v_sskin: 'Increment maximum HP per 1:4 owned. Heal same',
 	v_steal: 'Steal target permanent',
@@ -222,7 +214,7 @@ const data = {
 	v_vampire: 'Heal owner per damage dealt',
 	v_virusinfect: 'Sacrifice self & poison target creature',
 	v_virusplague: "Sacrifice self & poison foe's creatures",
-	v_void: "Reduce foe's maximum HP by 3",
+	v_void: "Reduce foe's maximum HP by 2, 3 if mark is 1:11",
 	v_web: 'Target creature loses airborne',
 	v_weight: 'Evade creatures larger than 5',
 	v_wings: 'Evade non-airborne & non-ranged attackers',
@@ -233,79 +225,14 @@ const data = {
 	['v_hammer', '1:3 1:4'],
 	['v_bow', '1:9'],
 ].forEach(x => {
-	data[x[0]] = 'Increment damage if mark is ' + x[1];
+	skillText[x[0]] = 'Increment damage if mark is ' + x[1];
 });
-function auraText(tgts, bufftext, upbufftext) {
-	return c =>
-		`${tgts} gain ${c.upped ? upbufftext : bufftext} while ${
-			c.name
-		} in play. Unique`;
-}
-const statusData = {
-	cloak: 'Cloaks own field',
-	charges: (c, inst) =>
-		c !== inst ||
-		Thing.prototype.hasactive.call(c, 'ownattack', 'losecharge') ||
-		c.getStatus('charges') === 1
-			? ''
-			: `Enter with ${c.getStatus('charges')} ${
-					c.getStatus('stackable') ? ' stacks' : ' charges'
-			  }`,
+export const statusText = {
 	flooding:
-		'Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique',
+		'Non aquatic creatures past first five (seven on first effective turn) creature slots die on turn end. Consumes 1:7',
 	freedom:
-		'Own airborne creatures have a 25% chance to  deal 50% more damage, bypass shields and evade targeting if 1:9',
-	nightfall: auraText('Nocturnal creatures', '1|1', '2|1'),
+		'Own airborne creatures have a 25% chance to deal 50% more damage, bypass shields and evade targeting if 1:9',
 	patience:
 		'Each turn delay own creatures. They gain 2|2. 5|5 if flooded. Unique',
-	stackable: '',
 	stasis: 'Prevent creatures attacking at end of turn',
-	voodoo: 'Repeat to foe negative status effects & non lethal damage',
 };
-function processEntry(c, event, entry) {
-	return typeof entry === 'string'
-		? entry
-		: entry instanceof Array
-		? entry[asCard(c).upped ? 1 : 0]
-		: entry instanceof Function
-		? entry(asCard(c), c)
-		: event in entry
-		? processEntry(c, event, entry[event])
-		: '';
-}
-function asCard(c) {
-	return c instanceof Card ? c : c.card;
-}
-function pushEntry(list, c, event, entry) {
-	const x = processEntry(c, event, entry);
-	if (x) list.push(x);
-}
-export default function skillText(c, event) {
-	if (c instanceof Card && c.type === etg.Spell) {
-		const entry = data[c.active.get('cast').name[0]];
-		return processEntry(c, 'cast', entry);
-	} else {
-		const ret = [],
-			stext = [];
-		for (const [key, val] of c.status) {
-			if (!val) continue;
-			const entry = statusData[key];
-			if (entry === undefined) {
-				let text = val === true || val === 1 ? key : key + ': ' + val;
-				text = text.charAt(0).toUpperCase() + text.slice(1);
-				stext.push(text);
-			} else pushEntry(ret, c, '', entry);
-		}
-		if (stext.length) ret.unshift(stext.join(', '));
-		for (const [key, val] of c.active) {
-			val.name.forEach(name => {
-				const entry = data[name];
-				if (entry === undefined) return;
-				pushEntry(ret, c, key, entry);
-				if (key == 'cast')
-					ret[ret.length - 1] = `${c.cast}:${c.castele} ${ret[ret.length - 1]}`;
-			});
-		}
-		return ret.join('\n');
-	}
-}
