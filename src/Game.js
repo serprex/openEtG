@@ -318,12 +318,12 @@ Game.prototype.next = function (event) {
 	}
 	return nextHandler[event.x].call(this, event);
 };
-Game.prototype.expectedDamage = function () {
+Game.prototype.expectedDamage = function (samples) {
 	const expectedDamage = new Int16Array(this.players.length);
 	if (!this.winner) {
 		const disable = Effect.disable;
 		Effect.disable = true;
-		for (let i = 0; i < 5; i++) {
+		for (let i = 0; i < samples; i++) {
 			const gclone = this.clone();
 			for (const pid of gclone.players) {
 				for (const id of gclone.get(pid).get('permanents')) {
@@ -341,7 +341,7 @@ Game.prototype.expectedDamage = function () {
 		}
 		Effect.disable = disable;
 		for (let i = 0; i < expectedDamage.length; i++) {
-			expectedDamage[i] /= 5;
+			expectedDamage[i] /= samples;
 		}
 	}
 	return expectedDamage;

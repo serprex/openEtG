@@ -161,7 +161,8 @@ export default connect(({ user, opts }) => ({
 	hideMainchat: !!opts.hideMainchat,
 	disableTut: !!opts.disableTut,
 	lofiArt: !!opts.lofiArt,
-	playByPlayMode: opts.playByPlayMode ?? '',
+	playByPlayMode: opts.playByPlayMode,
+	expectedDamageSamples: opts.expectedDamageSamples || '4',
 }))(
 	class MainMenu extends Component {
 		constructor(props) {
@@ -742,7 +743,7 @@ export default connect(({ user, opts }) => ({
 							/>
 						)}
 						{this.state.showsettings && (
-							<Components.Box x={585} y={380} width={272} height={156}>
+							<Components.Box x={580} y={300} width={300} height={240}>
 								{this.state.changepass ? (
 									<>
 										<input
@@ -965,6 +966,22 @@ export default connect(({ user, opts }) => ({
 										Off
 									</label>
 								</span>
+								<label
+									style={{ position: 'absolute', left: '8px', top: '193px' }}>
+									Expected Damage Samples {this.props.expectedDamageSamples}
+									<input
+										type="range"
+										style={{ width: '272px' }}
+										min={1}
+										max={5}
+										value={this.props.expectedDamageSamples}
+										onChange={e =>
+											this.props.dispatch(
+												store.setOpt('expectedDamageSamples', e.target.value),
+											)
+										}
+									/>
+								</label>
 							</Components.Box>
 						)}
 					</>

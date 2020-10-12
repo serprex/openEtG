@@ -609,8 +609,9 @@ function FoePlays({
 
 export default connect(({ user, opts }) => ({
 	user,
-	lofiArt: opts.lofiArt,
+	lofiArt: opts.lofiArt ?? false,
 	playByPlayMode: opts.playByPlayMode,
+	expectedDamageSamples: opts.expectedDamageSamples || '4',
 }))(
 	class Match extends Component {
 		constructor(props) {
@@ -967,7 +968,9 @@ export default connect(({ user, opts }) => ({
 				);
 				return {
 					gameProps: props.game.props,
-					expectedDamage: props.game.expectedDamage(),
+					expectedDamage: props.game.expectedDamage(
+						props.expectedDamageSamples | 0 || 4,
+					),
 					player1: player1.id,
 				};
 			}
