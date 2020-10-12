@@ -64,6 +64,13 @@ create table strings (
 	key text not null primary key,
 	val text not null
 );
+create table stats (
+	user_id bigint not null references users(id),
+	stats json not null,
+	game json not null,
+	moves json not null,
+	"when" timestamp not null default now()
+);
 
 insert into roles values (1, 'Codesmith'), (2, 'Mod');
 insert into arena_types values (1, 'A1'), (2, 'A2');

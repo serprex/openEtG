@@ -345,6 +345,7 @@ export default connect(({ user }) => ({ user }))(
 						JSON.stringify({
 							date: game.bonusstats.get('time'),
 							seed: game.data.seed,
+							set: game.data.set,
 							players: game.data.players,
 							moves: replay,
 						}),
@@ -359,7 +360,7 @@ export default connect(({ user }) => ({ user }))(
 				cardreward: this.state.cardreward,
 				goldreward: this.state.goldreward,
 			};
-			if (winner && this.props.user) {
+			if (winner) {
 				const wasPvP = game.data.players.every(pd => !pd.ai);
 				if (level !== undefined || wasPvP)
 					sock.userExec('addwin', { pvp: wasPvP });
@@ -447,27 +448,32 @@ export default connect(({ user }) => ({ user }))(
 			}
 			this.setState(state);
 			if (game.data.endurance === undefined) {
-				this.props.dispatch(
-					store.chatMsg(
-						[
-							level === undefined ? -1 : level,
-							(this.state.player1.foe.data.name || '?').replace(/,/g, ' '),
-							winner ? 'W' : 'L',
-							game.countPlies(),
-							game.bonusstats.get('duration'),
-							this.state.player1.hp,
-							this.state.player1.maxhp,
-							(state.goldreward | 0) - (game.data.cost | 0),
-							state.cardreward || '-',
-							userutil.calcWealth(state.cardreward),
-							!this.props.user || level === undefined
-								? -1
-								: this.props.user.streak[level],
-							streakrate.toFixed(3).replace(/\.?0+$/, ''),
-						].join(),
-						'Stats',
-					),
-				);
+				const stats = [
+					level === undefined ? -1 : level,
+					(this.state.player1.foe.data.name || '?').replace(/,/g, ' '),
+					winner ? 'W' : 'L',
+					game.countPlies(),
+					game.bonusstats.get('duration'),
+					this.state.player1.hp,
+					this.state.player1.maxhp,
+					(state.goldreward | 0) - (game.data.cost | 0),
+					state.cardreward || '-',
+					userutil.calcWealth(state.cardreward),
+					!this.props.user || level === undefined
+						? -1
+						: this.props.user.streak[level],
+					streakrate.toFixed(3).replace(/\.?0+$/, ''),
+				];
+				sock.userEmit('stat', {
+					stats: JSON.stringify(stats),
+					game: JSON.stringify({
+						seed: game.data.seed,
+						set: game.data.set,
+						players: game.data.players,
+					}),
+					moves: JSON.stringify(replay),
+				});
+				this.props.dispatch(store.chatMsg(stats.join(), 'Stats'));
 				const { opts } = store.store.getState();
 				if (opts.runcount) {
 					if (opts.runcountcur === opts.runcount) {
@@ -521,46 +527,42 @@ export default connect(({ user }) => ({ user }))(
 							}}
 						/>
 					)}
-					{this.props.user && (
+					{game.winner === this.state.player1.id && (
 						<>
-							{game.winner === this.state.player1.id && (
-								<>
-									{this.state.goldreward > 0 && (
-										<Components.Text
-											text={`${this.state.goldreward - (game.data.cost | 0)}$`}
-											style={{
-												textAlign: 'center',
-												width: '900px',
-												position: 'absolute',
-												left: '0px',
-												top: '550px',
-											}}
-										/>
-									)}
-									{cards.length > 0 && cards}
-									<Components.Text
-										text={game.data.wintext || 'You won!'}
-										style={{
-											textAlign: 'center',
-											width: '700px',
-											position: 'absolute',
-											left: '100px',
-											top: this.state.cardreward ? '100px' : '250px',
-										}}
-									/>
-								</>
+							{this.state.goldreward > 0 && (
+								<Components.Text
+									text={`${this.state.goldreward - (game.data.cost | 0)}$`}
+									style={{
+										textAlign: 'center',
+										width: '900px',
+										position: 'absolute',
+										left: '0px',
+										top: '550px',
+									}}
+								/>
 							)}
-							<span
+							{cards.length > 0 && cards}
+							<Components.Text
+								text={game.data.wintext || 'You won!'}
 								style={{
+									textAlign: 'center',
+									width: '700px',
 									position: 'absolute',
-									left: '8px',
-									top: '290px',
-								}}>
-								{this.state.lefttext}
-							</span>
-							{this.state.tooltip}
+									left: '100px',
+									top: this.state.cardreward ? '100px' : '250px',
+								}}
+							/>
 						</>
 					)}
+					<span
+						style={{
+							position: 'absolute',
+							left: '8px',
+							top: '290px',
+						}}>
+						{this.state.lefttext}
+					</span>
+					{this.state.tooltip}
 				</>
 			);
 		}

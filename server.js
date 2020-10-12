@@ -378,6 +378,12 @@ select *, (row_number() over (partition by arena_id order by score desc))::int "
 			lv: data.lv,
 		});
 	},
+	stat: function (data, user, meta, userId) {
+		return pg.pool.query({
+			text: `insert into stats (user_id, stats, game, moves) values ($1, $2, $3, $4)`,
+			values: [userId, data.stats, data.game, data.moves],
+		});
+	},
 	setgold: roleck('Codesmith', async function (data, user) {
 		const tgt = await Us.load(data.t);
 		sockEmit(this, 'chat', {
