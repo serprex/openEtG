@@ -478,9 +478,10 @@ function CardSelectorColumn(props) {
 	);
 }
 export class CardSelectorCore extends Component {
+	state = {};
+
 	static getDerivedStateFromProps(props, state) {
 		if (
-			!state ||
 			props.cards !== state.cards ||
 			props.cardpool !== state.cardpool ||
 			props.filter !== state.filter ||

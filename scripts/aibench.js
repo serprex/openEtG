@@ -16,16 +16,13 @@ function bench(name) {
 	for (let m = 0; m < moves.length; m++) {
 		const start = performance.now();
 		if (game.phase === etg.PlayPhase) {
-			const aiState = new aiSearch(game);
-			while (!aiState.cmd) {
-				aiState.step(game);
-			}
+			const cmd = aiSearch(game);
 			const end = performance.now();
 			timing.push(end - start);
 			if (game.byId(game.turn).data.ai === 1) {
 				for (const k in moves[m]) {
-					if (moves[m][k] !== aiState.cmd[k]) {
-						console.log(m, moves[m], aiState.cmd);
+					if (moves[m][k] !== cmd[k]) {
+						console.log(m, moves[m], cmd);
 						break;
 					}
 				}

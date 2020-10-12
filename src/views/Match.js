@@ -11,11 +11,13 @@ import { encodeCode } from '../etgutil.js';
 import * as mkAi from '../mkAi.js';
 import * as sock from '../sock.js';
 import Skills from '../Skills.js';
-import aiSearch from '../ai/search.js';
 import aiMulligan from '../ai/mulligan.js';
 import * as Components from '../Components/index.js';
 import * as store from '../store.js';
 import { mkQuestAi } from '../Quest.js';
+import AsyncWorker from '../AsyncWorker.js';
+
+const aiWorker = new AsyncWorker(import('../ai/ai.worker.js'));
 
 const svgbg = (() => {
 	// prettier-ignore
@@ -805,6 +807,7 @@ export default connect(({ user, opts }) => ({
 				sfx.playSound('mulligan');
 			}
 			game.next(data);
+			this.gameStep(game);
 			this.setState(state => {
 				if (!game.effects || !game.effects.length) return {};
 				const newstate = { effectId: state.effectId + 1 };
@@ -1181,31 +1184,35 @@ export default connect(({ user, opts }) => ({
 			}
 		};
 
-		gameStep() {
-			const { game } = this.props,
-				turn = game.byId(game.turn);
+		gameStep(game) {
+			const turn = game.byId(game.turn);
 			if (turn.data.ai === 1) {
 				if (game.phase === etg.PlayPhase) {
-					let now;
-					if (!this.aiState || !this.aiState.cmd) {
-						Effect.disable = true;
-						if (this.aiState) {
-							this.aiState.step(game);
-						} else {
-							this.aiState = new aiSearch(game);
-						}
-						Effect.disable = false;
-					}
-					if (
-						this.aiState &&
-						this.aiState.cmd &&
-						(now = Date.now()) > this.aiDelay
-					) {
-						this.applyNext(this.aiState.cmd, true);
-						this.aiState = null;
-						this.aiDelay =
-							now + (game.turn === this.state.player1 ? 2000 : 200);
-					}
+					aiWorker
+						.send({
+							data: {
+								seed: game.data.seed,
+								set: game.data.set,
+								players: game.data.players,
+							},
+							moves: game.bonusstats.get('replay'),
+						})
+						.then(e => {
+							const now = Date.now();
+							if (now < this.aiDelay) {
+								return new Promise(resolve =>
+									setTimeout(() => resolve(e), this.aiDelay - now),
+								);
+							} else {
+								return Promise.resolve(e);
+							}
+						})
+						.then(e => {
+							this.applyNext(e.data.cmd, true);
+							this.aiState = null;
+							this.aiDelay =
+								Date.now() + (game.turn === this.state.player1 ? 2000 : 200);
+						});
 				} else if (game.phase === etg.MulliganPhase) {
 					this.applyNext(
 						{
@@ -1290,8 +1297,6 @@ export default connect(({ user, opts }) => ({
 				});
 				this.streakback = user.streak[game.data.level];
 			}
-			this.gameStep();
-			this.gameInterval = setInterval(() => this.gameStep(), 30);
 			dispatch(
 				store.setCmds({
 					move: ({ data }) => this.applyNext(data, true),
@@ -1305,6 +1310,7 @@ export default connect(({ user, opts }) => ({
 					},
 				}),
 			);
+			this.gameStep(game);
 		}
 
 		componentDidMount() {

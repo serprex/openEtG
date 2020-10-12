@@ -1,11 +1,13 @@
-import Effect from '../Effect.js';
 import Game from '../Game.js';
 import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
 import aiSearch from '../ai/search.js';
 import aiMulligan from '../ai/mulligan.js';
 import * as util from '../util.js';
-Effect.disable = true;
+import AsyncWorker from '../AsyncWorker.js';
+
+const aiWorker = new AsyncWorker(import('../ai/ai.worker.js'));
+
 const deckeles = [
 	document.getElementById('deck1'),
 	document.getElementById('deck2'),
@@ -58,7 +60,6 @@ function fightItOut() {
 	}
 	result.textContent = '';
 	let game = mkGame(seed, set, decks),
-		aiState = undefined,
 		realp1 = game.byUser(0).id;
 	result.textContent = '';
 	const cmds = {
@@ -79,25 +80,27 @@ function fightItOut() {
 			}
 		},
 	};
-	function gameStep() {
+	async function gameStep() {
 		if (game.phase === etg.MulliganPhase) {
 			game.next({
 				x: aiMulligan(game.byId(game.turn)) ? 'accept' : 'mulligan',
 			});
 		}
 		if (game.phase === etg.PlayPhase) {
-			if (aiState) {
-				aiState.step(game);
-			} else {
-				aiState = new aiSearch(game);
+			const {
+				data: { cmd },
+			} = await aiWorker.send({
+				data: {
+					seed: game.data.seed,
+					set: game.data.set,
+					players: game.data.players,
+				},
+				moves: game.bonusstats.get('replay'),
+			});
+			if (cmd.x in cmds) {
+				cmds[cmd.x](cmd);
 			}
-			if (aiState.cmd) {
-				if (aiState.cmd.x in cmds) {
-					cmds[aiState.cmd.x](aiState.cmd);
-				}
-				game.next(aiState.cmd);
-				aiState = undefined;
-			}
+			game.next(cmd);
 		}
 		if (!game.winner) setTimeout(gameStep, 0);
 		else {
