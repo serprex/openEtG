@@ -63,12 +63,16 @@ if (typeof kongregateAPI === 'undefined') {
 										target="_blank"
 										href={data.html_url}
 										style={{
-											maxWidth: '380px',
+											maxWidth: '670px',
 											position: 'absolute',
-											left: '260px',
+											left: '220px',
 											top: '460px',
 										}}>
-										{data.author.login}: {data.commit.message}
+										{data.commit.message.split('\n').map((text, i) => (
+											<div key={i} style={{ marginBottom: '6px' }}>
+												{text}
+											</div>
+										))}
 									</a>
 								),
 							});
