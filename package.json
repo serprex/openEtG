@@ -1,6 +1,6 @@
 {
   "name": "openetg",
-	"type": "module",
+  "type": "module",
   "description": "openEtG",
   "readme": "README.md",
   "repository": {
@@ -21,6 +21,7 @@
     "@babel/runtime-corejs3": "^7.11.2",
     "babel-loader": "^8.1.0",
     "core-js": "^3.6.5",
+    "html-webpack-plugin": "^4.5.0",
     "prettier": "^2.1.2",
     "react": "^17.0.0-rc.3",
     "react-dom": "^16.13.1",

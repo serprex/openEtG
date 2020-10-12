@@ -15,36 +15,33 @@ const identityOnlyEncodings = new Set([
 	undefined,
 ]);
 const encode = {
-	br: (buf, oneshot) =>
+	br: buf =>
 		brotliCompressAsync(buf, {
 			params: {
-				[constants.BROTLI_PARAM_QUALITY]: oneshot
-					? constants.BROTLI_MIN_QUALITY
-					: constants.BROTLI_MAX_QUALITY,
+				[constants.BROTLI_PARAM_QUALITY]: constants.BROTLI_MAX_QUALITY,
 				[constants.BROTLI_PARAM_SIZE_HINT]: buf.length,
-				[constants.BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING]: oneshot,
 			},
 		}),
-	gzip: (buf, oneshot) => gzipAsync(buf, { level: oneshot ? 1 : 9 }),
-	deflate: (buf, oneshot) => inflateAsync(buf, { level: oneshot ? 1 : 9 }),
+	gzip: buf => gzipAsync(buf, { level: 9 }),
+	deflate: buf => inflateAsync(buf, { level: 9 }),
 };
 class CacheEntry {
 	constructor(datathunk) {
-		this.datathunk = datathunk;
+		this.identity = datathunk;
 		this.br = null;
 		this.gzip = null;
 		this.deflate = null;
 	}
 
 	async get(acceptedEncodings) {
-		const data = await this.datathunk;
-		if (identityOnlyEncodings.has(data.head['Content-Type'])) {
+		const data = await this.identity;
+		if (
+			identityOnlyEncodings.has(data.head['Content-Type']) ||
+			data.head['Cache-Control'] === 'no-store'
+		) {
 			return data;
 		} else {
 			for (const encoding of acceptedEncodings) {
-				if (encoding === 'identity') {
-					return data;
-				}
 				if (this[encoding]) {
 					return this[encoding];
 				}
@@ -54,10 +51,7 @@ class CacheEntry {
 						'Content-Encoding': encoding,
 					},
 					date: data.date,
-					buf: await encode[encoding](
-						data.buf,
-						data.head['Cache-Control'] === 'no-store',
-					),
+					buf: await encode[encoding](data.buf),
 				});
 			}
 		}

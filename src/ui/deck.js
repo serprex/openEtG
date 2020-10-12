@@ -3,15 +3,10 @@ import reactDOM from 'react-dom';
 import Cards from '../Cards.js';
 import { Card, DeckDisplay } from '../Components/index.js';
 import { decodedeck } from '../etgutil.js';
-const deck = decodedeck(
-	location.pathname.slice(location.pathname.lastIndexOf('/') + 1),
-);
+const deck = decodedeck(location.hash.slice(1));
 
 class App extends Component {
-	constructor(props) {
-		super(props);
-		this.state = { card: null };
-	}
+	state = { card: null };
 
 	render() {
 		return (

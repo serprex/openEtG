@@ -1,3 +1,5 @@
+const HtmlPlugin = require('html-webpack-plugin');
+
 module.exports = {
 	devtool: 'source-map',
 	entry: {
@@ -16,6 +18,11 @@ module.exports = {
 		filename: 'bundle/[name].js',
 		chunkFilename: 'bundle/[name].js',
 		sourceMapFilename: 'bundle/[name].js.map',
+	},
+	optimization: {
+		splitChunks: {
+			chunks: 'all',
+		},
 	},
 	module: {
 		rules: [
@@ -65,4 +72,60 @@ module.exports = {
 			},
 		],
 	},
+	plugins: [
+		new HtmlPlugin({
+			chunks: ['main'],
+			filename: 'index.html',
+			template: 'index.ejs',
+			scriptLoading: 'defer',
+		}),
+		new HtmlPlugin({
+			chunks: ['main'],
+			filename: 'kong.html',
+			template: 'kong.ejs',
+			scriptLoading: 'defer',
+		}),
+		new HtmlPlugin({
+			chunks: ['art'],
+			filename: 'artcredit.htm',
+			template: 'artcredit.ejs',
+			scriptLoading: 'defer',
+		}),
+		new HtmlPlugin({
+			chunks: ['aivai'],
+			filename: 'aivai.htm',
+			template: 'aivai.ejs',
+			scriptLoading: 'defer',
+		}),
+		new HtmlPlugin({
+			chunks: ['deck'],
+			filename: 'deck.htm',
+			template: 'deck.ejs',
+			scriptLoading: 'defer',
+		}),
+		new HtmlPlugin({
+			chunks: ['mosaic'],
+			filename: 'mosaic.htm',
+			template: 'mosaic.ejs',
+			scriptLoading: 'defer',
+		}),
+		new HtmlPlugin({
+			chunks: ['vdeckinfo'],
+			filename: 'vanilla/deckinfo.htm',
+			template: 'vanilla/deckinfo.ejs',
+			scriptLoading: 'defer',
+		}),
+		new HtmlPlugin({
+			chunks: ['vnamegame'],
+			filename: 'vanilla/namegame.htm',
+			template: 'vanilla/namegame.ejs',
+			scriptLoading: 'defer',
+		}),
+		new HtmlPlugin({
+			chunks: ['vspeed'],
+			filename: 'vanilla/speed.htm',
+			template: 'vanilla/speed.ejs',
+			scriptLoading: 'defer',
+		}),
+	],
 };

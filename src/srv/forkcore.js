@@ -32,7 +32,8 @@ async function forkcorelogic(req, res) {
 		acceptedEncodings.pop();
 	}
 	acceptedEncodings.push('identity');
-	if (await cache._try(acceptedEncodings, res, url, ifmod)) return;
+	if (await cache._try(acceptedEncodings, res, url || 'index.html', ifmod))
+		return;
 	const idx = url.indexOf('/'),
 		func = ~idx && lut[url.slice(0, idx)];
 	if (func) {
