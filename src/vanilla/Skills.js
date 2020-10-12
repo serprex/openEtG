@@ -45,15 +45,15 @@ const Actives = {
 			t.setStatus('aflatoxin', 1);
 		}
 	}),
-	air: (ctx, c, t) => {
-		c.owner.spend(etg.Air, -1);
-	},
 	antimatter: target('crea', (ctx, c, t) => {
 		t.incrAtk(t.trueatk() * -2);
 	}),
 	bblood: target('crea', (ctx, c, t) => {
 		t.buffhp(20);
 		t.setStatus('delayed', 6);
+		if (t.getStatus('vooodoo') && t.owner.foe.weaponId) {
+			t.owner.foe.weapon.setStatus('delayed', 6);
+		}
 	}),
 	blackhole: (ctx, c, t) => {
 		if (!c.owner.foe.sanctuary) {
@@ -96,7 +96,7 @@ const Actives = {
 	},
 	butterfly: target('v_butterfly', (ctx, c, t) => {
 		t.lobo();
-		t.active = t.active.set('cast', Actives.destroy);
+		t.setSkill('cast', Actives.destroy);
 		t.cast = 3;
 		t.castele = etg.Entropy;
 	}),
@@ -253,9 +253,6 @@ const Actives = {
 			);
 		}
 	},
-	earth: (ctx, c, t) => {
-		c.owner.spend(etg.Earth, -1);
-	},
 	earthquake: target('pill', (ctx, c, t) => {
 		if (t.getStatus('charges') > 3) {
 			t.setStatus('charges', t.getStatus('charges') - 3);
@@ -290,9 +287,6 @@ const Actives = {
 	},
 	fiery: (ctx, c, t) => {
 		return Math.floor(c.owner.quanta[etg.Fire] / 5);
-	},
-	fire: (ctx, c, t) => {
-		c.owner.spend(etg.Fire, -1);
 	},
 	firebolt: target('crea+play', (ctx, c, t) => {
 		t.spelldmg(3 + 3 * Math.floor(c.owner.quanta[etg.Fire] / 10));
@@ -389,7 +383,7 @@ const Actives = {
 		for (let i = 0; i < 23; i++) {
 			if (
 				c.owner.creatures[i] &&
-				c.owner.creatures[i].hasactive('ownattack', 'v_light')
+				c.owner.creatures[i].hasactive('ownattack', 'quanta 8')
 			) {
 				dr++;
 			}
@@ -516,21 +510,23 @@ const Actives = {
 			lobotomize: 2,
 			quint: 2,
 		};
-		const atkBuff = [],
-			hpBuff = [];
-		atkBuff[etg.Earth] = 1;
-		hpBuff[etg.Earth] = 4;
-		atkBuff[etg.Gravity] = 0;
-		hpBuff[etg.Gravity] = 6;
-		atkBuff[etg.Fire] = 3;
-		hpBuff[etg.Fire] = 0;
+		const atkBuff = new Map([
+				[etg.Earth, 1],
+				[etg.Gravity, 0],
+				[etg.Fire, 3],
+			]),
+			hpBuff = new Map([
+				[etg.Earth, 4],
+				[etg.Gravity, 6],
+				[etg.Fire, 0],
+			]);
 		let hpStat = c.card.upped ? 2 : 1,
 			atkStat = hpStat + 3;
 		for (let i = c.owner.hand.length - 1; i >= 0; i--) {
 			const card = c.owner.hand[i].card;
 			if (etg.ShardList.some(x => x && card.isOf(ctx.Cards.Codes[x]))) {
-				atkStat += (atkBuff[e] || 2) + card.upped;
-				hpStat += (hpBuff[e] || 2) + card.upped;
+				atkStat += (atkBuff.get(e) ?? 2) + card.upped;
+				hpStat += (hpBuff.get(e) ?? 2) + card.upped;
 				shardTally[card.element]++;
 				c.owner.hand.splice(i, 1);
 			}
@@ -576,9 +572,6 @@ const Actives = {
 		};
 		c.owner.addCrea(c.owner.newThing(ctx.Cards.Names.ShardGolem));
 	},
-	light: (ctx, c, t) => {
-		c.owner.spend(etg.Light, -1);
-	},
 	lightning: target('crea+play', (ctx, c, t) => {
 		t.spelldmg(5);
 	}),
@@ -614,7 +607,7 @@ const Actives = {
 					break;
 				}
 			}
-			if (givelight) cr.addactive('ownattack', Actives.light);
+			if (givelight) cr.addactive('ownattack', parseSkill('quanta 8'));
 		}
 	},
 	lycanthropy: (ctx, c, t) => {
@@ -629,8 +622,9 @@ const Actives = {
 		c.owner.setQuanta(etg.Light);
 		if (c.owner.sosa) {
 			c.owner.hp = 1;
+		} else {
+			c.owner.hp = c.owner.maxhp - 1;
 		}
-		c.owner.hp = c.owner.maxhp - 1;
 	},
 	mitosis: (ctx, c, t) => {
 		c.owner.addCrea(c.owner.newThing(c.card));
@@ -860,7 +854,6 @@ const Actives = {
 		const num = Math.min(8 - c.owner.hand.length, 3);
 		let anyentro = false;
 		for (let i = num - 1; ~i; i--) {
-			// Don't accept Marks/Nymphs
 			const card = ctx.randomcard(
 				c.card.upped,
 				x =>

@@ -11,7 +11,6 @@ export const skillText = {
 		'Target creature attacks multiple times per turn. Weaker creatures gain more attacks',
 	v_aflatoxin:
 		'Apply 2 poison to target. When target dies, it turns into a malignant cell',
-	v_air: 'Produce 1:9',
 	v_antimatter: 'Invert strength of target',
 	v_bblood: 'Target creature gains 0|20 & is delayed 6 turns',
 	v_blackhole:
@@ -51,7 +50,6 @@ export const skillText = {
 	],
 	v_dshield: 'Become immaterial until next turn',
 	v_duality: "Generate a copy of foe's next draw",
-	v_earth: 'Produce 1:4',
 	v_earthquake: 'Destroy up to 3 stacks from target permanent',
 	v_empathy: 'Heal owner per creature owned per turn. Upkeep per 8 creatures',
 	v_enchant: 'Target permanent becomes immaterial',
@@ -61,7 +59,6 @@ export const skillText = {
 	v_evade100: '100% chance to evade',
 	v_evolve: 'Become an unburrowed Shrieker',
 	v_fiery: 'Increment damage per 5:6 owned',
-	v_fire: 'Produce 1:6',
 	v_firebolt: 'Deals 3 damage to target. Deal 3 more per 10:6 remaining',
 	v_firewall: 'Damage attackers',
 	v_flyingweapon: 'Own weapon becomes a flying creature',
@@ -99,10 +96,6 @@ export const skillText = {
 	v_infect: 'Poison target creature',
 	v_ink: 'Summon a Cloak which lasts 1 turn',
 	v_integrity: 'Combine all shards in hand to form a Shard Golem',
-	v_light: {
-		auto: 'Produce 1:8',
-		ownplay: 'Produce 1:8 on play',
-	},
 	v_lightning: 'Deal 5 spell damage to target',
 	v_liquid:
 		'Target creature is poisoned & skills replaced with "Heal owner per damage dealt"',
@@ -126,9 +119,9 @@ export const skillText = {
 	v_nightmare:
 		"Fill foe's hand with copies of target creature's card. Drain 2HP per added card",
 	v_nova:
-		'Produce 1 quanta of each element. Increment singularity danger by 2. Summon singularity if danger exceeds 5',
+		'Gain 1 quanta of each element. If you play three or more of this card in one turn, summon a Singularity on your side.',
 	v_nova2:
-		'Produce 2 quanta of each element. Increment singularity danger by 3. Summon singularity if danger exceeds 5',
+		'Gain 2 quanta of each element. If you play two or more of this card in one turn, summon a Singularity on your side.',
 	v_nymph: 'Turn target pillar into a Nymph of same element',
 	v_obsession: c => `Damage owner ${c.upped ? 13 : 10} on discard`,
 	v_overdrivespell:
@@ -150,7 +143,7 @@ export const skillText = {
 			c.element
 		} & quanta of mark`,
 	v_plague: "Poison foe's creatures. Removes cloak",
-	v_platearmor: ['Target gains 0|3', 'Target gains 0|6'],
+	v_platearmor: c => `Target gains 0|${c.upped ? 6 : 3}`,
 	v_poison: {
 		hit: 'Apply poison on hit. Throttled',
 		cast: 'Apply poison to foe',
@@ -170,7 +163,7 @@ export const skillText = {
 	v_rage: c => `Target creature gains ${c.upped ? '+6|-6' : '+5|-5'}`,
 	v_readiness:
 		"Target creature's active becomes costless. Skill can be reactivated",
-	v_rebirth: c => `Become a ${c.upped ? 'Minor Phoenix' : 'Phoenix'}`,
+	v_rebirth: c => `Become a ${c.upped ? 'Minor ' : ''}Phoenix`,
 	v_regenerate: 'Heal owner 5',
 	v_relic: 'Worthless',
 	v_rewind:
