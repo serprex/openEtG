@@ -1053,7 +1053,7 @@ export default function (game) {
 		if (pl.casts === 0)
 			pscore -= (pl.handIds.length + (pl.handIds.length > 6 ? 7 : 4)) / 4;
 		if (pl.getStatus('flatline')) pscore -= 1;
-		if (pl.getStatus('neuro')) pscore -= 5 - pl.handIds.length / 2;
+		if (pl.getStatus('neuro')) pscore -= 5 + pl.handIds.length / 2;
 		gamevalue += pscore * (pl.leader === player.leader ? 1 : -1);
 	}
 	return gamevalue;
