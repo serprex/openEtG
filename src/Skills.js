@@ -1834,7 +1834,7 @@ const Skills = {
 			const card = ctx.randomcard(
 				c.card.upped,
 				x =>
-					x.getStatus('pillar') &&
+					!x.getStatus('pillar') &&
 					x.rarity < 4 &&
 					(i > 0 || anyentro || x.element === etg.Entropy),
 			);
