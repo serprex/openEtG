@@ -801,21 +801,28 @@ select *, (row_number() over (partition by arena_id order by score desc))::int "
 						user.pool = etgutil.addcard(user.pool, code, happened);
 						codeCount += happened;
 						const SellFunc = seller => {
-							const msg = {};
 							if (data.price > 0) {
-								msg.msg = `${user.name} bought ${amt} of ${
-									card.name
-								} @ ${-bid.p} from you.`;
-								msg.g = cost;
 								seller.gold += cost;
 							} else {
-								msg.msg = `${user.name} sold you ${amt} of ${card.name} @ ${bid.p}`;
-								msg.c = etgutil.encodeCount(amt) + etguil.encodeCode(code);
 								seller.pool = etgutil.addcard(seller.pool, code, amt);
 							}
 							const sellerSock = Us.socks.get(seller.name);
 							if (sellerSock) {
-								sockEmit(sellerSock, 'bzgive', msg);
+								sockEmit(
+									sellerSock,
+									'bzgive',
+									data.price > 0
+										? {
+												msg: `${user.name} bought ${amt} of ${
+													card.name
+												} @ ${-bid.p} from you.`,
+												g: cost,
+										  }
+										: {
+												msg: `${user.name} sold you ${amt} of ${card.name} @ ${bid.p}`,
+												c: etgutil.encodeCount(amt) + etgutil.encodeCode(code),
+										  },
+								);
 							}
 						};
 						if (bid.u === user.name) {
@@ -823,7 +830,7 @@ select *, (row_number() over (partition by arena_id order by score desc))::int "
 						} else {
 							Us.load(bid.u)
 								.then(SellFunc)
-								.catch(() => {});
+								.catch(e => console.log('Bazaar bug', e));
 						}
 						if (bid.q > count) {
 							ops.push({ op: 'UPDATE', bid, q: bid.q - count });
