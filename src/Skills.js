@@ -1405,9 +1405,8 @@ const Skills = {
 		for (let i = 1; i < 13; i++) {
 			c.owner.spend(i, -1);
 		}
-		c.owner.incrStatus('nova', 2);
-		if (c.owner.getStatus('nova') >= 6) {
-			c.transform(ctx.Cards.Names.Singularity.asShiny(c.card.shiny));
+		if (c.owner.incrStatus('nova') >= 3) {
+			c.transform(c.card.as(ctx.Cards.Names.Singularity));
 			c.owner.addCrea(c);
 		}
 	},
@@ -1415,11 +1414,8 @@ const Skills = {
 		for (let i = 1; i < 13; i++) {
 			c.owner.spend(i, -2);
 		}
-		c.owner.incrStatus('nova', 3);
-		if (c.owner.getStatus('nova') >= 6) {
-			c.transform(
-				ctx.Cards.Names.Singularity.asUpped(true).asShiny(c.card.shiny),
-			);
+		if (c.owner.incrStatus('nova2') >= 2) {
+			c.transform(c.card.as(ctx.Cards.Names.Singularity));
 			c.owner.addCrea(c);
 		}
 	},
@@ -1871,7 +1867,7 @@ const Skills = {
 		c.owner.deckIds = deckIds;
 	}),
 	silence: target('crea+play', (ctx, c, t) => {
-		if (t.type !== etg.Player || !t.getStatus('sanctuary')) t.casts = 0;
+		if (!t.getStatus('sanctuary')) t.casts = 0;
 	}),
 	singularity: (ctx, c, t) => {
 		if (c.trueatk() > 0) {

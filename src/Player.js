@@ -439,21 +439,21 @@ Player.prototype.v_endturn = function (discard) {
 		if ((p = this.permanents[i])) {
 			if (~p.getIndex()) {
 				p.casts = 1;
-				if (p.status.get('stasis') && p.status.get('charges') > 0) {
+				if (p.getStatus('stasis') && p.getStatus('charges') > 0) {
 					stasisFlag = true;
-				} else if (p.status.get('flooding')) {
+				} else if (p.getStatus('flooding')) {
 					floodingFlag = true;
-				} else if (p.status.get('patience')) {
+				} else if (p.getStatus('patience')) {
 					patienceFlag = true;
-				} else if (p.status.get('freedom')) {
-					freedomChance += p.status.get('charges') * 0.25;
+				} else if (p.getStatus('freedom')) {
+					freedomChance += p.getStatus('charges') * 0.25;
 				}
 			}
 		}
 		if ((p = this.foe.permanents[i])) {
-			if (p.status.get('stasis')) {
+			if (p.getStatus('stasis')) {
 				stasisFlag = true;
-			} else if (p.status.get('flooding')) {
+			} else if (p.getStatus('flooding')) {
 				floodingFlag = true;
 			}
 		}
@@ -473,8 +473,8 @@ Player.prototype.v_endturn = function (discard) {
 				floodingFlag &&
 				cr.card.element !== etg.Water &&
 				cr.card.element &&
-				!cr.status.get('immaterial') &&
-				!cr.status.get('burrowed') &&
+				!cr.getStatus('immaterial') &&
+				!cr.getStatus('burrowed') &&
 				~cr.getIndex()
 			) {
 				cr.die();
@@ -503,7 +503,6 @@ Player.prototype.v_endturn = function (discard) {
 		this.game.trigger(this.shieldId, 'ownattack');
 	}
 	if (this.weaponId) this.weapon.v_attack();
-	this.nova = this.nova2 = 0;
 	this.casts = 1;
 };
 Player.prototype.die = function () {

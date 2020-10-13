@@ -459,9 +459,7 @@ export default connect(({ user }) => ({ user }))(
 					(state.goldreward | 0) - (game.data.cost | 0),
 					state.cardreward || '-',
 					userutil.calcWealth(state.cardreward),
-					!this.props.user || level === undefined
-						? -1
-						: this.props.user.streak[level],
+					level === undefined ? -1 : this.props.user.streak[level],
 					streakrate.toFixed(3).replace(/\.?0+$/, ''),
 				];
 				sock.userEmit('stat', {

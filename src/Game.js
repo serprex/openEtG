@@ -228,6 +228,7 @@ Game.prototype.nextTurn = function () {
 			}
 			next.maybeDecrStatus('sosa');
 			next.setStatus('nova', 0);
+			next.setStatus('nova2', 0);
 			next.setStatus('sanctuary', 0);
 			next.setStatus('precognition', 0);
 			for (let i = next.drawpower; i > 0; i--) {

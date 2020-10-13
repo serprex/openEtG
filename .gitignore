@@ -14,6 +14,7 @@ atlas.png
 scripts/replays.json
 config.json
 wsconfig.json
+private/*
 
 aivai.htm
 artcredit.htm
