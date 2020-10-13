@@ -68,18 +68,17 @@ export class Delay extends Component {
 
 export function CardImage(props) {
 	const { card } = props,
-		bordcol = card.shiny ? '#daa520' : '#222',
 		bgcol = ui.maybeLightenStr(card);
 	return (
 		<div
-			className="cardslot"
+			className={`cardslot${card.shiny ? ' shiny' : ''}`}
 			onMouseOver={props.onMouseOver}
 			onMouseLeave={props.onMouseOut}
 			onClick={props.onClick}
 			onContextMenu={props.onContextMenu}
 			style={{
 				backgroundColor: bgcol,
-				borderColor: props.opacity ? '#f00' : bordcol,
+				borderColor: props.opacity ? '#f00' : '#222',
 				color: card.upped ? '#000' : '#fff',
 				...props.style,
 			}}>
@@ -240,7 +239,7 @@ export function Card(props) {
 				{card.name}
 			</span>
 			<img
-				className={card.code & 0x4000 ? 'shiny' : ''}
+				className={card.shiny ? 'shiny' : ''}
 				src={`/Cards/${etgutil.encodeCode(card.code)}.png`}
 				style={{
 					position: 'absolute',

@@ -310,14 +310,10 @@ function ArrowLine({ x0, y0, x1, y1, opacity }) {
 }
 
 class ThingInst extends Component {
-	constructor(props) {
-		super(props);
-
-		this.state = {
-			gameProps: null,
-			instdom: null,
-		};
-	}
+	state = {
+		gameProps: null,
+		instdom: null,
+	};
 
 	setInfo = e => this.props.setInfo(e, this.props.obj, this.props.pos.x);
 
@@ -432,6 +428,7 @@ class ThingInst extends Component {
 				faceDown: false,
 				instdom: (
 					<div
+						className={card.shiny ? 'shiny' : ''}
 						style={{
 							width: '64px',
 							height: '64px',
