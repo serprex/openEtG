@@ -28,6 +28,7 @@ module.exports = {
 		rules: [
 			{
 				test: /\.m?js$/,
+				exclude: /node_modules/,
 				type: 'javascript/auto',
 				resolve: {
 					fullySpecified: false,
@@ -72,6 +73,7 @@ module.exports = {
 			},
 			{
 				test: /\.worker\.js$/,
+				exclude: /node_modules/,
 				use: { loader: 'worker-loader' },
 			},
 		],
