@@ -400,7 +400,10 @@ export default connect(({ user }) => ({ user }))(
 										n: streak,
 									});
 								}
-								streakrate = Math.min((streak200[level] * streak) / 200, 1);
+								streakrate = Math.min(
+									(streak200[level] * (streak - 1)) / 200,
+									1,
+								);
 								lefttext.push(
 									<TooltipText
 										key={lefttext.length}
