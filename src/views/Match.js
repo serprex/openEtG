@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import { connect } from 'react-redux';
-import { Motion, TransitionMotion, spring } from 'react-motion';
+import { Motion, TransitionMotion, spring } from '@serprex/react-motion';
 import * as imm from '../immutable.js';
 
 import Effect from '../Effect.js';
