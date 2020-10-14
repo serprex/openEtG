@@ -145,14 +145,6 @@ export default connect(({ user }) => ({ user }))(
 						}}
 					/>
 					<Components.Text
-						text={this.state.info2}
-						style={{
-							position: 'absolute',
-							left: '250px',
-							top: '140px',
-						}}
-					/>
-					<Components.Text
 						text={this.state.info3}
 						style={{
 							position: 'absolute',
@@ -221,12 +213,6 @@ export default connect(({ user }) => ({ user }))(
 									: 'Convert 2 into a shiny version.';
 								newstate.downlish = false;
 							}
-							newstate.info2 =
-								card.rarity === -1
-									? ''
-									: card.isFree()
-									? '300$ to upgrade & polish'
-									: '';
 							this.setState(newstate);
 						}}
 					/>
