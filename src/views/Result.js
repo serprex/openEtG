@@ -447,7 +447,10 @@ export default connect(({ user }) => ({ user }))(
 				}
 			}
 			this.setState(state);
-			if (game.data.endurance === undefined) {
+			if (
+				game.data.endurance === undefined &&
+				game.data.colobonus === undefined
+			) {
 				const stats = [
 					level === undefined ? -1 : level,
 					(this.state.player1.foe.data.name || '?').replace(/,/g, ' '),
