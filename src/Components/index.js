@@ -71,14 +71,14 @@ export function CardImage(props) {
 		bgcol = ui.maybeLightenStr(card);
 	return (
 		<div
-			className={`cardslot${card.shiny ? ' shiny' : ''}`}
+			className="cardslot"
 			onMouseOver={props.onMouseOver}
 			onMouseLeave={props.onMouseOut}
 			onClick={props.onClick}
 			onContextMenu={props.onContextMenu}
 			style={{
 				backgroundColor: bgcol,
-				borderColor: props.opacity ? '#f00' : '#222',
+				borderColor: props.opacity ? '#f00' : card.shiny ? '#daa520' : '#222',
 				color: card.upped ? '#000' : '#fff',
 				...props.style,
 			}}>

@@ -98,6 +98,13 @@ const cloaksvg = (
 	/>
 );
 
+const instimgstyle = {
+	position: 'absolute',
+	width: '64px',
+	height: '64px',
+	pointerEvents: 'none',
+};
+
 const activeInfo = {
 	firebolt: (c, t) =>
 		3 + Math.floor((c.owner.quanta[etg.Fire] - c.card.cost) / 4),
@@ -428,24 +435,24 @@ class ThingInst extends Component {
 				faceDown: false,
 				instdom: (
 					<div
-						className={card.shiny ? 'shiny' : ''}
 						style={{
 							width: '64px',
 							height: '64px',
 							backgroundColor: bgcolor,
-							backgroundSize: 'contain',
-							backgroundImage: props.lofiArt
-								? undefined
-								: `url(/Cards/${encodeCode(card.code)}.png)`,
 						}}>
+						{!props.lofiArt && (
+							<img
+								className={card.shiny ? 'shiny' : ''}
+								src={`/Cards/${encodeCode(card.code)}.png`}
+								style={instimgstyle}
+							/>
+						)}
 						{children}
 						{obj.hasactive('prespell', 'protectonce') && (
 							<div
 								className="ico protection"
 								style={{
 									position: 'absolute',
-									left: '0',
-									top: '0',
 									width: '64px',
 									height: '64px',
 								}}
@@ -454,7 +461,6 @@ class ThingInst extends Component {
 						<div
 							style={{
 								position: 'absolute',
-								top: '0',
 								width: '64px',
 							}}>
 							{topText && (
