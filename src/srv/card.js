@@ -1,4 +1,4 @@
-import Cards from '../Cards.js';
+import AllCards from '../AllCards.js';
 import * as svg from '../svg.js';
 
 export default async function card(url, stime) {

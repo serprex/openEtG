@@ -1,4 +1,4 @@
-#!/bin/node --experimental-modules
+#!/bin/node --experimental-json-modules
 import Cards from '../src/Cards.js';
 import * as etgutil from '../src/etgutil.js';
 import decks from '../src/Decks.json';
@@ -8,13 +8,15 @@ function buildPool(x) {
 }
 decks.mage.forEach(buildPool);
 decks.demigod.forEach(buildPool);
-const a = Cards.filter(false, card => {
-	card.rarity > 0 &&
+const a = Cards.filter(
+	false,
+	card =>
+		card.rarity > 0 &&
 		card.rarity < 4 &&
 		etgutil.count(pool, card.asUpped(false).code) +
 			etgutil.count(pool, card.asUpped(true).code) ==
-			0;
-});
+			0,
+);
 a.forEach(x => console.log(x.name));
 const pool2 = etgutil.deck2pool(pool),
 	poolrank = [];

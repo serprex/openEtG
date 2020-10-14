@@ -1,4 +1,4 @@
-import reactDOM from 'react-dom';
+import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 
 import { store, chatMsg } from '../store.js';
@@ -16,7 +16,7 @@ import { emit } from '../sock.js';
 emit({ x: 'motd' });
 
 import('../views/App.js').then(App =>
-	reactDOM.render(
+	render(
 		<Provider store={store}>
 			<App.default />
 		</Provider>,
@@ -24,7 +24,7 @@ import('../views/App.js').then(App =>
 	),
 );
 import('../views/Rightpane.js').then(Rightpane =>
-	reactDOM.render(
+	render(
 		<Provider store={store}>
 			<Rightpane.default />
 		</Provider>,

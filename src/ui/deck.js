@@ -1,12 +1,23 @@
 import { Component } from 'react';
-import reactDOM from 'react-dom';
-import Cards from '../Cards.js';
+import { render } from 'react-dom';
+import Cards from '../AllCards.js';
 import { Card, DeckDisplay } from '../Components/index.js';
 import { decodedeck } from '../etgutil.js';
-const deck = decodedeck(location.hash.slice(1));
 
 class App extends Component {
-	state = { card: null };
+	state = { deck: decodedeck(location.hash.slice(1)), card: null };
+
+	hashChange = e => {
+		this.setState({ deck: decodedeck(location.hash.slice(1)) });
+	};
+
+	componentDidMount() {
+		window.addEventListener('hashchange', this.hashChange);
+	}
+
+	componentWillUnmount() {
+		window.removeEventListener('hashchange', this.hashChange);
+	}
 
 	render() {
 		return (
@@ -16,7 +27,7 @@ class App extends Component {
 					renderMark
 					x={-64}
 					y={-24}
-					deck={deck}
+					deck={this.state.deck}
 					onMouseOver={(i, card) => this.setState({ card })}
 				/>
 				<Card x={36} y={206} card={this.state.card} />
@@ -25,4 +36,4 @@ class App extends Component {
 	}
 }
 
-reactDOM.render(<App />, document.getElementById('deck'));
+render(<App />, document.getElementById('deck'));
