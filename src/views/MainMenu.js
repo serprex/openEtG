@@ -14,6 +14,7 @@ import * as userutil from '../userutil.js';
 import parseChat from '../parseChat.js';
 
 const tipjar = [
+	'Clicking on play by play rectangles will show the game state at that point of history',
 	'Each card in your booster pack has a 50% chance of being from the chosen element',
 	'Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily',
 	'Be sure to try the Proving Grounds Quests for some good cards',
