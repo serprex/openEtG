@@ -27,7 +27,7 @@ const SkillsValues = {
 		let a = 0,
 			fq = c.owner.foe.quanta;
 		for (let i = 1; i < 13; i++) {
-			a += Math.min(fq[i], 3) / 3;
+			a += Math.min(fq[i], 3) / 12;
 		}
 		return a;
 	},
@@ -1050,7 +1050,7 @@ export default function (game) {
 		if (pl.getStatus('precognition')) pscore += 0.5;
 		if (pl.casts === 0)
 			pscore -= (pl.handIds.length + (pl.handIds.length > 6 ? 7 : 4)) / 4;
-		if (pl.getStatus('flatline')) pscore -= 1;
+		if (pl.getStatus('flatline')) pscore -= 2;
 		if (pl.getStatus('neuro')) pscore -= 5 + pl.handIds.length / 2;
 		gamevalue += pscore * (pl.leader === player.leader ? 1 : -1);
 	}
