@@ -1,5 +1,4 @@
 #!/usr/bin/node
-'use strict';
 const write = process.stdout.write.bind(process.stdout);
 function writetd(...args) {
 	write('[tr]');

@@ -1443,7 +1443,7 @@ export default connect(({ user, opts }) => ({
 							? 12
 							: pl.getStatus('sanctuary')
 							? 8
-							: pl.getStatus('nova') >= 3 &&
+							: (pl.getStatus('nova') >= 2 || pl.getStatus('nova2') >= 1) &&
 							  (pl.id !== player1.id ||
 									pl.hand.some(c => c.card.isOf(game.Cards.Names.Nova)))
 							? 1

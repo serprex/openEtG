@@ -1405,7 +1405,8 @@ const Skills = {
 		for (let i = 1; i < 13; i++) {
 			c.owner.spend(i, -1);
 		}
-		if (c.owner.incrStatus('nova') >= 3) {
+		c.owner.incrStatus('nova', 1);
+		if (c.owner.getStatus('nova') >= 3) {
 			c.transform(c.card.as(ctx.Cards.Names.Singularity));
 			c.owner.addCrea(c);
 		}
@@ -1414,7 +1415,8 @@ const Skills = {
 		for (let i = 1; i < 13; i++) {
 			c.owner.spend(i, -2);
 		}
-		if (c.owner.incrStatus('nova2') >= 2) {
+		c.owner.incrStatus('nova2', 1);
+		if (c.owner.getStatus('nova2') >= 2) {
 			c.transform(c.card.as(ctx.Cards.Names.Singularity));
 			c.owner.addCrea(c);
 		}

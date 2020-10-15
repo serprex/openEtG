@@ -1,4 +1,3 @@
-'use strict';
 import fsCb from 'fs';
 const { existsSync, watch, promises } = fsCb,
 	fs = promises;
