@@ -371,19 +371,15 @@ export default connect(({ user }) => ({ user }))(
 						const foeDeck = etgutil.decodedeck(foedeck.deck);
 						let winnable = foeDeck.filter(code => {
 								const card = game.Cards.Codes[code];
-								return card && card.rarity > 0 && card.rarity < 3;
+								return card && card.rarity > 0 && card.rarity < 4;
 							}),
 							cardwon;
 						if (winnable.length) {
 							cardwon = RngMock.choose(winnable);
 						} else {
-							const elewin = game.Cards.Codes[RngMock.choose(foeDeck)];
 							cardwon = RngMock.randomcard(
-								elewin.upped,
-								x =>
-									x.element === elewin.element &&
-									!x.getStatus('pillar') &&
-									x.rarity <= 3,
+								false,
+								x => x.rarity > 0 && x.rarity < 4,
 							);
 						}
 						state.cardreward =
