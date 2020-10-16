@@ -75,36 +75,56 @@ export default function login(sockEmit) {
 				}),
 			);
 			if (!user.daily) user.daily = 128;
-			const update = await pg.pool.query({
-				text: `update users set wealth = $2, auth = $3, salt = $4, iter = $5, algo = $6 where name = $1`,
-				values: [
-					user.name,
-					user.gold + Math.round(userutil.calcWealth(user.pool)),
-					user.auth,
-					user.salt,
-					user.iter,
-					user.algo,
-				],
+			return pg.trx(async sql => {
+				if (user.id) {
+					const bids = await sql.query({
+						text: `select code, p, q from bazaar where user_id = $1`,
+						values: [user.id],
+					});
+					let bazaarWealth = 0;
+					for (const bid of bids.rows) {
+						if (bid.p < 0) {
+							bazaarWealth +=
+								userutil.calcWealth('01' + etgutil.encodeCode(bid.code)) *
+								bid.q;
+						} else {
+							bazaarWealth += bid.p * bid.q;
+						}
+					}
+
+					const update = await sql.query({
+						text: `update users set wealth = $2, auth = $3, salt = $4, iter = $5, algo = $6 where id = $1`,
+						values: [
+							user.id,
+							user.gold +
+								bazaarWealth +
+								Math.round(userutil.calcWealth(user.pool)),
+							user.auth,
+							user.salt,
+							user.iter,
+							user.algo,
+						],
+					});
+				} else {
+					const new_user = await sql.query({
+						text: `insert into users (name, auth, salt, iter, algo, wealth) values ($1, $2, $3, $4, $5, 0) returning id`,
+						values: [user.name, user.auth, user.salt, user.iter, user.algo],
+					});
+					await sql.query({
+						text: `insert into user_data (user_id, type_id, name, data) values ($1, 1, 'Main', $2)`,
+						values: [
+							new_user.rows[0].id,
+							JSON.stringify({
+								...user,
+								auth: undefined,
+								salt: undefined,
+								iter: undefined,
+								algo: undefined,
+							}),
+						],
+					});
+				}
 			});
-			if (update.rowCount === 0) {
-				const new_user = await pg.pool.query({
-					text: `insert into users (name, auth, salt, iter, algo, wealth) values ($1, $2, $3, $4, $5, 0) returning id`,
-					values: [user.name, user.auth, user.salt, user.iter, user.algo],
-				});
-				await pg.pool.query({
-					text: `insert into user_data (user_id, type_id, name, data) values ($1, 1, 'Main', $2)`,
-					values: [
-						new_user.rows[0].id,
-						JSON.stringify({
-							...user,
-							auth: undefined,
-							salt: undefined,
-							iter: undefined,
-							algo: undefined,
-						}),
-					],
-				});
-			}
 		}
 	}
 	async function loginAuth(data) {
