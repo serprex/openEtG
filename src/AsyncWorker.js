@@ -13,6 +13,13 @@ export default class AsyncWorker {
 		this.pending = new Map();
 	}
 
+	terminate() {
+		for (const resolve of this.pending.values()) {
+			resolve();
+		}
+		return this.worker.then(w => w.terminate());
+	}
+
 	send(data) {
 		return this.worker.then(
 			worker =>

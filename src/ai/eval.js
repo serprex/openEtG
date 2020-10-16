@@ -403,7 +403,7 @@ const SkillsValues = {
 		let a = 0;
 		const fq = c.owner.foe.quanta;
 		for (let i = 1; i < 13; i++) {
-			a += Math.min(fq[i], 3) / 3;
+			a += Math.min(fq[i], 3) / 12;
 		}
 		return a;
 	},

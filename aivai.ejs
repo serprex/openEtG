@@ -1,32 +1,38 @@
 <!DOCTYPE HTML>
-<html>
-<head>
-	<title>oetg AIvAI</title>
-	<link href="/forum/Smileys/default/death.png" rel="shortcut icon" />
-	<style>
-		body {
-			background-color:black;
-			color:white;
-			margin:0;
-		}
-		input {
-			width:420px;
-			display:block;
-		}
-		#result {
-			position:absolute;
-			top:2px;
-			left:428px;
-			white-space:pre;
-		}
-	</style>
-</head>
-<body>
-	<input id="deck1" placeholder="Deck 1">
-	<input id="deck2" placeholder="Deck 2">
-	<input id="seed" placeholder="Seed">
-	<input id="fight" value="Fight Once" type="button">
-	<input id="fight1000" value="Fight!!" type="button">
-	<div id="result"></div>
-</body>
-</html>
+<title>oetg AIvAI</title>
+<link href="/forum/Smileys/default/death.png" rel="shortcut icon" />
+<style>
+	body {
+		background-color:black;
+		color:white;
+		margin:0;
+	}
+	input {
+		width:420px;
+		display:block;
+	}
+	#threads {
+		width:320px;
+		margin-top:12px;
+		display:inline;
+	}
+	#replay {
+		word-break:break-all;
+		width:420px;
+	}
+	#result {
+		position:absolute;
+		top:2px;
+		left:428px;
+		white-space:pre;
+	}
+</style>
+<input id="deck1" placeholder="Deck 1">
+<input id="deck2" placeholder="Deck 2">
+<input id="seed" placeholder="Seed">
+<input id="stop" value="Stop" type="button" style="display:none">
+<input id="fight" value="Fight Once" type="button">
+<input id="fight1000" value="Fight!!" type="button">
+Threads <input id="threads" value="4" type="range" min="1" max="16"> <span id="threadspan"></span>
+<div id="replay"></div>
+<div id="result"></div>
