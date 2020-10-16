@@ -52,7 +52,7 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 						}}
 					/>
 					{this.state.deck.length > 0 &&
-						(this.props.orig.electrum > cost ? (
+						(this.props.orig.electrum >= cost ? (
 							<input
 								type="button"
 								value="Upgrade"
