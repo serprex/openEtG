@@ -137,8 +137,13 @@ const BonusList = [
 	},
 	{
 		name: 'Toxic',
-		desc: 'Foe lost with 18 poison',
+		desc: 'Foe lost with more than 18 poison counters',
 		func: (game, p1, p2, stats) => (p2.getStatus('poison') > 18 ? 0.1 : 0),
+	},
+	{
+		name: 'Purity',
+		desc: 'Won match with more than 2 purify counters',
+		func: (game, p1, p2, stats) => (p1.getStatus('poison') < -2 ? 0.05 : 0),
 	},
 	{
 		name: 'Unupped',
