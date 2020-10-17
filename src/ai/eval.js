@@ -204,7 +204,7 @@ const SkillsValues = {
 	holylight: 3,
 	hope: 2,
 	icebolt: 10,
-	ignite: 4,
+	ignite: 10,
 	immolate: 5,
 	improve: 6,
 	inertia: 2,
@@ -214,7 +214,7 @@ const SkillsValues = {
 	integrity: 4,
 	jelly: 5,
 	jetstream: 2.5,
-	lightning: 7,
+	lightning: 6,
 	liquid: 5,
 	livingweapon: 2,
 	lobotomize: 6,
@@ -457,13 +457,13 @@ const SkillsValues = {
 	v_holylight: 3,
 	v_hope: 2,
 	v_icebolt: 10,
-	v_ignite: 4,
+	v_ignite: 10,
 	v_immolate: 5,
 	v_improve: 6,
 	v_inertia: 2,
 	v_infect: 4,
 	v_integrity: 4,
-	v_lightning: 7,
+	v_lightning: 6,
 	v_liquid: 5,
 	v_lobotomize: 6,
 	v_luciferin: 3,
@@ -732,16 +732,14 @@ function calcExpectedDamage(pl, wallIndex, wallCharges, disShield, disField) {
 
 function evalactive(c, active, extra) {
 	let sum = 0;
-	for (let i = 0; i < active.name.length; i++) {
-		const aval = SkillsValues[active.name[i]];
+	for (const name of active.name) {
+		const aval = SkillsValues[name];
 		sum +=
-			aval === undefined
-				? 0
-				: aval instanceof Function
+			aval instanceof Function
 				? aval(c, extra)
 				: aval instanceof Array
 				? aval[c.card.upped ? 1 : 0]
-				: aval;
+				: aval ?? 0;
 	}
 	return sum;
 }
@@ -882,7 +880,7 @@ function evalthing(game, c, inHand = false, floodingFlag = false) {
 		if (key === 'hit') {
 			score +=
 				evalactive(c, act, ttatk) *
-				(ttatk ? 1 : c.getStatus('immaterial') ? 0 : 0.3) *
+				(ttatk ? 1 : c.getStatus('immaterial') ? 0 : 0.1) *
 				adrfactor *
 				delayfactor;
 		} else if (key === 'ownattack') {

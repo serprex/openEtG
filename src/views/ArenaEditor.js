@@ -70,6 +70,7 @@ function AttrUi({ y, name, value, sumscore, arpts, onChange }) {
 	);
 }
 
+const arpts = 380;
 export default connect(({ user }) => ({ user }))(
 	class ArenaEditor extends Component {
 		constructor(props) {
@@ -102,9 +103,9 @@ export default connect(({ user }) => ({ user }))(
 				}
 			}
 			this.state = {
-				hp: attrval(props.ainfo.hp, props.acard.upped ? 170 : 170),
-				mark: attrval(props.ainfo.mark, props.acard.upped ? 1 : 2),
-				draw: attrval(props.ainfo.draw, props.acard.upped ? 2 : 1),
+				hp: attrval(props.ainfo.hp, 170),
+				mark: attrval(props.ainfo.mark, 1),
+				draw: attrval(props.ainfo.draw, 2),
 				pool,
 				deck,
 				dmark: mark,
@@ -120,7 +121,6 @@ export default connect(({ user }) => ({ user }))(
 		};
 
 		render() {
-			const arpts = this.props.acard.upped ? 380 : 320;
 			let sumscore = 0;
 			for (const k in artable) {
 				sumscore += this.state[k] * artable[k].cost;
