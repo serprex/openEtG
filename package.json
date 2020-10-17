@@ -14,7 +14,7 @@
     "ws": "^7.3.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.1",
+    "@babel/core": "^7.12.3",
     "@babel/plugin-proposal-class-properties": "^7.12.1",
     "@babel/preset-env": "^7.12.1",
     "@babel/preset-react": "^7.12.1",
@@ -29,9 +29,9 @@
     "react-redux": "^7.2.1",
     "redux": "^4.0.5",
     "spritesheet-js": "^1.2.6",
-    "webpack": "^5.1.2",
+    "webpack": "^5.1.3",
     "webpack-cli": "^4.0.0",
-    "worker-loader": "^3.0.4"
+    "worker-loader": "^3.0.5"
   },
   "scripts": {
     "start": "node --experimental-modules --experimental-wasm-modules --experimental-json-modules ./server.js",
