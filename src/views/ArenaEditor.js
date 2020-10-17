@@ -9,9 +9,9 @@ import { chain } from '../util.js';
 import Editor from '../Components/Editor.js';
 
 const artable = {
-	hp: { min: 65, max: 200, incr: 45, cost: 1 },
-	mark: { cost: 45 },
-	draw: { cost: 135 },
+	hp: { min: 50, max: 200, incr: 30, cost: 1 },
+	mark: { cost: 30 },
+	draw: { cost: 90 },
 };
 function attrval(x, d) {
 	x = +x;
@@ -102,7 +102,7 @@ export default connect(({ user }) => ({ user }))(
 				}
 			}
 			this.state = {
-				hp: attrval(props.ainfo.hp, 200),
+				hp: attrval(props.ainfo.hp, props.acard.upped ? 170 : 170),
 				mark: attrval(props.ainfo.mark, props.acard.upped ? 1 : 2),
 				draw: attrval(props.ainfo.draw, props.acard.upped ? 2 : 1),
 				pool,
@@ -120,7 +120,7 @@ export default connect(({ user }) => ({ user }))(
 		};
 
 		render() {
-			const arpts = this.props.acard.upped ? 515 : 425;
+			const arpts = this.props.acard.upped ? 380 : 320;
 			let sumscore = 0;
 			for (const k in artable) {
 				sumscore += this.state[k] * artable[k].cost;
@@ -167,7 +167,7 @@ export default connect(({ user }) => ({ user }))(
 							left: '4px',
 							top: '188px',
 						}}>
-						{(arpts - sumscore) / 45}
+						{(arpts - sumscore) / 30}
 					</div>
 					<input
 						type="button"

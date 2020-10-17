@@ -60,9 +60,6 @@ function broadcast(data) {
 		if (sock.readyState === 1) sock.send(msg);
 	}
 }
-function getAgedHp(hp, age) {
-	return Math.max(hp - age * age, Math.ceil(hp / 2));
-}
 function wilson(up, total) {
 	// from npm's wilson-score
 	const z = 2.326348,
@@ -295,7 +292,6 @@ select *, (row_number() over (partition by arena_id order by score desc))::int "
 				rank: row.rank,
 				day: row.day,
 				hp: row.hp,
-				curhp: getAgedHp(row.hp, row.day),
 				mark: row.mark,
 				draw: row.draw,
 				win: row.won,
@@ -325,7 +321,9 @@ select *, (row_number() over (partition by arena_id order by score desc))::int "
 			values: [
 				row.user_id,
 				arenaId,
-				((wilson(won + 1, won + loss + 1) * 1000) | 0) - row.day * 2,
+				(wilson(won + 1, won + loss + 1) * 1000 -
+					(row.day ** 1.6 * 999) / (row.day ** 1.6 + 999)) |
+					0,
 			],
 		});
 	},
@@ -363,11 +361,10 @@ select *, (row_number() over (partition by arena_id order by score desc))::int "
 		adeck.mark = +adeck.mark || 1;
 		adeck.draw = +adeck.draw || data.lv + 1;
 		const age = sutil.getDay() - adeck.day;
-		const curhp = getAgedHp(adeck.hp, age);
 		sockEmit(this, 'foearena', {
 			seed: (Math.random() * MAX_INT) | 0,
 			name: adeck.name,
-			hp: curhp,
+			hp: adeck.hp,
 			age: age,
 			rank: idx,
 			mark: adeck.mark,
@@ -380,8 +377,8 @@ select *, (row_number() over (partition by arena_id order by score desc))::int "
 	},
 	stat: function (data, user, meta, userId) {
 		return pg.pool.query({
-			text: `insert into stats (user_id, stats, game, moves) values ($1, $2, $3, $4)`,
-			values: [userId, data.stats, data.game, data.moves],
+			text: `insert into stats (user_id, "set", stats, players) values ($1, $2, $3, $4)`,
+			values: [userId, data.set ?? '', data.stats, data.players],
 		});
 	},
 	setgold: roleck('Codesmith', async function (data, user) {

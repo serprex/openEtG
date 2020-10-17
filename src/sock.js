@@ -128,7 +128,6 @@ const sockEvents = {
 			]),
 			seed: data.seed,
 			rank: data.rank,
-			age: data.age,
 			arena: data.name,
 			level: 4 + data.lv,
 			cost: userutil.arenaCost(data.lv),

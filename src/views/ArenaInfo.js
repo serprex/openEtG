@@ -30,7 +30,7 @@ function RenderInfo(props) {
 						ai: 1,
 						name: 'Test',
 						deck: adeck,
-						hp: info.curhp,
+						hp: info.hp,
 						markpower: info.mark,
 						drawpower: info.draw,
 					},
@@ -85,7 +85,7 @@ function RenderInfo(props) {
 						left: '100px',
 						top: 224 + y + 'px',
 					}}>
-					HP: {info.curhp} / {info.hp}
+					HP: {info.hp}
 				</span>
 				<span
 					style={{

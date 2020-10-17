@@ -65,10 +65,11 @@ create table strings (
 	val text not null
 );
 create table stats (
+	id bigserial not null primary key,
 	user_id bigint not null references users(id),
 	stats json not null,
-	game json not null,
-	moves json not null,
+	"set" text not null,
+	players json[] not null,
 	"when" timestamp not null default now()
 );
 
@@ -84,3 +85,5 @@ create index ix_arena_score on arena (arena_id, score);
 create index ix_arena_user_id on arena using hash (user_id);
 create index ix_bazaar_user_id on bazaar using hash (user_id);
 create index ix_bazaar_code on bazaar using hash (code);
+create index ix_stats_user_id on stats using hash (user_id);
+create index ix_stats_when on stats ("when");

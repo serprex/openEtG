@@ -17,12 +17,12 @@ export const pveCostReward = new Uint8Array([
 	25,
 	10,
 	60,
+	25,
+	225,
+	25,
+	100,
 	20,
-	222,
-	10,
-	55,
-	20,
-	111,
+	250,
 ]);
 export function cardValue(card) {
 	return ~card.rarity

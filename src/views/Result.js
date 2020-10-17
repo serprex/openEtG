@@ -142,14 +142,14 @@ const BonusList = [
 	},
 	{
 		name: 'Unupped',
-		desc: '0.333..% per unupped card in deck',
+		desc: '0.5% per unupped card in deck',
 		func: (game, p1, p2, stats) => {
 			let unupnu = 0;
 			for (const [code, count] of etgutil.iterraw(p1.data.deck)) {
 				const card = game.Cards.Codes[code];
 				if (card && !card.upped) unupnu += count;
 			}
-			return unupnu / 300;
+			return unupnu / 200;
 		},
 	},
 	{
@@ -386,7 +386,6 @@ export default connect(({ user }) => ({ user }))(
 							'01' + etgutil.encodeCode(etgutil.asShiny(cardwon, false));
 					}
 					if (state.goldreward === undefined) {
-						let agetax = 0;
 						if (level !== undefined) {
 							if (game.data.daily === undefined) {
 								const streak = (this.props.streakback ?? 0) + 1;
@@ -409,29 +408,11 @@ export default connect(({ user }) => ({ user }))(
 										{(streakrate * 100).toFixed(1)}% streak bonus
 									</TooltipText>,
 								);
-								if (game.data.age) {
-									agetax = Math.max(
-										Math.min(game.data.age * 0.1 - 1.4, 0.5),
-										0,
-									);
-									if (agetax > 0) {
-										lefttext.push(
-											<TooltipText
-												key={lefttext.length}
-												tip={'Old arena decks bear less fruit'}
-												setTip={this.setTip}
-												clearTip={this.clearTip}>
-												{(agetax * -100).toFixed(1)}% age tax
-											</TooltipText>,
-										);
-									}
-								}
 							}
 							state.goldreward = Math.round(
 								userutil.pveCostReward[level * 2 + 1] *
 									(1 + streakrate) *
-									this.computeBonuses(game, lefttext, streakrate) *
-									(1 - agetax),
+									this.computeBonuses(game, lefttext, streakrate),
 							);
 						}
 					}
@@ -461,18 +442,21 @@ export default connect(({ user }) => ({ user }))(
 					(state.goldreward | 0) - (game.data.cost | 0),
 					state.cardreward || '-',
 					userutil.calcWealth(state.cardreward),
-					level === undefined ? -1 : this.props.user.streak[level],
-					streakrate.toFixed(3).replace(/\.?0+$/, ''),
+					level === undefined
+						? -1
+						: winner
+						? (this.props.streakback ?? 0) + 1
+						: 0,
+					streakrate,
 				];
 				sock.userEmit('stat', {
+					set: game.data.set,
 					stats: JSON.stringify(stats),
-					game: JSON.stringify({
-						seed: game.data.seed,
-						set: game.data.set,
-						players: game.data.players,
-					}),
-					moves: JSON.stringify(replay),
+					players: game.data.players,
 				});
+				stats[stats.length - 1] = stats[stats.length - 1]
+					.toFixed(3)
+					.replace(/\.?0+$/, '');
 				this.props.dispatch(store.chatMsg(stats.join(), 'Stats'));
 				const { opts } = store.store.getState();
 				if (opts.runcount) {
