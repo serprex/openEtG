@@ -619,7 +619,6 @@ export default connect(({ user, opts }) => ({
 	class Match extends Component {
 		constructor(props) {
 			super(props);
-			this.aiState = null;
 			this.aiDelay = 0;
 			this.streakback = 0;
 			this.idtrack = new Map();
@@ -1214,10 +1213,9 @@ export default connect(({ user, opts }) => ({
 							}
 						})
 						.then(e => {
-							this.applyNext(e.data.cmd, true);
-							this.aiState = null;
 							this.aiDelay =
 								Date.now() + (game.turn === this.state.player1 ? 2000 : 200);
+							this.applyNext(e.data.cmd, true);
 						});
 				} else if (game.phase === etg.MulliganPhase) {
 					this.applyNext(
@@ -1291,11 +1289,7 @@ export default connect(({ user, opts }) => ({
 
 		startMatch({ user, game, dispatch }) {
 			const wasPvP = game.data.players.every(pd => !pd.ai);
-			if (
-				user &&
-				!game.data.endurance &&
-				(game.data.level !== undefined || wasPvP)
-			) {
+			if (!game.data.endurance && (game.data.level !== undefined || wasPvP)) {
 				sock.userExec('addloss', {
 					pvp: wasPvP,
 					l: game.data.level,

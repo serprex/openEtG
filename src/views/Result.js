@@ -30,9 +30,7 @@ const BonusList = [
 		name: 'Are we idle yet?',
 		desc: 'Take longer than 3 minutes to win',
 		func: (game, p1, p2, stats) =>
-			game.bonusstats.get('duration') > 180000
-				? Math.min((game.bonusstats.get('duration') - 180000) / 60000, 0.2)
-				: 0,
+			Math.min((game.bonusstats.get('duration') - 180000) / 60000, 0.2),
 	},
 	{
 		name: 'Colosseum Bonus',
@@ -130,6 +128,11 @@ const BonusList = [
 			stats.pillarsPlayed.get(p1.id) === 0 ? 0.05 : 0,
 	},
 	{
+		name: 'Purity',
+		desc: 'Won match with more than 2 purify counters',
+		func: (game, p1, p2, stats) => (p1.getStatus('poison') < -2 ? 0.05 : 0),
+	},
+	{
 		name: 'Size matters',
 		desc: '0.666..% per card in deck over 36',
 		func: (game, p1, p2, stats) =>
@@ -139,11 +142,6 @@ const BonusList = [
 		name: 'Toxic',
 		desc: 'Foe lost with more than 18 poison counters',
 		func: (game, p1, p2, stats) => (p2.getStatus('poison') > 18 ? 0.1 : 0),
-	},
-	{
-		name: 'Purity',
-		desc: 'Won match with more than 2 purify counters',
-		func: (game, p1, p2, stats) => (p1.getStatus('poison') < -2 ? 0.05 : 0),
 	},
 	{
 		name: 'Unupped',
