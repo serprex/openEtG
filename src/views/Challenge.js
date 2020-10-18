@@ -20,7 +20,7 @@ class PremadePicker extends Component {
 
 	render() {
 		const { onClick, onClose } = this.props;
-		const { mage, demigod, falsegod } = aiDecks;
+		const { mage, demigod } = aiDecks;
 		return (
 			<div
 				className="bgbox"
@@ -66,20 +66,6 @@ class PremadePicker extends Component {
 						verticalAlign: 'top',
 					}}>
 					{demigod
-						.filter(x => !this.state.search || ~x[0].indexOf(this.state.search))
-						.map(([name, deck]) => (
-							<div key={name} onClick={() => onClick(name, deck, true)}>
-								{name}
-							</div>
-						))}
-				</div>
-				<div
-					style={{
-						display: 'inline-block',
-						width: '33%',
-						verticalAlign: 'top',
-					}}>
-					{falsegod
 						.filter(x => !this.state.search || ~x[0].indexOf(this.state.search))
 						.map(([name, deck]) => (
 							<div key={name} onClick={() => onClick(name, deck, true)}>
@@ -149,7 +135,6 @@ class PlayerEditor extends Component {
 							switch (state.deckgen) {
 								case 'mage':
 								case 'demigod':
-								case 'falsegod':
 									[data.name, data.deck] = RngMock.choose(
 										aiDecks[state.deckgen],
 									);
@@ -177,7 +162,6 @@ class PlayerEditor extends Component {
 						<option value="">Explicit</option>
 						<option value="mage">Random Mage</option>
 						<option value="demigod">Random Demigod</option>
-						<option value="falsegod">Random False God</option>
 						<option value="rng">Random</option>
 					</select>
 				</div>
