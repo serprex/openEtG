@@ -457,9 +457,7 @@ export default connect(({ user }) => ({ user }))(
 					stats: JSON.stringify(stats),
 					players: game.data.players,
 				});
-				stats[stats.length - 1] = stats[stats.length - 1]
-					.toFixed(3)
-					.replace(/\.?0+$/, '');
+				stats[stats.length - 1] = +stats[stats.length - 1].toFixed(3);
 				this.props.dispatch(store.chatMsg(stats.join(), 'Stats'));
 				const { opts } = store.store.getState();
 				if (opts.runcount) {
