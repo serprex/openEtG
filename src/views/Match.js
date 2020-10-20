@@ -155,13 +155,13 @@ function skillName(c, sk) {
 	return namelist.join(' ');
 }
 function activeText(c) {
-	const acast = c.active.get('cast');
+	const acast = c.getSkill('cast');
 	if (acast) return `${c.cast}:${c.castele}${skillName(c, acast)}`;
 	for (const akey of activetexts) {
-		const a = c.active.get(akey);
+		const a = c.getSkill(akey);
 		if (a) return `${akey} ${skillName(c, a)}`;
 	}
-	const aauto = c.active.get('ownattack');
+	const aauto = c.getSkill('ownattack');
 	return aauto ? skillName(c, aauto) : '';
 }
 
@@ -415,7 +415,7 @@ class ThingInst extends Component {
 							obj.getStatus('pendstate') ? obj.owner.mark : card.element
 						}\u00d7${charges}`;
 						topText = '';
-					} else if (obj.active.get('ownattack') === Skills.locket) {
+					} else if (obj.getSkill('ownattack') === Skills.locket) {
 						const mode = obj.getStatus('mode');
 						statText = `1:${~mode ? mode : obj.owner.mark}`;
 					} else {
@@ -762,7 +762,7 @@ export default connect(({ user, opts }) => ({
 						element: c.card.element,
 						costele: isSpell ? c.card.costele : c.castele,
 						cost: isSpell ? c.card.cost : c.cast,
-						name: isSpell ? c.card.name : c.active.get('cast').toString(),
+						name: isSpell ? c.card.name : c.getSkill('cast').toString(),
 						upped: c.card.upped,
 						shiny: c.card.shiny,
 						c: data.c,
@@ -1168,7 +1168,7 @@ export default connect(({ user, opts }) => ({
 				if (obj.type === etg.Spell && obj.card.type !== etg.Spell) {
 					cb();
 				} else {
-					const active = obj.active.get('cast'),
+					const active = obj.getSkill('cast'),
 						targetFilter = game.targetFilter(obj, active);
 					if (!targetFilter) {
 						cb();

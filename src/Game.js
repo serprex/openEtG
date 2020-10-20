@@ -180,6 +180,10 @@ Game.prototype.getStatus = function (id, key) {
 Game.prototype.setStatus = function (id, key, val) {
 	this.props = this.props.setIn([id, 'status', key], val | 0);
 };
+Game.prototype.hasactive = function (id, type, name) {
+	const atype = this.props.get(id).get('active').get(type);
+	return !!(atype && ~atype.name.indexOf(name));
+};
 Game.prototype.trigger = function (id, name, t, param) {
 	const a = this.props.get(id).get('active').get(name);
 	return a ? a.func(this, this.byId(id), t, param) : 0;
@@ -328,7 +332,11 @@ Game.prototype.expectedDamage = function (samples) {
 			const gclone = this.clone();
 			for (const pid of gclone.players) {
 				for (const id of gclone.get(pid).get('permanents')) {
-					if (id && gclone.getStatus(id, 'patience')) {
+					if (
+						id &&
+						(gclone.hasactive(id, 'attack', 'patience') ||
+							gclone.getStatus('patience'))
+					) {
 						gclone.byId(id).remove();
 					}
 				}

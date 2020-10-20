@@ -367,11 +367,11 @@ const Skills = {
 	cseed2: target('all', (ctx, c, t) => {
 		const choice = ctx.randomcard(ctx.upto(2), card => {
 			if (card.type !== etg.Spell) return false;
-			const tgting = card.active.get('cast')?.target;
+			const tgting = card.getSkill('cast')?.target;
 			return tgting && tgting(c, t);
 		});
 		ctx.effect({ x: 'Text', text: choice.name, id: t.id });
-		c.castSpell(t.id, choice.active.get('cast'));
+		c.castSpell(t.id, choice.getSkill('cast'));
 	}),
 	dagger: (ctx, c) => {
 		let buff = c.owner.mark === etg.Darkness || c.owner.mark === etg.Death;
@@ -645,7 +645,7 @@ const Skills = {
 		for (const [key, val] of t.status) {
 			c.incrStatus(key, key === 'adrenaline' && val > 1 ? 1 : val);
 		}
-		if (t.active.get('cast') === exports.endow) {
+		if (t.getSkill('cast') === exports.endow) {
 			c.active = c.active.delete('cast');
 		} else {
 			c.active = t.active;
@@ -800,10 +800,10 @@ const Skills = {
 			const card = t.card;
 			if (t.owner.getStatus('sanctuary')) return;
 			if (card.type === etg.Spell) {
-				tgting = card.active.get('cast').target;
+				tgting = card.getSkill('cast').target;
 			}
 		} else {
-			tgting = t.active.get('cast')?.target;
+			tgting = t.getSkill('cast')?.target;
 		}
 		const realturn = ctx.turn;
 		ctx.turn = t.ownerId;
@@ -1442,7 +1442,7 @@ const Skills = {
 	},
 	nymph: target('pill', (ctx, c, t) => {
 		ctx.effect({ x: 'Text', text: 'Nymph', id: t.id });
-		const tauto = t.active.get('ownattack');
+		const tauto = t.getSkill('ownattack');
 		const e =
 			t.card.element ||
 			(tauto === exports.pillmat

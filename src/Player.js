@@ -486,10 +486,8 @@ Player.prototype.v_endturn = function (discard) {
 			if (cr.getStatus('salvaged')) {
 				cr.setStatus('salvaged', 0);
 			}
-			if (
-				cr.active.get('cast') &&
-				cr.active.get('cast').castName === 'v_dshield'
-			) {
+			const cast = cr.getSkill('cast');
+			if (cast && cast.castName === 'v_dshield') {
 				cr.setStatus('immaterial', 0);
 				cr.setStatus('psionic', 0);
 			}

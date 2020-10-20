@@ -153,4 +153,8 @@ export default class Card {
 	getStatus(key) {
 		return this.status.get(key);
 	}
+
+	getSkill(key) {
+		return this.active.get(key);
+	}
 }

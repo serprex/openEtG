@@ -31,9 +31,9 @@ const afilter = new Map()
 	.set(Skills.pacify, (c, t) => t.trueatk())
 	.set(
 		Skills.readiness,
-		(c, t) => t.active.get('cast') && (t.cast || t.casts === 0),
+		(c, t) => t.getSkill('cast') && (t.cast || t.casts === 0),
 	)
-	.set(Skills.silence, (c, t) => t.active.get('cast') && t.casts !== 0)
+	.set(Skills.silence, (c, t) => t.getSkill('cast') && t.casts !== 0)
 	.set(Skills.lobotomize, (c, t) => {
 		if (!t.getStatus('psionic')) {
 			for (const [key, act] of t.active) {
@@ -87,7 +87,7 @@ export default function aiSearch(game) {
 			casthash.add(ch);
 			const active =
 				(c.type !== etg.Spell || c.card.type === etg.Spell) &&
-				c.active.get('cast');
+				c.getSkill('cast');
 			const tgthash = new Set();
 			const evalIter = (t, targetFilter) => {
 				if (t) {
@@ -104,17 +104,20 @@ export default function aiSearch(game) {
 						playerClone = gameClone.byId(player.id);
 					if (
 						c.type === etg.Permanent &&
-						c.getStatus('patience') &&
+						(c.hasactive('attack', 'patience') || c.getStatus('patience')) &&
 						c.ownerId === player.id &&
-						c.active.get('cast') === Skills.die
+						c.getSkill('cast') === Skills.die
 					) {
-						playerClone.permanents.forEach(
-							pr =>
+						for (const pr of playerClone.permanents) {
+							if (
 								pr &&
-								pr.getStatus('patience') &&
-								pr.active.get('cast') === Skills.die &&
-								pr.useactive(),
-						);
+								(pr.hasactive('attack', 'patience') ||
+									c.getStatus('patience')) &&
+								pr.getSkill('cast') === Skills.die
+							) {
+								pr.useactive();
+							}
+						}
 					} else {
 						gameClone.byId(c.id).useactive(t && gameClone.byId(t.id));
 					}

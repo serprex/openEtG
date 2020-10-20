@@ -5,7 +5,7 @@ import * as originalText from './vanilla/skillText.js';
 
 export default function skillText(c) {
 	if (c instanceof Card && c.type === etg.Spell) {
-		const entry = getDataFromName(c.active.get('cast').castName);
+		const entry = getDataFromName(c.getSkill('cast').castName);
 		return processEntry(c, 'cast', entry);
 	} else {
 		const ret = [],

@@ -90,7 +90,7 @@ const Actives = {
 	},
 	burrow: (ctx, c, t) => {
 		c.setStatus('burrowed', 1);
-		c.active = c.active.set('cast', Actives.unburrow);
+		c.setSkill('cast', Actives.unburrow);
 		c.cast = 0;
 		c.atk = Math.floor(c.atk / 2);
 	},
@@ -782,7 +782,7 @@ const Actives = {
 		t.dmg(dmg);
 	}),
 	readiness: target('crea', (ctx, c, t) => {
-		if (t.active.get('cast')) {
+		if (t.getSkill('cast')) {
 			t.cast = 0;
 			if (t.card.element === etg.Time && !t.getStatus('ready')) {
 				t.setStatus('ready', 1);

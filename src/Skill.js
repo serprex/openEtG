@@ -74,8 +74,7 @@ export default class Skill {
 		play: (c, t) => t.type === etg.Player,
 		notplay: (c, t) => t.type !== etg.Player,
 		sing: (c, t) =>
-			t.isMaterial(etg.Creature) &&
-			t.active.get('cast') !== c.active.get('cast'),
+			t.isMaterial(etg.Creature) && t.getSkill('cast') !== c.getSkill('cast'),
 		butterfly: (c, t) =>
 			(t.type === etg.Creature || t.type === etg.Weapon) &&
 			!t.getStatus('immaterial') &&
@@ -87,7 +86,7 @@ export default class Skill {
 		notskele: (c, t) =>
 			t.type !== etg.Player && !t.card.isOf(t.owner.game.Cards.Names.Skeleton),
 		forceplay: (c, t) =>
-			t.type === etg.Spell || (t.isMaterial() && t.active.get('cast')),
+			t.type === etg.Spell || (t.isMaterial() && t.getSkill('cast')),
 		airbornecrea: (c, t) =>
 			t.isMaterial(etg.Creature) && t.getStatus('airborne'),
 		golem: (c, t) => t.type !== etg.Spell && t.getStatus('golem') && t.attack,

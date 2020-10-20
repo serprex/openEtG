@@ -85,7 +85,7 @@ const filters = {
 		let n = 0;
 		for (let i = 0; i < deck.length; i++) {
 			const c = Cards.Codes[deck[i]],
-				cast = c.active.get('cast');
+				cast = c.getSkill('cast');
 			if (
 				cast &&
 				(cast === Skills.mutation ||
@@ -97,7 +97,7 @@ const filters = {
 			) {
 				n++;
 			}
-			if (c.active.get('death')) n++;
+			if (c.getSkill('death')) n++;
 		}
 		return n > 3;
 	},
@@ -212,7 +212,7 @@ export default class Builder {
 			ecost[0] -= 4;
 		}
 		if (card.type === etg.Creature) {
-			const auto = card.active.get('ownattack'),
+			const auto = card.getSkill('ownattack'),
 				castText = auto ? auto.castText : '';
 			if (castText && castText.startsWith('quanta '))
 				ecost[castText.split(' ')[1]] -= 3;

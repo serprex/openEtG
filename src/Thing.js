@@ -193,7 +193,7 @@ Thing.prototype.deatheffect = function (index) {
 	}
 };
 Thing.prototype.trigger = function (name, t, param) {
-	const a = this.active.get(name);
+	const a = this.getSkill(name);
 	return a ? a.func(this.game, this, t, param) : 0;
 };
 Thing.prototype.proc = function (name, param) {
@@ -392,7 +392,7 @@ Thing.prototype.setSkill = function (type, sk) {
 	this.active = this.active.set(type, sk);
 };
 Thing.prototype.rmactive = function (type, name) {
-	const atype = this.active.get(type);
+	const atype = this.getSkill(type);
 	if (!atype) return;
 	const actives = atype.name,
 		idx = actives.indexOf(name);
@@ -413,8 +413,7 @@ Thing.prototype.rmactive = function (type, name) {
 	}
 };
 Thing.prototype.hasactive = function (type, name) {
-	const atype = this.active.get(type);
-	return !!(atype && ~atype.name.indexOf(name));
+	return this.game.hasactive(this.id, type, name);
 };
 Thing.prototype.canactive = function (spend) {
 	if (
@@ -455,7 +454,7 @@ Thing.prototype.play = function (tgt, fromhand) {
 	const { owner, card } = this;
 	this.remove();
 	if (card.type === etg.Spell) {
-		this.castSpell(tgt ? tgt.id : 0, this.active.get('cast'));
+		this.castSpell(tgt ? tgt.id : 0, this.getSkill('cast'));
 	} else {
 		sfx.playSound(card.type <= etg.Permanent ? 'permPlay' : 'creaturePlay');
 		if (card.type === etg.Creature) owner.addCrea(this, fromhand);
@@ -477,7 +476,7 @@ Thing.prototype.useactive = function (t) {
 	} else if (owner.spend(this.castele, this.cast)) {
 		this.casts--;
 		if (this.getStatus('neuro')) this.addpoison(1);
-		this.castSpell(t ? t.id : 0, this.active.get('cast'));
+		this.castSpell(t ? t.id : 0, this.getSkill('cast'));
 	}
 };
 Thing.prototype.truedr = function () {
@@ -583,6 +582,11 @@ Thing.prototype.attack = function (data) {
 		}
 	} while (attackAgain);
 };
+const v_proc_thru_freeze = new Set([
+	Skills.v_overdrive,
+	Skills.v_acceleration,
+	Skills.v_siphon,
+]);
 Thing.prototype.v_attack = function (stasis, freedomChance) {
 	let attackAgain;
 	const isCreature = this.type === etg.Creature;
@@ -593,9 +597,8 @@ Thing.prototype.v_attack = function (stasis, freedomChance) {
 		}
 		const target = this.owner.foe;
 		if (
-			!this.status.get('frozen') ||
-			this.active.get('ownattack') === Skills.v_overdrive ||
-			this.active.get('ownattack') === Skills.v_acceleration
+			!this.getStatus('frozen') ||
+			v_proc_thru_freeze.has(this.getSkill('ownattack'))
 		) {
 			this.proc('attack');
 		}
@@ -603,7 +606,7 @@ Thing.prototype.v_attack = function (stasis, freedomChance) {
 		this.setStatus('ready', 0);
 		let trueatk;
 		if (
-			!(stasis || this.status.get('frozen') || this.status.get('delayed')) &&
+			!(stasis || this.getStatus('frozen') || this.getStatus('delayed')) &&
 			(trueatk = this.trueatk()) !== 0
 		) {
 			let momentum = this.getStatus('momentum');
@@ -624,7 +627,7 @@ Thing.prototype.v_attack = function (stasis, freedomChance) {
 				if (
 					!momentum &&
 					(fsh = target.shield) &&
-					(fsha = fsh.active.get('shield')) &&
+					(fsha = fsh.getSkill('shield')) &&
 					(fsha === Skills.v_wings || fsha === Skills.v_weight)
 				) {
 					stillblock = fsha.func(fsh, this);
@@ -646,7 +649,7 @@ Thing.prototype.v_attack = function (stasis, freedomChance) {
 				const tryDmg = Math.max(trueatk - truedr, 0);
 				if (
 					!target.shield ||
-					!target.shield.active.get('shield') ||
+					!target.shield.getSkill('shield') ||
 					!target.shield.trigger('shield', this, tryDmg)
 				) {
 					if (tryDmg > 0) {
@@ -658,7 +661,7 @@ Thing.prototype.v_attack = function (stasis, freedomChance) {
 		}
 		this.maybeDecrStatus('frozen');
 		this.maybeDecrStatus('delayed');
-		if (this.status.get('dive')) {
+		if (this.getStatus('dive')) {
 			this.setStatus('dive', 0);
 		}
 		if (~this.getIndex()) {

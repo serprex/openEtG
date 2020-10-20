@@ -72,7 +72,7 @@ test(
 					up = etgutil.asUpped(key, true);
 				assert.ok(OpenCards.Codes[un] && OpenCards.Codes[up], key);
 				const card = OpenCards.Codes[key];
-				if (card.type === etg.Spell) assert.ok(card.active.get('cast'));
+				if (card.type === etg.Spell) assert.ok(card.getSkill('cast'));
 			}
 		},
 	},
@@ -583,7 +583,7 @@ test(
 					up = etgutil.asUpped(key, true);
 				assert.ok(OriginalCards.Codes[un] && OriginalCards.Codes[up], key);
 				const card = OriginalCards.Codes[key];
-				if (card.type === etg.Spell) assert.ok(card.active.get('cast'));
+				if (card.type === etg.Spell) assert.ok(card.getSkill('cast'));
 			}
 		},
 	},
@@ -852,11 +852,11 @@ test(
 		Lobotomize() {
 			this.player1.addCrea(this.player1.newThing(this.Cards.Names.Devourer));
 			const dev = this.player1.creatures[0];
-			assert.ok(dev.active.get('ownattack'), 'Siphon');
-			assert.ok(dev.active.get('cast'), 'Burrow');
+			assert.ok(dev.getSkill('ownattack'), 'Siphon');
+			assert.ok(dev.getSkill('cast'), 'Burrow');
 			this.cast('v_lobotomize', this.player1, dev);
-			assert.ok(dev.active.get('ownattack'), 'Siphon');
-			assert.ok(!dev.active.get('cast'), 'No Burrow');
+			assert.ok(dev.getSkill('ownattack'), 'Siphon');
+			assert.ok(!dev.getSkill('cast'), 'No Burrow');
 		},
 		Obsession() {
 			initHand(

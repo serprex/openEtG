@@ -599,7 +599,7 @@ function estimateDamage(
 	}
 	const tatk = c.trueatk(),
 		fsh = c.owner.foe.shield,
-		fshactive = fsh && fsh.active.get('shield'),
+		fshactive = fsh && fsh.getSkill('shield'),
 		momentum =
 			!fsh ||
 			tatk <= 0 ||
@@ -792,14 +792,14 @@ function evalthing(game, c, inHand = false, floodingFlag = false) {
 	if (!c) return 0;
 	const { card } = c;
 	if (inHand && !caneventuallyactive(card.costele, card.cost, c.owner)) {
-		return card.active.get('discard') !== Skills.obsession
+		return card.getSkill('discard') !== Skills.obsession
 			? 0
 			: card.upped
 			? -7
 			: -6;
 	}
 	if (inHand && card.type === etg.Spell) {
-		return evalactive(c, card.active.get('cast'));
+		return evalactive(c, card.getSkill('cast'));
 	}
 	let ttatk,
 		hp,
@@ -845,8 +845,8 @@ function evalthing(game, c, inHand = false, floodingFlag = false) {
 		)
 			hp = 0;
 		if (hp === 0) {
-			if (c.active.get('owndeath')) {
-				score += evalactive(c, c.active.get('owndeath'), ttatk) * 3;
+			if (c.getSkill('owndeath')) {
+				score += evalactive(c, c.getSkill('owndeath'), ttatk) * 3;
 			}
 			for (let j = 0; j < 2; j++) {
 				const pl = j ? c.owner : c.owner.foe;
@@ -854,16 +854,16 @@ function evalthing(game, c, inHand = false, floodingFlag = false) {
 					pl.creatures.reduce(
 						(acc, cr) =>
 							acc +
-							(cr && cr.active.get('death')
-								? evalactive(cr, cr.active.get('death'), ttatk) * (j ? 3 : -3)
+							(cr && cr.getSkill('death')
+								? evalactive(cr, cr.getSkill('death'), ttatk) * (j ? 3 : -3)
 								: 0),
 						0,
 					) +
 					pl.permanents.reduce(
 						(acc, pr) =>
 							acc +
-							(pr && pr.active.get('death')
-								? evalactive(pr, pr.active.get('death'), ttatk) * (j ? 3 : -3)
+							(pr && pr.getSkill('death')
+								? evalactive(pr, pr.getSkill('death'), ttatk) * (j ? 3 : -3)
 								: 0),
 						0,
 					);
@@ -903,8 +903,8 @@ function evalthing(game, c, inHand = false, floodingFlag = false) {
 		if (hp !== 0 && c.owner.gpull === c.id) {
 			if (c.getStatus('voodoo')) score += hp;
 			score = ((score + hp) * Math.log(hp)) / 4;
-			if (c.active.get('shield') && !delaymix) {
-				score += evalactive(c, c.active.get('shield'));
+			if (c.getSkill('shield') && !delaymix) {
+				score += evalactive(c, c.getSkill('shield'));
 			}
 		} else {
 			score *=
@@ -935,7 +935,7 @@ function caneventuallyactive(element, cost, pl) {
 				pr &&
 				((pr.getStatus('pillar') &&
 					(!pr.card.element || pr.card.element === element)) ||
-					(pr.active.get('cast') === Skills.locket &&
+					(pr.getSkill('cast') === Skills.locket &&
 						pr.getStatus('mode') === element)),
 		)
 	);

@@ -10,7 +10,7 @@ export default function lethal(game) {
 			const ch = game.props.get(c.id).hashCode();
 			if (casthash.has(ch)) return;
 			casthash.add(ch);
-			const active = c.active.get('cast');
+			const active = c.getSkill('cast');
 			function evalIter(t, targetFilter) {
 				if ((!targetFilter || (t && targetFilter(t))) && --limit > 0) {
 					const gameClone = game.clone();
