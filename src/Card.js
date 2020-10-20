@@ -157,4 +157,9 @@ export default class Card {
 	getSkill(key) {
 		return this.active.get(key);
 	}
+
+	hasactive(key, name) {
+		const a = this.getSkill(key);
+		return !!(a && ~a.name.indexOf(name));
+	}
 }

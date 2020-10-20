@@ -132,6 +132,12 @@ export default function parseChat(e) {
 		} else if (msg.match(/^\/setgold /)) {
 			const [t, g] = msg.slice(9).split(' ');
 			sock.userEmit('setgold', { t, g: g | 0 });
+		} else if (msg.match(/^\/addbound /)) {
+			const [t, pool] = msg.slice(10).split(' ');
+			sock.userEmit('addbound', { t, pool });
+		} else if (msg.match(/^\/addpool /)) {
+			const [t, pool] = msg.slice(9).split(' ');
+			sock.userEmit('addpool', { t, pool });
 		} else if (msg.match(/^\/runcount /)) {
 			store.store.dispatch(store.setOptTemp('runcount', msg.slice(10) | 0));
 			store.store.dispatch(store.setOptTemp('runcountcur', 1));

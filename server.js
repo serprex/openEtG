@@ -391,6 +391,22 @@ from arena where user_id = $1`,
 		});
 		tgt.gold = data.g;
 	}),
+	addbound: roleck('Codesmith', async function (data, user) {
+		const tgt = await Us.load(data.t);
+		tgt.accountbound = etgutil.mergedecks(tgt.accountbound, data.pool);
+		sockEmit(this, 'chat', {
+			mode: 1,
+			msg: `Added to ${tgt.name}'s accountbound ${data.pool}`,
+		});
+	}),
+	addpool: roleck('Codesmith', async function (data, user) {
+		const tgt = await Us.load(data.t);
+		tgt.pool = etgutil.mergedecks(tgt.pool, data.pool);
+		sockEmit(this, 'chat', {
+			mode: 1,
+			msg: `Added to ${tgt.name}'s pool ${data.pool}`,
+		});
+	}),
 	codecreate: roleck('Codesmith', async function (data, user) {
 		if (!data.t) {
 			return sockEmit(this, 'chat', {
@@ -1308,25 +1324,6 @@ const sockEvents = {
 							Us.load(name)
 								.then(user => {
 									user.auth = data.g;
-									const req = https
-										.request({
-											hostname: 'www.kongregate.com',
-											path: '/api/submit_statistics.json',
-											method: 'POST',
-										})
-										.on('error', e => console.log(e));
-									req.write(
-										`user_id=${data.u}\ngame_auth_token=${
-											data.g
-										}\napi_key=${key}\nWealth=${
-											user.gold + userutil.calcWealth(user.pool)
-										}`,
-									);
-									req.end();
-									return sockEvents.login.call(this, {
-										u: name,
-										a: data.g,
-									});
 								})
 								.catch(() => {
 									Us.users.set(name, {
@@ -1334,11 +1331,11 @@ const sockEvents = {
 										gold: 0,
 										auth: data.g,
 									});
-									return sockEvents.login.call(this, {
-										u: name,
-										a: data.g,
-									});
 								});
+							return sockEvents.login.call(this, {
+								u: name,
+								a: data.g,
+							});
 						} else {
 							sockEmit(this, 'login', {
 								err: `${json.error}: ${json.error_description}`,

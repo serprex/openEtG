@@ -335,7 +335,7 @@ Game.prototype.expectedDamage = function (samples) {
 					if (
 						id &&
 						(gclone.hasactive(id, 'attack', 'patience') ||
-							gclone.getStatus('patience'))
+							gclone.getStatus(id, 'patience'))
 					) {
 						gclone.byId(id).remove();
 					}

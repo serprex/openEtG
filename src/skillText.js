@@ -643,7 +643,7 @@ const statusText = {
 		'Cloaks your field. Opponent cannot see your actions or directly target your other cards.',
 	charges: (c, inst) =>
 		c !== inst ||
-		Thing.prototype.hasactive.call(c, 'ownattack', 'losecharge') ||
+		c.hasactive('ownattack', 'losecharge') ||
 		c.getStatus('charges') === 1
 			? ''
 			: `Enters play with ${c.getStatus('charges')} ${
