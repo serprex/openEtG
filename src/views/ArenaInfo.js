@@ -74,6 +74,14 @@ function RenderInfo(props) {
 				<span
 					style={{
 						position: 'absolute',
+						left: '600px',
+						top: 4 + y + 'px',
+					}}>
+					Best Rank: {info.bestrank}
+				</span>
+				<span
+					style={{
+						position: 'absolute',
 						left: '400px',
 						top: 224 + y + 'px',
 					}}>

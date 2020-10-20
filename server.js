@@ -123,21 +123,24 @@ function listRoleHandler(role) {
 		});
 	};
 }
+function updateArenaRanks(sql) {
+	return sql.query({
+		text: `with arank as (select user_id, arena_id, "rank", (row_number() over (partition by arena_id order by score desc, day desc, "rank"))::int "realrank" from arena)
+update arena set "rank" = realrank, bestrank = least(bestrank, realrank) from arank where arank.arena_id = arena.arena_id and arank.user_id = arena.user_id and arank.realrank <> arank."rank"`,
+	});
+}
 const userEvents = {
 	modadd: addRoleHandler('Mod'),
 	modrm: rmRoleHandler('Mod'),
 	codesmithadd: addRoleHandler('Codesmith'),
 	codesmithrm: rmRoleHandler('Codesmith'),
 	modguest: roleck('Mod', function (data, user) {
-		if (data.m === 'off') {
-			return pg.pool.query({
-				text: `insert into strings (key, val) values ('GuestsBanned', '') on conflict do nothing`,
-			});
-		} else {
-			return pg.pool.query({
-				text: `delete from strings where key = 'GuestsBanned'`,
-			});
-		}
+		return pg.pool.query({
+			text:
+				data.m === 'off'
+					? "insert into strings (key, val) values ('GuestsBanned', '') on conflict do nothing"
+					: "delete from strings where key = 'GuestsBanned'",
+		});
 	}),
 	modmute: roleck('Mod', function (data, user) {
 		broadcast({ x: 'mute', m: data.m });
@@ -262,34 +265,37 @@ const userEvents = {
 					user.gold += Math.min(age * 25, 350);
 				}
 			}
-			return await pg.pool.query({
-				text: `insert into arena (user_id, arena_id, day, deck, code, won, loss, hp, draw, mark, score) values ($1, $2, $3, $4, $5, 0, 0, $6, $7, $8, 250)
-on conflict (user_id, arena_id) do update set day = $3, deck = $4, code = $5, won = 0, loss = 0, hp = $6, draw = $7, mark = $8, score = 250`,
-				values: [
-					userId,
-					data.lv ? 2 : 1,
-					today,
-					data.d,
-					user.ocard,
-					data.hp,
-					data.draw,
-					data.mark,
-				],
+			return await pg.trx(async sql => {
+				await pg.pool.query({
+					text: `insert into arena (user_id, arena_id, day, deck, code, won, loss, hp, draw, mark, score) values ($1, $2, $3, $4, $5, 0, 0, $6, $7, $8, 250)
+on conflict (user_id, arena_id) do update set day = $3, deck = $4, code = $5, won = 0, loss = 0, hp = $6, draw = $7, mark = $8, score = 250, "rank" = -1, bestrank = null`,
+					values: [
+						userId,
+						data.lv ? 2 : 1,
+						today,
+						data.d,
+						user.ocard,
+						data.hp,
+						data.draw,
+						data.mark,
+					],
+				});
+				return updateArenaRanks(sql);
 			});
 		}
 	},
 	async arenainfo(data, user, meta, userId) {
 		const day = sutil.getDay();
 		const res = await pg.pool.query({
-			text: `select arena_id, ($2 - arena.day) "day", draw, mark, hp, won, loss, code, deck, "rank" from (
-select *, (row_number() over (partition by arena_id order by score desc))::int "rank" from arena
-) arena where user_id = $1`,
+			text: `select arena_id, ($2 - arena.day) "day", draw, mark, hp, won, loss, code, deck, "rank", bestrank
+from arena where user_id = $1`,
 			values: [userId, day],
 		});
 		const info = {};
 		for (const row of res.rows) {
 			info[row.arena_id === 1 ? 'A' : 'B'] = {
 				rank: row.rank,
+				bestrank: row.bestrank,
 				day: row.day,
 				hp: row.hp,
 				mark: row.mark,
@@ -307,24 +313,27 @@ select *, (row_number() over (partition by arena_id order by score desc))::int "
 			.then(user => (user.gold += data.won ? 15 : 5))
 			.catch(() => {});
 		const arenaId = data.lv ? 2 : 1;
-		const res = await pg.pool.query({
-			text: `select a.user_id, a.won, a.loss, ($3 - a.day) "day" from arena a join users u on a.user_id = u.id and a.arena_id = $1 where u.name = $2`,
-			values: [arenaId, data.aname, sutil.getDay()],
-		});
-		if (res.rows.length === 0) return;
-		const row = res.rows[0],
-			won = row.won + (data.won ? 1 : 0),
-			loss = row.loss + (data.won ? 0 : 1),
-			wlfield = data.won ? 'won' : 'loss';
-		return pg.pool.query({
-			text: `update arena set ${wlfield} = ${wlfield} + 1, score = $3 where user_id = $1 and arena_id = $2`,
-			values: [
-				row.user_id,
-				arenaId,
-				(wilson(won + 1, won + loss + 1) * 1000 -
-					(row.day ** 1.6 * 999) / (row.day ** 1.6 + 999)) |
-					0,
-			],
+		await pg.trx(async sql => {
+			const res = await sql.query({
+				text: `select a.user_id, a.won, a.loss, ($3 - a.day) "day" from arena a join users u on a.user_id = u.id and a.arena_id = $1 where u.name = $2`,
+				values: [arenaId, data.aname, sutil.getDay()],
+			});
+			if (res.rows.length === 0) return;
+			const row = res.rows[0],
+				won = row.won + (data.won ? 1 : 0),
+				loss = row.loss + (data.won ? 0 : 1),
+				wlfield = data.won ? 'won' : 'loss';
+			await sql.query({
+				text: `update arena set ${wlfield} = ${wlfield} + 1, score = $3 where user_id = $1 and arena_id = $2`,
+				values: [
+					row.user_id,
+					arenaId,
+					(wilson(won + 1, won + loss + 1) * 1000 -
+						(row.day ** 1.6 * 999) / (row.day ** 1.6 + 999)) |
+						0,
+				],
+			});
+			return updateArenaRanks(sql);
 		});
 	},
 	async foearena(data, user) {
@@ -347,7 +356,7 @@ select *, (row_number() over (partition by arena_id order by score desc))::int "
 			idx = RngMock.upto(len);
 		}
 		const ares = await pg.pool.query({
-			text: `select u.name, a.score, a.deck, a.hp, a.mark, a.draw, a.day, a.won, a.loss, a.code from arena a join users u on u.id = a.user_id where a.arena_id = $1 order by a.score desc limit 1 offset $2`,
+			text: `select u.name, a.score, a.deck, a.hp, a.mark, a.draw, a.day, a.won, a.loss, a.code from arena a join users u on u.id = a.user_id where a.arena_id = $1 order by a."rank" limit 1 offset $2`,
 			values: [arenaId, idx],
 		});
 		if (ares.rows.length == 0) {
@@ -355,22 +364,15 @@ select *, (row_number() over (partition by arena_id order by score desc))::int "
 			return;
 		}
 		const adeck = ares.rows[0];
-		adeck.card = +adeck.card;
-		if (data.lv) adeck.card = etgutil.asUpped(adeck.card, true);
-		adeck.hp = +adeck.hp || 200;
-		adeck.mark = +adeck.mark || 1;
-		adeck.draw = +adeck.draw || data.lv + 1;
-		const age = sutil.getDay() - adeck.day;
 		sockEmit(this, 'foearena', {
 			seed: (Math.random() * MAX_INT) | 0,
 			name: adeck.name,
 			hp: adeck.hp,
-			age: age,
 			rank: idx,
 			mark: adeck.mark,
 			draw: adeck.draw,
 			deck: `${adeck.deck}05${etgutil.encodeCode(
-				data.lv ? etgutil.asUpped(adeck.card, true) : adeck.code,
+				data.lv ? etgutil.asUpped(adeck.code, true) : adeck.code,
 			)}`,
 			lv: data.lv,
 		});
@@ -1378,26 +1380,38 @@ const sockEvents = {
 	},
 	mod: listRoleHandler('Mod'),
 	codesmith: listRoleHandler('Codesmith'),
-	librarywant(data) {
-		return Us.load(data.f)
-			.then(user => {
-				sockEmit(this, 'librarygive', {
-					pool: user.pool,
-					bound: user.accountbound,
-					gold: user.gold,
-					pvpwins: user.pvpwins,
-					pvplosses: user.pvplosses,
-					aiwins: user.aiwins,
-					ailosses: user.ailosses,
-				});
-			})
-			.catch(() => {});
+	async librarywant(data) {
+		try {
+			const user = await Us.load(data.f);
+			const bids = await pg.pool.query({
+				text: 'select code, q, p from bazaar where user_id = $1',
+				values: [user.id],
+			});
+			let { gold, pool } = user;
+			for (const bid of bids.rows) {
+				if (bid.p < 0) {
+					pool = etgutil.addcard(pool, bid.code, bid.q);
+				} else {
+					gold += bid.p * bid.q;
+				}
+			}
+			sockEmit(this, 'librarygive', {
+				pool: pool,
+				bound: user.accountbound,
+				gold: gold,
+				pvpwins: user.pvpwins,
+				pvplosses: user.pvplosses,
+				aiwins: user.aiwins,
+				ailosses: user.ailosses,
+			});
+		} catch {
+			sockEmit(this, 'chat', { mode: 1, msg: `No user ${data.f}` });
+		}
 	},
 	async arenatop(data) {
-		const day = sutil.getDay();
 		const obj = await pg.pool.query({
-			text: `select u.name, a.code, ($1 - a.day) "day", a.won, a.loss, a.score from arena a join users u on u.id = a.user_id where a.arena_id = $2 order by a.score desc limit 30`,
-			values: [day, data.lv ? 2 : 1],
+			text: `select u.name, a.code, ($1 - a.day) "day", a.won, a.loss, a.score from arena a join users u on u.id = a.user_id where a.arena_id = $2 order by a."rank" limit 30`,
+			values: [sutil.getDay(), data.lv ? 2 : 1],
 		});
 		sockEmit(this, 'arenatop', {
 			top: obj.rows.map(row => [
