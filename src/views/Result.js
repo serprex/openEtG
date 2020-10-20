@@ -431,11 +431,12 @@ export default connect(({ user }) => ({ user }))(
 			}
 			this.setState(state);
 			if (
+				level !== undefined &&
 				game.data.endurance === undefined &&
 				game.data.colobonus === undefined
 			) {
 				const stats = [
-					level === undefined ? -1 : level,
+					level,
 					(this.state.player1.foe.data.name || '?').replace(/,/g, ' '),
 					winner ? 'W' : 'L',
 					game.countPlies(),
@@ -445,11 +446,7 @@ export default connect(({ user }) => ({ user }))(
 					(state.goldreward | 0) - (game.data.cost | 0),
 					state.cardreward || '-',
 					userutil.calcWealth(state.cardreward),
-					level === undefined
-						? -1
-						: winner
-						? (this.props.streakback ?? 0) + 1
-						: 0,
+					winner ? (this.props.streakback ?? 0) + 1 : 0,
 					streakrate,
 				];
 				sock.userEmit('stat', {
