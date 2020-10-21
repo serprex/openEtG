@@ -27,6 +27,28 @@ const ai4names = {
 	[etg.Water]: ['Aqua', 'rius'],
 };
 
+export function parseDeck(dcode) {
+	dcode = dcode.trim();
+	if (~dcode.indexOf(' ')) {
+		const dsplit = dcode.split(' ').sort();
+		dcode = '';
+		let i = 0;
+		while (i < dsplit.length) {
+			const di = dsplit[i],
+				dicode = parseInt(di, 32),
+				i0 = i++;
+			while (i < dsplit.length && dsplit[i] == di) {
+				i++;
+			}
+			dcode += etgutil.encodeCount(i - i0);
+			dcode += ~etgutil.fromTrueMark(dicode)
+				? di
+				: etgutil.encodeCode(dicode - 4000);
+		}
+	}
+	return dcode;
+}
+
 export default connect(({ user, orig, opts }) => ({
 	user,
 	orig,
@@ -62,6 +84,7 @@ export default connect(({ user, orig, opts }) => ({
 
 		vsAi = (level, cost, basereward, hpreward) => {
 			if (
+				hpreward > 0 &&
 				!Cards.isDeckLegal(
 					etgutil.decodedeck(this.props.orig.deck),
 					this.props.orig,
@@ -71,8 +94,11 @@ export default connect(({ user, orig, opts }) => ({
 				return;
 			}
 			const [ainame, aideck] =
-				level === 'ai4' ? this.mkAi4() : RngMock.choose(aiDecks[level]);
-			const name = this.props.user.name;
+				level === 'custom'
+					? ['Custom', parseDeck(this.props.origfoename)]
+					: level === 'ai4'
+					? this.mkAi4()
+					: RngMock.choose(aiDecks[level]);
 			const game = new Game({
 				seed: randint(),
 				cardreward: '',
@@ -80,7 +106,7 @@ export default connect(({ user, orig, opts }) => ({
 				cost,
 				basereward,
 				hpreward,
-				spins: level === 'ai2' ? 2 : 3,
+				spins: level === 'custom' ? 0 : level === 'ai2' ? 2 : 3,
 				rematch: () => this.vsAi(level, cost, basereward, hpreward),
 				players: RngMock.shuffle([
 					{
@@ -100,9 +126,11 @@ export default connect(({ user, orig, opts }) => ({
 					},
 				]),
 			});
-			const update = { electrum: -cost };
-			userEmit('origadd', update);
-			this.props.dispatch(store.addOrig(update));
+			if (cost > 0) {
+				const update = { electrum: -cost };
+				userEmit('origadd', update);
+				this.props.dispatch(store.addOrig(update));
+			}
 			this.props.dispatch(
 				store.doNav(import('../../views/Match.js'), { game }),
 			);
@@ -161,8 +189,27 @@ export default connect(({ user, orig, opts }) => ({
 							position: 'absolute',
 							left: '200px',
 							top: '170px',
+							width: '96px',
 						}}
 					/>
+					<input
+						type="button"
+						value="vs AI"
+						onClick={() => this.vsAi('custom', 0, 0, 0)}
+						style={{
+							position: 'absolute',
+							left: '200px',
+							top: '200px',
+						}}
+					/>
+					<span
+						style={{
+							position: 'absolute',
+							left: '300px',
+							top: '200px',
+						}}>
+						Enter deck as Player's Name to play against AI playing that deck
+					</span>
 					<input
 						placeholder="Player's Name"
 						value={this.props.origfoename}

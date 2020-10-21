@@ -101,8 +101,10 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 				electrum: game.data.cost + electrumwon,
 				pool: newpool || undefined,
 			};
-			userEmit('origadd', update);
-			this.props.dispatch(store.addOrig(update));
+			if (update.electrum || update.pool) {
+				userEmit('origadd', update);
+				this.props.dispatch(store.addOrig(update));
+			}
 
 			this.setState({ cardswon, electrumwon });
 		}
@@ -138,7 +140,7 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 						/>
 					)}
 					{this.state.cardswon}
-					{this.state.electrumwon && (
+					{!!this.state.electrumwon && (
 						<Components.Text
 							text={`${this.state.electrumwon}$`}
 							style={{

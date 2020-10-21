@@ -1,6 +1,7 @@
 import { createRef, Component } from 'react';
 import { connect } from 'react-redux';
 
+import { parseDeck } from './MainMenu.js';
 import * as etg from '../../etg.js';
 import Cards from '../Cards.js';
 import * as Components from '../../Components/index.js';
@@ -118,25 +119,9 @@ export default connect(({ orig }) => ({ orig }))(
 							autoFocus
 							value={this.currentDeckCode()}
 							onChange={e => {
-								let dcode = e.target.value.trim();
-								if (~dcode.indexOf(' ')) {
-									const dsplit = dcode.split(' ').sort();
-									dcode = '';
-									let i = 0;
-									while (i < dsplit.length) {
-										const di = dsplit[i],
-											dicode = parseInt(di, 32),
-											i0 = i++;
-										while (i < dsplit.length && dsplit[i] == di) {
-											i++;
-										}
-										dcode += etgutil.encodeCount(i - i0);
-										dcode += ~etgutil.fromTrueMark(dicode)
-											? di
-											: etgutil.encodeCode(dicode - 4000);
-									}
-								}
-								this.setState(processDeck(this.state.pool, dcode));
+								this.setState(
+									processDeck(this.state.pool, parseDeck(e.target.value)),
+								);
 							}}
 							ref={this.deckRef}
 							onClick={e => {
@@ -144,26 +129,6 @@ export default connect(({ orig }) => ({ orig }))(
 							}}
 						/>
 					</label>
-					<input
-						type="text"
-						value={this.props.deck}
-						onChange={e => {
-							let dcode = e.target.value.trim();
-							if (dcode.charAt(3) === ' ') {
-								dcode = etgutil.encodedeck(
-									dcode.split(' ').map(c => parseInt(c, 32) - 4000),
-								);
-							}
-							this.setState({ deck: dcode });
-						}}
-						placeholder="Deck"
-						style={{
-							left: '0px',
-							top: '600px',
-							width: '900px',
-							position: 'absolute',
-						}}
-					/>
 					<span
 						className={'ico e' + this.state.mark}
 						style={{
