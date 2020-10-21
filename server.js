@@ -221,12 +221,14 @@ const userEvents = {
 	},
 	async delete({ u }, user, meta, userId) {
 		await pg.trx(async sql => {
-			for (const table of ['arena', 'bazaar', 'user_data']) {
-				await sql.query({
-					text: `delete from ${table} where user_id = $1`,
-					values: [userId],
-				});
-			}
+			await Promise.all(
+				['arena', 'bazaar', 'stats', 'user_data'].map(table =>
+					sql.query({
+						text: `delete from ${table} where user_id = $1`,
+						values: [userId],
+					}),
+				),
+			);
 			await sql.query({
 				text: `delete from users where id = $1`,
 				values: [userId],

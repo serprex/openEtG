@@ -523,7 +523,7 @@ Player.prototype._draw = function () {
 	return id;
 };
 Player.prototype.mill = function (x = 1) {
-	for (let i = x * this.drawpower; i > 0; i--) this._draw();
+	for (let i = x * this.deckpower; i > 0; i--) this._draw();
 };
 Player.prototype.drawcard = function (drawstep) {
 	if (this.handIds.length < 8) {

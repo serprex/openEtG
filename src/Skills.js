@@ -180,6 +180,7 @@ const Skills = {
 	},
 	bounce: passive((ctx, c, t) => {
 		c.hp = c.maxhp;
+		c.rmactive('predeath', 'bounce');
 		unsummon(c);
 		return true;
 	}),

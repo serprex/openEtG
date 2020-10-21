@@ -79,7 +79,7 @@ const data = {
 			c.upped ? '2|2' : '1|1'
 		} Skeleton.`,
 	bounce:
-		"When dying instead return to owner's hand. Modified state remains when played again.",
+		"When dying instead return to owner's hand. Modified state besides this effect remains when played again.",
 	bravery:
 		'Opponent draws up to two cards. Draw cards equal to what opponent drew.',
 	brawl:
@@ -467,7 +467,7 @@ const data = {
 	reinforce:
 		"Target creature gains strength and HP equal to this creature's strength and HP. Destroy this creature.",
 	ren:
-		'Target creature gains: "When dying instead return to owner\'s hand. Modified state remains when played again."',
+		'Target creature gains: "When dying instead return to owner\'s hand. Modified state besides this effect remains when played again."',
 	rewind:
 		"Put target creature on top of its owner's deck. Removes all bonuses and modifiers on target creature.",
 	reveal: {
