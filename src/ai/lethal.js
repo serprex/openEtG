@@ -1,3 +1,5 @@
+import { hash } from '../immutable.js';
+
 export default function lethal(game) {
 	let limit = 333,
 		cmdct,
@@ -7,7 +9,7 @@ export default function lethal(game) {
 			foe = pl.foe;
 		function iterCore(c) {
 			if (!c || !c.canactive()) return;
-			const ch = game.props.get(c.id).hashCode();
+			const ch = hash(game.props.get(c.id));
 			if (casthash.has(ch)) return;
 			casthash.add(ch);
 			const active = c.getSkill('cast');

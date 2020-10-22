@@ -7,10 +7,6 @@ export function* iterSplit(src, str) {
 		i = j + str.length;
 	}
 }
-export function place(array, item) {
-	for (let i = 0; i < array.length; i++)
-		if (!array[i]) return (array[i] = item);
-}
 export function hashString(str) {
 	let hash = 5381;
 	for (let i = 0; i < str.length; i++)

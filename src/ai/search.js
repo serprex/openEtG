@@ -3,6 +3,7 @@ import Skills from '../Skills.js';
 import parseSkill from '../parseSkill.js';
 import evalGame from './eval.js';
 import lethal from './lethal.js';
+import { hash } from '../immutable.js';
 
 function getWorstCard(game, player) {
 	let worstcard = 0,
@@ -82,7 +83,7 @@ export default function aiSearch(game) {
 	const iterLoop = (game, n, cmdct0, casthash) => {
 		const iterCore = c => {
 			if (!c || !c.canactive()) return;
-			const ch = game.props.get(c.id).hashCode();
+			const ch = hash(game.props.get(c.id));
 			if (casthash.has(ch)) return;
 			casthash.add(ch);
 			const active =
@@ -91,7 +92,7 @@ export default function aiSearch(game) {
 			const tgthash = new Set();
 			const evalIter = (t, targetFilter) => {
 				if (t) {
-					const th = game.props.get(t.id).hashCode();
+					const th = hash(game.props.get(t.id));
 					if (tgthash.has(th)) return;
 					tgthash.add(th);
 				}

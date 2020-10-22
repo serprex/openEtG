@@ -1,5 +1,6 @@
 import * as etg from './etg.js';
 import { hashString } from './util.js';
+import { registerHashFunc } from './immutable.js';
 
 export default class Skill {
 	constructor(name, func, passive, target) {
@@ -8,17 +9,6 @@ export default class Skill {
 		this.passive = passive;
 		this.target = target;
 		this.hash = null;
-	}
-
-	hashCode() {
-		if (this.hash === null) {
-			let r = 78457;
-			for (let i = 0; i < this.name.length; i++) {
-				r = ((r * 17) ^ hashString(this.name[i])) & 0x7fffffff;
-			}
-			this.hash = r;
-		}
-		return this.hash;
 	}
 
 	get castName() {
@@ -124,3 +114,10 @@ export default class Skill {
 		}
 	}
 }
+registerHashFunc(Skill, function () {
+	let r = 78457;
+	for (let i = 0; i < this.name.length; i++) {
+		r = ((r * 17) ^ hashString(this.name[i])) & 0x7fffffff;
+	}
+	return r;
+});

@@ -33,7 +33,7 @@ create table motd (
 );
 create table bazaar (
 	id bigserial not null primary key,
-	user_id bigint not null,
+	user_id bigint not null references users(id),
 	code int not null,
 	q int not null,
 	p int not null

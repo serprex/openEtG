@@ -1,19 +1,50 @@
 import { hashString } from './util.js';
 
-export function hashArray(a) {
-	let r = a.length * 108;
-	for (let i = 0; i < a.length; i++) {
-		r = ((r * 63) ^ hash(a[i])) & 0x7fffffff;
+export function hashArray() {
+	let r = (this.length ?? this.size) * 108;
+	for (const x of this) {
+		r = ((r * 63) ^ hash(x)) & 0x7fffffff;
 	}
 	return r;
 }
 
-function hash(obj) {
+function hashMap() {
+	let r = 69105;
+	for (const [k, v] of this) {
+		r ^= hash(k) ^ (hash(v) * 929);
+	}
+	return r;
+}
+
+const hashCache = new WeakMap();
+const hashFunc = new Map([
+	[Array, hashArray],
+	[Uint8Array, hashArray],
+	[Int8Array, hashArray],
+	[Uint16Array, hashArray],
+	[Int16Array, hashArray],
+	[Int32Array, hashArray],
+	[Uint32Array, hashArray],
+	[Set, hashArray],
+	[Map, hashMap],
+]);
+export function registerHashFunc(type, func) {
+	hashFunc.set(type, func);
+}
+
+export function hash(obj) {
 	if (!obj) return 0;
 	if (typeof obj === 'number') return obj & 0x7fffffff;
 	if (typeof obj === 'string') return hashString(obj);
-	if (obj instanceof Array) return hashArray(obj);
-	if (obj.hashCode) return obj.hashCode();
+	if (typeof obj === 'boolean') return +obj;
+	const hashCode = hashCache.get(obj);
+	if (hashCode !== undefined) hashCode;
+	const func = hashFunc.get(obj.constructor);
+	if (func !== undefined) {
+		const hash = func.call(obj);
+		hashCache.set(obj, hash);
+		return hash;
+	}
 	return -1;
 }
 
@@ -55,17 +86,6 @@ class iMap {
 
 	get size() {
 		return this.data.size;
-	}
-
-	hashCode() {
-		if (this.hash === null) {
-			let r = 69105;
-			for (const [k, v] of this.data) {
-				r ^= hash(k) ^ (hash(v) * 929);
-			}
-			this.hash = r;
-		}
-		return this.hash;
 	}
 
 	has(k) {
@@ -115,6 +135,7 @@ class iMap {
 		return this.data[Symbol.iterator]();
 	}
 }
+registerHashFunc(iMap, hashMap);
 
 export const emptyMap = new iMap();
 

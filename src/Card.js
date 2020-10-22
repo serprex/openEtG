@@ -91,10 +91,6 @@ export default class Card {
 		return ((this.code & 0x3fff) - 1000) % 4000 > 1999;
 	}
 
-	hashCode() {
-		return this.code;
-	}
-
 	valueOf() {
 		return this.code;
 	}
@@ -163,3 +159,7 @@ export default class Card {
 		return !!(a && ~a.name.indexOf(name));
 	}
 }
+
+imm.registerHashFunc(Card, function () {
+	return this.code & 0x3fff;
+});
