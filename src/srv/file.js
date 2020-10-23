@@ -8,12 +8,13 @@ const mime = {
 	css: 'text/css',
 	htm: 'text/html',
 	html: 'text/html',
-	txt: 'text/plain',
 	js: 'application/javascript',
 	json: 'application/json',
 	map: 'application/octet-stream',
 	ogg: 'application/ogg',
 	png: 'image/png',
+	txt: 'text/plain',
+	wasm: 'application/wasm',
 };
 export default async function (url) {
 	const contentType = mime[url.slice(url.lastIndexOf('.') + 1)];
@@ -51,8 +52,9 @@ export default async function (url) {
 		}
 		reject('ENOENT');
 	}
-	const [stat, buf] = await Promise.all([fs.stat(url), fs.readFile(url)]);
-	watch(url, { persistent: false }, function (_e) {
+	const path = url.match(/\.(js(.map)?|html?|wasm)$/) ? 'bundle/' + url : url;
+	const [stat, buf] = await Promise.all([fs.stat(path), fs.readFile(path)]);
+	watch(path, { persistent: false }, function (_e) {
 		cache.rm(url);
 		this.close();
 	});

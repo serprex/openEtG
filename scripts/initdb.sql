@@ -84,7 +84,6 @@ create index ix_roles_val on roles using hash (val);
 create index ix_arena_types_val on arena_types using hash (val);
 create index ix_user_data_types_val on user_data_types using hash (val);
 create index ix_arena_score on arena (arena_id, score desc, day desc, "rank");
-create index ix_arena_score on arena (arena_id, score);
 create index ix_arena_user_id on arena using hash (user_id);
 create index ix_bazaar_user_id on bazaar using hash (user_id);
 create index ix_bazaar_code on bazaar using hash (code);

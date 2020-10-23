@@ -1,5 +1,4 @@
-import RngModule from './rng.js';
-const Rng = RngModule.exports;
+import * as Rng from './rng.wasm';
 import * as imm from './immutable.js';
 
 import * as etg from './etg.js';

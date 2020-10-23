@@ -1,6 +1,8 @@
-const HtmlPlugin = require('html-webpack-plugin');
+const path = require('path'),
+	HtmlPlugin = require('html-webpack-plugin');
 
 module.exports = {
+	experiments: { asyncWebAssembly: true },
 	devtool: 'source-map',
 	entry: {
 		aivai: './src/ui/aivai.js',
@@ -13,11 +15,10 @@ module.exports = {
 		vspeed: './src/vanilla/ui/speed.js',
 	},
 	output: {
-		path: __dirname,
-		publicPath: '/',
-		filename: 'bundle/[name].js',
-		chunkFilename: 'bundle/[name].js',
-		sourceMapFilename: 'bundle/[name].js.map',
+		path: path.resolve(__dirname, 'bundle'),
+		filename: '[name].js',
+		chunkFilename: '[name].js',
+		sourceMapFilename: '[name].js.map',
 	},
 	optimization: {
 		splitChunks: {
@@ -83,54 +84,77 @@ module.exports = {
 			chunks: ['main'],
 			filename: 'index.html',
 			template: 'index.ejs',
+			inject: true,
 			scriptLoading: 'defer',
 		}),
 		new HtmlPlugin({
 			chunks: ['main'],
 			filename: 'kong.html',
 			template: 'kong.ejs',
+			inject: true,
 			scriptLoading: 'defer',
 		}),
 		new HtmlPlugin({
 			chunks: ['art'],
 			filename: 'artcredit.htm',
 			template: 'artcredit.ejs',
+			inject: true,
 			scriptLoading: 'defer',
 		}),
 		new HtmlPlugin({
 			chunks: ['aivai'],
 			filename: 'aivai.htm',
 			template: 'aivai.ejs',
+			inject: true,
 			scriptLoading: 'defer',
 		}),
 		new HtmlPlugin({
 			chunks: ['deck'],
 			filename: 'deck.htm',
 			template: 'deck.ejs',
+			inject: true,
 			scriptLoading: 'defer',
 		}),
 		new HtmlPlugin({
 			chunks: ['mosaic'],
 			filename: 'mosaic.htm',
 			template: 'mosaic.ejs',
+			inject: true,
 			scriptLoading: 'defer',
 		}),
 		new HtmlPlugin({
 			chunks: ['vdeckinfo'],
 			filename: 'vanilla/deckinfo.htm',
 			template: 'vanilla/deckinfo.ejs',
+			inject: true,
 			scriptLoading: 'defer',
 		}),
 		new HtmlPlugin({
 			chunks: ['vnamegame'],
 			filename: 'vanilla/namegame.htm',
 			template: 'vanilla/namegame.ejs',
+			inject: true,
 			scriptLoading: 'defer',
 		}),
 		new HtmlPlugin({
 			chunks: ['vspeed'],
 			filename: 'vanilla/speed.htm',
 			template: 'vanilla/speed.ejs',
+			inject: true,
+			scriptLoading: 'defer',
+		}),
+		new HtmlPlugin({
+			chunks: [],
+			filename: 'vanilla/boltcalc.htm',
+			template: 'vanilla/boltcalc.ejs',
+			inject: true,
+			scriptLoading: 'defer',
+		}),
+		new HtmlPlugin({
+			chunks: [],
+			filename: 'vanilla/evadecalc.htm',
+			template: 'vanilla/evadecalc.ejs',
+			inject: true,
 			scriptLoading: 'defer',
 		}),
 	],
