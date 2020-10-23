@@ -48,95 +48,56 @@ export function hash(obj) {
 	return -1;
 }
 
-function update(o, path, idx, f) {
+function _update(o, path, idx, f) {
 	if (idx === path.length) {
 		return f(o);
 	}
 	const p = path[idx];
-	if (o instanceof iMap) {
-		return o.set(p, update(o.data.get(p), path, idx + 1, f));
+	if (o instanceof Map) {
+		const nm = new Map(o);
+		nm.set(p, _update(o.get(p), path, idx + 1, f));
+		return nm;
 	} else if (o instanceof Array) {
 		const no = o.slice();
-		no[p] = update(o[p], path, idx + 1, f);
+		no[p] = _update(o[p], path, idx + 1, f);
 		return no;
-	} else if (o instanceof Map) {
-		const nm = new Map(o);
-		nm.set(p, update(o.get(p), path, idx + 1, f));
-		return nm;
 	} else {
 		return {
 			...o,
-			[p]: update(o[p], path, idx + 1, f),
+			[p]: _update(o[p], path, idx + 1, f),
 		};
 	}
 }
 
-class iMap {
-	constructor(args) {
-		this.data = new Map(args);
-		this.hash = null;
-	}
-
-	clone() {
-		const newMap = Object.create(iMap.prototype);
-		newMap.data = new Map(this.data);
-		newMap.hash = null;
-		return newMap;
-	}
-
-	get size() {
-		return this.data.size;
-	}
-
-	has(k) {
-		return this.data.has(k);
-	}
-
-	get(k, def) {
-		return this.data.has(k) ? this.data.get(k) : def;
-	}
-
-	set(k, v) {
-		const a = this.clone();
-		a.data.set(k, v);
-		return a;
-	}
-
-	delete(k) {
-		const a = this.clone();
-		a.data.delete(k);
-		return a;
-	}
-
-	update(k, f) {
-		return this.set(k, f(this.data.get(k)));
-	}
-
-	updateIn(path, f) {
-		return update(this, path, 0, f);
-	}
-
-	setIn(path, val) {
-		return update(this, path, 0, () => val);
-	}
-
-	filter(f) {
-		const data = new Map();
-		for (const [k, v] of this.data) {
-			if (f(v, k)) data.set(k, v);
-		}
-		const a = Object.create(iMap.prototype);
-		a.data = data;
-		a.hash = null;
-		return a;
-	}
-
-	[Symbol.iterator]() {
-		return this.data[Symbol.iterator]();
-	}
+export function set(map, k, v) {
+	return new Map(map).set(k, v);
 }
-registerHashFunc(iMap, hashMap);
 
-export const emptyMap = new iMap();
+function _delete(map, k) {
+	const newMap = new Map(map);
+	newMap.delete(k);
+	return newMap;
+}
+export { _delete as delete };
 
-export { iMap as Map };
+export function update(map, k, f) {
+	return new Map(map).set(k, f(map.get(k)));
+}
+
+export function updateIn(map, path, f) {
+	return _update(map, path, 0, f);
+}
+
+export function setIn(map, path, val) {
+	return _update(map, path, 0, () => val);
+}
+
+export function filter(map, f) {
+	const data = new Map();
+	for (const [k, v] of map) {
+		if (f(v, k)) data.set(k, v);
+	}
+	return data;
+}
+
+export const emptyMap = new Map();

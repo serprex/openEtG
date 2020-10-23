@@ -272,7 +272,7 @@ export default connect(({ user }) => ({ user }))(
 			replayGame.set(
 				replayGame.id,
 				'active',
-				new imm.Map([
+				new Map([
 					[
 						'death',
 						new Skill(

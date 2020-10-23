@@ -169,7 +169,7 @@ export default connect(({ user, opts }) => ({
 		constructor(props) {
 			super(props);
 			this.state = {
-				showcard: props.nymph || (!props.user.daily && props.user.ocard),
+				showcard: props.nymph ?? (!props.user.daily && props.user.ocard),
 				showsettings: false,
 				changepass: false,
 				newpass: '',

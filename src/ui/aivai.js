@@ -87,10 +87,12 @@ function fightItOut() {
 	};
 	async function gameStep(worker) {
 		for (;;) {
-			const seed = parseInt(seedput.value) || util.randint();
+			const seed =
+				(mode === fight && parseInt(seedput.value)) || util.randint();
 			const players = decks.map((deck, i) => ({
 				idx: i,
 				user: i,
+				name: i.toString(),
 				deck,
 			}));
 			if (seed & 1) players.reverse();

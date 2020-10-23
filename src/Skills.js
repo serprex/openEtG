@@ -34,7 +34,7 @@ function quadpillarFactory1(ele) {
 function quadpillarFactory(ele) {
 	return (ctx, c, t) => quadPillarCore(ctx, ele, c, c.getStatus('charges'));
 }
-const defaultShardGolem = new imm.Map([
+const defaultShardGolem = new Map([
 	['stat', 1],
 	['cast', 0],
 	['status', imm.emptyMap],
@@ -437,7 +437,7 @@ const Skills = {
 		c.setStatus('airborne', false);
 	}),
 	deja: (ctx, c, t) => {
-		c.active = c.active.delete('cast');
+		c.active = imm.delete(c.active, 'cast');
 		Skills.parallel(ctx, c, c);
 	},
 	deployblobs: (ctx, c, t) => {
@@ -539,7 +539,7 @@ const Skills = {
 		if (isborne) {
 			t.incrAtk(3);
 			if (t.getSkill('cast') === exports.burrow)
-				t.active = t.active.delete('cast');
+				t.active = imm.delete(t.active, 'cast');
 		} else {
 			t.spelldmg(3);
 		}
@@ -647,7 +647,7 @@ const Skills = {
 			c.incrStatus(key, key === 'adrenaline' && val > 1 ? 1 : val);
 		}
 		if (t.getSkill('cast') === exports.endow) {
-			c.active = c.active.delete('cast');
+			c.active = imm.delete(c.active, 'cast');
 		} else {
 			c.active = t.active;
 			c.cast = t.cast;
@@ -1130,16 +1130,16 @@ const Skills = {
 		const active = shardSkills[ctx.choose(shlist) - 1][Math.min(num - 1, 5)];
 		const shardgolem = new Map([
 			['stat', stat | 0],
-			['status', new imm.Map([['golem', 1]])],
-			['active', new imm.Map([['cast', parseSkill(active)]])],
+			['status', new Map([['golem', 1]])],
+			['active', new Map([['cast', parseSkill(active)]])],
 			['cast', shardCosts[active]],
 		]);
 		function addSkill(event, active) {
 			shardgolem.set(
 				'active',
-				shardgolem
-					.get('active')
-					.update(event, a => Skill.combine(a, parseSkill(active))),
+				imm.update(shardgolem.get('active'), event, a =>
+					Skill.combine(a, parseSkill(active)),
+				),
 			);
 		}
 		[
@@ -1196,7 +1196,7 @@ const Skills = {
 				}
 			}
 		});
-		ctx.set(c.ownerId, 'shardgolem', new imm.Map(shardgolem));
+		ctx.set(c.ownerId, 'shardgolem', new Map(shardgolem));
 		c.owner.addCrea(
 			c.owner.newThing(c.card.as(ctx.Cards.Names.ShardGolem)),
 			true,
@@ -2160,7 +2160,7 @@ const Skills = {
 		c.atk = storedpower >> 1;
 		c.maxhp = c.hp = storedpower;
 		c.setStatus('storedpower', 0);
-		c.active = c.active.delete('cast');
+		c.active = imm.delete(c.active, 'cast');
 		c.owner.addCrea(c);
 		c.owner.gpull = c.id;
 	},

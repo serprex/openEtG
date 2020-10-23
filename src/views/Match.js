@@ -638,8 +638,8 @@ export default connect(({ user, opts }) => ({
 				player1: player1.id,
 				player2: player1.foeId,
 				fxid: 0,
-				startPos: new Map(),
-				endPos: new Map(),
+				startPos: imm.emptyMap,
+				endPos: imm.emptyMap,
 				fxTextPos: imm.emptyMap,
 				fxStatChange: imm.emptyMap,
 				effects: new Set(),
@@ -659,7 +659,8 @@ export default connect(({ user, opts }) => ({
 		Text = (key, state, newstate, { id, text, onRest }) => {
 			let offset;
 			const { fxid } = newstate;
-			newstate.fxTextPos = (newstate.fxTextPos ?? state.fxTextPos).update(
+			newstate.fxTextPos = imm.update(
+				newstate.fxTextPos ?? state.fxTextPos,
 				id,
 				(pos = 0) => (offset = pos) + 16,
 			);
@@ -688,7 +689,11 @@ export default connect(({ user, opts }) => ({
 							const effects = new Set(state.effects);
 							effects.delete(TextEffect);
 							const st = {
-								fxTextPos: state.fxTextPos.update(id, pos => pos && pos - 16),
+								fxTextPos: imm.update(
+									state.fxTextPos,
+									id,
+									pos => pos && pos - 16,
+								),
 								effects,
 							};
 							return onRest ? onRest(state, st) : st;
@@ -717,7 +722,7 @@ export default connect(({ user, opts }) => ({
 		StatChange = (key, state, newstate, id, hp, atk) => {
 			if (!newstate.fxStatChange) newstate.fxStatChange = state.fxStatChange;
 			let oldentry, newentry;
-			newstate.fxStatChange = newstate.fxStatChange.update(id, e => {
+			newstate.fxStatChange = imm.update(newstate.fxStatChange, id, e => {
 				oldentry = e;
 				newentry = e ? { ...e } : { atk: 0, hp: 0, dom: null };
 				newentry.hp += hp;
@@ -728,7 +733,7 @@ export default connect(({ user, opts }) => ({
 						newentry.hp > 0 ? '+' : ''
 					}${newentry.hp}`,
 					onRest: (state, st) => {
-						st.fxStatChange = state.fxStatChange.delete(id);
+						st.fxStatChange = imm.delete(state.fxStatChange, id);
 						return st;
 					},
 				});

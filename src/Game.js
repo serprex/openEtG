@@ -12,10 +12,10 @@ import Thing from './Thing.js';
 export default function Game(data) {
 	const { seed } = data;
 	Rng.initState(seed);
-	this.props = new imm.Map([
+	this.props = new Map([
 		[
 			1,
-			new imm.Map([
+			new Map([
 				['id', 2],
 				['active', imm.emptyMap],
 				['Cards', data.set === 'Original' ? OriginalCards : StandardCards],
@@ -24,7 +24,7 @@ export default function Game(data) {
 				['players', []],
 				[
 					'bonusstats',
-					new imm.Map([
+					new Map([
 						['time', Date.now()],
 						['replay', []],
 					]),
@@ -84,7 +84,7 @@ defineProp('Cards');
 
 Game.prototype.clone = function () {
 	const obj = Object.create(Game.prototype);
-	obj.props = this.props.delete('bonusstats');
+	obj.props = imm.delete(this.props, 'bonusstats');
 	obj.cache = new Map([[this.id, obj]]);
 	obj.effects = null;
 	for (const id of this.players) {
@@ -169,16 +169,16 @@ Game.prototype.get = function (key) {
 };
 Game.prototype.set = function (id, key, val) {
 	const ent = this.props.get(id) ?? imm.emptyMap;
-	this.props = this.props.set(id, ent.set(key, val));
+	this.props = imm.set(this.props, id, imm.set(ent, key, val));
 };
 Game.prototype.setIn = function (path, val) {
-	this.props = this.props.setIn(path, val);
+	this.props = imm.setIn(this.props, path, val);
 };
 Game.prototype.getStatus = function (id, key) {
 	return this.props.get(id).get('status').get(key) | 0;
 };
 Game.prototype.setStatus = function (id, key, val) {
-	this.props = this.props.setIn([id, 'status', key], val | 0);
+	this.props = imm.setIn(this.props, [id, 'status', key], val | 0);
 };
 Game.prototype.hasactive = function (id, type, name) {
 	const atype = this.props.get(id).get('active').get(type);
@@ -189,14 +189,15 @@ Game.prototype.trigger = function (id, name, t, param) {
 	return a ? a.func(this, this.byId(id), t, param) : 0;
 };
 Game.prototype.update = function (id, func) {
-	this.props = this.props.update(id, func);
+	this.props = imm.update(this.props, id, func);
 };
 Game.prototype.updateIn = function (path, func) {
-	this.props = this.props.updateIn(path, func);
+	this.props = imm.updateIn(this.props, path, func);
 };
 Game.prototype.cloneInstance = function (inst, ownerId) {
 	const newId = this.newId();
-	this.props = this.props.set(
+	this.props = imm.set(
+		this.props,
 		newId,
 		this.props.get(inst.id).set('owner', ownerId),
 	);

@@ -26,7 +26,7 @@ const Actives = {
 	},
 	accelerationspell: target('crea', (ctx, c, t) => {
 		t.lobo();
-		t.active = t.active.set('ownattack', Actives.acceleration);
+		t.setSkill('ownattack', Actives.acceleration);
 	}),
 	accretion: target('perm+play', (ctx, c, t) => {
 		if (t.type !== etg.Player) Actives.destroy.func(ctx, c, t);
@@ -173,7 +173,7 @@ const Actives = {
 		}
 	},
 	deja: (ctx, c, t) => {
-		c.active = c.active.delete('cast');
+		c.active = imm.delete(c.active, 'cast');
 		Actives.parallel.func(ctx, c, c);
 	},
 	dessication: (ctx, c, t) => {
@@ -521,16 +521,18 @@ const Actives = {
 				[etg.Fire, 0],
 			]);
 		let hpStat = c.card.upped ? 2 : 1,
-			atkStat = hpStat + 3;
-		for (let i = c.owner.hand.length - 1; i >= 0; i--) {
-			const card = c.owner.hand[i].card;
+			atkStat = hpStat + 3,
+			handIds = c.owner.handIds;
+		for (let i = handIds.length - 1; i >= 0; i--) {
+			const card = ctx.get(handIds[i]).get('card');
 			if (etg.ShardList.some(x => x && card.isOf(ctx.Cards.Codes[x]))) {
 				atkStat += (atkBuff.get(e) ?? 2) + card.upped;
 				hpStat += (hpBuff.get(e) ?? 2) + card.upped;
 				shardTally[card.element]++;
-				c.owner.hand.splice(i, 1);
+				handIds.splice(i, 1);
 			}
 		}
+		c.owner.handIds = handIds;
 		let active = 'burrow',
 			num = 0;
 		for (let i = 1; i < 13; i++) {
@@ -540,28 +542,27 @@ const Actives = {
 				active = shardSkills[i][num - 1];
 			}
 		}
-		let actives = imm.emptyMap.set(
-				cost < 0 ? activeType[~cost] : 'cast',
-				Actives[active],
-			),
+		let actives = new Map([
+				[cost < 0 ? activeType[~cost] : 'cast', Actives[active]],
+			]),
 			cost = shardCosts[active],
 			status = imm.emptyMap;
 		if (shardTally[etg.Air] > 0) {
-			status = status.set('airborne', true);
+			status = imm.set(status, 'airborne', 1);
 		}
 		if (shardTally[etg.Darkness] > 1) {
-			status = status.set('voodoo', true);
+			status = imm.set(status, 'voodoo', 1);
 		} else if (shardTally[etg.Darkness] > 0) {
-			actives = actives.set('ownattack', Actives.siphon);
+			actives = imm.set(actives, 'ownattack', Actives.siphon);
 		}
 		if (shardTally[etg.Aether] > 1) {
-			status = status.set('immaterial', true);
+			status = imm.set(status, 'immaterial', 1);
 		}
 		if (shardTally[etg.Gravity] > 1) {
-			status = status.set('momentum', true);
+			status = imm.set(status, 'momentum', 1);
 		}
 		if (shardTally[etg.Life] > 1) {
-			status = status.set(adrenaline, 1);
+			status = imm.set(status, adrenaline, 1);
 		}
 		c.owner.shardgolem = {
 			hpStat: hpStat,
@@ -577,7 +578,7 @@ const Actives = {
 	}),
 	liquid: target('crea', (ctx, c, t) => {
 		t.lobo();
-		t.active = t.active.set('hit', Actives.vampire);
+		t.setSkill('hit', Actives.vampire);
 		t.addpoison(1);
 	}),
 	lobotomize: target('crea', (ctx, c, t) => {
@@ -631,7 +632,7 @@ const Actives = {
 	},
 	mitosisspell: target('creacrea', (ctx, c, t) => {
 		t.lobo();
-		t.active = t.active.set('cast', Actives.mitosis);
+		t.setSkill('cast', Actives.mitosis);
 		t.castele = t.card.element;
 		t.cast = t.card.cost;
 	}),
@@ -701,7 +702,7 @@ const Actives = {
 	},
 	overdrivespell: target('crea', (ctx, c, t) => {
 		t.lobo();
-		t.active = t.active.set('ownattack', Actives.overdrive);
+		t.setSkill('ownattack', Actives.overdrive);
 	}),
 	pandemonium: (ctx, c, t) => {
 		c.owner.foe.masscc(c, Actives.cseed.func, !c.card.upped);
@@ -891,7 +892,7 @@ const Actives = {
 			Actives.nova.func(ctx, c.owner.foe);
 			c.owner.foe.nova = 0;
 		} else if (r < 3) {
-			c.active = c.active.set('hit', Actives.vampire);
+			c.setSkill('hit', Actives.vampire);
 		} else if (r < 5) {
 			Actives.quint.func(ctx, c, c);
 		} else if (r < 7) {
@@ -979,7 +980,7 @@ const Actives = {
 	},
 	stoneform: (ctx, c, t) => {
 		c.buffhp(20);
-		c.active = c.active.delete('cast');
+		c.active = imm.delete(c.active, 'cast');
 	},
 	storm2: (ctx, c, t) => {
 		c.owner.foe.masscc(c, function (ctx, c, x) {
@@ -1016,7 +1017,7 @@ const Actives = {
 	}),
 	unburrow: (ctx, c, t) => {
 		c.setStatus('burrowed', 0);
-		c.active = c.active.set('cast', Actives.burrow);
+		c.setSkill('cast', Actives.burrow);
 		c.cast = 1;
 		c.atk *= 2;
 	},

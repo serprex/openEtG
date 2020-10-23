@@ -31,7 +31,7 @@ function AttrUi({ y, name, value, sumscore, arpts, onChange }) {
 				}}>
 				{name}
 			</div>
-			{value - incr >= (data.min || 0) && (
+			{value - incr >= (data.min ?? 0) && (
 				<input
 					type="button"
 					value="-"

@@ -88,9 +88,9 @@ Thing.prototype.transform = function (card) {
 	this.card = card;
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
-	let status = this.status.filter((_v, k) => !passives.has(k));
+	let status = imm.filter(this.status, (_v, k) => !passives.has(k));
 	for (const [key, val] of card.status) {
-		if (!status.get(key)) status = status.set(key, val);
+		if (!status.get(key)) status = imm.set(status, key, val);
 	}
 	this.status = status;
 	this.active = card.active;
@@ -364,7 +364,7 @@ Thing.prototype.mutantactive = function () {
 		if (mutantabilities[index] === 'growth 1') {
 			this.addactive('death', active);
 		} else {
-			this.active = this.active.set('cast', active);
+			this.setSkill('cast', active);
 			this.cast = 1 + this.game.upto(2);
 			this.castele = this.card.element;
 			return true;
@@ -389,7 +389,7 @@ Thing.prototype.getSkill = function (type) {
 	return this.active.get(type);
 };
 Thing.prototype.setSkill = function (type, sk) {
-	this.active = this.active.set(type, sk);
+	this.active = imm.set(this.active, type, sk);
 };
 Thing.prototype.rmactive = function (type, name) {
 	const atype = this.getSkill(type);
@@ -399,8 +399,9 @@ Thing.prototype.rmactive = function (type, name) {
 	if (~idx) {
 		this.active =
 			actives.length === 1
-				? this.active.delete(type)
-				: this.active.set(
+				? imm.delete(this.active, type)
+				: imm.set(
+						this.active,
 						type,
 						actives.reduce(
 							(previous, current, i) =>

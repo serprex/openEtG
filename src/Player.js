@@ -12,6 +12,10 @@ export default function Player(game, id) {
 
 Player.prototype = Object.create(Thing.prototype);
 
+Player.prototype.toString = function () {
+	return this.data.name ?? 'p' + this.id;
+};
+
 function assertIds(val) {
 	for (let i = 0; i < val.length; i++) {
 		if (val[i] && typeof val[i] !== 'number') {

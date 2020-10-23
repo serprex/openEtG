@@ -317,7 +317,7 @@ export function DeckDisplay(props) {
 				codeCount[code] = (codeCount[code] ?? 0) + 1;
 				bcodeCount[bcode] = (bcodeCount[bcode] ?? 0) + 1;
 				if (
-					codeCount[code] > (props.pool[code] || 0) ||
+					codeCount[code] > (props.pool[code] ?? 0) ||
 					(!card.getStatus('pillar') && bcodeCount[bcode] > 6)
 				) {
 					opacity = '.5';
@@ -398,7 +398,7 @@ function CardSelectorColumn(props) {
 			if (
 				shiny.code in props.cardpool &&
 				props.cardpool[shiny.code] >
-					((props.cardminus && props.cardminus[shiny.code]) || 0)
+					((props.cardminus && props.cardminus[shiny.code]) ?? 0)
 			) {
 				return card.asShiny(true);
 			}
@@ -439,12 +439,12 @@ function CardSelectorColumn(props) {
 					? '-'
 					: code in props.cardpool
 					? props.cardpool[code] -
-					  ((props.cardminus && props.cardminus[code]) || 0)
+					  ((props.cardminus && props.cardminus[code]) ?? 0)
 					: 0,
 				shinyAmount =
 					props.filterboth && !props.shiny && scode in props.cardpool
 						? props.cardpool[scode] -
-						  ((props.cardminus && props.cardminus[scode]) || 0)
+						  ((props.cardminus && props.cardminus[scode]) ?? 0)
 						: 0;
 			countTexts.push(
 				<div

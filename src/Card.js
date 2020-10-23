@@ -40,7 +40,7 @@ export default class Card {
 		this.castele = 0;
 		if (info.Skill) {
 			if (this.type === etg.Spell) {
-				this.active = new imm.Map([['cast', parseSkill(info.Skill)]]);
+				this.active = new Map([['cast', parseSkill(info.Skill)]]);
 				this.cast = this.cost;
 				this.castele = this.costele;
 			} else if (activecache.has(info.Skill)) {
@@ -55,7 +55,7 @@ export default class Card {
 					const eqidx = active.indexOf('=');
 					const a0 = ~eqidx ? active.substr(0, eqidx) : 'ownattack';
 					const cast = readCost(a0, this.element);
-					this.active = this.active.update(cast ? 'cast' : a0, a =>
+					this.active = imm.update(this.active, cast ? 'cast' : a0, a =>
 						Skill.combine(a, parseSkill(active.substr(eqidx + 1))),
 					);
 					if (cast) {
@@ -73,7 +73,8 @@ export default class Card {
 				this.status = imm.emptyMap;
 				for (const status of util.iterSplit(info.Status, '+')) {
 					const eqidx = status.indexOf('=');
-					this.status = this.status.set(
+					this.status = imm.set(
+						this.status,
 						~eqidx ? status.substr(0, eqidx) : status,
 						+(eqidx === -1 || status.substr(eqidx + 1)),
 					);
