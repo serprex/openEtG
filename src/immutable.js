@@ -69,10 +69,6 @@ function _update(o, path, idx, f) {
 	}
 }
 
-export function set(map, k, v) {
-	return new Map(map).set(k, v);
-}
-
 function _delete(map, k) {
 	const newMap = new Map(map);
 	newMap.delete(k);

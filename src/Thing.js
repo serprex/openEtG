@@ -90,7 +90,7 @@ Thing.prototype.transform = function (card) {
 	this.atk = card.attack;
 	let status = imm.filter(this.status, (_v, k) => !passives.has(k));
 	for (const [key, val] of card.status) {
-		if (!status.get(key)) status = imm.set(status, key, val);
+		if (!status.get(key)) status = new Map(status).set(key, val);
 	}
 	this.status = status;
 	this.active = card.active;
@@ -389,7 +389,7 @@ Thing.prototype.getSkill = function (type) {
 	return this.active.get(type);
 };
 Thing.prototype.setSkill = function (type, sk) {
-	this.active = imm.set(this.active, type, sk);
+	this.active = new Map(this.active).set(type, sk);
 };
 Thing.prototype.rmactive = function (type, name) {
 	const atype = this.getSkill(type);
@@ -400,8 +400,7 @@ Thing.prototype.rmactive = function (type, name) {
 		this.active =
 			actives.length === 1
 				? imm.delete(this.active, type)
-				: imm.set(
-						this.active,
+				: new Map(this.active).set(
 						type,
 						actives.reduce(
 							(previous, current, i) =>

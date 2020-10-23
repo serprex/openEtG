@@ -169,7 +169,7 @@ Game.prototype.get = function (key) {
 };
 Game.prototype.set = function (id, key, val) {
 	const ent = this.props.get(id) ?? imm.emptyMap;
-	this.props = imm.set(this.props, id, imm.set(ent, key, val));
+	this.props = new Map(this.props).set(id, new Map(ent).set(key, val));
 };
 Game.prototype.setIn = function (path, val) {
 	this.props = imm.setIn(this.props, path, val);
@@ -196,10 +196,9 @@ Game.prototype.updateIn = function (path, func) {
 };
 Game.prototype.cloneInstance = function (inst, ownerId) {
 	const newId = this.newId();
-	this.props = imm.set(
-		this.props,
+	this.props = new Map(this.props).set(
 		newId,
-		this.props.get(inst.id).set('owner', ownerId),
+		new Map(this.props.get(inst.id)).set('owner', ownerId),
 	);
 	return this.byId(newId);
 };

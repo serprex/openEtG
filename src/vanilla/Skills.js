@@ -548,21 +548,21 @@ const Actives = {
 			cost = shardCosts[active],
 			status = imm.emptyMap;
 		if (shardTally[etg.Air] > 0) {
-			status = imm.set(status, 'airborne', 1);
+			status = new Map(status).set('airborne', 1);
 		}
 		if (shardTally[etg.Darkness] > 1) {
-			status = imm.set(status, 'voodoo', 1);
+			status = new Map(status).set('voodoo', 1);
 		} else if (shardTally[etg.Darkness] > 0) {
-			actives = imm.set(actives, 'ownattack', Actives.siphon);
+			actives = new Map(actives).set('ownattack', Actives.siphon);
 		}
 		if (shardTally[etg.Aether] > 1) {
-			status = imm.set(status, 'immaterial', 1);
+			status = new Map(status).set('immaterial', 1);
 		}
 		if (shardTally[etg.Gravity] > 1) {
-			status = imm.set(status, 'momentum', 1);
+			status = new Map(status).set('momentum', 1);
 		}
 		if (shardTally[etg.Life] > 1) {
-			status = imm.set(status, adrenaline, 1);
+			status = new Map(status).set('adrenaline', 1);
 		}
 		c.owner.shardgolem = {
 			hpStat: hpStat,

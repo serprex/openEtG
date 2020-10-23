@@ -73,8 +73,7 @@ export default class Card {
 				this.status = imm.emptyMap;
 				for (const status of util.iterSplit(info.Status, '+')) {
 					const eqidx = status.indexOf('=');
-					this.status = imm.set(
-						this.status,
+					this.status = new Map(this.status).set(
 						~eqidx ? status.substr(0, eqidx) : status,
 						+(eqidx === -1 || status.substr(eqidx + 1)),
 					);
