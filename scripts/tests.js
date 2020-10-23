@@ -185,6 +185,7 @@ test(
 			assert.equal(dev.maxhp, 2);
 			assert.ok(dev.hasactive('ownattack', 'growth 2 -1'));
 			this.player1.hand[this.player1.hand.length - 1].play();
+			this.cast('ren', dev, dev);
 			this.cast('pacify', dev, dev);
 			this.cast('atk2hp', dev, dev);
 			assert.equal(this.player1.handIds[this.player1.hand.length - 1], dev.id);
