@@ -437,16 +437,18 @@ from arena where user_id = $1`,
 		return pg.trx(async sql => {
 			await sql.query({ text: 'lock codes in row exclusive mode' });
 			const obj = await sql.query({
-					text: `select val from codes where code = $1`,
-					values: [data.code],
-				}),
-				type = obj.rows[0].val;
-			if (!type) {
+				text: `select val from codes where code = $1`,
+				values: [data.code],
+			});
+			if (obj.rowCount === 0) {
 				sockEmit(this, 'chat', {
 					mode: 1,
 					msg: 'Code does not exist',
 				});
-			} else if (type.charAt(0) === 'G') {
+				return;
+			}
+			const type = obj.rows[0].val;
+			if (type.charAt(0) === 'G') {
 				const g = +type.slice(1);
 				if (isNaN(g)) {
 					sockEmit(this, 'chat', {

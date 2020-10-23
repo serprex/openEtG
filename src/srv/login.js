@@ -97,8 +97,7 @@ export default function login(sockEmit) {
 						values: [
 							user.id,
 							user.gold +
-								bazaarWealth +
-								Math.round(userutil.calcWealth(user.pool)),
+								Math.round(bazaarWealth + userutil.calcWealth(user.pool)),
 							user.auth,
 							user.salt,
 							user.iter,
@@ -110,12 +109,14 @@ export default function login(sockEmit) {
 						text: `insert into users (name, auth, salt, iter, algo, wealth) values ($1, $2, $3, $4, $5, 0) returning id`,
 						values: [user.name, user.auth, user.salt, user.iter, user.algo],
 					});
+					user.id = new_user.rows[0].id;
 					await sql.query({
 						text: `insert into user_data (user_id, type_id, name, data) values ($1, 1, 'Main', $2)`,
 						values: [
-							new_user.rows[0].id,
+							user.id,
 							JSON.stringify({
 								...user,
+								id: undefined,
 								auth: undefined,
 								salt: undefined,
 								iter: undefined,
