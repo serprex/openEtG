@@ -30,7 +30,7 @@ const BonusList = [
 		name: 'Are we idle yet?',
 		desc: 'Take longer than 3 minutes to win',
 		func: (game, p1, p2, stats) =>
-			Math.min((game.bonusstats.get('duration') - 180000) / 60000, 0.2),
+			Math.min((game.get(game.id).get('duration') - 180000) / 60000, 0.2),
 	},
 	{
 		name: 'Colosseum Bonus',
@@ -63,7 +63,7 @@ const BonusList = [
 	{
 		name: 'Double Kill',
 		desc: 'Foe lost with as much negative hp as maxhp',
-		func: (game, p1, p2, stats) => (p2.hp <= -p2.maxhp ? 0.15 : 0),
+		func: (game, p1, p2, stats) => (p2.hp <= -p2.maxhp ? 0.1 : 0),
 	},
 	{
 		name: 'Equipped',
@@ -93,7 +93,12 @@ const BonusList = [
 			[1, 1 / 2, 1 / 4, 1 / 8, 1 / 16, 1 / 32, 1 / 64][game.data.rank],
 	},
 	{
-		name: 'Last point',
+		name: 'Last Leg',
+		desc: 'Foe lost with 1 maxhp',
+		func: (game, p1, p2, stats) => (p2.maxhp === 1 ? 0.1 : 0),
+	},
+	{
+		name: 'Last Point',
 		desc: 'End with 1hp',
 		func: (game, p1, p2, stats) => (p1.hp === 1 ? 0.3 : 0),
 	},
@@ -106,7 +111,7 @@ const BonusList = [
 		name: 'Mid Turn',
 		desc: 'Defeat foe with game ended still on own turn',
 		func: (game, p1, p2, stats) => {
-			const replay = game.bonusstats.get('replay');
+			const replay = game.get(game.id).get('replay');
 			return replay[replay.length - 1].x === 'end' ? 0 : 0.1;
 		},
 	},
@@ -250,7 +255,7 @@ export default connect(({ user }) => ({ user }))(
 
 		computeBonuses(game, lefttext, streakrate) {
 			if (game.data.endurance !== undefined) return 1;
-			const replay = game.bonusstats.get('replay'),
+			const replay = game.get(game.id).get('replay'),
 				replayGame = new Game({
 					seed: game.data.seed,
 					set: game.data.set,
@@ -332,12 +337,12 @@ export default connect(({ user }) => ({ user }))(
 				lefttext = [
 					<div key="0">{game.countPlies()} plies</div>,
 					<div key="1">
-						{(game.bonusstats.get('duration') / 1000).toFixed(1)} seconds
+						{(game.get(game.id).get('duration') / 1000).toFixed(1)} seconds
 					</div>,
 				];
 
 			this.props.dispatch(store.clearChat('Replay'));
-			const replay = game.bonusstats.get('replay');
+			const replay = game.get(game.id).get('replay');
 			if (
 				replay &&
 				game.data.endurance === undefined &&
@@ -346,7 +351,7 @@ export default connect(({ user }) => ({ user }))(
 				this.props.dispatch(
 					store.chat(
 						JSON.stringify({
-							date: game.bonusstats.get('time'),
+							date: game.get(game.id).get('time'),
 							seed: game.data.seed,
 							set: game.data.set,
 							players: game.data.players,
@@ -440,7 +445,7 @@ export default connect(({ user }) => ({ user }))(
 					(this.state.player1.foe.data.name || '?').replace(/,/g, ' '),
 					winner ? 'W' : 'L',
 					game.countPlies(),
-					game.bonusstats.get('duration'),
+					game.get(game.id).get('duration'),
 					this.state.player1.hp,
 					this.state.player1.maxhp,
 					(state.goldreward | 0) - (game.data.cost | 0),

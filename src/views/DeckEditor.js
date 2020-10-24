@@ -361,7 +361,7 @@ export default connect(({ user }) => ({
 						}}
 						setMark={mark => this.setState({ mark })}
 					/>
-					<Tutor.Editor x={4} y={220} />
+					<Tutor.Tutor x={4} y={220} panels={Tutor.Editor} />
 					<label
 						style={{
 							position: 'absolute',

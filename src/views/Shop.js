@@ -351,7 +351,7 @@ export default connect(({ user, opts }) => ({
 							}}
 						/>
 					)}
-					<Tutor.Shop x={8} y={500} />
+					<Tutor.Tutor x={8} y={500} panels={Tutor.Shop} />
 				</>
 			);
 		}

@@ -1205,7 +1205,7 @@ export default connect(({ user, opts }) => ({
 								set: game.data.set,
 								players: game.data.players,
 							},
-							moves: game.bonusstats.get('replay'),
+							moves: game.get(game.id).get('replay'),
 						})
 						.then(e => {
 							const now = Date.now();

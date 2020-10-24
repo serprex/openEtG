@@ -820,10 +820,10 @@ const Actives = {
 	}),
 	salvage: (ctx, c, t) => {
 		if (
-			c.owner !== t.owner &&
+			c.ownerId === t.ownerId &&
 			!c.getStatus('salvaged') &&
 			!t.getStatus('salvaged') &&
-			c.owner.game.turn !== c.owner
+			ctx.turn !== c.ownerId
 		) {
 			c.setStatus('salvaged', 1);
 			t.setStatus('salvaged', 1);

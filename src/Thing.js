@@ -342,10 +342,10 @@ Thing.prototype.lobo = function () {
 Thing.prototype.mutantactive = function (actives, ondeath) {
 	this.lobo();
 	const index = this.game.upto(actives.length + 3) - 3;
-	if (index < -1) {
-		this.setStatus(['momentum', 'immaterial'][~index], 1);
-	} else if (index === -1) {
+	if (index === -3) {
 		this.addactive('death', parseSkill(ondeath));
+	} else if (index < 0) {
+		this.setStatus(['momentum', 'immaterial'][~index], 1);
 	} else {
 		const active = parseSkill(actives[index]);
 		this.setSkill('cast', active);
@@ -732,7 +732,7 @@ Thing.prototype.setStatus = function (key, val) {
 	return this.game.setStatus(this.id, key, val);
 };
 Thing.prototype.clearStatus = function () {
-	this.game.setIn([this.id, 'status'], imm.emptyMap);
+	this.game.set(this.id, 'status', imm.emptyMap);
 };
 Thing.prototype.maybeDecrStatus = function (key) {
 	let oldval;

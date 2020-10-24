@@ -105,7 +105,7 @@ function fightItOut() {
 			while (game.phase === etg.PlayPhase) {
 				const msg = await worker.send({
 					data: game.data,
-					moves: game.bonusstats.get('replay'),
+					moves: game.get(game.id).get('replay'),
 				});
 				if (!msg) return;
 				const {
@@ -124,7 +124,7 @@ function fightItOut() {
 				} wins. ${game.countPlies()}\n${result.textContent}`;
 				replay.textContent = JSON.stringify({
 					...game.data,
-					moves: game.bonusstats.get('replay'),
+					moves: game.get(game.id).get('replay'),
 				});
 				return stopFight();
 			} else {

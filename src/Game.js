@@ -21,13 +21,8 @@ export default function Game(data) {
 				['phase', data.set === 'Original' ? etg.PlayPhase : etg.MulliganPhase],
 				['turn', 2],
 				['players', []],
-				[
-					'bonusstats',
-					new Map([
-						['time', Date.now()],
-						['replay', []],
-					]),
-				],
+				['time', Date.now()],
+				['replay', []],
 				['data', data],
 				[
 					'rng',
@@ -75,7 +70,6 @@ function defineProp(key) {
 }
 defineProp('players');
 defineProp('phase');
-defineProp('bonusstats');
 defineProp('data');
 defineProp('turn');
 defineProp('winner');
@@ -83,7 +77,7 @@ defineProp('Cards');
 
 Game.prototype.clone = function () {
 	const obj = Object.create(Game.prototype);
-	obj.props = imm.delete(this.props, 'bonusstats');
+	obj.props = imm.delete(this.props, 'replay');
 	obj.cache = new Map([[this.id, obj]]);
 	obj.effects = null;
 	for (const id of this.players) {
@@ -170,14 +164,13 @@ Game.prototype.set = function (id, key, val) {
 	const ent = this.props.get(id) ?? imm.emptyMap;
 	this.props = new Map(this.props).set(id, new Map(ent).set(key, val));
 };
-Game.prototype.setIn = function (path, val) {
-	this.props = imm.setIn(this.props, path, val);
-};
 Game.prototype.getStatus = function (id, key) {
 	return this.props.get(id).get('status').get(key) | 0;
 };
 Game.prototype.setStatus = function (id, key, val) {
-	this.props = imm.setIn(this.props, [id, 'status', key], val | 0);
+	const ent = this.props.get(id) ?? imm.emptyMap,
+		entStatus = ent.get('status') ?? imm.emptyMap;
+	this.set(id, 'status', new Map(entStatus).set(key, val));
 };
 Game.prototype.hasactive = function (id, type, name) {
 	const atype = this.props.get(id).get('active').get(type);
@@ -202,10 +195,11 @@ Game.prototype.cloneInstance = function (inst, ownerId) {
 	return this.byId(newId);
 };
 Game.prototype.countPlies = function () {
-	if (!this.bonusstats) return -1;
+	const replay = this.get(this.id).get('replay');
+	if (!replay) return -1;
 	let plies = 0;
-	for (const move of this.bonusstats.get('replay')) {
-		if (move.x === 'end') plies++;
+	for (const { x } of replay) {
+		if (x === 'end') plies++;
 	}
 	return plies;
 };
@@ -243,8 +237,6 @@ Game.prototype.nextTurn = function () {
 				next.die();
 				continue;
 			}
-		} else {
-			this.setIn([this.id, 'bonusstats', 'nomidturn'], true);
 		}
 		return;
 	}
@@ -264,12 +256,7 @@ Game.prototype.setWinner = function () {
 				this.winner = id;
 			}
 			this.phase = etg.EndPhase;
-			if (this.bonusstats) {
-				this.setIn(
-					[this.id, 'bonusstats', 'duration'],
-					Date.now() - this.bonusstats.get('time'),
-				);
-			}
+			this.set(this.id, 'duration', Date.now() - this.get(this.id).get('time'));
 		}
 	}
 };
@@ -301,7 +288,7 @@ const nextHandler = {
 			this.nextTurn();
 		}
 		const { players } = this;
-		let left = new Set();
+		const left = new Set();
 		for (let i = 0; i < players.length; i++) {
 			if (players[i] !== data.c && !this.get(players[i]).get('out')) {
 				left.add(players[i].leader ?? i);
@@ -315,11 +302,8 @@ const nextHandler = {
 	},
 };
 Game.prototype.next = function (event) {
-	if (this.bonusstats) {
-		this.updateIn([this.id, 'bonusstats', 'replay'], replay =>
-			replay.concat([event]),
-		);
-	}
+	const replay = this.get(this.id).get('replay');
+	if (replay) this.set(this.id, 'replay', replay.concat([event]));
 	return nextHandler[event.x].call(this, event);
 };
 Game.prototype.expectedDamage = function (samples) {

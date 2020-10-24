@@ -84,8 +84,4 @@ export function updateIn(map, path, f) {
 	return _update(map, path, 0, f);
 }
 
-export function setIn(map, path, val) {
-	return _update(map, path, 0, () => val);
-}
-
 export const emptyMap = new Map();

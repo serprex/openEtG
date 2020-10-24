@@ -578,20 +578,18 @@ Player.prototype.freeze = function (x) {
 };
 Player.prototype.dmg = function (x) {
 	if (!x) return 0;
-	const sosa = this.getStatus('sosa');
-	if (sosa) {
-		x *= -1;
-	}
+	const sosa = this.getStatus('sosa'),
+		dmg = sosa ? -x : x;
 	if (x < 0) {
-		const heal = Math.max(this.hp - this.maxhp, x);
+		const heal = Math.max(this.hp - this.maxhp, dmg);
 		this.hp -= heal;
-		return sosa ? -x : heal;
+		return sosa ? x : heal;
 	} else {
-		this.hp -= x;
+		this.hp -= dmg;
 		if (this.hp <= 0) {
 			this.die();
 		}
-		return sosa ? -x : x;
+		return x;
 	}
 };
 Player.prototype.spelldmg = function (x) {
