@@ -1,6 +1,5 @@
 import * as etg from './etg.js';
 import Card from './Card.js';
-import Thing from './Thing.js';
 import * as originalText from './vanilla/skillText.js';
 
 export default function skillText(c) {
