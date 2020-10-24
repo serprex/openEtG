@@ -1353,7 +1353,7 @@ const Skills = {
 		}
 	}),
 	mutant: (ctx, c, t) => {
-		if (!c.mutantactive()) {
+		if (!c.o_mutantactive()) {
 			c.setSkill('cast', exports.web);
 			c.cast = ctx.upto(2) + 1;
 		}
@@ -1534,7 +1534,7 @@ const Skills = {
 			const buff = ctx.upto(25);
 			copy.buffhp(Math.floor(buff / 5));
 			copy.incrAtk(buff % 5);
-			copy.mutantactive();
+			copy.o_mutantactive();
 		}
 		if (copy.getStatus('voodoo')) {
 			c.owner.foe.dmg(copy.maxhp - copy.hp);

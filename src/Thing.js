@@ -88,17 +88,25 @@ Thing.prototype.transform = function (card) {
 	this.card = card;
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
-	let status = imm.filter(this.status, (_v, k) => !passives.has(k));
-	for (const [key, val] of card.status) {
-		if (!status.get(key)) status = new Map(status).set(key, val);
+	for (const [k, v] of this.status) {
+		if (passives.has(k) && v !== card.status.get(k))
+			this.status = imm.delete(this.status, k);
 	}
-	this.status = status;
+	for (const [k, v] of card.status) {
+		if (this.status.get(k) !== v) this.status = new Map(this.status).set(k, v);
+	}
 	this.active = card.active;
 	if (this.status.get('mutant')) {
 		const buff = this.game.upto(25);
-		this.buffhp(1 + Math.floor(buff / 5));
-		this.incrAtk(1 + (buff % 5));
-		this.mutantactive();
+		if (card.code < 5000) {
+			this.buffhp(Math.floor(buff / 5));
+			this.incrAtk(buff % 5);
+			this.v_mutantactive();
+		} else {
+			this.buffhp(1 + Math.floor(buff / 5));
+			this.incrAtk(1 + (buff % 5));
+			this.o_mutantactive();
+		}
 	} else {
 		this.cast = card.cast;
 		this.castele = card.castele;
@@ -331,7 +339,22 @@ Thing.prototype.lobo = function () {
 		});
 	}
 };
-const mutantabilities = [
+Thing.prototype.mutantactive = function (actives, ondeath) {
+	this.lobo();
+	const index = this.game.upto(actives.length + 3) - 3;
+	if (index < -1) {
+		this.setStatus(['momentum', 'immaterial'][~index], 1);
+	} else if (index === -1) {
+		this.addactive('death', parseSkill(ondeath));
+	} else {
+		const active = parseSkill(actives[index]);
+		this.setSkill('cast', active);
+		this.cast = 1 + this.game.upto(2);
+		this.castele = this.card.element;
+		return true;
+	}
+};
+const o_mutantabilities = [
 	'hatch',
 	'freeze',
 	'burrow',
@@ -345,7 +368,6 @@ const mutantabilities = [
 	'gpull',
 	'devour',
 	'mutation',
-	'growth 1',
 	'growth 2',
 	'growth 2 0',
 	'poison 1',
@@ -354,22 +376,33 @@ const mutantabilities = [
 	'guard',
 	'mitosis',
 ];
-Thing.prototype.mutantactive = function () {
-	this.lobo();
-	const index = this.game.upto(mutantabilities.length + 2) - 2;
-	if (index < 0) {
-		this.setStatus(['momentum', 'immaterial'][~index], 1);
-	} else {
-		const active = parseSkill(mutantabilities[index]);
-		if (mutantabilities[index] === 'growth 1') {
-			this.addactive('death', active);
-		} else {
-			this.setSkill('cast', active);
-			this.cast = 1 + this.game.upto(2);
-			this.castele = this.card.element;
-			return true;
-		}
-	}
+Thing.prototype.o_mutantactive = function () {
+	return this.mutantactive(o_mutantabilities, 'growth 1');
+};
+const v_mutantabilities = [
+	'v_hatch',
+	'v_freeze',
+	'v_burrow',
+	'v_destroy',
+	'v_steal',
+	'v_dive',
+	'v_mend',
+	'v_paradox',
+	'v_lycanthropy',
+	'v_infect',
+	'v_gpull',
+	'v_devour',
+	'v_mutation',
+	'v_growth',
+	'v_ablaze',
+	'v_poison',
+	'v_deja',
+	'v_endow',
+	'v_guard',
+	'v_mitosis',
+];
+Thing.prototype.v_mutantactive = function () {
+	return this.mutantactive(v_mutantabilities, 'v_growth1');
 };
 Thing.prototype.isMaterial = function (type) {
 	return (

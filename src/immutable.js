@@ -88,12 +88,4 @@ export function setIn(map, path, val) {
 	return _update(map, path, 0, () => val);
 }
 
-export function filter(map, f) {
-	const data = new Map();
-	for (const [k, v] of map) {
-		if (f(v, k)) data.set(k, v);
-	}
-	return data;
-}
-
 export const emptyMap = new Map();

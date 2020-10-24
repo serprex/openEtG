@@ -420,21 +420,18 @@ const Actives = {
 		}
 	}),
 	improve: target('crea', (ctx, c, t) => {
-		const bans = [
+		const bans = new Set([
 			ctx.Cards.Names.ShardofFocus,
 			ctx.Cards.Names.FateEgg,
 			ctx.Cards.Names.Immortal,
 			ctx.Cards.Names.Scarab,
 			ctx.Cards.Names.DevonianDragon,
 			ctx.Cards.Names.Chimera,
-		];
-		t.transform(
-			ctx.randomcard(false, x => x.type === etg.Creature && !~bans.indexOf(x)),
-		);
-		t.buffhp(ctx.upto(5));
-		t.incrAtk(ctx.upto(5));
+		]);
 		t.setStatus('mutant', 1);
-		t.mutantactive();
+		t.transform(
+			ctx.randomcard(false, x => x.type === etg.Creature && !bans.has(x)),
+		);
 	}),
 	infect: target('crea', (ctx, c, t) => {
 		t.addpoison(1);
@@ -722,7 +719,7 @@ const Actives = {
 			const buff = ctx.upto(25);
 			t.buffhp(Math.floor(buff / 5));
 			t.incrAtk(buff % 5);
-			t.mutantactive();
+			t.v_mutantactive();
 		}
 		if (copy.getStatus('voodoo')) {
 			copy.owner.foe.dmg(copy.maxhp - copy.hp);
