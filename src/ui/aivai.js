@@ -1,9 +1,7 @@
 import Game from '../Game.js';
-import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
-import aiSearch from '../ai/search.js';
 import aiMulligan from '../ai/mulligan.js';
-import * as util from '../util.js';
+import { randint } from '../util.js';
 import AsyncWorker from '../AsyncWorker.js';
 
 const AiWorker = import('../ai/ai.worker.js');
@@ -87,8 +85,7 @@ function fightItOut() {
 	};
 	async function gameStep(worker) {
 		for (;;) {
-			const seed =
-				(mode === fight && parseInt(seedput.value)) || util.randint();
+			const seed = (mode === fight && parseInt(seedput.value)) || randint();
 			const players = decks.map((deck, i) => ({
 				idx: i,
 				user: i,

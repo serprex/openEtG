@@ -25,10 +25,11 @@ function printstat(e) {
 		if (hide.has('shard') && card.name.match(/^Shard of /)) return false;
 		if (
 			hide.has('rare') &&
-			(card.tier == 6 || card.tier == 8 || card.tier == 18)
+			(card.rarity == 6 || card.rarity == 8 || card.rarity == 18)
 		)
 			return false;
-		if (hide.has('nymph') && (card.tier == 15 || card.tier == 20)) return false;
+		if (hide.has('nymph') && (card.rarity == 15 || card.rarity == 20))
+			return false;
 		return true;
 	}
 	while (infobox.firstChild) infobox.firstChild.remove();
