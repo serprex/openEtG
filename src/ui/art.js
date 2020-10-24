@@ -30,7 +30,7 @@ const imgs = new Array(8),
 	imgdiv = document.getElementById('imgdiv');
 for (let i = 0; i < 8; i++) imgdiv.appendChild((imgs[i] = new Image()));
 const table = document.createElement('table');
-[
+for (const credit of [
 	[
 		['andretimpa', 'https://andretimpa.deviantart.com'],
 		['Opening Music', 'sound/openingMusic.ogg'],
@@ -497,16 +497,16 @@ const table = document.createElement('table');
 	],
 	[['NASA', 'https://nasa.gov'], ['5p2']],
 	[['freeSFX', 'https://freesfx.co.uk'], []],
-].forEach(credit => {
+]) {
 	let tr = document.createElement('tr');
 	hookRowMouseover(tr);
 	tr.className = 'padtop';
 	let x = 0;
 	function incx(text, link) {
-		let td = document.createElement('td');
-		const a = document.createElement('a');
+		const td = document.createElement('td'),
+			a = document.createElement('a');
 		a.href = link;
-		a.appendChild(document.createTextNode(text));
+		a.textContent = text;
 		td.appendChild(a);
 		tr.appendChild(td);
 		if (++x === 9) {
@@ -520,10 +520,9 @@ const table = document.createElement('table');
 	for (let i = 0; i < credit.length - 1; i++) {
 		incx(credit[i][0], credit[i][1]);
 	}
-	const codes = credit[credit.length - 1];
-	if (codes.length) {
-		codes.forEach((code, i) => incx(Cards.get(code), `Cards/${code}.png`));
+	for (const code of credit[credit.length - 1]) {
+		incx(Cards.get(code), `Cards/${code}.png`);
 	}
 	table.appendChild(tr);
-});
+}
 document.body.insertBefore(table, imgdiv);

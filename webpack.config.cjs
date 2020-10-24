@@ -58,8 +58,8 @@ module.exports = {
 									corejs: 3,
 									targets: {
 										browsers: [
-											'last 1 firefox version',
-											'last 1 chrome version',
+											'last 2 firefox version',
+											'last 2 chrome version',
 											'last 1 ios version',
 											'last 1 and_chr version',
 											'last 1 edge version',
