@@ -25,3 +25,4 @@ onmessage = function (e) {
 	premoves = moves;
 	postMessage({ id, cmd: aiSearch(game) });
 };
+postMessage(null);

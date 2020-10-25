@@ -1,4 +1,5 @@
 import Game from '../Game.js';
+import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
 import aiMulligan from '../ai/mulligan.js';
 import { randint } from '../util.js';

@@ -3,12 +3,17 @@ export default class AsyncWorker {
 		this.id = 0;
 		this.worker = worker.then(wcons => {
 			const w = new wcons.default();
-			w.addEventListener('message', e => {
-				const resolve = this.pending.get(e.data.id);
-				if (resolve) resolve(e);
-				this.pending.delete(e.id);
+			return new Promise(resolve => {
+				w.addEventListener('message', e => {
+					if (e.data === null) {
+						resolve(w);
+					} else {
+						const pending = this.pending.get(e.data.id);
+						if (pending) pending(e);
+						this.pending.delete(e.id);
+					}
+				});
 			});
-			return w;
 		});
 		this.pending = new Map();
 	}
