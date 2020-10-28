@@ -54,6 +54,7 @@ module.exports = {
 							[
 								'@babel/preset-env',
 								{
+									bugfixes: true,
 									useBuiltIns: 'usage',
 									corejs: 3,
 									targets: {

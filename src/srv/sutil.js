@@ -26,3 +26,11 @@ export function parseJSON(x) {
 		return null;
 	}
 }
+
+export function sockEmit(socket, event, data) {
+	if (socket.readyState === 1) {
+		if (!data) data = {};
+		data.x = event;
+		socket.send(JSON.stringify(data));
+	}
+}

@@ -224,11 +224,6 @@ class PlayerEditor extends Component {
 }
 
 class Group extends Component {
-	constructor(props) {
-		super(props);
-		this.state = { invite: '' };
-	}
-
 	updatePlayer = (i, pl) => {
 		const players = this.props.players.slice(),
 			{ idx } = players[i];
@@ -275,32 +270,10 @@ class Group extends Component {
 							type="button"
 							value="+Player"
 							onClick={() => {
-								const { invite } = this.state;
 								const idx = props.getNextIdx();
-								if (!invite) {
-									props.updatePlayers(props.players.concat([{ idx }]));
-									props.addEditing(idx);
-								} else {
-									if (!props.hasUserAsPlayer(invite)) {
-										props.updatePlayers(
-											props.players.concat([
-												{
-													idx,
-													user: invite,
-													pending: 2,
-												},
-											]),
-										);
-									}
-									props.invitePlayer(invite);
-								}
-								this.setState({ invite: '' });
+								props.updatePlayers(props.players.concat([{ idx }]));
+								props.addEditing(idx);
 							}}
-						/>
-						<input
-							style={{ marginLeft: '8px' }}
-							value={this.state.invite}
-							onChange={e => this.setState({ invite: e.target.value })}
 						/>
 						{props.removeGroup && (
 							<input
@@ -336,65 +309,6 @@ export default connect(({ user, opts }) => ({
 				replay: '',
 				mydeck: sock.getDeck(),
 			};
-		}
-
-		componentDidMount() {
-			this.props.dispatch(
-				store.setCmds({
-					matchbegin: data => {
-						this.props.dispatch(
-							store.doNav(import('./Match.js'), {
-								game: new Game(data.data),
-							}),
-						);
-					},
-					matchcancel: () => {
-						console.log('Match cancelled');
-						this.toMainMenu();
-					},
-					foeleft: data => {
-						if (data.name === this.props.username) {
-							console.log('You have been removed');
-							this.toMainMenu();
-						}
-						const groups = this.state.groups.slice();
-						for (let j = 0; j < groups.length; j++) {
-							let group = groups[j],
-								g = group;
-							for (let i = group.length - 1; ~i; i--) {
-								const player = group[i];
-								if (player.user === data.name) {
-									if (g === group) {
-										groups[j] = g = group.slice();
-									}
-									g.splice(i, 1);
-								}
-							}
-						}
-						this.setState({ groups });
-					},
-					matchready: data => {
-						const groups = this.state.groups.slice();
-						for (let j = 0; j < groups.length; j++) {
-							let group = groups[j],
-								g = group;
-							for (let i = group.length - 1; ~i; i--) {
-								const player = group[i];
-								if (player.user === data.name) {
-									if (g === group) {
-										groups[j] = g = group.slice();
-									}
-									g[i] = { ...player, pending: data.pending };
-								}
-							}
-						}
-						this.setState({ groups });
-					},
-					matchconfig: data => {
-						this.setState({ groups: data.data, set: data.set });
-					},
-				}),
-			);
 		}
 
 		getNextIdx = () => this.nextIdx++;
@@ -475,36 +389,17 @@ export default connect(({ user, opts }) => ({
 		};
 
 		exitClick = () => {
-			if (this.isMultiplayer()) {
-				if (this.props.username === this.state.groups[0][0].user) {
-					sock.userEmit('matchcancel');
-				} else {
-					sock.userEmit('foeleft');
-				}
-			}
 			this.toMainMenu();
 		};
 
 		toMainMenu = () =>
 			this.props.dispatch(store.doNav(import('./MainMenu.js')));
 
-		sendConfig = () => {
-			if (this.props.username === this.state.groups[0][0].user) {
-				sock.userEmit('matchconfig', {
-					data: this.state.groups,
-					set: this.state.set,
-				});
-			}
-		};
-
 		addGroup = () => {
-			this.setState(
-				state => ({
-					groups: state.groups.concat([[]]),
-					editing: state.editing.concat([new Set()]),
-				}),
-				this.sendConfig,
-			);
+			this.setState(state => ({
+				groups: state.groups.concat([[]]),
+				editing: state.editing.concat([new Set()]),
+			}));
 		};
 
 		updatePlayers = (i, p) =>
@@ -512,15 +407,7 @@ export default connect(({ user, opts }) => ({
 				const newgroups = state.groups.slice();
 				newgroups[i] = p;
 				return { groups: newgroups };
-			}, this.sendConfig);
-
-		invitePlayer = u => {
-			sock.userEmit('matchconfig', {
-				data: this.state.groups,
-				set: this.state.set,
 			});
-			sock.userEmit('matchinvite', { invite: u });
-		};
 
 		removeGroup = i => {
 			this.setState(state => {
@@ -529,7 +416,7 @@ export default connect(({ user, opts }) => ({
 				newgroups.splice(i, 1);
 				newediting.splice(i, 1);
 				return { groups: newgroups, editing: newediting };
-			}, this.sendConfig);
+			});
 		};
 
 		loadMyData = () => {
@@ -612,7 +499,6 @@ export default connect(({ user, opts }) => ({
 								this.state.groups.some(g => g.some(p => p.user === name))
 							}
 							updatePlayers={p => this.updatePlayers(i, p)}
-							invitePlayer={this.invitePlayer}
 							removeGroup={i > 0 && (() => this.removeGroup(i))}
 							getNextIdx={this.getNextIdx}
 							editing={this.state.editing[i]}
@@ -659,55 +545,11 @@ export default connect(({ user, opts }) => ({
 										style={{ float: 'right' }}
 										type="button"
 										value="Start"
-										onClick={() => {
-											if (isMultiplayer) {
-												sock.userEmit('matchbegin');
-											} else {
-												this.aiClick();
-											}
-										}}
+										onClick={() => this.aiClick()}
 									/>
 							  )
-							: mydata &&
-							  mydata.pending && (
-									<input
-										style={{ float: 'right' }}
-										type="button"
-										value="Ready"
-										onClick={() => {
-											sock.userEmit('matchready', {
-												data: {
-													deck: this.state.mydeck,
-												},
-											});
-										}}
-									/>
-							  )}
+							: null}
 					</div>
-					{/*amhost ? (
-						<select
-							value={this.state.set}
-							style={{
-								position: 'absolute',
-								left: '350px',
-								top: '8px',
-							}}
-							onChange={e =>
-								this.setState({ set: e.target.value }, this.sendConfig)
-							}>
-							<option value="">Standard</option>
-							<option value="Original">Original</option>
-						</select>
-					) : (
-						<div
-							style={{
-								position: 'absolute',
-								left: '350px',
-								top: '8px',
-							}}>
-							{this.state.set || 'Standard'}
-						</div>
-					)*/}
 					<input
 						style={{
 							position: 'absolute',

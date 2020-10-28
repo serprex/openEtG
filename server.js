@@ -19,7 +19,7 @@ import RngMock from './src/RngMock.js';
 import * as etgutil from './src/etgutil.js';
 import * as usercmd from './src/usercmd.js';
 import * as userutil from './src/userutil.js';
-import * as sutil from './src/srv/sutil.js';
+import { getDay, initsalt, parseJSON, sockEmit } from './src/srv/sutil.js';
 import * as pg from './src/srv/pg.js';
 import * as Us from './src/srv/Us.js';
 import starter from './src/srv/starter.json';
@@ -27,8 +27,8 @@ import originalstarter from './src/srv/original-starter.json';
 import forkcore from './src/srv/forkcore.js';
 import login from './src/srv/login.js';
 import config from './config.json';
+import { randint } from './src/util.js';
 
-const MAX_INT = 0x100000000;
 const sockmeta = new WeakMap();
 
 const [keypem, certpem] = config.certs
@@ -37,23 +37,6 @@ const [keypem, certpem] = config.certs
 			fs.readFile(`${config.certs}/oetg-cert.pem`),
 	  ])
 	: [];
-function activeUsers() {
-	const activeusers = [];
-	for (let [name, sock] of Us.socks) {
-		if (sock.readyState === 1) {
-			const meta = sockmeta.get(sock);
-			if (meta.offline) continue;
-			if (meta.afk) name += ' (afk)';
-			else if (meta.wantpvp) name += '\xb6';
-			activeusers.push(name);
-		}
-	}
-	return activeusers;
-}
-function genericChat(_socket, data) {
-	data.x = 'chat';
-	broadcast(data);
-}
 function broadcast(data) {
 	const msg = JSON.stringify(data);
 	for (const sock of wss.clients) {
@@ -72,21 +55,14 @@ function wilson(up, total) {
 		(1 + z2 / total)
 	);
 }
-function sockEmit(socket, event, data) {
-	if (socket.readyState === 1) {
-		if (!data) data = {};
-		data.x = event;
-		socket.send(JSON.stringify(data));
-	}
-}
 function roleck(key, func) {
-	return async function (data, user, meta, userid) {
+	return async function (data, user, userId) {
 		const ismem = await pg.pool.query({
 			text: `select exists(select * from user_role ur join roles r on ur.role_id = r.id where ur.user_id = $1 and r.val = $2) res`,
-			values: [userid, key],
+			values: [userId, key],
 		});
 		if (ismem.rows[0].res) {
-			return func.call(this, data, user, meta);
+			return func.call(this, data, user, userId);
 		} else {
 			sockEmit(this, 'chat', {
 				mode: 1,
@@ -185,9 +161,9 @@ const userEvents = {
 		};
 		user.quests = {};
 		user.streak = [];
-		return sockEvents.login.call(this, { u: user.name, a: user.auth });
+		return login.call(this, { u: user.name, a: user.auth });
 	},
-	async loginoriginal(data, user, meta, userId) {
+	async loginoriginal(data, user, userId) {
 		const result = await pg.pool.query({
 			text: 'select data from user_data where user_id = $1 and type_id = 2',
 			values: [userId],
@@ -198,7 +174,7 @@ const userEvents = {
 			result.rows.length ? result.rows[0].data : {},
 		);
 	},
-	async initoriginal(data, user, meta, userId) {
+	async initoriginal(data, user, userId) {
 		if (data.e < 1 || data.e > 13) return;
 		const sid = (data.e - 1) * 2;
 		const originaldata = {
@@ -213,13 +189,12 @@ const userEvents = {
 		});
 		sockEmit(this, 'originaldata', originaldata);
 	},
-	async logout({ u }, user, meta, userId) {
+	async logout({ u }, user, userId) {
 		await Us.save(user);
 		Us.users.delete(u);
 		Us.socks.delete(u);
-		sockmeta.set(this, {});
 	},
-	async delete({ u }, user, meta, userId) {
+	async delete({ u }, user, userId) {
 		await pg.trx(async sql => {
 			await Promise.all(
 				['arena', 'bazaar', 'stats', 'user_data'].map(table =>
@@ -236,9 +211,8 @@ const userEvents = {
 		});
 		Us.users.delete(u);
 		Us.socks.delete(u);
-		sockmeta.set(this, {});
 	},
-	async setarena(data, user, meta, userId) {
+	async setarena(data, user, userId) {
 		if (!user.ocard || !data.d) {
 			return;
 		}
@@ -260,7 +234,7 @@ const userEvents = {
 				text: `select day from arena where user_id = $1 and arena_id = $2`,
 				values: [userId, data.lv ? 2 : 1],
 			});
-			const today = sutil.getDay();
+			const today = getDay();
 			if (res.rowCount) {
 				const age = today - res.rows[0].day;
 				if (age > 0) {
@@ -286,8 +260,8 @@ on conflict (user_id, arena_id) do update set day = $3, deck = $4, code = $5, wo
 			});
 		}
 	},
-	async arenainfo(data, user, meta, userId) {
-		const day = sutil.getDay();
+	async arenainfo(data, user, userId) {
+		const day = getDay();
 		const res = await pg.pool.query({
 			text: `select arena_id, ($2 - arena.day) "day", draw, mark, hp, won, loss, code, deck, "rank", bestrank
 from arena where user_id = $1`,
@@ -318,7 +292,7 @@ from arena where user_id = $1`,
 		await pg.trx(async sql => {
 			const res = await sql.query({
 				text: `select a.user_id, a.won, a.loss, ($3 - a.day) "day" from arena a join users u on a.user_id = u.id and a.arena_id = $1 where u.name = $2`,
-				values: [arenaId, data.aname, sutil.getDay()],
+				values: [arenaId, data.aname, getDay()],
 			});
 			if (res.rows.length === 0) return;
 			const row = res.rows[0],
@@ -367,7 +341,7 @@ from arena where user_id = $1`,
 		}
 		const adeck = ares.rows[0];
 		sockEmit(this, 'foearena', {
-			seed: (Math.random() * MAX_INT) | 0,
+			seed: randint(),
 			name: adeck.name,
 			hp: adeck.hp,
 			rank: idx,
@@ -379,7 +353,7 @@ from arena where user_id = $1`,
 			lv: data.lv,
 		});
 	},
-	stat: function (data, user, meta, userId) {
+	stat(data, user, userId) {
 		return pg.pool.query({
 			text: `insert into stats (user_id, "set", stats, players) values ($1, $2, $3, $4)`,
 			values: [userId, data.set ?? '', data.stats, data.players],
@@ -520,189 +494,187 @@ from arena where user_id = $1`,
 			}
 		});
 	},
-	foewant(data, user, thismeta) {
+	async foewant(data, user, userId) {
+		if (data.set && typeof data.set !== 'string') return;
 		const { u, f } = data;
 		if (u === f) return;
-		const deck = user.decks[user.selectedDeck];
-		if (!deck) return;
-		thismeta.deck = deck;
+		const deck =
+			data.set === 'Original' ? data.deck : user.decks[user.selectedDeck];
+		if (typeof deck !== 'string') return;
 		const foesock = Us.socks.get(f);
-		if (foesock && foesock.readyState === 1) {
-			const foemeta = sockmeta.get(foesock);
-			if (foemeta.duelwant === u && !foemeta.origduel) {
-				foemeta.duelwant = null;
-				foemeta.duel = u;
-				thismeta.duel = f;
-				const data = {
-					seed: (Math.random() * MAX_INT) | 0,
-					players: RngMock.shuffle([
-						{
-							idx: 1,
-							deck: thismeta.deck,
-							name: u,
-							user: u,
-							markpower: 1,
-						},
-						{
-							idx: 2,
-							deck: foemeta.deck,
-							name: f,
-							user: f,
-							markpower: 1,
-						},
-					]),
-				};
-				sockEmit(this, 'pvpgive', { data });
-				sockEmit(foesock, 'pvpgive', { data });
-			} else {
-				thismeta.duelwant = f;
-				thismeta.origduel = false;
-				sockEmit(foesock, 'challenge', { f: u, pvp: true });
-			}
-		}
-	},
-	origfoewant(data, user, thismeta) {
-		const { u, f, deck } = data;
-		if (u === f || !deck) return;
-		thismeta.deck = deck;
-		const foesock = Us.socks.get(f);
-		if (foesock && foesock.readyState === 1) {
-			const foemeta = sockmeta.get(foesock);
-			if (foemeta.duelwant === u && foemeta.origduel) {
-				foemeta.duelwant = null;
-				foemeta.origduel = false;
-				foemeta.duel = u;
-				thismeta.duel = f;
-				const data = {
-					seed: (Math.random() * MAX_INT) | 0,
-					set: 'Original',
-					players: RngMock.shuffle([
-						{
-							idx: 1,
-							deck: thismeta.deck,
-							name: u,
-							user: u,
-							markpower: 1,
-						},
-						{
-							idx: 2,
-							deck: foemeta.deck,
-							name: f,
-							user: f,
-							markpower: 1,
-						},
-					]),
-				};
-				sockEmit(this, 'pvpgive', { data });
-				sockEmit(foesock, 'pvpgive', { data });
-			} else {
-				thismeta.duelwant = f;
-				thismeta.origduel = true;
-				sockEmit(foesock, 'challenge', {
-					f: u,
-					pvp: true,
-					orig: true,
-					deckcheck: data.deckcheck,
+		if (foesock?.readyState === 1) {
+			const foeUser = await Us.load(f);
+			return pg.trx(async sql => {
+				const pendingRequests = await sql.query({
+					text: `select mr1.game_id
+from match_request mr1
+join match_request mr2 on mr1.game_id = mr2.game_id
+where mr1.user_id = $1 and mr2.user_id = $2 and not mr1.accepted and mr2.accepted`,
+					values: [userId, foeUser.id],
 				});
-			}
-		}
-	},
-	canceltrade(data, user, info) {
-		if (info.trade) {
-			const foesock = Us.socks.get(info.trade.foe),
-				foemeta = sockmeta.get(foesock);
-			if (foesock) {
-				sockEmit(foesock, 'tradecanceled');
-				sockEmit(foesock, 'chat', {
-					mode: 1,
-					msg: `${data.u} has canceled the trade.`,
-				});
-				if (foemeta.trade && foemeta.trade.foe === data.u) delete foemeta.trade;
-			}
-			delete info.trade;
-		}
-	},
-	confirmtrade(data, user, thismeta) {
-		const thistrade = thismeta.trade;
-		if (!thistrade) {
-			return;
-		}
-		thistrade.tradecards = data.cards;
-		thistrade.g = Math.abs(data.g | 0);
-		thistrade.oppcards = data.oppcards;
-		thistrade.gopher = Math.abs(data.gopher | 0);
-		const thatsock = Us.socks.get(thistrade.foe),
-			thatmeta = thatsock && sockmeta.get(thatsock);
-		const thattrade = thatmeta && thatmeta.trade;
-		const otherUser = Us.users.get(thistrade.foe);
-		if (!thattrade || !otherUser) {
-			sockEmit(this, 'tradecanceled');
-			delete thismeta.trade;
-			return;
-		} else if (thattrade.accepted) {
-			const player1Cards = thistrade.tradecards,
-				player2Cards = thattrade.tradecards,
-				player1Gold = thistrade.g,
-				player2Gold = thattrade.g,
-				p1gdelta = (player2Gold - player1Gold) | 0,
-				p2gdelta = (player1Gold - player2Gold) | 0;
-			if (
-				player1Cards !== thattrade.oppcards ||
-				player2Cards !== thistrade.oppcards ||
-				player1Gold !== thattrade.gopher ||
-				player2Gold !== thistrade.gopher ||
-				user.gold + p1gdelta < 0 ||
-				otherUser.gold + p2gdelta < 0
-			) {
-				sockEmit(this, 'tradecanceled');
-				sockEmit(this, 'chat', {
-					mode: 1,
-					msg: 'Trade disagreement.',
-				});
-				sockEmit(thatsock, 'tradecanceled');
-				sockEmit(thatsock, 'chat', {
-					mode: 1,
-					msg: 'Trade disagreement.',
-				});
-				return;
-			}
-			sockEmit(this, 'tradedone', {
-				oldcards: player1Cards,
-				newcards: player2Cards,
-				g: p1gdelta,
+				if (pendingRequests.rows.length === 0) {
+					const game = {
+						set: data.set,
+						players: [
+							{ idx: 1, user: u, name: u, deck },
+							{ idx: 2, user: f, name: f, deck: null },
+						],
+					};
+					const newGame = await sql.query({
+							text:
+								"insert into games (data, moves, expire_at) values ($1,'{}', now() + interval '1 hour') returning id",
+							values: [JSON.stringify(game)],
+						}),
+						gameId = newGame.rows[0].id;
+					await sql.query({
+						text:
+							'insert into match_request (game_id, user_id, accepted) values ($1,$2,true),($1,$3,false)',
+						values: [gameId, userId, foeUser.id],
+					});
+					sockEmit(foesock, 'challenge', {
+						f: u,
+						set: data.set,
+						deckcheck: data.deckcheck,
+					});
+				} else {
+					const gameId = pendingRequests.rows[0].game_id;
+					await sql.query({
+						text:
+							'update match_request set accepted = true where game_id = $1 and user_id = $2',
+						values: [gameId, userId],
+					});
+					const gameRow = await sql.query({
+						text: 'select data from games where id = $1',
+						values: [gameId],
+					});
+					const gameData = gameRow.rows[0].data;
+					gameData.seed = randint();
+					gameData.players[1].deck = deck;
+					if (gameData.seed & 1) gameData.players.reverse();
+					await sql.query({
+						text:
+							"update games set data = $2, expire_at = now() + interval '1 hour' where id = $1",
+						values: [gameId, JSON.stringify(gameData)],
+					});
+					sockEmit(this, 'pvpgive', { id: gameId, data: gameData });
+					sockEmit(foesock, 'pvpgive', { id: gameId, data: gameData });
+				}
 			});
-			sockEmit(thatsock, 'tradedone', {
-				oldcards: player2Cards,
-				newcards: player1Cards,
-				g: p2gdelta,
-			});
-			user.pool = etgutil.removedecks(user.pool, player1Cards);
-			user.pool = etgutil.mergedecks(user.pool, player2Cards);
-			user.gold += p1gdelta;
-			otherUser.pool = etgutil.removedecks(otherUser.pool, player2Cards);
-			otherUser.pool = etgutil.mergedecks(otherUser.pool, player1Cards);
-			otherUser.gold += p2gdelta;
-			delete thismeta.trade;
-			delete thatmeta.trade;
-		} else {
-			thistrade.accepted = true;
 		}
 	},
-	tradewant(data, user, thismeta) {
+	async canceltrade(data, user, userId) {
+		const foe = await Us.load(data.f),
+			foesock = Us.socks.get(data.f);
+		if (foesock?.readyState === 1) {
+			sockEmit(foesock, 'tradecanceled', { u: user.name });
+			sockEmit(foesock, 'chat', {
+				u: user.name,
+				mode: 1,
+				msg: 'has canceled the trade.',
+			});
+		}
+		return pg.pool.query({
+			text:
+				'delete from trade_request where (user_id = $1 and for_user_id = $2) or (user_id = $2 and for_user_id = $1)',
+			values: [userId, foe.id],
+		});
+	},
+	async reloadtrade(data, user, userId) {
+		const foe = await Us.load(data.f);
+		const tradeResult = await pg.pool.query({
+			text:
+				'select cards, g from trade_request where user_id = $2 and for_user_id = $1',
+			values: [userId, foe.id],
+		});
+		console.log(userId, foe.id, tradeResult);
+		if (tradeResult.rows.length !== 0) {
+			const [row] = tradeResult.rows;
+			console.log(row);
+			sockEmit(this, 'offertrade', {
+				f: data.f,
+				c: row.cards,
+				g: row.g,
+			});
+		}
+	},
+	async offertrade(data, user, userId) {
 		const { u, f } = data;
 		if (u === f) {
 			return;
 		}
 		const foesock = Us.socks.get(f);
-		if (foesock && foesock.readyState === 1) {
-			thismeta.trade = { foe: f };
-			const foetrade = sockmeta.get(foesock).trade;
-			if (foetrade && foetrade.foe === u) {
-				sockEmit(this, 'tradegive');
-				sockEmit(foesock, 'tradegive');
-			} else {
-				sockEmit(foesock, 'challenge', { f: u });
-			}
+		if (foesock?.readyState === 1) {
+			const foe = await Us.load(f);
+			await pg.trx(async sql => {
+				if (
+					typeof data.forcards === 'string' &&
+					typeof data.forg === 'number'
+				) {
+					const acceptResult = await pg.pool.query({
+						text: `select 1 from trade_request where user_id = $2 and for_user_id = $1 and cards = $5 and g = $6 and forcards = $3 and forg = $4`,
+						values: [
+							userId,
+							foe.id,
+							data.cards,
+							data.g,
+							data.forcards,
+							data.forg,
+						],
+					});
+					if (acceptResult.rows.length !== 0) {
+						const p1gdelta = (data.forg - data.g) | 0,
+							p2gdelta = (data.g - data.forg) | 0;
+						if (user.gold < -p1gdelta || foe.gold < -p2gdelta) return;
+						const userpool = etgutil.deck2pool(user.pool),
+							foepool = etgutil.deck2pool(foe.pool);
+						for (const [code, count] of etgutil.iterraw(user.pool)) {
+							if ((userpool[code] -= count) < 0) return;
+						}
+						for (const [code, count] of etgutil.iterraw(foe.pool)) {
+							if ((foepool[code] -= count) < 0) return;
+						}
+						sockEmit(this, 'tradedone', {
+							oldcards: data.cards,
+							newcards: data.forcards,
+							g: p1gdelta,
+						});
+						sockEmit(foesock, 'tradedone', {
+							oldcards: data.forcards,
+							newcards: data.cards,
+							g: p2gdelta,
+						});
+						user.pool = etgutil.mergedecks(
+							etgutil.removedecks(user.pool, data.cards),
+							data.forcards,
+						);
+						user.gold += p1gdelta;
+						foe.pool = etgutil.mergedecks(
+							etgutil.removedecks(foe.pool, data.forcards),
+							data.cards,
+						);
+						foe.gold += p2gdelta;
+						return pg.pool.query({
+							text:
+								'delete from trade_request where (user_id = $1 and for_user_id = $2) or (user_id = $2 and for_user_id = $1)',
+							values: [userId, foe.id],
+						});
+					}
+				}
+				await pg.pool.query({
+					text: `insert into trade_request (user_id, for_user_id, cards, g, forcards, forg, expire_at)
+values ($1, $2, $3, $4, $5, $6, now() + interval '1 hour')
+on conflict (user_id, for_user_id) do update set user_id = $1, for_user_id = $2, cards = $3, g = $4, forcards = $5, forg = $6, expire_at = now() + interval '1 hour'`,
+					values: [
+						userId,
+						foe.id,
+						data.cards,
+						data.g,
+						data.forcards,
+						data.forg,
+					],
+				});
+				sockEmit(foesock, 'offertrade', { f: u, c: data.cards, g: data.g });
+			});
 		}
 	},
 	passchange(data, user) {
@@ -711,7 +683,7 @@ from arena where user_id = $1`,
 			user.auth = '';
 			sockEmit(this, 'passchange', { auth: '' });
 		} else {
-			sutil.initsalt(user);
+			initsalt(user);
 			crypto.pbkdf2(data.p, user.salt, user.iter, 64, user.algo, (err, key) => {
 				if (!err) {
 					user.auth = key.toString('base64');
@@ -720,11 +692,23 @@ from arena where user_id = $1`,
 			});
 		}
 	},
+	challrecv(data) {
+		const foesock = Us.socks.get(data.f);
+		if (foesock?.readyState === 1) {
+			sockEmit(foesock, 'chat', {
+				u: data.u,
+				mode: 1,
+				msg: `You have sent a ${data.trade ? 'trade' : 'PvP'} request to ${
+					data.u
+				}!`,
+			});
+		}
+	},
 	chat(data) {
 		const { to } = data;
 		if (to) {
 			const sockto = Us.socks.get(to);
-			if (sockto && sockto.readyState === 1) {
+			if (sockto?.readyState === 1) {
 				sockEmit(sockto, 'chat', {
 					msg: data.msg,
 					mode: 2,
@@ -741,10 +725,11 @@ from arena where user_id = $1`,
 					msg: `${to} isn't here right now.\nFailed to deliver: ${data.msg}`,
 				});
 		} else {
-			genericChat(this, data);
+			data.x = 'chat';
+			broadcast(data);
 		}
 	},
-	async bzcancel(data, user, meta, userId) {
+	async bzcancel(data, user, userId) {
 		const code = data.c | 0;
 		const bids = await pg.pool.query({
 			text:
@@ -768,7 +753,7 @@ from arena where user_id = $1`,
 			pool: user.pool,
 		});
 	},
-	async bzbid(data, user, meta, userId) {
+	async bzbid(data, user, userId) {
 		data.price |= 0;
 		if (!data.price) return;
 		const add = {},
@@ -978,7 +963,7 @@ from arena where user_id = $1`,
 								x.rarity === bumprarity,
 						);
 					cardcode = (
-						card || RngMock.randomcard(false, x => x.rarity === bumprarity)
+						card ?? RngMock.randomcard(false, x => x.rarity === bumprarity)
 					).code;
 				}
 				newCards = etgutil.addcard(newCards, cardcode);
@@ -1000,251 +985,45 @@ from arena where user_id = $1`,
 			});
 		}
 	},
-	foecancel(data, user, info) {
-		if (info.duel) {
-			const foesock = Us.socks.get(info.duel);
-			if (foesock) {
-				const foemeta = sockmeta.get(foesock);
-				sockEmit(foesock, 'chat', {
-					mode: 1,
-					msg: `${data.u} has canceled the duel.`,
-				});
-				if (foemeta.duel === data.u) {
-					sockEmit(foesock, 'foeleft', { name: data.u });
-					delete foemeta.duel;
-				}
-			}
-			delete info.duel;
-			delete info.spectators;
-		}
-	},
-	matchconfig(data, user, info) {
-		const { match } = info;
-		if (!match) {
-			info.host = user.name;
-			info.match = {
-				room: new Set([user.name]),
-				invites: new Set(),
-				config: data.data,
-				data: new Map(),
-				set: data.set,
-			};
-			return;
-		}
-		match.config = data.data;
-		match.set = data.set;
-		for (const u of match.room) {
-			if (u !== user.name) {
-				const s = Us.socks.get(u);
-				sockEmit(s, 'matchconfig', {
-					data: match.config,
-					set: match.set,
-				});
-			}
-		}
-	},
-	matchinvite(data, user, info) {
-		let { match } = info;
-		const invitedsock = Us.socks.get(data.invite);
-		if (invitedsock) {
-			if (!match) {
-				info.host = user.name;
-				info.match = match = {
-					room: new Set([user.name]),
-					invites: new Set(),
-					config: [[{ idx: 1, user: user.name }]],
-					data: new Map(),
-				};
-			}
-			match.invites.add(data.invite);
-			sockEmit(invitedsock, 'matchinvite', { u: user.name });
-		} else {
-			sockEmit(this, 'chat', {
-				mode: 1,
-				msg: `${data.invite} isn't online`,
+	move(data, user, userId) {
+		return pg.trx(async sql => {
+			const usersResult = await sql.query({
+				text:
+					'select u.id, u.name from match_request mr join users u on mr.user_id = u.id where mr.game_id = $1',
+				values: [data.id],
 			});
-		}
-	},
-	matchcancel(data, user, info) {
-		const { match } = info;
-		if (match) {
-			for (const u of match.room) {
-				const s = Us.socks.get(u);
-				sockEmit(s, 'matchcancel');
-			}
-			delete info.match;
-		}
-	},
-	matchleave(data, user, info) {
-		const { host } = info;
-		if (!host) return;
-		const hostsock = Us.socks.get(host),
-			hostmeta = sockmeta.get(hostsock);
-		if (!hostmeta) return;
-		const { match } = hostmeta;
-		if (!match) return;
-		hostmeta.match.room.delete(user.name);
-		for (const u of hostmeta.match.room) {
-			const s = Us.socks.get(u);
-			sockEmit(s, 'foeleft', { name: user.name });
-		}
-	},
-	matchremove(data, user, info) {
-		const { match } = info;
-		if (match) {
-			for (const u of match.room) {
-				const s = Us.socks.get(u);
-				sockEmit(s, 'foeleft', { name: data.name });
-			}
-			delete info.match;
-		}
-	},
-	matchjoin(data, user, info) {
-		const hostsock = Us.socks.get(data.host),
-			hostmeta = sockmeta.get(hostsock);
-		if (!hostmeta) {
-			sockEmit(this, 'chat', {
-				mode: 1,
-				msg: `${data.host} isn't online`,
-			});
-			return;
-		}
-		const { match } = hostmeta;
-		if (!match) {
-			sockEmit(this, 'chat', {
-				mode: 1,
-				msg: `${data.host} isn't hosting`,
-			});
-			return;
-		}
-		if (!match.invites.delete(user.name)) {
-			sockEmit(this, 'chat', {
-				mode: 1,
-				msg: `${data.host} hasn't invited you`,
-			});
-			return;
-		}
-		info.host = data.host;
-		for (const group of match.config) {
-			for (const player of group) {
-				if (player.user === user.name) {
-					player.pending = 1;
-				}
-			}
-		}
-		for (const u of match.room) {
-			const s = Us.socks.get(u);
-			sockEmit(s, 'matchready', { name: user.name, pending: 1 });
-		}
-		match.room.add(user.name);
-		sockEmit(this, 'matchgive', {
-			groups: match.config,
-			set: match.set,
-		});
-	},
-	matchready(data, user, info) {
-		const { host } = info;
-		if (!host) {
-			sockEmit(this, 'chat', {
-				mode: 1,
-				msg: "You aren't in a lobby",
-			});
-			return;
-		}
-		const hostsock = Us.socks.get(host),
-			hostmeta = sockmeta.get(hostsock);
-		if (!hostmeta) {
-			sockEmit(this, 'chat', {
-				mode: 1,
-				msg: `${host} isn't online`,
-			});
-			return;
-		}
-		const { match } = hostmeta;
-		if (!match) {
-			sockEmit(this, 'chat', {
-				mode: 1,
-				msg: `${host} isn't hosting`,
-			});
-			return;
-		}
-		hostmeta.match.data.set(user.name, data.data);
-		for (const group of hostmeta.match.config) {
-			for (const player of group) {
-				if (player.user === user.name) {
-					delete player.pending;
-				}
-			}
-		}
-		for (const u of hostmeta.match.room) {
-			const s = Us.socks.get(u);
-			sockEmit(s, 'matchready', { name: user.name });
-		}
-	},
-	matchbegin(data, user, info) {
-		const hostmeta = info,
-			{ match } = hostmeta;
-		if (!match) {
-			sockEmit(this, 'chat', { mode: 1, msg: "You aren't hosting" });
-		}
-		const players = [];
-		let idx = 1;
-		for (const group of match.config) {
-			if (!group.length) continue;
-			const leader = idx;
-			for (const player of group) {
-				const pldata = {
-					...match.data.get(player.user),
-					name: player.user || 'AI',
-					user: player.user,
-					idx: idx++,
-					leader: leader,
-				};
-				if (player.deck) pldata.deck = player.deck;
-				if (player.markpower) pldata.markpower = player.markpower;
-				if (player.deckpower) pldata.deckpower = player.deckpower;
-				if (player.drawpower) pldata.drawpower = player.drawpower;
-				if (!player.user) pldata.ai = 1;
-				players.push(pldata);
-			}
-		}
-		const gameData = {
-			cardreward: '',
-			seed: (Math.random() * MAX_INT) | 0,
-			players: RngMock.shuffle(players),
-			set: match.set,
-		};
-		for (const u of match.room) {
-			const s = Us.socks.get(u);
-			sockEmit(s, 'matchbegin', { data: gameData });
-		}
-	},
-	move(data, user, info) {
-		const { host } = info;
-		if (!host) {
-			const { duel } = info;
-			if (duel) {
-				const foesock = Us.socks.get(duel);
-				sockEmit(foesock, 'move', data);
+			if (!usersResult.rows.some(row => row.id === userId)) {
+				sockEmit(this, { mode: 1, msg: "You aren't in that match" });
 				return;
 			}
-			sockEmit(this, { mode: 1, msg: "You aren't in a match" });
-		}
-		const hostsock = Us.socks.get(host),
-			hostmeta = sockmeta.get(hostsock),
-			match = hostmeta && hostmeta.match;
-		if (!match) {
-			sockEmit(this, { mode: 1, msg: `${host} isn't hosting` });
-		} else {
-			for (const u of match.room) {
-				if (u !== user.name) {
-					const s = Us.socks.get(u);
-					sockEmit(s, 'move', data);
+			await sql.query({
+				text:
+					"update games set moves = array_append(moves, $2), expire_at = now() + interval '1 hour' where id = $1",
+				values: [data.id, JSON.stringify(data.data)],
+			});
+			const msg = JSON.stringify({ x: 'move', data: data.data });
+			for (const row of usersResult.rows) {
+				console.log(row);
+				if (row.id !== userId) {
+					const sock = Us.socks.get(row.name);
+					if (sock?.readyState === 1) {
+						sock.send(msg);
+					}
 				}
 			}
+		});
+	},
+	async reloadmoves(data, user, userId) {
+		const movesResult = await pg.pool.query({
+			text:
+				'select g.moves from games g join match_request mr on mr.game_id = g.id join users u on u.id = mr.user_id where g.id = $1 and u.id = $2',
+			values: [data.id, userId],
+		});
+		if (movesResult.rows.length !== 0) {
+			sockEmit(this, 'reloadmoves', movesResult.rows[0]);
 		}
 	},
-	updateorig(data, user, meta, userId) {
+	updateorig(data, user, userId) {
 		return pg.trx(async sql => {
 			const result = await sql.query({
 				text:
@@ -1268,7 +1047,7 @@ from arena where user_id = $1`,
 			}
 		});
 	},
-	origadd(data, user, meta, userId) {
+	origadd(data, user, userId) {
 		return pg.trx(async sql => {
 			const result = await sql.query({
 				text:
@@ -1297,7 +1076,7 @@ from arena where user_id = $1`,
 	},
 };
 const sockEvents = {
-	login: login(sockEmit),
+	login: login,
 	async konglogin(data) {
 		const keyresult = await pg.pool.query({
 			text: `select val from strings where key = 'kongapi'`,
@@ -1316,7 +1095,7 @@ const sockEvents = {
 					const chunks = [];
 					res.on('data', chunk => chunks.push(chunk));
 					res.on('end', () => {
-						const json = sutil.parseJSON(Buffer.concat(chunks).toString());
+						const json = parseJSON(Buffer.concat(chunks).toString());
 						if (!json) {
 							sockEmit(this, 'login', {
 								err: 'Kong returned invalid JSON',
@@ -1336,7 +1115,7 @@ const sockEvents = {
 										auth: data.g,
 									});
 								});
-							return sockEvents.login.call(this, {
+							return login.call(this, {
 								u: name,
 								a: data.g,
 							});
@@ -1355,14 +1134,15 @@ const sockEvents = {
 			text: `select 1 from strings where key = 'GuestsBanned'`,
 		});
 		if (isBanned.rows.length === 0) {
+			data.x = 'chat';
 			data.guest = true;
 			data.u = `Guest_${data.u}`;
-			genericChat(this, data);
+			broadcast(data);
 		}
 	},
 	roll(data) {
 		const A = Math.min(data.A || 1, 99),
-			X = data.X || MAX_INT;
+			X = data.X || 0x100000000;
 		let sum = 0;
 		for (let i = 0; i < A; i++) {
 			sum += RngMock.upto(X) + 1;
@@ -1410,40 +1190,41 @@ const sockEvents = {
 		}
 	},
 	async arenatop(data) {
-		const obj = await pg.pool.query({
-			text: `select u.name, a.code, ($1 - a.day) "day", a.won, a.loss, a.score from arena a join users u on u.id = a.user_id where a.arena_id = $2 order by a."rank" limit 30`,
-			values: [sutil.getDay(), data.lv ? 2 : 1],
+		const { rows } = await pg.pool.query({
+			text: `select u.name, a.score, a.won, a.loss, ($1 - a.day) "day", a.code from arena a join users u on u.id = a.user_id where a.arena_id = $2 order by a."rank" limit 30`,
+			values: [getDay(), data.lv ? 2 : 1],
+			rowMode: 'array',
 		});
 		sockEmit(this, 'arenatop', {
-			top: obj.rows.map(row => [
-				row.name,
-				row.score,
-				row.won,
-				row.loss,
-				row.day,
-				row.code,
-			]),
+			top: rows,
 			lv: data.lv,
 		});
 	},
 	async wealthtop(data) {
-		const obj = await pg.pool.query({
-			text: `select name, wealth from users order by wealth desc limit 50`,
+		const { rows } = await pg.pool.query({
+			text: `select name, wealth from users order by wealth desc limit 60`,
+			rowMode: 'array',
 		});
-		const top = [];
-		for (const row of obj.rows) {
-			top.push(row.name, row.wealth);
-		}
-		sockEmit(this, 'wealthtop', { top });
+		sockEmit(this, 'wealthtop', { top: rows.flat() });
 	},
 	chatus(data) {
 		const thismeta = sockmeta.get(this);
 		if (data.hide !== undefined) thismeta.offline = data.hide;
-		if (data.want !== undefined) thismeta.wantpvp = data.want;
 		if (data.afk !== undefined) thismeta.afk = data.afk;
 	},
 	who(data) {
-		sockEmit(this, 'chat', { mode: 1, msg: activeUsers().join(', ') });
+		const activeusers = [];
+		for (const [name, sock] of Us.socks) {
+			if (sock.readyState === 1) {
+				const meta = sockmeta.get(sock);
+				if (meta) {
+					if (meta.offline) continue;
+					if (meta.afk) name += ' (afk)';
+					activeusers.push(meta.afk ? `${name} (afk)` : name);
+				}
+			}
+		}
+		sockEmit(this, 'chat', { mode: 1, msg: activeusers.join(', ') });
 	},
 	async bzread(data) {
 		const bids = await pg.pool.query({
@@ -1462,74 +1243,9 @@ const sockEvents = {
 		}
 		sockEmit(this, 'bzread', { bz });
 	},
-	challrecv(data) {
-		const foesock = Us.socks.get(data.f);
-		if (foesock && foesock.readyState === 1) {
-			const info = sockmeta.get(foesock),
-				foename = data.pvp ? info.duelwant : info.trade ? info.trade.foe : '';
-			sockEmit(foesock, 'chat', {
-				mode: 1,
-				msg: `You have sent a ${
-					data.pvp ? 'PvP' : 'trade'
-				} request to ${foename}!`,
-			});
-		}
-	},
-	cardchosen(data) {
-		const thismeta = sockmeta.get(this);
-		if (!thismeta.trade) {
-			sockEmit(this, { mode: 1, msg: "You aren't in a trade" });
-		}
-		const foe = Us.socks.get(thismeta.trade.foe);
-		sockEmit(foe, 'cardchosen', data);
-	},
 };
-function onSocketClose() {
-	const info = sockmeta.get(this);
-	sockmeta.set(this, {});
-	if (info) {
-		if (info.name) {
-			Us.socks.delete(info.name);
-		}
-		if (info.trade) {
-			const foesock = Us.socks.get(info.trade.foe);
-			if (foesock && foesock.readyState === 1) {
-				const foeinfo = sockmeta.get(foesock);
-				if (
-					foeinfo &&
-					foeinfo.trade &&
-					Us.socks.get(foeinfo.trade.foe) === this
-				) {
-					sockEmit(foesock, 'tradecanceled');
-					delete foeinfo.trade;
-				}
-			}
-		}
-		if (info.host) {
-			const hostinfo = sockmeta.get(info.host);
-			if (hostinfo) {
-				const { match } = hostinfo,
-					{ name } = info;
-				if (match && name) {
-					match.room.delete(name);
-					for (const u of match.room) {
-						const s = Us.socks.get(u);
-						sockEmit(s, 'foeleft', { name });
-					}
-				}
-			}
-		}
-		if (info.foe) {
-			const foeinfo = sockmeta.get(info.foe);
-			if (foeinfo && foeinfo.foe === this) {
-				sockEmit(info.foe, 'foeleft', { name: info.name });
-				delete foeinfo.foe;
-			}
-		}
-	}
-}
 async function onSocketMessage(rawdata) {
-	const data = sutil.parseJSON(rawdata);
+	const data = parseJSON(rawdata);
 	if (!data || typeof data !== 'object' || typeof data.x !== 'string') return;
 	console.log(data.u, data.x);
 	try {
@@ -1545,12 +1261,10 @@ async function onSocketMessage(rawdata) {
 					const [row] = result.rows;
 					if (data.a === row.auth) {
 						const user = await Us.load(u);
-						const meta = sockmeta.get(this);
-						meta.name = u;
 						Us.socks.set(u, this);
 						delete data.a;
 						const res = await Promise.resolve(
-							func.call(this, data, user, meta, row.id),
+							func.call(this, data, user, row.id),
 						);
 						if (res && func === usercmd[data.x]) {
 							Object.assign(user, res);
@@ -1567,7 +1281,7 @@ async function onSocketMessage(rawdata) {
 }
 function onSocketConnection(socket) {
 	sockmeta.set(socket, {});
-	socket.on('close', onSocketClose).on('message', onSocketMessage);
+	socket.on('message', onSocketMessage);
 }
 const app = (config.certs
 	? https.createServer(

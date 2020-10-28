@@ -306,6 +306,18 @@ Game.prototype.next = function (event) {
 	if (replay) this.set(this.id, 'replay', replay.concat([event]));
 	return nextHandler[event.x].call(this, event);
 };
+Game.prototype.replaceMoves = function (moves) {
+	const { disable } = Effect;
+	Effect.disable = true;
+	const newgame = new Game(this.data);
+	for (const move of moves) {
+		newgame.next(move);
+	}
+	this.props = newgame.props;
+	this.cache = newgame.cache;
+	this.effects = [];
+	Effect.disable = disable;
+};
 Game.prototype.expectedDamage = function (samples) {
 	const expectedDamage = new Int16Array(this.players.length);
 	if (!this.winner) {

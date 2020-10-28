@@ -181,7 +181,7 @@ export default connect(({ user }) => ({ user }))(
 				lefttext: [],
 				tooltip: null,
 				game: props.game,
-				username: props.user && props.user.name,
+				username: props.user.name,
 				player1: props.game.byUser(props.user ? props.user.name : ''),
 				goldreward: props.game.data.goldreward,
 				cardreward: props.game.data.cardreward,
@@ -189,10 +189,7 @@ export default connect(({ user }) => ({ user }))(
 		}
 
 		static getDerivedStateFromProps(props, state) {
-			if (
-				props.game !== state.game ||
-				(props.user && props.user.name) !== state.username
-			) {
+			if (props.game !== state.game || props.user.name !== state.username) {
 				const player1 = props.game.byUser(props.user ? props.user.name : '');
 				return {
 					game: props.game,

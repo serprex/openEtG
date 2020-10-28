@@ -20,7 +20,6 @@ const ChannelTab = connect(({ opts }) => ({ selected: opts.channel }))(
 );
 
 export default connect(state => ({
-	wantpvp: state.opts.wantpvp,
 	offline: state.opts.offline,
 	afk: state.opts.afk,
 	showRightpane: !state.opts.hideRightpane,
@@ -63,17 +62,6 @@ export default connect(state => ({
 						}}
 					/>
 					Afk
-				</label>{' '}
-				<label>
-					<input
-						type="checkbox"
-						checked={props.wantpvp}
-						onChange={e => {
-							sock.emit({ x: 'chatus', want: e.target.checked });
-							props.dispatch(store.setOpt('wantpvp', e.target.checked));
-						}}
-					/>
-					Seeking PvP
 				</label>
 				<div>
 					<ChannelTab channel="Main" />

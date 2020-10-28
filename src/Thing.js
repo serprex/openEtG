@@ -490,6 +490,7 @@ Thing.prototype.play = function (tgt, fromhand) {
 		this.castSpell(tgt ? tgt.id : 0, this.getSkill('cast'));
 	} else {
 		sfx.playSound(card.type <= etg.Permanent ? 'permPlay' : 'creaturePlay');
+		this.casts = 0;
 		if (card.type === etg.Creature) owner.addCrea(this, fromhand);
 		else if (card.type === etg.Permanent) owner.addPerm(this, fromhand);
 		else if (card.type === etg.Weapon) owner.setWeapon(this, fromhand);

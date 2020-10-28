@@ -74,10 +74,33 @@ create table stats (
 	players json[] not null,
 	"when" timestamp not null default now()
 );
+create table games (
+	id bigserial not null primary key,
+	data json not null,
+	moves json[] not null,
+	expire_at timestamp not null
+);
+create table trade_request (
+	user_id bigint not null references users(id),
+	for_user_id bigint not null references users(id),
+	cards text not null,
+	g int not null,
+	forcards text,
+	forg int,
+	expire_at timestamp not null,
+	unique (user_id, for_user_id)
+);
+create table match_request (
+	game_id bigint not null references games(id),
+	user_id bigint not null references users(id),
+	accepted boolean not null,
+	unique (game_id, user_id)
+);
 
 insert into roles values (1, 'Codesmith'), (2, 'Mod');
 insert into arena_types values (1, 'A1'), (2, 'A2');
 insert into user_data_types values (1, 'open'), (2, 'orig');
+
 create index ix_users_wealth on users (wealth);
 create index ix_users_name on users using hash (name);
 create index ix_roles_val on roles using hash (val);

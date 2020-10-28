@@ -755,7 +755,7 @@ export default connect(({ user, opts }) => ({
 					pl => pl.user && pl.user !== this.props.user.name,
 				)
 			) {
-				sock.userEmit('move', { data });
+				sock.userEmit('move', { id: this.props.gameid, data });
 			}
 			if (data.x === 'cast' || data.x === 'end') {
 				let play;
@@ -1142,19 +1142,15 @@ export default connect(({ user, opts }) => ({
 		resignClick = () => {
 			if (this.props.replay) {
 				this.props.dispatch(store.doNav(import('./Challenge.js'), {}));
-				return;
-			}
-			if (this.state.resigning) {
-				if (this.props.game.get(this.state.player1).get('resigning')) {
-					this.gotoResult();
-				} else {
-					this.applyNext({ x: 'resign', c: this.state.player1 });
-					if (this.props.game.winner) {
-						this.gotoResult();
-					}
-				}
-			} else {
+			} else if (
+				this.props.game.winner ||
+				this.props.game.get(this.state.player1).get('resigning')
+			) {
+				this.gotoResult();
+			} else if (!this.state.resigning) {
 				this.setState({ resigning: true });
+			} else {
+				this.applyNext({ x: 'resign', c: this.state.player1 });
 			}
 		};
 
@@ -1268,6 +1264,8 @@ export default connect(({ user, opts }) => ({
 				) {
 					this.applyNext({ x: 'foe', t: this.state.player2.id });
 				}
+			} else if (ch === 'l') {
+				sock.userEmit('reloadmoves', { id: this.props.gameid });
 			} else if (~(chi = '[]'.indexOf(ch))) {
 				this.setState(state => {
 					const { players } = this.props.game,
@@ -1304,14 +1302,20 @@ export default connect(({ user, opts }) => ({
 			}
 			dispatch(
 				store.setCmds({
-					move: ({ data }) => this.applyNext(data, true),
-					foeleft: ({ data }) => {
-						const { players } = game.data;
-						for (let i = 0; i < players.length; i++) {
-							if (players[i].user === data.name) {
-								this.applyNext({ x: 'resign', c: game.players[i] }, true);
-							}
+					move: ({ data }) => {
+						const { game } = this.props;
+						if (
+							(data.c && !game.get(data.c)) ||
+							(data.t && !game.get(data.t))
+						) {
+							sock.userEmit('reloadmoves', { id: this.props.gameid });
+						} else {
+							this.applyNext(data, true);
 						}
+					},
+					reloadmoves: ({ moves }) => {
+						game.replaceMoves(moves);
+						this.forceUpdate();
 					},
 				}),
 			);
@@ -1319,7 +1323,6 @@ export default connect(({ user, opts }) => ({
 		}
 
 		componentDidMount() {
-			sock.cancelTrade();
 			if (!this.props.replay) {
 				if (!this.props.game.data.spectate) {
 					document.addEventListener('keydown', this.onkeydown);

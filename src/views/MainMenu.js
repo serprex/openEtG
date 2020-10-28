@@ -39,7 +39,7 @@ const tipjar = [
 	'Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm',
 	"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
 	'Cards in packs have a (45/packsize)% chance to increment rarity',
-	'At Wealth T50 you can see which players have the highest wealth. Wealth is a combination of current gold & cardpool',
+	'Wealth T60 is a leaderboard for player wealth. Wealth is a combination of current gold & cardpool',
 ];
 
 function Rect(props) {
@@ -531,7 +531,7 @@ export default connect(({ user, opts }) => ({
 							<TitleText text="Leaderboards" />
 							<input
 								type="button"
-								value="Wealth T50"
+								value="Wealth T60"
 								onClick={() => {
 									this.props.dispatch(store.doNav(import('./WealthTop.js')));
 								}}
@@ -700,14 +700,21 @@ export default connect(({ user, opts }) => ({
 							<input
 								type="button"
 								value="Trade"
-								onClick={foe =>
-									sock.offerTrade(
-										typeof foe === 'string' ? foe : self.props.foename,
-									)
-								}
-								onMouseOver={this.mkSetTip(
-									'Initiate trading cards with another player',
-								)}
+								onClick={() => {
+									sock.userEmit('offertrade', {
+										f: self.props.foename,
+										cards: '',
+										g: 0,
+										forcards: null,
+										forg: null,
+									});
+									this.props.dispatch(
+										store.doNav(import('./Trade.js'), {
+											foe: self.props.foename,
+										}),
+									);
+								}}
+								onMouseOver={this.mkSetTip('Trade cards/$ with another player')}
 								style={{
 									position: 'absolute',
 									left: '10px',

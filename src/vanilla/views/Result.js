@@ -14,20 +14,17 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 			super(props);
 			this.state = {
 				game: props.game,
-				username: props.user && props.user.name,
+				username: props.user.name,
 				player1: props.game.byUser(props.user ? props.user.name : ''),
 			};
 		}
 
 		static getDerivedStateFromProps(props, state) {
-			if (
-				props.game !== state.game ||
-				(props.user && props.user.name) !== state.username
-			) {
+			if (props.game !== state.game || props.user.name !== state.username) {
 				const player1 = props.game.byUser(props.user ? props.user.name : '');
 				return {
 					game: props.game,
-					username: props.user && props.user.name,
+					username: props.user.name,
 					player1,
 				};
 			}

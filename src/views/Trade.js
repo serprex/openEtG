@@ -25,9 +25,10 @@ export default connect(({ user }) => ({ user }))(
 		}
 
 		componentDidMount() {
+			sock.userEmit('reloadtrade', { f: this.props.foe });
 			this.props.dispatch(
 				store.setCmds({
-					cardchosen: data => {
+					offertrade: data => {
 						this.setState({
 							offer: etgutil.decodedeck(data.c),
 							gopher: data.g | 0,
@@ -37,17 +38,19 @@ export default connect(({ user }) => ({ user }))(
 					tradedone: data => {
 						this.props.dispatch(
 							store.updateUser({
-								pool: etgutil.removedecks(
-									etgutil.mergedecks(this.props.user.pool, data.newcards),
-									data.oldcards,
+								pool: etgutil.mergedecks(
+									etgutil.removedecks(this.props.user.pool, data.oldcards),
+									data.newcards,
 								),
 								gold: this.props.user.gold + data.g,
 							}),
 						);
 						this.props.dispatch(store.doNav(import('./MainMenu.js')));
 					},
-					tradecanceled: () => {
-						this.props.dispatch(store.doNav(import('./MainMenu.js')));
+					tradecanceled: data => {
+						if (data.u === this.props.foe) {
+							this.props.dispatch(store.doNav(import('./MainMenu.js')));
+						}
 					},
 				}),
 			);
@@ -73,39 +76,24 @@ export default connect(({ user }) => ({ user }))(
 							onClick={
 								this.state.confirm
 									? () => {
-											if (this.state.offer.length) {
-												sock.userEmit('confirmtrade', {
-													cards: etgutil.encodedeck(this.state.deck),
-													g: this.state.gold,
-													oppcards: etgutil.encodedeck(this.state.offer),
-													gopher: this.state.gopher,
-												});
-												this.setState({ confirm: 2 });
-											} else {
-												this.props.dispatch(
-													store.chatMsg(
-														'Wait for your friend to choose!',
-														'System',
-													),
-												);
-											}
+											sock.userEmit('offertrade', {
+												f: this.props.foe,
+												cards: etgutil.encodedeck(this.state.deck),
+												g: this.state.gold,
+												forcards: etgutil.encodedeck(this.state.offer),
+												forg: this.state.gopher,
+											});
+											this.setState({ confirm: 2 });
 									  }
 									: () => {
-											if (this.state.deck.length) {
-												sock.emit({
-													x: 'cardchosen',
-													c: etgutil.encodedeck(this.state.deck),
-													g: this.state.gold,
-												});
-												this.setState({ confirm: 1 });
-											} else {
-												this.props.dispatch(
-													store.chatMsg(
-														'You have to choose at least a card!',
-														'System',
-													),
-												);
-											}
+											sock.userEmit('offertrade', {
+												f: this.props.foe,
+												cards: etgutil.encodedeck(this.state.deck),
+												g: this.state.gold,
+												forcards: null,
+												forg: null,
+											});
+											this.setState({ confirm: 1 });
 									  }
 							}
 							style={{
@@ -171,7 +159,7 @@ export default connect(({ user }) => ({ user }))(
 						type="button"
 						value="Cancel"
 						onClick={() => {
-							sock.userEmit('canceltrade');
+							sock.userEmit('canceltrade', { f: this.props.foe });
 							this.props.dispatch(store.doNav(import('./MainMenu.js')));
 						}}
 						style={{

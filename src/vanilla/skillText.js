@@ -43,7 +43,7 @@ export const skillText = {
 	v_disshield: 'Absorb damage. Consume 1:1 per 3 damage absorbed',
 	v_divinity: 'Add 24 to maximum health if mark 1:8, otherwise 16 & heal same',
 	v_dive: 'Double strength until next attack',
-	v_drainlife: 'Drattins 2HP from target. Increment drain per 5:11 owned',
+	v_drainlife: 'Drain 2HP from target, plus an extra 2HP per 10:11 remaining',
 	v_dryspell: [
 		'Deal 1 damage to all creatures. Gain 1:7 per damage dealt. Removes cloak',
 		"Deal 2 damage to all opponent's creatures. Gain 1:7 per damage dealt. Removes cloak",
@@ -196,7 +196,7 @@ export const skillText = {
 	v_sskin: 'Increment maximum HP per 1:4 owned. Heal same',
 	v_steal: 'Steal target permanent',
 	v_steam: 'Gain 5|0',
-	v_stoneform: 'Gain 0|20 & become a golem',
+	v_stoneform: 'Gain 0|20',
 	v_storm2: "Deals 2 damage to foe's creatures. Removes cloak",
 	v_storm3: "Deals 3 damage to foe's creatures. Removes cloak",
 	v_swarm: 'Increment largeness per scarab',

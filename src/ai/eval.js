@@ -260,7 +260,6 @@ const SkillsValues = {
 	photosynthesis: 2,
 	plague: 5,
 	platearmor: 1,
-	poisonfoe: 1.4,
 	'poison 1': 1,
 	'poison 2': 2,
 	'poison 3': 3,

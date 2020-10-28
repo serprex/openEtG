@@ -6,27 +6,51 @@ export const users = new Map();
 export const socks = new Map();
 export function storeUsers() {
 	const queries = [];
-	for (const [u, user] of users) {
-		if (user.pool || user.accountbound) {
+	for (const user of users.values()) {
+		if (user.id) {
 			queries.push(save(user));
 		}
 	}
 	return Promise.all(queries);
 }
+
+function clearTradeRequests() {
+	return pg.pool.query({
+		text: 'delete from trade_request where expire_at < now()',
+	});
+}
+function clearMatchRequests() {
+	return pg.pool.query({
+		text: `with expiredids (id) as (select id from games where expire_at < now())
+, requests as (delete from match_request mr where exists (select * from expiredids eg where eg.id = mr.game_id))
+delete from games g where exists (select * from expiredids eg where eg.id = g.id)`,
+	});
+}
+
 const usergcloop = setInterval(
 	() =>
-		storeUsers().then(() => {
-			// Clear inactive users
-			for (const u of users.keys()) {
-				if (usergc.delete(u)) {
-					users.delete(u);
-				} else {
-					usergc.add(u);
+		Promise.all([
+			clearTradeRequests(),
+			clearMatchRequests(),
+			storeUsers().then(() => {
+				// Clear inactive users
+				for (const [u, sock] of socks) {
+					if (sock.readyState > 1) {
+						socks.delete(u);
+					}
 				}
-			}
-		}),
+				for (const u of users.keys()) {
+					if (usergc.delete(u)) {
+						users.delete(u);
+					} else {
+						usergc.add(u);
+					}
+				}
+			}),
+		]).catch(e => console.error(e)),
 	300000,
 );
+
 export function stop() {
 	clearInterval(usergcloop);
 	return storeUsers();

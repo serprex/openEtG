@@ -15,19 +15,20 @@ const buffer = [];
 let socket = new WebSocket(endpoint),
 	attempts = 0,
 	attemptTimeout = 0,
-	pvp = null,
-	trade = null;
+	pvp = null;
 const sockEvents = {
-	clear: () => store.store.dispatch(store.clearChat('Main')),
-	passchange: data => {
+	clear() {
+		store.store.dispatch(store.clearChat('Main'));
+	},
+	passchange(data) {
 		store.store.dispatch(store.updateUser({ auth: data.auth }));
 		store.store.dispatch(store.chatMsg('Password updated', 'System'));
 	},
-	mute: data => {
+	mute(data) {
 		store.store.dispatch(store.mute(data.m));
 		store.store.dispatch(store.chatMsg(data.m + ' has been muted', 'System'));
 	},
-	roll: data => {
+	roll(data) {
 		store.store.dispatch(
 			store.chat(
 				<div style={{ color: '#090' }}>
@@ -41,7 +42,7 @@ const sockEvents = {
 			),
 		);
 	},
-	chat: data => {
+	chat(data) {
 		const state = store.store.getState();
 		if (state.opts.muteall) {
 			if (!data.mode) return;
@@ -106,7 +107,7 @@ const sockEvents = {
 			),
 		);
 	},
-	foearena: data => {
+	foearena(data) {
 		const { user } = store.store.getState();
 		const game = new Game({
 			players: RngMock.shuffle([
@@ -147,66 +148,54 @@ const sockEvents = {
 		});
 		store.store.dispatch(store.doNav(import('./views/Match.js'), { game }));
 	},
-	tradegive: data => {
-		if (trade) {
-			trade = null;
-			store.store.dispatch(store.doNav(import('./views/Trade.js')));
-		}
-	},
-	pvpgive: data => {
+	pvpgive(data) {
 		if (pvp) {
 			pvp = null;
 			store.store.dispatch(
 				store.doNav(import('./views/Match.js'), {
+					gameid: data.id,
 					game: new Game(data.data),
 				}),
 			);
 		}
 	},
-	matchinvite: data => {
-		store.store.dispatch(
-			store.chat(
-				<div
-					style={{ cursor: 'pointer', color: '#69f' }}
-					onClick={() => userEmit('matchjoin', { host: data.u })}>
-					{`${data.u} invites you`}
-				</div>,
-			),
-		);
-	},
-	matchgive: data => {
-		store.store.dispatch(
-			store.doNav(import('./views/Challenge.js'), {
-				groups: data.groups,
-				set: data.set,
-			}),
-		);
-	},
-	challenge: data => {
+	challenge(data) {
 		store.store.dispatch(
 			store.chat(
 				<div
 					style={{ cursor: 'pointer', color: '#69f' }}
 					onClick={() => {
-						if (data.pvp) {
-							sendChallenge(data.f, data.orig, data.deckcheck);
-						} else {
-							userEmit('tradewant', { f: (trade = data.f) });
-						}
+						sendChallenge(data.f, data.set, data.deckcheck);
 					}}>
-					{`${data.f} offers to ${data.pvp ? 'duel' : 'trade with'} you!`}
-					{data.orig && <i> (in Legacy mode)</i>}
+					{`${data.f} offers to duel you!`}
+					{data.set && <i> (in Legacy mode)</i>}
 					{!data.deckcheck && <i> (without deck checks)</i>}
 				</div>,
 			),
 		);
-		emit({ x: 'challrecv', f: data.f, pvp: data.pvp });
+		userEmit({ x: 'challrecv', f: data.f });
 	},
-	bzgive: data => {
+	offertrade(data) {
+		store.store.dispatch(
+			store.chat(
+				<div
+					style={{ cursor: 'pointer', color: '#69f' }}
+					onClick={() =>
+						store.store.dispatch(
+							store.doNav(import('./views/Trade.js'), { foe: data.f }),
+						)
+					}>
+					{`${data.f} offers to trade with you!`}
+				</div>,
+			),
+		);
+		userEmit('challrecv', { f: data.f, trade: 1 });
+	},
+	bzgive(data) {
 		store.store.dispatch(store.userCmd(data.g ? 'addgold' : 'addcards', data));
 		store.store.dispatch(store.chatMsg(data.msg, 'System'));
 	},
-	addpools: data => {
+	addpools(data) {
 		store.store.dispatch(store.userCmd('addcards', { c: data.c }));
 		store.store.dispatch(store.userCmd('addbound', { c: data.b }));
 		store.store.dispatch(store.chatMsg(data.msg, 'System'));
@@ -216,7 +205,7 @@ socket.onmessage = function (msg) {
 	const data = JSON.parse(msg.data),
 		state = store.store.getState();
 	if (data.u && state.muted.has(data.u)) return;
-	const func = sockEvents[data.x] ?? state.cmds[data.x];
+	const func = state.cmds[data.x] ?? sockEvents[data.x];
 	if (func) func.call(this, data);
 };
 socket.onopen = function () {
@@ -226,13 +215,13 @@ socket.onopen = function () {
 		attemptTimeout = 0;
 	}
 	const { opts } = store.store.getState();
-	if (opts.offline || opts.wantpvp || opts.afk)
+	if (opts.offline || opts.afk) {
 		emit({
 			x: 'chatus',
 			hide: !!opts.offline,
-			wantpvp: !!opts.wantpvp,
 			afk: !!opts.afk,
 		});
+	}
 	buffer.forEach(this.send, this);
 	buffer.length = 0;
 	store.store.dispatch(store.chatMsg('Connected', 'System'));
@@ -291,17 +280,12 @@ export function sendChallenge(foe, orig = false, deckcheck = true) {
 		store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
 		return;
 	}
-	const msg = { f: foe, deck, deckcheck };
-	userEmit(orig ? 'origfoewant' : 'foewant', msg);
+	const msg = {
+		f: foe,
+		deck: orig ? deck : undefined,
+		set: orig ? 'Original' : undefined,
+		deckcheck,
+	};
+	userEmit(orig ? 'foewant' : 'foewant', msg);
 	pvp = foe;
-}
-export function offerTrade(f) {
-	trade = f;
-	userEmit('tradewant', { f });
-}
-export function cancelTrade() {
-	if (trade) {
-		trade = null;
-		userEmit('canceltrade');
-	}
 }

@@ -11,10 +11,6 @@ export default class Skill {
 		this.hash = null;
 	}
 
-	get castName() {
-		return this.name[0];
-	}
-
 	toString() {
 		return this.name.join(' ');
 	}

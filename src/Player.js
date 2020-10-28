@@ -212,8 +212,8 @@ Player.prototype.init = function (data) {
 		this.handIds = [];
 		const toHand2 = deckIds.splice(0, 7);
 		this.deckIds = deckIds;
-		for (let i = 0; i < 7; i++) {
-			this.addCard(toHand2[i]);
+		for (const id of toHand2) {
+			this.addCard(id);
 		}
 	}
 	return this;
@@ -491,7 +491,7 @@ Player.prototype.v_endturn = function (discard) {
 				cr.setStatus('salvaged', 0);
 			}
 			const cast = cr.getSkill('cast');
-			if (cast && cast.castName === 'v_dshield') {
+			if (cast && cast.toString() === 'v_dshield') {
 				cr.setStatus('immaterial', 0);
 				cr.setStatus('psionic', 0);
 			}
