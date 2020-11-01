@@ -447,7 +447,7 @@ export default connect(({ user }) => ({ user }))(
 					this.state.player1.maxhp,
 					(state.goldreward | 0) - (game.data.cost | 0),
 					state.cardreward || '-',
-					userutil.calcWealth(state.cardreward),
+					userutil.calcWealth(Cards, state.cardreward),
 					winner ? (this.props.streakback ?? 0) + 1 : 0,
 					streakrate,
 				];

@@ -1,7 +1,7 @@
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 
-import { store, chatMsg } from '../store.js';
+import { store, chatMsg, doNav } from '../store.js';
 
 let lastError = 0;
 window.onerror = function (...args) {
@@ -15,13 +15,12 @@ window.onerror = function (...args) {
 import { emit } from '../sock.js';
 emit({ x: 'motd' });
 
-import('../views/App.js').then(App =>
-	render(
-		<Provider store={store}>
-			<App.default />
-		</Provider>,
-		document.getElementById('leftpane'),
-	),
+import App from '../views/App.js';
+render(
+	<Provider store={store}>
+		<App />
+	</Provider>,
+	document.getElementById('leftpane'),
 );
 import('../views/Rightpane.js').then(Rightpane =>
 	render(

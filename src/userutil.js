@@ -1,4 +1,3 @@
-import Cards from './Cards.js';
 import * as etgutil from './etgutil.js';
 
 export const rewardwords = {
@@ -37,7 +36,7 @@ export function sellValue(card) {
 export function arenaCost(lv) {
 	return pveCostReward[lv ? 10 : 8];
 }
-export function calcWealth(cardpool, isDecoded) {
+export function calcWealth(Cards, cardpool, isDecoded) {
 	if (!cardpool) return 0;
 	let wealth = 0;
 	function wealthIter(code, count) {

@@ -27,6 +27,9 @@ module.exports = {
 			chunks: 'all',
 		},
 	},
+	performance: {
+		hints: false,
+	},
 	module: {
 		rules: [
 			{

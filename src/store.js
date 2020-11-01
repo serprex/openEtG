@@ -4,6 +4,7 @@ import { createStore, applyMiddleware } from 'redux';
 import * as usercmd from './usercmd.js';
 import * as sfx from './audio.js';
 import * as etgutil from './etgutil.js';
+import Login from './views/Login.js';
 
 const opts = { channel: 'Main' };
 let hasLocalStorage = true;
@@ -171,7 +172,7 @@ export const store = createStore(
 		return state;
 	},
 	{
-		nav: { key: 0 },
+		nav: { view: Login, props: undefined, key: 0 },
 		opts,
 		cmds: {},
 		chat: new Map(),

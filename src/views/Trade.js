@@ -121,7 +121,8 @@ export default connect(({ user }) => ({ user }))(
 					/>
 					<Components.Text
 						text={`${
-							this.state.gold + userutil.calcWealth(this.state.deck, true)
+							this.state.gold +
+							userutil.calcWealth(Cards, this.state.deck, true)
 						}$`}
 						style={{
 							position: 'absolute',
@@ -139,7 +140,8 @@ export default connect(({ user }) => ({ user }))(
 					/>
 					<Components.Text
 						text={`${
-							this.state.gopher + userutil.calcWealth(this.state.offer, true)
+							this.state.gopher +
+							userutil.calcWealth(Cards, this.state.offer, true)
 						}$`}
 						style={{
 							position: 'absolute',

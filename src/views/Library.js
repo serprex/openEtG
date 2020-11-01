@@ -106,7 +106,7 @@ export default class Library extends Component {
 						whiteSpace: 'pre',
 					}}>
 					{`Wealth ${
-						this.state.gold + Math.round(userutil.calcWealth(cardpool))
+						this.state.gold + Math.round(userutil.calcWealth(Cards, cardpool))
 					}\nGold ${this.state.gold}`}
 				</span>
 				<span

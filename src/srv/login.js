@@ -8,6 +8,7 @@ import aiDecks from '../Decks.json';
 import * as etgutil from '../etgutil.js';
 import RngMock from '../RngMock.js';
 import * as userutil from '../userutil.js';
+import Cards from '../Cards.js';
 const pbkdf2 = util.promisify(crypto.pbkdf2);
 
 async function loginRespond(socket, user, pass, authkey) {
@@ -83,8 +84,10 @@ async function loginRespond(socket, user, pass, authkey) {
 				let bazaarWealth = 0;
 				for (const bid of bids.rows) {
 					if (bid.p < 0) {
-						bazaarWealth +=
-							userutil.calcWealth('01' + etgutil.encodeCode(bid.code)) * bid.q;
+						const card = Cards.Codes[bid.code];
+						if (card) {
+							bazaarWealth += userutil.cardValue(card) * bid.q;
+						}
 					} else {
 						bazaarWealth += bid.p * bid.q;
 					}
@@ -95,7 +98,7 @@ async function loginRespond(socket, user, pass, authkey) {
 					values: [
 						user.id,
 						user.gold +
-							Math.round(bazaarWealth + userutil.calcWealth(user.pool)),
+							Math.round(bazaarWealth + userutil.calcWealth(Cards, user.pool)),
 						user.auth,
 						user.salt,
 						user.iter,

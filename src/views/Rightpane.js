@@ -5,18 +5,25 @@ import * as sock from '../sock.js';
 import * as store from '../store.js';
 import parseChat from '../parseChat.js';
 
-const ChannelTab = connect(({ opts }) => ({ selected: opts.channel }))(
-	function ChannelTab(props) {
-		return (
-			<span
-				className={props.selected === props.channel ? 'tabsel' : 'tab'}
-				onClick={e =>
-					props.dispatch(store.setOptTemp('channel', props.channel))
-				}>
-				{props.channel}
-			</span>
-		);
-	},
+const ChannelTab = connect(({ opts }, props) => ({
+	className: opts.channel === props.channel ? 'tabsel' : 'tab',
+}))(function ChannelTab(props) {
+	return (
+		<span
+			className={props.className}
+			onClick={e => props.dispatch(store.setOptTemp('channel', props.channel))}>
+			{props.channel}
+		</span>
+	);
+});
+const channelTabs = (
+	<div>
+		<ChannelTab channel="Main" />
+		<ChannelTab channel="System" />
+		<ChannelTab channel="Stats" />
+		<ChannelTab channel="Packs" />
+		<ChannelTab channel="Replay" />
+	</div>
 );
 
 export default connect(state => ({
@@ -63,13 +70,7 @@ export default connect(state => ({
 					/>
 					Afk
 				</label>
-				<div>
-					<ChannelTab channel="Main" />
-					<ChannelTab channel="System" />
-					<ChannelTab channel="Stats" />
-					<ChannelTab channel="Packs" />
-					<ChannelTab channel="Replay" />
-				</div>
+				{channelTabs}
 				<Chat channel={props.channel} />
 				<textarea
 					className="chatinput"
