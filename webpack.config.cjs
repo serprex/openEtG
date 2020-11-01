@@ -18,11 +18,15 @@ module.exports = {
 	},
 	output: {
 		path: path.resolve(__dirname, 'bundle'),
-		filename: '[name].js',
-		chunkFilename: '[name].js',
+		filename: 'hash/[contenthash].js',
+		chunkFilename: 'hash/[contenthash].js',
+		webassemblyModuleFilename: 'hash/[hash].wasm',
 		sourceMapFilename: '[name].js.map',
+		hashFunction: 'sha512',
+		hashDigestLength: 64,
 	},
 	optimization: {
+		chunkIds: 'deterministic',
 		splitChunks: {
 			chunks: 'all',
 		},

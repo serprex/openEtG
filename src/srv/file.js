@@ -60,7 +60,10 @@ export default async function (url) {
 	});
 	stat.mtime.setMilliseconds(0);
 	return {
-		head: { 'Content-Type': contentType },
+		head: {
+			'Content-Type': contentType,
+			'Cache-Control': url.startsWith('hash/') ? 'immutable' : 'no-cache',
+		},
 		date: stat.mtime,
 		buf,
 	};
