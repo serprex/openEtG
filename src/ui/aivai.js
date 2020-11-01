@@ -58,20 +58,17 @@ function fightItOut() {
 	}
 	const decks = deckeles.map(item => {
 		const deckstr = item.value.trim();
-		if (deckstr.charAt(3) === ' ') {
-			return etgutil.encodedeck(
-				deckstr.split(' ').map(x => parseInt(x, 32) - 4000),
-			);
-		}
-		return deckstr;
+		return deckstr.charAt(3) === ' '
+			? etgutil.encodedeck(
+					deckstr.split(' ').map(x => {
+						const code = parseInt(x, 32);
+						return ~etgutil.fromTrueMark(code) ? code : code - 4000;
+					}),
+			  )
+			: deckstr;
 	});
-	let set = undefined;
-	for (const [code, count] of etgutil.iterraw(decks[0])) {
-		if (code < 5000) {
-			set = 'Original';
-			break;
-		}
-	}
+	const set =
+		parseInt(decks[0].slice(2, 5), 32) < 5000 ? 'Original' : undefined;
 	result.textContent = '';
 	replay.textContent = '';
 	const cmds = {

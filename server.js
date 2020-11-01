@@ -15,6 +15,7 @@ import qs from 'querystring';
 import ws from 'ws';
 import * as etg from './src/etg.js';
 import Cards from './src/Cards.js';
+import OrigCards from './src/vanilla/Cards.js';
 import RngMock from './src/RngMock.js';
 import * as etgutil from './src/etgutil.js';
 import * as usercmd from './src/usercmd.js';
@@ -1051,7 +1052,7 @@ on conflict (user_id, for_user_id) do update set user_id = $1, for_user_id = $2,
 		return pg.trx(async sql => {
 			const result = await sql.query({
 				text:
-					'select data from user_data where user_id = $1 and type_id = 2 for update',
+					'select id, data from user_data where user_id = $1 and type_id = 2 for update',
 				values: [userId],
 			});
 			if (result.rows.length) {
@@ -1059,11 +1060,10 @@ on conflict (user_id, for_user_id) do update set user_id = $1, for_user_id = $2,
 				let pool = row.pool;
 				if (data.pool) pool = etgutil.mergedecks(pool, data.pool);
 				if (data.rmpool) pool = etgutil.removedecks(pool, data.rmpool);
-				return await sql.query({
-					text:
-						'update user_data set data = $2 where user_id = $1 and type_id = 2',
+				await sql.query({
+					text: 'update user_data set data = $2 where id = $1',
 					values: [
-						userId,
+						result.rows[0].id,
 						{
 							...row,
 							electrum: row.electrum + (data.electrum | 0),
@@ -1071,6 +1071,114 @@ on conflict (user_id, for_user_id) do update set user_id = $1, for_user_id = $2,
 						},
 					],
 				});
+			}
+		});
+	},
+	origimport(data, user, userId) {
+		return pg.trx(async sql => {
+			await sql.query({ text: 'lock original_import in row exclusive mode' });
+			const [existingImport, alreadyImport] = await Promise.all([
+				sql.query({
+					text:
+						'select u.name from original_import oi join user_data ud on ud.id = oi.user_data_id join users u on u.id = ud.user_id where oi.name = $1 and u.id != $2',
+					values: [data.name, userId],
+				}),
+				sql.query({
+					text:
+						'select oi.name from original_import oi join user_data ud on ud.id = oi.user_data_id join users u on u.id = ud.user_id where oi.name != $1 and u.id = $2',
+					values: [data.name, userId],
+				}),
+			]);
+			if (existingImport.rows.length !== 0) {
+				return sockEmit(this, 'chat', {
+					msg: `${data.name} already imported to ${existingImport.rows[0].name}`,
+					mode: 1,
+				});
+			}
+			if (alreadyImport.rows.length !== 0) {
+				return sockEmit(this, 'chat', {
+					msg: `Your account is already bound to ${alreadyImport.rows[0].name}`,
+					mode: 1,
+				});
+			}
+			const reqdata = `user=${encodeURIComponent(
+				data.name,
+			)}&psw=${encodeURIComponent(data.pass)}&errorcode=%2D1`;
+			const opts = await new Promise(resolve =>
+				http
+					.request(
+						'http://www.elementsthegame.com/testo5.php',
+						{
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded',
+								'Content-Length': reqdata.length,
+								Origin: 'http://elementsthegame.com',
+								Referrer: 'http://elementsthegame.com/elt1327.swf',
+							},
+						},
+						res => {
+							const chunks = [];
+							res.on('error', e => console.error(e.message));
+							res.on('data', chunk => chunks.push(chunk));
+							res.on('end', () =>
+								resolve(qs.parse(Buffer.concat(chunks).toString())),
+							);
+						},
+					)
+					.on('error', err => {
+						console.error(err);
+						resolve({ error: err.message });
+					})
+					.end(reqdata),
+			);
+			if (!opts?.decka) {
+				sockEmit(this, 'chat', {
+					msg: `Failed to load cardpool. Error code: ${opts?.error}`,
+					mode: 1,
+				});
+				return;
+			}
+			const { decka } = opts;
+			let topool = '';
+			for (let i = 1; i < decka.length; i += 7) {
+				const code = parseInt(decka.substring(i, i + 4), 10) + 1000,
+					count = parseInt(decka.substring(i + 4, i + 7), 10),
+					card = OrigCards.Codes[code];
+				if (card && (card.rarity === -1 || card.rarity === 15)) {
+					topool = etgutil.addcard(topool, code, count);
+				}
+			}
+			const result = await sql.query({
+				text:
+					'select ud.id, ud.data, oi.pool from user_data ud left join original_import oi on oi.user_data_id = ud.id where user_id = $1 and type_id = 2',
+				values: [userId],
+			});
+			if (result.rows.length !== 0) {
+				await sql.query({
+					text: `insert into original_import (user_data_id, name, pool) values ($1, $2, $3)
+on conflict (user_data_id) do update set name = $2, pool = $3`,
+					values: [result.rows[0].id, data.name, topool],
+				});
+				const pool = etgutil.mergedecks(
+					etgutil.removedecks(
+						result.rows[0].data.pool,
+						result.rows[0].pool ?? '',
+					),
+					topool,
+				);
+				await sql.query({
+					text: 'update user_data set data = $2 where id = $1',
+					values: [
+						result.rows[0].id,
+						{
+							...result.rows[0].data,
+							pool,
+						},
+					],
+				});
+
+				sockEmit(this, 'setorigpool', { pool });
 			}
 		});
 	},

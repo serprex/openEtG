@@ -18,6 +18,11 @@ create table user_data (
 	name text not null,
 	data json not null
 );
+create table original_import (
+	user_data_id bigint not null primary key references user_data(id),
+	name text not null,
+	pool text not null
+);
 create table roles (
 	id int not null primary key,
 	val text not null unique
@@ -112,3 +117,4 @@ create index ix_bazaar_user_id on bazaar using hash (user_id);
 create index ix_bazaar_code on bazaar using hash (code);
 create index ix_stats_user_id on stats using hash (user_id);
 create index ix_stats_when on stats ("when");
+create index ix_original_import_name on original_import using hash (name);
