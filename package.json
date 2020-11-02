@@ -22,7 +22,7 @@
     "@serprex/react-motion": "^0.6.1",
     "babel-loader": "^8.1.0",
     "core-js": "^3.6.5",
-    "html-webpack-plugin": "^5.0.0-alpha.6",
+    "html-webpack-plugin": "^5.0.0-alpha.10",
     "prettier": "^2.1.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
