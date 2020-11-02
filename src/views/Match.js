@@ -1151,6 +1151,7 @@ export default connect(({ user, opts }) => ({
 				this.setState({ resigning: true });
 			} else {
 				this.applyNext({ x: 'resign', c: this.state.player1 });
+				if (this.props.game.winner) this.gotoResult();
 			}
 		};
 

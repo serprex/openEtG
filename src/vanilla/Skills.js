@@ -755,8 +755,8 @@ const Actives = {
 		(t || c.owner.foe).addpoison(3);
 	},
 	precognition: (ctx, c, t) => {
-		c.owner.precognition = true;
 		c.owner.drawcard();
+		c.owner.setStatus('precognition', 1);
 	},
 	purify: target('crea+play', (ctx, c, t) => {
 		t.setStatus('poison', Math.min(t.getStatus('poison') - 2, -2));
