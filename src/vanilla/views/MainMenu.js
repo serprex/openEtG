@@ -221,10 +221,10 @@ export default connect(({ user, orig, opts }) => ({
 							left: '300px',
 							top: '200px',
 						}}>
-						Enter deck as Player's Name to play against AI playing that deck
+						Enter deck as Name to play against it
 					</span>
 					<input
-						placeholder="Player's Name"
+						placeholder="Name"
 						value={this.props.origfoename}
 						onChange={e =>
 							this.props.dispatch(
@@ -297,6 +297,9 @@ export default connect(({ user, orig, opts }) => ({
 							top: '170px',
 						}}
 					/>
+					<div style={{ position: 'absolute', left: '700px', top: '200px' }}>
+						Only nymphs & marks
+					</div>
 					<Components.ExitBtn x={9} y={140} />
 					<Components.Text
 						text={`${this.props.orig.electrum}$`}
