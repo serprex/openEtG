@@ -580,7 +580,7 @@ Player.prototype.dmg = function (x) {
 	if (!x) return 0;
 	const sosa = this.getStatus('sosa'),
 		dmg = sosa ? -x : x;
-	if (x < 0) {
+	if (dmg < 0) {
 		const heal = Math.max(this.hp - this.maxhp, dmg);
 		this.hp -= heal;
 		return sosa ? x : heal;
