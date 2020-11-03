@@ -1350,7 +1350,6 @@ const sockEvents = {
 				const meta = sockmeta.get(sock);
 				if (meta) {
 					if (meta.offline) continue;
-					if (meta.afk) name += ' (afk)';
 					activeusers.push(meta.afk ? `${name} (afk)` : name);
 				}
 			}
