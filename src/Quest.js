@@ -11,7 +11,7 @@ export function requireQuest(quest, user) {
 	return quest.questdependencies.every(dependency => user.quests[dependency]);
 }
 
-export const quarks = {};
+export const quarks = Object.create(null);
 quarks.basic_damage = {
 	name: 'Damage',
 	info: 'Tutorial - Basic 1/10 - Damage',

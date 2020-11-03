@@ -294,7 +294,7 @@ export default connect(({ user }) => ({
 				etgutil.iterraw(props.user.pool),
 				etgutil.iterraw(props.user.accountbound),
 			)) {
-				if (code in Cards.Codes) {
+				if (Cards.Codes[code]) {
 					pool[code] = (pool[code] ?? 0) + count;
 				}
 			}

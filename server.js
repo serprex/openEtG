@@ -587,10 +587,8 @@ where mr1.user_id = $1 and mr2.user_id = $2 and not mr1.accepted and mr2.accepte
 				'select cards, g from trade_request where user_id = $2 and for_user_id = $1',
 			values: [userId, foe.id],
 		});
-		console.log(userId, foe.id, tradeResult);
 		if (tradeResult.rows.length !== 0) {
 			const [row] = tradeResult.rows;
-			console.log(row);
 			sockEmit(this, 'offertrade', {
 				f: data.f,
 				c: row.cards,
@@ -988,27 +986,50 @@ on conflict (user_id, for_user_id) do update set user_id = $1, for_user_id = $2,
 	},
 	move(data, user, userId) {
 		return pg.trx(async sql => {
-			const usersResult = await sql.query({
-				text:
-					'select u.id, u.name from match_request mr join users u on mr.user_id = u.id where mr.game_id = $1',
-				values: [data.id],
-			});
+			const [usersResult, movesResult] = await Promise.all([
+				sql.query({
+					text:
+						'select u.id, u.name from match_request mr join users u on mr.user_id = u.id where mr.game_id = $1',
+					values: [data.id],
+				}),
+				sql.query({
+					text:
+						'select g.moves from games g join match_request mr on mr.game_id = g.id join users u on u.id = mr.user_id where g.id = $1 and u.id = $2 for update',
+					values: [data.id, userId],
+				}),
+			]);
 			if (!usersResult.rows.some(row => row.id === userId)) {
 				sockEmit(this, { mode: 1, msg: "You aren't in that match" });
 				return;
 			}
-			await sql.query({
-				text:
-					"update games set moves = array_append(moves, $2), expire_at = now() + interval '1 hour' where id = $1",
-				values: [data.id, JSON.stringify(data.data)],
-			});
-			const msg = JSON.stringify({ x: 'move', data: data.data });
-			for (const row of usersResult.rows) {
-				console.log(row);
-				if (row.id !== userId) {
-					const sock = Us.socks.get(row.name);
-					if (sock?.readyState === 1) {
-						sock.send(msg);
+			const moveList = movesResult.rows[0]?.moves;
+			if (
+				moveList?.length &&
+				moveList[moveList.length - 1].hash !== data.prehash
+			) {
+				sockEmit(
+					this,
+					'reloadmoves',
+					moveList.map(({ cmd }) => cmd),
+				);
+				return;
+			} else {
+				await sql.query({
+					text:
+						"update games set moves = array_append(moves, $2), expire_at = now() + interval '1 hour' where id = $1",
+					values: [data.id, JSON.stringify({ cmd: data.cmd, hash: data.hash })],
+				});
+				const msg = JSON.stringify({
+					x: 'move',
+					cmd: data.cmd,
+					hash: data.hash,
+				});
+				for (const row of usersResult.rows) {
+					if (row.id !== userId) {
+						const sock = Us.socks.get(row.name);
+						if (sock?.readyState === 1) {
+							sock.send(msg);
+						}
 					}
 				}
 			}
@@ -1021,7 +1042,9 @@ on conflict (user_id, for_user_id) do update set user_id = $1, for_user_id = $2,
 			values: [data.id, userId],
 		});
 		if (movesResult.rows.length !== 0) {
-			sockEmit(this, 'reloadmoves', movesResult.rows[0]);
+			sockEmit(this, 'reloadmoves', {
+				moves: movesResult.rows[0].moves.map(({ cmd }) => cmd),
+			});
 		}
 	},
 	updateorig(data, user, userId) {

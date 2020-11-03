@@ -56,7 +56,7 @@ const Actives = {
 		}
 	}),
 	blackhole: (ctx, c, t) => {
-		if (!c.owner.foe.sanctuary) {
+		if (!c.owner.foe.getStatus('sanctuary')) {
 			for (let q = 1; q < 13; q++) {
 				c.owner.dmg(-Math.min(c.owner.foe.quanta[q], 3));
 				c.owner.foe.setQuanta(q, Math.max(c.owner.foe.quanta[q] - 3, 0));
@@ -209,7 +209,7 @@ const Actives = {
 		c.die();
 	},
 	disfield: (ctx, c, t, dmg) => {
-		if (c.owner.sanctuary) return false;
+		if (c.owner.getStatus('sanctuary')) return false;
 		if (!c.owner.spend(etg.Chroma, dmg)) {
 			for (let i = 1; i < 13; i++) {
 				c.owner.setQuanta(i, 0);
@@ -219,7 +219,7 @@ const Actives = {
 		return true;
 	},
 	disshield: (ctx, c, t, dmg) => {
-		if (c.owner.sanctuary) return false;
+		if (c.owner.getStatus('sanctuary')) return false;
 		if (!c.owner.spend(etg.Entropy, Math.ceil(dmg / 3))) {
 			c.owner.setQuanta(etg.Entropy, 0);
 			c.remove();
@@ -653,7 +653,7 @@ const Actives = {
 		if (t.type === etg.Player) t.setStatus('neuro', 1);
 	}),
 	nightmare: target('crea', (ctx, c, t) => {
-		if (!c.owner.foe.sanctuary) {
+		if (!c.owner.foe.getStatus('sanctuary')) {
 			c.owner.dmg(-c.owner.foe.dmg(16 - c.owner.foe.hand.length * 2));
 			for (let i = c.owner.foe.hand.length; i < 8; i++) {
 				c.owner.foe.addCard(c.owner.foe.newThing(t.card));
@@ -831,14 +831,14 @@ const Actives = {
 		}
 	},
 	sanctuary: (ctx, c, t) => {
-		c.owner.sanctuary = true;
+		c.owner.setStatus('sanctuary', 1);
 		c.owner.dmg(-4);
 	},
 	scarab: (ctx, c, t) => {
 		c.owner.addCrea(c.owner.newThing(c.card.as(ctx.Cards.Names.Scarab)));
 	},
 	scramble: (ctx, c, t) => {
-		if (t.type === etg.Player && !t.sanctuary) {
+		if (t.type === etg.Player && !t.getStatus('sanctuary')) {
 			let n = 0;
 			for (let i = 0; i < 9; i++) {
 				if (t.spend(etg.Chroma, 1)) {
@@ -875,7 +875,7 @@ const Actives = {
 		}
 	},
 	silence: (ctx, c, t) => {
-		if (!c.owner.foe.sanctuary) {
+		if (!c.owner.foe.getStatus('sanctuary')) {
 			c.owner.foe.casts = 0;
 		}
 	},
@@ -1108,7 +1108,7 @@ const Actives = {
 		}
 	},
 	solar: (ctx, c, t) => {
-		if (!c.owner.sanctuary) c.owner.spend(etg.Light, -1);
+		if (!c.owner.getStatus('sanctuary')) c.owner.spend(etg.Light, -1);
 	},
 	thorn: (ctx, c, t) => {
 		if (t.type === etg.Creature && ctx.rng() < 0.75) {

@@ -1,30 +1,37 @@
-import { hashString } from './util.js';
+export function hashString(str) {
+	let hash = str.length;
+	for (let i = 0; i < str.length; i++)
+		hash = (hash * 33 + str.charCodeAt(i)) & 0x7fffffff;
+	return hash;
+}
 
 export function hashArray() {
-	let r = (this.length ?? this.size) * 108;
-	for (const x of this) {
-		r = ((r * 63) ^ hash(x)) & 0x7fffffff;
-	}
+	let r = this.length * 108;
+	for (const x of this) r = ((r * 63) ^ (r >> 16) ^ hash(x)) & 0x7fffffff;
+	return r;
+}
+
+export function hashTypedArray() {
+	let r = this.size * 108;
+	for (const x of this) r = ((r * 63) ^ (r >> 16) ^ x) & 0x7fffffff;
 	return r;
 }
 
 function hashMap() {
 	let r = 69105;
-	for (const [k, v] of this) {
-		r ^= hash(k) ^ (hash(v) * 929);
-	}
+	for (const [k, v] of this) r ^= (hash(k) ^ (hash(v) * 7)) & 0x7fffffff;
 	return r;
 }
 
 const hashCache = new WeakMap();
 const hashFunc = new Map([
 	[Array, hashArray],
-	[Uint8Array, hashArray],
-	[Int8Array, hashArray],
-	[Uint16Array, hashArray],
-	[Int16Array, hashArray],
-	[Int32Array, hashArray],
-	[Uint32Array, hashArray],
+	[Uint8Array, hashTypedArray],
+	[Int8Array, hashTypedArray],
+	[Uint16Array, hashTypedArray],
+	[Int16Array, hashTypedArray],
+	[Int32Array, hashTypedArray],
+	[Uint32Array, hashTypedArray],
 	[Set, hashArray],
 	[Map, hashMap],
 ]);

@@ -3,7 +3,7 @@ import * as svg from '../svg.js';
 
 export default async function card(url, stime) {
 	const code = parseInt(url.slice(0, 3), 32);
-	if (!(code in Cards.Codes)) {
+	if (!Cards.Codes[code]) {
 		throw new Error(`${code} undefined`);
 	}
 	return {

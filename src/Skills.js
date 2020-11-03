@@ -4,7 +4,7 @@ import * as etg from './etg.js';
 import Skill from './Skill.js';
 import parseSkill from './parseSkill.js';
 
-const exports = {};
+const exports = Object.create(null);
 export default exports;
 
 function adrenathrottle(f) {

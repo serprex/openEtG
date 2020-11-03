@@ -682,14 +682,12 @@ function pushEntry(list, c, event, entry) {
 }
 const cache = new Map();
 function getDataFromName(name) {
-	if (name in data) return data[name];
+	const dataName = data[name];
+	if (dataName) return dataName;
 	if (cache.has(name)) return cache.get(name);
-	const [base, ...args] = name.split(' ');
-	if (base in data) {
-		const r = data[base](...args);
-		cache.set(name, r);
-		return r;
-	}
-	cache.set(name, undefined);
-	return undefined;
+	const [base, ...args] = name.split(' '),
+		baseData = data[base],
+		value = baseData && baseData(...args);
+	cache.set(name, value);
+	return value;
 }

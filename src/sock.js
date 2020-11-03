@@ -76,8 +76,8 @@ const sockEvents = {
 			for (let i = 2; i < reres[0].length; i += 5) {
 				const code = parseInt(reres[0].substr(i, 3), 32);
 				if (
-					!(code in Cards.Codes) &&
-					!(code in OrigCards.Codes) &&
+					!Cards.Codes[code] &&
+					!OrigCards.Codes[code] &&
 					etgutil.fromTrueMark(code) === -1
 				) {
 					notlink = true;

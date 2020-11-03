@@ -7,12 +7,6 @@ export function* iterSplit(src, str) {
 		i = j + str.length;
 	}
 }
-export function hashString(str) {
-	let hash = 5381;
-	for (let i = 0; i < str.length; i++)
-		hash = (hash * 33 + str.charCodeAt(i)) & 0x7fffffff;
-	return hash;
-}
 export function randint() {
 	return (Math.random() * 0x100000000) | 0;
 }

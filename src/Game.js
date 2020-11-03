@@ -1,6 +1,7 @@
 import * as Rng from './rng.wasm';
 import * as imm from './immutable.js';
 
+import * as sfx from './audio.js';
 import * as etg from './etg.js';
 import Effect from './Effect.js';
 import OriginalCards from './vanilla/Cards.js';
@@ -74,6 +75,22 @@ defineProp('data');
 defineProp('turn');
 defineProp('winner');
 defineProp('Cards');
+
+Game.prototype.hash = function () {
+	let r = 1;
+	for (const [id, val] of this.props) {
+		r =
+			((r * 3 + (r >> 16) + id) ^
+				(id !== this.id
+					? imm.hash(val)
+					: imm.hash(val.get('rng')) ^
+					  (val.get('turn') * 3) ^
+					  (val.get('winner') * 5) ^
+					  (val.get('phase') * 7))) &
+			0x7fffffff;
+	}
+	return r;
+};
 
 Game.prototype.clone = function () {
 	const obj = Object.create(Game.prototype);
@@ -278,6 +295,7 @@ const nextHandler = {
 	mulligan(_data) {
 		const pl = this.byId(this.turn);
 		pl.drawhand(pl.handIds.length - 1);
+		sfx.playSound('mulligan');
 	},
 	foe(data) {
 		this.set(this.turn, 'foe', data.t);
@@ -301,22 +319,20 @@ const nextHandler = {
 		}
 	},
 };
-Game.prototype.next = function (event) {
+Game.prototype.next = function (cmd) {
 	const replay = this.get(this.id).get('replay');
-	if (replay) this.set(this.id, 'replay', replay.concat([event]));
-	return nextHandler[event.x].call(this, event);
+	if (replay) this.set(this.id, 'replay', replay.concat([cmd]));
+	nextHandler[cmd.x].call(this, cmd);
 };
-Game.prototype.replaceMoves = function (moves) {
+Game.prototype.withMoves = function (moves) {
 	const { disable } = Effect;
 	Effect.disable = true;
 	const newgame = new Game(this.data);
 	for (const move of moves) {
 		newgame.next(move);
 	}
-	this.props = newgame.props;
-	this.cache = newgame.cache;
-	this.effects = [];
 	Effect.disable = disable;
+	return newgame;
 };
 Game.prototype.expectedDamage = function (samples) {
 	const expectedDamage = new Int16Array(this.players.length);

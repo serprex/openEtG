@@ -16,10 +16,10 @@ function printstat() {
 		ups = 0,
 		total = 0;
 	for (const code32 of this.value.split(' ')) {
-		const code = parseInt(code32, 32) - 4000;
-		if (code in Cards.Codes) {
-			const card = Cards.Codes[code],
-				uncard = card.asUpped(false);
+		const code = parseInt(code32, 32) - 4000,
+			card = Cards.Codes[code];
+		if (card) {
+			const uncard = card.asUpped(false);
 			total++;
 			summon += card.cost;
 			const buycost =

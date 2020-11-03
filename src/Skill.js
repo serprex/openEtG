@@ -1,6 +1,5 @@
 import * as etg from './etg.js';
-import { hashString } from './util.js';
-import { registerHashFunc } from './immutable.js';
+import { registerHashFunc, hashString } from './immutable.js';
 
 export default class Skill {
 	constructor(name, func, passive, target) {
@@ -91,7 +90,7 @@ export default class Skill {
 	}
 
 	static parseTargeting(str) {
-		if (str in Skill.Targeting) {
+		if (Skill.Targeting[str]) {
 			return Skill.Targeting[str];
 		} else {
 			const splitIdx = str.lastIndexOf(':');

@@ -4,7 +4,6 @@ import { Motion, TransitionMotion, spring } from '@serprex/react-motion';
 import * as imm from '../immutable.js';
 
 import Effect from '../Effect.js';
-import * as sfx from '../audio.js';
 import * as ui from '../ui.js';
 import * as etg from '../etg.js';
 import { encodeCode } from '../etgutil.js';
@@ -610,11 +609,12 @@ function FoePlays({
 	);
 }
 
-export default connect(({ user, opts }) => ({
+const MatchView = connect(({ user, opts, nav }) => ({
 	user,
 	lofiArt: opts.lofiArt ?? false,
 	playByPlayMode: opts.playByPlayMode,
 	expectedDamageSamples: opts.expectedDamageSamples || '4',
+	navProps: nav.props,
 }))(
 	class Match extends Component {
 		constructor(props) {
@@ -651,7 +651,7 @@ export default connect(({ user, opts }) => ({
 				line1: null,
 				spellid: 0,
 				spells: [],
-				popup: props.game.data.quest && props.game.data.quest.opentext,
+				popup: props.game.data.quest?.opentext,
 				popupidx: 0,
 			};
 		}
@@ -746,21 +746,14 @@ export default connect(({ user, opts }) => ({
 			newstate.effects.add(newentry.dom);
 		};
 
-		applyNext = (data, iscmd) => {
+		applyNext = (cmd, iscmd) => {
 			const { game } = this.props,
-				{ turn } = game;
-			if (
-				!iscmd &&
-				game.data.players.some(
-					pl => pl.user && pl.user !== this.props.user.name,
-				)
-			) {
-				sock.userEmit('move', { id: this.props.gameid, data });
-			}
-			if (data.x === 'cast' || data.x === 'end') {
+				{ turn } = game,
+				prehash = iscmd || game.hash();
+			if (cmd.x === 'cast' || cmd.x === 'end') {
 				let play;
-				if (data.x === 'cast') {
-					const c = game.byId(data.c),
+				if (cmd.x === 'cast') {
+					const c = game.byId(cmd.c),
 						isSpell = c.type === etg.Spell;
 					play = {
 						card: c.card,
@@ -770,8 +763,8 @@ export default connect(({ user, opts }) => ({
 						name: isSpell ? c.card.name : c.getSkill('cast').toString(),
 						upped: c.card.upped,
 						shiny: c.card.shiny,
-						c: data.c,
-						t: data.t,
+						c: cmd.c,
+						t: cmd.t,
 						game: game.clone(),
 					};
 				} else {
@@ -789,8 +782,8 @@ export default connect(({ user, opts }) => ({
 					};
 				}
 				this.setState(state => {
-					const c = data.x === 'cast' && data.c && game.byId(data.c),
-						t = data.x === 'cast' && data.t && game.byId(data.t);
+					const c = cmd.x === 'cast' && cmd.c && game.byId(cmd.c),
+						t = cmd.x === 'cast' && cmd.t && game.byId(cmd.t);
 					if (c && c.ownerId !== this.state.player1 && c.owner.isCloaked()) {
 						return null;
 					}
@@ -799,7 +792,7 @@ export default connect(({ user, opts }) => ({
 					if (!foeplays.has(turn)) foeplays.set(turn, []);
 					foeplays.set(turn, foeplays.get(turn).concat([play]));
 					if (
-						data.x === 'cast' &&
+						cmd.x === 'cast' &&
 						iscmd &&
 						this.props.playByPlayMode !== 'disabled'
 					) {
@@ -811,13 +804,23 @@ export default connect(({ user, opts }) => ({
 					return delta;
 				});
 			}
-			if (data.x === 'mulligan') {
-				sfx.playSound('mulligan');
+			game.next(cmd);
+			if (
+				!iscmd &&
+				game.data.players.some(
+					pl => pl.user && pl.user !== this.props.user.name,
+				)
+			) {
+				sock.userEmit('move', {
+					id: this.props.gameid,
+					prehash,
+					hash: game.hash(),
+					cmd,
+				});
 			}
-			game.next(data);
 			this.gameStep(game);
 			this.setState(state => {
-				if (!game.effects || !game.effects.length) return {};
+				if (!game.effects?.length) return {};
 				const newstate = { effectId: state.effectId + 1 };
 				let { effectId } = state;
 				for (const effect of game.effects) {
@@ -959,7 +962,7 @@ export default connect(({ user, opts }) => ({
 			const newTurn = game.turn;
 			if (newTurn !== turn) {
 				const pl = game.byId(newTurn);
-				if (pl.data.user === (this.props.user ? this.props.user.name : '')) {
+				if (pl.data.user === this.props.user.name) {
 					this.setState({ player1: newTurn });
 				}
 				this.setState(state => ({
@@ -1131,7 +1134,6 @@ export default connect(({ user, opts }) => ({
 					game.phase === etg.MulliganPhase &&
 					game.get(this.state.player1).get('hand').length
 				) {
-					sfx.playSound('mulligan');
 					this.applyNext({ x: 'mulligan' });
 				} else if (this.state.targeting) {
 					this.setState({ targeting: null });
@@ -1265,7 +1267,7 @@ export default connect(({ user, opts }) => ({
 				) {
 					this.applyNext({ x: 'foe', t: this.state.player2.id });
 				}
-			} else if (ch === 'l') {
+			} else if (ch === 'l' && this.props.gameid) {
 				sock.userEmit('reloadmoves', { id: this.props.gameid });
 			} else if (~(chi = '[]'.indexOf(ch))) {
 				this.setState(state => {
@@ -1303,20 +1305,21 @@ export default connect(({ user, opts }) => ({
 			}
 			dispatch(
 				store.setCmds({
-					move: ({ data }) => {
+					move: ({ cmd, hash }) => {
 						const { game } = this.props;
-						if (
-							(data.c && !game.get(data.c)) ||
-							(data.t && !game.get(data.t))
-						) {
-							sock.userEmit('reloadmoves', { id: this.props.gameid });
-						} else {
-							this.applyNext(data, true);
+						if ((!cmd.c || game.get(cmd.c)) && (!cmd.t || game.get(cmd.t))) {
+							this.applyNext(cmd, true);
+							if (game.hash() === hash) return;
 						}
+						sock.userEmit('reloadmoves', { id: this.props.gameid });
 					},
 					reloadmoves: ({ moves }) => {
-						game.replaceMoves(moves);
-						this.forceUpdate();
+						this.props.dispatch(
+							store.doNav(Promise.resolve({ default: MatchView }), {
+								...this.props.navProps,
+								game: game.withMoves(moves),
+							}),
+						);
 					},
 				}),
 			);
@@ -2011,3 +2014,4 @@ export default connect(({ user, opts }) => ({
 		}
 	},
 );
+export default MatchView;

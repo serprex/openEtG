@@ -109,7 +109,7 @@ function fightItOut() {
 				const {
 					data: { cmd },
 				} = msg;
-				if (mode === fight && cmd.x in cmds) {
+				if (mode === fight && cmds[cmd.x]) {
 					cmds[cmd.x](game, game.turn === realp1 ? 1 : 2, cmd);
 				}
 				game.next(cmd);

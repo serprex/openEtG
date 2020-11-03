@@ -73,7 +73,7 @@ export function deck(deck) {
 		pathsvg = '',
 		suffix;
 	for (const code of etgutil.iterdeck(deck)) {
-		if (!(code in Cards.Codes)) {
+		if (!Cards.Codes[code]) {
 			const ismark = etgutil.fromTrueMark(code);
 			if (~ismark) mark = ismark;
 			continue;

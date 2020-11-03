@@ -82,7 +82,7 @@ export default connect(({ user }) => ({ user }))(
 				etgutil.iterraw(props.user.accountbound),
 			)) {
 				if (
-					code in Cards.Codes &&
+					Cards.Codes[code] &&
 					(!props.acard ||
 						(!Cards.Codes[code].isOf(baseacard) &&
 							(props.acard.upped || !Cards.Codes[code].upped)))
@@ -94,7 +94,7 @@ export default connect(({ user }) => ({ user }))(
 			let mark = 0,
 				deck = etgutil.decodedeck(props.adeck);
 			for (let i = deck.length - 1; i >= 0; i--) {
-				if (!(deck[i] in Cards.Codes)) {
+				if (!Cards.Codes[deck[i]]) {
 					const index = etgutil.fromTrueMark(deck[i]);
 					if (~index) {
 						mark = index;

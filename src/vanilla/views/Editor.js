@@ -35,7 +35,7 @@ export default connect(({ orig }) => ({ orig }))(
 
 			const pool = [];
 			for (const [code, count] of etgutil.iterraw(props.orig.pool)) {
-				if (code in Cards.Codes) {
+				if (Cards.Codes[code]) {
 					pool[code] = (pool[code] ?? 0) + count;
 				}
 			}

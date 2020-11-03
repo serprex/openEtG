@@ -7,7 +7,7 @@ export default class Cards {
 	constructor(CardsJson) {
 		this.filtercache = [[], [], [], []];
 		this.Codes = [];
-		this.Names = {};
+		this.Names = Object.create(null);
 
 		CardsJson.forEach((data, type) => {
 			const keys = data[0],

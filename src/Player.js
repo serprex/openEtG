@@ -199,7 +199,7 @@ Player.prototype.init = function (data) {
 	const deck = [];
 	for (const code of etgutil.iterdeck(data.deck)) {
 		let idx;
-		if (code in this.game.Cards.Codes) {
+		if (this.game.Cards.Codes[code]) {
 			deck.push(this.game.Cards.Codes[code]);
 		} else if (~(idx = etgutil.fromTrueMark(code))) {
 			this.mark = idx;

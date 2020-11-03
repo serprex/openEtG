@@ -55,7 +55,7 @@ export default function parseChat(e) {
 			} else {
 				store.store.dispatch(
 					store.chatMsg(
-						`Input '${user.name}yesdelete' into Trade/Library to delete your account`,
+						`Input '${user.name}yesdelete' into Player's Name to delete your account`,
 						'System',
 					),
 				);

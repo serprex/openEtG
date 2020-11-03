@@ -92,12 +92,12 @@ export function upshall(data, user) {
 		if (!card || (card.rarity === 5 && card.shiny) || card.rarity < 1) return;
 		const dcode = etgutil.asShiny(etgutil.asUpped(card.code, false), false);
 		if (code === dcode) return;
-		if (!(dcode in pool)) pool[dcode] = 0;
-		pool[dcode] += count * (card.upped && card.shiny ? 36 : 6);
+		pool[dcode] =
+			(pool[dcode] ?? 0) + count * (card.upped && card.shiny ? 36 : 6);
 		pool[code] = 0;
 	});
 	bound.forEach((count, code) => {
-		if (!(code in pool)) return;
+		if (!pool[code]) return;
 		const card = Cards.Codes[code];
 		if (
 			!card ||
@@ -127,7 +127,7 @@ export function upshall(data, user) {
 		pool[code] -= pc;
 	});
 	bound.forEach((count, code) => {
-		if (!(code in pool)) return;
+		if (!pool[code]) return;
 		const card = Cards.Codes[code];
 		if (
 			!card ||
