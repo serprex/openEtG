@@ -370,7 +370,10 @@ const Actives = {
 				x => x.type === etg.Creature && !bans.some(ban => x.isOf(ban)),
 			),
 		);
-		if (c.getStatus('ready')) Actives.parallel.func(ctx, c, c);
+		if (c.getStatus('ready')) {
+			c.casts = 0;
+			Actives.parallel.func(ctx, c, c);
+		}
 	},
 	heal: (ctx, c, t) => {
 		c.owner.dmg(-20);
