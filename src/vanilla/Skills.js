@@ -177,10 +177,7 @@ const Actives = {
 		Actives.parallel.func(ctx, c, c);
 	},
 	dessication: (ctx, c, t) => {
-		function dryeffect(ctx, c, t) {
-			c.spend(etg.Water, -t.dmg(2));
-		}
-		c.owner.foe.masscc(c.owner, dryeffect);
+		c.owner.foe.masscc(c.owner, (ctx, c, t) => c.spend(etg.Water, -t.dmg(2)));
 	},
 	destroy: target('perm', (ctx, c, t, dontsalvage, donttalk) => {
 		if (!donttalk) {
@@ -238,10 +235,11 @@ const Actives = {
 		);
 	}),
 	dryspell: (ctx, c, t) => {
-		function dryeffect(ctx, c, t) {
-			c.spend(etg.Water, -t.dmg(1));
-		}
-		c.owner.foe.masscc(c.owner, dryeffect, true);
+		c.owner.foe.masscc(
+			c.owner,
+			(ctx, c, t) => c.spend(etg.Water, -t.dmg(1)),
+			true,
+		);
 	},
 	dshield: (ctx, c, t) => {
 		c.setStatus('immaterial', 1);
@@ -406,14 +404,7 @@ const Actives = {
 	ignite: (ctx, c, t) => {
 		c.die();
 		c.owner.foe.spelldmg(20);
-		c.owner.foe.masscc(
-			c,
-			function (ctx, c, x) {
-				x.dmg(1);
-			},
-			true,
-			true,
-		);
+		c.owner.foe.masscc(c, (ctx, c, x) => x.dmg(1), true);
 	},
 	immolate: target('own:crea', (ctx, c, t) => {
 		t.die();
@@ -983,9 +974,7 @@ const Actives = {
 		c.active = imm.delete(c.active, 'cast');
 	},
 	storm2: (ctx, c, t) => {
-		c.owner.foe.masscc(c, function (ctx, c, x) {
-			x.dmg(2);
-		});
+		c.owner.foe.masscc(c, (ctx, c, x) => x.dmg(2));
 	},
 	storm3: (ctx, c, t) => {
 		c.owner.foe.masscc(c, Actives.snipe.func);
