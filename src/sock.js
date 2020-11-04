@@ -173,7 +173,7 @@ const sockEvents = {
 				</div>,
 			),
 		);
-		userEmit({ x: 'challrecv', f: data.f });
+		userEmit('challrecv', { f: data.f });
 	},
 	offertrade(data) {
 		store.store.dispatch(
