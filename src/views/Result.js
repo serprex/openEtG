@@ -426,7 +426,7 @@ export default connect(({ user }) => ({ user }))(
 					sock.userExec('addgold', { g: state.goldreward });
 				}
 				if (state.cardreward) {
-					sock.userExec(game.data.quest ? 'addbound' : 'addcards', {
+					sock.userExec(`add${game.data.quest ? 'bound' : ''}cards`, {
 						c: state.cardreward,
 					});
 				}

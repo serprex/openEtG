@@ -69,7 +69,7 @@ export default class Reward extends Component {
 						onClick={() => {
 							if (this.state.chosenReward) {
 								if (code === undefined) {
-									sock.userExec('addbound', {
+									sock.userExec('addboundcards', {
 										c:
 											etgutil.encodeCount(numberofcopies) +
 											this.state.chosenReward.toString(32),

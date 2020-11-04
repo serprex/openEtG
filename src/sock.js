@@ -197,7 +197,7 @@ const sockEvents = {
 	},
 	addpools(data) {
 		store.store.dispatch(store.userCmd('addcards', { c: data.c }));
-		store.store.dispatch(store.userCmd('addbound', { c: data.b }));
+		store.store.dispatch(store.userCmd('addboundcards', { c: data.b }));
 		store.store.dispatch(store.chatMsg(data.msg, 'System'));
 	},
 };

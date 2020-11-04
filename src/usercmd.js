@@ -182,7 +182,7 @@ export function setstreak(data, user) {
 export function addcards(data, user) {
 	return { pool: etgutil.mergedecks(user.pool, data.c) };
 }
-export function addbound(data, user) {
+export function addboundcards(data, user) {
 	return { accountbound: etgutil.mergedecks(user.accountbound, data.c) };
 }
 export function donedaily(data, user) {
