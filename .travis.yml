@@ -1,6 +1,0 @@
-arch: arm64
-virt: lxd
-language: node_js
-node_js: "node"
-notifications:
- email: false

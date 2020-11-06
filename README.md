@@ -1,4 +1,4 @@
-[![Build](https://travis-ci.org/serprex/openEtG.svg?branch=master)](https://travis-ci.org/serprex/openEtG)
+[![Test](https://github.com/serprex/openEtG/workflows/.github/workflows/npm-test.yml/badge.svg)](https://github.com/serprex/openEtG/actions?query=workflow%3A.github%2Fworkflows%2Fnpm-test.yml)
 
 # openEtG
 
