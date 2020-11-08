@@ -716,18 +716,20 @@ const Actives = {
 		t.die();
 	}),
 	parallel: target('crea', (ctx, c, t) => {
+		ctx.effect({ x: 'Text', text: 'Parallel', id: t.id });
 		if (t.card.isOf(ctx.Cards.Names.Chimera)) {
 			Actives.chimera(ctx, c);
 			return;
 		}
 		const copy = t.clone(c.owner);
+		ctx.effect({ x: 'StartPos', id: copy.id, src: t.id });
 		c.owner.addCrea(copy);
 		copy.setStatus('airborne', copy.card.getStatus('airborne'));
 		if (copy.getStatus('mutant')) {
 			const buff = ctx.upto(25);
-			t.buffhp(Math.floor(buff / 5));
-			t.incrAtk(buff % 5);
-			t.v_mutantactive();
+			copy.buffhp(Math.floor(buff / 5));
+			copy.incrAtk(buff % 5);
+			copy.v_mutantactive();
 		}
 		if (copy.getStatus('voodoo')) {
 			copy.owner.foe.dmg(copy.maxhp - copy.hp);
