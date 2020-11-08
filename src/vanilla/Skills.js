@@ -923,9 +923,8 @@ const Actives = {
 		for (let i = 0; i < 23; i++) {
 			const cr = c.owner.creatures[i];
 			if (cr && cr.getStatus('airborne') && cr.isMaterial(etg.Creature)) {
+				ctx.effect({ x: 'Dive', id: cr.id });
 				cr.incrStatus('dive', cr.trueatk());
-				const dive = cr.getStatus('dive');
-				cr.setStatus('dive', dive + cr.trueatk());
 			}
 		}
 	},
