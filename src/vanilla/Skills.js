@@ -310,6 +310,20 @@ const Actives = {
 		}
 		c.owner.setQuanta(etg.Aether, 0);
 	}),
+	freeevade: (ctx, c, t, data) => {
+		const tgt = ctx.byId(data.tgt);
+		if (
+			tgt &&
+			tgt.type === etg.Creature &&
+			tgt.ownerId === c.ownerId &&
+			tgt.ownerId !== t.ownerId &&
+			tgt.card.element === etg.Air &&
+			tgt.getStatus('airborne') &&
+			ctx.rng() < c.getStatus('charges') * 0.25
+		) {
+			data.evade = true;
+		}
+	},
 	freeze: target('crea', (ctx, c, t) => {
 		t.freeze(
 			c.card.upped && c.card !== ctx.Cards.Names.Pandemonium.asUpped(true)
