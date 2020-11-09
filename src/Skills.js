@@ -808,7 +808,8 @@ const Skills = {
 		}
 		const realturn = ctx.turn;
 		ctx.turn = t.ownerId;
-		if (!tgting || (tgt = findtgt(tgting))) {
+		if (t.casts < 1) t.casts = 1;
+		if (t.canactive() && (!tgting || (tgt = findtgt(tgting)))) {
 			ctx.effect({ x: 'Text', text: 'Forced', id: t.id });
 			t.useactive(tgt);
 		}

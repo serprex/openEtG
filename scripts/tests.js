@@ -550,6 +550,7 @@ test(
 			this.player1.deckpush(dfly.id);
 			this.player1.setQuanta(etg.Air, 3);
 			this.player1.addCard(tstorm);
+			whim.casts = 1;
 			whim.useactive(tstorm);
 			assert.ok(~this.player1.deckIds.indexOf(tstorm.id), 'Storm on deck');
 			assert.ok(~this.player1.handIds.indexOf(dfly.id), 'Fly in hand');
@@ -743,9 +744,11 @@ test(
 			this.player1.endturn();
 			assert.equal(this.player2.quanta[etg.Light], 0, 'Light');
 			assert.equal(this.player1.quanta[etg.Darkness], 1, 'Darkness');
+			this.player2.endturn();
 			this.player1.setQuanta(etg.Earth, 2);
 			this.cast('v_bless', this.player1, dev);
 			assert.equal(dev.trueatk(), 3, 'Blessed to 3|2');
+			dev.casts = 1;
 			dev.useactive();
 			assert.equal(dev.trueatk(), 1, 'Burrow halved to 1|2');
 			dev.casts = 1;

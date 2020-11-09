@@ -469,7 +469,7 @@ Thing.prototype.canactive = function (spend) {
 			this.casts !== 0 &&
 			!this.status.get('delayed') &&
 			!this.status.get('frozen') &&
-			this.owner.canspend(this.castele, this.cast)
+			this.owner[spend ? 'spend' : 'canspend'](this.castele, this.cast)
 		);
 	}
 };
@@ -499,15 +499,15 @@ Thing.prototype.play = function (tgt, fromhand) {
 };
 Thing.prototype.useactive = function (t) {
 	const { owner } = this;
+	if (!this.canactive(true)) {
+		return console.log(`${owner.id} cannot cast ${this.id} on ${t ?? 0}`);
+	}
 	if (this.type === etg.Spell) {
-		if (!this.canactive(true)) {
-			return console.log(`${owner.id} cannot cast ${this.id}`);
-		}
 		this.remove();
 		if (owner.getStatus('neuro')) owner.addpoison(1);
 		this.play(t, true);
 		this.proc('cardplay');
-	} else if (owner.spend(this.castele, this.cast)) {
+	} else {
 		this.casts--;
 		if (this.getStatus('neuro')) this.addpoison(1);
 		this.castSpell(t ? t.id : 0, this.getSkill('cast'));
