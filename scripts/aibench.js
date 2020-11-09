@@ -1,22 +1,23 @@
+#!/usr/bin/env -Snode --experimental-wasm-modules --experimental-json-modules --prof
+
 import perf_hooks from 'perf_hooks';
 const { performance } = perf_hooks;
 
 import * as etg from '../src/etg.js';
-import Game from '../src/Game.js';
-import aiSearch from '../src/ai/search.js';
+import CreateGame from '../src/Game.js';
 import replays from './replays.json';
 
-function bench(name) {
+async function bench(name) {
 	const replay = replays[name];
 	if (!replay) return;
-	const game = new Game(replay);
+	const game = await CreateGame(replay);
 	game.effects = null;
 	const { moves } = replay;
 	const timing = [];
 	for (let m = 0; m < moves.length; m++) {
-		const start = performance.now();
 		if (game.phase === etg.PlayPhase) {
-			const cmd = aiSearch(game);
+			const start = performance.now();
+			const cmd = game.aiSearch();
 			const end = performance.now();
 			timing.push(end - start);
 			if (game.byId(game.turn).data.ai === 1) {
@@ -37,6 +38,4 @@ function bench(name) {
 	console.log(name, totalTime, totalTime / timing.length);
 }
 
-for (const arg of process.argv) {
-	bench(arg);
-}
+await Promise.all(process.argv.map(bench));

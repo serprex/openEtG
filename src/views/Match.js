@@ -1,22 +1,24 @@
 import { Component } from 'react';
 import { connect } from 'react-redux';
 import { Motion, TransitionMotion, spring } from '@serprex/react-motion';
-import * as imm from '../immutable.js';
 
-import Effect from '../Effect.js';
+import { playSound } from '../audio.js';
 import * as ui from '../ui.js';
 import * as etg from '../etg.js';
 import { encodeCode } from '../etgutil.js';
 import * as mkAi from '../mkAi.js';
 import * as sock from '../sock.js';
-import Skills from '../Skills.js';
-import aiMulligan from '../ai/mulligan.js';
 import * as Components from '../Components/index.js';
 import * as store from '../store.js';
 import { mkQuestAi } from '../Quest.js';
+import enums from '../enum.json';
 import AsyncWorker from '../AsyncWorker.js';
 
-const aiWorker = new AsyncWorker(import('../ai/ai.worker.js'));
+const aiWorker = new AsyncWorker(import('../ai.worker.js'));
+
+function updateMap(map, k, f) {
+	return new Map(map).set(k, f(map.get(k)));
+}
 
 const svgbg = (() => {
 	// prettier-ignore
@@ -118,12 +120,8 @@ const activeInfo = {
 			(t.truehp() * (t.getStatus('frozen') ? 150 : 100)) / (t.truehp() + 100),
 		),
 	corpseexplosion: (c, t) => 1 + Math.floor(c.truehp() / 8),
-	adrenaline: (c, t) => `Extra: ${etg.getAdrenalRow(t.trueatk())}`,
-	fractal: (c, t) =>
-		`Copies: ${Math.min(
-			6 + Math.floor((c.owner.quanta[etg.Aether] - c.card.cost) / 2),
-			9 - c.owner.handIds.length,
-		)}`,
+	adrenaline: (c, t) =>
+		`Extra: ${c.game.wasm.getAdrenalRow(t.trueatk()).join(',')}`,
 };
 
 const activetexts = [
@@ -145,7 +143,7 @@ const activetextsRename = {
 };
 function skillName(c, sk) {
 	const namelist = [];
-	for (const name of sk.name) {
+	for (const name of sk) {
 		const nsplit = name.split(' ');
 		const rename = activetextsRename[nsplit[0]];
 		if (rename === null) continue;
@@ -154,13 +152,14 @@ function skillName(c, sk) {
 	return namelist.join(' ');
 }
 function activeText(c) {
-	const acast = c.getSkill('cast');
+	const skills = c.active;
+	const acast = skills.get('cast');
 	if (acast) return `${c.cast}:${c.castele}${skillName(c, acast)}`;
 	for (const akey of activetexts) {
-		const a = c.getSkill(akey);
+		const a = skills.get(akey);
 		if (a) return `${akey} ${skillName(c, a)}`;
 	}
-	const aauto = c.getSkill('ownattack');
+	const aauto = skills.get('ownattack');
 	return aauto ? skillName(c, aauto) : '';
 }
 
@@ -317,7 +316,7 @@ function ArrowLine({ x0, y0, x1, y1, opacity }) {
 
 class ThingInst extends Component {
 	state = {
-		gameProps: null,
+		gameHash: null,
 		instdom: null,
 	};
 
@@ -327,19 +326,17 @@ class ThingInst extends Component {
 
 	static getDerivedStateFromProps(props, state) {
 		const { game, obj, p1id } = props,
-			gameProps = game.props;
-		if (gameProps !== state.gameProps) {
+			gameHash = game.replay.length;
+		if (gameHash !== state.gameHash) {
 			const children = [],
 				isSpell = obj.type === etg.Spell,
 				{ card } = obj,
 				bgcolor = ui.maybeLightenStr(card);
 			const faceDown =
-				isSpell &&
-				obj.ownerId !== p1id &&
-				!game.getStatus(p1id, 'precognition');
+				isSpell && obj.ownerId !== p1id && !game.get(p1id, 'precognition');
 			if (faceDown) {
 				return {
-					gameProps,
+					gameHash,
 					faceDown: true,
 					instdom: (
 						<div
@@ -414,11 +411,14 @@ class ThingInst extends Component {
 							obj.getStatus('pendstate') ? obj.owner.mark : card.element
 						}\u00d7${charges}`;
 						topText = '';
-					} else if (obj.getSkill('ownattack') === Skills.locket) {
-						const mode = obj.getStatus('mode');
-						statText = `1:${~mode ? mode : obj.owner.mark}`;
 					} else {
-						statText = (charges || '').toString();
+						const ownattack = obj.getSkill('ownattack');
+						if (ownattack?.length === 1 && ownattack[0] === 'locket') {
+							const mode = obj.getStatus('mode');
+							statText = `1:${~mode ? mode : obj.owner.mark}`;
+						} else {
+							statText = `${charges || ''}`;
+						}
 					}
 				} else if (obj.type === etg.Weapon) {
 					statText = `${obj.trueatk()}${charges ? ` \u00d7${charges}` : ''}`;
@@ -430,7 +430,7 @@ class ThingInst extends Component {
 				statText = `${card.cost}:${card.costele}`;
 			}
 			return {
-				gameProps,
+				gameHash,
 				faceDown: false,
 				instdom: (
 					<div
@@ -447,7 +447,7 @@ class ThingInst extends Component {
 							/>
 						)}
 						{children}
-						{obj.hasactive('prespell', 'protectonce') && (
+						{game.game.has_protectonce(obj.id) && (
 							<div
 								className="ico protection"
 								style={{
@@ -631,17 +631,17 @@ const MatchView = connect(({ user, opts, nav }) => ({
 				showFoeplays: false,
 				foeplays: new Map(),
 				resigning: false,
-				gameProps: null,
+				gameHash: null,
 				expectedDamage: new Int16Array(2),
 				replayindex: 0,
 				replayhistory: [props.game],
 				player1: player1.id,
 				player2: player1.foeId,
 				fxid: 0,
-				startPos: imm.emptyMap,
-				endPos: imm.emptyMap,
-				fxTextPos: imm.emptyMap,
-				fxStatChange: imm.emptyMap,
+				startPos: new Map(),
+				endPos: new Map(),
+				fxTextPos: new Map(),
+				fxStatChange: new Map(),
 				effects: new Set(),
 				effectId: 0,
 				hovercard: null,
@@ -656,10 +656,10 @@ const MatchView = connect(({ user, opts, nav }) => ({
 			};
 		}
 
-		Text = (key, state, newstate, { id, text, onRest }) => {
+		Text = (key, state, newstate, id, text, onRest) => {
 			let offset;
 			const { fxid } = newstate;
-			newstate.fxTextPos = imm.update(
+			newstate.fxTextPos = updateMap(
 				newstate.fxTextPos ?? state.fxTextPos,
 				id,
 				(pos = 0) => (offset = pos) + 16,
@@ -689,7 +689,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							const effects = new Set(state.effects);
 							effects.delete(TextEffect);
 							const st = {
-								fxTextPos: imm.update(
+								fxTextPos: updateMap(
 									state.fxTextPos,
 									id,
 									pos => pos && pos - 16,
@@ -722,21 +722,25 @@ const MatchView = connect(({ user, opts, nav }) => ({
 		StatChange = (key, state, newstate, id, hp, atk) => {
 			if (!newstate.fxStatChange) newstate.fxStatChange = state.fxStatChange;
 			let oldentry, newentry;
-			newstate.fxStatChange = imm.update(newstate.fxStatChange, id, e => {
+			newstate.fxStatChange = updateMap(newstate.fxStatChange, id, e => {
 				oldentry = e;
 				newentry = e ? { ...e } : { atk: 0, hp: 0, dom: null };
 				newentry.hp += hp;
 				newentry.atk += atk;
-				newentry.dom = this.Text(key, state, newstate, {
-					id: id,
-					text: `${newentry.atk > 0 ? '+' : ''}${newentry.atk}|${
+				newentry.dom = this.Text(
+					key,
+					state,
+					newstate,
+					id,
+					`${newentry.atk > 0 ? '+' : ''}${newentry.atk}|${
 						newentry.hp > 0 ? '+' : ''
 					}${newentry.hp}`,
-					onRest: (state, st) => {
-						st.fxStatChange = imm.delete(state.fxStatChange, id);
+					(state, st) => {
+						st.fxStatChange = new Map(state.fxStatChange);
+						st.fxStatChange.delete(id);
 						return st;
 					},
-				});
+				);
 				return newentry;
 			});
 			if (!newstate.effects) newstate.effects = new Set(state.effects);
@@ -760,7 +764,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						element: c.card.element,
 						costele: isSpell ? c.card.costele : c.castele,
 						cost: isSpell ? c.card.cost : c.cast,
-						name: isSpell ? c.card.name : c.getSkill('cast').toString(),
+						name: isSpell ? c.card.name : c.getSkill('cast')[0],
 						upped: c.card.upped,
 						shiny: c.card.shiny,
 						c: cmd.c,
@@ -804,7 +808,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 					return delta;
 				});
 			}
-			game.next(cmd);
+			let effects = game.next(cmd);
 			if (
 				!iscmd &&
 				game.data.players.some(
@@ -820,84 +824,74 @@ const MatchView = connect(({ user, opts, nav }) => ({
 			}
 			this.gameStep(game);
 			this.setState(state => {
-				if (!game.effects?.length) return {};
+				let fxlen = effects.length();
+				if (fxlen === 0) return {};
 				const newstate = { effectId: state.effectId + 1 };
 				let { effectId } = state;
-				for (const effect of game.effects) {
+				for (let idx = 0; idx < fxlen; idx++) {
 					effectId++;
-					switch (effect.x) {
+					const fxkind = enums.Fx[effects.kind(idx)];
+					switch (fxkind) {
 						case 'StartPos':
 							newstate.startPos = (
 								newstate.startPos ?? new Map(state.startPos)
-							).set(effect.id, effect.src);
+							).set(effects.id(idx), effects.param1(idx));
 							break;
 						case 'EndPos':
 							if (!newstate.startPos)
 								newstate.startPos = new Map(state.startPos);
-							newstate.startPos.delete(effect.id);
+							newstate.startPos.delete(effects.id(idx));
 							newstate.endPos = (newstate.endPos ?? new Map(state.endPos)).set(
-								effect.id,
-								effect.tgt,
+								effects.id(idx),
+								effects.param1(idx),
 							);
 							break;
+						case 'Card':
+							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects.add(
+								this.Text(
+									effectId,
+									state,
+									newstate,
+									effects.id(idx),
+									game.Cards.Codes[effects.param1(idx)].name,
+								),
+							);
+
 						case 'Poison':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							newstate.effects.add(
-								this.Text(effectId, state, newstate, {
-									id: effect.id,
-									text: `Poison ${effect.amt}`,
-								}),
-							);
-							break;
-						case 'Death':
-							if (!newstate.effects) newstate.effects = new Set(state.effects);
-							newstate.effects.add(
-								this.Text(effectId, state, newstate, {
-									id: effect.id,
-									text: 'Death',
-								}),
+								this.Text(
+									effectId,
+									state,
+									newstate,
+									effects.id(idx),
+									`Poison ${effects.param1(idx)}`,
+								),
 							);
 							break;
 						case 'Delay':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							newstate.effects.add(
-								this.Text(effectId, state, newstate, {
-									id: effect.id,
-									text: `Delay ${effect.amt}`,
-								}),
-							);
-							break;
-						case 'Dive':
-							if (!newstate.effects) newstate.effects = new Set(state.effects);
-							newstate.effects.add(
-								this.Text(effectId, state, newstate, {
-									id: effect.id,
-									text: 'Dive',
-								}),
-							);
-							break;
-						case 'Free':
-							if (!newstate.effects) newstate.effects = new Set(state.effects);
-							newstate.effects.add(
-								this.Text(effectId, state, newstate, {
-									id: effect.id,
-									text: 'Free',
-								}),
+								this.Text(
+									effectId,
+									state,
+									newstate,
+									effects.id(idx),
+									`Delay ${effects.param1(idx)}`,
+								),
 							);
 							break;
 						case 'Freeze':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							newstate.effects.add(
-								this.Text(effectId, state, newstate, {
-									id: effect.id,
-									text: `Freeze ${effect.amt}`,
-								}),
-							);
-							break;
-						case 'Text':
-							if (!newstate.effects) newstate.effects = new Set(state.effects);
-							newstate.effects.add(
-								this.Text(effectId, state, newstate, effect),
+								this.Text(
+									effectId,
+									state,
+									newstate,
+									effects.id(idx),
+									`Freeze ${effects.param1(idx)}`,
+								),
 							);
 							break;
 						case 'Dmg':
@@ -905,8 +899,8 @@ const MatchView = connect(({ user, opts, nav }) => ({
 								effectId,
 								state,
 								newstate,
-								effect.id,
-								-effect.amt,
+								effects.id(idx),
+								-effects.param1(idx),
 								0,
 							);
 							break;
@@ -915,16 +909,16 @@ const MatchView = connect(({ user, opts, nav }) => ({
 								effectId,
 								state,
 								newstate,
-								effect.id,
+								effects.id(idx),
 								0,
-								effect.amt,
+								effects.param1(idx),
 							);
 							break;
 						case 'LastCard':
 							newstate.fxid = (newstate.fxid || state.fxid) + 1;
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							const playerName =
-								game.data.players[game.byId(effect.id).getIndex()].name;
+								game.data.players[game.byId(effects.id(idx)).getIndex()].name;
 							const LastCardEffect = (
 								<Components.Delay
 									key={effectId}
@@ -951,12 +945,55 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							);
 							newstate.effects.add(LastCardEffect);
 							break;
+						case 'Heal':
+							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects.add(
+								this.Text(
+									effectId,
+									state,
+									newstate,
+									effects.id(idx),
+									`+${effects.param1(idx)}`,
+								),
+							);
+							break;
+						case 'Lives':
+							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects.add(
+								this.Text(
+									effectId,
+									state,
+									newstate,
+									effects.id(idx),
+									`${effects.param1(idx)} lives`,
+								),
+							);
+							break;
+						case 'Quanta':
+							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects.add(
+								this.Text(
+									effectId,
+									state,
+									newstate,
+									effects.id(idx),
+									`${effects.param1(idx)}:${effects.param2(idx)}`,
+								),
+							);
+							break;
+						case 'Sfx':
+							playSound(game.wasm.Sfx[effects.sfx(idx)]);
+							break;
 						default:
-							console.log('Unknown effect', effect);
+							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects.add(
+								this.Text(effectId, state, newstate, effects.id(idx), fxkind),
+							);
+							break;
 					}
 				}
 				newstate.effectId = effectId;
-				game.effects.length = 0;
+				effects.free();
 				return newstate;
 			});
 			const newTurn = game.turn;
@@ -972,12 +1009,12 @@ const MatchView = connect(({ user, opts, nav }) => ({
 		};
 
 		static getDerivedStateFromProps(props, state) {
-			if (props.game.props !== state.gameProps) {
+			if (props.game.replay.length !== state.gameHash) {
 				const player1 = props.game.byId(
 					props.replay ? props.game.turn : state.player1,
 				);
 				return {
-					gameProps: props.game.props,
+					gameHash: props.game.replay.length,
 					expectedDamage: props.game.expectedDamage(
 						props.expectedDamageSamples | 0 || 4,
 					),
@@ -994,13 +1031,13 @@ const MatchView = connect(({ user, opts, nav }) => ({
 				newstate.replayhistory = history;
 				while (idx >= history.length) {
 					const gclone = history[history.length - 1].clone();
-					gclone.next(this.props.replay.moves[history.length - 1]);
+					gclone.next(this.props.replay.moves[history.length - 1], false);
 					history.push(gclone);
 				}
 			}
 			const game = (newstate.replayhistory ?? state.replayhistory)[idx];
 			newstate.player1 = game.turn;
-			newstate.player2 = game.get(game.turn).get('foe');
+			newstate.player2 = game.get_foe(game.turn);
 			return newstate;
 		};
 
@@ -1093,16 +1130,13 @@ const MatchView = connect(({ user, opts, nav }) => ({
 			const { game } = this.props;
 			if (
 				game.turn === this.state.player1 &&
-				game.phase === etg.MulliganPhase
+				game.phase === game.wasm.Phase.Mulligan
 			) {
 				this.applyNext({ x: 'accept' });
 			} else if (game.winner) {
 				this.gotoResult();
 			} else if (game.turn === this.state.player1) {
-				if (
-					discard === 0 &&
-					game.get(this.state.player1).get('hand').length === 8
-				) {
+				if (discard === 0 && game.full_hand(this.state.player1)) {
 					this.setState({
 						targeting: {
 							filter: obj =>
@@ -1131,8 +1165,8 @@ const MatchView = connect(({ user, opts, nav }) => ({
 				this.setState({ resigning: false });
 			} else if (game.turn === this.state.player1) {
 				if (
-					game.phase === etg.MulliganPhase &&
-					game.get(this.state.player1).get('hand').length
+					game.phase === game.wasm.Phase.Mulligan &&
+					!game.empty_hand(this.state.player1)
 				) {
 					this.applyNext({ x: 'mulligan' });
 				} else if (this.state.targeting) {
@@ -1146,7 +1180,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 				this.props.dispatch(store.doNav(import('./Challenge.js'), {}));
 			} else if (
 				this.props.game.winner ||
-				this.props.game.get(this.state.player1).get('resigning')
+				this.props.game.get(this.state.player1, 'resigned')
 			) {
 				this.gotoResult();
 			} else if (!this.state.resigning) {
@@ -1160,31 +1194,28 @@ const MatchView = connect(({ user, opts, nav }) => ({
 		thingClick = obj => {
 			const { game } = this.props;
 			this.clearCard();
-			if (this.props.replay || game.phase !== etg.PlayPhase) return;
+			if (this.props.replay || game.phase !== game.wasm.Phase.Play) return;
 			if (this.state.targeting) {
 				if (this.state.targeting.filter(obj)) {
 					this.state.targeting.cb(obj);
 				}
 			} else if (obj.ownerId === this.state.player1 && obj.canactive()) {
-				const cb = tgt => {
-					this.applyNext({ x: 'cast', c: obj.id, t: tgt && tgt.id });
-				};
+				const cb = tgt => this.applyNext({ x: 'cast', c: obj.id, t: tgt?.id });
 				if (obj.type === etg.Spell && obj.card.type !== etg.Spell) {
 					cb();
 				} else {
-					const active = obj.getSkill('cast'),
-						targetFilter = game.targetFilter(obj, active);
-					if (!targetFilter) {
+					const requiresTarget = game.requiresTarget(obj.id);
+					if (!requiresTarget) {
 						cb();
 					} else {
 						this.setState({
 							targeting: {
-								filter: targetFilter,
+								filter: tgt => game.canTarget(obj.id, tgt.id),
 								cb: tgt => {
 									cb(tgt);
 									this.setState({ targeting: null });
 								},
-								text: active.toString(),
+								text: obj.getSkill('cast')[0],
 								src: obj,
 							},
 						});
@@ -1196,7 +1227,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 		gameStep(game) {
 			const turn = game.byId(game.turn);
 			if (turn.data.ai === 1) {
-				if (game.phase === etg.PlayPhase) {
+				if (game.phase <= game.wasm.Phase.Play) {
 					aiWorker
 						.send({
 							data: {
@@ -1204,11 +1235,11 @@ const MatchView = connect(({ user, opts, nav }) => ({
 								set: game.data.set,
 								players: game.data.players,
 							},
-							moves: game.get(game.id).get('replay'),
+							moves: game.replay,
 						})
 						.then(e => {
 							const now = Date.now();
-							if (now < this.aiDelay) {
+							if (game.phase === game.wasm.Phase.Play && now < this.aiDelay) {
 								return new Promise(resolve =>
 									setTimeout(() => resolve(e), this.aiDelay - now),
 								);
@@ -1221,13 +1252,6 @@ const MatchView = connect(({ user, opts, nav }) => ({
 								Date.now() + (game.turn === this.state.player1 ? 2000 : 200);
 							this.applyNext(e.data.cmd, true);
 						});
-				} else if (game.phase === etg.MulliganPhase) {
-					this.applyNext(
-						{
-							x: aiMulligan(turn) ? 'accept' : 'mulligan',
-						},
-						true,
-					);
 				}
 			}
 		}
@@ -1282,7 +1306,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							];
 						if (
 							nextId !== this.state.player1 &&
-							!this.props.game.get(nextId).get('out')
+							!this.props.game.get(nextId, 'out')
 						) {
 							break;
 						}
@@ -1310,7 +1334,10 @@ const MatchView = connect(({ user, opts, nav }) => ({
 				store.setCmds({
 					move: ({ cmd, hash }) => {
 						const { game } = this.props;
-						if ((!cmd.c || game.get(cmd.c)) && (!cmd.t || game.get(cmd.t))) {
+						if (
+							(!cmd.c || game.has_id(cmd.c)) &&
+							(!cmd.t || game.has_id(cmd.t))
+						) {
 							this.applyNext(cmd, true);
 							if (game.hash() === hash) return;
 						}
@@ -1410,11 +1437,11 @@ const MatchView = connect(({ user, opts, nav }) => ({
 			let turntell, endText, cancelText;
 			const cloaked = player2.isCloaked();
 
-			if (game.phase !== etg.EndPhase) {
+			if (game.phase !== game.wasm.Phase.End) {
 				turntell = this.state.targeting
 					? this.state.targeting.text
 					: `${game.turn === player1.id ? 'Your' : 'Their'} turn${
-							game.phase > etg.MulliganPhase
+							game.phase > game.wasm.Phase.Mulligan
 								? ''
 								: game.players[0] === player1.id
 								? "\nYou're first"
@@ -1423,12 +1450,12 @@ const MatchView = connect(({ user, opts, nav }) => ({
 				if (game.turn === player1.id) {
 					endText = this.state.targeting
 						? ''
-						: game.phase === etg.PlayPhase
+						: game.phase === game.wasm.Phase.Play
 						? 'End Turn'
 						: game.turn === player1.id
 						? 'Accept'
 						: '';
-					if (game.phase !== etg.PlayPhase) {
+					if (game.phase !== game.wasm.Phase.Play) {
 						cancelText = game.turn === player1.id ? 'Mulligan' : '';
 					} else {
 						cancelText =
@@ -1547,7 +1574,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 				for (let i = 0; i < 16; i++) {
 					const pr = pl.permanents[i];
 					if (pr) {
-						if (pr.hasactive('attack', 'flooddeath')) floodvisible = true;
+						if (game.is_flooding(pr.id)) floodvisible = true;
 						if (j === 0 || !cloaked || pr.getStatus('cloak')) {
 							things.push(pr.id);
 						}
@@ -1562,7 +1589,8 @@ const MatchView = connect(({ user, opts, nav }) => ({
 					things.push(sh);
 				}
 				const qx = 0,
-					qy = j ? 106 : 308;
+					qy = j ? 106 : 308,
+					plquanta = pl.quanta;
 				for (let k = 1; k < 13; k++) {
 					children.push(
 						<span
@@ -1577,7 +1605,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 								paddingLeft: '16px',
 							}}>
 							&nbsp;
-							{pl.quanta[k] || ''}
+							{plquanta[k] || ''}
 						</span>,
 					);
 				}
@@ -1667,7 +1695,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 					/>,
 					<div
 						key={`${j}deck`}
-						className={pl.deckIds.length ? 'ico ccback' : ''}
+						className={pl.deck_length ? 'ico ccback' : ''}
 						style={{
 							position: 'absolute',
 							left: '103px',
@@ -1679,7 +1707,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							textShadow: '2px 2px 1px #000,2px 2px 2px #000',
 							zIndex: '2',
 						}}>
-						{pl.deckIds.length || '0!!'}
+						{pl.deck_length || '0!!'}
 					</div>,
 				);
 			}
@@ -1742,10 +1770,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							if (startpos < 0) {
 								pos = {
 									x: 103,
-									y:
-										(item.data.ownerId === player1.id) === (startpos === -1)
-											? 551
-											: 258,
+									y: -startpos === player1.id ? 551 : 258,
 								};
 							} else if (startpos) {
 								pos = this.idtrack.get(startpos);
@@ -1765,10 +1790,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							if (endpos < 0) {
 								pos = {
 									x: 103,
-									y:
-										(item.data.ownerId === player1.id) === (endpos === -1)
-											? 551
-											: 258,
+									y: -endpos === player1.id ? 551 : 258,
 								};
 							} else {
 								pos = this.idtrack.get(endpos || item.data.id);
@@ -1904,7 +1926,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 					/>
 					{!props.replay &&
 						!game.data.spectate &&
-						(game.turn === player1.id || game.winner) && (
+						(game.turn === player1.id || !!game.winner) && (
 							<>
 								{endText && (
 									<input

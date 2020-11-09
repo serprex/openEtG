@@ -8,7 +8,6 @@ import * as mkAi from '../mkAi.js';
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
 import * as store from '../store.js';
-import RngMock from '../RngMock.js';
 import * as Components from '../Components/index.js';
 import * as userutil from '../userutil.js';
 import parseChat from '../parseChat.js';
@@ -174,7 +173,7 @@ export default connect(({ user, opts }) => ({
 				changepass: false,
 				newpass: '',
 				newpass2: '',
-				tipNumber: RngMock.upto(tipjar.length),
+				tipNumber: (Math.random() * tipjar.length) | 0,
 				tipText: '',
 			};
 		}

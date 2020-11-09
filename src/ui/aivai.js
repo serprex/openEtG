@@ -1,11 +1,10 @@
-import Game from '../Game.js';
+import CreateGame from '../Game.js';
 import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
-import aiMulligan from '../ai/mulligan.js';
 import { randint } from '../util.js';
 import AsyncWorker from '../AsyncWorker.js';
 
-const AiWorker = import('../ai/ai.worker.js');
+const AiWorker = import('../ai.worker.js');
 let aiWorker = null;
 
 const deckeles = [
@@ -72,13 +71,19 @@ function fightItOut() {
 	result.textContent = '';
 	replay.textContent = '';
 	const cmds = {
+		accept(game, player, data) {},
+		mulligan(game, player, data) {
+			result.textContent += `${player}\tMULLIGAN\n`;
+		},
 		end(game, player, data) {
 			result.textContent += `${player}\tEND TURN ${game.countPlies()}\n`;
 		},
 		cast(game, player, data) {
 			const c = game.byId(data.c),
 				t = game.byId(data.t);
-			result.textContent += `${player}\t${c}${t ? ' targets ' + t : ''}\n`;
+			result.textContent += `${player}\t${c.card.name}${
+				t ? ` targets ${t.card ? t.card.name : t.id}` : ''
+			}\n`;
 		},
 	};
 	async function gameStep(worker) {
@@ -91,19 +96,13 @@ function fightItOut() {
 				deck,
 			}));
 			if (seed & 1) players.reverse();
-			const game = new Game({ seed, set, players });
+			const game = await CreateGame({ seed, set, players });
 			const realp1 = game.byUser(0).id;
 
-			while (game.phase === etg.MulliganPhase) {
-				game.next({
-					x: aiMulligan(game.byId(game.turn)) ? 'accept' : 'mulligan',
-				});
-			}
-
-			while (game.phase === etg.PlayPhase) {
+			while (game.phase < game.wasm.Phase.End) {
 				const msg = await worker.send({
 					data: game.data,
-					moves: game.get(game.id).get('replay'),
+					moves: game.replay,
 				});
 				if (!msg) return;
 				const {
@@ -122,7 +121,7 @@ function fightItOut() {
 				} wins. ${game.countPlies()}\n${result.textContent}`;
 				replay.textContent = JSON.stringify({
 					...game.data,
-					moves: game.get(game.id).get('replay'),
+					moves: game.replay,
 				});
 				return stopFight();
 			} else {

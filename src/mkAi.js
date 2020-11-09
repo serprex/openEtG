@@ -7,12 +7,12 @@ import * as store from './store.js';
 import * as userutil from './userutil.js';
 import * as util from './util.js';
 import deckgen from './deckgen/index.js';
-import Game from './Game.js';
+import CreateGame from './Game.js';
 
-export function run(game) {
-	if (game) {
+export async function run(gamethunk) {
+	const game = await gamethunk;
+	if (game)
 		store.store.dispatch(store.doNav(import('./views/Match.js'), { game }));
-	}
 }
 
 export function mkPremade(level, daily, datafn = null) {
@@ -65,7 +65,7 @@ export function mkPremade(level, daily, datafn = null) {
 		data.players[1].drawpower = 2;
 	}
 	RngMock.shuffle(data.players);
-	return new Game(datafn ? datafn(data) : data);
+	return CreateGame(datafn ? datafn(data) : data);
 }
 const randomNames = [
 	'Adrienne',
@@ -138,5 +138,5 @@ export function mkAi(level, daily, datafn = null) {
 	};
 	if (daily !== undefined) data.daily = daily;
 	RngMock.shuffle(data.players);
-	return new Game(datafn ? datafn(data) : data);
+	return CreateGame(datafn ? datafn(data) : data);
 }

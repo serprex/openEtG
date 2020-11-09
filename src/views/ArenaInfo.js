@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { connect } from 'react-redux';
 
 import Cards from '../Cards.js';
-import Game from '../Game.js';
+import CreateGame from '../Game.js';
 import * as sock from '../sock.js';
 import * as store from '../store.js';
 import * as util from '../util.js';
@@ -19,7 +19,7 @@ function RenderInfo(props) {
 				store.store.dispatch(store.chatMsg('Deck too small'));
 				return;
 			}
-			const game = new Game({
+			CreateGame({
 				seed: util.randint(),
 				cardreward: '',
 				rematch: testDeck,
@@ -35,8 +35,9 @@ function RenderInfo(props) {
 						drawpower: info.draw,
 					},
 				]),
-			});
-			store.store.dispatch(store.doNav(import('./Match.js'), { game }));
+			}).then(game =>
+				store.store.dispatch(store.doNav(import('./Match.js'), { game })),
+			);
 		};
 		const card =
 			info.card && (y ? etgutil.asUpped(info.card, true) : info.card);

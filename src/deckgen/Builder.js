@@ -1,7 +1,6 @@
 import * as etg from '../etg.js';
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
-import Skills from '../Skills.js';
 
 const hasBuff = new Uint16Array([
 	5125,
@@ -88,12 +87,12 @@ const filters = {
 				cast = c.getSkill('cast');
 			if (
 				cast &&
-				(cast === Skills.mutation ||
-					cast === Skills.improve ||
-					cast === Skills.jelly ||
-					cast === Skills.trick ||
-					cast === Skills.immolate ||
-					cast === Skills.appease)
+				(cast[0] === 'mutation' ||
+					cast[0] === 'improve' ||
+					cast[0] === 'jelly' ||
+					cast[0] === 'trick' ||
+					cast[0] === 'immolate' ||
+					cast[0] === 'appease')
 			) {
 				n++;
 			}
@@ -213,10 +212,10 @@ export default class Builder {
 		}
 		if (card.type === etg.Creature) {
 			const auto = card.getSkill('ownattack'),
-				castText = auto ? auto.castText : '';
+				castText = auto ? auto[0] : '';
 			if (castText && castText.startsWith('quanta '))
 				ecost[castText.split(' ')[1]] -= 3;
-			else if (auto === Skills.siphon) ecost[etg.Darkness] -= 2;
+			else if (castText === 'siphon') ecost[etg.Darkness] -= 2;
 		} else if (card.type === etg.Shield) this.anyshield++;
 		else if (card.type === etg.Weapon) this.anyweapon++;
 	}

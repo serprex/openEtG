@@ -1,9 +1,11 @@
-import Cards from '../Cards.js';
+import OrigCards from '../Cards.js';
+import OpenCards from '../../Cards.js';
+import { encodedeck } from '../../etgutil.js';
+import { deck } from '../../svg.js';
 
 const infobox = document.getElementById('infobox');
-document.getElementById('nameinput').addEventListener('keydown', printstat);
+document.getElementById('nameinput').addEventListener('input', printstat);
 function printstat(e) {
-	if (e.keyCode !== 13) return;
 	const hide = new Set(
 		['pillar', 'mark', 'shard', 'rare', 'nymph'].filter(
 			x => document.getElementById('hide' + x).checked,
@@ -11,13 +13,14 @@ function printstat(e) {
 	);
 	let letter,
 		ignore = name => name;
-	['Elite', 'Improved', 'Shard', 'Mark'].forEach(function (x) {
+	for (const x of ['Elite', 'Improved', 'Shard', 'Mark']) {
 		if (document.getElementById('ignore' + x).checked) {
 			const oldignore = ignore;
 			ignore = name => oldignore(name).replace(new RegExp(`^${x}( of)? `), '');
 		}
-	});
+	}
 	const upped = document.querySelector("input[name='upped']:checked").value;
+	const set = document.querySelector("input[name='set']:checked").value;
 	function cardfilter(card) {
 		if (ignore(card.name).charAt(0) !== letter) return false;
 		if (hide.has('pillar') && !card.type) return false;
@@ -33,28 +36,31 @@ function printstat(e) {
 		return true;
 	}
 	while (infobox.firstChild) infobox.firstChild.remove();
-	const deck = [],
+	const cards = [],
 		letters = new Set();
 	for (let i = 0; i < this.value.length; i++) {
 		letter = this.value.charAt(i).toUpperCase();
 		if (letters.has(letter)) continue;
 		letters.add(letter);
-		if (upped == 'no' || upped == 'both')
-			deck.push(...Cards.filter(false, cardfilter));
-		if (upped == 'yes' || upped == 'both')
-			deck.push(...Cards.filter(true, cardfilter));
+		if (set == 'open' || set == 'both') {
+			if (upped == 'no' || upped == 'both')
+				cards.push(...OpenCards.filter(false, cardfilter));
+			if (upped == 'yes' || upped == 'both')
+				cards.push(...OpenCards.filter(true, cardfilter));
+		}
+		if (set == 'orig' || set == 'both') {
+			if (upped == 'no' || upped == 'both')
+				cards.push(...OrigCards.filter(false, cardfilter));
+			if (upped == 'yes' || upped == 'both')
+				cards.push(...OrigCards.filter(true, cardfilter));
+		}
 	}
 	if (document.getElementById('sortele').checked)
-		deck.sort((x, y) => x.element - y.element);
-	for (let i = 0; i < deck.length; i += 70) {
-		const img = document.createElement('img');
-		img.src =
-			'http://dek.im/deck/' +
-			deck
-				.slice(i, i + 70)
-				.map(x => x.code.toString(32))
-				.join(' ');
-		infobox.appendChild(img);
+		cards.sort((x, y) => x.element - y.element);
+	if (!cards.length) infobox.appendChild(document.createTextNode('No matches'));
+	else {
+		const div = document.createElement('div');
+		div.innerHtml = deck(encodedeck(cards));
+		infobox.appendChild(div);
 	}
-	if (!deck.length) infobox.appendChild(document.createTextNode('No matches'));
 }

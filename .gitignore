@@ -3,6 +3,7 @@ Cards/*
 db/*
 backups/*
 bundle/*
+pkg/*
 atlas.json
 atlas.css
 atlas.png
@@ -26,3 +27,6 @@ mosaic.htm
 vanilla/deckinfo.htm
 vanilla/namegame.htm
 vanilla/speed.htm
+src/OpenNames.js
+src/OriginalNames.js
+src/enum.json

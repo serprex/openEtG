@@ -1,5 +1,4 @@
 import * as svg from '../svg.js';
-import fs from 'fs/promises';
 
 export default async function (url, stime) {
 	const deck = url.replace(/\.svg$/, '');

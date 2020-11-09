@@ -4,7 +4,6 @@ import * as etg from '../etg.js';
 import * as mkAi from '../mkAi.js';
 import * as sock from '../sock.js';
 import Decks from '../Decks.json';
-import RngMock from '../RngMock.js';
 import * as Components from '../Components/index.js';
 import * as store from '../store.js';
 
@@ -116,7 +115,7 @@ export default connect(({ user }) => ({ user }))(function Colosseum({ user }) {
 							top: '280px',
 						}}
 						onClick={() => {
-							const nymph = etg.NymphList[RngMock.upto(12) + 1];
+							const nymph = etg.NymphList[(Math.random() * 12 + 1) | 0];
 							sock.userExec('donedaily', { daily: 6, c: nymph });
 							store.store.dispatch(
 								store.doNav(import('./MainMenu.js'), { nymph }),

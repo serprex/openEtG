@@ -1,6 +1,5 @@
-import Game from './Game.js';
-import Cards from './Cards.js';
+import { Game } from './Game.js';
 const RngMock = Object.create(Game.prototype);
-RngMock.props = new Map().set(1, new Map().set('Cards', Cards));
+RngMock.data = { set: '' };
 RngMock.rng = Math.random;
 export default RngMock;

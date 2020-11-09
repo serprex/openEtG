@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import * as sock from '../sock.js';
 import Cards from '../Cards.js';
 import { parseInput, randint } from '../util.js';
-import Game from '../Game.js';
+import CreateGame from '../Game.js';
 import * as etgutil from '../etgutil.js';
 import * as Components from '../Components/index.js';
 import * as store from '../store.js';
@@ -352,8 +352,8 @@ export default connect(({ user, opts }) => ({
 				players: this.playersAsData(deck),
 			};
 			RngMock.shuffle(gameData.players);
-			this.props.dispatch(
-				store.doNav(import('./Match.js'), { game: new Game(gameData) }),
+			CreateGame(gameData).then(game =>
+				this.props.dispatch(store.doNav(import('./Match.js'), { game })),
 			);
 		};
 
@@ -373,18 +373,19 @@ export default connect(({ user, opts }) => ({
 			} catch {
 				return console.log('Invalid JSON');
 			}
-			const data = {
+			CreateGame({
 				seed: replay.seed,
 				set: replay.set,
 				cardreward: '',
 				goldreward: 0,
 				players: replay.players,
-			};
-			this.props.dispatch(
-				store.doNav(import('./Match.js'), {
-					replay,
-					game: new Game(data),
-				}),
+			}).then(game =>
+				this.props.dispatch(
+					store.doNav(import('./Match.js'), {
+						replay,
+						game,
+					}),
+				),
 			);
 		};
 

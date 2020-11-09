@@ -1,7 +1,7 @@
 import Cards from './Cards.js';
 import OrigCards from './vanilla/Cards.js';
 import * as etgutil from './etgutil.js';
-import Game from './Game.js';
+import CreateGame from './Game.js';
 import * as store from './store.js';
 import * as userutil from './userutil.js';
 import RngMock from './RngMock.js';
@@ -109,7 +109,7 @@ const sockEvents = {
 	},
 	foearena(data) {
 		const { user } = store.store.getState();
-		const game = new Game({
+		CreateGame({
 			players: RngMock.shuffle([
 				{
 					idx: 1,
@@ -145,17 +145,20 @@ const sockEvents = {
 				}
 				userEmit('foearena', { lv: data.lv });
 			},
-		});
-		store.store.dispatch(store.doNav(import('./views/Match.js'), { game }));
+		}).then(game =>
+			store.store.dispatch(store.doNav(import('./views/Match.js'), { game })),
+		);
 	},
 	pvpgive(data) {
 		if (pvp) {
 			pvp = null;
-			store.store.dispatch(
-				store.doNav(import('./views/Match.js'), {
-					gameid: data.id,
-					game: new Game(data.data),
-				}),
+			CreateGame(data.data).then(game =>
+				store.store.dispatch(
+					store.doNav(import('./views/Match.js'), {
+						gameid: data.id,
+						game,
+					}),
+				),
 			);
 		}
 	},

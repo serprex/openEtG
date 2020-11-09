@@ -1,5 +1,6 @@
 const path = require('path'),
-	HtmlPlugin = require('html-webpack-plugin');
+	HtmlPlugin = require('html-webpack-plugin'),
+	WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 
 module.exports = {
 	experiments: { asyncWebAssembly: true },
@@ -42,7 +43,7 @@ module.exports = {
 				type: 'javascript/auto',
 				resolve: {
 					fullySpecified: false,
-				}
+				},
 			},
 			{
 				test: /\.m?jsx?$/,
@@ -56,7 +57,7 @@ module.exports = {
 								{
 									runtime: 'automatic',
 									useSpread: true,
-								}
+								},
 							],
 							[
 								'@babel/preset-env',
@@ -76,9 +77,7 @@ module.exports = {
 								},
 							],
 						],
-						plugins: [
-							'@babel/plugin-proposal-class-properties',
-						],
+						plugins: ['@babel/plugin-proposal-class-properties'],
 					},
 				},
 			},
@@ -90,6 +89,12 @@ module.exports = {
 		],
 	},
 	plugins: [
+		new WasmPackPlugin({
+			crateDirectory: path.resolve(__dirname, 'src/rs'),
+			outDir: path.resolve(__dirname, 'src/rs/pkg'),
+			outName: 'etg',
+			extraArgs: '--no-typescript --weak-refs',
+		}),
 		new HtmlPlugin({
 			chunks: ['main'],
 			filename: 'index.html',

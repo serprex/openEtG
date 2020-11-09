@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import * as etg from '../../etg.js';
 import aiDecks from '../Decks.json';
 import * as etgutil from '../../etgutil.js';
-import Game from '../../Game.js';
+import CreateGame from '../../Game.js';
 import RngMock from '../RngMock.js';
 import * as store from '../../store.js';
 import { randint } from '../../util.js';
@@ -112,7 +112,12 @@ export default connect(({ user, orig, opts }) => ({
 					: level === 'ai4'
 					? this.mkAi4()
 					: RngMock.choose(aiDecks[level]);
-			const game = new Game({
+			if (cost > 0) {
+				const update = { electrum: -cost };
+				userEmit('origadd', update);
+				this.props.dispatch(store.addOrig(update));
+			}
+			CreateGame({
 				seed: randint(),
 				cardreward: '',
 				set: 'Original',
@@ -138,14 +143,10 @@ export default connect(({ user, orig, opts }) => ({
 						markpower: level === 'ai4' || level === 'fg' ? 3 : 1,
 					},
 				]),
-			});
-			if (cost > 0) {
-				const update = { electrum: -cost };
-				userEmit('origadd', update);
-				this.props.dispatch(store.addOrig(update));
-			}
-			this.props.dispatch(
-				store.doNav(import('../../views/Match.js'), { game }),
+			}).then(game =>
+				this.props.dispatch(
+					store.doNav(import('../../views/Match.js'), { game }),
+				),
 			);
 		};
 

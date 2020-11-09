@@ -6,8 +6,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 process.chdir(__dirname);
 
-import fs from 'fs/promises';
-
 import crypto from 'crypto';
 import http from 'http';
 import https from 'https';

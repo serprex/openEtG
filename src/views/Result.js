@@ -3,15 +3,13 @@ import { connect } from 'react-redux';
 
 import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
-import * as imm from '../immutable.js';
 import * as sock from '../sock.js';
 import * as store from '../store.js';
 import * as userutil from '../userutil.js';
 import * as Components from '../Components/index.js';
-import Game from '../Game.js';
+import CreateGame from '../Game.js';
 import Cards from '../Cards.js';
 import RngMock from '../RngMock.js';
-import Skill from '../Skill.js';
 
 const streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
 
@@ -30,7 +28,7 @@ const BonusList = [
 		name: 'Are we idle yet?',
 		desc: 'Take longer than 3 minutes to win',
 		func: (game, p1, p2, stats) =>
-			Math.min((game.get(game.id).get('duration') - 180000) / 60000, 0.2),
+			Math.min((game.duration - 180000) / 60000, 0.2),
 	},
 	{
 		name: 'Colosseum Bonus',
@@ -58,7 +56,7 @@ const BonusList = [
 		name: 'Deckout',
 		desc: 'Win through deckout',
 		func: (game, p1, p2, stats) =>
-			p2.deckIds.length === 0 && p2.hp > 0 ? 0.5 : 0,
+			p2.deck_length === 0 && p2.hp > 0 ? 0.5 : 0,
 	},
 	{
 		name: 'Double Kill',
@@ -74,7 +72,7 @@ const BonusList = [
 		name: 'First past the post',
 		desc: 'Win with non-positive hp, or foe loses from damage with positive hp',
 		func: (game, p1, p2, stats) =>
-			p2.deckIds.length && (p1.hp <= 0 || p2.hp > 0) ? 0.1 : 0,
+			p2.deck_length && (p1.hp <= 0 || p2.hp > 0) ? 0.1 : 0,
 	},
 	{
 		name: 'Full Health',
@@ -111,15 +109,15 @@ const BonusList = [
 		name: 'Mid Turn',
 		desc: 'Defeat foe with game ended still on own turn',
 		func: (game, p1, p2, stats) => {
-			const replay = game.get(game.id).get('replay');
-			return replay[replay.length - 1].x === 'end' ? 0 : 0.1;
+			const { replay } = game;
+			return replay.length && replay[replay.length - 1].x === 'end' ? 0 : 0.1;
 		},
 	},
 	{
 		name: 'Murderer',
 		desc: 'Kill over 5 creatures',
 		func: (game, p1, p2, stats) =>
-			stats.creaturesDied.get(p1.id) > 5 ? 0.15 : 0,
+			game.get(p1.id, '_creaturesDied') > 5 ? 0.15 : 0,
 	},
 	{
 		name: 'Perfect Damage',
@@ -163,7 +161,7 @@ const BonusList = [
 	{
 		name: 'Waiter',
 		desc: 'Won with 0 cards in deck',
-		func: (game, p1, p2, stats) => (p1.deckIds.length === 0 ? 0.2 : 0),
+		func: (game, p1, p2, stats) => (p1.deck_length === 0 ? 0.2 : 0),
 	},
 	{
 		name: 'Weapon Master',
@@ -250,10 +248,10 @@ export default connect(({ user }) => ({ user }))(
 			}
 		};
 
-		computeBonuses(game, lefttext, streakrate) {
+		async computeBonuses(game, lefttext, streakrate) {
 			if (game.data.endurance !== undefined) return 1;
-			const replay = game.get(game.id).get('replay'),
-				replayGame = new Game({
+			const replay = game.replay,
+				replayGame = await CreateGame({
 					seed: game.data.seed,
 					set: game.data.set,
 					players: game.data.players,
@@ -261,7 +259,6 @@ export default connect(({ user }) => ({ user }))(
 				replayStats = {
 					weaponsPlayed: new Map(),
 					creaturesPlayed: new Map(),
-					creaturesDied: new Map(),
 					pillarsPlayed: new Map(),
 				},
 				incrStat = key => {
@@ -271,21 +268,7 @@ export default connect(({ user }) => ({ user }))(
 					);
 				};
 
-			replayGame.set(
-				replayGame.id,
-				'active',
-				new Map([
-					[
-						'death',
-						new Skill(
-							'countdeath',
-							(ctx, c, t) => incrStat('creaturesDied'),
-							false,
-							null,
-						),
-					],
-				]),
-			);
+			replayGame.game._tracedeath();
 			for (const move of replay) {
 				if (move.x === 'cast') {
 					const c = replayGame.byId(move.c);
@@ -326,20 +309,18 @@ export default connect(({ user }) => ({ user }))(
 			return bonus;
 		}
 
-		componentDidMount() {
+		async componentDidMount() {
 			document.addEventListener('keydown', this.onkeydown);
 			const { game } = this.props,
 				level = game.data.level,
 				winner = game.winner === this.state.player1.id,
 				lefttext = [
 					<div key="0">{game.countPlies()} plies</div>,
-					<div key="1">
-						{(game.get(game.id).get('duration') / 1000).toFixed(1)} seconds
-					</div>,
+					<div key="1">{(game.duration / 1000).toFixed(1)} seconds</div>,
 				];
 
 			this.props.dispatch(store.clearChat('Replay'));
-			const replay = game.get(game.id).get('replay');
+			const { replay } = game;
 			if (
 				replay &&
 				game.data.endurance === undefined &&
@@ -348,7 +329,7 @@ export default connect(({ user }) => ({ user }))(
 				this.props.dispatch(
 					store.chat(
 						JSON.stringify({
-							date: game.get(game.id).get('time'),
+							date: game.time,
 							seed: game.data.seed,
 							set: game.data.set,
 							players: game.data.players,
@@ -417,7 +398,7 @@ export default connect(({ user }) => ({ user }))(
 							state.goldreward = Math.round(
 								userutil.pveCostReward[level * 2 + 1] *
 									(1 + streakrate) *
-									this.computeBonuses(game, lefttext, streakrate),
+									(await this.computeBonuses(game, lefttext, streakrate)),
 							);
 						}
 					}
@@ -442,7 +423,7 @@ export default connect(({ user }) => ({ user }))(
 					(this.state.player1.foe.data.name || '?').replace(/,/g, ' '),
 					winner ? 'W' : 'L',
 					game.countPlies(),
-					game.get(game.id).get('duration'),
+					game.duration,
 					this.state.player1.hp,
 					this.state.player1.maxhp,
 					(state.goldreward | 0) - (game.data.cost | 0),

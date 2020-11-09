@@ -1,5 +1,4 @@
 import * as etgutil from './etgutil.js';
-import RngMock from './RngMock.js';
 import * as sock from './sock.js';
 import * as store from './store.js';
 
@@ -159,7 +158,7 @@ export default function parseChat(e) {
 				const name =
 					store.store.getState().opts.username ||
 					guestname ||
-					(guestname = 10000 + RngMock.upto(89999) + '');
+					(guestname = `${(Math.random() * 89999 + 10000) | 0}`);
 				if (!msg.match(/^\s*$/))
 					sock.emit({ x: 'guestchat', msg: msg, u: name });
 			}

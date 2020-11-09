@@ -45,7 +45,7 @@ export default class OriginalLogin extends Component {
 						}}
 						onClick={() => {
 							sock.userEmit('initoriginal', {
-								e: i === 13 ? RngMock.upto(12) + 1 : i,
+								e: i === 13 ? (Math.random() * 12 + 1) | 0 : i,
 								name: 'Original',
 							});
 						}}

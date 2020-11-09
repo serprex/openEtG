@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import * as ui from '../ui.js';
 import { run } from '../mkAi.js';
 import * as sock from '../sock.js';
-import RngMock from '../RngMock.js';
 import { Card, ExitBtn } from '../Components/index.js';
 import * as store from '../store.js';
 import { mkQuestAi, quarks } from '../Quest.js';
@@ -181,7 +180,7 @@ export default connect(({ user }) => ({ user }))(
 									x: 'inituser',
 									u: this.props.user.name,
 									a: this.props.user.auth,
-									e: i === 14 ? RngMock.upto(12) + 1 : i,
+									e: i === 14 ? (Math.random() * 12 + 1) | 0 : i,
 								});
 							}}
 							onMouseOver={() => this.setState({ eledesc: i - 1 })}>

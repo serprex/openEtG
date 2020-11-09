@@ -1,47 +1,3 @@
-// adrtbl is a bitpacked 2d array
-// [[0,0,0,0],[1,1,1],[2,2,2],[3,3,3],[3,2],[4,2],[4,2],[5,3],[6,3],[3],[4],[4],[4],[5],[5],[5]]
-const adrtbl = new Uint16Array([
-	4,
-	587,
-	1171,
-	1755,
-	154,
-	162,
-	162,
-	234,
-	242,
-	25,
-	33,
-	33,
-	33,
-	41,
-	41,
-	41,
-]);
-export function getAdrenalRow(x) {
-	x |= 0;
-	const sign = (x > 0) - (x < 0);
-	x = Math.abs(x);
-	if (x > 15) return '';
-	let row = adrtbl[x],
-		atks = row & 7,
-		ret = '';
-	for (let i = 0; i < atks; i++) {
-		row >>= 3;
-		ret += (i ? ', ' : '') + (row & 7) * sign;
-	}
-	return ret;
-}
-export function countAdrenaline(x) {
-	x = Math.abs(x | 0);
-	return x > 15 ? 1 : (adrtbl[x] & 7) + 1;
-}
-export function calcAdrenaline(y, dmg) {
-	if (y < 2) return dmg;
-	const row = adrtbl[Math.abs(dmg)];
-	if (y - 2 >= (row & 7)) return 0;
-	return ((row >> ((y - 1) * 3)) & 7) * ((dmg > 0) - (dmg < 0));
-}
 export const Chroma = 0;
 export const Entropy = 1;
 export const Death = 2;
@@ -61,9 +17,6 @@ export const Permanent = 3;
 export const Spell = 4;
 export const Creature = 5;
 export const Player = 6;
-export const MulliganPhase = 0;
-export const PlayPhase = 1;
-export const EndPhase = 2;
 export const PillarList = new Uint16Array([
 	5002,
 	5100,

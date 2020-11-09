@@ -1,14 +1,12 @@
-import * as imm from './immutable.js';
 import * as etg from './etg.js';
 import * as util from './util.js';
-import Skill from './Skill.js';
 import * as etgutil from './etgutil.js';
 import skillText from './skillText.js';
-import parseSkill from './parseSkill.js';
 
 const statuscache = new Map(),
 	activecache = new Map(),
-	activecastcache = new Map();
+	activecastcache = new Map(),
+	emptyMap = new Map();
 
 function readCost(coststr, defaultElement) {
 	if (typeof coststr === 'number')
@@ -40,7 +38,7 @@ export default class Card {
 		this.castele = 0;
 		if (info.Skill) {
 			if (this.type === etg.Spell) {
-				this.active = new Map([['cast', parseSkill(info.Skill)]]);
+				this.active = new Map([['cast', [info.Skill]]]);
 				this.cast = this.cost;
 				this.castele = this.costele;
 			} else if (activecache.has(info.Skill)) {
@@ -50,14 +48,19 @@ export default class Card {
 					[this.cast, this.castele] = castinfo;
 				}
 			} else {
-				this.active = imm.emptyMap;
+				this.active = new Map();
 				for (const active of util.iterSplit(info.Skill, '+')) {
-					const eqidx = active.indexOf('=');
-					const a0 = ~eqidx ? active.substr(0, eqidx) : 'ownattack';
-					const cast = readCost(a0, this.element);
-					this.active = imm.update(this.active, cast ? 'cast' : a0, a =>
-						Skill.combine(a, parseSkill(active.substr(eqidx + 1))),
-					);
+					const eqidx = active.indexOf('='),
+						a0 = ~eqidx ? active.substr(0, eqidx) : 'ownattack',
+						cast = readCost(a0, this.element),
+						key = cast ? 'cast' : a0,
+						curval = this.active.get(key),
+						name = active.substr(eqidx + 1);
+					if (curval === undefined) {
+						this.active.set(key, [name]);
+					} else {
+						curval.push(name);
+					}
 					if (cast) {
 						[this.cast, this.castele] = cast;
 						activecastcache.set(info.Skill, cast);
@@ -65,22 +68,22 @@ export default class Card {
 				}
 				activecache.set(info.Skill, this.active);
 			}
-		} else this.active = imm.emptyMap;
+		} else this.active = emptyMap;
 		if (info.Status) {
 			if (statuscache.has(info.Status)) {
 				this.status = statuscache.get(info.Status);
 			} else {
-				this.status = imm.emptyMap;
+				this.status = new Map();
 				for (const status of util.iterSplit(info.Status, '+')) {
 					const eqidx = status.indexOf('=');
-					this.status = new Map(this.status).set(
+					this.status.set(
 						~eqidx ? status.substr(0, eqidx) : status,
 						+(eqidx === -1 || status.substr(eqidx + 1)),
 					);
 				}
 				statuscache.set(info.Status, this.status);
 			}
-		} else this.status = imm.emptyMap;
+		} else this.status = emptyMap;
 	}
 
 	get shiny() {
@@ -156,10 +159,6 @@ export default class Card {
 
 	hasactive(key, name) {
 		const a = this.getSkill(key);
-		return !!(a && ~a.name.indexOf(name));
+		return !!(a && ~a.indexOf(name));
 	}
 }
-
-imm.registerHashFunc(Card, function () {
-	return this.code & 0x3fff;
-});

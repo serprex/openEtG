@@ -5,7 +5,7 @@ import * as util from './util.js';
 import RngMock from './RngMock.js';
 import * as etgutil from './etgutil.js';
 import Cards from './Cards.js';
-import Game from './Game.js';
+import CreateGame from './Game.js';
 
 export function requireQuest(quest, user) {
 	return quest.questdependencies.every(dependency => user.quests[dependency]);
@@ -307,7 +307,7 @@ quarks.spirit5 = {
 		ctx.randomcard(
 			card.upped,
 			x => x.element === etg.Darkness && x.type === card.type,
-		),
+		).code,
 	wintext:
 		"As the maiden falls, your powers return to normal, and your allies settle back into their original forms.\
 		the shadows that gripped and drained your energies recede. Your strength returns to its former glory.\
@@ -767,7 +767,7 @@ export const root = {
 		},
 	],
 };
-export function mkQuestAi(quest, datafn) {
+export async function mkQuestAi(quest, datafn) {
 	const markpower = quest.markpower ?? 1;
 	const drawpower = quest.drawpower ?? 1;
 	const hp = quest.hp ?? 100;
@@ -812,10 +812,11 @@ export function mkQuestAi(quest, datafn) {
 		data.rewardamount = quest.rewardamount;
 	}
 	RngMock.shuffle(data.players);
-	const game = new Game(datafn ? datafn(data) : data);
+	const game = await CreateGame(datafn ? datafn(data) : data);
 	if (quest.morph) {
-		const pl = game.byUser(user.name);
-		pl.deckIds = pl.deck.map(x => pl.newThing(quest.morph(game, x.card)).id);
+		for (const card of game.byUser(user.name).deck) {
+			game.game.transform(card.id, quest.morph(RngMock, card.card));
+		}
 	}
 	return game;
 }

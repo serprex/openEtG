@@ -1,7 +1,6 @@
 import * as etg from './etg.js';
 import * as etgutil from './etgutil.js';
 import Card from './Card.js';
-import CardsJson from './Cards.json';
 
 export default class Cards {
 	constructor(CardsJson) {

@@ -1,22 +1,21 @@
-import Effect from './Effect.js';
 const sounds = new Map(),
 	musics = new Map();
 let currentMusic,
 	soundEnabled = false,
 	musicEnabled = false;
-export function playSound(name, dontreset) {
-	if (soundEnabled && !Effect.disable) {
+export function playSound(name, mayreset = false) {
+	if (soundEnabled) {
 		let sound = sounds.get(name);
 		if (!sound) {
 			sound = new Audio(`sound/${name}.ogg`);
 			sounds.set(name, sound);
 		}
-		if (!dontreset && sound.duration) sound.currentTime = 0;
+		if (mayreset && sound.duration) sound.currentTime = 0;
 		sound.play();
 	}
 }
 export function playMusic(name) {
-	if (name === currentMusic || Effect.disable) return;
+	if (name === currentMusic) return;
 	let music;
 	if (musicEnabled && (music = musics.get(currentMusic))) music.pause();
 	currentMusic = name;
