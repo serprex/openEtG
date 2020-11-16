@@ -1168,7 +1168,10 @@ on conflict (user_id, for_user_id) do update set user_id = $1, for_user_id = $2,
 				const code = parseInt(decka.substring(i, i + 4), 10) + 1000,
 					count = parseInt(decka.substring(i + 4, i + 7), 10),
 					card = OrigCards.Codes[code];
-				if (card && (card.rarity === -1 || card.rarity === 15)) {
+				if (
+					card &&
+					(card.rarity === -1 || card.rarity === 15 || card.rarity === 20)
+				) {
 					topool = etgutil.addcard(topool, code, count);
 				}
 			}

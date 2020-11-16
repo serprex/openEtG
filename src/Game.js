@@ -286,7 +286,7 @@ const nextHandler = {
 	},
 	accept(_data) {
 		if (this.phase === etg.MulliganPhase) {
-			this.turn = this.get(this.turn).get('foe');
+			this.turn = this.nextPlayer(this.turn);
 			if (this.turn === 2) {
 				this.phase = etg.PlayPhase;
 			}
