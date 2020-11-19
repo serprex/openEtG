@@ -1295,7 +1295,10 @@ const MatchView = connect(({ user, opts, nav }) => ({
 
 		startMatch({ user, game, dispatch }) {
 			const wasPvP = game.data.players.every(pd => !pd.ai);
-			if (!game.data.endurance && (game.data.level !== undefined || wasPvP)) {
+			if (
+				!game.data.endurance &&
+				(game.data.level !== undefined || wasPvP || !game.Cards.Names.Relic)
+			) {
 				sock.userExec('addloss', {
 					pvp: wasPvP,
 					l: game.data.level,

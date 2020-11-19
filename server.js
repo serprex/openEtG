@@ -1157,7 +1157,7 @@ on conflict (user_id, for_user_id) do update set user_id = $1, for_user_id = $2,
 			);
 			if (!opts?.decka) {
 				sockEmit(this, 'chat', {
-					msg: `Failed to load cardpool. Error code: ${opts?.error}`,
+					msg: `Failed to load cardpool. Error code: ${opts?.errorcode}`,
 					mode: 1,
 				});
 				return;
