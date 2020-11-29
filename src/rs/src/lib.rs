@@ -578,7 +578,7 @@ mod test {
 		let voodoo = ctx.new_thing(card::VoodooDoll, p1);
 		ctx.addCrea(p1, voodoo);
 		Skill::lightning.proc(&mut ctx, voodoo, voodoo, &mut ProcData::default());
-		Skill::infect.proc(&mut ctx, voodoo, voodoo, &mut ProcData::default());
+		Skill::poison(1).proc(&mut ctx, voodoo, voodoo, &mut ProcData::default());
 		Skill::holylight.proc(&mut ctx, voodoo, voodoo, &mut ProcData::default());
 		assert_eq!(ctx.truehp(voodoo), 1);
 		assert_eq!(ctx.truehp(p2), 85);

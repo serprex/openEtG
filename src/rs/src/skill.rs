@@ -312,7 +312,6 @@ pub enum Skill {
 	immolate,
 	improve,
 	inertia,
-	infect,
 	inflation,
 	ink,
 	innovation,
@@ -377,7 +376,7 @@ pub enum Skill {
 	plague,
 	platearmor,
 	poison(i16),
-	poisonfoe,
+	poisonfoe(i16),
 	powerdrain,
 	precognition,
 	predator,
@@ -575,9 +574,6 @@ pub enum Skill {
 	v_photosynthesis,
 	v_plague,
 	v_platearmor,
-	v_poison,
-	v_poison2,
-	v_poison3,
 	v_precognition,
 	v_purify,
 	v_queen,
@@ -772,7 +768,6 @@ impl Skill {
 			Self::icebolt => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::immolate => Tgt::And(&[Tgt::own, Tgt::crea]),
 			Self::improve => Tgt::crea,
-			Self::infect => Tgt::crea,
 			Self::innovation => Tgt::card,
 			Self::jelly => Tgt::crea,
 			Self::jetstream => Tgt::airbornecrea,
@@ -799,6 +794,7 @@ impl Skill {
 			Self::parallel => Tgt::crea,
 			Self::plague => Tgt::play,
 			Self::platearmor => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::poison(_) => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::powerdrain => Tgt::crea,
 			Self::purify => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::quint => Tgt::crea,
@@ -893,6 +889,7 @@ impl Skill {
 			Skill::evade(x)
 			| Skill::firestorm(x)
 			| Skill::poison(x)
+			| Skill::poisonfoe(x)
 			| Skill::storm(x)
 			| Skill::thorn(x) => x as i32,
 			Skill::quanta(x) => x as i32,
@@ -1322,7 +1319,7 @@ impl Skill {
 						Skill::freeze,
 						Skill::gpullspell,
 						Skill::icebolt,
-						Skill::infect,
+						Skill::poison(1),
 						Skill::lightning,
 						Skill::lobotomize,
 						Skill::parallel,
@@ -1705,7 +1702,7 @@ impl Skill {
 					for sk in hit.to_mut().iter_mut() {
 						match sk {
 							Skill::poison(ref mut x) => {
-								*x += 1;
+								*x = x.saturating_add(1);
 								return 0;
 							}
 							_ => (),
@@ -1891,7 +1888,7 @@ impl Skill {
 									.chain(pl.creatures.iter().cloned())
 									.chain(pl.permanents.iter().cloned())
 									.chain(pl.hand.iter().cloned())
-									.filter(|&id| id != 0 && tgting.check(ctx, t, id)),
+									.filter(|&id| id != 0 && tgting.full_check(ctx, t, id)),
 							);
 						}
 						ctx.choose(&tgts).cloned()
@@ -2154,9 +2151,6 @@ impl Skill {
 					}
 				}
 			}
-			Self::infect | Self::v_infect => {
-				ctx.poison(t, 1);
-			}
 			Self::inflation => {
 				let mut tgts = Vec::with_capacity(50 * ctx.players_ref().len());
 				for &id in ctx.players_ref().iter() {
@@ -2204,10 +2198,10 @@ impl Skill {
 						Skill::antimatter,
 					],
 					[
-						Skill::infect,
-						Skill::infect,
-						Skill::infect,
-						Skill::infect,
+						Skill::poison(1),
+						Skill::poison(1),
+						Skill::poison(2),
+						Skill::poison(3),
 						Skill::aflatoxin,
 						Skill::aflatoxin,
 					],
@@ -2299,7 +2293,7 @@ impl Skill {
 						(1, Soya::Stat(Stat::nocturnal, 1)),
 					],
 					&[(2, Soya::Stat(Stat::momentum, 1))],
-					&[(2, Soya::Skill(Event::Death, [Skill::poison(1)]))],
+					&[(2, Soya::Skill(Event::Hit, [Skill::poison(1)]))],
 					&[
 						(1, Soya::Stat(Stat::poisonous, 1)),
 						(2, Soya::Stat(Stat::adrenaline, 1)),
@@ -2383,7 +2377,7 @@ impl Skill {
 					Skill::paradox => 2,
 					Skill::improve => 2,
 					Skill::antimatter => 3,
-					Skill::infect => 1,
+					Skill::poison(_) => 1,
 					Skill::aflatoxin => 2,
 					Skill::devour => 3,
 					Skill::blackhole => 3,
@@ -2997,12 +2991,11 @@ impl Skill {
 			}
 			Self::poison(amt) => {
 				if throttle(ctx, c) {
-					let t = if t == 0 { ctx.get_owner(c) } else { t };
 					ctx.poison(t, amt as i32);
 				}
 			}
-			Self::poisonfoe => {
-				ctx.poison(ctx.get_foe(ctx.get_owner(c)), 1);
+			Self::poisonfoe(amt) => {
+				ctx.poison(ctx.get_foe(ctx.get_owner(c)), amt as i32);
 			}
 			Self::powerdrain => {
 				let mut candidates = Vec::with_capacity(23);
@@ -3847,7 +3840,7 @@ impl Skill {
 			}
 			Self::virusinfect | Self::v_virusinfect => {
 				ctx.die(c);
-				return Skill::infect.proc(ctx, c, t, data);
+				return Skill::poison(1).proc(ctx, c, t, data);
 			}
 			Self::virusplague => {
 				ctx.die(c);
@@ -4223,6 +4216,7 @@ impl Skill {
 					ctx.transform(t, card.code);
 				}
 			}
+			Self::v_infect => return Skill::poison(1).proc(ctx, c, t, data),
 			Self::v_integrity => {
 				const shardSkills: [[Skill; 6]; 12] = [
 					[
@@ -4237,9 +4231,9 @@ impl Skill {
 						Skill::v_infect,
 						Skill::v_growth1,
 						Skill::v_growth1,
-						Skill::v_poison,
+						Skill::poison(1),
 						Skill::v_aflatoxin,
-						Skill::v_poison2,
+						Skill::poison(2),
 					],
 					[
 						Skill::v_devour,
@@ -4371,9 +4365,8 @@ impl Skill {
 					Skill::v_antimatter => 4,
 					Skill::v_infect => 1,
 					Skill::v_growth1 => -4,
-					Skill::v_poison => -2,
+					Skill::poison(_) => -2,
 					Skill::v_aflatoxin => 2,
-					Skill::v_poison2 => -2,
 					Skill::v_devour => 3,
 					Skill::v_blackhole => 4,
 					Skill::v_growth => 2,
@@ -4595,9 +4588,6 @@ impl Skill {
 					},
 				);
 			}
-			Self::v_poison => return Skill::poison(1).proc(ctx, c, t, data),
-			Self::v_poison2 => return Skill::poison(2).proc(ctx, c, t, data),
-			Self::v_poison3 => return Skill::poison(3).proc(ctx, c, t, data),
 			Self::v_queen => {
 				let owner = ctx.get_owner(c);
 				let inst = ctx.new_thing(card::As(ctx.get(c, Stat::card), card::v_Firefly), owner);
@@ -4933,6 +4923,18 @@ impl Skill {
 }
 
 impl<'tgt> Tgt<'tgt> {
+	pub fn full_check(self, ctx: &Game, c: i32, t: i32) -> bool {
+		let kind = ctx.get_kind(t);
+		let owner = ctx.get_owner(t);
+		!((kind == etg::Player && ctx.get(t, Stat::out) != 0)
+			|| ctx.getIndex(t) == -1
+			|| (owner != ctx.turn
+				&& kind != etg::Spell
+				&& ctx.get(t, Stat::cloak) == 0
+				&& ctx.is_cloaked(owner)))
+			&& self.check(ctx, c, t)
+	}
+
 	pub fn check(self, ctx: &Game, c: i32, t: i32) -> bool {
 		match self {
 			Tgt::own => ctx.get_owner(c) == ctx.get_owner(t),

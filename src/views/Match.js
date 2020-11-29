@@ -824,7 +824,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 			}
 			this.gameStep(game);
 			this.setState(state => {
-				let fxlen = effects.length();
+				const fxlen = effects.length();
 				if (fxlen === 0) return {};
 				const newstate = { effectId: state.effectId + 1 };
 				let { effectId } = state;
@@ -993,7 +993,6 @@ const MatchView = connect(({ user, opts, nav }) => ({
 					}
 				}
 				newstate.effectId = effectId;
-				effects.free();
 				return newstate;
 			});
 			const newTurn = game.turn;

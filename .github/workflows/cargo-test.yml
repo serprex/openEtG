@@ -7,4 +7,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 15
       - run: cargo test --manifest-path=./src/rs/Cargo.toml

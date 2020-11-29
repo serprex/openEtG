@@ -856,24 +856,11 @@ impl Game {
 	}
 
 	pub fn can_target(&self, c: i32, t: i32) -> bool {
-		let skill = self.getSkill(c, Event::Cast);
-		if skill.is_empty() {
-			return false;
-		}
-		let skill = skill[0];
-		if let Some(tgt) = skill.targetting() {
-			let kind = self.get_kind(t);
-			let owner = self.get_owner(t);
-			!((kind == etg::Player && self.get(t, Stat::out) != 0)
-				|| self.getIndex(t) == -1
-				|| (owner != self.turn
-					&& kind != etg::Spell
-					&& self.get(t, Stat::cloak) == 0
-					&& self.is_cloaked(owner)))
-				&& tgt.check(self, c, t)
-		} else {
-			false
-		}
+		self.getSkill(c, Event::Cast)
+			.first()
+			.and_then(|sk| sk.targetting())
+			.map(|tgt| tgt.full_check(self, c, t))
+			.unwrap_or(false)
 	}
 
 	pub fn aisearch(&self) -> JsGameMove {
@@ -1062,7 +1049,7 @@ impl Game {
 				Skill::mend,
 				Skill::paradox,
 				Skill::lycanthropy,
-				Skill::infect,
+				Skill::poison(1),
 				Skill::gpull,
 				Skill::devour,
 				Skill::mutation,
@@ -1097,7 +1084,7 @@ impl Game {
 				Skill::v_mutation,
 				Skill::v_growth,
 				Skill::v_ablaze,
-				Skill::v_poison,
+				Skill::poisonfoe(1),
 				Skill::v_deja,
 				Skill::v_endow,
 				Skill::v_guard,
@@ -2132,26 +2119,32 @@ impl Game {
 					let amt = cmp::min(-amt, 1188);
 					let uni12 = Uniform::from(0..12);
 					for _ in 0..amt {
-						quanta[uni12.sample(&mut self.rng)] += 1;
+						let q = &mut quanta[uni12.sample(&mut self.rng)];
+						if (*q as i32) < cap {
+							*q += 1;
+						}
 					}
 				} else {
 					let amt = cmp::min(amt, 1188);
-					let mut total: u32 = quanta.iter().map(|&q| q as u32).sum();
-					for _ in 0..amt {
-						let mut pick = self.rng.gen_range(0, total);
-						for i in 0..12 {
-							if pick < quanta[i] as u32 {
-								quanta[i] -= 1;
-								total -= 1;
+					let total: u32 = quanta.iter().map(|&q| q as u32).sum();
+					for n in 0..amt as u32 {
+						let mut pick = self.rng.gen_range(0, total - n);
+						for q in quanta.iter_mut() {
+							if pick < *q as u32 {
+								*q -= 1;
 								break;
 							}
-							pick -= quanta[i] as u32;
+							pick -= *q as u32;
 						}
 					}
 				}
 			} else {
-				quanta[(qtype - 1) as usize] =
-					cmp::min(quanta[(qtype - 1) as usize] as i32 - amt, cap) as u8;
+				let q = &mut quanta[(qtype - 1) as usize];
+				if amt < 0 {
+					*q = cmp::min((*q as i32).saturating_sub(amt), cap) as u8;
+				} else {
+					*q -= amt as u8;
+				}
 			}
 			self.get_player_mut(id).quanta = quanta;
 			true
@@ -2219,12 +2212,15 @@ impl Game {
 			if self.spend(cowner, self.get(c, Stat::costele), self.get(c, Stat::cost)) {
 				self.play(c, t, true);
 				self.proc(Event::Cardplay, c);
+				if self.get(cowner, Stat::neuro) != 0 {
+					self.poison(cowner, 1);
+				}
 			}
 		} else if self.spend(cowner, self.get(c, Stat::castele), self.get(c, Stat::cast)) {
 			let casts = self.get(c, Stat::casts) - 1;
 			self.set(c, Stat::casts, casts);
 			if self.get(c, Stat::neuro) != 0 {
-				self.poison(cowner, 1);
+				self.poison(c, 1);
 			}
 			let skill = self.getSkill(c, Event::Cast)[0];
 			self.castSpell(c, t, skill);

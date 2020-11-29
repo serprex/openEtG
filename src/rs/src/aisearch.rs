@@ -89,7 +89,7 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 						if (pl.shield != 0 && ctx.get(pl.shield, Stat::reflective) != 0)
 							|| active == Skill::pandemonium
 						{
-							if tgting.check(ctx, id, turn) {
+							if tgting.full_check(ctx, id, turn) {
 								tgts.push(turn);
 							}
 						}
@@ -101,18 +101,19 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 								pl.creatures
 									.iter()
 									.cloned()
-									.filter(|&t| t != 0 && tgting.check(ctx, id, t)),
+									.filter(|&t| t != 0 && tgting.full_check(ctx, id, t)),
 							);
 						} else {
 							tgts.extend(pl.creatures.iter().cloned().filter(|&t| {
-								t != 0 && ctx.get(t, Stat::voodoo) != 0 && tgting.check(ctx, id, t)
+								t != 0
+									&& ctx.get(t, Stat::voodoo) != 0 && tgting.full_check(ctx, id, t)
 							}));
 						}
 					} else {
 						tgts.extend(
 							once(turn)
 								.chain(pl.hand.iter().cloned())
-								.filter(|&t| t != 0 && tgting.check(ctx, id, t)),
+								.filter(|&t| t != 0 && tgting.full_check(ctx, id, t)),
 						)
 					}
 				}
@@ -216,7 +217,7 @@ where
 
 fn scantgt(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut i32, id: i32, tgt: Tgt) {
 	alltgts(ctx, |ctx, t| {
-		if tgt.check(ctx, id, t) {
+		if tgt.full_check(ctx, id, t) {
 			scancore(ctx, depth, candy, limit, GameMove::Cast(id, t));
 		}
 	});

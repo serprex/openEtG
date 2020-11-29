@@ -20,17 +20,15 @@ export default function skillText(c) {
 		const ret = [],
 			stext = [];
 		for (const [key, val] of c.status) {
-			if (!val) continue;
+			if (val === 0 || skipstat.has(key)) continue;
 			const entry = statusText[key];
 			if (entry === undefined) {
-				let text = val === 1 ? key : val + key;
-				text = text.charAt(0).toUpperCase() + text.slice(1);
-				stext.push(text);
+				const text = val === 1 ? key : val + key;
+				stext.push(text.charAt(0).toUpperCase() + text.slice(1));
 			} else pushEntry(ret, c, '', entry);
 		}
 		if (stext.length) ret.unshift(stext.join(', ') + '.');
 		for (const [k, v] of c.active) {
-			if (skipstat.has(k)) continue;
 			for (const name of v) {
 				const entry = getDataFromName(name);
 				if (entry === undefined) return;
@@ -308,7 +306,6 @@ const data = {
 	improve:
 		'Transform a target creature into a random mutant creature. Mutant creatures gain a random ability, 0-4 strength, and 0-4 hp.',
 	inertia: 'When any card you own is targeted by either player, gain 2:3.',
-	infect: 'Give target creature 1 poison counter.',
 	inflation: 'Increase the cost of all active abilities by 1.',
 	ink: 'Summon a Cloak that lasts 1 turn.',
 	innovation:
@@ -420,13 +417,19 @@ const data = {
 		'Target creature gains 0|6, or target player gains 6 maximum HP and heals 6.',
 	],
 	poison: x => {
-		x = `Give ${x === '1' ? '' : x + ' '}poison `;
+		const s = x === '1' ? '' : 's';
+		x = `Give ${x === '1' ? '' : x + ' '}poison counter${s} `;
 		return {
-			hit: `${x} counters on hit. Throttled (only triggers at most twice from Adrenaline.)`,
-			cast: `${x} counters to opponent.`,
+			cast: `${x} to target creature.`,
+			hit: `${x} on hit. Throttled (only triggers at most twice from Adrenaline.)`,
 		};
 	},
-	poisonfoe: 'When this card enters play, give 1 poison counter to opponent.',
+	poisonfoe: x => ({
+		cast: `Give ${x === '1' ? '' : x + ' '}poison counter${
+			x === '1' ? '' : 's'
+		} to opponent.`,
+		play: 'When this card enters play, give 1 poison counter to opponent.',
+	}),
 	powerdrain:
 		"Remove half of target creature's strength and HP, rounded up. Add an equal amount of strength and HP to a random creature you control.",
 	precognition:
