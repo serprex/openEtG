@@ -509,6 +509,7 @@ pub enum Skill {
 	v_drainlife,
 	v_dryspell,
 	v_dshield,
+	v_dshieldoff,
 	v_duality,
 	v_earthquake,
 	v_empathy,
@@ -1108,8 +1109,7 @@ impl Skill {
 					if cr != 0 {
 						let fcr = foecreatures[i];
 						if fcr == 0 {
-							let mut nodata = ProcData::default();
-							ctx.attack(cr, &mut nodata);
+							ctx.queue_attack(cr, 0);
 						} else {
 							ctx.attackCreature(cr, fcr, None);
 							ctx.attackCreature(fcr, cr, None);
@@ -1312,35 +1312,32 @@ impl Skill {
 				}
 			}
 			Self::cseed => {
-				return ctx
-					.choose(&[
-						Skill::drainlife,
-						Skill::firebolt,
-						Skill::freeze,
-						Skill::gpullspell,
-						Skill::icebolt,
-						Skill::poison(1),
-						Skill::lightning,
-						Skill::lobotomize,
-						Skill::parallel,
-						Skill::rewind,
-						Skill::snipe,
-						Skill::swave,
-					])
-					.unwrap()
-					.proc(ctx, c, t, data)
+				if let Some(sk) = ctx.choose(&[
+					Skill::drainlife,
+					Skill::firebolt,
+					Skill::freeze,
+					Skill::gpullspell,
+					Skill::icebolt,
+					Skill::poison(1),
+					Skill::lightning,
+					Skill::lobotomize,
+					Skill::parallel,
+					Skill::rewind,
+					Skill::snipe,
+					Skill::swave,
+				]) {
+					return sk.proc(ctx, c, t, data);
+				}
 			}
 			Self::cseed2 => {
 				let upped = ctx.upto(2) == 0;
 				if let Some(card) = ctx.random_card(upped, |ctx, card| {
 					if card.kind == etg::Spell as i8 {
 						for &(k, skills) in card.skill.iter() {
-							if k == Event::Cast {
-								let skill = skills[0];
-								if let Some(tgt) = skill.targetting() {
-									if tgt.check(ctx, c, t) {
-										return true;
-									}
+							assert!(k == Event::Cast);
+							if let Some(tgt) = skills.first().and_then(|sk| sk.targetting()) {
+								if tgt.check(ctx, c, t) {
+									return true;
 								}
 							}
 						}
@@ -1352,14 +1349,8 @@ impl Skill {
 						c,
 						t,
 						card.skill
-							.iter()
-							.find_map(|&(k, skills)| {
-								if k == Event::Cast {
-									Some(skills[0])
-								} else {
-									None
-								}
-							})
+							.first()
+							.and_then(|&(k, skills)| skills.first().cloned())
 							.unwrap(),
 					);
 				}
@@ -1373,10 +1364,10 @@ impl Skill {
 				let tgt = data[ProcKey::tgt];
 				let owner = ctx.get_owner(c);
 				if tgt != 0
-					&& ctx.get(c, Stat::frozen) == 0
-					&& ctx.get(c, Stat::delayed) == 0
 					&& owner != ctx.get_owner(t)
 					&& owner == ctx.get_owner(tgt)
+					&& ctx.get(c, Stat::frozen) == 0
+					&& ctx.get(c, Stat::delayed) == 0
 					&& data
 						.active()
 						.and_then(|sk| sk.targetting())
@@ -2003,7 +1994,7 @@ impl Skill {
 				}
 			}
 			Self::golemhit => {
-				ctx.attack(t, &mut Default::default());
+				ctx.queue_attack(t, 0);
 			}
 			Self::gpull | Self::v_gpull => return Skill::gpullspell.proc(ctx, c, t, data),
 			Self::gpullspell | Self::v_gpullspell => {
@@ -2068,12 +2059,8 @@ impl Skill {
 				if !ctx.hasskill(c, Event::Turnstart, Skill::predatoroff) {
 					ctx.addskill(c, Event::Turnstart, Skill::predatoroff);
 					let owner = ctx.get_owner(c);
-					let mut attackdata = ProcData::default();
-					for _ in 0..2 {
-						attackdata[ProcKey::target] = owner;
-						ctx.attack(c, &mut attackdata);
-						attackdata.clear();
-					}
+					ctx.queue_attack(c, owner);
+					ctx.queue_attack(c, owner);
 				}
 			}
 			Self::holylight => {
@@ -3026,14 +3013,12 @@ impl Skill {
 					&& !ctx.hasskill(c, Event::Turnstart, Skill::predatoroff)
 				{
 					ctx.addskill(c, Event::Turnstart, Skill::predatoroff);
-					ctx.attack(c, &mut ProcData::default());
-					let pl = ctx.get_player_mut(foe);
-					let card = if *pl.thing.status.get(&Stat::sanctuary).unwrap_or(&0) == 0 {
-						pl.hand.last().cloned().unwrap_or(0)
-					} else {
-						0
-					};
-					ctx.die(card);
+					ctx.queue_attack(c, 0);
+					if ctx.get(foe, Stat::sanctuary) == 0 {
+						if let Some(card) = ctx.get_player(foe).hand.last().cloned() {
+							ctx.die(card);
+						}
+					}
 				}
 			}
 			Self::predatoroff => {
@@ -3346,9 +3331,7 @@ impl Skill {
 				}
 			}
 			Self::sing => {
-				let mut singdata = ProcData::default();
-				singdata[ProcKey::target] = ctx.get_owner(t);
-				ctx.attack(t, &mut singdata);
+				ctx.queue_attack(t, ctx.get_owner(t));
 			}
 			Self::singularity | Self::v_singularity => {
 				if ctx.trueatk(c) > 0 {
@@ -3758,12 +3741,10 @@ impl Skill {
 				ctx.set(owner, Stat::gpull, c);
 			}
 			Self::unappease => {
-				if ctx.get(c, Stat::appeased) == 0 {
-					if ctx.hasskill(c, Event::Cast, Skill::appease) {
-						data[ProcKey::target] = ctx.get_owner(c);
-					}
-				} else {
+				if ctx.get(c, Stat::appeased) != 0 {
 					ctx.set(c, Stat::appeased, 0);
+				} else if ctx.hasskill(c, Event::Cast, Skill::appease) {
+					data[ProcKey::tgt] = ctx.get_owner(c);
 				}
 			}
 			Self::unsanctify => {
@@ -3812,15 +3793,13 @@ impl Skill {
 			}
 			Self::vengeance => {
 				let owner = ctx.get_owner(c);
-				if owner == ctx.get_owner(t) && ctx.get_leader(owner) == ctx.get_leader(ctx.turn) {
+				if owner == ctx.get_owner(t) && ctx.get_leader(owner) != ctx.get_leader(ctx.turn) {
 					if ctx.maybeDecrStatus(c, Stat::charges) < 2 {
 						ctx.remove(c);
 					}
-					let mut attackdata = ProcData::default();
 					for &cr in ctx.get_player(owner).creatures.clone().iter() {
 						if cr != 0 && cr != t {
-							ctx.attack(cr, &mut attackdata);
-							attackdata.clear();
+							ctx.queue_attack(cr, 0);
 						}
 					}
 				}
@@ -3832,7 +3811,7 @@ impl Skill {
 				{
 					ctx.set(c, Stat::vindicated, 1);
 					data[ProcKey::vindicated] = 1;
-					ctx.attack(t, &mut ProcData::default());
+					ctx.queue_attack(t, 0);
 				}
 			}
 			Self::virtue => {
@@ -3996,23 +3975,22 @@ impl Skill {
 				}
 			}
 			Self::v_cseed => {
-				return ctx
-					.choose(&[
-						Skill::v_drainlife,
-						Skill::v_firebolt,
-						Skill::v_freeze,
-						Skill::v_gpullspell,
-						Skill::v_icebolt,
-						Skill::v_infect,
-						Skill::v_lightning,
-						Skill::v_lobotomize,
-						Skill::v_parallel,
-						Skill::v_rewind,
-						Skill::v_snipe,
-						Skill::v_swave,
-					])
-					.unwrap()
-					.proc(ctx, c, t, data)
+				if let Some(sk) = ctx.choose(&[
+					Skill::v_drainlife,
+					Skill::v_firebolt,
+					Skill::v_freeze,
+					Skill::v_gpullspell,
+					Skill::v_icebolt,
+					Skill::v_infect,
+					Skill::v_lightning,
+					Skill::v_lobotomize,
+					Skill::v_parallel,
+					Skill::v_rewind,
+					Skill::v_snipe,
+					Skill::v_swave,
+				]) {
+					return sk.proc(ctx, c, t, data);
+				}
 			}
 			Self::v_deja => {
 				ctx.rmskill(c, Event::Cast, Skill::v_deja);
@@ -4061,6 +4039,15 @@ impl Skill {
 			}
 			Self::v_dshield => {
 				ctx.set(c, Stat::immaterial, 1);
+				ctx.addskill(t, Event::Turnstart, Skill::dshieldoff);
+			}
+			Self::v_dshieldoff => {
+				let owner = ctx.get_owner(c);
+				if owner == t {
+					ctx.set(c, Stat::immaterial, 0);
+					ctx.set(c, Stat::psionic, 0);
+					ctx.rmskill(c, Event::Turnstart, Skill::v_dshieldoff);
+				}
 			}
 			Self::v_empathy => {
 				let owner = ctx.get_owner(c);

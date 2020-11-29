@@ -375,6 +375,7 @@ pub struct Game {
 	pub duration: f64,
 	moves: Vec<GameMove>,
 	props: Vec<Entity>,
+	attacks: Vec<(i32, i32)>,
 	cards: &'static Cards,
 	fx: Option<Fxs>,
 }
@@ -391,6 +392,7 @@ impl Clone for Game {
 			duration: 0.0,
 			moves: Vec::new(),
 			props: self.props.clone(),
+			attacks: self.attacks.clone(),
 			cards: self.cards,
 			fx: None,
 		}
@@ -416,6 +418,7 @@ impl Game {
 			duration: 0.0,
 			moves: Default::default(),
 			props: vec![Entity::Thing(Default::default())],
+			attacks: Vec::new(),
 			cards: if set == CardSet::Original {
 				&card::OrigSet
 			} else {
@@ -1188,8 +1191,7 @@ impl Game {
 		if trueatk != 0 {
 			let dmg = self.dmg(t, trueatk);
 			let mut data = ProcData::default();
-			data.set(ProcKey::blocked, 0);
-			data.set(ProcKey::dmg, dmg);
+			data[ProcKey::dmg] = dmg;
 			if dmg != 0 {
 				self.trigger_data(Event::Hit, c, t, &mut data);
 			}
@@ -1200,7 +1202,7 @@ impl Game {
 	pub fn attack(&mut self, id: i32, data: &mut ProcData) {
 		loop {
 			let mut data = data.clone();
-			let target = &mut data[ProcKey::target];
+			let target = &mut data[ProcKey::tgt];
 			let target = if *target == 0 {
 				let foe = self.get_foe(self.get_owner(id));
 				*target = foe;
@@ -1997,7 +1999,7 @@ impl Game {
 		let markpower = self.get(id, Stat::markpower);
 		self.spend(id, mark, markpower * if mark > 0 { -1 } else { -3 });
 		let mut data = ProcData::default();
-		data[ProcKey::target] = self.get_foe(id);
+		data[ProcKey::tgt] = self.get_foe(id);
 		data[ProcKey::attackPhase] = 1;
 		self.proc_data(Event::Beginattack, id, &mut data);
 		for &pr in self.get_player(id).permanents.clone().iter() {
@@ -2227,6 +2229,24 @@ impl Game {
 		}
 	}
 
+	pub fn queue_attack(&mut self, c: i32, t: i32) {
+		self.attacks.push((c, t));
+	}
+
+	pub fn flush_attacks(&mut self) {
+		let mut n = 0;
+		while n < self.attacks.len() {
+			let (c, t) = self.attacks[n];
+			let mut data = ProcData::default();
+			if t != 0 {
+				data[ProcKey::tgt] = t;
+			}
+			self.attack(c, &mut data);
+			n += 1;
+		}
+		self.attacks.clear();
+	}
+
 	pub fn r#move(&mut self, cmd: GameMove) {
 		self.moves.push(cmd);
 		match cmd {
@@ -2239,10 +2259,12 @@ impl Game {
 				} else {
 					self.v_endturn(self.turn)
 				}
+				self.flush_attacks();
 				self.nextTurn();
 			}
 			GameMove::Cast(c, t) => {
 				self.useactive(c, t);
+				self.flush_attacks();
 			}
 			GameMove::Accept => {
 				self.turn = self.nextPlayer(self.turn);
