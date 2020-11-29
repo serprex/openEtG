@@ -2706,14 +2706,14 @@ impl Skill {
 			Self::nightmare | Self::v_nightmare => {
 				let owner = ctx.get_owner(c);
 				let foe = ctx.get_foe(owner);
-				if ctx.get(owner, Stat::sanctuary) != 0 {
+				if ctx.get(foe, Stat::sanctuary) == 0 {
 					ctx.fx(t, Fx::Nightmare);
 					let card = ctx.get(c, Stat::card);
-					let copies = ctx.get_player(foe).hand.len() as i32;
+					let copies = 8 - ctx.get_player(foe).hand.len() as i32;
 					let dmg = if self == Self::nightmare {
-						ctx.spelldmg(foe, (8 - copies) * if card::Upped(card) { 2 } else { 1 })
+						ctx.spelldmg(foe, copies * if card::Upped(card) { 2 } else { 1 })
 					} else {
-						ctx.dmg(foe, (8 - copies) * 2)
+						ctx.dmg(foe, copies * 2)
 					};
 					ctx.dmg(owner, -dmg);
 					for _ in 0..copies {
