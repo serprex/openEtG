@@ -20,7 +20,7 @@ export const pveCostReward = new Uint8Array([
 	225,
 	25,
 	100,
-	40,
+	30,
 	200,
 ]);
 export function cardValue(card) {
