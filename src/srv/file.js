@@ -54,10 +54,12 @@ export default async function (url) {
 	}
 	const path = url.match(/\.(js(.map)?|html?|wasm)$/) ? 'bundle/' + url : url;
 	const [stat, buf] = await Promise.all([fs.stat(path), fs.readFile(path)]);
-	watch(path, { persistent: false }, function (_e) {
-		cache.rm(url);
-		this.close();
-	});
+	if (!url.startsWith('hash/')) {
+		watch(path, { persistent: false }, function (_e) {
+			cache.rm(url);
+			this.close();
+		});
+	}
 	stat.mtime.setMilliseconds(0);
 	return {
 		head: {
