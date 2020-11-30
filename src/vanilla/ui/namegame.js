@@ -60,7 +60,7 @@ function printstat(e) {
 	if (!cards.length) infobox.appendChild(document.createTextNode('No matches'));
 	else {
 		const div = document.createElement('div');
-		div.innerHtml = deck(encodedeck(cards));
+		div.innerHTML = deck(encodedeck(cards.map(x => x.code)));
 		infobox.appendChild(div);
 	}
 }
