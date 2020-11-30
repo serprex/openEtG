@@ -4561,7 +4561,7 @@ impl Skill {
 				}
 			}
 			Self::v_plague => {
-				ctx.masscc(ctx.get_owner(c), 0, |ctx, cr| {
+				ctx.masscc(ctx.get_foe(ctx.get_owner(c)), 0, |ctx, cr| {
 					ctx.poison(cr, 1);
 				});
 			}
