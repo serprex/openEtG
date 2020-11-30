@@ -2696,7 +2696,7 @@ impl Skill {
 				let foe = ctx.get_foe(owner);
 				if ctx.get(foe, Stat::sanctuary) == 0 {
 					ctx.fx(t, Fx::Nightmare);
-					let card = ctx.get(c, Stat::card);
+					let card = ctx.get(t, Stat::card);
 					let copies = 8 - ctx.get_player(foe).hand.len() as i32;
 					let dmg = if self == Self::nightmare {
 						ctx.spelldmg(foe, copies * if card::Upped(card) { 2 } else { 1 })
@@ -3134,14 +3134,15 @@ impl Skill {
 			}
 			Self::reducemaxhp => {
 				let dmg = data[ProcKey::dmg];
-				let maxhp = cmp::max(ctx.get(t, Stat::maxhp) - dmg, 1);
-				ctx.set(t, Stat::maxhp, maxhp);
+				let maxhp = ctx.get_mut(t, Stat::maxhp);
+				*maxhp = cmp::max(*maxhp - dmg, 1);
+				let maxhp = *maxhp;
 				if maxhp > 500 && ctx.get_kind(t) == etg::Player {
 					ctx.set(t, Stat::maxhp, 500);
 				}
-				let hp = ctx.get(t, Stat::hp);
-				if hp > maxhp {
-					ctx.dmg(t, hp - maxhp);
+				let hp = ctx.get_mut(t, Stat::hp);
+				if *hp > maxhp {
+					*hp = maxhp;
 				}
 			}
 			Self::regen => {
@@ -3170,8 +3171,8 @@ impl Skill {
 				ctx.fx(c, Fx::EndPos(t));
 				let hp = ctx.truehp(c);
 				let atk = ctx.trueatk(c);
-				ctx.buffhp(c, hp);
-				ctx.incrAtk(c, atk);
+				ctx.buffhp(t, hp);
+				ctx.incrAtk(t, atk);
 				ctx.remove(c);
 			}
 			Self::ren => {
@@ -3829,10 +3830,11 @@ impl Skill {
 				return Skill::plague.proc(ctx, c, t, data);
 			}
 			Self::void => {
-				let maxhp = ctx.get_mut(c, Stat::maxhp);
-				*maxhp = cmp::min(*maxhp - 3, 1);
+				let foe = ctx.get_foe(ctx.get_owner(c));
+				let maxhp = ctx.get_mut(foe, Stat::maxhp);
+				*maxhp = cmp::max(*maxhp - 3, 1);
 				let maxhp = *maxhp;
-				let hp = ctx.get_mut(c, Stat::hp);
+				let hp = ctx.get_mut(foe, Stat::hp);
 				if *hp > maxhp {
 					*hp = maxhp;
 				}
