@@ -2516,7 +2516,8 @@ impl Skill {
 			}
 			Self::loot => {
 				let owner = ctx.get_owner(c);
-				if owner == ctx.get_owner(t) && ctx.hasskill(c, Event::Turnstart, Skill::salvageoff)
+				if owner == ctx.get_owner(t)
+					&& !ctx.hasskill(c, Event::Turnstart, Skill::salvageoff)
 				{
 					let foe = ctx.get_foe(owner);
 					let mut candidates = Vec::with_capacity(18);
@@ -4976,7 +4977,8 @@ impl<'tgt> Tgt<'tgt> {
 			Tgt::devour => ctx.material(t, etg::Creature) && ctx.truehp(t) < ctx.truehp(c),
 			Tgt::paradox => ctx.material(t, etg::Creature) && ctx.truehp(t) < ctx.trueatk(t),
 			Tgt::notskele => {
-				ctx.material(t, etg::Creature) && card::IsOf(ctx.get(t, Stat::card), card::Skeleton)
+				ctx.material(t, etg::Creature)
+					&& !card::IsOf(ctx.get(t, Stat::card), card::Skeleton)
 			}
 			Tgt::forceplay => {
 				ctx.get_kind(t) == etg::Spell
