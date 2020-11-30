@@ -660,6 +660,8 @@ impl Game {
 		self.set(c, Stat::hp, card.health as i32);
 		self.set(c, Stat::maxhp, card.health as i32);
 		self.set(c, Stat::atk, card.attack as i32);
+		self.set(c, Stat::cost, card.cost as i32);
+		self.set(c, Stat::costele, card.costele as i32);
 		for &passive in &[
 			Stat::airborne,
 			Stat::aquatic,

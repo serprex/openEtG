@@ -138,8 +138,9 @@ const activetexts = [
 	'postauto',
 ];
 const activetextsRename = {
-	quanta: (c, x) => ui.eleNames[x[1]].toLowerCase(),
 	burrow: (c, x) => (c.getStatus('burrowed') ? 'unburrow' : 'burrow'),
+	quanta: (c, x) => ui.eleNames[x[1]].toLowerCase(),
+	summon: (c, x) => c.game.Cards.Codes[x[1]].name.toLowerCase(),
 };
 function skillName(c, sk) {
 	const namelist = [];
