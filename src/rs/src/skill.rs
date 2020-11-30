@@ -3191,7 +3191,9 @@ impl Skill {
 				ctx.fx(t, Fx::Rewind);
 				ctx.fx(t, Fx::EndPos(-town));
 				ctx.remove(t);
-				ctx.get_player_mut(town).deck_mut().push(t);
+				let card = ctx.get(t, Stat::card);
+				let inst = ctx.new_thing(card, town);
+				ctx.get_player_mut(town).deck_mut().push(inst);
 			}
 			Self::ricochet => {
 				if ctx.get_kind(t) == etg::Spell
