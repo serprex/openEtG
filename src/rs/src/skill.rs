@@ -1996,7 +1996,7 @@ impl Skill {
 			Self::golemhit => {
 				ctx.queue_attack(t, 0);
 			}
-			Self::gpull | Self::v_gpull => return Skill::gpullspell.proc(ctx, c, t, data),
+			Self::gpull | Self::v_gpull => return Skill::gpullspell.proc(ctx, c, c, data),
 			Self::gpullspell | Self::v_gpullspell => {
 				ctx.fx(t, Fx::Pull);
 				if ctx.get_kind(t) == etg::Player {
