@@ -22,7 +22,7 @@ use wasm_bindgen::prelude::*;
 use crate::card::{self, Card, Cards};
 use crate::etg;
 use crate::generated;
-use crate::skill::{Event, ProcData, ProcKey, Skill};
+use crate::skill::{Event, ProcData, ProcKey, Skill, Skills};
 use crate::{now, set_panic_hook};
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -37,7 +37,7 @@ pub struct ThingData {
 	pub kind: i32,
 	pub owner: i32,
 	pub status: FxHashMap<Stat, i32>,
-	pub skill: FxHashMap<Event, Cow<'static, [Skill]>>,
+	pub skill: Skills,
 }
 
 #[derive(Clone, Default)]
@@ -47,8 +47,8 @@ pub struct PlayerData {
 	pub leader: i32,
 	pub weapon: i32,
 	pub shield: i32,
-	pub creatures: [i32; 23],
-	pub permanents: [i32; 16],
+	pub creatures: Rc<[i32; 23]>,
+	pub permanents: Rc<[i32; 16]>,
 	pub quanta: [u8; 12],
 	pub hand: ArrayVec<[i32; 8]>,
 	pub deck: Rc<Vec<i32>>,
@@ -633,25 +633,28 @@ impl Game {
 	}
 
 	pub fn new_thing(&mut self, code: i32, owner: i32) -> i32 {
-		let id = self.new_id(Entity::Thing(Default::default()));
-		self.set_owner(id, owner);
-		self.set(id, Stat::card, code);
+		let mut thing = ThingData::default();
+		thing.owner = owner;
+		thing.status.insert(Stat::card, code);
 		let card = self.cards.get(code);
-		self.set(id, Stat::cast, card.cast as i32);
-		self.set(id, Stat::castele, card.castele as i32);
-		self.set(id, Stat::cost, card.cost as i32);
-		self.set(id, Stat::costele, card.costele as i32);
-		self.set(id, Stat::hp, card.health as i32);
-		self.set(id, Stat::maxhp, card.health as i32);
-		self.set(id, Stat::atk, card.attack as i32);
-		self.set(id, Stat::casts, 0);
+		thing.status.insert(Stat::cast, card.cast as i32);
+		thing.status.insert(Stat::castele, card.castele as i32);
+		thing.status.insert(Stat::cost, card.cost as i32);
+		thing.status.insert(Stat::costele, card.costele as i32);
+		thing.status.insert(Stat::hp, card.health as i32);
+		thing.status.insert(Stat::maxhp, card.health as i32);
+		thing.status.insert(Stat::atk, card.attack as i32);
+		thing.status.insert(Stat::casts, 0);
 		for &(k, v) in card.status.iter() {
-			self.set(id, k, v);
+			thing.status.insert(k, v);
 		}
-		for &(k, v) in card.skill.iter() {
-			self.setSkill(id, k, v);
-		}
-		id
+		thing.skill = Skills::from(
+			card.skill
+				.iter()
+				.map(|&(k, v)| (k, Cow::Borrowed(v)))
+				.collect::<Vec<_>>(),
+		);
+		self.new_id(Entity::Thing(Rc::new(thing)))
 	}
 
 	pub fn transform(&mut self, c: i32, code: i32) {
@@ -1567,7 +1570,7 @@ impl Game {
 	pub fn addCreaCore(&mut self, id: i32, crea: i32, fromhand: bool) {
 		assert!(id < crea);
 		let pl = self.get_player_mut(id);
-		for cr in pl.creatures.iter_mut() {
+		for cr in Rc::make_mut(&mut pl.creatures).iter_mut() {
 			if *cr == 0 {
 				*cr = crea;
 				self.place(etg::Creature, id, crea, fromhand);
@@ -1596,7 +1599,7 @@ impl Game {
 			}
 		}
 		let pl = self.get_player_mut(id);
-		for pr in pl.permanents.iter_mut() {
+		for pr in Rc::make_mut(&mut pl.permanents).iter_mut() {
 			if *pr == 0 {
 				*pr = perm;
 				self.place(etg::Permanent, id, perm, fromhand);
@@ -1607,7 +1610,7 @@ impl Game {
 
 	pub fn setCrea(&mut self, id: i32, index: i32, crea: i32) {
 		let pl = self.get_player_mut(id);
-		pl.creatures[index as usize] = crea;
+		Rc::make_mut(&mut pl.creatures)[index as usize] = crea;
 		self.place(etg::Creature, id, crea, false);
 	}
 
@@ -1762,18 +1765,18 @@ impl Game {
 				}
 			}
 		}
-		let crs = self.get_player(owner).creatures;
+		let crs = self.get_player(owner).creatures.clone();
 		let foecrs = if foe != 0 {
-			self.get_player(foe).creatures
+			Some(self.get_player(foe).creatures.clone())
 		} else {
-			Default::default()
+			None
 		};
 		for i in 0..23 {
 			let cr = crs[i];
 			if cr != 0 && self.material(cr, 0) {
 				func(self, cr);
 			}
-			if foe != 0 {
+			if let Some(ref foecrs) = foecrs {
 				let cr = foecrs[i];
 				if cr != 0 && self.material(cr, 0) {
 					func(self, cr);
@@ -1796,10 +1799,10 @@ impl Game {
 							o.remove();
 						}
 					}
-					pl.creatures[index as usize] = 0;
+					Rc::make_mut(&mut pl.creatures)[index as usize] = 0;
 				}
 				etg::Permanent => {
-					self.get_player_mut(owner).permanents[index as usize] = 0;
+					Rc::make_mut(&mut self.get_player_mut(owner).permanents)[index as usize] = 0;
 				}
 				etg::Spell => {
 					self.get_player_mut(owner).hand.remove(index as usize);
@@ -1849,7 +1852,8 @@ impl Game {
 						let owner = self.get_owner(id);
 						let cell = self.new_thing(cellcode, owner);
 						self.set_kind(cell, etg::Creature);
-						self.get_player_mut(owner).creatures[idx as usize] = cell;
+						Rc::make_mut(&mut self.get_player_mut(owner).creatures)[idx as usize] =
+							cell;
 					}
 				}
 				self.deatheffect(id, idx);

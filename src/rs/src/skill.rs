@@ -3,7 +3,6 @@
 
 use std::borrow::Cow;
 use std::cmp;
-use std::collections::hash_map::Entry;
 use std::convert::TryFrom;
 use std::iter::once;
 use std::num::NonZeroU8;
@@ -158,6 +157,109 @@ fn throttle(ctx: &Game, c: i32) -> bool {
 			let weapon = ctx.get_weapon(ctx.get_owner(c));
 			weapon != 0 && ctx.get(weapon, Stat::nothrottle) != 0
 		})
+}
+
+pub struct SkillsVacant<'a> {
+	pub skills: &'a mut Skills,
+	pub k: Event,
+}
+
+impl<'a> SkillsVacant<'a> {
+	pub fn insert(self, value: Cow<'static, [Skill]>) -> &'a mut Cow<'static, [Skill]> {
+		self.skills.0.push((self.k, value));
+		&mut self.skills.0.last_mut().unwrap().1
+	}
+}
+
+pub struct SkillsOccupied<'a> {
+	pub skills: &'a mut Skills,
+	pub idx: usize,
+}
+
+impl<'a> SkillsOccupied<'a> {
+	pub fn into_mut(self) -> &'a mut Cow<'static, [Skill]> {
+		&mut self.skills.0[self.idx].1
+	}
+}
+
+pub enum SkillsEntry<'a> {
+	Vacant(SkillsVacant<'a>),
+	Occupied(SkillsOccupied<'a>),
+}
+
+#[derive(Clone, Default)]
+pub struct Skills(pub Vec<(Event, Cow<'static, [Skill]>)>);
+
+impl From<Vec<(Event, Cow<'static, [Skill]>)>> for Skills {
+	fn from(x: Vec<(Event, Cow<'static, [Skill]>)>) -> Skills {
+		Skills(x)
+	}
+}
+
+impl From<&[(Event, Cow<'static, [Skill]>)]> for Skills {
+	fn from(x: &[(Event, Cow<'static, [Skill]>)]) -> Skills {
+		Skills(Vec::from(x))
+	}
+}
+
+impl Skills {
+	pub fn get(&self, needle: &Event) -> Option<&Cow<'static, [Skill]>> {
+		for &(k, ref v) in self.0.iter() {
+			if k == *needle {
+				return Some(v);
+			}
+		}
+		None
+	}
+
+	pub fn get_mut(&mut self, needle: &Event) -> Option<&mut Cow<'static, [Skill]>> {
+		for &mut (k, ref mut v) in self.0.iter_mut() {
+			if k == *needle {
+				return Some(v);
+			}
+		}
+		None
+	}
+
+	pub fn remove(&mut self, needle: &Event) {
+		for idx in 0..self.0.len() {
+			if self.0[idx].0 == *needle {
+				self.0.remove(idx);
+				return;
+			}
+		}
+	}
+
+	pub fn iter(&self) -> impl Iterator<Item = (&Event, &Cow<'static, [Skill]>)> {
+		self.0.iter().map(|&(ref k, ref v)| (k, v))
+	}
+
+	pub fn iter_mut(&mut self) -> impl Iterator<Item = (&Event, &mut Cow<'static, [Skill]>)> {
+		self.0.iter_mut().map(|&mut (ref k, ref mut v)| (k, v))
+	}
+
+	pub fn clear(&mut self) {
+		self.0.clear()
+	}
+
+	pub fn insert(&mut self, k: Event, v: Cow<'static, [Skill]>) {
+		for &mut (ev, ref mut sk) in self.0.iter_mut() {
+			if k == ev {
+				*sk = v;
+				return;
+			}
+		}
+		self.0.push((k, v));
+	}
+
+	pub fn entry<'a>(&'a mut self, k: Event) -> SkillsEntry<'a> {
+		for (idx, ref kv) in self.0.iter_mut().enumerate() {
+			if kv.0 == k {
+				return SkillsEntry::Occupied(SkillsOccupied { skills: self, idx });
+			}
+		}
+		SkillsEntry::Vacant(SkillsVacant { skills: self, k })
+	}
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), derive(Debug))]
@@ -1242,10 +1344,10 @@ impl Skill {
 					ctx.set(chim, Stat::airborne, 1);
 				}
 				ctx.set_kind(chim, etg::Creature);
-				let crs = &mut ctx.get_player_mut(owner).creatures;
+				let crs = Rc::make_mut(&mut ctx.get_player_mut(owner).creatures);
 				crs[0] = chim;
-				for i in 1..crs.len() {
-					crs[i] = 0;
+				for cr in crs[1..].iter_mut() {
+					*cr = 0;
 				}
 				ctx.set(owner, Stat::gpull, chim);
 			}
@@ -2421,10 +2523,10 @@ impl Skill {
 								shardgolem.status.insert(stat, val);
 							}
 							&Soya::Skill(ev, ref sk) => match shardgolem.skill.entry(ev) {
-								Entry::Occupied(o) => {
+								SkillsEntry::Occupied(o) => {
 									o.into_mut().to_mut().extend_from_slice(sk);
 								}
-								Entry::Vacant(v) => {
+								SkillsEntry::Vacant(v) => {
 									v.insert(Cow::from(&sk[..]));
 								}
 							},
@@ -3400,18 +3502,18 @@ impl Skill {
 			}
 			Self::siphonactive => {
 				ctx.fx(c, Fx::Siphon);
-				let mut cskill: FxHashMap<Event, Cow<'static, [Skill]>> = Default::default();
+				let mut cskill: Vec<(Event, Cow<'static, [Skill]>)> = Default::default();
 				for (&k, v) in ctx.get_thing(t).skill.iter() {
-					cskill.insert(
+					cskill.push((
 						k,
 						v.iter()
 							.cloned()
 							.filter(|&sk| !sk.passive())
 							.collect::<Vec<_>>()
 							.into(),
-					);
+					));
 				}
-				ctx.get_thing_mut(c).skill = cskill;
+				ctx.get_thing_mut(c).skill = Skills::from(cskill);
 				ctx.set(c, Stat::cast, ctx.get(t, Stat::cast));
 				ctx.set(c, Stat::castele, ctx.get(t, Stat::castele));
 				ctx.set(c, Stat::casts, 1);
@@ -4420,10 +4522,10 @@ impl Skill {
 					shardgolem.status.insert(Stat::voodoo, 1);
 				} else if tally[etg::Darkness as usize - 1] > 0 {
 					match shardgolem.skill.entry(Event::OwnAttack) {
-						Entry::Occupied(o) => {
+						SkillsEntry::Occupied(o) => {
 							o.into_mut().to_mut().push(Skill::siphon);
 						}
-						Entry::Vacant(v) => {
+						SkillsEntry::Vacant(v) => {
 							v.insert(Cow::from(&[Skill::siphon][..]));
 						}
 					}

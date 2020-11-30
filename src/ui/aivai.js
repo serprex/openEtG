@@ -71,17 +71,17 @@ function fightItOut() {
 	result.textContent = '';
 	replay.textContent = '';
 	const cmds = {
-		accept(game, player, data) {},
 		mulligan(game, player, data) {
-			result.textContent += `${player}\tMULLIGAN\n`;
+			return `${player}\tMULLIGAN\n`;
 		},
 		end(game, player, data) {
-			result.textContent += `${player}\tEND TURN ${game.countPlies()}\n`;
+			return `${player}\tEND TURN ${game.countPlies()}${
+				data.t ? '\tDISCARD ' + game.byId(data.t).card.name : ''
+			}\n`;
 		},
 		cast(game, player, data) {
-			const c = game.byId(data.c),
-				t = game.byId(data.t);
-			result.textContent += `${player}\t${c.card.name}${
+			const t = game.byId(data.t);
+			return `${player}\t${game.byId(data.c).card.name}${
 				t ? ` targets ${t.card ? t.card.name : t.id}` : ''
 			}\n`;
 		},
@@ -109,7 +109,11 @@ function fightItOut() {
 					data: { cmd },
 				} = msg;
 				if (mode === fight && cmds[cmd.x]) {
-					cmds[cmd.x](game, game.turn === realp1 ? 1 : 2, cmd);
+					result.textContent += cmds[cmd.x](
+						game,
+						game.turn === realp1 ? 1 : 2,
+						cmd,
+					);
 				}
 				game.next(cmd);
 			}
