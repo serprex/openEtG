@@ -847,7 +847,7 @@ impl Game {
 	}
 
 	pub fn is_flooding(&self, id: i32) -> bool {
-		self.hasskill(id, Event::Attack, Skill::flooddeath)
+		self.hasskill(id, Event::Attack, Skill::flooddeath) || self.get(id, Stat::flooding) != 0
 	}
 
 	pub fn has_protectonce(&self, id: i32) -> bool {

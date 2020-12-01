@@ -1006,11 +1006,6 @@ fn evalthing(
 		if v != 0 {
 			match k {
 				Stat::airborne | Stat::ranged => score += 0.2,
-				Stat::cloak => {
-					if ctx.get(id, Stat::charges) != 0 || owner != ctx.turn {
-						score += 4.0;
-					}
-				}
 				Stat::nightfall => score += 0.5,
 				Stat::reflective => score += 1.0,
 				Stat::patience => score += 2.0,
@@ -1190,6 +1185,13 @@ pub fn eval(ctx: &Game) -> f32 {
 		let mut pscore = (wall.charges * 4) as f32 + (ctx.get(pl, Stat::markpower) as f32).sqrt()
 			- expected_damage
 			+ wall.dmg as f32;
+		if player
+			.permanents
+			.iter()
+			.any(|&pr| pr != 0 && ctx.get(pr, Stat::cloak) != 0 && ctx.get(pr, Stat::charges) != 0)
+		{
+			pscore += 3.0;
+		}
 		if expected_damage > ctx.get(pl, Stat::hp) as f32 {
 			pscore -= (expected_damage - ctx.get(pl, Stat::hp) as f32) * 99.0 + 33.0;
 		}
