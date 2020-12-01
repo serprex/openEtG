@@ -2650,6 +2650,7 @@ impl Skill {
 			}
 			Self::luciferin | Self::v_luciferin => {
 				let owner = ctx.get_owner(c);
+				ctx.dmg(owner, -10);
 				for &cr in ctx.get_player(owner).creatures.clone().iter() {
 					if cr != 0 {
 						let thing = ctx.get_thing(cr);
