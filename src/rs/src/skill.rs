@@ -4629,7 +4629,7 @@ impl Skill {
 						(ctx.upto(12) + 1) as usize
 					} else {
 						card.element as usize
-					}];
+					}] - 4000;
 				let town = ctx.get_owner(t);
 				let nymph = ctx.new_thing(nymphcode, town);
 				ctx.fx(nymph, Fx::StartPos(t));
