@@ -22,16 +22,14 @@ fn filter(ctx: &Game, skill: Skill, c: i32, t: i32) -> bool {
 }
 
 fn has_sopa(ctx: &Game, id: i32) -> bool {
-	ctx.hasskill(id, Event::Attack, Skill::patience) || ctx.get(id, Stat::patience) != 0
+	ctx.get_kind(id) == etg::Permanent
+		&& ctx.hasskill(id, Event::Cast, Skill::die)
+		&& (ctx.hasskill(id, Event::Attack, Skill::patience) || ctx.get(id, Stat::patience) != 0)
 }
 
 fn proc_sopa(gclone: &mut Game, turn: i32) {
 	for &pr in gclone.get_player(turn).permanents.clone().iter() {
-		if pr != 0
-			&& has_sopa(gclone, pr)
-			&& gclone.hasskill(pr, Event::Cast, Skill::die)
-			&& gclone.canactive(pr)
-		{
+		if pr != 0 && has_sopa(gclone, pr) && gclone.canactive(pr) {
 			gclone.r#move(GameMove::Cast(pr, 0));
 		}
 	}
@@ -215,7 +213,7 @@ where
 	alltgtsforplayer(ctx, ctx.get_foe(ctx.turn), &mut func);
 }
 
-fn scantgt(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut i32, id: i32, tgt: Tgt) {
+fn scantgt(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32, id: i32, tgt: Tgt) {
 	alltgts(ctx, |ctx, t| {
 		if tgt.full_check(ctx, id, t) {
 			scancore(ctx, depth, candy, limit, GameMove::Cast(id, t));
@@ -223,10 +221,10 @@ fn scantgt(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut i32, id: i
 	});
 }
 
-fn scancore(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut i32, cmd: GameMove) {
+fn scancore(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32, cmd: GameMove) {
 	let mut gclone = ctx.clone();
 	if (if let GameMove::Cast(id, 0) = cmd {
-		if gclone.hasskill(id, Event::Cast, Skill::die) && has_sopa(&gclone, id) {
+		if has_sopa(&gclone, id) {
 			let turn = gclone.turn;
 			proc_sopa(&mut gclone, turn);
 			false
@@ -238,9 +236,6 @@ fn scancore(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut i32, cmd:
 	}) {
 		gclone.r#move(cmd);
 	}
-	if depth > 1 && *limit != 0 {
-		*limit -= 1
-	}
 	let score = eval(&gclone);
 	if score > candy.score || (score == candy.score && depth < candy.depth) {
 		if depth == 0 {
@@ -250,38 +245,50 @@ fn scancore(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut i32, cmd:
 			candy.score = score;
 		}
 	}
-	if depth < 2 && *limit > 0 {
-		scan(&gclone, depth + 1, candy, limit);
+	if *limit > 0 {
+		if depth == 0 {
+			let mut searchcan = *candy;
+			searchcan.cmd = cmd;
+			scan(&gclone, depth + 1, &mut searchcan, limit);
+			if searchcan.score > candy.score {
+				*candy = searchcan;
+			}
+		} else {
+			*limit -= 1;
+		}
 	}
 }
 
-fn scan(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut i32) {
+fn scan(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32) {
 	let pl = ctx.get_player(ctx.turn);
-	for &id in pl.hand.iter() {
-		if !ctx.canactive(id) {
-			continue;
-		}
-		let card = ctx.get_card(ctx.get(id, Stat::card));
-		if let Some(tgt) = if card.kind == etg::Spell as i8 {
-			ctx.getSkill(id, Event::Cast)[0].targetting()
-		} else {
-			None
-		} {
+	for (id, sk) in pl
+		.hand
+		.iter()
+		.cloned()
+		.filter(|&id| ctx.canactive(id))
+		.map(|id| {
+			let card = ctx.get_card(ctx.get(id, Stat::card));
+			(
+				id,
+				(if card.kind == etg::Spell as i8 {
+					ctx.getSkill(id, Event::Cast).first()
+				} else {
+					None
+				}),
+			)
+		})
+		.chain(
+			once(pl.weapon)
+				.chain(once(pl.shield))
+				.chain(pl.creatures.iter().cloned())
+				.chain(pl.permanents.iter().cloned())
+				.filter(|&id| id != 0 && ctx.canactive(id))
+				.map(|id| (id, ctx.getSkill(id, Event::Cast).first())),
+		) {
+		if let Some(tgt) = sk.and_then(|sk| sk.targetting()) {
 			scantgt(ctx, depth, candy, limit, id, tgt);
 		} else {
 			scancore(ctx, depth, candy, limit, GameMove::Cast(id, 0));
-		}
-	}
-	for &id in pl.creatures.iter().chain(pl.permanents.iter()) {
-		if !ctx.canactive(id) {
-			continue;
-		}
-		if let Some(&cast) = ctx.getSkill(id, Event::Cast).first() {
-			if let Some(tgt) = cast.targetting() {
-				scantgt(ctx, depth, candy, limit, id, tgt);
-			} else {
-				scancore(ctx, depth, candy, limit, GameMove::Cast(id, 0));
-			}
 		}
 	}
 }

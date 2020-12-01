@@ -1960,6 +1960,14 @@ const MatchView = connect(({ user, opts, nav }) => ({
 								style={{
 									position: 'absolute',
 									left: '760px',
+									top: '560px',
+								}}>
+								{game.game.aieval().toFixed(2)}
+							</span>
+							<span
+								style={{
+									position: 'absolute',
+									left: '760px',
 									top: '520px',
 								}}>
 								{this.state.replayindex}

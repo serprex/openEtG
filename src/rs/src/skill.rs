@@ -832,10 +832,10 @@ impl Skill {
 			Self::blackhole => Tgt::play,
 			Self::bless => Tgt::Or(&[Tgt::crea, Tgt::weap]),
 			Self::bolsterintodeck => Tgt::crea,
-			Self::bubbleclear => Tgt::crea,
+			Self::bubbleclear => Tgt::And(&[Tgt::crea, Tgt::perm]),
 			Self::butterfly => Tgt::butterfly,
 			Self::catapult => Tgt::And(&[Tgt::own, Tgt::crea]),
-			Self::clear => Tgt::crea,
+			Self::clear => Tgt::And(&[Tgt::crea, Tgt::perm]),
 			Self::corpseexplosion => Tgt::And(&[Tgt::own, Tgt::crea]),
 			Self::cpower => Tgt::Or(&[Tgt::crea, Tgt::weap]),
 			Self::cseed => Tgt::crea,
@@ -1366,9 +1366,11 @@ impl Skill {
 				ctx.set(t, Stat::psionic, 0);
 				ctx.maybeDecrStatus(t, Stat::delayed);
 				ctx.maybeDecrStatus(t, Stat::frozen);
-				ctx.dmg(t, -1);
-				if ctx.hasskill(t, Event::Turnstart, Skill::beguilestop) {
-					Skill::beguilestop.proc(ctx, t, ctx.get_owner(t), data);
+				if ctx.get_kind(t) == etg::Creature {
+					ctx.dmg(t, -1);
+					if ctx.hasskill(t, Event::Turnstart, Skill::beguilestop) {
+						Skill::beguilestop.proc(ctx, t, ctx.get_owner(t), data);
+					}
 				}
 			}
 			Self::cold => {
@@ -3165,7 +3167,7 @@ impl Skill {
 			}
 			Self::quantagift => {
 				let owner = ctx.get_owner(c);
-				let mark = ctx.get(c, Stat::mark);
+				let mark = ctx.get(owner, Stat::mark);
 				if mark == etg::Water {
 					ctx.spend(owner, etg::Water, -3);
 				} else {

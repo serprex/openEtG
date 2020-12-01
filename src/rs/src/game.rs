@@ -373,7 +373,6 @@ pub struct Game {
 	players: Rc<Vec<i32>>,
 	pub time: f64,
 	pub duration: f64,
-	moves: Vec<GameMove>,
 	props: Vec<Entity>,
 	attacks: Vec<(i32, i32)>,
 	cards: &'static Cards,
@@ -390,7 +389,6 @@ impl Clone for Game {
 			players: self.players.clone(),
 			time: 0.0,
 			duration: 0.0,
-			moves: Vec::new(),
 			props: self.props.clone(),
 			attacks: self.attacks.clone(),
 			cards: self.cards,
@@ -416,7 +414,6 @@ impl Game {
 			players: Default::default(),
 			time: now(),
 			duration: 0.0,
-			moves: Default::default(),
 			props: vec![Entity::Thing(Default::default())],
 			attacks: Vec::new(),
 			cards: if set == CardSet::Original {
@@ -659,35 +656,41 @@ impl Game {
 
 	pub fn transform(&mut self, c: i32, code: i32) {
 		let card = self.get_card(code);
-		self.set(c, Stat::card, code);
-		self.set(c, Stat::hp, card.health as i32);
-		self.set(c, Stat::maxhp, card.health as i32);
-		self.set(c, Stat::atk, card.attack as i32);
-		self.set(c, Stat::cost, card.cost as i32);
-		self.set(c, Stat::costele, card.costele as i32);
-		for &passive in &[
+		let thing = self.get_thing_mut(c);
+		thing.status.insert(Stat::card, code);
+		thing.status.insert(Stat::hp, card.health as i32);
+		thing.status.insert(Stat::maxhp, card.health as i32);
+		thing.status.insert(Stat::atk, card.attack as i32);
+		thing.status.insert(Stat::cost, card.cost as i32);
+		thing.status.insert(Stat::costele, card.costele as i32);
+		for passive in &[
+			Stat::additive,
 			Stat::airborne,
 			Stat::aquatic,
-			Stat::nocturnal,
-			Stat::voodoo,
-			Stat::swarmhp,
-			Stat::ranged,
-			Stat::additive,
-			Stat::stackable,
-			Stat::token,
-			Stat::poisonous,
 			Stat::golem,
+			Stat::nocturnal,
+			Stat::pillar,
+			Stat::poisonous,
+			Stat::ranged,
+			Stat::stackable,
+			Stat::swarmhp,
+			Stat::token,
+			Stat::voodoo,
 		] {
-			self.set(c, passive, 0);
+			if let Some(val) = thing.status.get_mut(passive) {
+				*val = 0;
+			}
 		}
 		for &(k, v) in card.status {
-			self.set(c, k, v);
+			thing.status.insert(k, v);
 		}
-		self.get_thing_mut(c).skill.clear();
-		for &(k, v) in card.skill.iter() {
-			self.setSkill(c, k, v);
-		}
-		if self.get(c, Stat::mutant) != 0 {
+		thing.skill = Skills::from(
+			card.skill
+				.iter()
+				.map(|&(k, v)| (k, Cow::Borrowed(v)))
+				.collect::<Vec<_>>(),
+		);
+		if thing.status.get(&Stat::mutant).cloned().unwrap_or(0) != 0 {
 			let buff = self.rng.gen_range(0, 25);
 			if card.code < 5000 {
 				self.buffhp(c, buff / 5);
@@ -699,8 +702,8 @@ impl Game {
 				self.o_mutantactive(c);
 			}
 		} else {
-			self.set(c, Stat::cast, card.cast as i32);
-			self.set(c, Stat::castele, card.castele as i32);
+			thing.status.insert(Stat::cast, card.cast as i32);
+			thing.status.insert(Stat::castele, card.castele as i32);
 		}
 	}
 
@@ -874,6 +877,11 @@ impl Game {
 	pub fn aisearch(&self) -> JsGameMove {
 		use crate::aisearch::search;
 		search(self).into()
+	}
+
+	pub fn aieval(&self) -> f32 {
+		use crate::aieval::eval;
+		eval(self)
 	}
 
 	pub fn canactive(&self, id: i32) -> bool {
@@ -1217,8 +1225,7 @@ impl Game {
 			};
 			let kind = self.get_kind(id);
 			if kind == etg::Creature {
-				let poison = self.get(id, Stat::poison);
-				self.dmg_die(id, poison, true);
+				self.dmg_die(id, self.get(id, Stat::poison), true);
 			}
 			self.set(id, Stat::casts, 1);
 			let frozen = self.get(id, Stat::frozen);
@@ -2254,7 +2261,6 @@ impl Game {
 	}
 
 	pub fn r#move(&mut self, cmd: GameMove) {
-		self.moves.push(cmd);
 		match cmd {
 			GameMove::End(c) => {
 				if c != 0 {
