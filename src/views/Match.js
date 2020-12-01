@@ -318,17 +318,26 @@ function ArrowLine({ x0, y0, x1, y1, opacity }) {
 class ThingInst extends Component {
 	state = {
 		gameHash: null,
-		instdom: null,
+		dom: null,
 	};
 
-	setInfo = e => this.props.setInfo(e, this.props.obj, this.props.pos.x);
+	setInfo = e =>
+		this.props.setInfo(
+			e,
+			this.props.game.byId(this.props.id),
+			this.props.pos.x,
+		);
 
-	onClick = () => this.props.onClick(this.props.obj);
+	onClick = () => this.props.onClick(this.props.id);
 
 	static getDerivedStateFromProps(props, state) {
-		const { game, obj, p1id } = props,
-			gameHash = game.replay.length;
+		const { game, p1id, id } = props,
+			gameHash = game.replay.length,
+			obj = game.byId(id);
 		if (gameHash !== state.gameHash) {
+			if (!game.has_id(id)) {
+				return { gameHash, dom: null };
+			}
 			const children = [],
 				isSpell = obj.type === etg.Spell,
 				{ card } = obj,
@@ -339,7 +348,7 @@ class ThingInst extends Component {
 				return {
 					gameHash,
 					faceDown: true,
-					instdom: (
+					dom: (
 						<div
 							className="ico cback"
 							style={{
@@ -363,7 +372,7 @@ class ThingInst extends Component {
 				];
 				const bordervisible = [
 					obj.getStatus('delayed'),
-					obj.id === obj.owner.gpull,
+					id === obj.owner.gpull,
 					obj.getStatus('frozen'),
 				];
 				for (let k = 0; k < 7; k++) {
@@ -433,7 +442,7 @@ class ThingInst extends Component {
 			return {
 				gameHash,
 				faceDown: false,
-				instdom: (
+				dom: (
 					<div
 						style={{
 							width: '64px',
@@ -448,7 +457,7 @@ class ThingInst extends Component {
 							/>
 						)}
 						{children}
-						{game.game.has_protectonce(obj.id) && (
+						{game.game.has_protectonce(id) && (
 							<div
 								className="ico protection"
 								style={{
@@ -509,8 +518,10 @@ class ThingInst extends Component {
 	}
 
 	render() {
+		if (this.state.dom === null) return null;
 		const { props } = this,
-			{ game, obj, p1id, pos, setInfo } = props,
+			{ game, p1id, pos, setInfo } = props,
+			obj = game.byId(props.id),
 			isSpell = obj.type === etg.Spell,
 			{ faceDown } = this.state;
 
@@ -534,7 +545,7 @@ class ThingInst extends Component {
 				onMouseOver={!faceDown && setInfo ? this.setInfo : undefined}
 				onMouseLeave={props.onMouseOut}
 				onClick={this.onClick}>
-				{this.state.instdom}
+				{this.state.dom}
 			</div>
 		);
 	}
@@ -1191,10 +1202,11 @@ const MatchView = connect(({ user, opts, nav }) => ({
 			}
 		};
 
-		thingClick = obj => {
+		thingClick = id => {
 			const { game } = this.props;
 			this.clearCard();
 			if (this.props.replay || game.phase !== game.wasm.Phase.Play) return;
+			const obj = game.byId(id);
 			if (this.state.targeting) {
 				if (this.state.targeting.filter(obj)) {
 					this.state.targeting.cb(obj);
@@ -1268,21 +1280,19 @@ const MatchView = connect(({ user, opts, nav }) => ({
 			} else if (ch === '\b' || ch === '0') {
 				this.cancelClick();
 			} else if (~(chi = 'sw'.indexOf(ch))) {
-				this.thingClick(
-					this.props.game.byId(chi ? this.state.player2 : this.state.player1),
-				);
+				this.thingClick(chi ? this.state.player2 : this.state.player1);
 			} else if (~(chi = 'qa'.indexOf(ch))) {
-				const { shield } = this.props.game.byId(
+				const { shieldId } = this.props.game.byId(
 					chi ? this.state.player2 : this.state.player1,
 				);
-				if (shield) this.thingClick(shield);
+				if (shieldId !== 0) this.thingClick(shieldId);
 			} else if (~(chi = 'ed'.indexOf(ch))) {
-				const { weapon } = this.props.game.byId(
+				const { weaponId } = this.props.game.byId(
 					chi ? this.state.player2 : this.state.player1,
 				);
-				if (weapon) this.thingClick(weapon);
+				if (weaponId !== 0) this.thingClick(weaponId);
 			} else if (~(chi = '12345678'.indexOf(ch))) {
-				const card = this.props.game.byId(this.state.player1).hand[chi];
+				const card = this.props.game.byId(this.state.player1).handIds[chi];
 				if (card) this.thingClick(card);
 			} else if (ch === 'p') {
 				if (
@@ -1498,7 +1508,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							border: 'transparent 2px solid',
 							zIndex: '4',
 						}}
-						onClick={() => this.thingClick(pl)}
+						onClick={() => this.thingClick(pl.id)}
 						onMouseOver={e => this.setInfo(e, pl)}
 						onMouseMove={e => this.setInfo(e, pl)}
 					/>,
@@ -1761,11 +1771,11 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							return {
 								key: `${id}`,
 								style,
-								data: obj,
+								data: id,
 							};
 						})}
 						willEnter={item => {
-							const startpos = this.state.startPos.get(item.data.id);
+							const startpos = this.state.startPos.get(item.data);
 							let pos;
 							if (startpos < 0) {
 								pos = {
@@ -1785,7 +1795,8 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							};
 						}}
 						willLeave={item => {
-							const endpos = this.state.endPos.get(item.data.id);
+							if (!game.has_id(item.data)) return null;
+							const endpos = this.state.endPos.get(item.data);
 							let pos;
 							if (endpos < 0) {
 								pos = {
@@ -1793,7 +1804,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 									y: -endpos === player1.id ? 551 : 258,
 								};
 							} else {
-								pos = this.idtrack.get(endpos || item.data.id);
+								pos = this.idtrack.get(endpos || item.data);
 							}
 
 							return pos
@@ -1811,15 +1822,14 @@ const MatchView = connect(({ user, opts, nav }) => ({
 										Number.isFinite(item.style.x) &&
 										Number.isFinite(item.style.y)
 									) {
-										this.idtrack.set(item.data.id, item.style);
+										this.idtrack.set(item.data, item.style);
 									}
 									return (
 										<ThingInst
 											key={item.key}
 											lofiArt={props.lofiArt}
 											game={game}
-											id={item.data.id}
-											obj={item.data}
+											id={item.data}
 											p1id={player1.id}
 											setInfo={this.setInfo}
 											onMouseOut={this.clearCard}
