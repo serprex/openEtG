@@ -2666,7 +2666,7 @@ impl Skill {
 			Self::lycanthropy => {
 				ctx.buffhp(c, 5);
 				ctx.incrAtk(c, 5);
-				ctx.lobo(c);
+				ctx.rmskill(c, Event::Cast, Self::lycanthropy);
 				ctx.set(c, Stat::nocturnal, 1);
 			}
 			Self::martyr => {
@@ -2817,7 +2817,8 @@ impl Skill {
 				}
 			}
 			Self::nightshade => {
-				Skill::lycanthropy.proc(ctx, c, t, data);
+				ctx.lobo(t);
+				Skill::lycanthropy.proc(ctx, t, 0, data);
 			}
 			Self::noeatspell => {
 				if t == ctx.get_owner(c) {
