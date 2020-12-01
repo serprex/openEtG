@@ -1215,14 +1215,6 @@ impl Game {
 	pub fn attack(&mut self, id: i32, data: &mut ProcData) {
 		loop {
 			let mut data = data.clone();
-			let target = &mut data[ProcKey::tgt];
-			let target = if *target == 0 {
-				let foe = self.get_foe(self.get_owner(id));
-				*target = foe;
-				foe
-			} else {
-				*target
-			};
 			let kind = self.get_kind(id);
 			if kind == etg::Creature {
 				self.dmg_die(id, self.get(id, Stat::poison), true);
@@ -1231,6 +1223,14 @@ impl Game {
 			let frozen = self.get(id, Stat::frozen);
 			if frozen == 0 {
 				self.proc_data(Event::Attack, id, &mut data);
+				let target = &mut data[ProcKey::tgt];
+				let target = if *target == 0 {
+					let foe = self.get_foe(self.get_owner(id));
+					*target = foe;
+					foe
+				} else {
+					*target
+				};
 				let stasis = data[ProcKey::stasis] != 0;
 				let freedom = data[ProcKey::freedom] != 0;
 				if !stasis && self.get(id, Stat::delayed) == 0 {
