@@ -3347,9 +3347,11 @@ impl Skill {
 				}
 			}
 			Self::sadism => {
-				let dmg = data[ProcKey::dmg];
-				if dmg > 0 {
-					ctx.dmg(ctx.get_owner(c), -dmg);
+				if ctx.get_kind(t) != etg::Player {
+					let dmg = data[ProcKey::dmg];
+					if dmg > 0 {
+						ctx.dmg(ctx.get_owner(c), -dmg);
+					}
 				}
 			}
 			Self::salvage => {
