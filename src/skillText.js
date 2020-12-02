@@ -536,10 +536,10 @@ const data = {
 		'Non-ranged attackers are delayed for one turn after their attack. Delayed creatures may not attack or use abilities.',
 	snipe: 'Deal 3 damage to target creature.',
 	solar: 'Gain 1:8 for each attacker.',
-	sosa: [
-		'Lose HP equal to 48% of your maximum HP. Consume all non-1:2 quanta. For two turns, damage heals you and healing damages you.',
-		'Lose HP equal to 40% of your maximum HP. Consume all non-1:2 quanta. For two turns, damage heals you and healing damages you.',
-	],
+	sosa: c =>
+		`Sacrifice ${
+			c.upped ? 40 : 48
+		} HP. Consume all non-1:2 quanta. For two turns, damage heals you and healing damages you.`,
 	soulcatch: 'Whenever a creature dies, gain 3:2.',
 	spores: [
 		'When this creature dies, summon 2 Spores.',
@@ -809,7 +809,7 @@ const data = {
 	v_sosa: c =>
 		`Sacrifice ${
 			c.upped ? 40 : 48
-		}HP & consume all non 1:2 to invert damage for 2 turns`,
+		}HP. Consume all non 1:2. Invert damage for 2 turns`,
 	v_soulcatch: c => `When a creature dies, produce ${c.upped ? 3 : 2}:2`,
 	v_sskin: 'Increment maximum HP per 1:4 owned. Heal same',
 	v_steal: 'Steal target permanent',
