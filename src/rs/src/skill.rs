@@ -410,6 +410,7 @@ pub enum Skill {
 	holylight,
 	hope,
 	icebolt,
+	icegrowth(i8, i8),
 	ignite,
 	immolate,
 	improve,
@@ -1118,6 +1119,7 @@ impl Skill {
 			}
 			Self::becomearctic => {
 				ctx.transform(c, card::As(ctx.get(c, Stat::card), card::ArcticSquid));
+				return 1;
 			}
 			Self::beguile => {
 				let town = ctx.get_owner(t);
@@ -2198,6 +2200,10 @@ impl Skill {
 					);
 				}
 				ctx.spelldmg(t, 2 + bonus);
+			}
+			Self::icegrowth(atk, hp) => {
+				Skill::growth(atk, hp).proc(ctx, c, t, data);
+				return 1;
 			}
 			Self::ignite | Self::v_ignite => {
 				ctx.die(c);
