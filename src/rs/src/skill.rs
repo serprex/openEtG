@@ -832,10 +832,10 @@ impl Skill {
 			Self::blackhole => Tgt::play,
 			Self::bless => Tgt::Or(&[Tgt::crea, Tgt::weap]),
 			Self::bolsterintodeck => Tgt::crea,
-			Self::bubbleclear => Tgt::And(&[Tgt::crea, Tgt::perm]),
+			Self::bubbleclear => Tgt::Or(&[Tgt::crea, Tgt::perm]),
 			Self::butterfly => Tgt::butterfly,
 			Self::catapult => Tgt::And(&[Tgt::own, Tgt::crea]),
-			Self::clear => Tgt::And(&[Tgt::crea, Tgt::perm]),
+			Self::clear => Tgt::Or(&[Tgt::crea, Tgt::perm]),
 			Self::corpseexplosion => Tgt::And(&[Tgt::own, Tgt::crea]),
 			Self::cpower => Tgt::Or(&[Tgt::crea, Tgt::weap]),
 			Self::cseed => Tgt::crea,
@@ -1438,7 +1438,7 @@ impl Skill {
 				if let Some(card) = ctx.random_card(upped, |ctx, card| {
 					if card.kind == etg::Spell as i8 {
 						for &(k, skills) in card.skill.iter() {
-							assert!(k == Event::Cast);
+							debug_assert!(k == Event::Cast);
 							if let Some(tgt) = skills.first().and_then(|sk| sk.targetting()) {
 								if tgt.check(ctx, c, t) {
 									return true;

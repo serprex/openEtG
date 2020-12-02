@@ -279,7 +279,7 @@ quarks.spirit3 = {
 		"You step through the portal and are wisked off to a shifting expanse of swampland. Purple lightning crackles above.\
 		Far off, in the distant center of the dark and brooding expanse, stands an ominous fortress.\
 		The gravel road before you winds its way toward it like a great serpent slithering its way through a desolate bog.\
-		A lone maiden blocks your path. In a voice like claws upon glass she shrieks 'you do not belong here... DIE!' ",
+		A lone maiden blocks your path. In a voice like claws upon glass she shrieks 'you do not belong here... DIE!'",
 	questdependencies: ['spirit2'],
 };
 quarks.spirit4 = {

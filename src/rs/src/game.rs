@@ -1317,8 +1317,6 @@ impl Game {
 		loop {
 			let mut data = data.clone();
 			let kind = self.get_kind(id);
-			let owner = self.get_owner(id);
-			let target = self.get_foe(owner);
 			if kind == etg::Creature {
 				let poison = self.get(id, Stat::poison);
 				self.dmg_die(id, poison, true);
@@ -1339,6 +1337,8 @@ impl Game {
 				if !stasis && frozen == 0 && self.get(id, Stat::delayed) == 0 {
 					let mut trueatk = self.trueatk(id);
 					if trueatk != 0 {
+						let owner = self.get_owner(id);
+						let target = self.get_foe(owner);
 						let mut bypass = self.get(id, Stat::momentum) != 0;
 						if freedom {
 							bypass = true;
@@ -1436,12 +1436,14 @@ impl Game {
 				self.dmg(owner, dmg)
 			}
 		} else {
-			let capdmg = if dmg < 0 {
-				cmp::max(self.get(id, Stat::hp) - self.get(id, Stat::maxhp), dmg)
+			let sosa = self.get(id, Stat::sosa) != 0;
+			let realdmg = if sosa { -dmg } else { dmg };
+			let capdmg = if realdmg < 0 {
+				cmp::max(self.get(id, Stat::hp) - self.get(id, Stat::maxhp), realdmg)
 			} else if kind != etg::Player {
-				cmp::min(self.truehp(id), dmg)
+				cmp::min(self.truehp(id), realdmg)
 			} else {
-				dmg
+				realdmg
 			};
 			*self.get_mut(id, Stat::hp) -= capdmg;
 			if kind != etg::Player {
@@ -1458,7 +1460,11 @@ impl Game {
 				let foe = self.get_foe(self.get_owner(id));
 				self.dmg(foe, dmg);
 			}
-			capdmg
+			if sosa {
+				-capdmg
+			} else {
+				capdmg
+			}
 		}
 	}
 
@@ -1575,7 +1581,7 @@ impl Game {
 	}
 
 	pub fn addCreaCore(&mut self, id: i32, crea: i32, fromhand: bool) {
-		assert!(id < crea);
+		debug_assert!(id < crea);
 		let pl = self.get_player_mut(id);
 		for cr in Rc::make_mut(&mut pl.creatures).iter_mut() {
 			if *cr == 0 {
@@ -1591,7 +1597,7 @@ impl Game {
 	}
 
 	fn addPermCore(&mut self, id: i32, perm: i32, fromhand: bool) {
-		assert!(id < perm);
+		debug_assert!(id < perm);
 		let additive = self.get(perm, Stat::additive);
 		if additive != 0 {
 			let code = card::AsShiny(self.get(perm, Stat::card), false);
