@@ -99,7 +99,7 @@ const data = {
 			c.upped ? '2|1' : '1|1'
 		} Phantom.`,
 	bubbleclear:
-		"Remove statuses (positive and negative) from target creature, reduce target creature's delay by 1, and heal target creature 1.\nTarget gains a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages the affected card.",
+		'Remove statuses (positive and negative) from target, and heal target creature 1.\nTarget gains a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages the affected card.',
 	butterfly:
 		'Target creature or weapon with either strength or HP less than 3 has its skills replaced with "3:1 Destroy target permanent."',
 	burrow: c =>
@@ -119,7 +119,7 @@ const data = {
 	chromastat:
 		"Generate 1:0 for this creature's total strength & HP when this creature deals damage.",
 	clear:
-		"Remove statuses (positive and negative) from target creature, reduce target creature's delay by 1, and heal target creature 1.",
+		'Remove statuses (positive and negative) from target, and heal target creature 1.',
 	cold: '30% chance to freeze non-ranged attackers for 3 turns.',
 	corpseexplosion: [
 		'Sacrifice one of your creatures to deal 1 spell damage to all creatures. Increase damage by 1 for every 8 HP of the sacrifice. Poisonous sacrifices poison opponent.',

@@ -1358,15 +1358,22 @@ impl Skill {
 			}
 			Self::clear => {
 				ctx.fx(t, Fx::Clear);
-				ctx.set(t, Stat::poison, 0);
-				ctx.set(t, Stat::adrenaline, 0);
-				ctx.set(t, Stat::aflatoxin, 0);
-				ctx.set(t, Stat::neuro, 0);
-				ctx.set(t, Stat::momentum, 0);
-				ctx.set(t, Stat::psionic, 0);
-				ctx.maybeDecrStatus(t, Stat::delayed);
-				ctx.maybeDecrStatus(t, Stat::frozen);
-				if ctx.get_kind(t) == etg::Creature {
+				let thing = ctx.get_thing_mut(t);
+				for status in &[
+					Stat::poison,
+					Stat::adrenaline,
+					Stat::aflatoxin,
+					Stat::neuro,
+					Stat::momentum,
+					Stat::psionic,
+					Stat::delayed,
+					Stat::frozen,
+				] {
+					if let Some(val) = thing.status.get_mut(status) {
+						*val = 0;
+					}
+				}
+				if thing.kind == etg::Creature {
 					ctx.dmg(t, -1);
 					if ctx.hasskill(t, Event::Turnstart, Skill::beguilestop) {
 						Skill::beguilestop.proc(ctx, t, ctx.get_owner(t), data);
@@ -3157,11 +3164,18 @@ impl Skill {
 				return 1;
 			}
 			Self::purify | Self::v_purify => {
-				let poison = ctx.get(t, Stat::poison);
-				ctx.set(t, Stat::poison, if poison < 0 { poison - 2 } else { -2 });
-				ctx.set(t, Stat::aflatoxin, 0);
-				ctx.set(t, Stat::neuro, 0);
-				ctx.set(t, Stat::sosa, 0);
+				let thing = ctx.get_thing_mut(t);
+				let poison = thing.status.entry(Stat::poison).or_insert(0);
+				if *poison < 0 {
+					*poison = poison.saturating_sub(2);
+				} else {
+					*poison = 0;
+				}
+				for status in &[Stat::aflatoxin, Stat::neuro, Stat::sosa] {
+					if let Some(val) = thing.status.get_mut(status) {
+						*val = 0;
+					}
+				}
 			}
 			Self::quanta(e) => {
 				ctx.fx(c, Fx::Quanta(1, e as u16));

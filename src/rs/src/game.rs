@@ -1962,7 +1962,8 @@ impl Game {
 	}
 
 	pub fn incrStatus(&mut self, id: i32, k: Stat, amt: i32) {
-		*self.get_mut(id, k) += amt;
+		let stat = self.get_mut(id, k);
+		*stat = stat.saturating_add(amt);
 	}
 
 	pub fn maybeDecrStatus(&mut self, id: i32, k: Stat) -> i32 {
@@ -1975,14 +1976,21 @@ impl Game {
 	}
 
 	pub fn clearStatus(&mut self, id: i32) {
-		self.set(id, Stat::additive, 0);
-		self.set(id, Stat::charges, 0);
-		self.set(id, Stat::chargecap, 0);
-		self.set(id, Stat::cloak, 0);
-		self.set(id, Stat::epoch, 0);
-		self.set(id, Stat::flooding, 0);
-		self.set(id, Stat::nothrottle, 0);
-		self.set(id, Stat::stackable, 0);
+		let thing = self.get_thing_mut(id);
+		for status in &[
+			Stat::additive,
+			Stat::charges,
+			Stat::chargecap,
+			Stat::cloak,
+			Stat::epoch,
+			Stat::flooding,
+			Stat::nothrottle,
+			Stat::stackable,
+		] {
+			if let Some(val) = thing.status.get_mut(status) {
+				*val = 0;
+			}
+		}
 	}
 
 	pub fn nextTurn(&mut self) -> i32 {
@@ -1991,14 +1999,19 @@ impl Game {
 			let next = self.nextPlayer(turn);
 			if next != turn {
 				if self.cards.set != CardSet::Original {
-					let poison = self.get(next, Stat::poison);
-					self.dmg(next, poison);
+					self.dmg(next, self.get(next, Stat::poison));
 				}
-				self.maybeDecrStatus(next, Stat::sosa);
-				self.set(next, Stat::nova, 0);
-				self.set(next, Stat::nova2, 0);
-				self.set(next, Stat::sanctuary, 0);
-				self.set(next, Stat::precognition, 0);
+				let thing = self.get_thing_mut(next);
+				if let Some(sosa) = thing.status.get_mut(&Stat::sosa) {
+					if *sosa > 0 {
+						*sosa -= 1;
+					}
+				}
+				for status in &[Stat::nova, Stat::nova2, Stat::sanctuary, Stat::precognition] {
+					if let Some(val) = thing.status.get_mut(status) {
+						*val = 0;
+					}
+				}
 				for _ in 0..self.get(next, Stat::drawpower) {
 					self.drawstep(next);
 				}
@@ -2042,8 +2055,11 @@ impl Game {
 		if weapon != 0 {
 			self.attack(weapon, &mut data);
 		}
-		self.set(id, Stat::casts, 1);
-		self.set(id, Stat::flatline, 0);
+		let thing = self.get_thing_mut(id);
+		thing.status.insert(Stat::casts, 1);
+		if let Some(val) = thing.status.get_mut(&Stat::flatline) {
+			*val = 0;
+		}
 	}
 
 	pub fn v_endturn(&mut self, id: i32) {
