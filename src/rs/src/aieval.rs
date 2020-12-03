@@ -796,12 +796,12 @@ fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
 						continue;
 					}
 					Skill::weight | Skill::v_weight => {
-						if ctx.truehp(id) > 5 {
+						if ctx.get_kind(id) == etg::Creature && ctx.truehp(id) > 5 {
 							continue;
 						}
 					}
 					Skill::wings | Skill::v_wings => {
-						if ctx.get(id, Stat::airborne) == 0 {
+						if ctx.get(id, Stat::airborne) != 0 || ctx.get(id, Stat::ranged) != 0 {
 							continue;
 						}
 					}

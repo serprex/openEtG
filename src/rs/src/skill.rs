@@ -113,21 +113,12 @@ pub enum ProcKey {
 #[derive(Clone, Default)]
 pub struct ProcData(FxHashMap<ProcKey, i32>, Option<Skill>);
 impl ProcData {
-	pub fn set(&mut self, k: ProcKey, v: i32) -> i32 {
-		self.0.insert(k, v).unwrap_or(0)
-	}
-
 	pub fn active(&self) -> Option<Skill> {
 		self.1
 	}
 
 	pub fn set_active(&mut self, s: Option<Skill>) {
 		self.1 = s;
-	}
-
-	pub fn clear(&mut self) {
-		self.0.clear();
-		self.1 = None;
 	}
 }
 
@@ -898,7 +889,7 @@ impl Skill {
 			Self::parallel => Tgt::crea,
 			Self::plague => Tgt::play,
 			Self::platearmor => Tgt::Or(&[Tgt::crea, Tgt::play]),
-			Self::poison(_) => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::poison(_) => Tgt::crea,
 			Self::powerdrain => Tgt::crea,
 			Self::purify => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::quint => Tgt::crea,
@@ -1018,7 +1009,7 @@ impl Skill {
 			Self::abomination => {
 				if data[ProcKey::tgt] == c && data.active() == Some(Self::mutation) {
 					Skill::improve.proc(ctx, c, c, data);
-					data.set(ProcKey::evade, 1);
+					data[ProcKey::evade] = 1;
 				}
 			}
 			Self::absorbdmg => {
@@ -1830,18 +1821,18 @@ impl Skill {
 			}
 			Self::evade(chance) => {
 				if ctx.rng_ratio(chance as u32, 100) {
-					data.set(ProcKey::dmg, 0);
+					data[ProcKey::dmg] = 0;
 				}
 			}
 			Self::evade100 => {
-				data.set(ProcKey::dmg, 0);
+				data[ProcKey::dmg] = 0;
 			}
 			Self::evadecrea => {
 				if data[ProcKey::tgt] == c
 					&& ctx.get_owner(c) != ctx.get_owner(t)
 					&& ctx.get_kind(t) == etg::Creature
 				{
-					data.set(ProcKey::evade, 1);
+					data[ProcKey::evade] = 1;
 				}
 			}
 			Self::evadespell => {
@@ -1850,7 +1841,7 @@ impl Skill {
 					&& ctx.get_kind(t) == etg::Spell
 					&& ctx.get_card(ctx.get(t, Stat::card)).kind as i32 == etg::Spell
 				{
-					data.set(ProcKey::evade, 1);
+					data[ProcKey::evade] = 1;
 				}
 			}
 			Self::evolve => {
@@ -3116,7 +3107,7 @@ impl Skill {
 				if let Some(&id) = ctx.choose(&candidates) {
 					let halfhp = (ctx.truehp(t) + 1) / 2;
 					let halfatk = (ctx.trueatk(t) + 1) / 2;
-					ctx.buffhp(t, -halfhp);
+					ctx.dmg(t, halfhp);
 					ctx.incrAtk(t, -halfatk);
 					ctx.buffhp(id, halfhp);
 					ctx.incrAtk(id, halfatk);
@@ -3988,9 +3979,9 @@ impl Skill {
 				ctx.fx(t, Fx::Web);
 				ctx.set(t, Stat::airborne, 0);
 			}
-			Self::weight => {
+			Self::weight | Self::v_weight => {
 				if ctx.get_kind(t) == etg::Creature && ctx.truehp(t) > 5 {
-					data.set(ProcKey::dmg, 0);
+					data[ProcKey::dmg] = 0;
 				}
 			}
 			Self::wind => {
@@ -3998,9 +3989,9 @@ impl Skill {
 				ctx.incrAtk(c, stored);
 				ctx.set(c, Stat::storedatk, 0);
 			}
-			Self::wings => {
+			Self::wings | Self::v_wings => {
 				if ctx.get(t, Stat::airborne) == 0 && ctx.get(t, Stat::airborne) == 0 {
-					data.set(ProcKey::dmg, 0);
+					data[ProcKey::dmg] = 0;
 				}
 			}
 			Self::wisdom => {
@@ -4103,7 +4094,10 @@ impl Skill {
 				*ctx.get_mut(c, Stat::atk) /= 2;
 			}
 			Self::v_cold => {
-				if ctx.get_kind(t) == etg::Creature && ctx.rng_ratio(3, 10) {
+				if ctx.get_kind(t) == etg::Creature
+					&& data[ProcKey::dmg] > 0
+					&& ctx.rng_ratio(3, 10)
+				{
 					ctx.freeze(t, 3);
 				}
 			}
@@ -4138,14 +4132,12 @@ impl Skill {
 			}
 			Self::v_disfield => {
 				if ctx.get(ctx.get_owner(c), Stat::sanctuary) == 0 {
-					Skill::disfield.proc(ctx, c, t, data);
-					return (data[ProcKey::dmg] == 0) as i32;
+					return Skill::disfield.proc(ctx, c, t, data);
 				}
 			}
 			Self::v_disshield => {
 				if ctx.get(ctx.get_owner(c), Stat::sanctuary) == 0 {
-					Skill::disshield.proc(ctx, c, t, data);
-					return (data[ProcKey::dmg] == 0) as i32;
+					return Skill::disshield.proc(ctx, c, t, data);
 				}
 			}
 			Self::v_dive => {
@@ -4896,7 +4888,8 @@ impl Skill {
 				ctx.set(c, Stat::swarmhp, hp - 1);
 			}
 			Self::v_thorn => {
-				if ctx.get_kind(c) == etg::Creature && ctx.rng_ratio(3, 4) {
+				if ctx.get_kind(c) == etg::Creature && data[ProcKey::dmg] > 0 && ctx.rng_ratio(3, 4)
+				{
 					ctx.poison(t, 1);
 				}
 			}
@@ -4923,12 +4916,6 @@ impl Skill {
 				if *hp > maxhp {
 					*hp = maxhp;
 				}
-			}
-			Self::v_weight => {
-				return (ctx.get_kind(t) == etg::Creature && ctx.truehp(t) > 5) as i32
-			}
-			Self::v_wings => {
-				return (ctx.get(t, Stat::airborne) != 0 && ctx.get(t, Stat::ranged) != 0) as i32
 			}
 			Self::v_wisdom => {
 				ctx.incrAtk(t, 4);

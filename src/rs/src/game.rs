@@ -1258,7 +1258,7 @@ impl Game {
 							self.spelldmg(target, trueatk);
 						} else if bypass || trueatk < 0 {
 							let mut hitdata = ProcData::default();
-							hitdata.set(ProcKey::dmg, self.dmg(target, trueatk));
+							hitdata[ProcKey::dmg] = self.dmg(target, trueatk);
 							self.trigger_data(Event::Hit, id, target, &mut hitdata);
 						} else {
 							if gpull != 0 {
@@ -1270,12 +1270,16 @@ impl Game {
 									0
 								};
 								let mut hitdata = ProcData::default();
-								hitdata.set(ProcKey::dmg, trueatk - truedr);
-								hitdata.set(ProcKey::blocked, truedr);
+								let reducedmg = trueatk - truedr;
+								hitdata[ProcKey::dmg] = reducedmg;
+								hitdata[ProcKey::blocked] = truedr;
 								if shield != 0 {
 									self.trigger_data(Event::Shield, shield, id, &mut hitdata);
 								}
-								let dmg = self.dmg(target, hitdata[ProcKey::dmg]);
+								let finaldmg = hitdata[ProcKey::dmg];
+								hitdata[ProcKey::blocked] += reducedmg - finaldmg;
+								let dmg = self.dmg(target, finaldmg);
+								hitdata[ProcKey::dmg] = dmg;
 								if dmg > 0 {
 									self.trigger_data(Event::Hit, id, target, &mut hitdata);
 								}
@@ -1363,17 +1367,16 @@ impl Game {
 							} else {
 								0
 							};
-							let trydmg = cmp::max(trueatk - truedr, 0);
-							let skiphit = if shield != 0 {
-								let mut dmgdata = ProcData::default();
-								dmgdata.set(ProcKey::dmg, trydmg);
-								self.trigger_data(Event::Shield, shield, id, &mut dmgdata) != 0
-							} else {
-								false
-							};
-							if !skiphit && trydmg > 0 {
-								let mut hitdata = ProcData::default();
-								hitdata.set(ProcKey::dmg, self.dmg(target, trydmg));
+							let mut hitdata = ProcData::default();
+							let reducedmg = trueatk - truedr;
+							hitdata[ProcKey::dmg] = reducedmg;
+							hitdata[ProcKey::blocked] = truedr;
+							if shield != 0 {
+								self.trigger_data(Event::Shield, shield, id, &mut hitdata);
+							}
+							let dmg = self.dmg(target, hitdata[ProcKey::dmg]);
+							hitdata[ProcKey::dmg] = dmg;
+							if dmg > 0 {
 								self.trigger_data(Event::Hit, id, target, &mut hitdata);
 							}
 						}
@@ -1418,7 +1421,7 @@ impl Game {
 			_ => (),
 		}
 		let mut dmgdata = ProcData::default();
-		dmgdata.set(ProcKey::dmg, dmg);
+		dmgdata[ProcKey::dmg] = dmg;
 		self.trigger_data(Event::Spelldmg, id, 0, &mut dmgdata);
 		self.dmg(id, dmgdata[ProcKey::dmg])
 	}
@@ -1450,7 +1453,7 @@ impl Game {
 				self.fx(id, Fx::Dmg(capdmg));
 			}
 			let mut dmgdata = ProcData::default();
-			dmgdata.set(ProcKey::dmg, dmg);
+			dmgdata[ProcKey::dmg] = dmg;
 			self.proc_data(Event::Dmg, id, &mut dmgdata);
 			if self.truehp(id) <= 0 {
 				if !dontdie {
@@ -1536,7 +1539,7 @@ impl Game {
 		self.set_kind(thingid, kind);
 		let mut data = ProcData::default();
 		if fromhand {
-			data.set(ProcKey::fromhand, 1);
+			data[ProcKey::fromhand] = 1;
 		}
 		self.proc_data(Event::Play, thingid, &mut data);
 	}
@@ -1665,7 +1668,7 @@ impl Game {
 		}
 		let ownpoison = self.getSkill(id, Event::OwnPoison);
 		let mut data = ProcData::default();
-		data.set(ProcKey::amt, amt);
+		data[ProcKey::amt] = amt;
 		if self.trigger_data(Event::OwnFreeze, id, 0, &mut data) == 0 {
 			let amt = data[ProcKey::amt];
 			if amt > 0 {
@@ -1685,7 +1688,7 @@ impl Game {
 		}
 		let ownpoison = self.getSkill(id, Event::OwnPoison);
 		let mut data = ProcData::default();
-		data.set(ProcKey::amt, amt);
+		data[ProcKey::amt] = amt;
 		if self.trigger_data(Event::OwnPoison, id, 0, &mut data) == 0 {
 			let amt = data[ProcKey::amt];
 			self.incrStatus(id, Stat::poison, amt);
@@ -1897,7 +1900,7 @@ impl Game {
 
 	pub fn deatheffect(&mut self, id: i32, index: i32) {
 		let mut data = ProcData::default();
-		data.set(ProcKey::index, index);
+		data[ProcKey::index] = index;
 		self.proc_data(Event::Death, id, &mut data);
 	}
 
@@ -1929,7 +1932,7 @@ impl Game {
 				self.fx(cardid, Fx::StartPos(-id));
 				let mut data = ProcData::default();
 				if isstep {
-					data.set(ProcKey::drawstep, 1);
+					data[ProcKey::drawstep] = 1;
 				}
 				self.proc_data(Event::Draw, id, &mut data);
 			}
