@@ -609,9 +609,6 @@ pub enum Skill {
 	v_empathy,
 	v_enchant,
 	v_endow,
-	v_evade100,
-	v_evade40,
-	v_evade50,
 	v_evolve,
 	v_fiery,
 	v_firebolt,
@@ -1075,7 +1072,7 @@ impl Skill {
 					ctx.fx(wolf, Fx::StartPos(c));
 				}
 			}
-			Self::antimatter => {
+			Self::antimatter | Self::v_antimatter => {
 				let delta = ctx.trueatk(t) * -2;
 				ctx.incrAtk(t, delta);
 			}
@@ -4039,10 +4036,6 @@ impl Skill {
 					ctx.addCard(owner, c);
 				}
 			}
-			Self::v_antimatter => {
-				let delta = ctx.trueatk(t) * -2;
-				ctx.incrAtk(t, delta);
-			}
 			Self::v_bblood => {
 				ctx.buffhp(t, 20);
 				ctx.set(t, Stat::delayed, 6);
@@ -4194,9 +4187,6 @@ impl Skill {
 				ctx.buffhp(c, 2);
 				ctx.get_thing_mut(c).skill = ctx.get_thing(t).skill.clone();
 			}
-			Self::v_evade100 => return 1,
-			Self::v_evade40 => return ctx.rng_ratio(2, 5) as i32,
-			Self::v_evade50 => return ctx.rng_ratio(1, 2) as i32,
 			Self::v_evolve => {
 				ctx.transform(c, card::As(ctx.get(c, Stat::card), card::v_Shrieker));
 				ctx.set(c, Stat::burrowed, 0);

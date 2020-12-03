@@ -45,7 +45,7 @@ fn eval_skill(
 					0.0
 				}
 			}
-			Skill::antimatter => 12.0,
+			Skill::antimatter | Skill::v_antimatter => 12.0,
 			Skill::appease => {
 				if ctx.get_kind(c) == etg::Spell {
 					-6.0
@@ -550,14 +550,14 @@ fn eval_skill(
 			}
 			Skill::cold => 7.0,
 			Skill::despair => 5.0,
-			Skill::evade100 | Skill::v_evade100 => {
+			Skill::evade100 => {
 				if ctx.get(c, Stat::charges) == 0 && ctx.get_owner(c) == ctx.turn {
 					0.0
 				} else {
 					1.0
 				}
 			}
-			Skill::evade(_) | Skill::v_evade40 | Skill::v_evade50 => 1.0,
+			Skill::evade(_) => 1.0,
 			Skill::firewall => {
 				4.0 + ctx
 					.get_player(ctx.get_foe(ctx.get_owner(c)))
@@ -596,7 +596,6 @@ fn eval_skill(
 			Skill::v_accretion => 8.0,
 			Skill::v_adrenaline => 8.0,
 			Skill::v_aflatoxin => 5.0,
-			Skill::v_antimatter => 12.0,
 			Skill::v_bblood => 7.0,
 			Skill::v_bless => 4.0,
 			Skill::v_boneyard => 3.0,
@@ -792,15 +791,15 @@ fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
 						wall.disentro -= ((dmg + 2) / 3) as i16;
 						continue;
 					}
-					Skill::evade100 | Skill::v_evade100 => {
+					Skill::evade100 => {
 						continue;
 					}
-					Skill::weight | Skill::v_weight => {
+					Skill::weight => {
 						if ctx.get_kind(id) == etg::Creature && ctx.truehp(id) > 5 {
 							continue;
 						}
 					}
-					Skill::wings | Skill::v_wings => {
+					Skill::wings => {
 						if ctx.get(id, Stat::airborne) != 0 || ctx.get(id, Stat::ranged) != 0 {
 							continue;
 						}
@@ -816,8 +815,6 @@ fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
 		for &shsk in fshactive.iter() {
 			match shsk {
 				Skill::evade(x) => atk *= x as f32 / 100.0,
-				Skill::v_evade40 => atk *= 0.4,
-				Skill::v_evade50 => atk *= 0.5,
 				Skill::chaos if card::Upped(ctx.get(fsh, Stat::card)) => atk *= 0.8,
 				_ => (),
 			}

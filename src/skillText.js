@@ -672,9 +672,6 @@ const data = {
 	v_empathy: 'Heal owner per creature owned per turn. Upkeep per 8 creatures',
 	v_enchant: 'Target permanent becomes immaterial',
 	v_endow: 'Replicate attributes of target weapon',
-	v_evade40: '40% chance to evade',
-	v_evade50: '50% chance to evade',
-	v_evade100: '100% chance to evade',
 	v_evolve: 'Become an unburrowed Shrieker',
 	v_fiery: 'Increment damage per 5:6 owned',
 	v_firebolt: 'Deals 3 damage to target. Deal 3 more per 10:6 remaining',
@@ -827,8 +824,6 @@ const data = {
 	v_virusplague: "Sacrifice self & poison foe's creatures",
 	v_void: "Reduce foe's maximum HP by 2, 3 if mark is 1:11",
 	v_web: 'Target creature loses airborne',
-	v_weight: 'Evade creatures larger than 5',
-	v_wings: 'Evade non-airborne & non-ranged attackers',
 	v_wisdom: 'Target gains 4|0. May target immaterial, granting psionic',
 };
 for (const [k, v] of [
