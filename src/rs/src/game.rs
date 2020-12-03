@@ -1423,7 +1423,7 @@ impl Game {
 		let mut dmgdata = ProcData::default();
 		dmgdata[ProcKey::dmg] = dmg;
 		self.trigger_data(Event::Spelldmg, id, 0, &mut dmgdata);
-		if dmgdata[ProcKey::evade] != 0 {
+		if dmgdata[ProcKey::evade] == 0 {
 			self.dmg(id, dmgdata[ProcKey::dmg])
 		} else {
 			0
@@ -1866,7 +1866,7 @@ impl Game {
 		} else if kind == etg::Creature {
 			let mut data = ProcData::default();
 			self.trigger_data(Event::Predeath, id, 0, &mut data);
-			if data[ProcKey::evade] != 0 {
+			if data[ProcKey::evade] == 0 {
 				if self.get(id, Stat::aflatoxin) != 0 {
 					let card = self.get(id, Stat::card);
 					let cellcode = card::As(card, card::MalignantCell);
