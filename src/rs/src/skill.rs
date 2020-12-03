@@ -3445,9 +3445,9 @@ impl Skill {
 			Self::shuffle3 => {
 				let owner = ctx.get_owner(c);
 				let decklen = ctx.get_player(owner).deck.len() as i32;
-				let idx1 = ctx.upto(decklen) as usize;
-				let idx2 = ctx.upto(decklen + 1) as usize;
-				let idx3 = ctx.upto(decklen + 2) as usize;
+				let idx1 = ctx.upto(decklen + 1) as usize;
+				let idx2 = ctx.upto(decklen + 2) as usize;
+				let idx3 = ctx.upto(decklen + 3) as usize;
 				let card = ctx.get(t, Stat::card);
 				let c1 = ctx.new_thing(card, owner);
 				let c2 = ctx.new_thing(card, owner);
@@ -3763,7 +3763,7 @@ impl Skill {
 				let card = ctx.get(c, Stat::card);
 				ctx.dmg(t, if card::Upped(card) { 4 } else { 3 });
 				let town = ctx.get_owner(t);
-				let idx = ctx.upto(ctx.get_player(town).deck.len() as i32);
+				let idx = ctx.upto(ctx.get_player(town).deck.len() as i32 + 1);
 				let newrock = ctx.new_thing(card::As(card, card::ThrowRock), town);
 				let pl = ctx.get_player_mut(town);
 				pl.deck_mut().insert(idx as usize, newrock);
@@ -3824,7 +3824,7 @@ impl Skill {
 						} else {
 							ctx.get_foe(pl)
 						};
-						let idx = ctx.upto(ctx.get_player(newowner).deck.len() as i32);
+						let idx = ctx.upto(ctx.get_player(newowner).deck.len() as i32 + 1);
 						let inst = ctx.new_thing(ctx.get(pr, Stat::card), newowner);
 						ctx.get_player_mut(newowner)
 							.deck_mut()
