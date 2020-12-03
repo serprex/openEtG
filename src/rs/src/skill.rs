@@ -83,8 +83,12 @@ impl From<Event> for u8 {
 impl TryFrom<u8> for Event {
 	type Error = ();
 
-	fn try_from(x: u8) -> Result<Self, Self::Error> {
-		NonZeroU8::new(x).map(|nz| Event(nz)).ok_or(())
+	fn try_from(x: u8) -> Result<Self, ()> {
+		if x != 0 && x != 128 {
+			Ok(Event(unsafe { NonZeroU8::new_unchecked(x) }))
+		} else {
+			Err(())
+		}
 	}
 }
 
