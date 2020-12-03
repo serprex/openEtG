@@ -1423,7 +1423,11 @@ impl Game {
 		let mut dmgdata = ProcData::default();
 		dmgdata[ProcKey::dmg] = dmg;
 		self.trigger_data(Event::Spelldmg, id, 0, &mut dmgdata);
-		self.dmg(id, dmgdata[ProcKey::dmg])
+		if dmgdata[ProcKey::evade] != 0 {
+			self.dmg(id, dmgdata[ProcKey::dmg])
+		} else {
+			0
+		}
 	}
 
 	pub fn dmg_die(&mut self, id: i32, dmg: i32, dontdie: bool) -> i32 {
@@ -1669,8 +1673,9 @@ impl Game {
 		let ownpoison = self.getSkill(id, Event::OwnPoison);
 		let mut data = ProcData::default();
 		data[ProcKey::amt] = amt;
-		if self.trigger_data(Event::OwnFreeze, id, 0, &mut data) == 0 {
-			let amt = data[ProcKey::amt];
+		self.trigger_data(Event::OwnFreeze, id, 0, &mut data);
+		let amt = data[ProcKey::amt];
+		if amt != 0 {
 			if amt > 0 {
 				self.fx(id, Fx::Sfx(Sfx::freeze));
 			}
@@ -1689,8 +1694,9 @@ impl Game {
 		let ownpoison = self.getSkill(id, Event::OwnPoison);
 		let mut data = ProcData::default();
 		data[ProcKey::amt] = amt;
-		if self.trigger_data(Event::OwnPoison, id, 0, &mut data) == 0 {
-			let amt = data[ProcKey::amt];
+		self.trigger_data(Event::OwnPoison, id, 0, &mut data);
+		let amt = data[ProcKey::amt];
+		if data[ProcKey::amt] != 0 {
 			self.incrStatus(id, Stat::poison, amt);
 			if amt > 0 {
 				self.fx(id, Fx::Sfx(Sfx::poison));
@@ -1709,18 +1715,16 @@ impl Game {
 		}
 	}
 
-	pub fn trigger(&mut self, k: Event, c: i32, t: i32) -> i32 {
+	pub fn trigger(&mut self, k: Event, c: i32, t: i32) {
 		self.trigger_data(k, c, t, &mut ProcData::default())
 	}
 
-	pub fn trigger_data(&mut self, k: Event, c: i32, t: i32, data: &mut ProcData) -> i32 {
-		let mut n = 0;
+	pub fn trigger_data(&mut self, k: Event, c: i32, t: i32, data: &mut ProcData) {
 		if let Some(ss) = self.get_thing(c).skill.get(&k) {
 			for &s in ss.clone().iter() {
-				n += s.proc(self, c, t, data);
+				s.proc(self, c, t, data);
 			}
 		}
-		n
 	}
 
 	pub fn trigger_pure(&self, k: Event, c: i32, t: i32) -> i32 {
@@ -1860,7 +1864,9 @@ impl Game {
 		} else if kind == etg::Spell {
 			self.proc(Event::Discard, id);
 		} else if kind == etg::Creature {
-			if self.trigger(Event::Predeath, id, 0) == 0 {
+			let mut data = ProcData::default();
+			self.trigger_data(Event::Predeath, id, 0, &mut data);
+			if data[ProcKey::evade] != 0 {
 				if self.get(id, Stat::aflatoxin) != 0 {
 					let card = self.get(id, Stat::card);
 					let cellcode = card::As(card, card::MalignantCell);

@@ -998,7 +998,7 @@ impl Skill {
 		}
 	}
 
-	pub fn proc(self, ctx: &mut Game, c: i32, t: i32, data: &mut ProcData) -> i32 {
+	pub fn proc(self, ctx: &mut Game, c: i32, t: i32, data: &mut ProcData) {
 		match self {
 			Self::r#_tracedeath => {
 				ctx.incrStatus(ctx.turn, Stat::_creaturesDied, 1);
@@ -1107,7 +1107,7 @@ impl Skill {
 			}
 			Self::becomearctic => {
 				ctx.transform(c, card::As(ctx.get(c, Stat::card), card::ArcticSquid));
-				return 1;
+				data[ProcKey::amt] = 0;
 			}
 			Self::beguile => {
 				let town = ctx.get_owner(t);
@@ -1177,7 +1177,7 @@ impl Skill {
 				ctx.set(c, Stat::hp, ctx.get(c, Stat::maxhp));
 				ctx.rmskill(c, Event::Predeath, Skill::bounce);
 				ctx.unsummon(c);
-				return 1;
+				data[ProcKey::evade] = 1;
 			}
 			Self::bravery => {
 				let owner = ctx.get_owner(c);
@@ -1292,16 +1292,17 @@ impl Skill {
 			}
 			Self::cell => {
 				ctx.transform(c, card::As(ctx.get(c, Stat::card), card::MalignantCell));
+				data[ProcKey::amt] = 0;
 			}
 			Self::chaos => {
 				let rng = ctx.rng();
 				if rng < 0.5 {
 					if rng < 0.3 {
 						if ctx.get_kind(c) == etg::Creature && ctx.get(c, Stat::ranged) == 0 {
-							return Skill::cseed.proc(ctx, c, t, data);
+							Skill::cseed.proc(ctx, c, t, data);
 						}
 					} else if card::Upped(ctx.get(c, Stat::card)) {
-						return 1;
+						data[ProcKey::dmg] = 0;
 					}
 				}
 			}
@@ -1795,7 +1796,7 @@ impl Skill {
 						match sk {
 							Skill::poison(ref mut x) => {
 								*x = x.saturating_add(1);
-								return 0;
+								return;
 							}
 							_ => (),
 						}
@@ -1950,7 +1951,7 @@ impl Skill {
 				let town = ctx.get_owner(t);
 				let tgting = if ctx.get_kind(t) == etg::Spell {
 					if ctx.get(town, Stat::sanctuary) != 0 {
-						return 0;
+						return;
 					}
 					let card = ctx.get_card(ctx.get(t, Stat::card));
 					if card.kind as i32 == etg::Spell {
@@ -2042,7 +2043,7 @@ impl Skill {
 					},
 				);
 			}
-			Self::freezeperm => return Self::freeze.proc(ctx, c, t, data),
+			Self::freezeperm => Skill::freeze.proc(ctx, c, t, data),
 			Self::fungusrebirth => {
 				ctx.transform(c, card::As(ctx.get(c, Stat::card), card::Fungus));
 			}
@@ -2097,7 +2098,7 @@ impl Skill {
 			Self::golemhit => {
 				ctx.queue_attack(t, 0);
 			}
-			Self::gpull | Self::v_gpull => return Skill::gpullspell.proc(ctx, c, c, data),
+			Self::gpull | Self::v_gpull => Skill::gpullspell.proc(ctx, c, c, data),
 			Self::gpullspell | Self::v_gpullspell => {
 				ctx.fx(t, Fx::Pull);
 				if ctx.get_kind(t) == etg::Player {
@@ -2190,8 +2191,8 @@ impl Skill {
 				ctx.spelldmg(t, 2 + bonus);
 			}
 			Self::icegrowth(atk, hp) => {
+				data[ProcKey::amt] = 0;
 				Skill::growth(atk, hp).proc(ctx, c, t, data);
-				return 1;
 			}
 			Self::ignite | Self::v_ignite => {
 				ctx.die(c);
@@ -3155,7 +3156,7 @@ impl Skill {
 			Self::protectoncedmg => {
 				ctx.rmskill(c, Event::Prespell, Skill::protectonce);
 				ctx.rmskill(c, Event::Spelldmg, Skill::protectoncedmg);
-				return 1;
+				data[ProcKey::evade] = 1;
 			}
 			Self::purify | Self::v_purify => {
 				let thing = ctx.get_thing_mut(t);
@@ -3790,7 +3791,7 @@ impl Skill {
 				for i in 0..3 {
 					let pl = if i == 2 {
 						if upped {
-							return 0;
+							break;
 						} else {
 							owner
 						}
@@ -4050,7 +4051,7 @@ impl Skill {
 				if ctx.maybeDecrStatus(c, Stat::charges) < 2 {
 					ctx.remove(c);
 				}
-				return 1;
+				data[ProcKey::dmg] = 0;
 			}
 			Self::v_boneyard => {
 				if !card::IsOf(ctx.get(t, Stat::card), card::v_Skeleton) {
@@ -4073,7 +4074,7 @@ impl Skill {
 						if ctx.get_player(owner).hand.is_full()
 							|| ctx.get_player(foe).hand.is_full()
 						{
-							return 0;
+							return;
 						}
 						ctx.drawcard(owner);
 						ctx.drawcard(foe);
@@ -4929,9 +4930,8 @@ impl Skill {
 			| Self::v_fiery
 			| Self::v_hammer
 			| Self::v_hopedr
-			| Self::v_swarmhp => return self.proc_pure(ctx, c, t),
+			| Self::v_swarmhp => panic!("Pure skill triggered with impurity"),
 		}
-		0
 	}
 
 	pub fn proc_pure(self, ctx: &Game, c: i32, t: i32) -> i32 {
