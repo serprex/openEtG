@@ -8,8 +8,6 @@ use std::iter::once;
 use std::num::NonZeroU8;
 use std::rc::Rc;
 
-use fxhash::FxHashMap;
-
 use crate::card;
 use crate::etg;
 use crate::game::{Entity, Fx, Game, Sfx, Stat, ThingData};
@@ -3285,18 +3283,20 @@ impl Skill {
 						if let Some(tgting) = skill.targetting() {
 							let town = ctx.get_owner(t);
 							let mut tgts = Vec::with_capacity(50 * ctx.players_ref().len());
-							for &pid in ctx.players().iter() {
-								ctx.set_owner(t, pid);
-								let pl = ctx.get_player(pid);
-								tgts.extend(
-									once(pl.weapon)
-										.chain(once(pl.shield))
-										.chain(pl.creatures.iter().cloned())
-										.chain(pl.permanents.iter().cloned())
-										.chain(pl.hand.iter().cloned())
-										.filter(|&id| id != 0 && tgting.check(ctx, t, id))
-										.map(|id| (id, pid)),
-								);
+							for &caster in ctx.players().iter() {
+								ctx.set_owner(t, caster);
+								for &pid in ctx.players().iter() {
+									let pl = ctx.get_player(pid);
+									tgts.extend(
+										once(pl.weapon)
+											.chain(once(pl.shield))
+											.chain(pl.creatures.iter().cloned())
+											.chain(pl.permanents.iter().cloned())
+											.chain(pl.hand.iter().cloned())
+											.filter(|&id| id != 0 && tgting.check(ctx, t, id))
+											.map(|id| (id, caster)),
+									);
+								}
 							}
 							if let Some(&(tgt, src)) = ctx.choose(&tgts) {
 								ctx.set_owner(t, src);
