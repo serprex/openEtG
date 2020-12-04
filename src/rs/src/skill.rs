@@ -2828,7 +2828,8 @@ impl Skill {
 			}
 			Self::nymph => {
 				ctx.fx(t, Fx::Nymph);
-				let card = ctx.get_card(ctx.get(t, Stat::card));
+				let code = ctx.get(t, Stat::card);
+				let card = ctx.get_card(code);
 				let nymphcode = etg::NymphList[if card.element as i32 == etg::Chroma {
 					match ctx.getSkill(t, Event::OwnAttack) {
 						&[Skill::pillmat] => *ctx
@@ -2846,7 +2847,7 @@ impl Skill {
 					card.element as usize
 				}];
 				let town = ctx.get_owner(t);
-				let nymph = ctx.new_thing(nymphcode, town);
+				let nymph = ctx.new_thing(card::As(code, nymphcode), town);
 				ctx.fx(nymph, Fx::StartPos(t));
 				ctx.addCrea(town, nymph);
 				ctx.destroy(t, None);
@@ -4588,7 +4589,8 @@ impl Skill {
 			}
 			Self::v_nymph => {
 				ctx.fx(t, Fx::Nymph);
-				let card = ctx.get_card(ctx.get(t, Stat::card));
+				let code = ctx.get(t, Stat::card);
+				let card = ctx.get_card(code);
 				let nymphcode =
 					etg::NymphList[if card.element as i32 == etg::Chroma || card.rarity == 15 {
 						(ctx.upto(12) + 1) as usize
@@ -4596,7 +4598,7 @@ impl Skill {
 						card.element as usize
 					}] - 4000;
 				let town = ctx.get_owner(t);
-				let nymph = ctx.new_thing(nymphcode, town);
+				let nymph = ctx.new_thing(card::As(code, nymphcode), town);
 				ctx.fx(nymph, Fx::StartPos(t));
 				ctx.addCrea(town, nymph);
 				ctx.destroy(t, None);
