@@ -3130,7 +3130,7 @@ impl Skill {
 				if *poison < 0 {
 					*poison = poison.saturating_sub(2);
 				} else {
-					*poison = 0;
+					*poison = -2;
 				}
 				for status in &[Stat::aflatoxin, Stat::neuro, Stat::sosa] {
 					if let Some(val) = thing.status.get_mut(status) {
