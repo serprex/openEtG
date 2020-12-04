@@ -3,21 +3,38 @@
 use std::cmp;
 use std::default::Default;
 use std::iter::once;
-
-use fxhash::FxHashMap;
+use std::ops::{Index, IndexMut};
 
 use crate::card::{self, CardSet};
 use crate::etg;
 use crate::game::{Game, Stat};
 use crate::skill::{Event, Skill};
 
-fn eval_skill(
-	ctx: &Game,
-	c: i32,
-	skills: &[Skill],
-	ttatk: f32,
-	damage: &FxHashMap<i32, f32>,
-) -> f32 {
+struct DamageMap(Vec<f32>);
+
+impl DamageMap {
+	fn new(size: usize) -> Self {
+		let mut v = Vec::with_capacity(size);
+		v.resize(size, 0.0);
+		DamageMap(v)
+	}
+}
+
+impl Index<i32> for DamageMap {
+	type Output = f32;
+
+	fn index(&self, id: i32) -> &f32 {
+		self.0.index(id as usize)
+	}
+}
+
+impl IndexMut<i32> for DamageMap {
+	fn index_mut(&mut self, id: i32) -> &mut f32 {
+		self.0.index_mut(id as usize)
+	}
+}
+
+fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageMap) -> f32 {
 	const FateEgg: u16 = card::FateEgg as u16;
 	const FateEggUp: u16 = card::Upped(card::FateEgg) as u16;
 	const Firefly: u16 = card::Firefly as u16;
@@ -56,7 +73,7 @@ fn eval_skill(
 				}
 			}
 			Skill::bblood => 7.0,
-			Skill::beguilestop => -damage.get(&c).cloned().unwrap_or(0.0),
+			Skill::beguilestop => -damage[c],
 			Skill::bellweb => 1.0,
 			Skill::blackhole => ctx
 				.get_player(ctx.get_foe(ctx.get_owner(c)))
@@ -246,7 +263,7 @@ fn eval_skill(
 						&& ctx.get(cr, Stat::delayed) == 0
 						&& ctx.get(cr, Stat::frozen) == 0
 					{
-						let atk = damage.get(&cr).cloned().unwrap_or(0.0);
+						let atk = damage[cr];
 						if atk > dmg {
 							dmg = atk;
 						}
@@ -516,7 +533,7 @@ fn eval_skill(
 						0.5
 					}
 				} else {
-					(ctx.trueatk(c) as f32 - damage.get(&c).cloned().unwrap_or(0.0)) / 1.5
+					(ctx.trueatk(c) as f32 - damage[c]) / 1.5
 				}
 			}
 			Skill::virusplague => 1.0,
@@ -831,7 +848,7 @@ fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
 
 fn evalthing(
 	ctx: &Game,
-	damage: &FxHashMap<i32, f32>,
+	damage: &DamageMap,
 	id: i32,
 	inhand: bool,
 	flooded: bool,
@@ -871,7 +888,7 @@ fn evalthing(
 	let mut score = 0.0;
 	let mut delaymix = cmp::max(ctx.get(id, Stat::frozen), ctx.get(id, Stat::delayed)) as f32;
 	let (ttatk, ctrueatk, adrenaline, delayfactor) = if iscrea || kind == etg::Weapon {
-		let ttatk = damage.get(&id).cloned().unwrap_or(0.0);
+		let ttatk = damage[id];
 		let ctrueatk = ctx.trueatk(id);
 		let adrenaline = if ctx.get(id, Stat::adrenaline) == 0 {
 			1.0
@@ -1056,15 +1073,15 @@ fn evalthing(
 pub fn eval(ctx: &Game) -> f32 {
 	let turn = ctx.turn;
 	if ctx.winner != 0 {
-		return if ctx.winner == turn {
+		return if ctx.winner == ctx.get_leader(turn) {
 			9999999.0
 		} else {
 			-9999999.0
 		};
 	}
-	let foe = ctx.get_foe(turn);
-	let foepl = ctx.get_player(foe);
-	if foepl.deck.is_empty() && !foepl.hand.is_full() {
+	let turnfoe = ctx.get_foe(turn);
+	let turnfoepl = ctx.get_player(turnfoe);
+	if turnfoepl.deck.is_empty() && !turnfoepl.hand.is_full() {
 		return 99999990.0;
 	}
 	let players = ctx.players_ref();
@@ -1090,17 +1107,19 @@ pub fn eval(ctx: &Game) -> f32 {
 			{
 				wall.charges = ctx.get(shield, Stat::charges) as i16;
 			} else if ctx.hasskill(shield, Event::Shield, Skill::disshield)
-				|| ctx.hasskill(shield, Event::Shield, Skill::v_disshield)
+				|| (ctx.hasskill(shield, Event::Shield, Skill::v_disshield)
+					&& ctx.get(pl, Stat::sanctuary) == 0)
 			{
 				wall.disentro = player.quanta(etg::Entropy) as i16;
 			} else if ctx.hasskill(shield, Event::Shield, Skill::disfield)
-				|| ctx.hasskill(shield, Event::Shield, Skill::v_disfield)
+				|| (ctx.hasskill(shield, Event::Shield, Skill::v_disfield)
+					&& ctx.get(pl, Stat::sanctuary) == 0)
 			{
 				wall.dischroma = player.quanta.iter().map(|&q| q as i16).sum();
 			}
 		}
 	}
-	let mut damage_hash: FxHashMap<i32, f32> = Default::default();
+	let mut damage = DamageMap::new(ctx.props_len());
 	let stasis = players.iter().any(|&pl| {
 		ctx.get_player(pl)
 			.permanents
@@ -1113,7 +1132,7 @@ pub fn eval(ctx: &Game) -> f32 {
 		let player = ctx.get_player(pl);
 		let patience = walls[plidx].patience;
 		let mut foewall = &mut walls[ctx.getIndex(player.foe) as usize];
-		let mut total: f32 = ctx.get(foe, Stat::poison) as f32;
+		let mut total: f32 = ctx.get(player.foe, Stat::poison) as f32;
 		let freedom = if ctx.cardset() == CardSet::Open {
 			1.0 - 0.7f32.powf(
 				player
@@ -1137,7 +1156,7 @@ pub fn eval(ctx: &Game) -> f32 {
 			for &cr in player.creatures.iter() {
 				if cr != 0 {
 					let dmg = estimate_damage(ctx, cr, freedom, foewall);
-					damage_hash.insert(cr, dmg);
+					damage[cr] = dmg;
 					total += dmg;
 				}
 			}
@@ -1145,17 +1164,14 @@ pub fn eval(ctx: &Game) -> f32 {
 		let weapon = ctx.get_weapon(pl);
 		if weapon != 0 {
 			let dmg = estimate_damage(ctx, weapon, freedom, foewall);
-			damage_hash.insert(weapon, dmg);
+			damage[weapon] = dmg;
 			total += dmg;
 		}
 		walls[plidx].dmg = total.min(32000.0).max(-32000.0) as i16;
 	}
 	let wallturn = walls[ctx.getIndex(turn) as usize];
-	if wallturn.dmg as i32 > ctx.get(foe, Stat::hp) {
-		return ((wallturn.dmg as i32 - ctx.get(foe, Stat::hp)) * 999) as f32;
-	}
-	if ctx.get_player(turn).deck.is_empty() {
-		return -9999980.0;
+	if wallturn.dmg as i32 > ctx.get(turnfoe, Stat::hp) {
+		return ((wallturn.dmg as i32 - ctx.get(turnfoe, Stat::hp)) * 999) as f32;
 	}
 	let flooded = players.iter().any(|&pl| {
 		ctx.get_player(pl)
@@ -1164,6 +1180,9 @@ pub fn eval(ctx: &Game) -> f32 {
 			.any(|&pr| pr != 0 && ctx.is_flooding(pr))
 	});
 	let mut score = 0.0;
+	if ctx.get_player(turn).deck.is_empty() {
+		score -= 99.0;
+	}
 	for j in 0..pcount {
 		let plidx = (p0 + j) % pcount;
 		let pl = players[plidx];
@@ -1193,25 +1212,24 @@ pub fn eval(ctx: &Game) -> f32 {
 		}
 		let patience = wall.patience;
 		if patience {
-			pscore += 200.0;
 			pscore += (ctx.count_creatures(pl) * 3) as f32;
 		}
-		pscore += evalthing(ctx, &damage_hash, ctx.get_weapon(pl), false, false, false);
-		pscore += evalthing(ctx, &damage_hash, ctx.get_shield(pl), false, false, false);
+		pscore += evalthing(ctx, &damage, ctx.get_weapon(pl), false, false, false);
+		pscore += evalthing(ctx, &damage, ctx.get_shield(pl), false, false, false);
 		pscore += player
 			.creatures
 			.iter()
-			.map(|&cr| evalthing(ctx, &damage_hash, cr, false, flooded, patience))
+			.map(|&cr| evalthing(ctx, &damage, cr, false, flooded, patience))
 			.sum::<f32>();
 		pscore += player
 			.permanents
 			.iter()
-			.map(|&pr| evalthing(ctx, &damage_hash, pr, false, false, false))
+			.map(|&pr| evalthing(ctx, &damage, pr, false, false, false))
 			.sum::<f32>();
 		pscore += player
 			.hand
 			.iter()
-			.map(|&hr| evalthing(ctx, &damage_hash, hr, true, false, false))
+			.map(|&hr| evalthing(ctx, &damage, hr, true, false, false))
 			.sum::<f32>();
 		if pl != turn {
 			let handlen = player.hand.len();
@@ -1219,7 +1237,7 @@ pub fn eval(ctx: &Game) -> f32 {
 				if player.hand.len() + draw <= 8 && player.deck.len() >= draw {
 					pscore += evalthing(
 						ctx,
-						&damage_hash,
+						&damage,
 						player.deck[player.deck.len() - draw],
 						true,
 						false,

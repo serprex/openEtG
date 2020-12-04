@@ -229,37 +229,9 @@ pub enum Fx {
 	Web,
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub struct Fxs(Vec<(i32, Fx)>);
-
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-impl Fxs {
-	#[cfg_attr(target_arch = "wasm32", wasm_bindgen(constructor))]
-	pub fn new() -> Fxs {
-		Fxs(Vec::new())
-	}
-
-	pub fn length(&self) -> usize {
-		self.0.len()
-	}
-
-	pub fn id(&self, idx: usize) -> i32 {
-		self.0[idx].0
-	}
-
-	pub fn kind(&self, idx: usize) -> i32 {
-		generated::id_fx(self.0[idx].1)
-	}
-
-	pub fn sfx(&self, idx: usize) -> Option<Sfx> {
-		match self.0[idx].1 {
-			Fx::Sfx(sfx) => Some(sfx),
-			_ => None,
-		}
-	}
-
-	pub fn param1(&self, idx: usize) -> i32 {
-		match self.0[idx].1 {
+impl Fx {
+	pub fn param(self) -> i32 {
+		match self {
 			Fx::Atk(amt) => amt,
 			Fx::Card(code) => code,
 			Fx::Delay(amt) => amt,
@@ -269,21 +241,31 @@ impl Fxs {
 			Fx::Heal(amt) => amt,
 			Fx::Lives(amt) => amt,
 			Fx::Poison(amt) => amt,
+			Fx::Sfx(sfx) => sfx as i32,
 			Fx::StartPos(src) => src,
-			Fx::Quanta(amt, _) => amt as i32,
-			_ => 0,
-		}
-	}
-
-	pub fn param2(&self, idx: usize) -> u16 {
-		match self.0[idx].1 {
-			Fx::Quanta(_, e) => e,
+			Fx::Quanta(amt, e) => (amt as i32) | (e as i32) << 8,
 			_ => 0,
 		}
 	}
 }
 
+pub struct Fxs(Vec<(i32, Fx)>);
+
 impl Fxs {
+	pub fn new() -> Fxs {
+		Fxs(Vec::new())
+	}
+
+	pub fn js(&self) -> Vec<i32> {
+		let mut ret = Vec::with_capacity(self.0.len() * 3);
+		for &(id, fx) in self.0.iter() {
+			ret.push(generated::id_fx(fx));
+			ret.push(id);
+			ret.push(fx.param());
+		}
+		ret
+	}
+
 	pub fn push(&mut self, id: i32, fx: Fx) {
 		self.0.push((id, fx))
 	}
@@ -768,10 +750,10 @@ impl Game {
 			.collect()
 	}
 
-	pub fn next(&mut self, x: GameMoveType, c: i32, t: i32, fx: bool) -> Option<Fxs> {
+	pub fn next(&mut self, x: GameMoveType, c: i32, t: i32, fx: bool) -> Option<Vec<i32>> {
 		self.fx = if fx { Some(Fxs::new()) } else { None };
 		self.r#move(JsGameMove { x, c, t }.into());
-		self.fx.take()
+		self.fx.take().map(|fxs| fxs.js())
 	}
 
 	pub fn getIndex(&self, id: i32) -> i32 {
@@ -960,6 +942,10 @@ impl Game {
 }
 
 impl Game {
+	pub fn props_len(&self) -> usize {
+		self.props.len()
+	}
+
 	pub fn get(&self, id: i32, k: Stat) -> i32 {
 		*self.get_thing(id).status.get(&k).unwrap_or(&0)
 	}

@@ -820,7 +820,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 					return delta;
 				});
 			}
-			let effects = game.next(cmd);
+			const effects = game.next(cmd);
 			if (
 				!iscmd &&
 				game.data.players.some(
@@ -836,26 +836,27 @@ const MatchView = connect(({ user, opts, nav }) => ({
 			}
 			this.gameStep(game);
 			this.setState(state => {
-				const fxlen = effects.length();
-				if (fxlen === 0) return {};
-				const newstate = { effectId: state.effectId + 1 };
+				const newstate = {};
 				let { effectId } = state;
-				for (let idx = 0; idx < fxlen; idx++) {
+				console.log(effects);
+				for (let idx = 0; idx < effects.length; idx += 3) {
+					const kind = enums.Fx[effects[idx]],
+						id = effects[idx + 1],
+						param = effects[idx + 2];
 					effectId++;
-					const fxkind = enums.Fx[effects.kind(idx)];
-					switch (fxkind) {
+					switch (kind) {
 						case 'StartPos':
 							newstate.startPos = (
 								newstate.startPos ?? new Map(state.startPos)
-							).set(effects.id(idx), effects.param1(idx));
+							).set(id, param);
 							break;
 						case 'EndPos':
 							if (!newstate.startPos)
 								newstate.startPos = new Map(state.startPos);
-							newstate.startPos.delete(effects.id(idx));
+							newstate.startPos.delete(id);
 							newstate.endPos = (newstate.endPos ?? new Map(state.endPos)).set(
-								effects.id(idx),
-								effects.param1(idx),
+								id,
+								param,
 							);
 							break;
 						case 'Card':
@@ -865,72 +866,39 @@ const MatchView = connect(({ user, opts, nav }) => ({
 									effectId,
 									state,
 									newstate,
-									effects.id(idx),
-									game.Cards.Codes[effects.param1(idx)].name,
+									id,
+									game.Cards.Codes[param].name,
 								),
 							);
-
+							break;
 						case 'Poison':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							newstate.effects.add(
-								this.Text(
-									effectId,
-									state,
-									newstate,
-									effects.id(idx),
-									`Poison ${effects.param1(idx)}`,
-								),
+								this.Text(effectId, state, newstate, id, `Poison ${param}`),
 							);
 							break;
 						case 'Delay':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							newstate.effects.add(
-								this.Text(
-									effectId,
-									state,
-									newstate,
-									effects.id(idx),
-									`Delay ${effects.param1(idx)}`,
-								),
+								this.Text(effectId, state, newstate, id, `Delay ${param}`),
 							);
 							break;
 						case 'Freeze':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							newstate.effects.add(
-								this.Text(
-									effectId,
-									state,
-									newstate,
-									effects.id(idx),
-									`Freeze ${effects.param1(idx)}`,
-								),
+								this.Text(effectId, state, newstate, id, `Freeze ${param}`),
 							);
 							break;
 						case 'Dmg':
-							this.StatChange(
-								effectId,
-								state,
-								newstate,
-								effects.id(idx),
-								-effects.param1(idx),
-								0,
-							);
+							this.StatChange(effectId, state, newstate, id, -param, 0);
 							break;
 						case 'Atk':
-							this.StatChange(
-								effectId,
-								state,
-								newstate,
-								effects.id(idx),
-								0,
-								effects.param1(idx),
-							);
+							this.StatChange(effectId, state, newstate, id, 0, param);
 							break;
 						case 'LastCard':
-							newstate.fxid = (newstate.fxid || state.fxid) + 1;
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							const playerName =
-								game.data.players[game.byId(effects.id(idx)).getIndex()].name;
+								game.data.players[game.byId(id).getIndex()].name;
 							const LastCardEffect = (
 								<Components.Delay
 									key={effectId}
@@ -938,7 +906,6 @@ const MatchView = connect(({ user, opts, nav }) => ({
 									first={<LastCard opacity={1} name={playerName} />}
 									second={
 										<Motion
-											key={newstate.fxid}
 											defaultStyle={{ opacity: 1 }}
 											style={{ opacity: spring(0) }}
 											onRest={() => {
@@ -960,25 +927,13 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						case 'Heal':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							newstate.effects.add(
-								this.Text(
-									effectId,
-									state,
-									newstate,
-									effects.id(idx),
-									`+${effects.param1(idx)}`,
-								),
+								this.Text(effectId, state, newstate, id, `+${param}`),
 							);
 							break;
 						case 'Lives':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							newstate.effects.add(
-								this.Text(
-									effectId,
-									state,
-									newstate,
-									effects.id(idx),
-									`${effects.param1(idx)} lives`,
-								),
+								this.Text(effectId, state, newstate, id, `${param} lives`),
 							);
 							break;
 						case 'Quanta':
@@ -988,18 +943,18 @@ const MatchView = connect(({ user, opts, nav }) => ({
 									effectId,
 									state,
 									newstate,
-									effects.id(idx),
-									`${effects.param1(idx)}:${effects.param2(idx)}`,
+									id,
+									`${param & 255}:${param >> 8}`,
 								),
 							);
 							break;
 						case 'Sfx':
-							playSound(game.wasm.Sfx[effects.sfx(idx)]);
+							playSound(game.wasm.Sfx[param]);
 							break;
 						default:
 							if (!newstate.effects) newstate.effects = new Set(state.effects);
 							newstate.effects.add(
-								this.Text(effectId, state, newstate, effects.id(idx), fxkind),
+								this.Text(effectId, state, newstate, id, kind),
 							);
 							break;
 					}
