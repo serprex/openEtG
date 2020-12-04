@@ -666,7 +666,6 @@ fn eval_skill(
 			Skill::v_plague => 5.0,
 			Skill::v_platearmor => 1.0,
 			Skill::v_precognition => 1.0,
-			Skill::v_purify => 2.0,
 			Skill::v_queen => 7.0,
 			Skill::v_quint => 6.0,
 			Skill::v_readiness => 3.0,

@@ -22,7 +22,7 @@ use wasm_bindgen::prelude::*;
 use crate::card::{self, Card, Cards};
 use crate::etg;
 use crate::generated;
-use crate::skill::{Event, ProcData, ProcKey, Skill, Skills};
+use crate::skill::{Event, ProcData, Skill, Skills};
 use crate::{now, set_panic_hook};
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -1204,7 +1204,7 @@ impl Game {
 		if trueatk != 0 {
 			let dmg = self.dmg(t, trueatk);
 			let mut data = ProcData::default();
-			data[ProcKey::dmg] = dmg;
+			data.dmg = dmg;
 			if dmg != 0 {
 				self.trigger_data(Event::Hit, c, t, &mut data);
 			}
@@ -1223,7 +1223,7 @@ impl Game {
 			let frozen = self.get(id, Stat::frozen);
 			if frozen == 0 {
 				self.proc_data(Event::Attack, id, &mut data);
-				let target = &mut data[ProcKey::tgt];
+				let target = &mut data.tgt;
 				let target = if *target == 0 {
 					let foe = self.get_foe(self.get_owner(id));
 					*target = foe;
@@ -1231,8 +1231,8 @@ impl Game {
 				} else {
 					*target
 				};
-				let stasis = data[ProcKey::stasis] != 0;
-				let freedom = data[ProcKey::freedom] != 0;
+				let stasis = data.stasis;
+				let freedom = data.freedom;
 				if !stasis && self.get(id, Stat::delayed) == 0 {
 					let mut trueatk = self.trueatk(id);
 					if trueatk != 0 {
@@ -1258,7 +1258,7 @@ impl Game {
 							self.spelldmg(target, trueatk);
 						} else if bypass || trueatk < 0 {
 							let mut hitdata = ProcData::default();
-							hitdata[ProcKey::dmg] = self.dmg(target, trueatk);
+							hitdata.dmg = self.dmg(target, trueatk);
 							self.trigger_data(Event::Hit, id, target, &mut hitdata);
 						} else {
 							if gpull != 0 {
@@ -1271,15 +1271,15 @@ impl Game {
 								};
 								let mut hitdata = ProcData::default();
 								let reducedmg = trueatk - truedr;
-								hitdata[ProcKey::dmg] = reducedmg;
-								hitdata[ProcKey::blocked] = truedr;
+								hitdata.dmg = reducedmg;
+								hitdata.blocked = truedr;
 								if shield != 0 {
 									self.trigger_data(Event::Shield, shield, id, &mut hitdata);
 								}
-								let finaldmg = hitdata[ProcKey::dmg];
-								hitdata[ProcKey::blocked] += reducedmg - finaldmg;
+								let finaldmg = hitdata.dmg;
+								hitdata.blocked += reducedmg - finaldmg;
 								let dmg = self.dmg(target, finaldmg);
-								hitdata[ProcKey::dmg] = dmg;
+								hitdata.dmg = dmg;
 								if dmg > 0 {
 									self.trigger_data(Event::Hit, id, target, &mut hitdata);
 								}
@@ -1336,8 +1336,8 @@ impl Game {
 					)
 				}) {
 				self.proc_data(Event::Attack, id, &mut data);
-				let freedom = data[ProcKey::freedom] != 0;
-				let stasis = data[ProcKey::stasis] != 0;
+				let freedom = data.freedom;
+				let stasis = data.stasis;
 				if !stasis && frozen == 0 && self.get(id, Stat::delayed) == 0 {
 					let mut trueatk = self.trueatk(id);
 					if trueatk != 0 {
@@ -1369,13 +1369,13 @@ impl Game {
 							};
 							let mut hitdata = ProcData::default();
 							let reducedmg = trueatk - truedr;
-							hitdata[ProcKey::dmg] = reducedmg;
-							hitdata[ProcKey::blocked] = truedr;
+							hitdata.dmg = reducedmg;
+							hitdata.blocked = truedr;
 							if shield != 0 {
 								self.trigger_data(Event::Shield, shield, id, &mut hitdata);
 							}
-							let dmg = self.dmg(target, hitdata[ProcKey::dmg]);
-							hitdata[ProcKey::dmg] = dmg;
+							let dmg = self.dmg(target, hitdata.dmg);
+							hitdata.dmg = dmg;
 							if dmg > 0 {
 								self.trigger_data(Event::Hit, id, target, &mut hitdata);
 							}
@@ -1421,12 +1421,12 @@ impl Game {
 			_ => (),
 		}
 		let mut dmgdata = ProcData::default();
-		dmgdata[ProcKey::dmg] = dmg;
+		dmgdata.dmg = dmg;
 		self.trigger_data(Event::Spelldmg, id, 0, &mut dmgdata);
-		if dmgdata[ProcKey::evade] == 0 {
-			self.dmg(id, dmgdata[ProcKey::dmg])
-		} else {
+		if dmgdata.evade {
 			0
+		} else {
+			self.dmg(id, dmgdata.dmg)
 		}
 	}
 
@@ -1457,7 +1457,7 @@ impl Game {
 				self.fx(id, Fx::Dmg(capdmg));
 			}
 			let mut dmgdata = ProcData::default();
-			dmgdata[ProcKey::dmg] = dmg;
+			dmgdata.dmg = dmg;
 			self.proc_data(Event::Dmg, id, &mut dmgdata);
 			if self.truehp(id) <= 0 {
 				if !dontdie {
@@ -1541,11 +1541,14 @@ impl Game {
 	fn place(&mut self, kind: i32, id: i32, thingid: i32, fromhand: bool) {
 		self.set_owner(thingid, id);
 		self.set_kind(thingid, kind);
-		let mut data = ProcData::default();
-		if fromhand {
-			data[ProcKey::fromhand] = 1;
-		}
-		self.proc_data(Event::Play, thingid, &mut data);
+		self.proc_data(
+			Event::Play,
+			thingid,
+			&mut ProcData {
+				fromhand: fromhand,
+				..Default::default()
+			},
+		);
 	}
 
 	pub fn setWeapon(&mut self, id: i32, weapon: i32) {
@@ -1672,9 +1675,9 @@ impl Game {
 		}
 		let ownpoison = self.getSkill(id, Event::OwnPoison);
 		let mut data = ProcData::default();
-		data[ProcKey::amt] = amt;
+		data.amt = amt;
 		self.trigger_data(Event::OwnFreeze, id, 0, &mut data);
-		let amt = data[ProcKey::amt];
+		let amt = data.amt;
 		if amt != 0 {
 			if amt > 0 {
 				self.fx(id, Fx::Sfx(Sfx::freeze));
@@ -1693,10 +1696,10 @@ impl Game {
 		}
 		let ownpoison = self.getSkill(id, Event::OwnPoison);
 		let mut data = ProcData::default();
-		data[ProcKey::amt] = amt;
+		data.amt = amt;
 		self.trigger_data(Event::OwnPoison, id, 0, &mut data);
-		let amt = data[ProcKey::amt];
-		if data[ProcKey::amt] != 0 {
+		let amt = data.amt;
+		if data.amt != 0 {
 			self.incrStatus(id, Stat::poison, amt);
 			if amt > 0 {
 				self.fx(id, Fx::Sfx(Sfx::poison));
@@ -1866,7 +1869,7 @@ impl Game {
 		} else if kind == etg::Creature {
 			let mut data = ProcData::default();
 			self.trigger_data(Event::Predeath, id, 0, &mut data);
-			if data[ProcKey::evade] == 0 {
+			if !data.evade {
 				if self.get(id, Stat::aflatoxin) != 0 {
 					let card = self.get(id, Stat::card);
 					let cellcode = card::As(card, card::MalignantCell);
@@ -1905,9 +1908,14 @@ impl Game {
 	}
 
 	pub fn deatheffect(&mut self, id: i32, index: i32) {
-		let mut data = ProcData::default();
-		data[ProcKey::index] = index;
-		self.proc_data(Event::Death, id, &mut data);
+		self.proc_data(
+			Event::Death,
+			id,
+			&mut ProcData {
+				index: index as i8,
+				..Default::default()
+			},
+		);
 	}
 
 	pub fn draw(&mut self, id: i32) -> i32 {
@@ -1936,11 +1944,14 @@ impl Game {
 			let cardid = self.draw(id);
 			if cardid != 0 && self.addCard(id, cardid) != -1 {
 				self.fx(cardid, Fx::StartPos(-id));
-				let mut data = ProcData::default();
-				if isstep {
-					data[ProcKey::drawstep] = 1;
-				}
-				self.proc_data(Event::Draw, id, &mut data);
+				self.proc_data(
+					Event::Draw,
+					id,
+					&mut ProcData {
+						drawstep: isstep,
+						..Default::default()
+					},
+				);
 			}
 		}
 	}
@@ -2039,9 +2050,11 @@ impl Game {
 		let mark = self.get(id, Stat::mark);
 		let markpower = self.get(id, Stat::markpower);
 		self.spend(id, mark, markpower * if mark > 0 { -1 } else { -3 });
-		let mut data = ProcData::default();
-		data[ProcKey::tgt] = self.get_foe(id);
-		data[ProcKey::attackPhase] = 1;
+		let mut data = ProcData {
+			tgt: self.get_foe(id),
+			attackphase: true,
+			..Default::default()
+		};
 		self.proc_data(Event::Beginattack, id, &mut data);
 		for &pr in self.get_player(id).permanents.clone().iter() {
 			if pr != 0 {
@@ -2210,13 +2223,15 @@ impl Game {
 	}
 
 	pub fn castSpellCore(&mut self, c: i32, t: i32, skill: Skill, procspell: bool) {
-		let mut data = ProcData::default();
-		data[ProcKey::tgt] = t;
-		data.set_active(Some(skill));
+		let mut data = ProcData {
+			tgt: t,
+			active: Some(skill),
+			..Default::default()
+		};
 		self.proc_data(Event::Prespell, c, &mut data);
-		let t = data[ProcKey::tgt];
-		let evade = data[ProcKey::evade];
-		if evade != 0 {
+		let t = data.tgt;
+		let evade = data.evade;
+		if evade {
 			if t != 0 {
 				self.fx(t, Fx::Evade);
 			}
@@ -2283,7 +2298,7 @@ impl Game {
 			let (c, t) = self.attacks[n];
 			let mut data = ProcData::default();
 			if t != 0 {
-				data[ProcKey::tgt] = t;
+				data.tgt = t;
 			}
 			self.attack(c, &mut data);
 			n += 1;
