@@ -7,6 +7,7 @@ pkg/*
 atlas.json
 atlas.css
 atlas.png
+atlas.webp
 *.sh
 *.pem
 *.exe

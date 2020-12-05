@@ -1,7 +1,7 @@
 *{box-sizing:border-box}
 body{
 	background-color:#000;
-	background-image:url(assets/bg_default.png);
+	background-image:url(assets/bg_default.webp);
 	background-repeat:no-repeat;
 	color:#fff;
 	margin:0;
@@ -39,7 +39,7 @@ select{
 }
 select:hover{background-color:#bbcccf}
 select:hover:active{background-color:#99aaaf}
-.bg_main{background-image:url(assets/bg_main.png);width:900px;height:600px}
+.bg_main{background-image:url(assets/bg_main.webp);width:900px;height:600px}
 .width400{width:400px;margin:0}
 .floatRight{float:right}
 .atopol{width:900px;margin:0}

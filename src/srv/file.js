@@ -15,12 +15,13 @@ const mime = {
 	png: 'image/png',
 	txt: 'text/plain',
 	wasm: 'application/wasm',
+	webp: 'image/webp',
 };
 export default async function (url) {
 	const contentType = mime[url.slice(url.lastIndexOf('.') + 1)];
 	if (!contentType) return reject('Unknown MIME');
 	if (url.startsWith('Cards/') && !existsSync(url)) {
-		const code = url.match(/^Cards\/([a-v\d]{3})\.png$/);
+		const code = url.match(/^Cards\/([a-v\d]{3})\.webp$/);
 		if (code) {
 			let icode = parseInt(code[1], 32),
 				isShiny = icode & 0x4000;
@@ -33,7 +34,7 @@ export default async function (url) {
 					head: {
 						Location: `/Cards/${etgutil.encodeCode(
 							etgutil.asShiny(icode, false),
-						)}.png`,
+						)}.webp`,
 					},
 					date: new Date(),
 					buf: '',
@@ -43,7 +44,7 @@ export default async function (url) {
 				if (unupped !== code[1]) {
 					return {
 						status: '302',
-						head: { Location: `/Cards/${unupped}.png` },
+						head: { Location: `/Cards/${unupped}.webp` },
 						date: new Date(),
 						buf: '',
 					};

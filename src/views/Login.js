@@ -103,7 +103,7 @@ if (typeof kongregateAPI === 'undefined') {
 				return (
 					<div
 						style={{
-							backgroundImage: 'url(assets/bg_login.png)',
+							backgroundImage: 'url(assets/bg_login.webp)',
 							width: '900px',
 							height: '600px',
 						}}>

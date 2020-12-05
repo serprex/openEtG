@@ -12,6 +12,7 @@ stime.setMilliseconds(0);
 const identityOnlyEncodings = new Set([
 	'application/ogg',
 	'image/png',
+	'image/webp',
 	undefined,
 ]);
 const encode = {

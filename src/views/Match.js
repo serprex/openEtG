@@ -452,7 +452,7 @@ class ThingInst extends Component {
 						{!props.lofiArt && (
 							<img
 								className={card.shiny ? 'shiny' : ''}
-								src={`/Cards/${encodeCode(card.code)}.png`}
+								src={`/Cards/${encodeCode(card.code)}.webp`}
 								style={instimgstyle}
 							/>
 						)}

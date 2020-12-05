@@ -21,7 +21,7 @@ export function card(code) {
 			card.code & 0x4000 ? "class='shiny' " : ''
 		}src='/Cards/${card.code.toString(
 			32,
-		)}.png' style='position:absolute;top:-130px;left:-2px'/>${card
+		)}.webp' style='position:absolute;top:-130px;left:-2px'/>${card
 			.info()
 			.replace(/\|/g, ' / ')
 			.replace(/(\d\d?):(\d\d?) ?/g, (m, n, e) => {

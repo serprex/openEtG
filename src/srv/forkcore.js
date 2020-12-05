@@ -47,7 +47,9 @@ async function forkcorelogic(req, res) {
 		);
 	} else if (
 		!~url.indexOf('..') &&
-		url.match(/^$|(?<!config)\.(js(on|\.map)?|html?|css|csv|png|ogg|txt|wasm)$/)
+		url.match(
+			/^$|(?<!config)\.(js(on|\.map)?|html?|css|csv|png|ogg|txt|wasm|webp)$/,
+		)
 	) {
 		await cache.add(
 			res,

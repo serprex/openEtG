@@ -3,7 +3,7 @@ function hookRowMouseover(tr) {
 		let i = 1;
 		for (; i < this.children.length; i++) {
 			const child = this.children[i].children[0];
-			if (child.href && child.href.match(/\/Cards\/...\.png$/)) {
+			if (child.href && child.href.match(/\/Cards\/...\.webp$/)) {
 				imgs[i - 1].src = child.href;
 				imgs[i - 1].style.visibility = '';
 			} else imgs[i - 1].style.visibility = 'hidden';
@@ -521,7 +521,7 @@ for (const credit of [
 		incx(credit[i][0], credit[i][1]);
 	}
 	for (const code of credit[credit.length - 1]) {
-		incx(Cards.get(code), `Cards/${code}.png`);
+		incx(Cards.get(code), `Cards/${code}.webp`);
 	}
 	table.appendChild(tr);
 }

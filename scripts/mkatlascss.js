@@ -21,7 +21,7 @@ png.on('end', function () {
 		`background-size:${(pngw / 4).toFixed(2)}px;`,
 	];
 	const out = fs.createWriteStream(process.argv[2]);
-	out.write(".ico{display:inline-block;background:url('atlas.png')}");
+	out.write(".ico{display:inline-block;background:url('atlas.webp')}");
 	const rules = {};
 	for (const asset in assets) {
 		const data = assets[asset];
