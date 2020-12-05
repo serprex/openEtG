@@ -1329,6 +1329,9 @@ impl Game {
 						if self.get(id, Stat::psionic) != 0 {
 							self.spelldmg(target, trueatk);
 						} else if bypass || trueatk < 0 {
+							let mut hitdata = ProcData::default();
+							hitdata.dmg = self.dmg(target, trueatk);
+							self.trigger_data(Event::Hit, id, target, &mut hitdata);
 						} else if kind == etg::Creature && self.get(target, Stat::gpull) != 0 {
 							let dmg = self.dmg(self.get(target, Stat::gpull), trueatk);
 							if self
@@ -2075,7 +2078,6 @@ impl Game {
 		for i in 0..16 {
 			let pr = self.get_player(id).permanents[i];
 			if pr != 0 {
-				self.set(pr, Stat::casts, 1);
 				let flooding = self.get(pr, Stat::flooding) as usize;
 				if flooding != 0 {
 					if flooding < floodingIndex {
@@ -2124,6 +2126,11 @@ impl Game {
 					self.die(cr);
 				}
 			}
+		}
+		let shield = self.get_shield(id);
+		if shield != 0 {
+			self.set(shield, Stat::casts, 1);
+			self.trigger_data(Event::OwnAttack, shield, 0, &mut data);
 		}
 		let weapon = self.get_weapon(id);
 		if weapon != 0 {
