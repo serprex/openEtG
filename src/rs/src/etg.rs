@@ -7,50 +7,71 @@ use fxhash::FxHasher;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
-// AdrenalineTable is a bitpacked 2d array
-// [[0,0,0,0],[1,1,1],[2,2,2],[3,3,3],[3,2],[4,2],[4,2],[5,3],[6,3],[3],[4],[4],[4],[5],[5],[5]]
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const AdrenalineTable: [u16; 16] = [
-	4, 3|1<<3|1<<6|1<<9, 3|2<<3|2<<6|2<<9, 3|3<<3|3<<6|3<<9,
-	2|3<<3|2<<6, 2|4<<3|2<<6, 2|4<<3|2<<6, 2|5<<3|3<<6, 2|6<<3|3<<6,
-	1|3<<3, 1|4<<3, 1|4<<3, 1|4<<3, 1|5<<3, 1|5<<3, 1|5<<3,
+const AdrenalineTable: [i8; 80] = [
+	4, 0, 0, 0, 0,
+	3, 1, 1, 1, 0,
+	3, 2, 2, 2, 0,
+	3, 3, 3, 3, 0,
+	2, 3, 2, 0, 0,
+	2, 4, 2, 0, 0,
+	2, 4, 2, 0, 0,
+	2, 5, 3, 0, 0,
+	2, 6, 3, 0, 0,
+	1, 3, 0, 0, 0,
+	1, 4, 0, 0, 0,
+	1, 4, 0, 0, 0,
+	1, 4, 0, 0, 0,
+	1, 5, 0, 0, 0,
+	1, 5, 0, 0, 0,
+	1, 5, 0, 0, 0,
 ];
+
 pub fn countAdrenaline(x: i32) -> i32 {
 	let x = x.abs();
 	if x > 15 {
 		1
 	} else {
-		(AdrenalineTable[x as usize] as i32 & 7) + 1
+		AdrenalineTable[x as usize * 5] as i32 + 1
 	}
 }
+
 pub fn calcAdrenaline(y: i32, dmg: i32) -> i32 {
 	if y < 2 {
 		dmg
 	} else {
-		let row = AdrenalineTable[dmg.abs() as usize] as i32;
-		if y - 2 >= (row & 7) {
-			0
+		let admg = AdrenalineTable[(dmg.abs() * 5 + y - 1) as usize] as i32;
+		if dmg < 0 {
+			-admg
 		} else {
-			let admg = (row >> ((y - 1) * 3)) & 7;
-			if dmg > 0 {
-				admg
-			} else {
-				-admg
-			}
+			admg
 		}
 	}
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn getAdrenalRow(x: i32) -> Vec<i8> {
-	let mut v = Vec::new();
-	let mut cell = AdrenalineTable[x.abs() as usize];
-	for _ in 0..(cell & 7) {
-		cell >>= 3;
-		let dmg = (cell & 7) as i8;
-		v.push(if x < 0 { -dmg } else { dmg });
+	let xabs = x.abs() as usize;
+	if xabs > 15 {
+		Vec::new()
+	} else {
+		let mut v = Vec::<i8>::with_capacity(4);
+		let vp = v.as_mut_ptr();
+		let len = AdrenalineTable[xabs * 5] as usize;
+		unsafe {
+			v.set_len(len);
+			std::ptr::copy_nonoverlapping(
+				AdrenalineTable.as_ptr().offset(xabs as isize * 5 + 1),
+				vp,
+				4,
+			);
+			if x < 0 {
+				let vp = vp.cast::<u32>();
+				*vp = (!*vp) + 0x01010101;
+			}
+		}
+		v
 	}
-	v
 }
 
 pub fn hash<T: Hash>(obj: &T) -> i32 {

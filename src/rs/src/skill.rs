@@ -685,8 +685,6 @@ pub enum Skill {
 	v_virusplague,
 	v_void,
 	v_web,
-	v_weight,
-	v_wings,
 	v_wisdom,
 }
 
@@ -3939,7 +3937,7 @@ impl Skill {
 				ctx.fx(t, Fx::Web);
 				ctx.set(t, Stat::airborne, 0);
 			}
-			Self::weight | Self::v_weight => {
+			Self::weight => {
 				if ctx.get_kind(t) == etg::Creature && ctx.truehp(t) > 5 {
 					data.dmg = 0;
 				}
@@ -3949,7 +3947,7 @@ impl Skill {
 				ctx.incrAtk(c, stored);
 				ctx.set(c, Stat::storedatk, 0);
 			}
-			Self::wings | Self::v_wings => {
+			Self::wings => {
 				if ctx.get(t, Stat::airborne) == 0 && ctx.get(t, Stat::airborne) == 0 {
 					data.dmg = 0;
 				}

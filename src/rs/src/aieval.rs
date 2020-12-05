@@ -160,7 +160,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 					ctx.get(weapon, Stat::cost) as f32
 				}
 			}
-			Skill::disfield => {
+			Skill::disfield | Skill::v_disfield => {
 				(3 + ctx
 					.get_player(ctx.get_owner(c))
 					.permanents
@@ -181,7 +181,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 					})
 					.sum::<i32>()) as f32
 			}
-			Skill::disshield => {
+			Skill::disshield | Skill::v_disshield => {
 				let owner = ctx.get_owner(c);
 				let hasentropymark = ctx.get(owner, Stat::mark) == etg::Entropy;
 				2.0 + ctx
@@ -591,17 +591,9 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			}
 			Skill::thorn(chance) => chance as f32 / 15.0,
 			Skill::vend => 2.0,
-			Skill::weight => 5.0,
-			Skill::wings => {
-				if ctx.get(c, Stat::charges) == 0 && ctx.get_owner(c) == ctx.turn {
-					0.0
-				} else {
-					6.0
-				}
-			}
 			Skill::v_ablaze => 3.0,
-			Skill::v_accelerationspell(x) => (x as i32 * 2) as f32,
 			Skill::v_acceleration(x) => (ctx.truehp(c) - 2 + x as i32) as f32,
+			Skill::v_accelerationspell(x) => (x as i32 * 2) as f32,
 			Skill::v_accretion => 8.0,
 			Skill::v_adrenaline => 8.0,
 			Skill::v_aflatoxin => 5.0,
@@ -617,8 +609,6 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::v_deadalive => 2.0,
 			Skill::v_deja => 4.0,
 			Skill::v_destroy => 8.0,
-			Skill::v_disfield => 8.0,
-			Skill::v_disshield => 7.0,
 			Skill::v_divinity => 3.0,
 			Skill::v_drainlife => 10.0,
 			Skill::v_dryspell => 5.0,
@@ -632,8 +622,8 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::v_freedom => (ctx.get(c, Stat::charges) * 5) as f32,
 			Skill::v_gas => 5.0,
 			Skill::v_gratitude => (ctx.get(c, Stat::charges) * 4) as f32,
-			Skill::v_growth1 => 3.0,
 			Skill::v_growth => 5.0,
+			Skill::v_growth1 => 3.0,
 			Skill::v_guard => 4.0,
 			Skill::v_hatch => 4.5,
 			Skill::v_heal => 8.0,
@@ -664,6 +654,8 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 					.sum::<usize>();
 				((24 - ctx.get_player(ctx.get_foe(owner)).hand.len()) >> n) as f32
 			}
+			Skill::v_cold => 7.0,
+			Skill::v_firewall => 7.0,
 			Skill::v_nova => 4.0,
 			Skill::v_nova2 => 6.0,
 			Skill::v_nymph => 7.0,
@@ -685,7 +677,9 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::v_scarab => 4.0,
 			Skill::v_silence => 1.0,
 			Skill::v_siphon => 4.0,
+			Skill::v_skull => 5.0,
 			Skill::v_skyblitz => 10.0,
+			Skill::v_slow => 6.0,
 			Skill::v_snipe => 7.0,
 			Skill::v_sosa => 6.0,
 			Skill::v_soulcatch => 2.0,
@@ -696,16 +690,11 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::v_storm2 => 6.0,
 			Skill::v_storm3 => 12.0,
 			Skill::v_swave => 6.0,
+			Skill::v_thorn => 5.0,
 			Skill::v_upkeep => -0.5,
 			Skill::v_virusplague => 1.0,
 			Skill::v_void => (ctx.get(c, Stat::charges) * 5) as f32,
 			Skill::v_wisdom => 4.0,
-			Skill::v_cold => 7.0,
-			Skill::v_firewall => 7.0,
-			Skill::v_skull => 5.0,
-			Skill::v_slow => 6.0,
-			Skill::v_thorn => 5.0,
-			Skill::v_weight => 5.0,
 			_ => 0.0,
 		})
 		.sum()
@@ -793,7 +782,6 @@ impl WallShield {
 	}
 }
 
-/* TODO sofr bypass */
 #[derive(Default, Clone, Copy)]
 struct Wall {
 	pub shield: Option<WallShield>,
@@ -802,7 +790,8 @@ struct Wall {
 }
 
 fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
-	if ctx.get(id, Stat::frozen) != 0 || ctx.get(id, Stat::delayed) != 0 {
+	let mut delay = cmp::min(ctx.get(id, Stat::frozen), ctx.get(id, Stat::delayed));
+	if delay != 0 && ctx.get(id, Stat::adrenaline) == 0 {
 		return 0.0;
 	}
 	let tatk = ctx.trueatk(id);
@@ -823,10 +812,9 @@ fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
 			.sum::<i32>() as i16;
 		return 0.0;
 	}
-	let momentum = psionic
-		|| fsh == 0
+	let bypass = fsh == 0 || psionic || ctx.get(id, Stat::momentum) != 0;
+	let momentum = bypass
 		|| tatk <= 0
-		|| ctx.get(id, Stat::momentum) != 0
 		|| (ctx.get(id, Stat::burrowed) != 0
 			&& ctx
 				.get_player(owner)
@@ -838,30 +826,39 @@ fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
 	} else {
 		0
 	};
-	let mut atk = once(tatk)
-		.chain(
-			(1..if ctx.get(id, Stat::adrenaline) == 0 {
-				1
-			} else {
-				etg::countAdrenaline(tatk)
-			})
-				.map(|a| ctx.trueatk_adrenaline(id, a)),
-		)
-		.map(|dmg| {
-			if momentum {
-				dmg as f32
-			} else if let Some(ref mut wshield) = wall.shield {
+	let mut atk = 0.0;
+	let mut momatk = 0;
+	for dmg in once(tatk).chain(
+		(1..if ctx.get(id, Stat::adrenaline) == 0 {
+			1
+		} else {
+			etg::countAdrenaline(tatk)
+		})
+			.map(|a| ctx.trueatk_adrenaline(id, a)),
+	) {
+		if delay != 0 {
+			delay -= 1;
+			continue;
+		}
+		momatk += dmg;
+		if !momentum {
+			atk += if let Some(ref mut wshield) = wall.shield {
 				wshield.dmg(ctx, id, cmp::max(dmg - dr, 0))
 			} else {
 				cmp::max(dmg - dr, 0) as f32
 			}
-		})
-		.sum::<f32>();
-	if (fsh == 0 || ctx.cardset() == CardSet::Original)
-		&& freedom > 0.0
-		&& ctx.get(id, Stat::airborne) != 0
-	{
-		atk += (atk / 2.0).ceil() * freedom;
+		}
+	}
+	if momentum {
+		atk = momatk as f32;
+	}
+	if freedom > 0.0 && ctx.get(id, Stat::airborne) != 0 {
+		atk = atk * (1.0 - freedom)
+			+ if (bypass && ctx.get(foe, Stat::gpull) == 0) || ctx.cardset() == CardSet::Original {
+				(momatk as f32 * 1.5).ceil()
+			} else {
+				momatk as f32
+			} * freedom;
 	}
 	if ctx.get(foe, Stat::sosa) == 0 {
 		atk
