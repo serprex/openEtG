@@ -1153,7 +1153,7 @@ pub fn eval(ctx: &Game) -> f32 {
 						}
 					}
 					Skill::evade(x) => {
-						wall.shield = Some(WallShield::Evade(x as f32 / 100.0));
+						wall.shield = Some(WallShield::Evade((100 - x) as f32 / 100.0));
 					}
 					Skill::chaos if card::Upped(ctx.get(shield, Stat::card)) => {
 						wall.shield = Some(WallShield::Evade(0.8));

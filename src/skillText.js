@@ -31,7 +31,7 @@ export default function skillText(c) {
 		for (const [k, v] of c.active) {
 			for (const name of v) {
 				const entry = getDataFromName(name);
-				if (entry === undefined) return;
+				if (entry === undefined) continue;
 				pushEntry(ret, c, k, entry);
 				if (k === 'cast')
 					ret[ret.length - 1] = `${c.cast}:${c.castele} ${ret[ret.length - 1]}`;
@@ -541,10 +541,8 @@ const data = {
 			c.upped ? 40 : 48
 		} HP. Consume all non-1:2 quanta. For two turns, damage heals you and healing damages you.`,
 	soulcatch: 'Whenever a creature dies, gain 3:2.',
-	spores: [
-		'When this creature dies, summon 2 Spores.',
-		'When this creature dies, summon 2 Toxic Spores.',
-	],
+	spores: c =>
+		`When this creature dies, summon 2 ${c.upped ? 'Toxic ' : ''}Spores.`,
 	sskin:
 		'Gain maximum HP and heal an amount equal to the 1:4 in your quanta pool after casting this spell.',
 	stasis: "Creatures do not attack at the end of each player's turn.",
@@ -561,17 +559,17 @@ const data = {
 		'Base HP is equal to the number of Scarabs you control, including this one.',
 	swave:
 		"Deal 4 spell damage to target creature or player. If target creature is frozen, it dies. If target player's weapon is frozen, destroy it.",
-	tempering: [
-		'Target weapon gains 3 strength. If target weapon is frozen, it loses frozen status.',
-		'Target weapon gains 5 strength. If target weapon is frozen, it loses frozen status.',
-	],
+	tempering: c =>
+		`Target weapon gains ${
+			c.upped ? 5 : 3
+		} strength. If target weapon is frozen, it loses frozen status.`,
 	tesseractsummon:
 		'Summon 2 random creatures from your deck. Opponent summons 1 random creature from their deck. Freeze these creatures for a number of turns equal to \u00bc of their quanta cost, rounded up.',
 	thorn: x => `${x}% chance to give non-ranged attackers 1 poison counter.`,
-	throwrock: [
-		"Deal 3 damage to target creature, then shuffle Throw Rock into its owner's deck.",
-		"Deal 4 damage to target creature, then shuffle Throw Rock into its owner's deck.",
-	],
+	throwrock: c =>
+		`Deal ${
+			c.upped ? 4 : 3
+		} damage to target creature, then shuffle Throw Rock into its owner's deck.`,
 	tick: [
 		'This creature takes 1 damage. If this damage kills the creature, deal 18 spell damage to opponent.',
 		"This creature takes 3 damage. If this damage kills the creature, deal 4 spell damage to all of opponent's creatures",

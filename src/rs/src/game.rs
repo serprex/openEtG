@@ -710,14 +710,6 @@ impl Game {
 		return self.players[0];
 	}
 
-	pub fn get_keys(&self, id: i32) -> Vec<i32> {
-		self.get_thing(id)
-			.status
-			.keys()
-			.map(|&s| generated::id_stat(s))
-			.collect()
-	}
-
 	pub fn get_stats(&self, id: i32) -> Vec<i32> {
 		self.get_thing(id)
 			.status

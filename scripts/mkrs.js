@@ -7,7 +7,6 @@ import OpenCards from '../src/Cards.js';
 const source = [
 	'#![allow(non_upper_case_globals)]',
 	'use crate::card::{Card,CardSet,Cards};use crate::game::{Fx,Stat};use crate::skill::{Event,Skill};',
-	'const sOrig:&str="Original";',
 ];
 function statusSlice(card) {
 	let s = '&[';

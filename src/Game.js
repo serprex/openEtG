@@ -177,9 +177,6 @@ export class Game {
 	get_foe(id) {
 		return this.game.get_foe(id);
 	}
-	get_keys(id) {
-		return this.game.get_keys(id).map(x => enums.StatId[x]);
-	}
 	is_flooding(id) {
 		return this.game.is_flooding(id);
 	}
