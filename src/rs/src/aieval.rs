@@ -293,10 +293,10 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::halveatk => {
 				if ctx.get_kind(c) == etg::Spell {
 					-ctx.get_card(ctx.get(c, Stat::card)).attack as f32 / 4.0
+				} else if ttatk == 0.0 {
+					0.0
 				} else {
-					let atk = ctx.trueatk(c);
-
-					((atk < 0) as i32 - (atk > 0) as i32) as f32
+					ttatk.signum()
 				}
 			}
 			Skill::hasten | Skill::v_hasten => {
@@ -414,6 +414,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::protectonce => 2.0,
 			Skill::protectall => 4.0,
 			Skill::purify => 2.0,
+			Skill::quanta(_) => 0.1,
 			Skill::quint => 6.0,
 			Skill::quinttog => 7.0,
 			Skill::rage | Skill::v_rage => {
@@ -538,22 +539,13 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			}
 			Skill::virusplague => 1.0,
 			Skill::void => 5.0,
-			Skill::voidshell => {
-				let owner = ctx.get_owner(c);
-				(ctx.get(owner, Stat::maxhp) - ctx.get(owner, Stat::hp)) as f32 / 10.0
-			}
 			Skill::web | Skill::v_web => 1.0,
 			Skill::wind => ctx.get(c, Stat::storedatk) as f32 / 2.0,
 			Skill::wisdom => 4.0,
 			Skill::yoink => 4.0,
 			Skill::vengeance => 2.0,
 			Skill::vindicate => 3.0,
-			Skill::pillar
-			| Skill::pend
-			| Skill::pillmat
-			| Skill::pillspi
-			| Skill::pillcar
-			| Skill::quanta(_) => {
+			Skill::pillar | Skill::pend | Skill::pillmat | Skill::pillspi | Skill::pillcar => {
 				if ctx.get_kind(c) == etg::Spell {
 					0.1
 				} else {
@@ -743,16 +735,72 @@ fn caneventuallyactive(ctx: &Game, id: i32, cost: i32, costele: i32) -> bool {
 	})
 }
 
+#[derive(Clone, Copy)]
+enum WallShield {
+	Chargeblock(i32),
+	Disentro(i32),
+	Dischroma(i32),
+	Voidshell(i32),
+	Evade(f32),
+	Evade100,
+	Weight,
+	Wings,
+}
+
+impl WallShield {
+	pub fn dmg(&mut self, ctx: &Game, id: i32, dmg: i32) -> f32 {
+		match *self {
+			WallShield::Chargeblock(ref mut charges) => {
+				if *charges > 0 {
+					*charges -= 1;
+					return 0.0;
+				}
+			}
+			WallShield::Disentro(ref mut q) => {
+				if *q > 0 {
+					*q -= (dmg + 2) / 3;
+					return 0.0;
+				}
+			}
+			WallShield::Evade(x) => return (dmg as f32) * x,
+			WallShield::Dischroma(ref mut q) => {
+				if *q > 0 {
+					*q -= dmg;
+					return 0.0;
+				}
+			}
+			WallShield::Voidshell(ref mut maxhp) => {
+				if *maxhp > 1 {
+					*maxhp = cmp::max(*maxhp - dmg, 1);
+					return 0.0;
+				}
+			}
+			WallShield::Evade100 => {
+				return 0.0;
+			}
+			WallShield::Weight => {
+				if ctx.get_kind(id) == etg::Creature && ctx.truehp(id) > 5 {
+					return 0.0;
+				}
+			}
+			WallShield::Wings => {
+				if ctx.get(id, Stat::airborne) != 0 || ctx.get(id, Stat::ranged) != 0 {
+					return 0.0;
+				}
+			}
+		}
+		dmg as f32
+	}
+}
+
+/* TODO sofr bypass */
 #[derive(Default, Clone, Copy)]
 struct Wall {
-	pub charges: i16,
-	pub disentro: i16,
-	pub dischroma: i16,
+	pub shield: Option<WallShield>,
 	pub dmg: i16,
 	pub patience: bool,
 }
 
-/* TODO shell of void, sofr bypass */
 fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
 	if ctx.get(id, Stat::frozen) != 0 || ctx.get(id, Stat::delayed) != 0 {
 		return 0.0;
@@ -761,15 +809,24 @@ fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
 	let owner = ctx.get_owner(id);
 	let foe = ctx.get_foe(owner);
 	let fsh = ctx.get_shield(foe);
-	let fshactive = if fsh != 0 {
-		ctx.getSkill(fsh, Event::Shield)
-	} else {
-		&[]
-	};
-	let momentum = fsh == 0
+	let psionic = ctx.get(id, Stat::psionic) != 0;
+	if psionic && fsh != 0 && ctx.get(fsh, Stat::reflective) != 0 {
+		wall.dmg += once(tatk)
+			.chain(
+				(1..if ctx.get(id, Stat::adrenaline) == 0 {
+					1
+				} else {
+					etg::countAdrenaline(tatk)
+				})
+					.map(|a| ctx.trueatk_adrenaline(id, a)),
+			)
+			.sum::<i32>() as i16;
+		return 0.0;
+	}
+	let momentum = psionic
+		|| fsh == 0
 		|| tatk <= 0
 		|| ctx.get(id, Stat::momentum) != 0
-		|| ctx.get(id, Stat::psionic) != 0
 		|| (ctx.get(id, Stat::burrowed) != 0
 			&& ctx
 				.get_player(owner)
@@ -781,62 +838,29 @@ fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
 	} else {
 		0
 	};
-	let mut atk = 0;
-	for dmg in once(tatk).chain(
-		(1..if ctx.get(id, Stat::adrenaline) == 0 {
-			1
-		} else {
-			etg::countAdrenaline(tatk)
+	let mut atk = once(tatk)
+		.chain(
+			(1..if ctx.get(id, Stat::adrenaline) == 0 {
+				1
+			} else {
+				etg::countAdrenaline(tatk)
+			})
+				.map(|a| ctx.trueatk_adrenaline(id, a)),
+		)
+		.map(|dmg| {
+			if momentum {
+				dmg as f32
+			} else if let Some(ref mut wshield) = wall.shield {
+				wshield.dmg(ctx, id, cmp::max(dmg - dr, 0))
+			} else {
+				cmp::max(dmg - dr, 0) as f32
+			}
 		})
-			.map(|a| ctx.trueatk_adrenaline(id, a)),
-	) {
-		atk += if momentum {
-			dmg
-		} else {
-			for &shsk in fshactive.iter() {
-				match shsk {
-					Skill::blockwithcharge | Skill::v_blockwithcharge if wall.charges > 0 => {
-						wall.charges -= 1;
-						continue;
-					}
-					Skill::disfield | Skill::v_disfield if wall.dischroma > 0 => {
-						wall.dischroma -= dmg as i16;
-						continue;
-					}
-					Skill::disshield | Skill::v_disshield if wall.disentro > 0 => {
-						wall.disentro -= ((dmg + 2) / 3) as i16;
-						continue;
-					}
-					Skill::evade100 => {
-						continue;
-					}
-					Skill::weight => {
-						if ctx.get_kind(id) == etg::Creature && ctx.truehp(id) > 5 {
-							continue;
-						}
-					}
-					Skill::wings => {
-						if ctx.get(id, Stat::airborne) != 0 || ctx.get(id, Stat::ranged) != 0 {
-							continue;
-						}
-					}
-					_ => (),
-				}
-			}
-			cmp::max(dmg - dr, 0)
-		};
-	}
-	let mut atk = atk as f32;
-	if !momentum {
-		for &shsk in fshactive.iter() {
-			match shsk {
-				Skill::evade(x) => atk *= x as f32 / 100.0,
-				Skill::chaos if card::Upped(ctx.get(fsh, Stat::card)) => atk *= 0.8,
-				_ => (),
-			}
-		}
-	}
-	if fsh == 0 && freedom > 0.0 && ctx.get(id, Stat::airborne) != 0 {
+		.sum::<f32>();
+	if (fsh == 0 || ctx.cardset() == CardSet::Original)
+		&& freedom > 0.0
+		&& ctx.get(id, Stat::airborne) != 0
+	{
 		atk += (atk / 2.0).ceil() * freedom;
 	}
 	if ctx.get(foe, Stat::sosa) == 0 {
@@ -1102,20 +1126,42 @@ pub fn eval(ctx: &Game) -> f32 {
 					|| ctx.get(pr, Stat::patience) != 0)
 		});
 		if shield != 0 {
-			if ctx.hasskill(shield, Event::Shield, Skill::blockwithcharge)
-				|| ctx.hasskill(shield, Event::Shield, Skill::v_blockwithcharge)
-			{
-				wall.charges = ctx.get(shield, Stat::charges) as i16;
-			} else if ctx.hasskill(shield, Event::Shield, Skill::disshield)
-				|| (ctx.hasskill(shield, Event::Shield, Skill::v_disshield)
-					&& ctx.get(pl, Stat::sanctuary) == 0)
-			{
-				wall.disentro = player.quanta(etg::Entropy) as i16;
-			} else if ctx.hasskill(shield, Event::Shield, Skill::disfield)
-				|| (ctx.hasskill(shield, Event::Shield, Skill::v_disfield)
-					&& ctx.get(pl, Stat::sanctuary) == 0)
-			{
-				wall.dischroma = player.quanta.iter().map(|&q| q as i16).sum();
+			for &fsh in ctx.getSkill(shield, Event::Shield) {
+				match fsh {
+					Skill::blockwithcharge | Skill::v_blockwithcharge => {
+						wall.shield = Some(WallShield::Chargeblock(ctx.get(shield, Stat::charges)));
+					}
+					Skill::disshield | Skill::v_disshield => {
+						if fsh == Skill::disshield || ctx.get(pl, Stat::sanctuary) == 0 {
+							wall.shield =
+								Some(WallShield::Disentro(player.quanta(etg::Entropy) as i32));
+						}
+					}
+					Skill::disfield | Skill::v_disfield => {
+						if fsh == Skill::disfield || ctx.get(pl, Stat::sanctuary) == 0 {
+							wall.shield = Some(WallShield::Dischroma(
+								player.quanta.iter().map(|&q| q as i32).sum::<i32>(),
+							));
+						}
+					}
+					Skill::voidshell => {
+						wall.shield = Some(WallShield::Voidshell(ctx.get(pl, Stat::maxhp)));
+					}
+					Skill::evade100 => {
+						if ctx.get_owner(shield) != ctx.turn || ctx.get(shield, Stat::charges) > 0 {
+							wall.shield = Some(WallShield::Evade100);
+						}
+					}
+					Skill::evade(x) => {
+						wall.shield = Some(WallShield::Evade(x as f32 / 100.0));
+					}
+					Skill::chaos if card::Upped(ctx.get(shield, Stat::card)) => {
+						wall.shield = Some(WallShield::Evade(0.8));
+					}
+					Skill::weight => wall.shield = Some(WallShield::Weight),
+					Skill::wings => wall.shield = Some(WallShield::Wings),
+					_ => (),
+				}
 			}
 		}
 	}
@@ -1197,9 +1243,22 @@ pub fn eval(ctx: &Game) -> f32 {
 			.sum::<i32>() as f32;
 		let player = ctx.get_player(pl);
 		let wall = &walls[plidx];
-		let mut pscore = (wall.charges * 4) as f32 + (ctx.get(pl, Stat::markpower) as f32).sqrt()
-			- expected_damage
-			+ wall.dmg as f32;
+		let mut pscore =
+			(ctx.get(pl, Stat::markpower) as f32).sqrt() - expected_damage + wall.dmg as f32;
+		let mut plhp = ctx.get(pl, Stat::hp);
+		if let Some(wshield) = wall.shield {
+			match wshield {
+				WallShield::Chargeblock(charges) => pscore += (charges * 4) as f32,
+				WallShield::Voidshell(maxhp) => {
+					if plhp > maxhp {
+						pscore -= (plhp - maxhp) as f32;
+						plhp = maxhp;
+					}
+					pscore += (ctx.get(pl, Stat::maxhp) - plhp * 12) as f32 / 4.0;
+				}
+				_ => (),
+			}
+		}
 		if player
 			.permanents
 			.iter()
@@ -1207,8 +1266,8 @@ pub fn eval(ctx: &Game) -> f32 {
 		{
 			pscore += 3.0;
 		}
-		if expected_damage > ctx.get(pl, Stat::hp) as f32 {
-			pscore -= (expected_damage - ctx.get(pl, Stat::hp) as f32) * 99.0 + 33.0;
+		if expected_damage > plhp as f32 {
+			pscore -= (expected_damage - plhp as f32) * 99.0 + 33.0;
 		}
 		let patience = wall.patience;
 		if patience {
@@ -1246,8 +1305,7 @@ pub fn eval(ctx: &Game) -> f32 {
 				}
 			}
 		}
-		pscore +=
-			(ctx.get(pl, Stat::hp) as f32).sqrt() * 4.0 - (ctx.get(pl, Stat::poison) as f32) / 2.0;
+		pscore += (plhp as f32).sqrt() * 4.0 - (ctx.get(pl, Stat::poison) as f32) / 2.0;
 		if ctx.get(pl, Stat::precognition) != 0 {
 			pscore += 0.5;
 		}

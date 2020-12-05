@@ -838,7 +838,6 @@ const MatchView = connect(({ user, opts, nav }) => ({
 			this.setState(state => {
 				const newstate = {};
 				let { effectId } = state;
-				console.log(effects);
 				for (let idx = 0; idx < effects.length; idx += 3) {
 					const kind = enums.Fx[effects[idx]],
 						id = effects[idx + 1],

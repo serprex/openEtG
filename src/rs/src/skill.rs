@@ -3427,19 +3427,18 @@ impl Skill {
 				let r = ctx.upto(12);
 				let owner = ctx.get_owner(c);
 				if r == 0 {
-					for q in ctx
-						.get_player_mut(ctx.get_foe(ctx.get_owner(c)))
-						.quanta
-						.iter_mut()
-					{
-						*q += 1;
+					let cap = if self == Self::singularity { 99 } else { 75 };
+					for q in ctx.get_player_mut(ctx.get_foe(owner)).quanta.iter_mut() {
+						if *q < cap {
+							*q += 1;
+						}
 					}
 				} else if r < 5 {
 					if self == Self::v_singularity {
 						ctx.lobo(c);
 					}
 					if r < 3 {
-						ctx.addskill(c, Event::Hit, Skill::vampire);
+						ctx.setSkill(c, Event::Hit, &[Skill::vampire]);
 					} else {
 						ctx.set(c, Stat::immaterial, 1);
 					}
