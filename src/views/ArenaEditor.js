@@ -186,7 +186,7 @@ export default connect(({ user }) => ({ user }))(
 								d:
 									etgutil.encodedeck(this.state.deck) +
 									etgutil.toTrueMarkSuffix(this.state.dmark),
-								lv: this.props.acard.upped,
+								lv: +this.props.acard.upped,
 								hp: this.state.hp,
 								mark: this.state.mark,
 								draw: this.state.draw,

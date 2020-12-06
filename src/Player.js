@@ -3,7 +3,6 @@ import Thing from './Thing.js';
 export default class Player extends Thing {
 	constructor(game, id) {
 		super(game, id);
-		this.cache = new WeakMap();
 	}
 	toString() {
 		return this.data.name ?? 'p' + this.id;
@@ -55,13 +54,6 @@ export default class Player extends Thing {
 	}
 	isCloaked() {
 		return this.game.game.is_cloaked(this.id);
-	}
-	forEach(func, dohand) {
-		func(this.weapon);
-		func(this.shield);
-		this.creatures.forEach(func);
-		this.permanents.forEach(func);
-		if (dohand) this.hand.forEach(func);
 	}
 	canspend(qtype, x) {
 		return this.game.game.canspend(qtype, x);
@@ -115,19 +107,3 @@ Player.prototype.info = function () {
 	if (this.gpull) info.push('gpull');
 	return info.join('\n');
 };
-
-function defineInstArray(key) {
-	Object.defineProperty(Player.prototype, key, {
-		get() {
-			const ids = this.game[`get_${key}`](this.id),
-				cache = this.cache.get(ids);
-			if (cache) return cache;
-			const a = Array.from(ids, this.game.byId, this.game);
-			this.cache.set(ids, a);
-			return a;
-		},
-	});
-}
-defineInstArray('creatures');
-defineInstArray('permanents');
-defineInstArray('hand');

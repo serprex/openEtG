@@ -2,7 +2,7 @@ import * as etg from './etg.js';
 import * as sock from './sock.js';
 import * as store from './store.js';
 import * as util from './util.js';
-import RngMock from './RngMock.js';
+import * as Rng from './Rng.js';
 import * as etgutil from './etgutil.js';
 import Cards from './Cards.js';
 import CreateGame from './Game.js';
@@ -304,7 +304,8 @@ quarks.spirit5 = {
 	deck: '0b606015ur025us035up025uu025v2035vb015uo025uv015v8025ul018pi',
 	name: 'Spirit of the Dark Maiden',
 	morph: (ctx, card) =>
-		ctx.randomcard(
+		Rng.randomcard(
+			Cards,
 			card.upped,
 			x => x.element === etg.Darkness && x.type === card.type,
 		).code,
@@ -811,11 +812,11 @@ export async function mkQuestAi(quest, datafn) {
 		data.choicerewards = quest.choicerewards;
 		data.rewardamount = quest.rewardamount;
 	}
-	RngMock.shuffle(data.players);
+	Rng.shuffle(data.players);
 	const game = await CreateGame(datafn ? datafn(data) : data);
 	if (quest.morph) {
 		for (const card of game.byUser(user.name).deck) {
-			game.game.transform(card.id, quest.morph(RngMock, card.card));
+			game.game.transform(card.id, quest.morph(card.card));
 		}
 	}
 	return game;

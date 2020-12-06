@@ -70,7 +70,7 @@ export default function parseChat(e) {
 				data.A = +ndn[0];
 				data.X = +ndn[1];
 			}
-			sock.emit({ ...data, x: 'roll' });
+			sock.userEmit('roll', data);
 		} else if (msg.match(/^\/decks/) && user) {
 			let names = Object.keys(user.decks);
 			try {
@@ -119,7 +119,7 @@ export default function parseChat(e) {
 		} else if (msg.match(/^\/(motd|mod|codesmith)$/)) {
 			sock.emit({ x: msg.slice(1) });
 		} else if (user && msg === '/modclear') {
-			sock.userEmit({ x: 'modclear' });
+			sock.userEmit('modclear');
 		} else if (
 			user &&
 			msg.match(/^\/(mod(guest|mute|add|rm|motd)|codesmith(add|rm)) /)
@@ -133,10 +133,10 @@ export default function parseChat(e) {
 			sock.userEmit('setgold', { t, g: g | 0 });
 		} else if (msg.match(/^\/addbound /)) {
 			const [t, pool] = msg.slice(10).split(' ');
-			sock.userEmit('addbound', { t, pool });
+			sock.userEmit('addpool', { t, pool, bound: true });
 		} else if (msg.match(/^\/addpool /)) {
 			const [t, pool] = msg.slice(9).split(' ');
-			sock.userEmit('addpool', { t, pool });
+			sock.userEmit('addpool', { t, pool, bound: false });
 		} else if (msg.match(/^\/runcount /)) {
 			store.store.dispatch(store.setOptTemp('runcount', msg.slice(10) | 0));
 			store.store.dispatch(store.setOptTemp('runcountcur', 1));

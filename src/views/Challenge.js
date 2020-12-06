@@ -8,7 +8,7 @@ import CreateGame from '../Game.js';
 import * as etgutil from '../etgutil.js';
 import * as Components from '../Components/index.js';
 import * as store from '../store.js';
-import RngMock from '../RngMock.js';
+import * as Rng from '../Rng.js';
 import aiDecks from '../Decks.json';
 import deckgen from '../deckgen/index.js';
 
@@ -135,9 +135,7 @@ class PlayerEditor extends Component {
 							switch (state.deckgen) {
 								case 'mage':
 								case 'demigod':
-									[data.name, data.deck] = RngMock.choose(
-										aiDecks[state.deckgen],
-									);
+									[data.name, data.deck] = Rng.choose(aiDecks[state.deckgen]);
 									break;
 								case 'rng':
 									data.deck = deckgen(
@@ -351,7 +349,7 @@ export default connect(({ user, opts }) => ({
 				rematch: this.aiClick,
 				players: this.playersAsData(deck),
 			};
-			RngMock.shuffle(gameData.players);
+			Rng.shuffle(gameData.players);
 			CreateGame(gameData).then(game =>
 				this.props.dispatch(store.doNav(import('./Match.js'), { game })),
 			);

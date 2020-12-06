@@ -13,7 +13,7 @@ pub struct Cards {
 
 #[derive(Clone, Copy)]
 pub struct Card {
-	pub code: i32,
+	pub code: u16,
 	pub kind: i8,
 	pub element: i8,
 	pub rarity: i8,
@@ -29,19 +29,18 @@ pub struct Card {
 
 impl Cards {
 	pub fn get(&self, code: i32) -> &'static Card {
-		#[cfg(not(target_arch = "wasm32"))]
-		if code == 0 {
-			use backtrace::Backtrace;
-			println!("{:?}", Backtrace::new());
-		}
-		if let Ok(idx) = self
-			.data
-			.binary_search_by_key(&AsShiny(code, false), |card| card.code)
-		{
-			&self.data[idx]
+		if let Some(card) = self.try_get(code) {
+			card
 		} else {
 			panic!("Unknown code: {}", code)
 		}
+	}
+
+	pub fn try_get(&self, code: i32) -> Option<&'static Card> {
+		self.data
+			.binary_search_by_key(&AsShiny(code, false), |card| card.code as i32)
+			.map(|idx| &self.data[idx])
+			.ok()
 	}
 
 	pub fn filter<Ffilt>(&self, upped: bool, ffilt: Ffilt) -> Vec<&'static Card>
@@ -58,19 +57,42 @@ impl Cards {
 			.filter(|c| ffilt(c))
 			.collect::<Vec<_>>()
 	}
+
+	pub fn random_card<Ffilt, R>(
+		&self,
+		rng: &mut R,
+		upped: bool,
+		ffilt: Ffilt,
+	) -> Option<&'static Card>
+	where
+		Ffilt: Fn(&'static Card) -> bool,
+		R: rand::Rng,
+	{
+		use rand::seq::IteratorRandom;
+
+		(match self.set {
+			CardSet::Open => &OpenCache,
+			CardSet::Original => &OrigCache,
+		}[upped as usize])
+			.iter()
+			.cloned()
+			.map(|c| &self.data[c as usize])
+			.filter(|c| ffilt(c))
+			.choose(rng)
+	}
 }
 
 impl Card {
 	pub fn upped(&self) -> bool {
-		Upped(self.code)
+		Upped(self.code as i32)
 	}
 
 	pub fn shiny(&self) -> bool {
-		Shiny(self.code)
+		Shiny(self.code as i32)
 	}
 
 	pub fn isOf(&self, code: i32) -> bool {
-		IsOf(self.code, code)
+		IsOf(self.code as i32, code)
 	}
 }
 

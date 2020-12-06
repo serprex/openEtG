@@ -1,3 +1,2 @@
 edition = "2018"
-ignore = ["src/generated.rs"]
 hard_tabs = true

@@ -7,12 +7,6 @@
     "type": "git",
     "url": "https://github.com/serprex/openEtG"
   },
-  "dependencies": {
-    "bufferutil": "^4.0.1",
-    "ioredis": "^4.17.3",
-    "pg": "^8.5.1",
-    "ws": "^7.4.0"
-  },
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "@babel/plugin-proposal-class-properties": "^7.12.1",
@@ -35,7 +29,6 @@
     "worker-loader": "^3.0.5"
   },
   "scripts": {
-    "start": "node --experimental-modules --experimental-wasm-modules --experimental-json-modules ./server.js",
     "test": "cargo test --manifest-path=./src/rs/Cargo.toml",
     "dev": "webpack --mode=development --watch --config webpack.config.cjs",
     "build": "webpack --mode=production --config webpack.config.cjs",
@@ -43,8 +36,8 @@
     "build-atlas-png": "spritesheet-js --padding 1 assets/gold.png assets/e0.png assets/e1.png assets/e2.png assets/e3.png assets/e4.png assets/e5.png assets/e6.png assets/e7.png assets/e8.png assets/e9.png assets/e10.png assets/e11.png assets/e12.png assets/e13.png assets/e14.png assets/r1.png assets/r2.png assets/r3.png assets/r4.png assets/r5.png assets/t0.png assets/t1.png assets/t2.png assets/t3.png assets/t4.png assets/t5.png assets/protection.png assets/sacrifice.png assets/s0.png assets/s1.png assets/s2.png assets/s3.png assets/s4.png assets/s5.png assets/s6.png assets/sabbath.png assets/sborder0.png assets/sborder1.png assets/sborder2.png assets/cback.png --customFormat atlas.template --extension=json -n assets/atlas && optipng -o9 -strip all assets/atlas.png",
     "build-atlas-css": "node --experimental-modules --experimental-json-modules ./scripts/mkatlascss.js ./assets/atlas.css ./assets/atlas.png",
     "build-mkrs": "node --experimental-modules --experimental-json-modules ./scripts/mkrs.js",
-		"build-webp": "find assets/atlas.png assets/bg_main.png assets/bg_login.png assets/bg_default.png Cards/ -type f -name '*.png' -exec sh -c 'for f;do cwebp -m 6 -q 100 \"$f\" -o \"${f%.png}.webp\";done' sh {} +"
-
+    "build-mkrs-server": "node --experimental-modules --experimental-json-modules ./scripts/mkrs-server.js",
+    "build-webp": "find assets/atlas.png assets/bg_main.png assets/bg_login.png assets/bg_default.png Cards/ -type f -name '*.png' -exec sh -c 'for f;do cwebp -m 6 -q 100 \"$f\" -o \"${f%.png}.webp\";done' sh {} +"
   },
   "license": "MIT"
 }

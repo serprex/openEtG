@@ -240,7 +240,9 @@ export function Card(props) {
 			</span>
 			<img
 				className={card.shiny ? 'shiny' : ''}
-				src={`/Cards/${etgutil.encodeCode(card.code)}.webp`}
+				src={`/Cards/${etgutil.encodeCode(
+					card.code + (etgutil.asShiny(card.code, false) < 5000 ? 4000 : 0),
+				)}.webp`}
 				style={{
 					position: 'absolute',
 					top: '20px',

@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { connect } from 'react-redux';
 import { Text } from './index.js';
 
-export const Tutor = connect(({ opts }) => ({ disableTut: !opts.disableTut }))(
+export const Tutor = connect(({ opts }) => ({ enableTut: !opts.disableTut }))(
 	class Tutor extends Component {
 		constructor(props) {
 			super(props);
@@ -11,7 +11,7 @@ export const Tutor = connect(({ opts }) => ({ disableTut: !opts.disableTut }))(
 
 		render() {
 			return (
-				this.props.disableTut && (
+				this.props.enableTut && (
 					<>
 						<span
 							className="imgb ico e13"

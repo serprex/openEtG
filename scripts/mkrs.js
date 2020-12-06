@@ -1,6 +1,4 @@
 import fs from 'fs/promises';
-import OrigCardsJson from '../src/vanilla/Cards.json';
-import OpenCardsJson from '../src/Cards.json';
 import OrigCards from '../src/vanilla/Cards.js';
 import OpenCards from '../src/Cards.js';
 
@@ -57,8 +55,8 @@ for (const Cards of [OpenCards, OrigCards]) {
 		},data:&[`,
 	);
 	const codeidx = new Map();
-	for (const card of Cards.Codes) {
-		if (!card || card.shiny) continue;
+	Cards.Codes.forEach(card => {
+		if (!card || card.shiny) return;
 		codeidx.set(card.code, codeidx.size);
 		json.Card[card.code] = card.name;
 		source.push(
@@ -70,7 +68,7 @@ for (const Cards of [OpenCards, OrigCards]) {
 				card.castele
 			},status:${statusSlice(card)},skill:${skillSlice(card)}},`,
 		);
-	}
+	});
 	source.push(
 		`]};pub const ${open ? 'OpenCache' : 'OrigCache'}:[&'static [u16];2]=[`,
 	);

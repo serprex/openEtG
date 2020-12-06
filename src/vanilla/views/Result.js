@@ -6,7 +6,7 @@ import * as etg from '../../etg.js';
 import * as etgutil from '../../etgutil.js';
 import * as Components from '../../Components/index.js';
 import * as store from '../../store.js';
-import RngMock from '../../RngMock.js';
+import * as Rng from '../../Rng.js';
 
 export default connect(({ user, orig }) => ({ user, orig }))(
 	class OriginalResult extends Component {
@@ -53,7 +53,7 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 			if (game.winner !== this.state.player1.id) return;
 			const foedecks = game.data.players.filter(pd => !pd.user);
 			if (foedecks.length === 0) return;
-			const foedeck = RngMock.choose(foedecks),
+			const foedeck = Rng.choose(foedecks),
 				foeDeck = etgutil
 					.decodedeck(foedeck.deck)
 					.map(code => game.Cards.Codes[code])
@@ -65,16 +65,16 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 			for (let i = 0; i < game.data.spins; i++) {
 				const spins = [];
 				while (spins.length < 4) {
-					let card = RngMock.choose(foeDeck);
-					if (card.getStatus('pillar')) card = RngMock.choose(foeDeck);
+					let card = Rng.choose(foeDeck);
+					if (card.getStatus('pillar')) card = Rng.choose(foeDeck);
 					if (card.rarity === 15 || card.rarity === 20) {
 						card = game.Cards.Names.Relic;
 					}
 					spins.push(card);
 				}
-				const c0 = RngMock.choose(spins),
-					c1 = RngMock.choose(spins),
-					c2 = RngMock.choose(spins);
+				const c0 = Rng.choose(spins),
+					c1 = Rng.choose(spins),
+					c2 = Rng.choose(spins);
 				cardswon.push(
 					<div
 						key={cardswon.length}

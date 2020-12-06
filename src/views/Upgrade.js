@@ -74,9 +74,6 @@ export default connect(({ user }) => ({ user }))(
 			function autoCards() {
 				sock.userExec('upshall');
 			}
-			function autoCardsUp() {
-				sock.userExec('upshall', { up: 1 });
-			}
 			return (
 				<>
 					<Components.ExitBtn x={5} y={50} />
@@ -116,16 +113,6 @@ export default connect(({ user }) => ({ user }))(
 							position: 'absolute',
 							left: '5px',
 							top: '138px',
-						}}
-					/>
-					<input
-						type="button"
-						value="Fullconvert"
-						onClick={autoCardsUp}
-						style={{
-							position: 'absolute',
-							left: '5px',
-							top: '162px',
 						}}
 					/>
 					<Components.Text

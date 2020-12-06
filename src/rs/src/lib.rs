@@ -5,6 +5,7 @@ pub mod aisearch;
 pub mod card;
 pub mod etg;
 pub mod game;
+#[rustfmt::skip]
 pub mod generated;
 pub mod skill;
 
@@ -31,28 +32,6 @@ pub fn now() -> f64 {
 	0.0
 }
 
-#[cfg(target_arch = "wasm32")]
-mod rng {
-	use rand::{Rng, SeedableRng};
-	use rand_pcg::Pcg32;
-	use wasm_bindgen::prelude::*;
-
-	#[wasm_bindgen]
-	pub struct Random(Pcg32);
-
-	#[wasm_bindgen]
-	impl Random {
-		#[wasm_bindgen(constructor)]
-		pub fn new(seed: u32) -> Random {
-			Random(Pcg32::seed_from_u64(seed as u64))
-		}
-
-		pub fn next(&mut self) -> f64 {
-			self.0.gen()
-		}
-	}
-}
-
 pub fn set_panic_hook() {
 	#[cfg(target_arch = "wasm32")]
 	#[cfg(feature = "console_error_panic_hook")]
@@ -70,8 +49,8 @@ mod test {
 	fn upped_alignment_and_spell_skill() {
 		for set in [card::OpenSet, card::OrigSet].iter() {
 			for card in set.data.iter() {
-				let un = set.get(card::AsUpped(card.code, false));
-				let up = set.get(card::AsUpped(card.code, true));
+				let un = set.get(card::AsUpped(card.code as i32, false));
+				let up = set.get(card::AsUpped(card.code as i32, true));
 				if card.kind == etg::Spell as i8 {
 					assert_eq!(card.skill.len(), 1);
 					assert!(card.skill[0].0 == Event::Cast);

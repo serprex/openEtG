@@ -176,7 +176,7 @@ pub enum Fx {
 	Aflatoxin,
 	Appeased,
 	Atk(i32),
-	Card(i32),
+	Card(u16),
 	Catapult,
 	Clear,
 	Death,
@@ -233,7 +233,7 @@ impl Fx {
 	pub fn param(self) -> i32 {
 		match self {
 			Fx::Atk(amt) => amt,
-			Fx::Card(code) => code,
+			Fx::Card(code) => code as i32,
 			Fx::Delay(amt) => amt,
 			Fx::Dmg(amt) => amt,
 			Fx::EndPos(tgt) => tgt,
@@ -678,7 +678,7 @@ impl Game {
 				.collect::<Vec<_>>(),
 		);
 		if thing.status.get(&Stat::mutant).cloned().unwrap_or(0) != 0 {
-			let buff = self.rng.gen_range(0, 25);
+			let buff = self.rng.gen_range(0..25);
 			if card.code < 5000 {
 				self.buffhp(c, buff / 5);
 				self.incrAtk(c, buff % 5);
@@ -699,7 +699,7 @@ impl Game {
 	}
 
 	pub fn upto(&mut self, n: i32) -> i32 {
-		self.rng.gen_range(0, n)
+		self.rng.gen_range(0..n)
 	}
 
 	pub fn rng_ratio(&mut self, numerator: u32, denominator: u32) -> bool {
@@ -1013,15 +1013,15 @@ impl Game {
 	where
 		Ffilt: Fn(&Game, &'static Card) -> bool,
 	{
-		self.cards
-			.filter(upped, |c| ffilt(self, c))
-			.choose(&mut self.rng)
-			.cloned()
+		let mut rng = self.rng.clone();
+		let card = self.cards.random_card(&mut rng, upped, |c| ffilt(self, c));
+		self.rng = rng;
+		card
 	}
 
 	fn mutantactive(&mut self, id: i32, actives: &'static [Skill], ondeath: Skill) -> bool {
 		self.lobo(id);
-		let idx = self.rng.gen_range(-3, actives.len() as isize);
+		let idx = self.rng.gen_range(-3..actives.len() as isize);
 		if idx == -3 {
 			self.addskill(id, Event::Death, ondeath);
 			false
@@ -2186,7 +2186,7 @@ impl Game {
 					let amt = cmp::min(amt, 1188);
 					let total: u32 = quanta.iter().map(|&q| q as u32).sum();
 					for n in 0..amt as u32 {
-						let mut pick = self.rng.gen_range(0, total - n);
+						let mut pick = self.rng.gen_range(0..total - n);
 						for q in quanta.iter_mut() {
 							if pick < *q as u32 {
 								*q -= 1;

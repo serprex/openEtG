@@ -2,7 +2,6 @@ import { Component } from 'react';
 import { connect } from 'react-redux';
 
 import { ExitBtn } from '../../Components/index.js';
-import RngMock from '../RngMock.js';
 import * as sock from '../../sock.js';
 import * as store from '../../store.js';
 import { eleNames } from '../../ui.js';

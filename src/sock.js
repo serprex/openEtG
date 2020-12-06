@@ -4,13 +4,13 @@ import * as etgutil from './etgutil.js';
 import CreateGame from './Game.js';
 import * as store from './store.js';
 import * as userutil from './userutil.js';
-import RngMock from './RngMock.js';
+import { shuffle } from './Rng.js';
 import config from '../wsconfig.json';
 
 const endpoint = `${location.protocol === 'http:' ? 'ws://' : 'wss://'}
 	${location.hostname}:${
 	location.protocol === 'http:' ? config.wsport : config.wssport
-}`;
+}/ws`;
 const buffer = [];
 let socket = new WebSocket(endpoint),
 	attempts = 0,
@@ -110,7 +110,7 @@ const sockEvents = {
 	foearena(data) {
 		const { user } = store.store.getState();
 		CreateGame({
-			players: RngMock.shuffle([
+			players: shuffle([
 				{
 					idx: 1,
 					name: user.name,
@@ -192,7 +192,7 @@ const sockEvents = {
 				</div>,
 			),
 		);
-		userEmit('challrecv', { f: data.f, trade: 1 });
+		userEmit('challrecv', { f: data.f, trade: true });
 	},
 	bzgive(data) {
 		store.store.dispatch(store.userCmd(data.g ? 'addgold' : 'addcards', data));

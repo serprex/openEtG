@@ -1,7 +1,6 @@
 import OrigCards from '../Cards.js';
 import OpenCards from '../../Cards.js';
 import { encodedeck } from '../../etgutil.js';
-import { deck } from '../../svg.js';
 
 const infobox = document.getElementById('infobox');
 document.getElementById('nameinput').addEventListener('input', printstat);
@@ -59,8 +58,8 @@ function printstat(e) {
 		cards.sort((x, y) => x.element - y.element);
 	if (!cards.length) infobox.appendChild(document.createTextNode('No matches'));
 	else {
-		const div = document.createElement('div');
-		div.innerHTML = deck(encodedeck(cards.map(x => x.code)));
+		const div = document.createElement('img');
+		div.src = `/deck/${encodedeck(cards.map(x => x.code))}.svg`;
 		infobox.appendChild(div);
 	}
 }

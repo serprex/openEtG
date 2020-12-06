@@ -91,29 +91,6 @@ export class Game {
 		}
 		return obj;
 	}
-	rng() {
-		throw new Error('Only RngMock supports Game#rng');
-	}
-	upto(x) {
-		return (this.rng() * x) | 0;
-	}
-	choose(x) {
-		return x[this.upto(x.length)];
-	}
-	randomcard(upped, filter) {
-		const keys = this.Cards.filter(upped, filter);
-		return keys && this.choose(keys);
-	}
-	shuffle(array) {
-		let counter = array.length;
-		while (counter) {
-			const index = this.upto(counter--),
-				temp = array[counter];
-			array[counter] = array[index];
-			array[index] = temp;
-		}
-		return array;
-	}
 	byId(id) {
 		if (!id) return null;
 		let inst = this.cache.get(id);
@@ -205,8 +182,8 @@ export class Game {
 			fx,
 		);
 	}
-	async withMoves(moves) {
-		const newgame = await CreateGame(this.data);
+	withMoves(moves) {
+		const newgame = new Game(this.data, this.wasm);
 		for (const move of moves) {
 			newgame.next(move, false);
 		}
@@ -235,4 +212,4 @@ defineProp('winner');
 defineProp('time');
 defineProp('duration');
 
-Game.prototype.id = 1;
+Game.prototype.id = 0;

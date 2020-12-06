@@ -5,7 +5,7 @@ import * as etg from '../../etg.js';
 import aiDecks from '../Decks.json';
 import * as etgutil from '../../etgutil.js';
 import CreateGame from '../../Game.js';
-import RngMock from '../RngMock.js';
+import * as Rng from '../../Rng.js';
 import * as store from '../../store.js';
 import { randint } from '../../util.js';
 import * as Components from '../../Components/index.js';
@@ -69,18 +69,19 @@ export default connect(({ user, orig, opts }) => ({
 		}
 
 		mkAi4 = () => {
-			const e1 = RngMock.upto(12) + 1,
-				e2 = RngMock.upto(12) + 1,
+			const e1 = Rng.upto(12) + 1,
+				e2 = Rng.upto(12) + 1,
 				name = ai4names[e1][0] + ai4names[e2][1],
 				deck = [];
 			for (let i = 0; i < 24; i++) {
-				const upped = RngMock.rng() < 0.3;
+				const upped = Rng.rng() < 0.3;
 				deck.push(etg.PillarList[i < 4 ? 0 : e1] - (upped ? 2000 : 4000));
 			}
 			for (let i = 0; i < 40; i++) {
 				const e = i < 30 ? e1 : e2;
-				const card = RngMock.randomcard(
-					RngMock.rng() < 0.3,
+				const card = Rng.randomcard(
+					Cards,
+					Rng.rng() < 0.3,
 					card =>
 						card.element === e &&
 						!card.isOf(Cards.Names.Miracle) &&
@@ -111,7 +112,7 @@ export default connect(({ user, orig, opts }) => ({
 					? ['Custom', parseDeck(this.props.origfoename)]
 					: level === 'ai4'
 					? this.mkAi4()
-					: RngMock.choose(aiDecks[level]);
+					: Rng.choose(aiDecks[level]);
 			if (cost > 0) {
 				const update = { electrum: -cost };
 				userEmit('origadd', update);
@@ -126,7 +127,7 @@ export default connect(({ user, orig, opts }) => ({
 				hpreward,
 				spins: level === 'custom' ? 0 : level === 'ai2' ? 2 : 3,
 				rematch: () => this.vsAi(level, cost, basereward, hpreward),
-				players: RngMock.shuffle([
+				players: Rng.shuffle([
 					{
 						idx: 1,
 						name: this.props.user.name,

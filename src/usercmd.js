@@ -68,84 +68,58 @@ export function unpolish(data, user) {
 	const use = ~card.rarity ? 6 : 2;
 	return untransmute(user, card.code, etgutil.asShiny, use);
 }
-function upshpi(cost, func) {
+function upshpi(func) {
 	return (data, user) => {
 		const card = Cards.Codes[data.c];
-		if (card && user.gold >= cost && card.isFree()) {
+		if (card && user.gold >= 50 && card.isFree()) {
 			return {
-				gold: user.gold - cost,
+				gold: user.gold - 50,
 				pool: etgutil.addcard(user.pool, func(data.c)),
 			};
 		}
 	};
 }
-export const uppillar = upshpi(50, code => etgutil.asUpped(code, true));
-export const shpillar = upshpi(50, code => etgutil.asShiny(code, true));
-export const upshpillar = upshpi(300, code =>
-	etgutil.asUpped(etgutil.asShiny(code, true), true),
-);
+export const uppillar = upshpi(code => etgutil.asUpped(code, true));
+export const shpillar = upshpi(code => etgutil.asShiny(code, true));
+function convert(pool, oldcode, oldamt, newcode) {
+	if (pool[newcode] >= 65535) {
+		return false;
+	}
+	pool[newcode] += 1;
+	pool[oldcode] -= oldamt;
+	return true;
+}
 export function upshall(data, user) {
 	const pool = etgutil.deck2pool(user.pool);
 	const bound = etgutil.deck2pool(user.accountbound);
+	const base = new Set();
 	pool.forEach((count, code) => {
-		const card = Cards.Codes[code];
-		if (!card || (card.rarity === 5 && card.shiny) || card.rarity < 1) return;
-		const dcode = etgutil.asShiny(etgutil.asUpped(card.code, false), false);
-		if (code === dcode) return;
-		pool[dcode] =
-			(pool[dcode] ?? 0) + count * (card.upped && card.shiny ? 36 : 6);
-		pool[code] = 0;
+		base.add(etgutil.asShiny(etgutil.asUpped(code, false), false));
 	});
-	bound.forEach((count, code) => {
-		if (!pool[code]) return;
+	for (code of base) {
 		const card = Cards.Codes[code];
-		if (
-			!card ||
-			card.rarity === 5 ||
-			card.rarity < 1 ||
-			card.upped ||
-			card.shiny
-		)
-			return;
-		pool[code] += Math.min(count, 6);
-	});
-	pool.forEach((count, code) => {
-		const card = Cards.Codes[code];
-		if (
-			!card ||
-			(card.rarity === 5 && card.shiny) ||
-			card.rarity < 1 ||
-			card.upped ||
-			card.shiny
-		)
-			return;
-		if (!data.up) count -= 6;
-		let pc = 0;
-		for (let i = 1; i < 4; i++) {
-			if (card.rarity === 5 && i & 2) continue;
-			const upcode = etgutil.asShiny(etgutil.asUpped(code, i & 1), i & 2);
-			pool[upcode] = Math.max(
-				Math.min(Math.floor(count / (i === 3 ? 36 : 6)), 6),
-				0,
-			);
-			pc += pool[upcode] * (i === 3 ? 36 : 6);
-			count -= i === 1 && data.up ? 42 : 36;
+		if (card && card.rarity > 0) {
+			const upcode = etgutil.asUpped(code, true);
+			const shcode = etgutil.asShiny(code, true);
+			const uhcode = etgutil.asShiny(etgutil.asUpped(code, true), true);
+			let un = (pool[code] ?? 0) + (bound[code] ?? 0);
+			let up = (pool[upcode] ?? 0) + (bound[upcode] ?? 0);
+			let sh = (pool[shcode] ?? 0) + (bound[shcode] ?? 0);
+			while (un >= 12 && up < 6 && convert(pool, code, 6, upcode)) {
+				un -= 6;
+				up += 1;
+			}
+			if (card.rarity < 5) {
+				while (un >= 12 && sh < 6 && convert(pool, code, 6, shcode)) {
+					un -= 6;
+					sh += 1;
+				}
+				while (un >= 42 && convert(pool, code, 36, uhcode)) {
+					un -= 36;
+				}
+			}
 		}
-		pool[code] -= pc;
-	});
-	bound.forEach((count, code) => {
-		if (!pool[code]) return;
-		const card = Cards.Codes[code];
-		if (
-			!card ||
-			card.rarity === 5 ||
-			card.rarity < 1 ||
-			card.upped ||
-			card.shiny
-		)
-			return;
-		pool[code] -= Math.min(count, 6);
-	});
+	}
 	let newpool = '';
 	pool.forEach((count, code) => {
 		if (count) newpool = etgutil.addcard(newpool, code, count);

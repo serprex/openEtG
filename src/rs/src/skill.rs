@@ -928,6 +928,7 @@ impl Skill {
 			Self::v_lightning => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::v_liquid => Tgt::crea,
 			Self::v_lobotomize => Tgt::crea,
+			Self::v_mend => Tgt::crea,
 			Self::v_mitosisspell => Tgt::creacrea,
 			Self::v_momentum => Tgt::crea,
 			Self::v_mutation => Tgt::crea,
@@ -2111,7 +2112,7 @@ impl Skill {
 				if let Some(rcard) = ctx.random_card(card::Upped(ccard), |ctx, card| {
 					card.kind as i32 == etg::Creature
 				}) {
-					ctx.transform(c, card::AsShiny(rcard.code, card::Shiny(ccard)));
+					ctx.transform(c, card::AsShiny(rcard.code as i32, card::Shiny(ccard)));
 				}
 			}
 			Self::heal => {
@@ -2197,7 +2198,7 @@ impl Skill {
 				if let Some(card) =
 					ctx.random_card(false, |ctx, card| card.kind as i32 == etg::Creature)
 				{
-					ctx.transform(t, card.code);
+					ctx.transform(t, card.code as i32);
 				}
 			}
 			Self::inertia => {
@@ -2902,7 +2903,8 @@ impl Skill {
 						.iter()
 						.any(|&(k, v)| k == Stat::pillar && v != 0)
 				}) {
-					let inst = ctx.new_thing(card::As(ctx.get(c, Stat::card), newcard.code), owner);
+					let inst =
+						ctx.new_thing(card::As(ctx.get(c, Stat::card), newcard.code as i32), owner);
 					ctx.fx(inst, Fx::StartPos(inst));
 					ctx.addPerm(owner, inst);
 				}
@@ -3065,11 +3067,13 @@ impl Skill {
 					ctx.poison(cr, 1);
 				});
 			}
-			Self::platearmor => {
+			Self::platearmor | Self::v_platearmor => {
 				ctx.buffhp(
 					t,
 					if card::Upped(ctx.get(c, Stat::card)) {
 						6
+					} else if self == Self::v_platearmor {
+						3
 					} else {
 						4
 					},
@@ -3397,8 +3401,8 @@ impl Skill {
 						if card.element as i32 == etg::Entropy {
 							anyentro = true;
 						}
-						let inst =
-							ctx.new_thing(card::AsShiny(card.code, card::Shiny(ccard)), owner);
+						let inst = ctx
+							.new_thing(card::AsShiny(card.code as i32, card::Shiny(ccard)), owner);
 						ctx.fx(inst, Fx::StartPos(c));
 						ctx.addCard(owner, inst);
 					}
@@ -4254,9 +4258,9 @@ impl Skill {
 				if let Some(card) =
 					ctx.random_card(card::Upped(ctx.get(c, Stat::card)), |ctx, card| {
 						card.kind == etg::Creature as i8
-							&& !legacy_banned(card::AsUpped(card.code, false))
+							&& !legacy_banned(card::AsUpped(card.code as i32, false))
 					}) {
-					ctx.transform(c, card.code);
+					ctx.transform(c, card.code as i32);
 				}
 				if ctx.get(c, Stat::ready) != 0 {
 					ctx.set(c, Stat::casts, 0);
@@ -4299,9 +4303,9 @@ impl Skill {
 				ctx.fx(t, Fx::Improve);
 				ctx.set(t, Stat::mutant, 1);
 				if let Some(card) = ctx.random_card(false, |ctx, card| {
-					card.kind == etg::Creature as i8 && !legacy_banned(card.code)
+					card.kind == etg::Creature as i8 && !legacy_banned(card.code as i32)
 				}) {
-					ctx.transform(t, card.code);
+					ctx.transform(t, card.code as i32);
 				}
 			}
 			Self::v_infect => return Skill::poison(1).proc(ctx, c, t, data),
@@ -4676,16 +4680,6 @@ impl Skill {
 					ctx.poison(cr, 1);
 				});
 			}
-			Self::v_platearmor => {
-				ctx.buffhp(
-					t,
-					if card::Upped(ctx.get(c, Stat::card)) {
-						6
-					} else {
-						3
-					},
-				);
-			}
 			Self::v_queen => {
 				let owner = ctx.get_owner(c);
 				let inst = ctx.new_thing(card::As(ctx.get(c, Stat::card), card::v_Firefly), owner);
@@ -4766,18 +4760,18 @@ impl Skill {
 				for i in (0..num).rev() {
 					if let Some(card) = ctx.random_card(card::Upped(ccard), |ctx, card| {
 						card.rarity != 15
-							&& card.rarity != 20 && !card::IsOf(card.code, card::v_Relic)
-							&& !card::IsOf(card.code, card::v_Miracle)
+							&& card.rarity != 20 && !card::IsOf(card.code as i32, card::v_Relic)
+							&& !card::IsOf(card.code as i32, card::v_Miracle)
 							&& !etg::ShardList[1..]
 								.iter()
-								.any(|&shard| !card::IsOf(card.code, shard))
+								.any(|&shard| !card::IsOf(card.code as i32, shard))
 							&& (i > 0 || anyentro || card.element as i32 == etg::Entropy)
 					}) {
 						if card.element as i32 == etg::Entropy {
 							anyentro = true;
 						}
-						let inst =
-							ctx.new_thing(card::AsShiny(card.code, card::Shiny(ccard)), owner);
+						let inst = ctx
+							.new_thing(card::AsShiny(card.code as i32, card::Shiny(ccard)), owner);
 						ctx.fx(inst, Fx::StartPos(c));
 						ctx.addCard(owner, inst);
 					}

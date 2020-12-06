@@ -5,7 +5,7 @@ import { Motion, TransitionMotion, spring } from '@serprex/react-motion';
 import { playSound } from '../audio.js';
 import * as ui from '../ui.js';
 import * as etg from '../etg.js';
-import { encodeCode } from '../etgutil.js';
+import { encodeCode, asShiny } from '../etgutil.js';
 import * as mkAi from '../mkAi.js';
 import * as sock from '../sock.js';
 import * as Components from '../Components/index.js';
@@ -452,7 +452,9 @@ class ThingInst extends Component {
 						{!props.lofiArt && (
 							<img
 								className={card.shiny ? 'shiny' : ''}
-								src={`/Cards/${encodeCode(card.code)}.webp`}
+								src={`/Cards/${encodeCode(
+									card.code + (asShiny(card.code, false) < 5000 ? 4000 : 0),
+								)}.webp`}
 								style={instimgstyle}
 							/>
 						)}
@@ -1284,8 +1286,10 @@ const MatchView = connect(({ user, opts, nav }) => ({
 		startMatch({ user, game, dispatch }) {
 			const wasPvP = game.data.players.every(pd => !pd.ai);
 			if (
+				!this.props.noloss &&
 				!game.data.endurance &&
-				(game.data.level !== undefined || wasPvP || !game.Cards.Names.Relic)
+				!game.Cards.Names.Relic &&
+				(game.data.level !== undefined || wasPvP)
 			) {
 				sock.userExec('addloss', {
 					pvp: wasPvP,
@@ -1312,6 +1316,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							store.doNav(Promise.resolve({ default: MatchView }), {
 								...this.props.navProps,
 								game: game.withMoves(moves),
+								noloss: true,
 							}),
 						);
 					},
@@ -1445,7 +1450,10 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							? 8
 							: (pl.getStatus('nova') >= 2 || pl.getStatus('nova2') >= 1) &&
 							  (pl.id !== player1.id ||
-									pl.hand.some(c => c.card.isOf(game.Cards.Names.Nova)))
+									pl.handIds.some(id => {
+										const card = game.Cards.Codes[game.get(id, 'card')];
+										return card && card.isOf(game.Cards.Names.Nova);
+									}))
 							? 1
 							: null;
 				this.idtrack.set(pl.id, plpos);
@@ -1536,11 +1544,11 @@ const MatchView = connect(({ user, opts, nav }) => ({
 					}
 				}
 				for (let i = 0; i < 16; i++) {
-					const pr = pl.permanents[i];
+					const pr = pl.permanentIds[i];
 					if (pr) {
-						if (game.is_flooding(pr.id)) floodvisible = true;
-						if (j === 0 || !cloaked || pr.getStatus('cloak')) {
-							things.push(pr.id);
+						if (game.is_flooding(pr)) floodvisible = true;
+						if (j === 0 || !cloaked || game.get(pr, 'cloak')) {
+							things.push(pr);
 						}
 					}
 				}

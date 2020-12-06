@@ -1,0 +1,27 @@
+[package]
+name = "etg-server"
+version = "0.1.0"
+authors = ["serprex"]
+edition = "2018"
+description = "openEtG server"
+license = "MIT"
+repository = "https://github.com/serprex/openEtG"
+
+[dependencies]
+async-compression = { version = "0.3", features = ["tokio-02", "gzip", "brotli"] }
+base64 = "0.13"
+bb8-postgres = { version = "0.5", features = ["with-serde_json-1"] }
+etg = { version = "0.1", path = "../" }
+fastpbkdf2 = { version = "0.2.0", git = "https://github.com/serprex/rust-fastpbkdf2", branch = "update-deps" }
+futures = { version = "0.3", default-features = false, features = ["alloc"] }
+form_urlencoded = "1.0"
+fxhash = "0.2"
+getrandom = "0.2"
+hyper-tls = "0.4"
+rand = "0.8"
+rand_pcg = "0.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+time = "0.2"
+tokio = { version = "0.2", features = ["full"] } # warp 0.2 uses tokio 0.2, tokio-postgres 0.6 uses tokio 0.3
+warp = { version = "0.2", default-features = false, features = ["websocket"] }

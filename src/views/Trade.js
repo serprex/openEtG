@@ -177,8 +177,8 @@ export default connect(({ user }) => ({ user }))(
 						onChange={e =>
 							this.setState({
 								gold: Math.min(
-									this.props.user.gold,
-									Math.abs(e.target.value | 0),
+									Math.min(this.props.user.gold, Math.abs(e.target.value | 0)),
+									65535,
 								),
 							})
 						}

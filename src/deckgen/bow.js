@@ -1,6 +1,6 @@
 import * as etg from '../etg.js';
 import Cards from '../Cards.js';
-import RngMock from '../RngMock.js';
+import * as Rng from '../Rng.js';
 import Builder from './Builder.js';
 import duo from './duo.js';
 
@@ -8,18 +8,19 @@ export default function bow(uprate, markpower, maxRarity) {
 	let build;
 	if (Math.random() < uprate / 2) {
 		build = new Builder(etg.Entropy, uprate, markpower);
-		for (let i = 0; i < 5 + RngMock.upto(1); i++) {
+		for (let i = 0; i < 5 + Rng.upto(1); i++) {
 			build.addCard(Cards.Names.Nova.asUpped(true));
 		}
 	} else {
 		build = new Builder(etg.Chroma, uprate, markpower);
-		for (let i = 0; i < RngMock.upto(12) - 6; i++) {
+		for (let i = 0; i < Rng.upto(12) - 6; i++) {
 			build.addCard(Cards.Names.Nova);
 		}
 	}
 	for (let ele = 1; ele <= 12; ele++) {
-		for (let i = 1 + RngMock.upto(3); ~i; i--) {
-			const card = RngMock.randomcard(
+		for (let i = 1 + Rng.upto(3); ~i; i--) {
+			const card = Rng.randomcard(
+				Cards,
 				Math.random() < uprate,
 				x =>
 					x.element === ele &&

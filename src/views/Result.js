@@ -9,7 +9,7 @@ import * as userutil from '../userutil.js';
 import * as Components from '../Components/index.js';
 import CreateGame from '../Game.js';
 import Cards from '../Cards.js';
-import RngMock from '../RngMock.js';
+import * as Rng from '../Rng.js';
 
 const streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
 
@@ -352,7 +352,7 @@ export default connect(({ user }) => ({ user }))(
 					sock.userExec('addwin', { pvp: wasPvP });
 				if (level !== undefined) {
 					const foedecks = game.data.players.filter(pd => !pd.user),
-						foedeck = RngMock.choose(foedecks);
+						foedeck = Rng.choose(foedecks);
 					if (state.cardreward === undefined && foedeck) {
 						const foeDeck = etgutil.decodedeck(foedeck.deck);
 						let winnable = foeDeck.filter(code => {
@@ -361,9 +361,10 @@ export default connect(({ user }) => ({ user }))(
 							}),
 							cardwon;
 						if (winnable.length) {
-							cardwon = RngMock.choose(winnable);
+							cardwon = Rng.choose(winnable);
 						} else {
-							cardwon = RngMock.randomcard(
+							cardwon = Rng.randomcard(
+								Cards,
 								false,
 								x => x.rarity > 0 && x.rarity < 4,
 							);
@@ -434,7 +435,7 @@ export default connect(({ user }) => ({ user }))(
 				];
 				sock.userEmit('stat', {
 					set: game.data.set,
-					stats: JSON.stringify(stats),
+					stats: stats,
 					players: game.data.players,
 				});
 				stats[stats.length - 1] = +stats[stats.length - 1].toFixed(3);

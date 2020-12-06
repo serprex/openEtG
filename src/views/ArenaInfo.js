@@ -8,7 +8,7 @@ import * as store from '../store.js';
 import * as util from '../util.js';
 import * as etgutil from '../etgutil.js';
 import * as Components from '../Components/index.js';
-import RngMock from '../RngMock.js';
+import { shuffle } from '../Rng.js';
 
 function RenderInfo(props) {
 	const { info, y, name } = props;
@@ -23,7 +23,7 @@ function RenderInfo(props) {
 				seed: util.randint(),
 				cardreward: '',
 				rematch: testDeck,
-				players: RngMock.shuffle([
+				players: shuffle([
 					{ idx: 1, name, user: name, deck },
 					{
 						idx: 2,
@@ -190,7 +190,7 @@ export default connect(({ user }) => ({
 			sock.userEmit('arenainfo');
 			store.store.dispatch(
 				store.setCmds({
-					arenainfo: data => this.setState(data),
+					arenainfo: ({ A, B }) => this.setState({ A, B }),
 				}),
 			);
 		}
