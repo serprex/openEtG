@@ -4892,86 +4892,80 @@ impl Skill {
 
 	pub fn proc_pure(self, ctx: &Game, c: i32, t: i32) -> i32 {
 		match self {
-			Self::accumulation => return ctx.get(c, Stat::charges),
+			Self::accumulation => ctx.get(c, Stat::charges),
 			Self::axe => {
 				let mark = ctx.get(ctx.get_owner(c), Stat::mark);
-				return (mark == etg::Fire || mark == etg::Time) as i32;
+				(mark == etg::Fire || mark == etg::Time) as i32
 			}
 			Self::bow | Self::v_bow => {
 				let mark = ctx.get(ctx.get_owner(c), Stat::mark);
-				return (mark == etg::Air || mark == etg::Light) as i32;
+				(mark == etg::Air || mark == etg::Light) as i32
 			}
-			Self::countimmbur => {
-				let mut n = 0;
-				for &pl in ctx.players_ref().iter() {
+			Self::countimmbur => ctx
+				.players_ref()
+				.iter()
+				.map(|&pl| {
 					let p = ctx.get_player(pl);
-					for &id in p.creatures.iter().chain(p.permanents.iter()) {
-						n += (ctx.get(id, Stat::immaterial) != 0
-							|| ctx.get(id, Stat::burrowed) != 0) as i32;
-					}
-				}
-				return n;
-			}
+					once(p.shield)
+						.chain(once(p.weapon))
+						.chain(p.creatures.iter().cloned())
+						.chain(p.permanents.iter().cloned())
+						.filter(|&id| {
+							id != 0 && ctx.get(id, Stat::immaterial) != 0
+								|| ctx.get(id, Stat::burrowed) != 0
+						})
+						.count()
+				})
+				.sum::<usize>() as i32,
 			Self::dagger => {
 				let owner = ctx.get_owner(c);
 				let mark = ctx.get(owner, Stat::mark);
-				let mut buff = (mark == etg::Death || mark == etg::Darkness) as i32;
-				for &pr in ctx.get_player(owner).permanents.clone().iter() {
-					if pr != 0 && ctx.get(pr, Stat::cloak) != 0 {
-						buff += 1
-					}
-				}
-				return buff;
+				(mark == etg::Death || mark == etg::Darkness) as i32
+					+ ctx
+						.get_player(owner)
+						.permanents
+						.iter()
+						.filter(|&&pr| pr != 0 && ctx.get(pr, Stat::cloak) != 0)
+						.count() as i32
 			}
 			Self::disc => {
 				let mark = ctx.get(ctx.get_owner(c), Stat::mark);
-				return (mark == etg::Entropy || mark == etg::Aether) as i32;
+				(mark == etg::Entropy || mark == etg::Aether) as i32
 			}
 			Self::hammer | Self::v_hammer => {
 				let mark = ctx.get(ctx.get_owner(c), Stat::mark);
-				return (mark == etg::Gravity || mark == etg::Earth) as i32;
+				(mark == etg::Gravity || mark == etg::Earth) as i32
 			}
-			Self::hope => {
-				return ctx
-					.get_player(ctx.get_owner(c))
-					.creatures
-					.iter()
-					.map(|&cr| {
-						(cr != 0
-							&& ctx.hasskill(cr, Event::OwnAttack, Skill::quanta(etg::Light as i8)))
-							as i32
-					})
-					.sum();
-			}
+			Self::hope => ctx
+				.get_player(ctx.get_owner(c))
+				.creatures
+				.iter()
+				.filter(|&&cr| {
+					cr != 0 && ctx.hasskill(cr, Event::OwnAttack, Skill::quanta(etg::Light as i8))
+				})
+				.count() as i32,
 			Self::fiery | Self::v_fiery => {
 				let pl = ctx.get_player(ctx.get_owner(c));
-				return pl.quanta(etg::Fire) as i32 / 5;
+				pl.quanta(etg::Fire) as i32 / 5
 			}
 			Self::staff => {
 				let mark = ctx.get(ctx.get_owner(c), Stat::mark);
-				return (mark == etg::Life || mark == etg::Water) as i32;
+				(mark == etg::Life || mark == etg::Water) as i32
 			}
-			Self::swarm => {
-				return ctx
-					.get_player(ctx.get_owner(c))
-					.creatures
-					.iter()
-					.map(|&cr| (cr != 0 && ctx.hasskill(cr, Event::Hp, Skill::swarm)) as i32)
-					.sum();
-			}
+			Self::swarm => ctx
+				.get_player(ctx.get_owner(c))
+				.creatures
+				.iter()
+				.filter(|&&cr| cr != 0 && ctx.hasskill(cr, Event::Hp, Skill::swarm))
+				.count() as i32,
 			Self::v_dagger => {
 				let mark = ctx.get(ctx.get_owner(c), Stat::mark);
-				return (mark == etg::Death || mark == etg::Darkness) as i32;
+				(mark == etg::Death || mark == etg::Darkness) as i32
 			}
-			Self::v_hopedr => {
-				return ctx.get(c, Stat::hope);
-			}
-			Self::v_swarmhp => {
-				return ctx.get(c, Stat::swarmhp);
-			}
-			_ => (),
+			Self::v_hopedr => ctx.get(c, Stat::hope),
+			Self::v_swarmhp => ctx.get(c, Stat::swarmhp),
+			_ => 0,
 		}
-		0
 	}
 }
 
