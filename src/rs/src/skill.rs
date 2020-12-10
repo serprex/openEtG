@@ -4972,14 +4972,16 @@ impl Skill {
 impl<'tgt> Tgt<'tgt> {
 	pub fn full_check(self, ctx: &Game, c: i32, t: i32) -> bool {
 		let kind = ctx.get_kind(t);
-		let owner = ctx.get_owner(t);
-		!((kind == etg::Player && ctx.get(t, Stat::out) != 0)
-			|| ctx.getIndex(t) == -1
-			|| (owner != ctx.turn
-				&& kind != etg::Spell
-				&& ctx.get(t, Stat::cloak) == 0
-				&& ctx.is_cloaked(owner)))
-			&& self.check(ctx, c, t)
+		(if kind == etg::Player {
+			ctx.get(t, Stat::out) == 0
+		} else {
+			let owner = ctx.get_owner(t);
+			ctx.getIndex(t) != -1
+				&& (owner == ctx.turn
+					|| kind == etg::Spell
+					|| !ctx.is_cloaked(owner)
+					|| ctx.get(t, Stat::cloak) != 0)
+		}) && self.check(ctx, c, t)
 	}
 
 	pub fn check(self, ctx: &Game, c: i32, t: i32) -> bool {
