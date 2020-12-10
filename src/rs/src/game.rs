@@ -1275,19 +1275,20 @@ impl Game {
 			if self.getIndex(id) != -1 {
 				if self.get_kind(id) == etg::Creature && self.truehp(id) <= 0 {
 					self.die(id);
-					return;
-				} else {
-					if frozen == 0 {
-						self.trigger_data(Event::Postauto, id, 0, &mut data);
+					if self.getIndex(id) == -1 {
+						return;
 					}
-					let adrenaline = self.get(id, Stat::adrenaline);
-					if adrenaline != 0 {
-						if adrenaline < etg::countAdrenaline(self.trueatk_adrenaline(id, 0)) {
-							self.incrStatus(id, Stat::adrenaline, 1);
-							continue;
-						} else {
-							self.set(id, Stat::adrenaline, 1);
-						}
+				}
+				if frozen == 0 {
+					self.trigger_data(Event::Postauto, id, 0, &mut data);
+				}
+				let adrenaline = self.get(id, Stat::adrenaline);
+				if adrenaline != 0 {
+					if adrenaline < etg::countAdrenaline(self.trueatk_adrenaline(id, 0)) {
+						self.incrStatus(id, Stat::adrenaline, 1);
+						continue;
+					} else {
+						self.set(id, Stat::adrenaline, 1);
 					}
 				}
 			}
@@ -1371,16 +1372,15 @@ impl Game {
 				if self.get_kind(id) == etg::Creature && self.truehp(id) <= 0 {
 					self.die(id);
 					return;
-				} else {
-					self.trigger_data(Event::Postauto, id, 0, &mut data);
-					let adrenaline = self.get(id, Stat::adrenaline);
-					if adrenaline != 0 {
-						if adrenaline < etg::countAdrenaline(self.trueatk_adrenaline(id, 0)) {
-							self.incrStatus(id, Stat::adrenaline, 1);
-							continue;
-						} else {
-							self.set(id, Stat::adrenaline, 1);
-						}
+				}
+				self.trigger_data(Event::Postauto, id, 0, &mut data);
+				let adrenaline = self.get(id, Stat::adrenaline);
+				if adrenaline != 0 {
+					if adrenaline < etg::countAdrenaline(self.trueatk_adrenaline(id, 0)) {
+						self.incrStatus(id, Stat::adrenaline, 1);
+						continue;
+					} else {
+						self.set(id, Stat::adrenaline, 1);
 					}
 				}
 			}
