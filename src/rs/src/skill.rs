@@ -3661,7 +3661,8 @@ impl Skill {
 					if ctx.get_kind(t) == etg::Player {
 						let weapon = ctx.get_weapon(t);
 						if weapon != 0 && ctx.get(weapon, Stat::frozen) != 0 {
-							Skill::destroy.proc(ctx, c, t, data);
+							ctx.fx(weapon, Fx::Shatter);
+							ctx.destroy(weapon, None);
 						}
 					}
 					ctx.spelldmg(t, 4);
