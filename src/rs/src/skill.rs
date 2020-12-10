@@ -1068,7 +1068,7 @@ impl Skill {
 				ctx.rmskill(c, Event::Play, Self::autoburrowproc);
 			}
 			Self::autoburrowproc => {
-				if let Some(cast) = ctx.getSkill(t, Event::Cast).first() {
+				if let Some(Skill::burrow) = ctx.getSkill(t, Event::Cast).first() {
 					Skill::burrow.proc(ctx, t, 0, data);
 				}
 			}
@@ -2946,7 +2946,7 @@ impl Skill {
 					ctx.set(clone, Stat::casts, 0);
 				}
 				if ctx.get(clone, Stat::voodoo) != 0 {
-					let foe = ctx.get_owner(owner);
+					let foe = ctx.get_foe(owner);
 					ctx.dmg(foe, ctx.get(clone, Stat::maxhp) - ctx.get(clone, Stat::hp));
 					if self == Self::parallel {
 						ctx.poison(foe, ctx.get(clone, Stat::poison));
