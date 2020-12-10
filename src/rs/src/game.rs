@@ -734,7 +734,7 @@ impl Game {
 	pub fn get_one_skill(&self, id: i32, k: u8) -> Vec<i32> {
 		self.get_thing(id)
 			.skill
-			.get(&Event::try_from(k).unwrap())
+			.get(Event::try_from(k).unwrap())
 			.map(|sk| sk.as_ref())
 			.unwrap_or(&[])
 			.iter()
@@ -1473,7 +1473,7 @@ impl Game {
 	pub fn getSkill(&self, id: i32, k: Event) -> &[Skill] {
 		self.get_thing(id)
 			.skill
-			.get(&k)
+			.get(k)
 			.map(|v| &v[..])
 			.unwrap_or(&[])
 	}
@@ -1485,14 +1485,14 @@ impl Game {
 	pub fn hasskill(&self, id: i32, k: Event, skill: Skill) -> bool {
 		self.get_thing(id)
 			.skill
-			.get(&k)
+			.get(k)
 			.map(|ss| ss.iter().any(|&s| s == skill))
 			.unwrap_or(false)
 	}
 
 	pub fn addskill(&mut self, id: i32, k: Event, skill: Skill) {
 		let thing = self.get_thing_mut(id);
-		if let Some(smap) = thing.skill.get_mut(&k) {
+		if let Some(smap) = thing.skill.get_mut(k) {
 			smap.to_mut().push(skill);
 		} else {
 			thing.skill.insert(k, Cow::from(vec![skill]));
@@ -1501,7 +1501,7 @@ impl Game {
 
 	pub fn rmskill(&mut self, id: i32, k: Event, skill: Skill) {
 		let thing = self.get_thing_mut(id);
-		if let Some(smap) = thing.skill.get_mut(&k) {
+		if let Some(smap) = thing.skill.get_mut(k) {
 			smap.to_mut().retain(|&smaps| smaps != skill);
 		}
 	}
@@ -1704,7 +1704,7 @@ impl Game {
 	}
 
 	pub fn trigger_data(&mut self, k: Event, c: i32, t: i32, data: &mut ProcData) {
-		if let Some(ss) = self.get_thing(c).skill.get(&k) {
+		if let Some(ss) = self.get_thing(c).skill.get(k) {
 			for &s in ss.clone().iter() {
 				s.proc(self, c, t, data);
 			}
@@ -1713,7 +1713,7 @@ impl Game {
 
 	pub fn trigger_pure(&self, k: Event, c: i32, t: i32) -> i32 {
 		let mut n = 0;
-		if let Some(ss) = self.get_thing(c).skill.get(&k) {
+		if let Some(ss) = self.get_thing(c).skill.get(k) {
 			for &s in ss.iter() {
 				n += s.proc_pure(self, c, t);
 			}

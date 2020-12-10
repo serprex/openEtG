@@ -172,18 +172,18 @@ impl From<&[(Event, Cow<'static, [Skill]>)]> for Skills {
 }
 
 impl Skills {
-	pub fn get(&self, needle: &Event) -> Option<&Cow<'static, [Skill]>> {
+	pub fn get(&self, needle: Event) -> Option<&Cow<'static, [Skill]>> {
 		for &(k, ref v) in self.0.iter() {
-			if k == *needle {
+			if k == needle {
 				return Some(v);
 			}
 		}
 		None
 	}
 
-	pub fn get_mut(&mut self, needle: &Event) -> Option<&mut Cow<'static, [Skill]>> {
+	pub fn get_mut(&mut self, needle: Event) -> Option<&mut Cow<'static, [Skill]>> {
 		for &mut (k, ref mut v) in self.0.iter_mut() {
-			if k == *needle {
+			if k == needle {
 				return Some(v);
 			}
 		}
@@ -1257,7 +1257,6 @@ impl Skill {
 						ctx.set(c, Stat::hp, card.health as i32);
 						ctx.set(c, Stat::atk, card.attack as i32);
 						ctx.setCrea(owner, index as i32, c);
-						ctx.get_player_mut(owner);
 					}
 				}
 			}
@@ -1761,8 +1760,10 @@ impl Skill {
 			}
 			Self::envenom => {
 				ctx.addskill(t, Event::Shield, Skill::thorn(25));
-				if let Some(hit) = ctx.get_thing_mut(t).skill.get_mut(&Event::Hit) {
-					for sk in hit.to_mut().iter_mut() {
+				let thing = ctx.get_thing_mut(t);
+				if let Some(hit) = thing.skill.get_mut(Event::Hit) {
+					let hit = hit.to_mut();
+					for sk in hit.iter_mut() {
 						match sk {
 							Skill::poison(ref mut x) => {
 								*x = x.saturating_add(1);
@@ -1771,8 +1772,12 @@ impl Skill {
 							_ => (),
 						}
 					}
+					hit.push(Skill::poison(1));
+				} else {
+					thing
+						.skill
+						.insert(Event::Hit, Cow::Borrowed(&[Skill::poison(1)]))
 				}
-				ctx.addskill(c, Event::Hit, Skill::poison(1));
 			}
 			Self::epidemic => {
 				ctx.poison(ctx.get_foe(ctx.get_owner(c)), ctx.get(t, Stat::poison));
