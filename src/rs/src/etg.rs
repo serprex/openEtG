@@ -28,23 +28,30 @@ const AdrenalineTable: [i8; 80] = [
 ];
 
 pub fn countAdrenaline(x: i32) -> i32 {
-	let x = x.abs();
+	let x = x.abs() as usize;
 	if x > 15 {
 		1
 	} else {
-		AdrenalineTable[x as usize * 5] as i32 + 1
+		AdrenalineTable[x * 5] as i32 + 1
 	}
 }
 
 pub fn calcAdrenaline(y: i32, dmg: i32) -> i32 {
 	if y < 2 {
 		dmg
+	} else if y > 5 {
+		0
 	} else {
-		let admg = AdrenalineTable[(dmg.abs() * 5 + y - 1) as usize] as i32;
-		if dmg < 0 {
-			-admg
+		let absdmg = dmg.abs();
+		if absdmg > 15 {
+			0
 		} else {
-			admg
+			let admg = AdrenalineTable[(absdmg * 5 + y - 1) as usize] as i32;
+			if dmg < 0 {
+				-admg
+			} else {
+				admg
+			}
 		}
 	}
 }
