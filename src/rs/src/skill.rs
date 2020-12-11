@@ -190,9 +190,9 @@ impl Skills {
 		None
 	}
 
-	pub fn remove(&mut self, needle: &Event) {
+	pub fn remove(&mut self, needle: Event) {
 		for idx in 0..self.0.len() {
-			if self.0[idx].0 == *needle {
+			if self.0[idx].0 == needle {
 				self.0.remove(idx);
 				return;
 			}
@@ -2394,8 +2394,10 @@ impl Skill {
 				tally[etg::Earth as usize - 1] = 1;
 				let mut stat2 = 2;
 				let owner = ctx.get_owner(c);
-				for idx in 0..ctx.get_player(owner).hand.len() {
-					let code = ctx.get_player(owner).hand[idx];
+				let mut idx = 0;
+				let mut len = ctx.get_player(owner).hand.len();
+				while idx < len {
+					let code = ctx.get(ctx.get_player(owner).hand[idx], Stat::card);
 					if etg::ShardList[1..]
 						.iter()
 						.any(|&shard| card::IsOf(code, shard))
@@ -2404,6 +2406,9 @@ impl Skill {
 						tally[card.element as usize - 1] += 1;
 						stat2 += if card::Upped(code) { 4 } else { 3 };
 						ctx.get_player_mut(owner).hand.remove(idx);
+						len -= 1;
+					} else {
+						idx += 1;
 					}
 				}
 				let mut shlist = Vec::with_capacity(12);
@@ -2423,8 +2428,8 @@ impl Skill {
 				let active =
 					match shardSkills[ctx.choose(&shlist).cloned().unwrap_or(0)][shmax..=shmax] {
 						[Skill::summon(code)] => Cow::from(vec![Skill::summon(card::AsUpped(
-							soicode,
-							card::Upped(code as i32),
+							code as i32,
+							card::Upped(soicode as i32),
 						) as u16)]),
 						ref x => Cow::from(x),
 					};
@@ -3816,13 +3821,13 @@ impl Skill {
 			}
 			Self::turngolem => {
 				ctx.remove(c);
-				let stored = ctx.get(c, Stat::storedpower);
 				let thing = ctx.get_thing_mut(c);
-				thing.skill.remove(&Event::Cast);
+				let stored =
+					std::mem::replace(thing.status.entry(Stat::storedpower).or_insert(0), 0);
+				thing.skill.remove(Event::Cast);
 				thing.status.insert(Stat::atk, stored / 2);
 				thing.status.insert(Stat::maxhp, stored);
 				thing.status.insert(Stat::hp, stored);
-				thing.status.insert(Stat::storedpower, 0);
 				let owner = thing.owner;
 				ctx.addCrea(owner, c);
 				ctx.set(owner, Stat::gpull, c);
@@ -4387,8 +4392,10 @@ impl Skill {
 				let mut hp = if card::Upped(soicode) { 2 } else { 1 };
 				let mut atk = hp + 3;
 				let owner = ctx.get_owner(c);
-				for idx in 0..ctx.get_player(owner).hand.len() {
-					let code = ctx.get_player(owner).hand[idx];
+				let mut idx = 0;
+				let mut len = ctx.get_player(owner).hand.len();
+				while idx < len {
+					let code = ctx.get(ctx.get_player(owner).hand[idx], Stat::card);
 					if etg::ShardList[1..]
 						.iter()
 						.any(|&shard| card::IsOf(code, shard))
@@ -4403,7 +4410,14 @@ impl Skill {
 						};
 						hp += hpbuff;
 						atk += atkbuff;
+						if card::Upped(code) {
+							hp += 1;
+							atk += 1;
+						}
 						ctx.get_player_mut(owner).hand.remove(idx);
+						len -= 1;
+					} else {
+						idx += 1;
 					}
 				}
 				let mut shpick = 0;
