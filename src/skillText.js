@@ -144,7 +144,7 @@ const data = {
 	deathwish:
 		'Whenever opponent casts a spell or ability on an allied creature, if this creature is a valid target, that spell or ability targets this creature instead.',
 	deckblast:
-		'Deals spell damage to opponent for each card remaining in deck. Discard your deck.',
+		'Deals spell damage to opponent for each card remaining in deck. Destroy all cards in your deck.',
 	deepdive:
 		'Burrow. While burrowed, replace this ability with "2:3 Freeze target permanent." Next turn, unburrow, become airborne, and triple this creature\'s strength until its next attack.',
 	deja: 'Remove this ability and summon a copy of this creature.',
@@ -153,7 +153,7 @@ const data = {
 		'Non-ranged attackers have a 40% chance plus 5% per 1:11 producing creature you control to gain -1|-1.',
 	destroy: 'Destroy target permanent.',
 	destroycard:
-		"Discard target card, or discard the top card of target player's deck.",
+		"Discard target card, or destroy top card of target player's deck.",
 	detain:
 		'Target creature with less HP than this creature gets -1|-1 and is burrowed. Gain 1|1.',
 	devour:
@@ -177,20 +177,20 @@ const data = {
 		'When opponent discards a card, add a copy of that card to your hand.',
 	drawequip: 'Both players draw the next weapon or shield in their deck.',
 	drawpillar:
-		'When this card is played, if the top card of your deck is a pillar, tower, or pendulum, draw it.',
+		'When this card is played, if top card of your deck is a pillar, tower, or pendulum, draw it.',
 	dryspell:
 		'Deal 1 spell damage to all creatures. Gain 1:7 for each damage dealt. Removes cloak.',
 	dshield: 'Target creature gains immaterial until next turn.',
-	duality: "Add a copy of the top card of opponent's deck to your hand.",
+	duality: "Add a copy of top card of opponent's deck to your hand.",
 	earthquake:
 		'Destroy up to 3 copies of target pillar, pendum, tower, or other stacking permanent.',
 	eatspell:
 		'Until your next turn, the next spell any player casts is nullified. If this ability nullifies a spell, this creature gains 1|1.',
 	elf: 'If this card is targeted by Chaos Seed, it becomes a Fallen Elf.',
 	embezzle:
-		'Replaces target creature\'s skills with "When this creature damages a player, that player draws a card. When this creature dies, destroy the top two cards of opponent\'s deck."',
+		'Replaces target creature\'s skills with "When this creature damages a player, that player draws a card. When this creature dies, destroy top two cards of opponent\'s deck."',
 	embezzledeath:
-		"When this creature dies, destroy the top two cards of opponent's deck.",
+		"When this creature dies, destroy top two cards of opponent's deck.",
 	empathy:
 		'At the end of your turn, heal 1 for each creature you own. For every 8 creatures you own (rounded down), pay 1:5 at the end of your turn.',
 	enchant: 'Target permanent becomes immaterial.',
@@ -309,7 +309,7 @@ const data = {
 	inflation: 'Increase the cost of all active abilities by 1.',
 	ink: 'Summon a Cloak that lasts 1 turn.',
 	innovation:
-		"Discard target card in either player's hand. The owner of target card draws three cards. Destroy the top card of your deck.",
+		"Discard target card in either player's hand. The owner of target card draws three cards. Destroy top card of your deck.",
 	integrity:
 		'Destroy all shards in your hand to play a Shard Golem with stats and abilities based on the shards destroyed.',
 	jelly:
@@ -342,9 +342,9 @@ const data = {
 		"Change your mark to target's element. Increase your mark power by 1.",
 	midas:
 		'Target permanent becomes a Golden Relic with "2:0: Sacrifice this card and draw a card." If target is a weapon, its strength is 1. If target is a shield, its damage reduction is 1.',
-	mill: "Discard top card of target player's deck",
+	mill: "Destroy top card of target player's deck",
 	millpillar:
-		"If the top card of target player's deck is a pillar, pendulum, or tower, destroy that card.",
+		"If top card of target player's deck is a pillar, pendulum, or tower, destroy that card.",
 	mimic:
 		'Whenever another creature enters play, transform this card into a fresh copy of that creature. This creature retains this ability.',
 	miracle:
@@ -492,7 +492,7 @@ const data = {
 		'Whenever a permanent is destroyed, gain 1|1. Once per turn, when opponent destroys a permanent, add a copy of that permanent to your hand.',
 	salvageoff: 'Cannot salvage another destroyed permanent until next turn.',
 	sanctify:
-		"During your opponent's turn, your hand and quanta pool cannot be modified.",
+		"During your opponent's turn, your hand and quanta pool are protected and you cannot be silenced.",
 	unsanctify: {
 		ownplay:
 			"Nullify opponent's sanctuary effect from Sancuary or Dream Catcher.",
@@ -514,7 +514,7 @@ const data = {
 	shtriga: 'Gain immaterial at the start of your next turn.',
 	shuffle3: 'Shuffle 3 copies of target creature into your deck.',
 	silence:
-		'Target player cannot play cards until the end of their next turn, or target creature cannot use active abilities until the end of their next turn.',
+		'Silence target player or creature. Silenced players cannot play cards until the end of their next turn, while silenced creatures cannot use active abilities until the end of their next turn.',
 	sing: 'Target creature without this ability attacks its owner.',
 	singularity: 'That was a bad idea.',
 	sinkhole: [
@@ -585,9 +585,9 @@ const data = {
 	turngolem:
 		"This card becomes a creature with Gravity Pull. Set the creature's HP to the total damage this card blocked while it was a shield. Set the creature's strength to half its HP.",
 	unsummon:
-		"Return target creature to its owner's hand. Remove any modifiers and statuses on target creature. If owner's hand is full, instead return target creature to the top of its owner's deck.",
+		"Return target creature to its owner's hand. Remove any modifiers and statuses on target creature. If owner's hand is full, instead return target creature to top of its owner's deck.",
 	unsummonquanta:
-		"Return target creature to its owner's hand. Remove any modifiers and statuses on target creature. If owner's hand is full, instead return target creature to the top of its owner's deck. Gain quanta equivalent to target card's cost.",
+		"Return target creature to its owner's hand. Remove any modifiers and statuses on target creature. If owner's hand is full, instead return target creature to top of its owner's deck. Gain quanta equivalent to target card's cost.",
 	unvindicate:
 		'Cannot activate vindicate again until the start of its next turn.',
 	upkeep: c =>
@@ -792,7 +792,7 @@ const data = {
 			c.upped ? ' upgraded' : ''
 		} cards in hand. One will be 1:1`,
 	v_silence:
-		'foe cannot play cards during their next turn, or target creature gains summoning sickness',
+		'Foe cannot play cards during their next turn, or target creature gains summoning sickness',
 	v_singularity: 'Not well behaved',
 	v_siphon: 'Siphon 1:0 from foe as 1:11. Throttled',
 	v_skull:
