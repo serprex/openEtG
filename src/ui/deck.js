@@ -3,6 +3,7 @@ import { render } from 'react-dom';
 import Cards from '../AllCards.js';
 import { Card, DeckDisplay } from '../Components/index.js';
 import { decodedeck } from '../etgutil.js';
+import { calcWealth } from '../userutil.js';
 
 class App extends Component {
 	state = { deck: decodedeck(location.hash.slice(1)), card: null };
@@ -31,6 +32,14 @@ class App extends Component {
 					onMouseOver={(i, card) => this.setState({ card })}
 				/>
 				<Card x={36} y={206} card={this.state.card} />
+				<span
+					style={{
+						position: 'absolute',
+						left: '172px',
+						top: '206px',
+					}}>
+					{calcWealth(Cards, this.state.deck, true)}
+				</span>
 			</>
 		);
 	}

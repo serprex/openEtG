@@ -1485,7 +1485,7 @@ impl Skill {
 			Self::deepdiveproc => {
 				if t == ctx.get_owner(c) {
 					ctx.rmskill(c, Event::Turnstart, Skill::deepdiveproc);
-					ctx.addskill(c, Event::Turnstart, Skill::deepdiveproc);
+					ctx.addskill(c, Event::Turnstart, Skill::deepdiveproc2);
 					ctx.set(c, Stat::airborne, 1);
 					ctx.set(c, Stat::burrowed, 0);
 					ctx.set(c, Stat::dive, ctx.trueatk(c) * 2);
@@ -2797,7 +2797,7 @@ impl Skill {
 			}
 			Self::noeatspell => {
 				if t == ctx.get_owner(c) {
-					ctx.rmskill(t, Event::Prespell, Skill::eatspell);
+					ctx.rmskill(c, Event::Prespell, Skill::eatspell);
 				}
 			}
 			Self::nova => {
