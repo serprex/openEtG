@@ -7,7 +7,7 @@ export const rewardwords = {
 	shard: 4,
 	nymph: 5,
 };
-const cardValues = new Float32Array([25 / 3, 1.375, 5, 30, 35, 250]),
+const cardValues24 = new Uint16Array([200, 33, 120, 720, 840, 6000]),
 	sellValues = new Uint8Array([5, 1, 3, 15, 20, 150]);
 export const pveCostReward = new Uint8Array([
 	0,
@@ -23,10 +23,13 @@ export const pveCostReward = new Uint8Array([
 	30,
 	200,
 ]);
-export function cardValue(card) {
+function cardValue24(card) {
 	return ~card.rarity
-		? cardValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1)
+		? cardValues24[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1)
 		: 0;
+}
+export function cardValue(card) {
+	return cardValue24(card) / 24;
 }
 export function sellValue(card) {
 	return ~card.rarity
@@ -46,7 +49,7 @@ export function calcWealth(Cards, cardpool, isDecoded) {
 			card.rarity !== -1 &&
 			(card.rarity || card.upped || card.shiny)
 		) {
-			wealth += cardValue(card) * count;
+			wealth += cardValue24(card) * count;
 		}
 	}
 	if (typeof cardpool === 'string') {
@@ -60,5 +63,5 @@ export function calcWealth(Cards, cardpool, isDecoded) {
 				: (count, code) => wealthIter(code, count),
 		);
 	}
-	return wealth;
+	return wealth / 24;
 }
