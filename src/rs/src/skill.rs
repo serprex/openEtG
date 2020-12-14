@@ -578,7 +578,7 @@ pub enum Skill {
 	v_disshield,
 	v_dive,
 	v_divinity,
-	v_drainlife,
+	v_drainlife(u8),
 	v_dryspell,
 	v_dshield,
 	v_dshieldoff,
@@ -589,7 +589,7 @@ pub enum Skill {
 	v_endow,
 	v_evolve,
 	v_fiery,
-	v_firebolt,
+	v_firebolt(u8),
 	v_firewall,
 	v_flyingweapon,
 	v_fractal,
@@ -611,7 +611,7 @@ pub enum Skill {
 	v_holylight,
 	v_hope,
 	v_hopedr,
-	v_icebolt,
+	v_icebolt(u8),
 	v_ignite,
 	v_immolate,
 	v_improve,
@@ -911,17 +911,17 @@ impl Skill {
 			Self::v_cseed => Tgt::crea,
 			Self::v_destroy => Tgt::perm,
 			Self::v_devour => Tgt::devour,
-			Self::v_drainlife => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::v_drainlife(_) => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::v_earthquake => Tgt::pill,
 			Self::v_enchant => Tgt::perm,
 			Self::v_endow => Tgt::weap,
-			Self::v_firebolt => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::v_firebolt(_) => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::v_fractal => Tgt::crea,
 			Self::v_freeze => Tgt::crea,
 			Self::v_gpullspell => Tgt::crea,
 			Self::v_guard => Tgt::crea,
 			Self::v_holylight => Tgt::Or(&[Tgt::crea, Tgt::play]),
-			Self::v_icebolt => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::v_icebolt(_) => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::v_immolate => Tgt::And(&[Tgt::own, Tgt::crea]),
 			Self::v_improve => Tgt::crea,
 			Self::v_infect => Tgt::crea,
@@ -4065,11 +4065,11 @@ impl Skill {
 			}
 			Self::v_cseed => {
 				if let Some(sk) = ctx.choose(&[
-					Skill::v_drainlife,
-					Skill::v_firebolt,
+					Skill::v_drainlife(0),
+					Skill::v_firebolt(0),
 					Skill::v_freeze,
 					Skill::v_gpullspell,
-					Skill::v_icebolt,
+					Skill::v_icebolt(0),
 					Skill::v_infect,
 					Skill::v_lightning,
 					Skill::v_lobotomize,
@@ -4118,9 +4118,9 @@ impl Skill {
 				*maxhp = cmp::min(*maxhp + amt, 500);
 				ctx.dmg(owner, -amt);
 			}
-			Self::v_drainlife => {
+			Self::v_drainlife(cost) => {
 				let owner = ctx.get_owner(c);
-				let bonus = ctx.get_player(owner).quanta(etg::Darkness) as i32 / 10;
+				let bonus = (ctx.get_player(owner).quanta(etg::Darkness) + cost) as i32 / 10;
 				let heal = ctx.spelldmg(t, 2 + bonus * 2);
 				ctx.dmg(owner, -heal);
 			}
@@ -4160,10 +4160,11 @@ impl Skill {
 				ctx.transform(c, card::As(ctx.get(c, Stat::card), card::v_Shrieker));
 				ctx.set(c, Stat::burrowed, 0);
 			}
-			Self::v_firebolt => {
+			Self::v_firebolt(cost) => {
 				ctx.spelldmg(
 					t,
-					3 + 3 * (ctx.get_player(ctx.get_owner(c)).quanta(etg::Fire) as i32 / 10),
+					3 + 3
+						* ((ctx.get_player(ctx.get_owner(c)).quanta(etg::Fire) + cost) as i32 / 10),
 				);
 			}
 			Self::v_firewall => {
@@ -4262,9 +4263,9 @@ impl Skill {
 				let dr = Self::hope.proc_pure(ctx, c, t);
 				ctx.set(c, Stat::hope, dr);
 			}
-			Self::v_icebolt => {
+			Self::v_icebolt(cost) => {
 				let owner = ctx.get_owner(c);
-				let bonus = ctx.get_player(owner).quanta(etg::Water) as i32 / 10;
+				let bonus = (ctx.get_player(owner).quanta(etg::Water) + cost) as i32 / 10;
 				if ctx.upto(20) < 7 + bonus * 2 {
 					ctx.freeze(
 						t,

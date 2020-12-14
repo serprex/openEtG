@@ -599,15 +599,20 @@ impl Game {
 				.get_player(id)
 				.hand
 				.iter()
-				.all(|&card| self.get(card, Stat::cost) == 0)
+				.all(|&card| self.get(card, Stat::cost) != 0)
 		{
 			let pl = self.get_player_mut(id);
 			let pldecklen = pl.deck.len();
 			let oldhand = pl.hand.clone();
-			let newhand: ArrayVec<[i32; 8]> =
-				pl.deck_mut().drain(cmp::min(pldecklen - 7, 0)..).collect();
+			let newhand: ArrayVec<[i32; 8]> = pl
+				.deck_mut()
+				.drain(if pldecklen <= 7 { 0 } else { pldecklen - 7 }..)
+				.collect();
 			pl.deck_mut().extend_from_slice(&oldhand);
 			pl.hand = newhand;
+			for &id in pl.hand.clone().iter() {
+				self.set_kind(id, etg::Spell);
+			}
 		}
 	}
 
@@ -2072,6 +2077,7 @@ impl Game {
 		let foe = self.get_foe(id);
 		self.dmg(foe, self.get(foe, Stat::poison));
 		let mut data = ProcData::default();
+		data.attackphase = true;
 		let mut patienceFlag = false;
 		let mut floodingIndex = 23;
 		self.proc_data(Event::Beginattack, id, &mut data);

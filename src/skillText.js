@@ -659,7 +659,8 @@ const data = {
 	v_disshield: 'Absorb damage. Consume 1:1 per 3 damage absorbed',
 	v_divinity: 'Add 24 to maximum health if mark 1:8, otherwise 16 & heal same',
 	v_dive: 'Double strength until next attack',
-	v_drainlife: 'Drain 2HP from target, plus an extra 2HP per 10:11 remaining',
+	v_drainlife: _ =>
+		'Drain 2HP from target, plus an extra 2HP per 10:11 remaining',
 	v_dryspell: [
 		'Deal 1 damage to all creatures. Gain 1:7 per damage dealt. Removes cloak',
 		"Deal 2 damage to all opponent's creatures. Gain 1:7 per damage dealt. Removes cloak",
@@ -672,7 +673,7 @@ const data = {
 	v_endow: 'Replicate attributes of target weapon',
 	v_evolve: 'Become an unburrowed Shrieker',
 	v_fiery: 'Increment damage per 5:6 owned',
-	v_firebolt: 'Deals 3 damage to target. Deal 3 more per 10:6 remaining',
+	v_firebolt: _ => 'Deals 3 damage to target. Deal 3 more per 10:6 remaining',
 	v_firewall: 'Damage attackers',
 	v_flyingweapon: 'Own weapon becomes a flying creature',
 	v_fractal:
@@ -700,7 +701,7 @@ const data = {
 	v_holylight: 'Heal target 10. Nocturnal targets are damaged instead',
 	v_hope:
 		'Blocks one additional damage for each creature you control that produces 1:8 every turn.',
-	v_icebolt:
+	v_icebolt: _ =>
 		'Deal 2 damage to target, plus an additional 2 per 10:7 remaining. 25% plus 5% per point of damage chance to freeze target',
 	v_ignite: 'Deal 20 spell damage to foe & 1 damage to all creatures',
 	v_immolate: c =>
