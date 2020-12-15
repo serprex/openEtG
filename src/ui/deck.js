@@ -35,7 +35,7 @@ class App extends Component {
 				<span
 					style={{
 						position: 'absolute',
-						left: '172px',
+						left: '204px',
 						top: '206px',
 					}}>
 					{calcWealth(Cards, this.state.deck, true)}
