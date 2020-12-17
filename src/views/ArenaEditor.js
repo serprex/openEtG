@@ -195,7 +195,7 @@ export default connect(({ user }) => ({ user }))(
 								data.mod = true;
 							}
 							sock.userEmit('setarena', data);
-							if (this.props.ainfo.day > 0) {
+							if (this.props.acreate && this.props.ainfo.day > 0) {
 								this.props.dispatch(
 									store.updateUser({
 										gold:
