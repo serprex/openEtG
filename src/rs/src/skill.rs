@@ -4876,11 +4876,12 @@ impl Skill {
 					3
 				} else {
 					2
-				};
-				let maxhp = ctx.get_mut(c, Stat::maxhp);
-				*maxhp = cmp::min(*maxhp + amt, 1);
+				} * ctx.get(c, Stat::charges);
+				let foe = ctx.get_foe(ctx.get_owner(c));
+				let maxhp = ctx.get_mut(foe, Stat::maxhp);
+				*maxhp = cmp::max(*maxhp - amt, 1);
 				let maxhp = *maxhp;
-				let hp = ctx.get_mut(c, Stat::hp);
+				let hp = ctx.get_mut(foe, Stat::hp);
 				if *hp > maxhp {
 					*hp = maxhp;
 				}
