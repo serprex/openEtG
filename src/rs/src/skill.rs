@@ -1359,7 +1359,7 @@ impl Skill {
 						owner
 					},
 					|ctx, cr| {
-						ctx.spelldmg(t, dmg);
+						ctx.spelldmg(cr, dmg);
 					},
 				);
 				ctx.poison(foe, ctx.get(t, Stat::poison) + ctx.get(t, Stat::poisonous));

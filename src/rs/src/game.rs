@@ -1858,7 +1858,11 @@ impl Game {
 			if !data.evade {
 				if self.get(id, Stat::aflatoxin) != 0 {
 					let card = self.get(id, Stat::card);
-					let cellcode = card::As(card, card::MalignantCell);
+					let cellcode = if self.cards.set == CardSet::Open {
+						card::As(card, card::MalignantCell)
+					} else {
+						card::v_MalignantCell
+					};
 					if card != cellcode {
 						let owner = self.get_owner(id);
 						let cell = self.new_thing(cellcode, owner);
