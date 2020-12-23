@@ -124,7 +124,7 @@ const userEvents = {
 		broadcast({ x: 'clear' });
 	}),
 	modmotd: roleck('Mod', function (data, user) {
-		const match = data.m.match(/^(\d+) ?(.*)$/);
+		const match = data.m.match(/^(\d+) *(.*)$/);
 		if (match) {
 			const num = match[1],
 				text = match[2];
@@ -215,7 +215,6 @@ const userEvents = {
 		if (!user.ocard || !data.d) {
 			return;
 		}
-		const au = `${data.lv ? 'B:' : 'A:'}${data.u}`;
 		if (data.mod) {
 			return pg.pool.query({
 				text: `update arena set deck = $3, hp = $4, draw = $5, mark = $6 where user_id = $1 and arena_id = $2`,
@@ -331,7 +330,7 @@ from arena where user_id = $1`,
 			idx = RngMock.upto(len);
 		}
 		const ares = await pg.pool.query({
-			text: `select u.name, a.score, a.deck, a.hp, a.mark, a.draw, a.day, a.won, a.loss, a.code from arena a join users u on u.id = a.user_id where a.arena_id = $1 order by a."rank" limit 1 offset $2`,
+			text: `select u.name, a.deck, a.hp, a.mark, a.draw, a.day, a.won, a.loss, a.code from arena a join users u on u.id = a.user_id where a.arena_id = $1 order by a."rank" limit 1 offset $2`,
 			values: [arenaId, idx],
 		});
 		if (ares.rows.length == 0) {
@@ -607,7 +606,7 @@ where mr1.user_id = $1 and mr2.user_id = $2 and not mr1.accepted and mr2.accepte
 					typeof data.forcards === 'string' &&
 					typeof data.forg === 'number'
 				) {
-					const acceptResult = await pg.pool.query({
+					const acceptResult = await sql.query({
 						text: `select 1 from trade_request where user_id = $2 and for_user_id = $1 and cards = $5 and g = $6 and forcards = $3 and forg = $4`,
 						values: [
 							userId,
@@ -650,14 +649,14 @@ where mr1.user_id = $1 and mr2.user_id = $2 and not mr1.accepted and mr2.accepte
 							data.cards,
 						);
 						foe.gold += p2gdelta;
-						return pg.pool.query({
+						return sql.query({
 							text:
 								'delete from trade_request where (user_id = $1 and for_user_id = $2) or (user_id = $2 and for_user_id = $1)',
 							values: [userId, foe.id],
 						});
 					}
 				}
-				await pg.pool.query({
+				await sql.query({
 					text: `insert into trade_request (user_id, for_user_id, cards, g, forcards, forg, expire_at)
 values ($1, $2, $3, $4, $5, $6, now() + interval '1 hour')
 on conflict (user_id, for_user_id) do update set user_id = $1, for_user_id = $2, cards = $3, g = $4, forcards = $5, forg = $6, expire_at = now() + interval '1 hour'`,

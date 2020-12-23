@@ -1282,8 +1282,8 @@ impl Skill {
 				let owner = ctx.get_owner(c);
 				for &cr in ctx.get_player(owner).creatures.iter() {
 					if cr != 0 {
-						hp += ctx.get(cr, Stat::hp);
-						atk += ctx.get(cr, Stat::atk);
+						hp += ctx.truehp(cr);
+						atk += ctx.trueatk(cr);
 					}
 				}
 				let chim = ctx.new_thing(
@@ -2919,10 +2919,27 @@ impl Skill {
 				});
 			}
 			Self::pandemonium3 => {
-				let owner = ctx.get_owner(c);
-				ctx.masscc(ctx.get_foe(owner), owner, |ctx, cr| {
-					Skill::cseed2.proc(ctx, c, cr, &mut ProcData::default());
-				});
+				let mut ids = Vec::new();
+				for &pid in ctx.players().iter() {
+					let pl = ctx.get_player(pid);
+					ids.extend(
+						once(pid)
+							.chain(once(pl.weapon))
+							.chain(once(pl.shield))
+							.chain(pl.creatures.clone().iter().cloned())
+							.chain(pl.permanents.clone().iter().cloned())
+							.chain(pl.hand.clone().iter().cloned())
+							.filter(|&id| id != 0),
+					);
+				}
+				ctx.shuffle(&mut ids[..]);
+				for &id in ids.iter() {
+					if ctx.get(id, Stat::cloak) != 0 {
+						ctx.die(id);
+					} else {
+						Skill::cseed2.proc(ctx, c, id, data);
+					}
+				}
 			}
 			Self::paradox | Self::v_paradox => {
 				ctx.fx(t, Fx::Paradox);

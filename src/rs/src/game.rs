@@ -939,6 +939,10 @@ impl Game {
 }
 
 impl Game {
+	pub fn shuffle<T>(&mut self, slice: &mut [T]) {
+		slice.shuffle(&mut self.rng);
+	}
+
 	pub fn props_len(&self) -> usize {
 		self.props.len()
 	}
