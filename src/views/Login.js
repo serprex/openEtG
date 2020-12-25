@@ -189,17 +189,14 @@ if (typeof kongregateAPI === 'undefined') {
 } else {
 	View = connect()(
 		class Login extends Component {
+			state = { guest: false };
+
 			componentDidMount() {
 				kongregateAPI.loadAPI(() => {
 					const kong = kongregateAPI.getAPI();
 					if (kong.services.isGuest()) {
-						this.props.dispatch(store.doNav(MainMenu));
+						this.setState({ guest: true });
 					} else {
-						sock.emit({
-							x: 'konglogin',
-							u: kong.services.getUserId(),
-							g: kong.services.getGameAuthToken(),
-						});
 						this.props.dispatch(
 							store.setCmds({
 								login: data => {
@@ -214,16 +211,30 @@ if (typeof kongregateAPI === 'undefined') {
 											this.props.dispatch(store.doNav(MainMenu));
 										}
 									} else {
+										this.props.dispatch(store.chatMsg(data.err));
 										alert(data.err);
 									}
 								},
 							}),
 						);
+						sock.emit({
+							x: 'konglogin',
+							u: kong.services.getUserId(),
+							g: kong.services.getGameAuthToken(),
+						});
 					}
 				});
 			}
 
 			render() {
+				if (this.state.guest) {
+					return (
+						<>
+							Log in to use Kongregate, or play at{' '}
+							<a href="https://etg.dek.im">etg.dek.im</a>
+						</>
+					);
+				}
 				return 'Logging in..';
 			}
 		},

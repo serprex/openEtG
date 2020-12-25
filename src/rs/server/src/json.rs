@@ -251,7 +251,7 @@ pub enum UserMessage {
 		a: Option<String>,
 	},
 	konglogin {
-		u: String,
+		u: u64,
 		g: String,
 	},
 	guestchat {
@@ -501,12 +501,21 @@ pub enum WsResponse<'a> {
 		ailosses: i32,
 	},
 	login(&'a UserObject),
+	#[serde(rename = "loginfail")]
+	loginfail {
+		err: &'a str,
+	},
 	r#move {
 		cmd: GamesMoveCmd,
 		hash: i32,
 	},
 	mute {
 		m: &'a str,
+	},
+	offertrade {
+		f: &'a str,
+		c: &'a str,
+		g: i32,
 	},
 	originaldata(&'a LegacyUser),
 	#[serde(rename = "originaldata")]
@@ -534,6 +543,11 @@ pub enum WsResponse<'a> {
 	},
 	tradecanceled {
 		u: &'a str,
+	},
+	tradedone {
+		oldcards: &'a str,
+		newcards: &'a str,
+		g: i32,
 	},
 	wealthtop {
 		top: &'a [Value],

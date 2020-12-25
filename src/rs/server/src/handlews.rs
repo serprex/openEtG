@@ -692,21 +692,21 @@ pub async fn handle_ws(
 								if let Ok(trx) = client.transaction().await {
 									let lv = if lv == 0 { 1i32 } else { 2i32 };
 									if let Ok(row) = trx.query_one("select a.won, a.loss, a.day from arena a where a.arena_id = $1 and a.user_id = $2 for update", &[&lv, &auserid]).await {
-										let awon = row.get::<usize, i32>(0) + won as i32;
-										let aloss = row.get::<usize, i32>(1) + (!won) as i32;
-										let age = get_day().saturating_sub(row.get::<usize, i32>(2) as u32) as f64;
-										let sweet16 = age.powf(1.6);
-										let newscore =
-											(wilson((awon + 1) as f64, (awon + aloss + 1) as f64) * 1000.0 - (sweet16 * 999.0) / (sweet16 + 999.0)) as i32;
-										trx.execute(
+											let awon = row.get::<usize, i32>(0) + won as i32;
+											let aloss = row.get::<usize, i32>(1) + (!won) as i32;
+											let age = get_day().saturating_sub(row.get::<usize, i32>(2) as u32) as f64;
+											let sweet16 = age.powf(1.6);
+											let newscore =
+												((wilson((awon + 1) as f64, (awon + aloss + 1) as f64) - sweet16 / (sweet16 + 864.0)) * 1000.0) as i32;
+											trx.execute(
 												if won {
 													"update arena set won = won+1, score = $3 where arena_id = $1 and user_id = $2"
 												} else {
 													"update arena set loss = loss+1, score = $3 where arena_id = $1 and user_id = $2"
 												}, &[&lv, &auserid, &newscore]).await.ok();
-										update_arena_ranks(&trx).await.ok();
-										trx.commit().await.ok();
-									}
+											update_arena_ranks(&trx).await.ok();
+											trx.commit().await.ok();
+										}
 								}
 							}
 						}
@@ -1455,12 +1455,11 @@ pub async fn handle_ws(
 										"select cards, g from trade_request where user_id = $2 and for_user_id = $1", &[&userid, &foeuserid]).await {
 										let cards: String = trade.get(0);
 										let g: i32 = trade.get(1);
-										sendmsg(&tx, &json!({
-											"x": "offertrade",
-											"f": f,
-											"c": cards,
-											"g": g,
-										}));
+										sendmsg(&tx, &WsResponse::offertrade {
+											f: &f,
+											c: &cards,
+											g: g,
+										});
 									}
 								}
 							}
@@ -1545,18 +1544,16 @@ pub async fn handle_ws(
 																		msg: err,
 																	});
 																} else {
-																	sendmsg(&tx, &json!({
-																		"x": "tradedone",
-																		"oldcards": &cards,
-																		"newcards": forcardsref,
-																		"g": p1gdelta,
-																	}));
-																	sendmsg(&foesock.tx, &json!({
-																		"x": "tradedone",
-																		"oldcards": forcardsref,
-																		"newcards": &cards,
-																		"g": p2gdelta,
-																	}));
+																	sendmsg(&tx, &WsResponse::tradedone{
+																		oldcards: &cards,
+																		newcards: forcardsref,
+																		g: p1gdelta,
+																	});
+																	sendmsg(&foesock.tx, &WsResponse::tradedone {
+																		oldcards: forcardsref,
+																		newcards: &cards,
+																		g: p2gdelta,
+																	});
 																	user.data.gold = user.data.gold.saturating_add(p1gdelta);
 																	foeuser.data.gold = foeuser.data.gold.saturating_add(p2gdelta);
 																	for (code, count) in iterraw(cards.as_bytes()) {
@@ -1594,12 +1591,11 @@ pub async fn handle_ws(
 															values ($1, $2, $3, $4, $5, $6, now() + interval '1 hour') \
 															on conflict (user_id, for_user_id) do update set user_id = $1, for_user_id = $2, cards = $3, g = $4, forcards = $5, forg = $6, expire_at = now() + interval '1 hour'",
 															params).await.is_ok() && trx.commit().await.is_ok() {
-													sendmsg(&foesock.tx, &json!({
-														"x": "offertrade",
-														"f": u,
-														"c": cards,
-														"g": g,
-													}));
+													sendmsg(&foesock.tx, &WsResponse::offertrade {
+														f: &u,
+														c: &cards,
+														g: g32,
+													});
 												}
 											}
 										}
@@ -1704,13 +1700,7 @@ pub async fn handle_ws(
 						UserMessage::login { u, a, p } => {
 							let username = u;
 							if username.is_empty() {
-								sendmsg(
-									&tx,
-									&json!({
-										"x": "login",
-										"err": "No name",
-									}),
-								);
+								sendmsg(&tx, &WsResponse::loginfail { err: "No name" });
 							} else {
 								let mut wusers = users.write().await;
 								let user =
@@ -1778,10 +1768,9 @@ pub async fn handle_ws(
 								} else {
 									sendmsg(
 										&tx,
-										&json!({
-											"x": "login",
-											"err": "Authentication failed",
-										}),
+										&WsResponse::loginfail {
+											err: "Authentication failed",
+										},
 									);
 								}
 							}
@@ -1823,7 +1812,17 @@ pub async fn handle_ws(
 												if let Some(user) =
 													wusers.load(&*client, &name).await
 												{
-													user.lock().await.auth = g.clone();
+													let mut user = user.lock().await;
+													user.auth = g.clone();
+													login_success(
+														&usersocks,
+														&tx,
+														sockid,
+														&mut user,
+														&name,
+														&mut client,
+													)
+													.await;
 												} else {
 													let mut newuser = UserObject {
 														name: name.clone(),
@@ -1851,22 +1850,38 @@ pub async fn handle_ws(
 											} else {
 												sendmsg(
 													&tx,
-													&json!({
-														"x": "login",
-														"err": format!("{}: {}", body["error"], body["error_description"]),
-													}),
+													&WsResponse::loginfail {
+														err: &format!(
+															"{}: {}",
+															body["error"],
+															body["error_description"]
+														),
+													},
 												);
 											}
+										} else {
+											sendmsg(
+												&tx,
+												&WsResponse::loginfail {
+													err: "Failed to parse Kongregate's response",
+												},
+											);
 										}
+									} else {
+										sendmsg(
+											&tx,
+											&WsResponse::loginfail {
+												err: "Kongregate refused request",
+											},
+										);
 									}
 								}
 							} else {
 								sendmsg(
 									&tx,
-									&json!({
-										"x": "login",
-										"err": "Global error: no kong api in db",
-									}),
+									&WsResponse::loginfail {
+										err: "Global error: no kong api in db",
+									},
 								);
 							}
 						}
