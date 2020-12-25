@@ -6,7 +6,6 @@ use etg::card;
 
 use super::card_name;
 use crate::etgutil::{decode_code, parse_digit32};
-use crate::ignore;
 
 pub fn css_class(byte: u8) -> &'static str {
 	match byte {
@@ -66,9 +65,9 @@ pub fn deck(deck: &str) -> String {
 			classes[if shiny { b'A' } else { b'B' } as usize] = true;
 			let path = paths.entry(elecls).or_insert(String::new());
 			for _ in 0..count {
-				ignore(write!(path, "M {} {}h100v16h-100", x, y));
+				write!(path, "M {} {}h100v16h-100", x, y).ok();
 				textml.push_str("<text clip-path='polygon(0 0,96px 0,96px 14px,0 14px)' ");
-				ignore(write!(textml, "x='{}' y='{}'", x + 2, y + 13));
+				write!(textml, "x='{}' y='{}'", x + 2, y + 13).ok();
 				if !upped {
 					textml.push_str(" fill='#fff'");
 				}
@@ -89,7 +88,7 @@ pub fn deck(deck: &str) -> String {
 		classes[b'a' as usize + mark as usize] = true;
 	}
 	let mut result = String::from("<svg xmlns='http://www.w3.org/2000/svg' height='160' width='");
-	ignore(write!(result, "{}", if y == 0 { x } else { x + 100 }));
+	write!(result, "{}", if y == 0 { x } else { x + 100 }).ok();
 	result.push_str("'><style type='text/css'><![CDATA[text{font:12px sans-serif}");
 	for (idx, &k) in classes.iter().enumerate() {
 		if k {

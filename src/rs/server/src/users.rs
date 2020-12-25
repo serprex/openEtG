@@ -3,12 +3,12 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use bb8_postgres::tokio_postgres::{types::Json, Client, GenericClient};
+use openssl::hash::MessageDigest;
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
 
 use crate::cardpool::Cardpool;
 use crate::handlews::{AsyncSocks, AsyncUserSocks};
-use crate::ignore;
 
 #[derive(Clone, Copy)]
 pub enum HashAlgo {
@@ -32,6 +32,15 @@ impl HashAlgo {
 		match self {
 			HashAlgo::Sha1 => "SHA1",
 			HashAlgo::Sha512 => "SHA512",
+		}
+	}
+}
+
+impl From<HashAlgo> for MessageDigest {
+	fn from(algo: HashAlgo) -> MessageDigest {
+		match algo {
+			HashAlgo::Sha1 => MessageDigest::sha1(),
+			HashAlgo::Sha512 => MessageDigest::sha512(),
 		}
 	}
 }
@@ -163,14 +172,13 @@ impl Users {
 	pub async fn evict(&mut self, client: &Client, name: &str) {
 		if let Some(user) = self.data.remove(name) {
 			let user = user.lock().await;
-			ignore(
-				client
-					.query(
-						"update user_data set data = $2 where user_id = $1 and type_id = 1",
-						&[&user.id, &Json(&user.data)],
-					)
-					.await,
-			);
+			client
+				.query(
+					"update user_data set data = $2 where user_id = $1 and type_id = 1",
+					&[&user.id, &Json(&user.data)],
+				)
+				.await
+				.ok();
 		}
 	}
 

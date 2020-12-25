@@ -4,7 +4,6 @@ use etg::card;
 
 use super::{card_info, card_name};
 use crate::etgutil::encode_code;
-use crate::ignore;
 
 pub fn eleup_str(element: i8, upped: bool) -> &'static str {
 	match element + if upped { 13 } else { 0 } {
@@ -78,20 +77,20 @@ pub fn card(code: i32) -> Option<String> {
 	result.push_str(card_info(card));
 	if card.rarity != 0 {
 		result.push_str("<span class='ico r");
-		ignore(write!(result, "{}", card.rarity));
+		write!(result, "{}", card.rarity).ok();
 		result.push_str("' style='position:absolute;right:30px;bottom:2px'></span>");
 	}
 	if card.cost != 0 {
 		result.push_str("<span style='position:absolute;right:2px;top:-150px'>");
-		ignore(write!(result, "{}", card.cost));
+		write!(result, "{}", card.cost).ok();
 		if card.element != card.costele {
 			result.push_str("<span class='ico ce");
-			ignore(write!(result, "{}", card.costele));
+			write!(result, "{}", card.costele).ok();
 			result.push_str("'></span>");
 		}
 	}
 	result.push_str("<span class='ico t");
-	ignore(write!(result, "{}", card.kind));
+	write!(result, "{}", card.kind).ok();
 	result.push_str(
 		"' style='position:absolute;right:2px;bottom:2px'></span></p></foreignObject></svg>",
 	);

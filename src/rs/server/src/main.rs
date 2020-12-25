@@ -30,9 +30,6 @@ pub fn get_day() -> u32 {
 	}
 }
 
-#[inline(always)]
-pub fn ignore<T, E>(_: Result<T, E>) {}
-
 use serde::Deserialize;
 #[derive(Deserialize)]
 struct ConfigRaw {
@@ -158,7 +155,7 @@ async fn main() {
 	sigintstream.recv().await;
 	drop(closetx);
 	println!("Shutting down");
-	ignore(serverloop.await);
+	serverloop.await.ok();
 	if let Ok(client) = sigintpgpool.get().await {
 		if !sigintusers.write().await.saveall(&client).await {
 			println!("Error while saving users");

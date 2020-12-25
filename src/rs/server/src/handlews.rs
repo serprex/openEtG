@@ -7,9 +7,10 @@ use bb8_postgres::tokio_postgres::{
 	types::{Json, ToSql},
 	Client, GenericClient,
 };
-use fastpbkdf2::{pbkdf2_hmac_sha1, pbkdf2_hmac_sha512};
 use futures::{FutureExt, StreamExt};
 use fxhash::FxHashMap;
+use openssl::hash::MessageDigest;
+use openssl::pkcs5::pbkdf2_hmac;
 use rand::distributions::{Distribution, Uniform};
 use rand::Rng;
 use serde_json::{json, Map, Value};
@@ -24,7 +25,7 @@ use crate::json::{
 	BzBid, GamesData, GamesDataPlayer, GamesMove, LegacyUser, UserMessage, WsResponse,
 };
 use crate::users::{self, HashAlgo, UserData, UserObject, Users};
-use crate::{get_day, ignore, svg, PgPool};
+use crate::{get_day, svg, PgPool};
 
 static NEXT_SOCK_ID: AtomicUsize = AtomicUsize::new(0);
 
@@ -50,7 +51,7 @@ where
 	if let Ok(valstr) = serde_json::to_string(val) {
 		let msg = Message::text(valstr);
 		for sock in socks.read().await.values() {
-			ignore(sock.tx.send(Ok(msg.clone())));
+			sock.tx.send(Ok(msg.clone())).ok();
 		}
 	}
 }
@@ -76,7 +77,7 @@ where
 	T: serde::Serialize,
 {
 	if let Ok(valstr) = serde_json::to_string(val) {
-		ignore(tx.send(Ok(Message::text(valstr))));
+		tx.send(Ok(Message::text(valstr))).ok();
 	}
 }
 
@@ -119,7 +120,7 @@ async fn add_role_handler<'a>(
 	m: &'a str,
 ) {
 	if role_check(role, tx, client, userid).await {
-		ignore(client.execute("insert into user_role (user_id, role_id) select u.id, r.id from users u, roles r where u.name = $1 and r.val = $2 on conflict do nothing", &[&m, &role]).await);
+		client.execute("insert into user_role (user_id, role_id) select u.id, r.id from users u, roles r where u.name = $1 and r.val = $2 on conflict do nothing", &[&m, &role]).await.ok();
 	}
 }
 
@@ -131,7 +132,7 @@ async fn rm_role_handler<'a>(
 	m: &'a str,
 ) {
 	if role_check(role, tx, client, userid).await {
-		ignore(client.execute("delete from user_role ur using users u, roles r where ur.user_id = u.id and ur.role_id = r.id and u.name = $1 and r.val = $2", &[&m, &role]).await);
+		client.execute("delete from user_role ur using users u, roles r where ur.user_id = u.id and ur.role_id = r.id and u.name = $1 and r.val = $2", &[&m, &role]).await.ok();
 	}
 }
 
@@ -237,17 +238,16 @@ async fn login_success(
 						wealth24 += card_val24(card.rarity, upped, shiny) * count as u32;
 					}
 				}
-				ignore(trx.execute(
-								"update users set wealth = $2, auth = $3, salt = $4, iter = $5, algo = $6 where id = $1",
-								&[
-								&user.id,
-								&(user.data.gold.saturating_add(wealth + (wealth24 / 24) as i32)),
-								&user.auth,
-								&user.salt,
-								&user.iter,
-								&user.algo.as_str(),
-								]).await);
-				ignore(trx.commit().await);
+				trx.execute("update users set wealth = $2, auth = $3, salt = $4, iter = $5, algo = $6 where id = $1",
+					&[
+						&user.id,
+						&(user.data.gold.saturating_add(wealth + (wealth24 / 24) as i32)),
+						&user.auth,
+						&user.salt,
+						&user.iter,
+						&user.algo.as_str(),
+					]).await.ok();
+				trx.commit().await.ok();
 			}
 		} else {
 			if let Ok(new_row) = trx.query_one(
@@ -434,18 +434,17 @@ pub async fn handle_ws(
 						UserMessage::modguest { m, .. } => {
 							let userid = user.unwrap().lock().await.id;
 							if role_check("Mod", &tx, &client, userid).await {
-								ignore(
-									client
-										.execute(
-											if m == "off" {
-												"insert into strings (key, val) values ('GuestsBanned', '') on conflict do nothing"
-											} else {
-												"delete from strings where key = 'GuestsBanned'"
-											},
-											&[],
-										)
-										.await,
-								);
+								client
+									.execute(
+										if m == "off" {
+											"insert into strings (key, val) values ('GuestsBanned', '') on conflict do nothing"
+										} else {
+											"delete from strings where key = 'GuestsBanned'"
+										},
+										&[],
+									)
+									.await
+									.ok();
 							}
 						}
 						UserMessage::modmute { m, .. } => {
@@ -479,11 +478,11 @@ pub async fn handle_ws(
 								)
 							};
 							if let Ok(id) = digits.parse::<i32>() {
-								ignore(if motd.is_empty() {
+								(if motd.is_empty() {
 									client.query("delete from motd where id = $1", &[&id]).await
 								} else {
 									client.query("insert into motd (id, val) values ($1, $2) on conflict (id) do update set val = $2", &[&id, &motd]).await
-								});
+								}).ok();
 							} else {
 								sendmsg(
 									&tx,
@@ -580,7 +579,7 @@ pub async fn handle_ws(
 										.await
 										.is_ok()
 									{
-										ignore(trx.commit().await);
+										trx.commit().await.ok();
 										let mut wusers = users.write().await;
 										let mut wusersocks = usersocks.write().await;
 										wusersocks.remove(&u);
@@ -609,13 +608,15 @@ pub async fn handle_ws(
 								let draw = draw as i32;
 								let lv = if lv == 0 { 1i32 } else { 2i32 };
 								if r#mod {
-									ignore(client.execute("update arena set deck = $3, hp = $4, draw = $5, mark = $6 where user_id = $1 and arena_id = $2" , &[
-														  &userid,
-														  &lv,
-														  &d,
-														  &hp,
-														  &draw,
-														  &mark]).await);
+									client.execute("update arena set deck = $3, hp = $4, draw = $5, mark = $6 where user_id = $1 and arena_id = $2",
+										&[
+											&userid,
+											&lv,
+											&d,
+											&hp,
+											&draw,
+											&mark,
+										]).await.ok();
 								} else {
 									let oldage = client.query_one("select day from arena where user_id = $1 and arena_id = $2",
 																  &[&userid, &lv]).await;
@@ -633,7 +634,7 @@ pub async fn handle_ws(
 										if trx.execute("insert into arena (user_id, arena_id, day, deck, code, won, loss, hp, draw, mark, score) values ($1, $2, $3, $4, $5, 0, 0, $6, $7, $8, 250) on conflict (user_id, arena_id) do update set day = $3, deck = $4, code = $5, won = 0, loss = 0, hp = $6, draw = $7, mark = $8, score = 250, \"rank\" = -1, bestrank = null",
 										&[&userid, &lv, &(today as i32), &d, &ocard, &hp, &draw, &mark]).await.is_ok() {
 											if update_arena_ranks(&trx).await.is_ok() {
-												ignore(trx.commit().await);
+												trx.commit().await.ok();
 											}
 										}
 									}
@@ -697,14 +698,14 @@ pub async fn handle_ws(
 										let sweet16 = age.powf(1.6);
 										let newscore =
 											(wilson((awon + 1) as f64, (awon + aloss + 1) as f64) * 1000.0 - (sweet16 * 999.0) / (sweet16 + 999.0)) as i32;
-										ignore(trx.execute(
+										trx.execute(
 												if won {
 													"update arena set won = won+1, score = $3 where arena_id = $1 and user_id = $2"
 												} else {
 													"update arena set loss = loss+1, score = $3 where arena_id = $1 and user_id = $2"
-												}, &[&lv, &auserid, &newscore]).await);
-										ignore(update_arena_ranks(&trx).await);
-										ignore(trx.commit().await);
+												}, &[&lv, &auserid, &newscore]).await.ok();
+										update_arena_ranks(&trx).await.ok();
+										trx.commit().await.ok();
 									}
 								}
 							}
@@ -769,7 +770,7 @@ pub async fn handle_ws(
 							..
 						} => {
 							let userid = user.unwrap().lock().await.id;
-							ignore(client.execute("insert into stats (user_id, \"set\", stats, players) values ($1, $2, $3, $4)", &[&userid, &set, &Json(stats), &Json(players)]).await);
+							client.execute("insert into stats (user_id, \"set\", stats, players) values ($1, $2, $3, $4)", &[&userid, &set, &Json(stats), &Json(players)]).await.ok();
 						}
 						UserMessage::setgold { t, g, .. } => {
 							let userid = user.unwrap().lock().await.id;
@@ -1137,8 +1138,8 @@ pub async fn handle_ws(
 																	data: &gamedata,
 																}) {
 																	let pvpgive = Message::text(pvpgive);
-																	ignore(tx.send(Ok(pvpgive.clone())));
-																	ignore(foesock.tx.send(Ok(pvpgive)));
+																	tx.send(Ok(pvpgive.clone())).ok();
+																	foesock.tx.send(Ok(pvpgive)).ok();
 																}
 															}
 														}
@@ -1224,7 +1225,7 @@ pub async fn handle_ws(
 														let name: String = row.get(1);
 														if let Some(sockid) = rusersocks.get(&name) {
 															if let Some(sock) = rsocks.get(sockid) {
-																ignore(sock.tx.send(Ok(Message::text(movejson.clone()))));
+																sock.tx.send(Ok(Message::text(movejson.clone()))).ok();
 															}
 														}
 													}
@@ -1253,7 +1254,7 @@ pub async fn handle_ws(
 										data.insert(String::from("deck"), Value::from(deck));
 									}
 									if trx.execute("update user_data set data = $2 where user_id = $1 and type_id = 2", &[&userid, &Json(data)]).await.is_ok() {
-										ignore(trx.commit().await);
+										trx.commit().await.ok();
 									}
 								}
 							}
@@ -1285,7 +1286,7 @@ pub async fn handle_ws(
 										}
 									}
 									if trx.execute("update user_data set data = $2 where id = $1", &[&rowid, &Json(data)]).await.is_ok() {
-										ignore(trx.commit().await);
+										trx.commit().await.ok();
 									}
 								}
 							}
@@ -1436,9 +1437,9 @@ pub async fn handle_ws(
 											);
 											let userid = user.unwrap().lock().await.id;
 											let foeuserid = foeuser.lock().await.id;
-											ignore(client.execute(
-													"delete from trade_request where (user_id = $1 and for_user_id = $2) or (user_id = $2 and for_user_id = $1)",
-													&[&userid, &foeuserid]).await);
+											client.execute(
+												"delete from trade_request where (user_id = $1 and for_user_id = $2) or (user_id = $2 and for_user_id = $1)",
+												&[&userid, &foeuserid]).await.ok();
 										}
 									}
 								}
@@ -1614,12 +1615,14 @@ pub async fn handle_ws(
 							} else {
 								user.initsalt();
 								let mut keybuf = [0u8; 64];
-								pbkdf2_hmac_sha512(
+								pbkdf2_hmac(
 									p.as_bytes(),
 									user.salt.as_bytes(),
-									user.iter as u32,
+									user.iter as usize,
+									MessageDigest::sha512(),
 									&mut keybuf,
-								);
+								)
+								.ok();
 								user.auth = base64::encode(&mut keybuf[..]);
 							}
 							sendmsg(&tx, &WsResponse::passchange { auth: &user.auth });
@@ -1738,31 +1741,26 @@ pub async fn handle_ws(
 									if salt.is_empty() {
 										user.initsalt();
 									}
-									match user.algo {
-										HashAlgo::Sha512 => pbkdf2_hmac_sha512(
-											psw.as_bytes(),
-											user.salt.as_bytes(),
-											user.iter as u32,
-											&mut keybuf,
-										),
-										HashAlgo::Sha1 => pbkdf2_hmac_sha1(
-											psw.as_bytes(),
-											user.salt.as_bytes(),
-											user.iter as u32,
-											&mut keybuf,
-										),
-									}
+									pbkdf2_hmac(
+										psw.as_bytes(),
+										user.salt.as_bytes(),
+										user.iter as usize,
+										MessageDigest::from(user.algo),
+										&mut keybuf,
+									)
+									.ok();
 									let realkey = user.auth.as_bytes();
 									if realkey.is_empty() {
 										user.auth = base64::encode(&mut keybuf[..]);
 										true
 									} else {
 										let mut realkeybuf = [0u8; 64];
-										ignore(base64::decode_config_slice(
+										base64::decode_config_slice(
 											user.auth.as_bytes(),
 											base64::STANDARD,
 											&mut realkeybuf,
-										));
+										)
+										.ok();
 										keybuf == realkeybuf
 									}
 								} else {
@@ -2357,7 +2355,7 @@ pub async fn handle_ws(
 											}
 										}
 									}
-									ignore(trx.commit().await)
+									trx.commit().await.ok();
 								}
 							}
 						}

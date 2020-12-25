@@ -251,14 +251,14 @@ async fn handle_get_core(
 	let invalidate = if let Some(ims) = ims.map(SystemTime::from) {
 		let rcache = cache.read().await;
 		if let Some(cached) = rcache.get_map(accept).get(path) {
-			let stale = cached
+			if cached
 				.file
 				.as_ref()
 				.and_then(|file| std::fs::metadata(file).ok())
 				.and_then(|md| md.modified().ok())
 				.map(|md| md > cached.mtime)
-				.unwrap_or(false);
-			if stale {
+				.unwrap_or(false)
+			{
 				true
 			} else {
 				return if cached.mtime <= ims {
