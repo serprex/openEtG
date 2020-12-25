@@ -693,10 +693,10 @@ pub async fn handle_ws(
 									if let Ok(row) = trx.query_one("select a.won, a.loss, a.day from arena a where a.arena_id = $1 and a.user_id = $2 for update", &[&lv, &auserid]).await {
 										let awon = row.get::<usize, i32>(0) + won as i32;
 										let aloss = row.get::<usize, i32>(1) + (!won) as i32;
-										let age = row.get::<usize, i32>(2).saturating_sub(get_day() as i32) as f64;
+										let age = get_day().saturating_sub(row.get::<usize, i32>(2) as u32) as f64;
 										let sweet16 = age.powf(1.6);
 										let newscore =
-											(wilson((awon + 1) as f64, (awon + aloss + 1) as f64) * 1000.0 - sweet16 * 999.0 / (sweet16 + 999.0)) as i32;
+											(wilson((awon + 1) as f64, (awon + aloss + 1) as f64) * 1000.0 - (sweet16 * 999.0) / (sweet16 + 999.0)) as i32;
 										ignore(trx.execute(
 												if won {
 													"update arena set won = won+1, score = $3 where arena_id = $1 and user_id = $2"
@@ -1986,7 +1986,7 @@ pub async fn handle_ws(
 										Value::from(row.get::<usize, i32>(1)),
 										Value::from(row.get::<usize, i32>(2)),
 										Value::from(row.get::<usize, i32>(3)),
-										Value::from((today as i32).saturating_sub(row.get::<usize, i32>(4))),
+										Value::from(today.saturating_sub(row.get::<usize, i32>(4) as u32)),
 										Value::from(row.get::<usize, i32>(5)),
 									]);
 								}
