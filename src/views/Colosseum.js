@@ -147,7 +147,7 @@ export default connect(({ user }) => ({ user }))(function Colosseum({ user }) {
 									? `You currently have a ${user.ostreak} day colosseum streak.`
 									: "You'ven't begun a streak."
 							}\n${
-								user.ostreakday
+								user.ostreak && user.ostreakday
 									? `You've redeemed ${
 											[250, 15, 25, 77, 100][user.ostreak % 5]
 									  }$ today.`

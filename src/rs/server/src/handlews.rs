@@ -2049,8 +2049,8 @@ pub async fn handle_ws(
 								let bound = user
 									.data
 									.freepacks
-									.map(|fp| fp.get(pack as usize) != Some(&0))
-									.unwrap_or(false);
+									.and_then(|fp| fp.get(pack as usize).cloned())
+									.unwrap_or(0) != 0;
 								if !bound && bulk > 0 {
 									amount *= bulk as i32;
 									cost *= bulk as i32;
