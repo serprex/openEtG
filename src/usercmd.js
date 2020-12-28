@@ -6,13 +6,13 @@ function transmute(user, oldcard, func, use) {
 	const newcard = func(oldcard, true);
 	if (poolCount < use) {
 		const boundCount = etgutil.count(user.accountbound, oldcard);
-		if (poolCount + boundCount >= use) {
-			const result = {};
-			result.accountbound = etgutil.addcard(user.accountbound, oldcard, -use);
-			if (boundCount < use)
-				result.pool = etgutil.addcard(user.pool, oldcard, boundCount - use);
-			result.accountbound = etgutil.addcard(result.accountbound, newcard);
-			return result;
+		if (boundCount >= use) {
+			return {
+				accountbound: etgutil.addcard(
+					etgutil.addcard(user.accountbound, oldcard, -use),
+					newcard,
+				),
+			};
 		}
 	} else {
 		return {

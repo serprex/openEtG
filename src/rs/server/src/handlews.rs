@@ -2553,48 +2553,60 @@ pub async fn handle_ws(
 							user.data.quests.insert(quest, 1);
 						}
 						UserMessage::upgrade { card, .. } => {
-							let user = user.unwrap();
-							let mut user = user.lock().await;
-							transmute(
-								&mut user.data,
-								card,
-								etg::card::AsUpped(card as i32, true) as u16,
-								6,
-								1,
-							);
+							if let Some(carddata) = etg::card::OpenSet.try_get(card as i32) {
+								let user = user.unwrap();
+								let mut user = user.lock().await;
+								let copies = if carddata.rarity != -1 && !(carddata.rarity == 5 && etg::card::Shiny(card as i32)) { 6 } else { 1 };
+								transmute(
+									&mut user.data,
+									card,
+									etg::card::AsUpped(card as i32, true) as u16,
+									copies,
+									1,
+								);
+							}
 						}
 						UserMessage::downgrade { card, .. } => {
-							let user = user.unwrap();
-							let mut user = user.lock().await;
-							transmute(
-								&mut user.data,
-								card,
-								etg::card::AsUpped(card as i32, false) as u16,
-								1,
-								6,
-							);
+							if let Some(carddata) = etg::card::OpenSet.try_get(card as i32) {
+								let user = user.unwrap();
+								let mut user = user.lock().await;
+								let copies = if carddata.rarity != -1 && !(carddata.rarity == 5 && etg::card::Shiny(card as i32)) { 6 } else { 1 };
+								transmute(
+									&mut user.data,
+									card,
+									etg::card::AsUpped(card as i32, false) as u16,
+									1,
+									copies,
+								);
+							}
 						}
 						UserMessage::polish { card, .. } => {
-							let user = user.unwrap();
-							let mut user = user.lock().await;
-							transmute(
-								&mut user.data,
-								card,
-								etg::card::AsShiny(card as i32, true) as u16,
-								6,
-								1,
-							);
+							if let Some(carddata) = etg::card::OpenSet.try_get(card as i32) {
+								let user = user.unwrap();
+								let mut user = user.lock().await;
+								let copies = if carddata.rarity != -1 { 6 } else { 2 };
+								transmute(
+									&mut user.data,
+									card,
+									etg::card::AsShiny(card as i32, true) as u16,
+									copies,
+									1,
+								);
+							}
 						}
 						UserMessage::unpolish { card, .. } => {
-							let user = user.unwrap();
-							let mut user = user.lock().await;
-							transmute(
-								&mut user.data,
-								card,
-								etg::card::AsShiny(card as i32, false) as u16,
-								1,
-								6,
-							);
+							if let Some(carddata) = etg::card::OpenSet.try_get(card as i32) {
+								let user = user.unwrap();
+								let mut user = user.lock().await;
+								let copies = if carddata.rarity != -1 { 6 } else { 2 };
+								transmute(
+									&mut user.data,
+									card,
+									etg::card::AsShiny(card as i32, false) as u16,
+									1,
+									copies,
+								);
+							}
 						}
 						UserMessage::uppillar { c, .. } => {
 							let user = user.unwrap();

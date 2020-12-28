@@ -10,15 +10,13 @@ export default connect(({ user }) => ({ user }))(
 	class Upgrade extends Component {
 		constructor(props) {
 			super(props);
-			this.state = {};
+			this.state = { showbound: false };
 		}
 
 		static getDerivedStateFromProps(nextProps, prevState) {
 			return {
-				cardpool: etgutil.deck2pool(
-					nextProps.user.accountbound,
-					etgutil.deck2pool(nextProps.user.pool),
-				),
+				cardpool: etgutil.deck2pool(nextProps.user.pool),
+				boundpool: etgutil.deck2pool(nextProps.user.accountbound),
 			};
 		}
 
@@ -29,7 +27,10 @@ export default connect(({ user }) => ({ user }))(
 					if (card.upped) return 'You cannot upgrade upgraded cards.';
 					const use =
 						~card.rarity && !(card.rarity === 5 && card.shiny) ? 6 : 1;
-					if (self.state.cardpool[card.code] >= use) {
+					if (
+						self.state.cardpool[card.code] >= use ||
+						self.state.boundpool[card.code] >= use
+					) {
 						sock.userExec('upgrade', { card: card.code });
 					} else
 						return `You need at least ${use} copies to be able to upgrade this card!`;
@@ -48,7 +49,10 @@ export default connect(({ user }) => ({ user }))(
 					if (card.shiny) return 'You cannot polish shiny cards.';
 					if (card.rarity === 5) return 'You cannot polish Nymphs.';
 					const use = card.rarity !== -1 ? 6 : 2;
-					if (self.state.cardpool[card.code] >= use) {
+					if (
+						self.state.cardpool[card.code] >= use ||
+						self.state.boundpool[card.code] >= use
+					) {
 						sock.userExec('polish', { card: card.code });
 					} else
 						return `You need at least ${use} copies to be able to polish this card!`;
@@ -149,9 +153,23 @@ export default connect(({ user }) => ({ user }))(
 					/>
 					<Components.Card x={534} y={8} card={this.state.card1} />
 					<Components.Card x={734} y={8} card={this.state.card2} />
+					<input
+						type="button"
+						value="Toggle Bound"
+						style={{
+							position: 'absolute',
+							left: '5px',
+							top: '554px',
+						}}
+						onClick={() => {
+							this.setState({ showbound: !this.state.showbound });
+						}}
+					/>
 					<Components.CardSelector
 						cards={Cards}
-						cardpool={this.state.cardpool}
+						cardpool={
+							this.state.showbound ? this.state.boundpool : this.state.cardpool
+						}
 						maxedIndicator
 						onClick={card => {
 							const newstate = {
