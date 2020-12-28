@@ -501,7 +501,7 @@ pub enum WsResponse<'a> {
 		ailosses: i32,
 	},
 	login(&'a UserObject),
-	#[serde(rename = "loginfail")]
+	#[serde(rename = "login")]
 	loginfail {
 		err: &'a str,
 	},
