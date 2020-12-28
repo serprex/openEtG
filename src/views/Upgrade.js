@@ -154,7 +154,6 @@ export default connect(({ user }) => ({ user }))(
 						cardpool={this.state.cardpool}
 						maxedIndicator
 						onClick={card => {
-							const code = card.code;
 							const newstate = {
 								card1: card,
 								card2: card.asUpped(true),

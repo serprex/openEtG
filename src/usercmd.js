@@ -82,10 +82,11 @@ function upshpi(func) {
 export const uppillar = upshpi(code => etgutil.asUpped(code, true));
 export const shpillar = upshpi(code => etgutil.asShiny(code, true));
 function convert(pool, oldcode, oldamt, newcode) {
-	if (pool[newcode] >= 65535) {
+	const oldnew = pool[newcode] ?? 0;
+	if (oldnew >= 65535) {
 		return false;
 	}
-	pool[newcode] += 1;
+	pool[newcode] = oldnew + 1;
 	pool[oldcode] -= oldamt;
 	return true;
 }
@@ -96,7 +97,7 @@ export function upshall(data, user) {
 	pool.forEach((count, code) => {
 		base.add(etgutil.asShiny(etgutil.asUpped(code, false), false));
 	});
-	for (code of base) {
+	for (const code of base) {
 		const card = Cards.Codes[code];
 		if (card && card.rarity > 0) {
 			const upcode = etgutil.asUpped(code, true);

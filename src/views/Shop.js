@@ -332,7 +332,7 @@ export default connect(({ user, opts }) => ({
 					))}
 					{elebuttons}
 					{this.state.cards && <PackDisplay cards={this.state.cards} />}
-					{!hasFreePacks && (
+					{!hasFreePacks && !!~this.state.packele && !!~this.state.packrarity && (
 						<input
 							type="number"
 							placeholder="Bulk"
