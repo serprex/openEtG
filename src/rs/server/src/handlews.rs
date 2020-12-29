@@ -161,7 +161,7 @@ async fn login_success(
 				user.data.ostreak = 0;
 			}
 			user.data.ostreakday = 0;
-			user.data.ostreakday = today;
+			user.data.ostreakday2 = today;
 			user.data.oracle = today;
 			let mut rng = rand::thread_rng();
 			let ocardnymph = rng.gen_ratio(3, 100);
@@ -668,7 +668,7 @@ pub async fn handle_ws(
 										"draw": draw,
 										"mark": mark,
 										"hp": hp,
-										"won": won,
+										"win": won,
 										"loss": loss,
 										"card": code,
 										"deck": deck,
@@ -2508,7 +2508,7 @@ pub async fn handle_ws(
 							let mut user = user.lock().await;
 							if (daily < 3 || daily == 5) && user.data.ostreakday == 0 {
 								user.data.gold =
-									user.data.gold.saturating_add(match user.data.ostreak {
+									user.data.gold.saturating_add(match user.data.ostreak % 5 {
 										0 => 15,
 										1 => 25,
 										2 => 77,
