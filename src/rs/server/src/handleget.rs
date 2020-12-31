@@ -248,7 +248,7 @@ async fn handle_get_core(
 	if path.contains("..") || !path.starts_with('/') {
 		return response::Builder::new().status(403).body(Bytes::new());
 	}
-	let invalidate = if let Some(ims) = ims.map(SystemTime::from) {
+	let invalidate = {
 		let rcache = cache.read().await;
 		if let Some(cached) = rcache.get_map(accept).get(path) {
 			if cached
@@ -261,7 +261,10 @@ async fn handle_get_core(
 			{
 				true
 			} else {
-				return if cached.mtime <= ims {
+				return if ims
+					.map(|ims| cached.mtime <= SystemTime::from(ims))
+					.unwrap_or(false)
+				{
 					response::Builder::new().status(304).body(Bytes::new())
 				} else {
 					Response::<Bytes>::try_from(cached.clone())
@@ -270,8 +273,6 @@ async fn handle_get_core(
 		} else {
 			false
 		}
-	} else {
-		false
 	};
 	if invalidate {
 		cache.write().await.remove(path);
