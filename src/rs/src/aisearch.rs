@@ -111,7 +111,7 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 						tgts.extend(
 							once(turn)
 								.chain(pl.hand.iter().cloned())
-								.filter(|&t| t != 0 && tgting.full_check(ctx, id, t)),
+								.filter(|&t| tgting.full_check(ctx, id, t)),
 						)
 					}
 				}
@@ -151,15 +151,22 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 			}
 		}
 	});
-	dmgmoves.sort_by_key(|&x| x.1);
+	dmgmoves.sort_by_key(|&x| x.2);
 	if let Some(&firstmove) = dmgmoves.first() {
 		let firstmove = Some(GameMove::Cast(firstmove.0, firstmove.1));
 		let mut gclone = ctx.clone();
 		for &(c, t, _) in dmgmoves.iter() {
-			if ctx.getIndex(c) != -1
-				&& ctx.canactive(c)
-				&& (t == 0 || (ctx.getIndex(t) != -1 && ctx.can_target(c, t)))
-			{
+			if gclone.getIndex(c) != -1
+				&& gclone.canactive(c)
+				&& (if let Some(tgt) = gclone
+					.getSkill(c, Event::Cast)
+					.first()
+					.and_then(|sk| sk.targetting())
+				{
+					t != 0 && gclone.getIndex(t) != -1 && gclone.can_target(c, t)
+				} else {
+					t == 0
+				}) {
 				gclone.r#move(GameMove::Cast(c, t));
 				if gclone.winner == turn {
 					return firstmove;

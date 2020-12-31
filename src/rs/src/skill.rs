@@ -474,7 +474,6 @@ pub enum Skill {
 	regrade,
 	reinforce,
 	ren,
-	resetcap,
 	reveal,
 	rewind,
 	ricochet,
@@ -1405,7 +1404,7 @@ impl Skill {
 				let upped = ctx.upto(2) == 0;
 				if let Some(card) = ctx.random_card(upped, |ctx, card| {
 					if card.kind == etg::Spell as i8 {
-						for &(k, skills) in card.skill.iter() {
+						if let Some(&(k, skills)) = card.skill.first() {
 							debug_assert!(k == Event::Cast);
 							if let Some(tgt) = skills.first().and_then(|sk| sk.targetting()) {
 								if tgt.check(ctx, c, t) {
@@ -2028,8 +2027,7 @@ impl Skill {
 				}
 			}
 			Self::gaintimecharge => {
-				if !data.drawstep && ctx.get_owner(c) == t && ctx.get(c, Stat::chargecap) < 4 {
-					ctx.incrStatus(c, Stat::chargecap, 1);
+				if !data.drawstep && ctx.get_owner(c) == t {
 					ctx.incrStatus(c, Stat::charges, 1);
 				}
 			}
@@ -3289,9 +3287,6 @@ impl Skill {
 					ctx.fx(t, Fx::Ren);
 					ctx.addskill(t, Event::Predeath, Skill::bounce);
 				}
-			}
-			Self::resetcap => {
-				ctx.set(c, Stat::chargecap, 0);
 			}
 			Self::reveal => {
 				ctx.set(ctx.get_owner(c), Stat::precognition, 1);

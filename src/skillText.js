@@ -251,7 +251,7 @@ const data = {
 		destroy: 'Whenever any other permanent is destroyed, gain two stacks.',
 	},
 	gaintimecharge:
-		'Up to 4 times per turn, gain one stack for every card you draw. Does not gain a stack from your draw at the start of your turn.',
+		'Gain one stack for every card you draw. Does not gain a stack from your draw at the start of your turn.',
 	gas: 'Summon an Unstable Gas.',
 	grave:
 		'When another creature dies, unburrow and transform this creature into a fresh copy of the dying creature. This creature retains nocturnal.',
