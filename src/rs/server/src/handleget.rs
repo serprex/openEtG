@@ -7,7 +7,7 @@ use std::sync::Arc;
 use std::time::SystemTime;
 
 use tokio::sync::RwLock;
-use warp::http::{self, response, HeaderValue, Response};
+use warp::http::{self, header, response, HeaderValue, Response};
 use warp::hyper::body::Bytes;
 use warp::path::FullPath;
 
@@ -90,17 +90,13 @@ impl Cache {
 pub type AsyncCache = Arc<RwLock<Cache>>;
 
 pub async fn compress_and_cache(
-	cache: &AsyncCache,
+	cache: AsyncCache,
 	encoding: Encoding,
 	path: String,
 	resp: PlainResponse,
 ) -> CachedResponse {
 	use async_compression::tokio_02::write::{BrotliEncoder, GzipEncoder};
 	use tokio::io::AsyncWriteExt;
-	let encoding = match resp.kind {
-		ContentType::ApplicationOgg | ContentType::ImageWebp => Encoding::identity,
-		_ => encoding,
-	};
 	match match encoding {
 		Encoding::br => {
 			let mut encoder = BrotliEncoder::new(Vec::new());
@@ -133,7 +129,12 @@ pub async fn compress_and_cache(
 				encoding: encoding,
 				cache: resp.cache,
 				kind: resp.kind,
-				mtime: SystemTime::now(),
+				mtime: resp
+					.mtime
+					.unwrap_or_else(SystemTime::now)
+					.duration_since(SystemTime::UNIX_EPOCH)
+					.unwrap()
+					.as_secs(),
 				content: Bytes::from(compressed),
 				file: resp.file,
 			};
@@ -147,7 +148,7 @@ pub async fn compress_and_cache(
 			encoding: Encoding::identity,
 			cache: resp.cache,
 			kind: resp.kind,
-			mtime: SystemTime::UNIX_EPOCH,
+			mtime: 0,
 			content: Bytes::from(content),
 			file: resp.file,
 		},
@@ -189,7 +190,7 @@ pub struct CachedResponse {
 	pub encoding: Encoding,
 	pub cache: CacheControl,
 	pub kind: ContentType,
-	pub mtime: SystemTime,
+	pub mtime: u64,
 	pub file: Option<String>,
 	pub content: Bytes,
 }
@@ -197,27 +198,27 @@ pub struct CachedResponse {
 impl TryFrom<CachedResponse> for Response<Bytes> {
 	type Error = http::Error;
 
-	fn try_from(x: CachedResponse) -> Result<Self, Self::Error> {
-		Response::builder()
+	fn try_from(cached: CachedResponse) -> Result<Self, Self::Error> {
+		let mut builder = Response::builder()
 			.header(
-				"content-encoding",
-				HeaderValue::from_static(match x.encoding {
+				header::CONTENT_ENCODING,
+				HeaderValue::from_static(match cached.encoding {
 					Encoding::br => "br",
 					Encoding::gzip => "gzip",
 					Encoding::identity => "identity",
 				}),
 			)
 			.header(
-				"cache-control",
-				HeaderValue::from_static(match x.cache {
+				header::CACHE_CONTROL,
+				HeaderValue::from_static(match cached.cache {
 					CacheControl::NoStore => "no-store",
 					CacheControl::NoCache => "no-cache",
 					CacheControl::Immutable => "immutable",
 				}),
 			)
 			.header(
-				"content-type",
-				HeaderValue::from_static(match x.kind {
+				header::CONTENT_TYPE,
+				HeaderValue::from_static(match cached.kind {
 					ContentType::ApplicationJavascript => "application/javascript",
 					ContentType::ApplicationJson => "application/json",
 					ContentType::ApplicationOctetStream => "application/octet-stream",
@@ -229,8 +230,15 @@ impl TryFrom<CachedResponse> for Response<Bytes> {
 					ContentType::TextHtml => "text/html",
 					ContentType::TextPlain => "text/plain",
 				}),
-			)
-			.body(x.content.clone())
+			);
+		if cached.mtime > 0 {
+			builder = builder.header(
+				header::LAST_MODIFIED,
+				time::OffsetDateTime::from_unix_timestamp(cached.mtime as i64)
+					.format("%a, %d %b %Y %T GMT"),
+			);
+		}
+		builder.body(cached.content.clone())
 	}
 }
 
@@ -242,12 +250,16 @@ async fn handle_get_core(
 	users: AsyncUsers,
 	cache: AsyncCache,
 ) -> Result<Response<Bytes>, http::Error> {
-	let accept = accept.map(|x| x.0).unwrap_or(Encoding::identity);
 	let path = path.as_str();
 	let path = if path == "/" { "/index.html" } else { path };
 	if path.contains("..") || !path.starts_with('/') {
 		return response::Builder::new().status(403).body(Bytes::new());
 	}
+	let accept = if path.ends_with(".webp") || path.ends_with(".ogg") {
+		Encoding::identity
+	} else {
+		accept.map(|x| x.0).unwrap_or(Encoding::identity)
+	};
 	let invalidate = {
 		let rcache = cache.read().await;
 		if let Some(cached) = rcache.get_map(accept).get(path) {
@@ -256,13 +268,19 @@ async fn handle_get_core(
 				.as_ref()
 				.and_then(|file| std::fs::metadata(file).ok())
 				.and_then(|md| md.modified().ok())
-				.map(|md| md > cached.mtime)
+				.and_then(|md| md.duration_since(SystemTime::UNIX_EPOCH).ok())
+				.map(|md| md.as_secs().saturating_sub(12) > cached.mtime)
 				.unwrap_or(false)
 			{
 				true
 			} else {
 				return if ims
-					.map(|ims| cached.mtime <= SystemTime::from(ims))
+					.and_then(|ims| {
+						SystemTime::from(ims)
+							.duration_since(SystemTime::UNIX_EPOCH)
+							.ok()
+					})
+					.map(|ims| cached.mtime <= ims.as_secs().saturating_add(12))
 					.unwrap_or(false)
 				{
 					response::Builder::new().status(304).body(Bytes::new())
@@ -290,7 +308,7 @@ async fn handle_get_core(
 				cache: CacheControl::NoCache,
 				mtime: md.modified().ok(),
 				content: data,
-				file: Some(String::from(uppath)),
+				file: Some(uppath),
 			}
 		} else if let Ok(code) =
 			i32::from_str_radix(&path["/Cards/".len()..path.len() - ".webp".len()], 32)
@@ -302,7 +320,7 @@ async fn handle_get_core(
 				let newpath = unsafe { String::from_utf8_unchecked(newpath) };
 				return response::Builder::new()
 					.status(302)
-					.header("location", newpath)
+					.header(header::LOCATION, newpath)
 					.body(Bytes::new());
 			} else {
 				let unupped = card::AsUpped(code, false);
@@ -313,7 +331,7 @@ async fn handle_get_core(
 					let newpath = unsafe { String::from_utf8_unchecked(newpath) };
 					return response::Builder::new()
 						.status(302)
-						.header("location", &newpath)
+						.header(header::LOCATION, &newpath)
 						.body(Bytes::new());
 				} else {
 					return response::Builder::new().status(404).body(Bytes::new());
@@ -326,6 +344,10 @@ async fn handle_get_core(
 		let mut uppath = String::from("../../..");
 		uppath.push_str(&path);
 		let data = tokio::fs::read(&uppath).await.unwrap_or(Vec::new());
+		let mtime = tokio::fs::metadata(&uppath)
+			.await
+			.ok()
+			.and_then(|md| md.modified().ok());
 		PlainResponse {
 			kind: if path.ends_with(".css") {
 				ContentType::TextCss
@@ -334,41 +356,53 @@ async fn handle_get_core(
 			},
 			cache: CacheControl::NoCache,
 			content: data,
-			mtime: None,
-			file: Some(String::from(uppath)),
+			mtime,
+			file: Some(uppath),
 		}
 	} else if path == "/manifest.json" {
 		let data = tokio::fs::read("../../../manifest.json")
 			.await
 			.unwrap_or(Vec::new());
+		let mtime = tokio::fs::metadata("../../../manifest.json")
+			.await
+			.ok()
+			.and_then(|md| md.modified().ok());
 		PlainResponse {
 			kind: ContentType::ApplicationJavascript,
 			cache: CacheControl::NoCache,
 			content: data,
-			mtime: None,
+			mtime,
 			file: Some(String::from("../../../manifest.json")),
 		}
 	} else if path == "/ui.css" {
 		let data = tokio::fs::read("../../../ui.css")
 			.await
 			.unwrap_or(Vec::new());
+		let mtime = tokio::fs::metadata("../../../ui.css")
+			.await
+			.ok()
+			.and_then(|md| md.modified().ok());
 		PlainResponse {
 			kind: ContentType::TextCss,
 			cache: CacheControl::NoCache,
 			content: data,
-			mtime: None,
+			mtime,
 			file: Some(String::from("../../../ui.css")),
 		}
 	} else if path.starts_with("/sound/") {
 		let mut uppath = String::from("../../../bundle");
 		uppath.push_str(&path);
 		let data = tokio::fs::read(&uppath).await.unwrap_or(Vec::new());
+		let mtime = tokio::fs::metadata(&uppath)
+			.await
+			.ok()
+			.and_then(|md| md.modified().ok());
 		PlainResponse {
 			kind: ContentType::ApplicationOgg,
 			cache: CacheControl::NoCache,
 			content: data,
-			mtime: None,
-			file: Some(String::from(uppath)),
+			mtime,
+			file: Some(uppath),
 		}
 	} else if path.ends_with(".js")
 		|| path.ends_with(".htm")
@@ -384,6 +418,14 @@ async fn handle_get_core(
 		} else {
 			CacheControl::NoCache
 		};
+		let mtime = if matches!(cache, CacheControl::Immutable) {
+			None
+		} else {
+			tokio::fs::metadata(&uppath)
+				.await
+				.ok()
+				.and_then(|md| md.modified().ok())
+		};
 		PlainResponse {
 			cache: cache,
 			kind: if path.ends_with(".js") {
@@ -396,11 +438,11 @@ async fn handle_get_core(
 				ContentType::ApplicationOctetStream
 			},
 			content: data,
-			mtime: None,
+			mtime,
 			file: if matches!(cache, CacheControl::Immutable) {
 				None
 			} else {
-				Some(String::from(uppath))
+				Some(uppath)
 			},
 		}
 	} else if path.starts_with("/card/") && path.len() >= "/card/".len() + 3 {
@@ -434,7 +476,7 @@ async fn handle_get_core(
 			newpath.push_str(&path["/deck/".len()..]);
 			return response::Builder::new()
 				.status(302)
-				.header("location", newpath)
+				.header(header::LOCATION, newpath)
 				.body(Bytes::new());
 		}
 	} else if path.starts_with("/collection/") {
@@ -552,12 +594,12 @@ async fn handle_get_core(
 		write!(newpath, "{}", rand::thread_rng().next_u32()).ok();
 		return response::Builder::new()
 			.status(302)
-			.header("location", newpath)
+			.header(header::LOCATION, newpath)
 			.body(Bytes::new());
 	} else {
 		return response::Builder::new().status(404).body(Bytes::new());
 	};
-	Response::<Bytes>::try_from(compress_and_cache(&cache, accept, path.to_string(), res).await)
+	Response::<Bytes>::try_from(compress_and_cache(cache, accept, path.to_string(), res).await)
 }
 
 pub async fn handle_get(
