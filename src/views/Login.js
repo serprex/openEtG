@@ -61,6 +61,7 @@ if (typeof kongregateAPI === 'undefined') {
 								commit: (
 									<a
 										target="_blank"
+										rel="noopener"
 										href={data.html_url}
 										style={{
 											maxWidth: '670px',
