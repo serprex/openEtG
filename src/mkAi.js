@@ -110,7 +110,7 @@ export function mkAi(level, daily, datafn = null) {
 		store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
 		return;
 	}
-	const deck = level === 0 ? deckgen(0, 1, 2) : deckgen(0.4, 2, 4);
+	const deck = level === 0 ? deckgen(0, 1, 2) : deckgen(0.4, 2, 3);
 	store.store.dispatch(store.setOptTemp('aideck', deck));
 
 	const data = {

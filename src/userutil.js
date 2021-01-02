@@ -4,11 +4,11 @@ export const rewardwords = {
 	mark: -1,
 	pillar: 0,
 	rare: 3,
-	shard: 4,
-	nymph: 5,
+	shard: 3,
+	nymph: 4,
 };
-const cardValues24 = new Uint16Array([200, 33, 120, 720, 840, 6000]),
-	sellValues = new Uint8Array([5, 1, 3, 15, 20, 150]);
+const cardValues24 = new Uint16Array([200, 33, 120, 720, 6000]),
+	sellValues = new Uint8Array([5, 1, 3, 15, 150]);
 export const pveCostReward = new Uint8Array([
 	0,
 	10,

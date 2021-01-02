@@ -10,19 +10,23 @@ import * as Components from '../Components/index.js';
 import * as store from '../store.js';
 
 const packdata = [
-	{ cost: 15, type: 'Bronze', info: '10 Commons', color: '#c73' },
-	{ cost: 25, type: 'Silver', info: '3 Commons, 3 Uncommons', color: '#ccc' },
 	{
-		cost: 77,
-		type: 'Gold',
-		info: '1 Common, 2 Uncommons, 2 Rares',
-		color: '#fd0',
+		cost: 15,
+		type: 'Bronze',
+		info: '10 Commons. ~3.4% rarity bonus',
+		color: '#c73',
 	},
 	{
-		cost: 100,
-		type: 'Platinum',
-		info: '4 Commons, 3 Uncommons, 1 Rare, 1 Shard',
-		color: '#eee',
+		cost: 25,
+		type: 'Silver',
+		info: '3 Commons, 3 Uncommons. ~6.8% rarity bonus',
+		color: '#ccc',
+	},
+	{
+		cost: 80,
+		type: 'Gold',
+		info: '1 Common, 2 Uncommons, 2 Rares. ~1.7% rarity bonus',
+		color: '#fd0',
 	},
 	{ cost: 250, type: 'Nymph', info: '1 Nymph', color: '#69b' },
 ];

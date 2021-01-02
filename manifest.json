@@ -1,5 +1,6 @@
 {
   "short_name": "oetg",
+  "manifest_version": 2,
   "name": "openEtG",
   "icons": [
     {

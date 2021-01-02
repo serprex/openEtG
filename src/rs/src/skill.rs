@@ -231,8 +231,8 @@ impl Skills {
 	}
 }
 
-#[cfg_attr(not(target_arch = "wasm32"), derive(Debug))]
-#[derive(Eq, PartialEq, Clone, Copy, Hash)]
+// #[cfg_attr(not(target_arch = "wasm32"), derive(Debug))]
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
 pub enum Skill {
 	r#_tracedeath,
 	abomination,
@@ -3545,15 +3545,17 @@ impl Skill {
 					let thp = ctx.truehp(t);
 					if thp <= 0 || ctx.rng() < 0.5 / thp as f64 {
 						let index = ctx.getIndex(t);
-						let town = ctx.get_owner(t);
-						ctx.fx(t, Fx::Death);
-						ctx.die(t);
-						let cr = ctx.get_player(town).creatures[index as usize];
-						if cr == 0 || ctx.get(cr, Stat::card) != cardmalig {
-							let skele =
-								ctx.new_thing(card::As(ctx.get(cr, Stat::card), cardskele), town);
-							ctx.setCrea(town, index, skele);
-							ctx.fx(skele, Fx::Sfx(Sfx::skelify));
+						if index != -1 {
+							let town = ctx.get_owner(t);
+							ctx.fx(t, Fx::Death);
+							ctx.die(t);
+							let cr = ctx.get_player(town).creatures[index as usize];
+							if cr == 0 || ctx.get(cr, Stat::card) != cardmalig {
+								let skele = ctx
+									.new_thing(card::As(ctx.get(cr, Stat::card), cardskele), town);
+								ctx.setCrea(town, index, skele);
+								ctx.fx(skele, Fx::Sfx(Sfx::skelify));
+							}
 						}
 					}
 				}

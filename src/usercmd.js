@@ -47,24 +47,24 @@ function untransmute(user, oldcard, func, use) {
 export function upgrade(data, user) {
 	const card = Cards.Codes[data.card];
 	if (!card || card.upped) return;
-	const use = ~card.rarity && !(card.rarity === 5 && card.shiny) ? 6 : 1;
+	const use = ~card.rarity && !(card.rarity === 4 && card.shiny) ? 6 : 1;
 	return transmute(user, card.code, etgutil.asUpped, use);
 }
 export function downgrade(data, user) {
 	const card = Cards.Codes[data.card];
 	if (!card || !card.upped) return;
-	const use = ~card.rarity && !(card.rarity === 5 && card.shiny) ? 6 : 1;
+	const use = ~card.rarity && !(card.rarity === 4 && card.shiny) ? 6 : 1;
 	return untransmute(user, card.code, etgutil.asUpped, use);
 }
 export function polish(data, user) {
 	const card = Cards.Codes[data.card];
-	if (!card || card.shiny || card.rarity === 5) return;
+	if (!card || card.shiny || card.rarity === 4) return;
 	const use = ~card.rarity ? 6 : 2;
 	return transmute(user, card.code, etgutil.asShiny, use);
 }
 export function unpolish(data, user) {
 	const card = Cards.Codes[data.card];
-	if (!card || !card.shiny || card.rarity === 5) return;
+	if (!card || !card.shiny || card.rarity === 4) return;
 	const use = ~card.rarity ? 6 : 2;
 	return untransmute(user, card.code, etgutil.asShiny, use);
 }
@@ -110,7 +110,7 @@ export function upshall(data, user) {
 				un -= 6;
 				up += 1;
 			}
-			if (card.rarity < 5) {
+			if (card.rarity < 4) {
 				while (un >= 12 && sh < 6 && convert(pool, code, 6, shcode)) {
 					un -= 6;
 					sh += 1;

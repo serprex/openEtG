@@ -68,7 +68,7 @@ export default class Library extends Component {
 				/>,
 			);
 		}
-		for (let r = 1; r < 5; r++) {
+		for (let r = 1; r < 4; r++) {
 			children.push(
 				<span
 					className={`ico r${r}`}

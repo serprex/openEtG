@@ -509,7 +509,7 @@ export class CardSelectorCore extends Component {
 									etgutil.asShiny(x.code, true) in props.cardpool) ||
 								props.showall ||
 								x.isFree()) &&
-							(!props.rarity || props.rarity === Math.min(x.rarity, 4)),
+							(!props.rarity || props.rarity === x.rarity),
 						props.cards.cardCmp,
 						props.shiny && !props.filterboth,
 					),

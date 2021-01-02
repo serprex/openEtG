@@ -26,7 +26,7 @@ export default connect(({ user }) => ({ user }))(
 				if (!card.isFree()) {
 					if (card.upped) return 'You cannot upgrade upgraded cards.';
 					const use =
-						~card.rarity && !(card.rarity === 5 && card.shiny) ? 6 : 1;
+						~card.rarity && !(card.rarity === 4 && card.shiny) ? 6 : 1;
 					if (
 						self.state.cardpool[card.code] >= use ||
 						self.state.boundpool[card.code] >= use
@@ -47,7 +47,7 @@ export default connect(({ user }) => ({ user }))(
 			function polishCard(card) {
 				if (!card.isFree()) {
 					if (card.shiny) return 'You cannot polish shiny cards.';
-					if (card.rarity === 5) return 'You cannot polish Nymphs.';
+					if (card.rarity === 4) return 'You cannot polish Nymphs.';
 					const use = card.rarity !== -1 ? 6 : 2;
 					if (
 						self.state.cardpool[card.code] >= use ||
@@ -63,7 +63,7 @@ export default connect(({ user }) => ({ user }))(
 			function unpolishCard(card) {
 				if (card.rarity || (card.shiny && card.upped)) {
 					if (!card.shiny) return 'You cannot unpolish non-shiny cards.';
-					if (!card.rarity === 5) return 'You cannot unpolish Nymphs.';
+					if (!card.rarity === 4) return 'You cannot unpolish Nymphs.';
 					sock.userExec('unpolish', { card: card.code });
 				} else return 'You cannot unpolish pillars.';
 			}
@@ -194,7 +194,7 @@ export default connect(({ user }) => ({ user }))(
 									: 'Convert into an upgraded version.';
 								newstate.downgrade = false;
 							}
-							if (card.rarity === 5) {
+							if (card.rarity === 4) {
 								newstate.info3 =
 									'This card cannot be ' +
 									(card.shiny ? 'un' : '') +
@@ -210,7 +210,7 @@ export default connect(({ user }) => ({ user }))(
 							} else {
 								newstate.info3 = card.isFree()
 									? '50$ to polish'
-									: card.rarity === 5
+									: card.rarity === 4
 									? 'This card cannot be polished.'
 									: card.rarity !== -1
 									? 'Convert 6 into a shiny version.'

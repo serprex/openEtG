@@ -29,7 +29,7 @@ use crate::{get_day, svg, PgPool};
 
 static NEXT_SOCK_ID: AtomicUsize = AtomicUsize::new(0);
 
-const SELL_VALUES: [u8; 6] = [5, 1, 3, 15, 20, 150];
+const SELL_VALUES: [u8; 5] = [5, 1, 3, 15, 150];
 
 enum BzBidOp<'a> {
 	Delete { id: i64, bid: BzBid<'a> },
@@ -166,13 +166,13 @@ async fn login_success(
 			let mut rng = rand::thread_rng();
 			let ocardnymph = rng.gen_ratio(3, 100);
 			if let Some(card) = etg::card::OpenSet.random_card(&mut rng, false, |card| {
-				(card.rarity != 5) ^ ocardnymph
+				(card.rarity != 4) ^ ocardnymph
 					&& card
 						.status
 						.iter()
 						.all(|&(k, v)| k != etg::game::Stat::pillar || v == 0)
 			}) {
-				let ccode = if card.rarity == 5 {
+				let ccode = if card.rarity == 4 {
 					etg::card::AsShiny(card.code as i32, true) as u16
 				} else {
 					card.code
@@ -278,8 +278,7 @@ fn card_val24(rarity: i8, upped: bool, shiny: bool) -> u32 {
 			1 => 33,
 			2 => 120,
 			3 => 720,
-			4 => 840,
-			5 => 6000,
+			4 => 6000,
 			_ => 0,
 		}) * (match (upped, shiny) {
 			(false, false) => 1,
@@ -1011,8 +1010,8 @@ pub async fn handle_ws(
 												"mark" => Some(-1),
 												"pillar" => Some(0),
 												"rare" => Some(3),
-												"shard" => Some(4),
-												"nymph" => Some(5),
+												"shard" => Some(3),
+												"nymph" => Some(4),
 												_ => None,
 											} {
 												if cardcard.rarity == rarity {
@@ -2030,21 +2029,19 @@ pub async fn handle_ws(
 							element,
 							..
 						} => {
-							const PACKS: [(u8, u8, &'static [u8]); 5] = [
-								(10, 15, &[]),
-								(6, 25, &[3]),
-								(5, 77, &[1, 3]),
-								(9, 100, &[4, 7, 8]),
-								(1, 250, &[0, 0, 0, 0]),
+							const PACKS: [(u8, u8, &'static [i32], f64); 4] = [
+								(10, 15, &[], 0.03448275862068971),
+								(6, 25, &[3], 0.06841339155749637),
+								(5, 80, &[1, 3], 0.017472777918460383),
+								(1, 250, &[0, 0, 0], 0.0),
 							];
 							let user = user.unwrap();
 							let mut user = user.lock().await;
-							if let Some(&(amount, cost, rares)) = PACKS.get(pack as usize) {
+							if let Some(&(amount, cost, rares, bumprate)) = PACKS.get(pack as usize)
+							{
 								let mut amount = amount as i32;
 								let mut cost = cost as i32;
-								let mut rares =
-									rares.iter().map(|r| *r as i32).collect::<Vec<i32>>();
-								let bumprate = 0.45 / amount as f64;
+								let mut rares = Vec::from(rares);
 								let bound = user
 									.data
 									.freepacks
@@ -2065,7 +2062,7 @@ pub async fn handle_ws(
 										while rarity - 1 < rares.len() && i == rares[rarity - 1] {
 											rarity += 1;
 										}
-										let code: u16 = if rarity == 5 {
+										let code: u16 = if rarity == 4 {
 											if element > 0 && element < 13 {
 												etg::etg::NymphList[element as usize] as u16
 											} else {
@@ -2556,7 +2553,7 @@ pub async fn handle_ws(
 								let user = user.unwrap();
 								let mut user = user.lock().await;
 								let copies = if carddata.rarity != -1
-									&& !(carddata.rarity == 5 && etg::card::Shiny(card as i32))
+									&& !(carddata.rarity == 4 && etg::card::Shiny(card as i32))
 								{
 									6
 								} else {
@@ -2576,7 +2573,7 @@ pub async fn handle_ws(
 								let user = user.unwrap();
 								let mut user = user.lock().await;
 								let copies = if carddata.rarity != -1
-									&& !(carddata.rarity == 5 && etg::card::Shiny(card as i32))
+									&& !(carddata.rarity == 4 && etg::card::Shiny(card as i32))
 								{
 									6
 								} else {
@@ -2698,7 +2695,7 @@ pub async fn handle_ws(
 											un -= 6;
 											up += 1;
 										}
-										if card.rarity < 5 {
+										if card.rarity < 4 {
 											while un >= 12
 												&& sh < 6 && convert(
 												&mut user.data.pool,
