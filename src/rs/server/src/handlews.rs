@@ -1109,6 +1109,7 @@ pub async fn handle_ws(
 										if let Some(foeuser) = wusers.load(&*client, &f).await {
 											let foeuserid = foeuser.lock().await.id;
 											if let Ok(trx) = client.transaction().await {
+												trx.execute("delete from match_request mr1 where user_id = $1 and accepted", &[&userid]).await.ok();
 												if let Ok(pending_request_maybe) = trx
 													.query_opt(
 														"select mr1.game_id, games.data \

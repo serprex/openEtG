@@ -1358,9 +1358,8 @@ impl Game {
 							if shield != 0 {
 								self.trigger_data(Event::Shield, shield, id, &mut hitdata);
 							}
-							let dmg = self.dmg(target, hitdata.dmg);
-							hitdata.dmg = dmg;
-							if dmg != 0 {
+							self.dmg(target, hitdata.dmg);
+							if hitdata.dmg != 0 {
 								self.trigger_data(Event::Hit, id, target, &mut hitdata);
 							}
 						}
