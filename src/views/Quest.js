@@ -59,17 +59,14 @@ export default connect(({ user, opts }) => ({ user, oquest: opts.quest }))(
 				if (!qbag.children) break;
 			}
 		}
-		const selectedQuest = {
-			...(qbag.key && Quest.quarks[qbag.key]),
-			...qbag,
-		};
+		const selectedQuest = qbag.key && Quest.quarks[qbag.key];
 		return (
 			<>
 				<Components.Box x={8} y={8} width={880} height={108} />
 				<Components.ExitBtn x={750} y={120} />
 				<Components.Text
 					text={
-						selectedQuest.info ??
+						selectedQuest?.info ??
 						"Click the list items to see the quest lines, & the FIGHT button to challenge them!\nNames in red are the ones you haven't yet completed."
 					}
 					style={{

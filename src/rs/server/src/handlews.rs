@@ -2643,13 +2643,20 @@ pub async fn handle_ws(
 								.collect::<std::collections::HashSet<u16>>();
 							let convert =
 								|pool: &mut Cardpool, oldcode: u16, oldamt: u16, newcode: u16| {
-									let newc = pool.0.entry(newcode).or_default();
-									if *newc == u16::max_value() {
-										return false;
+									if pool.0.get(&newcode).cloned() == Some(u16::max_value())
+										|| pool
+											.0
+											.get(&oldcode)
+											.cloned()
+											.map(|oldc| oldc < oldamt)
+											.unwrap_or(true)
+									{
+										false
+									} else {
+										*pool.0.entry(newcode).or_default() += 1;
+										*pool.0.get_mut(&oldcode).unwrap() -= oldamt;
+										true
 									}
-									*newc += 1;
-									*pool.0.get_mut(&oldcode).unwrap() -= oldamt;
-									true
 								};
 							for &code in base.iter() {
 								let c32 = code as i32;

@@ -83,7 +83,7 @@ export const uppillar = upshpi(code => etgutil.asUpped(code, true));
 export const shpillar = upshpi(code => etgutil.asShiny(code, true));
 function convert(pool, oldcode, oldamt, newcode) {
 	const oldnew = pool[newcode] ?? 0;
-	if (oldnew >= 65535) {
+	if (oldnew >= 65535 || (pool[oldcode] ?? 0) < oldamt) {
 		return false;
 	}
 	pool[newcode] = oldnew + 1;
