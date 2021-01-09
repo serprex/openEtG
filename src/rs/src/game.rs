@@ -1186,20 +1186,23 @@ impl Game {
 		self.incrStatus(c, Stat::atk, amt);
 	}
 
-	pub fn attackCreature(&mut self, c: i32, t: i32, trueatk: Option<i32>) {
-		let trueatk = trueatk.unwrap_or_else(|| self.trueatk(c));
+	pub fn attackCreature(&mut self, c: i32, t: i32) {
+		self.attackCreatureDmg(c, t, self.trueatk(c))
+	}
+
+	pub fn attackCreatureDmg(&mut self, c: i32, t: i32, trueatk: i32) {
 		if trueatk != 0 {
 			let dmg = self.dmg(t, trueatk);
-			let mut data = ProcData::default();
-			data.dmg = dmg;
 			if dmg != 0 {
+				let mut data = ProcData::default();
+				data.dmg = dmg;
 				self.trigger_data(Event::Hit, c, t, &mut data);
+				self.trigger_data(Event::Shield, t, c, &mut data);
 			}
-			self.trigger_data(Event::Shield, t, c, &mut data);
 		}
 	}
 
-	pub fn attack(&mut self, id: i32, data: &mut ProcData) {
+	pub fn attack(&mut self, id: i32, data: &ProcData) {
 		loop {
 			let mut data = data.clone();
 			let kind = self.get_kind(id);
@@ -1210,14 +1213,6 @@ impl Game {
 			let frozen = self.get(id, Stat::frozen);
 			if frozen == 0 {
 				self.proc_data(Event::Attack, id, &mut data);
-				let target = &mut data.tgt;
-				let target = if *target == 0 {
-					let foe = self.get_foe(self.get_owner(id));
-					*target = foe;
-					foe
-				} else {
-					*target
-				};
 				let stasis = data.stasis;
 				let freedom = data.freedom;
 				if !stasis && self.get(id, Stat::delayed) == 0 {
@@ -1232,8 +1227,8 @@ impl Game {
 								.iter()
 								.any(|&pr| pr != 0 && self.get(pr, Stat::tunnel) != 0)
 						}
-						let gpull = self.get(target, Stat::gpull);
-						let shield = self.get_shield(target);
+						let gpull = self.get(data.tgt, Stat::gpull);
+						let shield = self.get_shield(data.tgt);
 						if freedom {
 							if bypass || (shield == 0 && gpull == 0) {
 								trueatk = (trueatk * 3 + 1) / 2;
@@ -1242,34 +1237,31 @@ impl Game {
 							}
 						}
 						if psionic {
-							self.spelldmg(target, trueatk);
+							self.spelldmg(data.tgt, trueatk);
 						} else if bypass || trueatk < 0 {
 							let mut hitdata = ProcData::default();
-							hitdata.dmg = self.dmg(target, trueatk);
-							self.trigger_data(Event::Hit, id, target, &mut hitdata);
+							hitdata.dmg = self.dmg(data.tgt, trueatk);
+							self.trigger_data(Event::Hit, id, data.tgt, &mut hitdata);
+						} else if gpull != 0 {
+							self.attackCreatureDmg(id, gpull, trueatk);
 						} else {
-							if gpull != 0 {
-								self.attackCreature(id, gpull, Some(trueatk));
+							let truedr = if shield != 0 {
+								cmp::min(self.truedr(shield), trueatk)
 							} else {
-								let truedr = if shield != 0 {
-									cmp::min(self.truedr(shield), trueatk)
-								} else {
-									0
-								};
-								let mut hitdata = ProcData::default();
-								let reducedmg = trueatk - truedr;
-								hitdata.dmg = reducedmg;
-								hitdata.blocked = truedr;
-								if shield != 0 {
-									self.trigger_data(Event::Shield, shield, id, &mut hitdata);
-								}
-								let finaldmg = hitdata.dmg;
-								hitdata.blocked += reducedmg - finaldmg;
-								let dmg = self.dmg(target, finaldmg);
-								hitdata.dmg = dmg;
-								if dmg > 0 {
-									self.trigger_data(Event::Hit, id, target, &mut hitdata);
-								}
+								0
+							};
+							let mut hitdata = ProcData::default();
+							hitdata.dmg = trueatk - truedr;
+							hitdata.blocked = truedr;
+							if shield != 0 {
+								self.trigger_data(Event::Shield, shield, id, &mut hitdata);
+							}
+							let finaldmg = hitdata.dmg;
+							hitdata.blocked = trueatk - finaldmg;
+							let dmg = self.dmg(data.tgt, finaldmg);
+							hitdata.dmg = dmg;
+							if dmg != 0 {
+								self.trigger_data(Event::Hit, id, data.tgt, &mut hitdata);
 								if dmg != trueatk {
 									self.trigger_data(Event::Blocked, id, shield, &mut hitdata);
 								}
@@ -1305,7 +1297,7 @@ impl Game {
 		}
 	}
 
-	pub fn v_attack(&mut self, id: i32, data: &mut ProcData) {
+	pub fn v_attack(&mut self, id: i32, data: &ProcData) {
 		loop {
 			let mut data = data.clone();
 			let kind = self.get_kind(id);
@@ -1339,15 +1331,16 @@ impl Game {
 						if self.get(id, Stat::psionic) != 0 {
 							self.spelldmg(target, trueatk);
 						} else if bypass || trueatk < 0 {
+							self.dmg(target, trueatk);
 							let mut hitdata = ProcData::default();
-							hitdata.dmg = self.dmg(target, trueatk);
+							hitdata.dmg = trueatk;
 							self.trigger_data(Event::Hit, id, target, &mut hitdata);
 						} else if kind == etg::Creature && self.get(target, Stat::gpull) != 0 {
 							let dmg = self.dmg(self.get(target, Stat::gpull), trueatk);
 							if self
 								.getSkill(id, Event::Hit)
 								.iter()
-								.any(|&s| s == Skill::v_vampire)
+								.any(|&s| s == Skill::vampire)
 							{
 								self.dmg(owner, -dmg);
 							}
@@ -1367,7 +1360,7 @@ impl Game {
 							}
 							let dmg = self.dmg(target, hitdata.dmg);
 							hitdata.dmg = dmg;
-							if dmg > 0 {
+							if dmg != 0 {
 								self.trigger_data(Event::Hit, id, target, &mut hitdata);
 							}
 						}
@@ -1420,48 +1413,47 @@ impl Game {
 		}
 	}
 
-	pub fn dmg_die(&mut self, id: i32, dmg: i32, dontdie: bool) -> i32 {
+	pub fn dmg_die(&mut self, mut id: i32, dmg: i32, dontdie: bool) -> i32 {
 		if dmg == 0 {
 			return 0;
-		};
-		let kind = self.get_kind(id);
+		}
+		let mut kind = self.get_kind(id);
 		if kind == etg::Weapon {
 			if dmg < 0 {
-				0
+				return 0;
 			} else {
-				let owner = self.get_owner(id);
-				self.dmg(owner, dmg)
+				id = self.get_owner(id);
+				kind = etg::Player;
 			}
+		}
+		let sosa = self.get(id, Stat::sosa) != 0;
+		let realdmg = if sosa { -dmg } else { dmg };
+		let capdmg = if realdmg < 0 {
+			cmp::max(self.get(id, Stat::hp) - self.get(id, Stat::maxhp), realdmg)
+		} else if kind != etg::Player {
+			cmp::min(self.truehp(id), realdmg)
 		} else {
-			let sosa = self.get(id, Stat::sosa) != 0;
-			let realdmg = if sosa { -dmg } else { dmg };
-			let capdmg = if realdmg < 0 {
-				cmp::max(self.get(id, Stat::hp) - self.get(id, Stat::maxhp), realdmg)
-			} else if kind != etg::Player {
-				cmp::min(self.truehp(id), realdmg)
-			} else {
-				realdmg
-			};
-			*self.get_mut(id, Stat::hp) -= capdmg;
-			if kind != etg::Player {
-				self.fx(id, Fx::Dmg(capdmg));
+			realdmg
+		};
+		*self.get_mut(id, Stat::hp) -= capdmg;
+		if kind != etg::Player {
+			self.fx(id, Fx::Dmg(capdmg));
+		}
+		let mut dmgdata = ProcData::default();
+		dmgdata.dmg = dmg;
+		self.proc_data(Event::Dmg, id, &mut dmgdata);
+		if self.truehp(id) <= 0 {
+			if !dontdie {
+				self.die(id);
 			}
-			let mut dmgdata = ProcData::default();
-			dmgdata.dmg = dmg;
-			self.proc_data(Event::Dmg, id, &mut dmgdata);
-			if self.truehp(id) <= 0 {
-				if !dontdie {
-					self.die(id);
-				}
-			} else if dmg > 0 && self.get(id, Stat::voodoo) != 0 {
-				let foe = self.get_foe(self.get_owner(id));
-				self.dmg(foe, dmg);
-			}
-			if sosa {
-				-capdmg
-			} else {
-				capdmg
-			}
+		} else if dmg > 0 && self.get(id, Stat::voodoo) != 0 {
+			let foe = self.get_foe(self.get_owner(id));
+			self.dmg(foe, dmg);
+		}
+		if sosa {
+			-capdmg
+		} else {
+			capdmg
 		}
 	}
 
@@ -2059,7 +2051,7 @@ impl Game {
 		}
 		for &cr in self.get_player(id).creatures.clone().iter() {
 			if cr != 0 {
-				self.attack(cr, &mut data);
+				self.attack(cr, &data);
 			}
 		}
 		let shield = self.get_shield(id);
@@ -2069,7 +2061,7 @@ impl Game {
 		}
 		let weapon = self.get_weapon(id);
 		if weapon != 0 {
-			self.attack(weapon, &mut data);
+			self.attack(weapon, &data);
 		}
 		let thing = self.get_thing_mut(id);
 		thing.status.insert(Stat::casts, 1);
@@ -2129,7 +2121,7 @@ impl Game {
 						self.delay(cr, 1)
 					}
 				}
-				self.v_attack(cr, &mut data);
+				self.v_attack(cr, &data);
 				if i > floodingIndex
 					&& crcard.element != etg::Water as i8
 					&& crcard.element != etg::Chroma as i8
@@ -2148,7 +2140,7 @@ impl Game {
 		}
 		let weapon = self.get_weapon(id);
 		if weapon != 0 {
-			self.v_attack(weapon, &mut data);
+			self.v_attack(weapon, &data);
 		}
 		self.set(id, Stat::casts, 1);
 	}
@@ -2292,17 +2284,21 @@ impl Game {
 	}
 
 	pub fn flush_attacks(&mut self) {
-		let mut n = 0;
-		while n < self.attacks.len() {
-			let (c, t) = self.attacks[n];
+		if !self.attacks.is_empty() {
+			let mut n = 0;
 			let mut data = ProcData::default();
-			if t != 0 {
-				data.tgt = t;
+			while n < self.attacks.len() {
+				let (c, t) = self.attacks[n];
+				data.tgt = if t == 0 {
+					self.get_foe(self.get_owner(c))
+				} else {
+					t
+				};
+				self.attack(c, &data);
+				n += 1;
 			}
-			self.attack(c, &mut data);
-			n += 1;
+			self.attacks.clear();
 		}
-		self.attacks.clear();
 	}
 
 	pub fn r#move(&mut self, cmd: GameMove) {

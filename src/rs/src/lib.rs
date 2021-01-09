@@ -99,6 +99,16 @@ mod test {
 		deck.extend_from_slice(&newdeck);
 	}
 
+	fn attack_foe(ctx: &mut Game, id: i32) {
+		ctx.attack(
+			id,
+			&ProcData {
+				tgt: ctx.get_foe(ctx.get_owner(id)),
+				..Default::default()
+			},
+		)
+	}
+
 	#[test]
 	fn adrenaline() {
 		let (mut ctx, p1, p2) = setup(CardSet::Open);
@@ -192,8 +202,8 @@ mod test {
 		Skill::acceleration.proc(&mut ctx, dev, dev, &mut ProcData::default());
 		println!("? {}", ctx.hasskill(dev, Event::Predeath, Skill::bounce));
 		ctx.set_quanta(p2, etg::Light, 2);
-		ctx.attack(dev, &mut ProcData::default());
-		ctx.attack(dev, &mut ProcData::default());
+		attack_foe(&mut ctx, dev);
+		attack_foe(&mut ctx, dev);
 		assert_eq!(ctx.get_player(p1).hand.last(), Some(&dev));
 		assert_eq!(ctx.get(dev, Stat::atk), 4);
 		assert_eq!(ctx.get(dev, Stat::hp), 2);
@@ -510,10 +520,10 @@ mod test {
 		assert_eq!(ctx.trueatk(steam), 0);
 		ctx.useactive(steam, 0);
 		assert_eq!(ctx.trueatk(steam), 5);
-		ctx.attack(steam, &mut ProcData::default());
+		attack_foe(&mut ctx, steam);
 		assert_eq!(ctx.trueatk(steam), 4);
 		for _ in 0..5 {
-			ctx.attack(steam, &mut ProcData::default());
+			attack_foe(&mut ctx, steam);
 		}
 		assert_eq!(ctx.trueatk(steam), 0);
 	}

@@ -322,7 +322,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::hope => 2.0,
 			Skill::icebolt => 10.0,
 			Skill::ignite => 10.0,
-			Skill::immolate => 5.0,
+			Skill::immolate(_) => 5.0,
 			Skill::improve => 6.0,
 			Skill::inertia => 2.0,
 			Skill::ink => 3.0,
@@ -398,7 +398,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::phoenix => 3.0,
 			Skill::photosynthesis => 2.0,
 			Skill::plague => 5.0,
-			Skill::platearmor => 1.0,
+			Skill::platearmor(x) | Skill::v_platearmor(x) => x as f32 / 5.0,
 			Skill::poison(x) => x as f32,
 			Skill::poisonfoe(x) => x as f32,
 			Skill::powerdrain => 6.0,
@@ -515,7 +515,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::unsummonquanta => 3.0,
 			Skill::upkeep => -0.5,
 			Skill::upload => 3.0,
-			Skill::vampire | Skill::v_vampire => {
+			Skill::vampire => {
 				(if ctx.get_kind(c) == etg::Spell {
 					ctx.get_card(ctx.get(c, Stat::card)).attack as f32
 				} else {
@@ -631,7 +631,6 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::v_hope => 2.0,
 			Skill::v_icebolt(_) => 10.0,
 			Skill::v_ignite => 10.0,
-			Skill::v_immolate => 5.0,
 			Skill::v_improve => 6.0,
 			Skill::v_infect => 4.0,
 			Skill::v_integrity => 4.0,
@@ -665,7 +664,6 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::v_phoenix => 3.0,
 			Skill::v_photosynthesis => 2.0,
 			Skill::v_plague => 5.0,
-			Skill::v_platearmor => 1.0,
 			Skill::v_precognition => 1.0,
 			Skill::v_queen => 7.0,
 			Skill::v_quint => 6.0,

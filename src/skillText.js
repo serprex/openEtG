@@ -299,9 +299,9 @@ const data = {
 		'Deal 2 spell damage plus one per 5:7 you have after playing this card. 25% plus 5% per point of damage chance to freeze target.',
 	ignite:
 		'Deal 20 spell damage to opponent. Deal 1 spell damage to each creature.',
-	immolate: c =>
+	immolate: x =>
 		`Sacrifice a creature you control. Gain ${
-			c.upped ? 8 : 6
+			x + 1
 		}:6 plus 1 quanta of each other element.`,
 	improve:
 		'Transform a target creature into a random mutant creature. Mutant creatures gain a random ability, 0-4 strength, and 0-4 hp.',
@@ -412,10 +412,8 @@ const data = {
 		} and one quanta matching your mark.`,
 	plague:
 		"Give target player's creatures 1 poison counter each. Removes cloak.",
-	platearmor: [
-		'Target creature gains 0|4, or target player gains 4 maximum HP and heals 4.',
-		'Target creature gains 0|6, or target player gains 6 maximum HP and heals 6.',
-	],
+	platearmor: x =>
+		`Target gains 0|${x}, or target player gains ${x} maximum HP and heals ${x}.`,
 	poison: x => {
 		const s = x === '1' ? '' : 's';
 		x = `Give ${x === '1' ? '' : x + ' '}poison counter${s} `;
@@ -704,10 +702,6 @@ const data = {
 	v_icebolt: _ =>
 		'Deal 2 damage to target, plus an additional 2 per 10:7 remaining. 25% plus 5% per point of damage chance to freeze target',
 	v_ignite: 'Deal 20 spell damage to foe & 1 damage to all creatures',
-	v_immolate: c =>
-		`Sacrifice a creature to produce ${
-			c.upped ? 7 : 5
-		}:6 & 1 quanta of each other element`,
 	v_improve: 'Mutate target creature',
 	v_infect: 'Poison target creature',
 	v_ink: 'Summon a Cloak which lasts 1 turn',
@@ -757,7 +751,7 @@ const data = {
 			c.element
 		} & quanta of mark`,
 	v_plague: "Poison foe's creatures. Removes cloak",
-	v_platearmor: c => `Target gains 0|${c.upped ? 6 : 3}`,
+	v_platearmor: x => `Target gains 0|${x}`,
 	v_poison: {
 		hit: 'Apply poison on hit. Throttled',
 		cast: 'Apply poison to foe',
@@ -818,7 +812,6 @@ const data = {
 		'Deals 4 damage to target. Instantly kill creature or destroy weapon if frozen',
 	v_thorn: '75% chance to poison attackers',
 	v_upkeep: c => 'Consumes 1:' + c.element,
-	v_vampire: 'Heal owner per damage dealt',
 	v_virusinfect: 'Sacrifice self & poison target creature',
 	v_virusplague: "Sacrifice self & poison foe's creatures",
 	v_void: "Reduce foe's maximum HP by 2, 3 if mark is 1:11",

@@ -381,7 +381,7 @@ pub enum Skill {
 	icebolt,
 	icegrowth(i8, i8),
 	ignite,
-	immolate,
+	immolate(i16),
 	improve,
 	inertia,
 	inflation,
@@ -446,7 +446,7 @@ pub enum Skill {
 	pillspi,
 	pillspi1,
 	plague,
-	platearmor,
+	platearmor(i16),
 	poison(i16),
 	poisonfoe(i16),
 	powerdrain,
@@ -612,7 +612,6 @@ pub enum Skill {
 	v_hopedr,
 	v_icebolt(u8),
 	v_ignite,
-	v_immolate,
 	v_improve,
 	v_infect,
 	v_integrity,
@@ -642,7 +641,7 @@ pub enum Skill {
 	v_phoenix,
 	v_photosynthesis,
 	v_plague,
-	v_platearmor,
+	v_platearmor(i16),
 	v_precognition,
 	v_queen,
 	v_quint,
@@ -679,7 +678,6 @@ pub enum Skill {
 	v_thorn,
 	v_unburrow,
 	v_upkeep,
-	v_vampire,
 	v_virusinfect,
 	v_virusplague,
 	v_void,
@@ -832,7 +830,7 @@ impl Skill {
 			Self::heal => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::holylight => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::icebolt => Tgt::Or(&[Tgt::crea, Tgt::play]),
-			Self::immolate => Tgt::And(&[Tgt::own, Tgt::crea]),
+			Self::immolate(_) => Tgt::And(&[Tgt::own, Tgt::crea]),
 			Self::improve => Tgt::crea,
 			Self::innovation => Tgt::card,
 			Self::jelly => Tgt::crea,
@@ -859,7 +857,7 @@ impl Skill {
 			Self::paradox => Tgt::paradox,
 			Self::parallel => Tgt::crea,
 			Self::plague => Tgt::play,
-			Self::platearmor => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::platearmor(_) => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::poison(_) => Tgt::crea,
 			Self::powerdrain => Tgt::crea,
 			Self::purify => Tgt::Or(&[Tgt::crea, Tgt::play]),
@@ -921,7 +919,6 @@ impl Skill {
 			Self::v_guard => Tgt::crea,
 			Self::v_holylight => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::v_icebolt(_) => Tgt::Or(&[Tgt::crea, Tgt::play]),
-			Self::v_immolate => Tgt::And(&[Tgt::own, Tgt::crea]),
 			Self::v_improve => Tgt::crea,
 			Self::v_infect => Tgt::crea,
 			Self::v_lightning => Tgt::Or(&[Tgt::crea, Tgt::play]),
@@ -935,7 +932,7 @@ impl Skill {
 			Self::v_nymph => Tgt::pill,
 			Self::v_paradox => Tgt::paradox,
 			Self::v_parallel => Tgt::crea,
-			Self::v_platearmor => Tgt::crea,
+			Self::v_platearmor(_) => Tgt::crea,
 			Self::v_quint => Tgt::crea,
 			Self::v_rage => Tgt::crea,
 			Self::v_readiness => Tgt::crea,
@@ -1177,8 +1174,8 @@ impl Skill {
 						if fcr == 0 {
 							ctx.queue_attack(cr, 0);
 						} else {
-							ctx.attackCreature(cr, fcr, None);
-							ctx.attackCreature(fcr, cr, None);
+							ctx.attackCreature(cr, fcr);
+							ctx.attackCreature(fcr, cr);
 						}
 					}
 				}
@@ -1369,7 +1366,7 @@ impl Skill {
 					&& ctx.get(c, Stat::delayed) == 0
 					&& data.dmg > 0 && ctx.getIndex(c) != -1
 				{
-					ctx.attackCreature(c, t, None);
+					ctx.attackCreature(c, t);
 				}
 			}
 			Self::cpower | Self::v_cpower => {
@@ -2093,7 +2090,7 @@ impl Skill {
 				ctx.delay(c, 1);
 				ctx.delay(t, 1);
 				if ctx.get(c, Stat::airborne) != 0 || ctx.get(t, Stat::airborne) == 0 {
-					ctx.attackCreature(c, t, None);
+					ctx.attackCreature(c, t);
 				}
 			}
 			Self::halveatk => {
@@ -2170,7 +2167,7 @@ impl Skill {
 					ctx.spelldmg(cr, 1);
 				});
 			}
-			Self::immolate | Self::v_immolate => {
+			Self::immolate(x) => {
 				ctx.die(t);
 				if !ctx.hasskill(t, Event::OwnAttack, Skill::singularity)
 					&& !ctx.hasskill(t, Event::OwnAttack, Skill::v_singularity)
@@ -2179,15 +2176,7 @@ impl Skill {
 					for e in 1..13 {
 						ctx.spend(owner, e, -1);
 					}
-					ctx.spend(
-						owner,
-						etg::Fire,
-						if card::Upped(ctx.get(c, Stat::card)) {
-							-7
-						} else {
-							-5
-						},
-					);
+					ctx.spend(owner, etg::Fire, -(x as i32));
 				}
 			}
 			Self::improve => {
@@ -3065,17 +3054,8 @@ impl Skill {
 					ctx.poison(cr, 1);
 				});
 			}
-			Self::platearmor | Self::v_platearmor => {
-				ctx.buffhp(
-					t,
-					if card::Upped(ctx.get(c, Stat::card)) {
-						6
-					} else if self == Self::v_platearmor {
-						3
-					} else {
-						4
-					},
-				);
+			Self::platearmor(x) | Self::v_platearmor(x) => {
+				ctx.buffhp(t, x as i32);
 			}
 			Self::poison(amt) => {
 				if throttle(ctx, c) {
@@ -3892,10 +3872,9 @@ impl Skill {
 				let buff = ctx.dmg(c, 2);
 				ctx.incrAtk(t, buff);
 			}
-			Self::vampire | Self::v_vampire => {
-				let dmg = data.dmg;
-				ctx.fx(c, Fx::Heal(dmg));
-				ctx.dmg(ctx.get_owner(c), -dmg);
+			Self::vampire => {
+				ctx.fx(c, Fx::Heal(data.dmg));
+				ctx.dmg(ctx.get_owner(c), -data.dmg);
 			}
 			Self::vend => {
 				ctx.drawcard(ctx.get_owner(c));
@@ -4389,10 +4368,10 @@ impl Skill {
 						Skill::v_precognition,
 					],
 					[
-						Skill::v_vampire,
-						Skill::v_vampire,
-						Skill::v_vampire,
-						Skill::v_vampire,
+						Skill::vampire,
+						Skill::vampire,
+						Skill::vampire,
+						Skill::vampire,
 						Skill::v_liquid,
 						Skill::v_steal,
 					],
@@ -4489,7 +4468,7 @@ impl Skill {
 					Skill::v_neuro => -2,
 					Skill::v_precognition => 2,
 					Skill::v_siphon => -1,
-					Skill::v_vampire => -2,
+					Skill::vampire => -2,
 					Skill::v_liquid => 2,
 					Skill::v_steal => 3,
 					Skill::v_lobotomize => 2,
