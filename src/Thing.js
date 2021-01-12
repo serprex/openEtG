@@ -3,6 +3,17 @@ import skillText from './skillText.js';
 import Card from './Card.js';
 import enums from './enum.json';
 
+function decodeSkillName(cell) {
+	const skid = cell & 0xffff,
+		n = enums.Skill[skid],
+		c = enums.SkillParams[skid] ?? 0;
+	return c == 0
+		? n
+		: c == 1
+		? `${n} ${cell >> 16}`
+		: `${n} ${(cell >> 16) & 0xff} ${cell >> 24}`;
+}
+
 export default class Thing {
 	constructor(game, id) {
 		if (!id || typeof id !== 'number') {
@@ -23,17 +34,7 @@ export default class Thing {
 				lastidx = idx + (raw[idx] >> 8),
 				name = [];
 			while (idx++ < lastidx) {
-				const cell = raw[idx],
-					skid = cell & 0xffff,
-					n = enums.Skill[skid],
-					c = enums.SkillParams[skid] ?? 0;
-				name.push(
-					c == 0
-						? n
-						: c == 1
-						? `${n} ${cell >> 16}`
-						: `${n} ${(cell >> 16) & 0xff} ${cell >> 24}`,
-				);
+				name.push(decodeSkillName(raw[idx]));
 			}
 			if (name.length) skills.set(ev, name);
 		}
@@ -50,7 +51,7 @@ export default class Thing {
 	getSkill(k) {
 		const name = [];
 		for (const x of this.game.game.get_one_skill(this.id, enums.EventId[k])) {
-			name.push(enums.Skill[x]);
+			name.push(decodeSkillName(x));
 		}
 		if (name.length) return name;
 	}

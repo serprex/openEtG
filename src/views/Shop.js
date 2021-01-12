@@ -156,6 +156,7 @@ export default connect(({ user, opts }) => ({
 				element: this.state.packele,
 			};
 			parseInput(boostdata, 'bulk', this.props.bulk, 99);
+			boostdata.bulk ||= 1;
 			if (
 				this.props.user.gold >= pack.cost * (boostdata.bulk || 1) ||
 				(this.props.user.freepacks &&

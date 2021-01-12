@@ -1652,7 +1652,7 @@ pub async fn handle_ws(
 										{
 											sent = true;
 											let mut tou = String::from("To ");
-											tou.push_str(&u);
+											tou.push_str(&to);
 											sendmsg(
 												&tx,
 												&json!({ "x": "chat", "mode": 2, "u": tou, "msg": msg }),
@@ -2330,13 +2330,10 @@ pub async fn handle_ws(
 										if let Some(selltx) = if sell.u == u {
 											Some(tx.clone())
 										} else {
-											let mut tx = None;
-											if let Some(sockid) = rusersocks.get(&sell.u) {
-												if let Some(sock) = rsocks.get(&sockid) {
-													tx = Some(sock.tx.clone())
-												}
-											}
-											tx
+											rusersocks
+												.get(&sell.u)
+												.and_then(|sockid| rsocks.get(&sockid))
+												.map(|sock| sock.tx.clone())
 										} {
 											if let Some(card) =
 												etg::card::OpenSet.try_get(sell.code as i32)
@@ -2345,12 +2342,6 @@ pub async fn handle_ws(
 												sendmsg(
 													&selltx,
 													&if sell.p > 0 {
-														json!({
-															"x": "bzgive",
-															"msg": format!("{} bought {} of {} @ {} from you.", u, sell.amt, cardname, sell.p),
-															"g": sell.amt as i32 * sell.p,
-														})
-													} else {
 														let ecount = encode_count(sell.amt as u32);
 														let ecode = encode_code(sell.code as i32);
 														let givec = [
@@ -2359,8 +2350,14 @@ pub async fn handle_ws(
 														];
 														json!({
 															"x": "bzgive",
-															"msg": format!("{} sold you {} of {} @ {}", u, sell.amt, cardname, -sell.p),
+															"msg": format!("{} sold you {} of {} @ {}", u, sell.amt, cardname, sell.p),
 															"c": unsafe { std::str::from_utf8_unchecked(&givec[..]) },
+														})
+													} else {
+														json!({
+															"x": "bzgive",
+															"msg": format!("{} bought {} of {} @ {} from you.", u, sell.amt, cardname, -sell.p),
+															"g": sell.amt as i32 * -sell.p,
 														})
 													},
 												);

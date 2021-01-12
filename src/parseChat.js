@@ -65,10 +65,11 @@ export default function parseChat(e) {
 			const data = { u: user ? user.name : '' };
 			const ndn = msg.slice(6).split('d');
 			if (!ndn[1]) {
-				data.X = +ndn[0] || 0x100000000;
+				data.A = 1;
+				data.X = ndn[0] >>> 0 || 0xffffffff;
 			} else {
-				data.A = +ndn[0];
-				data.X = +ndn[1];
+				data.A = ndn[0] >>> 0;
+				data.X = ndn[1] >>> 0;
 			}
 			sock.userEmit('roll', data);
 		} else if (msg.match(/^\/decks/) && user) {

@@ -301,7 +301,7 @@ const data = {
 		'Deal 20 spell damage to opponent. Deal 1 spell damage to each creature.',
 	immolate: x =>
 		`Sacrifice a creature you control. Gain ${
-			x + 1
+			+x + 1
 		}:6 plus 1 quanta of each other element.`,
 	improve:
 		'Transform a target creature into a random mutant creature. Mutant creatures gain a random ability, 0-4 strength, and 0-4 hp.',
@@ -751,7 +751,7 @@ const data = {
 			c.element
 		} & quanta of mark`,
 	v_plague: "Poison foe's creatures. Removes cloak",
-	v_platearmor: x => `Target gains 0|${x}`,
+	v_platearmor: x => `Target creature gains 0|${x}.`,
 	v_poison: {
 		hit: 'Apply poison on hit. Throttled',
 		cast: 'Apply poison to foe',

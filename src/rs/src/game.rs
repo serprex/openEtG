@@ -743,7 +743,7 @@ impl Game {
 			.map(|sk| sk.as_ref())
 			.unwrap_or(&[])
 			.iter()
-			.map(|&sk| generated::id_skill(sk))
+			.map(|&sk| generated::id_skill(sk) | sk.param1() << 16 | sk.param2() << 24)
 			.collect()
 	}
 
@@ -1260,11 +1260,11 @@ impl Game {
 							hitdata.blocked = trueatk - finaldmg;
 							let dmg = self.dmg(data.tgt, finaldmg);
 							hitdata.dmg = dmg;
-							if dmg != 0 {
+							if hitdata.dmg != 0 {
 								self.trigger_data(Event::Hit, id, data.tgt, &mut hitdata);
-								if dmg != trueatk {
-									self.trigger_data(Event::Blocked, id, shield, &mut hitdata);
-								}
+							}
+							if hitdata.blocked != 0 {
+								self.trigger_data(Event::Blocked, id, shield, &mut hitdata);
 							}
 						}
 					}
