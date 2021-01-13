@@ -493,7 +493,7 @@ const data = {
 		"During your opponent's turn, your hand and quanta pool are protected and you cannot be silenced.",
 	unsanctify: {
 		ownplay:
-			"Nullify opponent's sanctuary effect from Sancuary or Dream Catcher.",
+			"Nullify opponent's sanctuary effect from Sanctuary or Dream Catcher.",
 	},
 	scatterhand:
 		'Target player shuffles their hand into their deck and draws an equal number of cards. Cards drawn this way do not trigger effects that occur when a card is drawn. Draw a card.',

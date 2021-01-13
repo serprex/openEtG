@@ -3838,7 +3838,7 @@ impl Skill {
 				}
 			}
 			Self::unsanctify => {
-				ctx.set(ctx.get_owner(c), Stat::sanctuary, 0);
+				ctx.set(ctx.get_foe(ctx.get_owner(c)), Stat::sanctuary, 0);
 			}
 			Self::unsummon => {
 				let town = ctx.get_owner(t);
