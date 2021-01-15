@@ -1082,7 +1082,7 @@ impl Game {
 				Skill::v_paradox,
 				Skill::v_lycanthropy,
 				Skill::v_infect,
-				Skill::v_gpull,
+				Skill::gpull,
 				Skill::v_devour,
 				Skill::v_mutation,
 				Skill::v_growth,

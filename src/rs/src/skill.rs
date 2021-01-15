@@ -597,7 +597,6 @@ pub enum Skill {
 	v_freeze,
 	v_gaincharge2,
 	v_gas,
-	v_gpull,
 	v_gpullspell,
 	v_gratitude,
 	v_growth,
@@ -2065,13 +2064,13 @@ impl Skill {
 			Self::golemhit => {
 				ctx.queue_attack(t, 0);
 			}
-			Self::gpull | Self::v_gpull => Skill::gpullspell.proc(ctx, c, c, data),
+			Self::gpull => Skill::gpullspell.proc(ctx, c, c, data),
 			Self::gpullspell | Self::v_gpullspell => {
 				ctx.fx(t, Fx::Pull);
-				if ctx.get_kind(t) == etg::Player {
-					ctx.set(t, Stat::gpull, 0);
-				} else {
+				if ctx.get_kind(t) == etg::Creature {
 					ctx.set(ctx.get_owner(t), Stat::gpull, t);
+				} else {
+					ctx.set(t, Stat::gpull, 0);
 				}
 			}
 			Self::gratitude => {

@@ -304,7 +304,7 @@ const data = {
 			+x + 1
 		}:6 plus 1 quanta of each other element.`,
 	improve:
-		'Transform a target creature into a random mutant creature. Mutant creatures gain a random ability, 0-4 strength, and 0-4 hp.',
+		'Transform a target creature into a random mutant creature. Mutant creatures gain a random ability, 1-5 strength, and 1-5 hp.',
 	inertia: 'When any card you own is targeted by either player, gain 2:3.',
 	inflation: 'Increase the cost of all active abilities by 1.',
 	ink: 'Summon a Cloak that lasts 1 turn.',
@@ -684,7 +684,6 @@ const data = {
 		} turns. Being frozen disables attacking & per turn skills`,
 	v_gaincharge2: 'Gain 2 stacks per death',
 	v_gas: 'Summon an Unstable Gas',
-	v_gpull: 'Intercept attacks directed to owner',
 	v_gpullspell: 'Target creature intercepts attacks directed to its owner',
 	v_gratitude: 'Heal owner 3, 5 if 1:5',
 	v_growth1: {

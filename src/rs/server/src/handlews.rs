@@ -2166,7 +2166,7 @@ pub async fn handle_ws(
 												}
 											}
 											/* TODO fix ORDER BY */
-											if let Ok(bids) = trx.query("select b.id, u.name u, b.p, b.q from bazaar b join users u on b.user_id = u.id where b.code = $1 order by sign(b.p), abs(b.p)", &[&code]).await {
+											if let Ok(bids) = trx.query("select b.id, u.name u, b.p, b.q from bazaar b join users u on b.user_id = u.id where b.code = $1 order by b.p desc", &[&code]).await {
 												let mut ops: Vec<BzBidOp> = Vec::new();
 												for bid in bids.iter() {
 													let id: i64 = bid.get(0);

@@ -271,7 +271,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 				}
 				dmg
 			}
-			Skill::gpull | Skill::v_gpull => {
+			Skill::gpull => {
 				if ctx.get_kind(c) == etg::Spell || c != ctx.get(ctx.get_owner(c), Stat::gpull) {
 					2.0
 				} else {
