@@ -473,7 +473,7 @@ const data = {
 	regeneratespell:
 		'Replace target creature or non-stacking permanent\'s abilities with "Heal this card\'s owner 5 every turn or when this card attacks."',
 	regrade:
-		"If target card is upgraded, it becomes unupgraded. If target card is unupgraded, it becomes upgraded. Gain 1 quanta of target card's element.",
+		"If target card is upgraded, it becomes unupgraded. If target card is unupgraded, it becomes upgraded. Gain 1 quanta of target card's element. Cannot target stacks.",
 	reinforce:
 		"Target creature gains strength and HP equal to this creature's strength and HP. Destroy this creature.",
 	ren:

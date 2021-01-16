@@ -79,7 +79,7 @@ for (const credit of [
 	[['Hawanja', 'https://hawanja.deviantart.com'], ['4vs']],
 	[
 		['jarozaoz', 'http://elementscommunity.org/forum/profile/?u=6364'],
-		['4t3', '4vn', '532', '5le', '5op'],
+		['4t3', '4vn', '5le', '5op'],
 	],
 	[
 		['kae', 'https://willowdream.deviantart.com'],
@@ -387,7 +387,7 @@ for (const credit of [
 	],
 	[
 		['sael', 'mailto:animaetmateria@gmail.com'],
-		['4vl', '55s', '58t', '5fp', '5rp', '5s7', '5sb', '5up'],
+		['4vl', '532', '55s', '58t', '5fp', '5rp', '5s7', '5sb', '5up'],
 	],
 	[
 		['serprex', 'https://serprex.github.io'],

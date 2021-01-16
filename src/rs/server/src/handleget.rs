@@ -95,7 +95,7 @@ pub async fn compress_and_cache(
 	path: String,
 	resp: PlainResponse,
 ) -> CachedResponse {
-	use async_compression::tokio_02::write::{BrotliEncoder, GzipEncoder};
+	use async_compression::tokio::write::{BrotliEncoder, GzipEncoder};
 	use tokio::io::AsyncWriteExt;
 	match match encoding {
 		Encoding::br => {

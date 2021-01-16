@@ -103,8 +103,8 @@ async fn main() {
 		loop {
 			tokio::select! {
 				_ = interval.tick() => (),
-				msg = gccloserx.recv() => {
-					if msg.is_some() {
+				msg = gccloserx.changed() => {
+					if msg.is_ok() {
 						continue;
 					} else {
 						break;
@@ -146,7 +146,7 @@ async fn main() {
 		.and_then(handleget::handle_get);
 	let (_, server) = warp::serve(ws.or(full))
 		.bind_with_graceful_shutdown(([0, 0, 0, 0], listenport), async move {
-			while closerx.recv().await.is_some() {}
+			while closerx.changed().await.is_ok() {}
 		});
 	let serverloop = tokio::spawn(server);
 

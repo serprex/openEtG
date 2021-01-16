@@ -19,6 +19,7 @@ function Order({ order, onClick }) {
 const CardOrders = connect(({ user }) => ({ uname: user.name }))(
 	function CardOrders({ uname, bc, onClickBuy, onClickSell, onClickCancel }) {
 		if (!bc) return null;
+		bc = bc.slice().sort((x, y) => y.p - x.p);
 		const hasMine = bc.some(({ u }) => u === uname);
 		return (
 			<>
@@ -291,11 +292,19 @@ export default connect(({ user }) => ({ user }))(
 				sellq: 0,
 				buyq: 0,
 				showOrders: false,
+				cardpool: null,
+				userpool: null,
 			};
 		}
 
 		static getDerivedStateFromProps(nextProps, prevState) {
-			return { cardpool: etgutil.deck2pool(nextProps.user.pool) };
+			if (nextProps.user.pool === prevState.userpool) {
+				return null;
+			}
+			return {
+				cardpool: etgutil.deck2pool(nextProps.user.pool),
+				userpool: nextProps.user.pool,
+			};
 		}
 
 		componentDidMount() {
@@ -322,10 +331,6 @@ export default connect(({ user }) => ({ user }))(
 							for (const code in data.add) {
 								newbz[code] = newbz[code] ? newbz[code].slice() : [];
 								newbz[code].push(...data.add[code]);
-								newbz[code].sort(
-									(a, b) =>
-										(a.p > 0) - (b.p > 0) || Math.abs(a.p) - Math.abs(b.p),
-								);
 							}
 							return { bz: newbz };
 						});

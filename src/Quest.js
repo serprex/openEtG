@@ -459,8 +459,22 @@ quarks.pgrare = {
 	name: 'Master of Arms',
 	hp: 150,
 	wintext:
-		'You have proved your worth for the Master of Arms, and he gives you one of his rare cards.',
-	choicerewards: 'rare',
+		'You have proved your worth for the Master of Arms, and he gives you one of his rare weapons.',
+	/* prettier-ignore */
+	choicerewards: [
+		5109, 5124,
+		5210, 5222,
+		5308, 5324,
+		5407, 5423,
+		5509, 5523,
+		5607, 5621,
+		5708, 5723,
+		5809, 5822,
+		5090, 5924,
+		6008, 6025,
+		6107, 6126,
+		6206, 6223,
+	],
 	info: 'Fight the Master of Arms at the Proving Grounds!',
 };
 quarks.pgshard = {
@@ -469,8 +483,21 @@ quarks.pgshard = {
 	name: 'Gemcutter',
 	hp: 150,
 	wintext:
-		'You have proved your worth for the Gemcutter and he gives you one of his shards.',
-	choicerewards: 'shard',
+		'You have proved your worth for the Gemcutter and he gives you one of his rare shards.',
+	choicerewards: [
+		5130,
+		5230,
+		5330,
+		5430,
+		5530,
+		5630,
+		5730,
+		5830,
+		5930,
+		6030,
+		6130,
+		6230,
+	],
 	info: 'Fight the Gemcutter at the Proving Grounds!',
 };
 quarks.pgfarmer = {

@@ -439,11 +439,31 @@ impl UserMessage {
 }
 
 #[derive(Serialize, Clone)]
+pub struct ArenaInfo {
+	pub day: u32,
+	pub draw: i32,
+	pub mark: i32,
+	pub hp: i32,
+	pub win: i32,
+	pub loss: i32,
+	pub card: i32,
+	pub deck: String,
+	pub rank: i32,
+	pub bestrank: i32,
+}
+
+#[derive(Serialize, Clone)]
 #[serde(tag = "x")]
 pub enum WsResponse<'a> {
+	arenainfo {
+		#[serde(rename = "A")]
+		a1: Option<Box<ArenaInfo>>,
+		#[serde(rename = "B")]
+		a2: Option<Box<ArenaInfo>>,
+	},
 	arenatop {
 		lv: u8,
-		top: &'a [[Value; 6]],
+		top: &'a [(String, i32, i32, i32, u32, i32)],
 	},
 	boostergive {
 		cards: &'a Cardpool,
@@ -456,8 +476,18 @@ pub enum WsResponse<'a> {
 		g: i32,
 		pool: &'a Cardpool,
 	},
+	#[serde(rename = "bzgive")]
+	bzgivec {
+		msg: &'a str,
+		c: &'a str,
+	},
+	#[serde(rename = "bzgive")]
+	bzgiveg {
+		msg: &'a str,
+		g: i32,
+	},
 	bzread {
-		bz: &'a FxHashMap<u16, Vec<Value>>,
+		bz: &'a FxHashMap<u16, Vec<BzBid<'a>>>,
 	},
 	challenge {
 		f: &'a str,
@@ -467,6 +497,18 @@ pub enum WsResponse<'a> {
 	chat {
 		mode: u8,
 		msg: &'a str,
+	},
+	#[serde(rename = "chat")]
+	chatu {
+		mode: u8,
+		msg: &'a str,
+		u: &'a str,
+	},
+	#[serde(rename = "chat")]
+	chatguest {
+		guest: bool,
+		msg: &'a str,
+		u: &'a str,
 	},
 	clear,
 	codecard {

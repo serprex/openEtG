@@ -13,16 +13,17 @@ use openssl::hash::MessageDigest;
 use openssl::pkcs5::pbkdf2_hmac;
 use rand::distributions::{Distribution, Uniform};
 use rand::Rng;
-use serde_json::{json, Map, Value};
+use serde_json::{Map, Value};
 use tokio::join;
 use tokio::sync::{mpsc, Mutex, MutexGuard, RwLock};
+use tokio_stream::wrappers::UnboundedReceiverStream;
 use warp::ws::{Message, WebSocket};
 
 use crate::cardpool::Cardpool;
 use crate::etgutil::{decode_code, encode_code, encode_count, iterraw};
 use crate::generated::{DG_COUNT, MAGE_COUNT, ORIGINAL_STARTERS, STARTERS};
 use crate::json::{
-	BzBid, GamesData, GamesDataPlayer, GamesMove, LegacyUser, UserMessage, WsResponse,
+	ArenaInfo, BzBid, GamesData, GamesDataPlayer, GamesMove, LegacyUser, UserMessage, WsResponse,
 };
 use crate::users::{self, HashAlgo, UserData, UserObject, Users};
 use crate::{get_day, svg, PgPool};
@@ -67,10 +68,6 @@ pub struct Sock {
 pub type AsyncUsers = Arc<RwLock<Users>>;
 pub type AsyncSocks = Arc<RwLock<HashMap<usize, Sock>>>;
 pub type AsyncUserSocks = Arc<RwLock<HashMap<String, usize>>>;
-
-fn mkmsg(val: Value) -> Result<Message, warp::Error> {
-	Ok(Message::text(format!("{}", val)))
-}
 
 fn sendmsg<T>(tx: &WsSender, val: &T)
 where
@@ -365,6 +362,7 @@ pub async fn handle_ws(
 
 	let (user_ws_tx, mut user_ws_rx) = ws.split();
 	let (tx, rx) = mpsc::unbounded_channel();
+	let rx = UnboundedReceiverStream::new(rx);
 	tokio::spawn(rx.forward(user_ws_tx).map(|result| {
 		if let Err(e) = result {
 			println!("send err {}", e);
@@ -647,8 +645,8 @@ pub async fn handle_ws(
 								&[&userid],
 								).await {
 								let today = get_day();
-								let mut result = Map::new();
-								result.insert(String::from("x"), Value::from("arenainfo"));
+								let mut a1 = None;
+								let mut a2 = None;
 								for row in rows.iter() {
 									let arena_id: i32 = row.get(0);
 									let day: i32 = row.get(1);
@@ -661,21 +659,24 @@ pub async fn handle_ws(
 									let deck: String = row.get(8);
 									let rank: i32 = row.get(9);
 									let bestrank: i32 = row.get(10);
-									let key = String::from(if arena_id == 1 { "A" } else { "B" });
-									result.insert(key, json!({
-										"day": today.saturating_sub(day as u32) as i32,
-										"draw": draw,
-										"mark": mark,
-										"hp": hp,
-										"win": won,
-										"loss": loss,
-										"card": code,
-										"deck": deck,
-										"rank": rank,
-										"bestrank": bestrank,
+									*if arena_id == 1 {
+										&mut a1
+									} else {
+										&mut a2
+									} = Some(Box::new(ArenaInfo {
+										day: today.saturating_sub(day as u32),
+										draw: draw,
+										mark: mark,
+										hp: hp,
+										win: won,
+										loss: loss,
+										card: code,
+										deck: deck,
+										rank: rank,
+										bestrank: bestrank,
 									}));
 								}
-								sendmsg(&tx, &Value::Object(result));
+								sendmsg(&tx, &WsResponse::arenainfo { a1, a2 });
 							}
 						}
 						UserMessage::modarena { aname, won, lv, .. } => {
@@ -1428,12 +1429,11 @@ pub async fn handle_ws(
 											);
 											sendmsg(
 												&foesock.tx,
-												&json!({
-													"x": "chat",
-													"u": &u,
-													"mode": 1,
-													"msg": "has canceled the trade",
-												}),
+												&WsResponse::chatu {
+													u: &u,
+													mode: 1,
+													msg: "has canceled the trade",
+												},
 											);
 											let userid = user.unwrap().lock().await.id;
 											let foeuserid = foeuser.lock().await.id;
@@ -1628,12 +1628,15 @@ pub async fn handle_ws(
 								if let Some(foesock) = socks.read().await.get(&foesockid) {
 									sendmsg(
 										&foesock.tx,
-										&json!({
-											"x": "chat",
-											"u": &u,
-											"mode": 1,
-											"msg": format!("You have sent a {} request to {}!", if trade { "trade" } else { "PvP" }, u),
-										}),
+										&WsResponse::chatu {
+											u: &u,
+											mode: 1,
+											msg: &format!(
+												"You have sent a {} request to {}!",
+												if trade { "trade" } else { "PvP" },
+												u
+											),
+										},
 									);
 								}
 							}
@@ -1643,19 +1646,27 @@ pub async fn handle_ws(
 								let mut sent = false;
 								if let Some(tosockid) = usersocks.read().await.get(&to) {
 									if let Some(sock) = socks.read().await.get(&tosockid) {
-										if sock
-											.tx
-											.send(mkmsg(
-												json!({ "x": "chat", "mode": 2, "u": u, "msg": msg }),
-											))
-											.is_ok()
+										if serde_json::to_string(&WsResponse::chatu {
+											mode: 2,
+											u: &u,
+											msg: &msg,
+										})
+										.ok()
+										.and_then(|msgstr| {
+											sock.tx.send(Ok(Message::text(msgstr))).ok()
+										})
+										.is_some()
 										{
 											sent = true;
 											let mut tou = String::from("To ");
 											tou.push_str(&to);
 											sendmsg(
 												&tx,
-												&json!({ "x": "chat", "mode": 2, "u": tou, "msg": msg }),
+												&WsResponse::chatu {
+													mode: 2,
+													u: &tou,
+													msg: &msg,
+												},
 											);
 										}
 									}
@@ -1663,17 +1674,23 @@ pub async fn handle_ws(
 								if !sent {
 									sendmsg(
 										&tx,
-										&json!({ "x": "chat", "mode": 1, "msg": format!("{} isn't here right now.\nFailed to deliver: {}", to, msg)}),
+										&WsResponse::chat {
+											mode: 1,
+											msg: &format!(
+												"{} isn't here right now.\nFailed to deliver: {}",
+												to, msg
+											),
+										},
 									);
 								}
 							} else {
 								broadcast(
 									&socks,
-									&json!({
-										"x": "chat",
-										"u": u,
-										"msg": msg,
-									}),
+									&WsResponse::chatu {
+										mode: 0,
+										u: &u,
+										msg: &msg,
+									},
 								)
 								.await;
 							}
@@ -1687,12 +1704,11 @@ pub async fn handle_ws(
 								guestname.push_str(&u);
 								broadcast(
 									&socks,
-									&json!({
-										"x": "chat",
-										"guest": true,
-										"u": guestname,
-										"msg": msg,
-									}),
+									&WsResponse::chatguest {
+										guest: true,
+										u: &guestname,
+										msg: &msg,
+									},
 								)
 								.await;
 							}
@@ -1991,16 +2007,16 @@ pub async fn handle_ws(
 						UserMessage::arenatop { lv, .. } => {
 							let today = get_day();
 							if let Ok(rows) = client.query("select u.name, a.score, a.won, a.loss, a.day, a.code from arena a join users u on u.id = a.user_id where a.arena_id = $1 order by a.\"rank\" limit 30", &[if lv == 0 { &1i32 } else { &2i32 }]).await {
-								let mut top = Vec::<[Value; 6]>::with_capacity(rows.len());
+								let mut top = Vec::with_capacity(rows.len());
 								for row in rows {
-									top.push([
-										Value::from(row.get::<usize, String>(0)),
-										Value::from(row.get::<usize, i32>(1)),
-										Value::from(row.get::<usize, i32>(2)),
-										Value::from(row.get::<usize, i32>(3)),
-										Value::from(today.saturating_sub(row.get::<usize, i32>(4) as u32)),
-										Value::from(row.get::<usize, i32>(5)),
-									]);
+									top.push((
+										row.get::<usize, String>(0),
+										row.get::<usize, i32>(1),
+										row.get::<usize, i32>(2),
+										row.get::<usize, i32>(3),
+										today.saturating_sub(row.get::<usize, i32>(4) as u32),
+										row.get::<usize, i32>(5),
+									));
 								}
 								sendmsg(
 									&tx,
@@ -2165,7 +2181,6 @@ pub async fn handle_ws(
 													continue;
 												}
 											}
-											/* TODO fix ORDER BY */
 											if let Ok(bids) = trx.query("select b.id, u.name u, b.p, b.q from bazaar b join users u on b.user_id = u.id where b.code = $1 order by b.p desc", &[&code]).await {
 												let mut ops: Vec<BzBidOp> = Vec::new();
 												for bid in bids.iter() {
@@ -2339,28 +2354,39 @@ pub async fn handle_ws(
 												etg::card::OpenSet.try_get(sell.code as i32)
 											{
 												let cardname = svg::card_name(card);
-												sendmsg(
-													&selltx,
-													&if sell.p > 0 {
-														let ecount = encode_count(sell.amt as u32);
-														let ecode = encode_code(sell.code as i32);
-														let givec = [
-															ecount[0], ecount[1], ecode[0],
-															ecode[1], ecode[2],
-														];
-														json!({
-															"x": "bzgive",
-															"msg": format!("{} sold you {} of {} @ {}", u, sell.amt, cardname, sell.p),
-															"c": unsafe { std::str::from_utf8_unchecked(&givec[..]) },
-														})
-													} else {
-														json!({
-															"x": "bzgive",
-															"msg": format!("{} bought {} of {} @ {} from you.", u, sell.amt, cardname, -sell.p),
-															"g": sell.amt as i32 * -sell.p,
-														})
-													},
-												);
+												if sell.p > 0 {
+													let ecount = encode_count(sell.amt as u32);
+													let ecode = encode_code(sell.code as i32);
+													let givec = [
+														ecount[0], ecount[1], ecode[0], ecode[1],
+														ecode[2],
+													];
+													sendmsg(
+														&selltx,
+														&WsResponse::bzgivec {
+															msg: &format!(
+																"{} sold you {} of {} @ {}",
+																u, sell.amt, cardname, sell.p
+															),
+															c: unsafe {
+																std::str::from_utf8_unchecked(
+																	&givec[..],
+																)
+															},
+														},
+													)
+												} else {
+													sendmsg(
+														&selltx,
+														&WsResponse::bzgiveg {
+															msg: &format!(
+																"{} bought {} of {} @ {} from you.",
+																u, sell.amt, cardname, -sell.p
+															),
+															g: sell.amt as i32 * -sell.p,
+														},
+													)
+												}
 											}
 										}
 									}
@@ -2396,18 +2422,16 @@ pub async fn handle_ws(
 							}
 						}
 						UserMessage::bzread => {
-							let mut bz: FxHashMap<u16, Vec<Value>> = Default::default();
+							let mut bz: FxHashMap<u16, Vec<_>> = Default::default();
 							if let Ok(bids) = client.query("select u.name, b.code, b.q, b.p from bazaar b join users u on b.user_id = u.id", &[]).await {
 								for bid in bids.iter() {
 									let name: String = bid.get(0);
 									let code: i32 = bid.get(1);
 									let q: i32 = bid.get(2);
 									let p: i32 = bid.get(3);
-									bz.entry(code as u16).or_default().push(json!({
-										"u": name,
-										"q": q,
-										"p": p,
-									}));
+									bz.entry(code as u16).or_default().push(BzBid {
+										u: Cow::Owned(name), q, p
+									});
 								}
 							}
 							sendmsg(&tx, &WsResponse::bzread { bz: &bz });

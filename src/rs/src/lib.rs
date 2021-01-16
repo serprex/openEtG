@@ -542,8 +542,6 @@ mod test {
 		Skill::hasten.proc(&mut ctx, p2, 0, &mut ProcData::default());
 		Skill::hasten.proc(&mut ctx, p2, 0, &mut ProcData::default());
 		assert_eq!(ctx.get(barrier, Stat::charges), 9);
-		Skill::hasten.proc(&mut ctx, p2, 0, &mut ProcData::default());
-		assert_eq!(ctx.get(barrier, Stat::charges), 9);
 		ctx.r#move(GameMove::End(0));
 		ctx.r#move(GameMove::End(0));
 		Skill::hasten.proc(&mut ctx, p2, 0, &mut ProcData::default());

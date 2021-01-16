@@ -81,10 +81,11 @@ export default class Reward extends Component {
 										card: this.state.chosenReward,
 									});
 								}
-							} else
+							} else {
 								store.store.dispatch(
 									store.chatMsg('Choose a reward', 'System'),
 								);
+							}
 						}}
 						style={{
 							position: 'absolute',

@@ -452,7 +452,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::sanctify => 2.0,
 			Skill::scramble | Skill::v_scramble => {
 				(13 - ctx
-					.get_player(ctx.get_owner(c))
+					.get_player(ctx.get_foe(ctx.get_owner(c)))
 					.quanta
 					.iter()
 					.map(|&q| (q != 0) as i32)
@@ -944,7 +944,7 @@ fn evalthing(
 			}
 			let poison = ctx.get(id, Stat::poison);
 			if poison > 0 {
-				hp = hp - poison * 2;
+				hp -= poison * 2;
 				if ctx.get(id, Stat::aflatoxin) != 0 {
 					score -= 2.0;
 				}

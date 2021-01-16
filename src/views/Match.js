@@ -778,7 +778,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						element: c.card.element,
 						costele: isSpell ? c.card.costele : c.castele,
 						cost: isSpell ? c.card.cost : c.cast,
-						name: isSpell ? c.card.name : c.getSkill('cast')[0],
+						name: isSpell ? c.card.name : skillName(c, c.getSkill('cast')),
 						upped: c.card.upped,
 						shiny: c.card.shiny,
 						c: cmd.c,
@@ -807,8 +807,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 					}
 					const foeplays = new Map(state.foeplays),
 						delta = { foeplays };
-					if (!foeplays.has(turn)) foeplays.set(turn, []);
-					foeplays.set(turn, foeplays.get(turn).concat([play]));
+					foeplays.set(turn, (foeplays.get(turn) ?? []).concat([play]));
 					if (
 						cmd.x === 'cast' &&
 						iscmd &&
@@ -1183,7 +1182,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 									cb(tgt);
 									this.setState({ targeting: null });
 								},
-								text: obj.getSkill('cast')[0],
+								text: skillName(obj, obj.getSkill('cast')),
 								src: obj,
 							},
 						});
@@ -1497,7 +1496,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							className={'ico sacrifice'}
 							style={{
 								position: 'absolute',
-								left: j ? '800px' : '0',
+								left: '0',
 								top: j ? '7px' : '502px',
 								pointerEvents: 'none',
 							}}
