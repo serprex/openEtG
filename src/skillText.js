@@ -108,8 +108,12 @@ const data = {
 			: 'Unburrow.',
 	catapult:
 		"Sacrifice target creature you control to damage opponent for 100 * Creature's HP / (100 + Creature's HP). Frozen creautres deal 1.5x more. Poisoned creatures transfer their poison to opponent.",
-	catlife:
-		'Enters play with 9 lives. When it dies, this creature loses a life and revives with full HP.',
+	catlife: c =>
+		`Has ${c.getStatus(
+			'lives',
+		)} lives. When it dies, this creature loses a life and revives with ${
+			asCard(c).attack
+		}|${asCard(c).health} stats.`,
 	cell: 'Becomes a Malignant Cell if poisoned.',
 	chaos: c =>
 		(c.upped ? '20% chance to evade attacks. ' : '') +

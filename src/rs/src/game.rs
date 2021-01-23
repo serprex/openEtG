@@ -1441,13 +1441,13 @@ impl Game {
 		let mut dmgdata = ProcData::default();
 		dmgdata.dmg = dmg;
 		self.proc_data(Event::Dmg, id, &mut dmgdata);
-		if self.truehp(id) <= 0 {
-			if !dontdie {
+		if dmg > 0 {
+			if !dontdie && self.truehp(id) <= 0 {
 				self.die(id);
+			} else if self.get(id, Stat::voodoo) != 0 {
+				let foe = self.get_foe(self.get_owner(id));
+				self.dmg(foe, dmg);
 			}
-		} else if dmg > 0 && self.get(id, Stat::voodoo) != 0 {
-			let foe = self.get_foe(self.get_owner(id));
-			self.dmg(foe, dmg);
 		}
 		if sosa {
 			-capdmg

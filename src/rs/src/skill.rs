@@ -866,7 +866,11 @@ impl Skill {
 			Self::readiness => Tgt::crea,
 			Self::reap => Tgt::notskele,
 			Self::regeneratespell => Tgt::Or(&[Tgt::crea, Tgt::And(&[Tgt::perm, Tgt::nonstack])]),
-			Self::regrade => Tgt::And(&[Tgt::notself, Tgt::notplay, Tgt::nonstack]),
+			Self::regrade => Tgt::And(&[
+				Tgt::notself,
+				Tgt::notplay,
+				Tgt::Or(&[Tgt::card, Tgt::nonstack]),
+			]),
 			Self::reinforce => Tgt::crea,
 			Self::ren => Tgt::crea,
 			Self::rewind => Tgt::crea,

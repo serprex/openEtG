@@ -1730,7 +1730,10 @@ pub async fn handle_ws(
 											salt: String::new(),
 											iter: 0,
 											algo: users::HASH_ALGO,
-											data: Default::default(),
+											data: UserData {
+												oracle: u32::MAX,
+												..Default::default()
+											},
 										}));
 										wusers.insert(username.clone(), user.clone());
 										user
@@ -1942,21 +1945,24 @@ pub async fn handle_ws(
 						UserMessage::roll {
 							u, rolls, sides, ..
 						} => {
-							let range = Uniform::new_inclusive(1, sides as u64);
 							let mut sum = 0u64;
-							let mut rng = rand::thread_rng();
-							for _ in 0..rolls {
-								sum = sum.saturating_add(range.sample(&mut rng));
+							{
+								let range = Uniform::new_inclusive(1, sides as u64);
+								let mut rng = rand::thread_rng();
+								for _ in 0..rolls {
+									sum = sum.saturating_add(range.sample(&mut rng));
+								}
 							}
-							sendmsg(
-								&tx,
+							broadcast(
+								&socks,
 								&WsResponse::roll {
 									u: &u,
 									rolls,
 									sides,
 									sum,
 								},
-							);
+							)
+							.await;
 						}
 						UserMessage::librarywant { f } => {
 							if let Some(user) = users.write().await.load(&*client, &f).await {
