@@ -116,8 +116,9 @@ const data = {
 		}|${asCard(c).health} stats.`,
 	cell: 'Becomes a Malignant Cell if poisoned.',
 	chaos: c =>
-		(c.upped ? '20% chance to evade attacks. ' : '') +
-		'Non-ranged attacking creatures have a 30% chance to have a random effect cast on them.',
+		`${
+			c.upped ? '20% chance to evade attacks. ' : ''
+		}Non-ranged attacking creatures have a 30% chance to have a random effect cast on them.`,
 	chimera:
 		"Combine all your creatures to form a Chimera with momentum, gravity pull, and the total of your creatures' combined strength and HP.",
 	chromastat:

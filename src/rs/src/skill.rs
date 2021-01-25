@@ -1268,7 +1268,7 @@ impl Skill {
 				let rng = ctx.rng();
 				if rng < 0.5 {
 					if rng < 0.3 {
-						if ctx.get_kind(c) == etg::Creature && ctx.get(c, Stat::ranged) == 0 {
+						if ctx.get_kind(t) == etg::Creature && ctx.get(t, Stat::ranged) == 0 {
 							Skill::cseed.proc(ctx, c, t, data);
 						}
 					} else if card::Upped(ctx.get(c, Stat::card)) {
