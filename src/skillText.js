@@ -271,15 +271,16 @@ const data = {
 	gpullspell:
 		"Creatures attacking target creature's owner instead attack target creature.\nIf target is a player, creatures attack that player when attacking that player.",
 	gratitude: 'Heal yourself 4 at the end of your turn.',
-	growth: (atk, hp = atk) => {
+	growth: (atk, hp) => {
 		const x = `${atk}|${hp}`;
 		return {
 			death: `When any creature dies, gain ${x}.`,
-			ownfreeze: `When this card would be frozen, instead gain ${x}.`,
 			cast: `Gain ${x}.`,
 			ownattack: `This creature gains ${x} when it attacks.`,
 		};
 	},
+	icegrowth: (atk, hp) =>
+		`When this card would be frozen, instead gain ${atk}|${hp}.`,
 	guard:
 		"Delay target creature and this creature. If target creature isn't airborne or this creature is airborne, this creature deals damage equal to its strength to target creature.",
 	halveatk: "This creature's strength is halved after it attacks.",

@@ -3,6 +3,7 @@ import { PureComponent, Component, createRef } from 'react';
 
 import * as etgutil from '../etgutil.js';
 import Cards from '../Cards.js';
+import { Box } from '../Components/index.js';
 import * as Tutor from '../Components/Tutor.js';
 import * as sock from '../sock.js';
 import * as store from '../store.js';
@@ -221,14 +222,7 @@ const DeckSelector = connect(({ user }) => ({ user }))(
 
 		render() {
 			return (
-				<div
-					className="bgbox"
-					style={{
-						position: 'absolute',
-						top: '270px',
-						width: '900px',
-						height: '330px',
-					}}>
+				<Box x={0} y={270} width={900} height={330}>
 					<input
 						autoFocus
 						placeholder="Name"
@@ -276,7 +270,7 @@ const DeckSelector = connect(({ user }) => ({ user }))(
 						setPage={this.setPage}
 						onClick={this.props.loadDeck}
 					/>
-				</div>
+				</Box>
 			);
 		}
 	},

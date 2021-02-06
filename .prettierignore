@@ -3,4 +3,3 @@ node_modules/*
 *.min.js
 *.css
 *.json
-src/rng.js

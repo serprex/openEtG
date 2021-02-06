@@ -77,15 +77,14 @@ select:hover:active{background-color:#99aaaf}
 	z-index:-1;
 }
 .bgbox{
-	background-color:#0d2e4a;
-	border-style:solid;
-	border-width:2px;
-	border-left-color:#111;
-	border-bottom-color:#111;
-	border-top-color:#999;
-	border-right-color:#999;
-	padding:4px;
+	padding:8px;
 	overflow:hidden;
+	background-image:url(assets/bg_metal.webp);
+	box-shadow:0px -3px 8px 4px rgba(0, 0, 0, 0.85),
+		inset 3px 3px 3px 0 #000, inset -3px -3px 3px #666,
+		inset 0px 16px 20px -8px rgba(0, 0, 0, 0.85),
+		inset 0px -16px 20px -12px rgba(255, 255, 255, 0.3);
+	border-radius:0 0 16px 16px;
 }
 .tutorialbox{
 	background-color:rgba(255,255,255,0.7);

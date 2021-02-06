@@ -2161,7 +2161,15 @@ pub async fn handle_ws(
 									for (code, mut count) in iterraw(cards.as_bytes()) {
 										if let Some(card) = etg::card::OpenSet.try_get(code) {
 											let code16 = code as u16;
-											let sellval = SELL_VALUES[card.rarity as usize] as i32;
+											let sellval = SELL_VALUES[card.rarity as usize] as i32
+												* match (
+													etg::card::Upped(code),
+													etg::card::Shiny(code),
+												) {
+													(false, false) => 1,
+													(true, true) => 36,
+													_ => 6,
+												};
 											let mut codecount = if price > 0 {
 												0
 											} else {

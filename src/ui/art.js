@@ -387,6 +387,10 @@ for (const credit of [
 	],
 	[
 		['sael', 'mailto:animaetmateria@gmail.com'],
+		['Bronze', 'assets/pack0.webp'],
+		['Silver', 'assets/pack1.webp'],
+		['Gold', 'assets/pack2.webp'],
+		['Nymph', 'assets/pack3.webp'],
 		['4vl', '532', '55s', '58t', '5fp', '5rp', '5s7', '5sb', '5up'],
 	],
 	[

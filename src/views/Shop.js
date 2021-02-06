@@ -14,21 +14,18 @@ const packdata = [
 		cost: 15,
 		type: 'Bronze',
 		info: '10 Commons. ~3.4% rarity bonus',
-		color: '#c73',
 	},
 	{
 		cost: 25,
 		type: 'Silver',
 		info: '3 Commons, 3 Uncommons. ~6.8% rarity bonus',
-		color: '#ccc',
 	},
 	{
 		cost: 80,
 		type: 'Gold',
 		info: '1 Common, 2 Uncommons, 2 Rares. ~1.7% rarity bonus',
-		color: '#fd0',
 	},
-	{ cost: 250, type: 'Nymph', info: '1 Nymph', color: '#69b' },
+	{ cost: 250, type: 'Nymph', info: '1 Nymph' },
 ];
 
 class PackDisplay extends Component {
@@ -196,8 +193,8 @@ export default connect(({ user, opts }) => ({
 				<>
 					<Components.Box x={40} y={16} width={820} height={60} />
 					<Components.Box x={40} y={89} width={494} height={168} />
-					<Components.Box x={40} y={270} width={620} height={168} />
-					<Components.Box x={770} y={90} width={90} height={184} />
+					<Components.Box x={40} y={270} width={712} height={300} />
+					<Components.Box x={768} y={90} width={94} height={184} />
 					<Components.Text
 						text={this.props.user.gold + '$'}
 						style={{
@@ -294,46 +291,34 @@ export default connect(({ user, opts }) => ({
 							</>
 						)}
 					{packdata.map((pack, n) => (
-						<div
-							key={pack.type}
-							className="imgb"
-							onClick={() => {
-								const update = {
-									packrarity: n,
-									info2: pack.type + ' Pack: ' + pack.info,
-								};
-								this.setState(update);
-							}}
-							style={{
-								color: '#000',
-								position: 'absolute',
-								left: 50 + 125 * n + 'px',
-								top: 280 + 'px',
-								borderRadius: '6px',
-								border: '3px solid #000',
-								width: '100px',
-								height: '150px',
-								backgroundColor: pack.color,
-							}}>
-							<span
+						<>
+							<img
+								src={`/assets/pack${n}.webp`}
+								key={pack.type}
+								className="imgb"
+								onClick={() => {
+									this.setState({
+										packrarity: n,
+										info2: `${pack.type} Pack: ${pack.info}`,
+									});
+								}}
 								style={{
-									fontSize: '18px',
 									position: 'absolute',
-									top: '50%',
-									left: '50%',
-									transform: 'translate(-50%,-50%)',
-								}}>
-								{pack.type}
-							</span>
+									left: `${48 + 176 * n}px`,
+									top: '278px',
+								}}
+							/>
 							<Components.Text
 								text={pack.cost + '$'}
 								style={{
 									position: 'absolute',
-									left: '7px',
-									top: '122px',
+									left: `${48 + 176 * n}px`,
+									top: '542px',
+									width: '160px',
+									textAlign: 'center',
 								}}
 							/>
-						</div>
+						</>
 					))}
 					{elebuttons}
 					{this.state.cards && <PackDisplay cards={this.state.cards} />}
