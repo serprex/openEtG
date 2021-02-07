@@ -1932,7 +1932,7 @@ impl Skill {
 				let owner = ctx.get_owner(c);
 				if !ctx.get_player(owner).hand.is_full() {
 					let foe = ctx.get_foe(owner);
-					if ctx.get(foe, Stat::protectdeck) != 0 {
+					if ctx.get(foe, Stat::protectdeck) == 0 {
 						let id = ctx.draw(foe);
 						if id != 0 && ctx.addCard(owner, id) != -1 {
 							ctx.fx(id, Fx::StartPos(-foe));
