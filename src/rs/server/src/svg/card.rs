@@ -83,6 +83,7 @@ pub fn card(code: i32) -> Option<String> {
 	if card.cost != 0 {
 		result.push_str("<span style='position:absolute;right:2px;top:-150px'>");
 		write!(result, "{}", card.cost).ok();
+		result.push_str("</span>");
 		if card.element != card.costele {
 			result.push_str("<span class='ico ce");
 			write!(result, "{}", card.costele).ok();
