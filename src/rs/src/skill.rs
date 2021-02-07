@@ -1765,12 +1765,11 @@ impl Skill {
 				ctx.fx(t, Fx::Endow);
 				ctx.incrAtk(c, ctx.trueatk(t) - ctx.trigger_pure(Event::Buff, t, 0));
 				ctx.buffhp(c, 2);
-				if ctx.hasskill(t, Event::Cast, Skill::endow) {
-					ctx.rmskill(t, Event::Cast, Skill::endow);
-				} else {
-					ctx.set(c, Stat::cast, ctx.get(t, Stat::cast));
-					ctx.set(c, Stat::castele, ctx.get(t, Stat::castele));
-					ctx.get_thing_mut(c).skill = ctx.get_thing(t).skill.clone();
+				ctx.set(c, Stat::cast, ctx.get(t, Stat::cast));
+				ctx.set(c, Stat::castele, ctx.get(t, Stat::castele));
+				ctx.get_thing_mut(c).skill = ctx.get_thing(t).skill.clone();
+				if ctx.hasskill(c, Event::Cast, Skill::endow) {
+					ctx.rmskill(c, Event::Cast, Skill::endow);
 				}
 				for (&k, &v) in ctx.get_thing(t).status.clone().iter() {
 					match k {

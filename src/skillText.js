@@ -195,7 +195,8 @@ const data = {
 	empathy:
 		'At the end of your turn, heal 1 for each creature you own. For every 8 creatures you own (rounded down), pay 1:5 at the end of your turn.',
 	enchant: 'Target permanent becomes immaterial.',
-	endow: 'Gain the strength, skills, and statuses of target weapon. Gain 0|2.',
+	endow:
+		'Gain the strength, skills, and statuses of target weapon. Gain 0|2.\nCannot gain Endow skill.',
 	envenom:
 		'Target weapon gains "Give 1 poison on hit. Throttled (only triggers at most twice from Adrenaline), or target shield gains "25% chance to give non-ranged attackers 1 poison counter."',
 	epidemic:
