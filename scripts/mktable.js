@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/node --experimental-json-modules
 const write = process.stdout.write.bind(process.stdout);
 function writetd(...args) {
 	write('[tr]');

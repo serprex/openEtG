@@ -1,16 +1,7 @@
 import * as etg from './etg.js';
 import Card from './Card.js';
 
-const skipstat = new Set([
-	'hp',
-	'maxhp',
-	'atk',
-	'card',
-	'cost',
-	'costele',
-	'cast',
-	'castele',
-]);
+const skipstat = new Set(['hp', 'maxhp', 'atk', 'card', 'cast', 'castele']);
 
 export default function skillText(c) {
 	if (c instanceof Card && c.type === etg.Spell) {
@@ -20,7 +11,13 @@ export default function skillText(c) {
 		const ret = [],
 			stext = [];
 		for (const [key, val] of c.status) {
-			if (val === 0 || skipstat.has(key)) continue;
+			if (
+				val === 0 ||
+				skipstat.has(key) ||
+				(key === 'cost' && val === c.card.cost) ||
+				(key === 'costele' && val === c.card.costele)
+			)
+				continue;
 			const entry = statusText[key];
 			if (entry === undefined) {
 				const text = val === 1 ? key : val + key;
@@ -63,8 +60,6 @@ const data = {
 		"If target creature or weapon's attack is positive, it becomes negative. Otherwise, it becomes positive.",
 	appease:
 		"Sacrifice target creature you own and gain 1|1. If this ability isn't used, this creature will attack its owner. This creature attacks normally the turn it is played or if it loses this ability.",
-	atk2hp:
-		"Set target's maximum HP equal to its strength. Set its HP to its maximum HP.",
 	autoburrow:
 		'Until end of turn, your creatures with burrow enter play burrowed.',
 	axedraw:
@@ -81,6 +76,8 @@ const data = {
 	bless: 'Target gains 3|3.',
 	blockwithcharge:
 		'Each stack fully blocks one attacker and is then destroyed.',
+	bloodmoon:
+		'Aquatic creatures gain "Gain 1:8 when it attacks."\nGolems gain "Damage dealt by this card also reduces the defender\'s maximum HP."\nNocturnal creatures gain "Heal yourself equal to the damage dealt by this card."',
 	bolsterintodeck: 'Add 3 copies of target creature on top of your deck.',
 	boneyard: c =>
 		`Whenever a creature which isn\'t a Skeleton dies, summon a ${
@@ -140,7 +137,6 @@ const data = {
 		'Inflict a random effect on target creature. Possible effects include damage, lobotomize, parallel universe, gravity pull, reverse time, and freeze.',
 	cseed2:
 		'Inflict a random effect on target card. All existing effects are possible.',
-	darkness: 'Produces 1:11 when it attacks.',
 	deadalive: {
 		hit:
 			'When this card deals damage, trigger all effects that occur when a creature dies.',
@@ -209,6 +205,8 @@ const data = {
 	epochreset: {
 		cast: 'Reset your count of cards played this turn.',
 	},
+	equalize:
+		"Set target creature's maximum HP equal to its strength. Set its HP to its maximum HP.\nOr change target card's elemental cost to 1:0",
 	evade: x => `${x}% chance to evade attacks.`,
 	evade100: 'Completely block enemy attacks.',
 	evadecrea:
@@ -226,7 +224,6 @@ const data = {
 	firestorm: x =>
 		`Deal ${x} spell damage to all of target player\'s creatures, thawing them. Removes cloak.`,
 	firewall: 'Deals 1 damage to each non-ranged attacking creature.',
-	flatline: 'Opponent cannot gain quanta through the end of their next turn.',
 	flooddeath:
 		"Each player's non-aquatic creatures past their first five creature slots die at the end of that player's turn. Consumes 1:7 each turn. Does not stack.",
 	flyself:
@@ -300,7 +297,7 @@ const data = {
 		'Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature.\nGain 1:8 when played.',
 	],
 	hope:
-		'Blocks one additional damage for each creature you control that produces 1:8 every turn.',
+		'Blocks one additional damage for each creature you control that gain 1:8 when attacking.',
 	icebolt:
 		'Deal 2 spell damage plus one per 5:7 you have after playing this card. 25% plus 5% per point of damage chance to freeze target.',
 	ignite:
@@ -328,7 +325,7 @@ const data = {
 		"Equip target creature as a weapon. If target creature's owner already had a weapon equipped, return it to their hand. Heal target creature's owner equal to target creature's HP.",
 	lobotomize: "Remove target creature's abilities.",
 	locket:
-		"Produces quanta matching your mark each turn, until set to produce quanta of a specific element. Doesn't operate while frozen.",
+		"Gains quanta matching your mark each turn, until set to gain quanta of a specific element. Doesn't operate while frozen.",
 	locketshift:
 		"Switch this card's production to match the element of any target, including immaterial and burrowed cards.",
 	loot:
@@ -340,7 +337,7 @@ const data = {
 			: 'Expires at end of turn';
 	},
 	luciferin:
-		'Your creatures without skills gain "Produces 1:8 when it attacks."\nHeal yourself 10.\nRemoves cloak.',
+		'Your creatures without skills gain "Gain 1:8 when it attacks."\nHeal yourself 10.\nRemoves cloak.',
 	lycanthropy: 'Remove this ability and gain 5|5 and become nocturnal.',
 	martyr: 'Gains 1|0 for every point of damage this card receives.',
 	mend: 'Heal target creature 10.',
@@ -388,7 +385,7 @@ const data = {
 		} spell damage.`,
 	ouija: "Whenever a creature dies, add an Ouija Essence to opponent's hand.",
 	pacify: "Set target creature or weapon's strength to 0.",
-	pairproduce: 'Your pillars, pendulums, and towers produce quanta.',
+	pairproduce: 'Your pillars, pendulums, and towers trigger as if end of turn.',
 	paleomagnetism: {
 		ownattack: [
 			"Summon a pillar or pendulum every turn. \u2154 chance it matches your mark, otherwise it matches your opponent's mark.",
@@ -413,7 +410,7 @@ const data = {
 	pillar: c => `Gain ${c.element ? 1 : 3}:${c.element} every turn.`,
 	pillar1: c => `Gain ${c.element ? 1 : 3}:${c.element} when played`,
 	pend: c =>
-		`Each turn, switches between producing ${c.element ? 1 : 3}:${
+		`Each turn, switch between gaining ${c.element ? 1 : 3}:${
 			c.element
 		} and one quanta matching your mark.`,
 	plague:
@@ -447,11 +444,11 @@ const data = {
 	purify:
 		'Remove all poison counters and sacrifice status from target creature or player. Target creature or player gains two purify counters.',
 	quantagift:
-		'Gain 2:7 and 2 quanta matching your mark. If your mark is 1:7, instead gain only 3:7 total. If your mark is 1:0, produce an additional 4:0',
+		'Gain 2:7 and 2 quanta matching your mark. If your mark is 1:7, instead gain only 3:7 total. If your mark is 1:0, gain an additional 4:0',
 	quanta: x => ({
-		ownattack: `Gain 1:${x} every turn`,
-		owndeath: `When this creature dies, gain 1:${x}`,
-		ownplay: `Gain 1:${x} when played`,
+		ownattack: `Gain 1:${x} when it attacks.`,
+		owndeath: `When this creature dies, gain 1:${x}.`,
+		ownplay: `Gain 1:${x} when played.`,
 	}),
 	quint:
 		'Target creature becomes immaterial. If target creature is frozen, it loses frozen status.',
@@ -491,6 +488,8 @@ const data = {
 	},
 	ricochet:
 		'Any targeted spells cast by either player are copied when played. The copy has a random caster and a random non-player target.',
+	sabbath:
+		'Target cannot gain quanta through the end of their next turn. Their deck is protected until start of their next turn.',
 	sadism: 'Whenever any creatures are damaged, heal yourself an equal amount.',
 	salvage:
 		'Whenever a permanent is destroyed, gain 1|1. Once per turn, when opponent destroys a permanent, add a copy of that permanent to your hand.',
@@ -501,8 +500,8 @@ const data = {
 		ownplay:
 			"Nullify opponent's sanctuary effect from Sanctuary or Dream Catcher.",
 	},
-	scatterhand:
-		'Target player shuffles their hand into their deck and draws an equal number of cards. Cards drawn this way do not trigger effects that occur when a card is drawn. Draw a card.',
+	scatter:
+		'Target player shuffles their hand into their deck and draws an equal number of cards. Cards drawn this way do not trigger effects that occur when a card is drawn.\nTargeting a card will only shuffle that card.\nDraw a card.',
 	scramble: {
 		hit:
 			"Randomize up to 9 quanta randomly chosen from opponent's quanta pool on hit.",
@@ -550,6 +549,8 @@ const data = {
 	sskin:
 		'Gain maximum HP and heal an amount equal to the 1:4 in your quanta pool after casting this spell.',
 	stasis: "Creatures do not attack at the end of each player's turn.",
+	stasisdraw:
+		'Target player cannot draw cards until their end of turn. Their deck is protected until start of their next turn.',
 	static: 'Deals 2 spell damage to opponent for each attacker.',
 	steal: 'You gain control of target permanent.',
 	steam:
@@ -703,7 +704,7 @@ const data = {
 	v_heal: 'Heal self 20',
 	v_holylight: 'Heal target 10. Nocturnal targets are damaged instead',
 	v_hope:
-		'Blocks one additional damage for each creature you control that produces 1:8 every turn.',
+		'Blocks one additional damage for each creature you control that gain 1:8 when attacking.',
 	v_icebolt: _ =>
 		'Deal 2 damage to target, plus an additional 2 per 10:7 remaining. 25% plus 5% per point of damage chance to freeze target',
 	v_ignite: 'Deal 20 spell damage to foe & 1 damage to all creatures',
@@ -719,7 +720,8 @@ const data = {
 		const charges = c.getStatus('charges');
 		return `Lasts ${charges} turn ${charges == 1 ? '' : 's'}`;
 	},
-	v_luciferin: 'All your creatures without skills produce 1:8. Heal self 10',
+	v_luciferin:
+		'All your creatures without skills gain 1:8 when attacking. Heal self 10',
 	v_lycanthropy: 'Gain 5|5',
 	v_mend: 'Heal target creature 5',
 	v_miracle: 'Heal self to one below maximum HP. Consumes remaining 1:8',
@@ -743,36 +745,18 @@ const data = {
 		`Random effects are inflicted to ${
 			c.upped ? "oppenent's" : 'all'
 		} creatures. Removes cloak`,
-	v_paradox: 'Kill target creature which is stronger than it is large',
 	v_parallel: 'Duplicate target creature',
 	v_phoenix: ['Become an Ash on death', 'Become a Minor Ash on death'],
-	v_photosynthesis: 'Produce 2:5. May activate multiple times',
-	v_pillar: {
-		auto: c => `Produce ${c.element ? 1 : 3}:${c.element}`,
-		play: c => `Produce ${c.element ? 1 : 3}:${c.element} on play`,
-	},
+	v_photosynthesis: 'Gain 2:5. May activate multiple times',
 	v_pend: c =>
-		`Oscilliate between producing ${c.element ? 1 : 3}:${
+		`Oscilliate between gaining ${c.element ? 1 : 3}:${
 			c.element
 		} & quanta of mark`,
 	v_plague: "Poison foe's creatures. Removes cloak",
 	v_platearmor: x => `Target creature gains 0|${x}.`,
-	v_poison: {
-		hit: 'Apply poison on hit. Throttled',
-		cast: 'Apply poison to foe',
-	},
-	v_poison2: {
-		hit: 'Apply 2 poison on hit. Throttled',
-		cast: 'Apply 2 poison to foe',
-	},
-	v_poison3: {
-		hit: 'Apply 3 poison on hit. Throttled',
-		cast: 'Apply 3 poison to foe',
-	},
 	v_precognition: "Reveal foe's hand until end of their turn. Draw",
 	v_purify: 'Replace poison statuses with 2 purify. Removes sacrifice',
 	v_queen: 'Summon a Firefly',
-	v_quint: 'Target creature becomes immaterial. Thaws',
 	v_rage: c => `Target creature gains ${c.upped ? '+6|-6' : '+5|-5'}`,
 	v_readiness:
 		"Target creature's active becomes costless. Skill can be reactivated",
@@ -800,12 +784,12 @@ const data = {
 	v_skyblitz: 'Dive all own airborne creatures. Consumes remaining 1:9',
 	v_slow: 'Delay attackers',
 	v_snipe: 'Deal 3 damage to target creature',
-	v_solar: 'Produce 1:8 per attacker',
+	v_solar: 'Gain 1:8 per attacker',
 	v_sosa: c =>
 		`Sacrifice ${
 			c.upped ? 40 : 48
 		}HP. Consume all non 1:2. Invert damage for 2 turns`,
-	v_soulcatch: c => `When a creature dies, produce ${c.upped ? 3 : 2}:2`,
+	v_soulcatch: c => `When a creature dies, gain ${c.upped ? 3 : 2}:2`,
 	v_sskin: 'Increment maximum HP per 1:4 owned. Heal same',
 	v_steal: 'Steal target permanent',
 	v_steam: 'Gain 5|0',

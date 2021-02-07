@@ -212,7 +212,7 @@ mod test {
 		ctx.play(dev, 0, true);
 		Skill::ren.proc(&mut ctx, dev, dev, &mut ProcData::default());
 		Skill::pacify.proc(&mut ctx, dev, dev, &mut ProcData::default());
-		Skill::atk2hp.proc(&mut ctx, dev, dev, &mut ProcData::default());
+		Skill::equalize.proc(&mut ctx, dev, dev, &mut ProcData::default());
 		assert_eq!(ctx.get_player(p1).hand.last(), Some(&dev));
 		assert_eq!(ctx.get(dev, Stat::atk), 0);
 		assert_eq!(ctx.get(dev, Stat::hp), 0);

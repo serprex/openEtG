@@ -82,6 +82,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 				.map(|&q| cmp::min(q, 3) as f32 / 12.0)
 				.sum(),
 			Skill::bless => 4.0,
+			Skill::bloodmoon => 10.0,
 			Skill::boneyard => 3.0,
 			Skill::bounce => 1.0,
 			Skill::bravery => {
@@ -236,7 +237,6 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::feed => 6.0,
 			Skill::fickle => 3.0,
 			Skill::firebolt => 10.0,
-			Skill::flatline => 1.0,
 			Skill::flyingweapon => 7.0,
 			Skill::foedraw => 8.0,
 			Skill::forcedraw => -10.0,
@@ -447,6 +447,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::ren => 5.0,
 			Skill::rewind => 6.0,
 			Skill::ricochet => 2.0,
+			Skill::sabbath => 1.0,
 			Skill::sadism => 5.0,
 			Skill::salvage => 2.0,
 			Skill::sanctify => 2.0,
@@ -474,6 +475,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::soulcatch => 2.0,
 			Skill::spores => 4.0,
 			Skill::sskin => 15.0,
+			Skill::stasisdraw => 1.0,
 			Skill::steal => 6.0,
 			Skill::steam => 6.0,
 			Skill::stoneform => 1.0,
@@ -659,14 +661,12 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::v_nova2 => 6.0,
 			Skill::v_nymph => 7.0,
 			Skill::v_pandemonium => 3.0,
-			Skill::v_paradox => 5.0,
 			Skill::v_parallel => 8.0,
 			Skill::v_phoenix => 3.0,
 			Skill::v_photosynthesis => 2.0,
 			Skill::v_plague => 5.0,
 			Skill::v_precognition => 1.0,
 			Skill::v_queen => 7.0,
-			Skill::v_quint => 6.0,
 			Skill::v_readiness => 3.0,
 			Skill::v_regenerate => 5.0,
 			Skill::v_rewind => 6.0,
@@ -1285,20 +1285,24 @@ pub fn eval(ctx: &Game) -> f32 {
 			.iter()
 			.map(|&hr| evalthing(ctx, &damage, hr, true, false, false))
 			.sum::<f32>();
-		if pl != turn {
-			let handlen = player.hand.len();
-			for draw in 1..=ctx.get(pl, Stat::drawpower) as usize {
-				if player.hand.len() + draw <= 8 && player.deck.len() >= draw {
-					pscore += evalthing(
-						ctx,
-						&damage,
-						player.deck[player.deck.len() - draw],
-						true,
-						false,
-						false,
-					);
+		if ctx.get(pl, Stat::drawlock) == 0 {
+			if pl != turn {
+				let handlen = player.hand.len();
+				for draw in 1..=ctx.get(pl, Stat::drawpower) as usize {
+					if player.hand.len() + draw <= 8 && player.deck.len() >= draw {
+						pscore += evalthing(
+							ctx,
+							&damage,
+							player.deck[player.deck.len() - draw],
+							true,
+							false,
+							false,
+						);
+					}
 				}
 			}
+		} else {
+			pscore -= 0.5;
 		}
 		pscore += (plhp as f32).sqrt() * 4.0 - (ctx.get(pl, Stat::poison) as f32) / 2.0;
 		if ctx.get(pl, Stat::precognition) != 0 {
@@ -1310,7 +1314,7 @@ pub fn eval(ctx: &Game) -> f32 {
 				handlen + if handlen > 6 { 7 } else { 4 }
 			} as f32 / 4.0
 		}
-		if ctx.get(pl, Stat::flatline) != 0 {
+		if ctx.get(pl, Stat::sabbath) != 0 {
 			pscore -= 2.0;
 		}
 		if ctx.get(pl, Stat::neuro) != 0 {

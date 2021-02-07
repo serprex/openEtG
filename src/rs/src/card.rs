@@ -53,7 +53,7 @@ impl Cards {
 		}[upped as usize])
 			.iter()
 			.cloned()
-			.map(|c| &self.data[c as usize])
+			.map(|c| unsafe { self.data.get_unchecked(c as usize) })
 			.filter(|c| ffilt(c))
 			.collect::<Vec<_>>()
 	}
@@ -76,7 +76,7 @@ impl Cards {
 		}[upped as usize])
 			.iter()
 			.cloned()
-			.map(|c| &self.data[c as usize])
+			.map(|c| unsafe { self.data.get_unchecked(c as usize) })
 			.filter(|c| ffilt(c))
 			.choose(rng)
 	}

@@ -73,6 +73,12 @@ export default class Thing {
 	get castele() {
 		return this.game.get(this.id, 'castele');
 	}
+	get cost() {
+		return this.game.get(this.id, 'cost');
+	}
+	get costele() {
+		return this.game.get(this.id, 'costele');
+	}
 	get maxhp() {
 		return this.game.get(this.id, 'maxhp');
 	}

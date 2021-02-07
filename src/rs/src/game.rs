@@ -295,9 +295,9 @@ pub enum Stat {
 	deckpower,
 	delayed,
 	dive,
+	drawlock,
 	drawpower,
 	epoch,
-	flatline,
 	flooding,
 	frozen,
 	golem,
@@ -325,11 +325,13 @@ pub enum Stat {
 	poison,
 	poisonous,
 	precognition,
+	protectdeck,
 	psionic,
 	ranged,
 	ready,
 	reflective,
 	resigned,
+	sabbath,
 	salvaged,
 	sanctuary,
 	shardgolem,
@@ -416,11 +418,17 @@ impl Game {
 	}
 
 	pub fn get_owner(&self, id: i32) -> i32 {
-		self.get_thing(id).owner
+		match self.props[id as usize] {
+			Entity::Thing(ref thing) => thing.owner,
+			_ => id,
+		}
 	}
 
 	pub fn get_kind(&self, id: i32) -> i32 {
-		self.get_thing(id).kind
+		match self.props[id as usize] {
+			Entity::Thing(ref thing) => thing.kind,
+			_ => etg::Player,
+		}
 	}
 
 	pub fn get_foe(&self, id: i32) -> i32 {
@@ -542,9 +550,10 @@ impl Game {
 
 	pub fn new_player(&mut self) -> i32 {
 		let id = self.new_id(Entity::Player(Default::default()));
-		self.set_owner(id, id);
-		self.set_kind(id, etg::Player);
-		self.set(id, Stat::casts, 1);
+		let thing = self.get_thing_mut(id);
+		thing.owner = id;
+		thing.kind = etg::Player;
+		thing.status.insert(Stat::casts, 1);
 		Rc::make_mut(&mut self.players).push(id);
 		id
 	}
@@ -960,11 +969,17 @@ impl Game {
 	}
 
 	pub fn set_kind(&mut self, id: i32, val: i32) {
-		self.get_thing_mut(id).kind = val;
+		match self.props[id as usize] {
+			Entity::Thing(ref mut thing) => Rc::make_mut(thing).kind = val,
+			_ => (),
+		}
 	}
 
 	pub fn set_owner(&mut self, id: i32, val: i32) {
-		self.get_thing_mut(id).owner = val;
+		match self.props[id as usize] {
+			Entity::Thing(ref mut thing) => Rc::make_mut(thing).owner = val,
+			_ => (),
+		}
 	}
 
 	pub fn choose<'a, 'b, T>(&'a mut self, slice: &'b [T]) -> Option<&'b T> {
@@ -1079,7 +1094,7 @@ impl Game {
 				Skill::v_steal,
 				Skill::v_dive,
 				Skill::v_mend,
-				Skill::v_paradox,
+				Skill::paradox,
 				Skill::v_lycanthropy,
 				Skill::v_infect,
 				Skill::gpull,
@@ -1925,7 +1940,7 @@ impl Game {
 	}
 
 	fn drawcore(&mut self, id: i32, isstep: bool) {
-		if !self.get_player(id).hand.is_full() {
+		if !self.get_player(id).hand.is_full() && self.get(id, Stat::drawlock) == 0 {
 			let cardid = self.draw(id);
 			if cardid != 0 && self.addCard(id, cardid) != -1 {
 				self.fx(cardid, Fx::StartPos(-id));
@@ -1942,12 +1957,14 @@ impl Game {
 	}
 
 	pub fn mill(&mut self, id: i32, mut amt: i32) {
-		let deckpower = self.get(id, Stat::deckpower);
-		if deckpower > 1 {
-			amt *= deckpower;
-		}
-		for _ in 0..amt {
-			self.draw(id);
+		if self.get(id, Stat::protectdeck) == 0 {
+			let deckpower = self.get(id, Stat::deckpower);
+			if deckpower > 1 {
+				amt *= deckpower;
+			}
+			for _ in 0..amt {
+				self.draw(id);
+			}
 		}
 	}
 
@@ -2012,7 +2029,13 @@ impl Game {
 						*sosa -= 1;
 					}
 				}
-				for status in &[Stat::nova, Stat::nova2, Stat::sanctuary, Stat::precognition] {
+				for status in &[
+					Stat::nova,
+					Stat::nova2,
+					Stat::sanctuary,
+					Stat::precognition,
+					Stat::protectdeck,
+				] {
 					if let Some(val) = thing.status.get_mut(status) {
 						*val = 0;
 					}
@@ -2064,8 +2087,10 @@ impl Game {
 		}
 		let thing = self.get_thing_mut(id);
 		thing.status.insert(Stat::casts, 1);
-		if let Some(val) = thing.status.get_mut(&Stat::flatline) {
-			*val = 0;
+		for status in &[Stat::sabbath, Stat::drawlock] {
+			if let Some(val) = thing.status.get_mut(status) {
+				*val = 0;
+			}
 		}
 	}
 
@@ -2145,7 +2170,7 @@ impl Game {
 	}
 
 	pub fn spend(&mut self, id: i32, qtype: i32, amt: i32) -> bool {
-		if amt < 0 && self.get(id, Stat::flatline) != 0 {
+		if amt < 0 && self.get(id, Stat::sabbath) != 0 {
 			return false;
 		}
 		self.spendscramble(id, qtype, amt)

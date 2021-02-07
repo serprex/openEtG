@@ -437,7 +437,7 @@ class ThingInst extends Component {
 				}
 			} else {
 				topText = card.name;
-				statText = `${card.cost}:${card.costele}`;
+				statText = `${obj.cost}:${obj.costele}`;
 			}
 			return {
 				gameHash,
@@ -776,8 +776,8 @@ const MatchView = connect(({ user, opts, nav }) => ({
 					play = {
 						card: c.card,
 						element: c.card.element,
-						costele: isSpell ? c.card.costele : c.castele,
-						cost: isSpell ? c.card.cost : c.cast,
+						costele: isSpell ? c.costele : c.castele,
+						cost: isSpell ? c.cost : c.cast,
 						name: isSpell ? c.card.name : skillName(c, c.getSkill('cast')),
 						upped: c.card.upped,
 						shiny: c.card.shiny,
@@ -1503,15 +1503,45 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						/>,
 					);
 				}
-				if (pl.getStatus('flatline')) {
+				if (pl.getStatus('sabbath')) {
 					children.push(
 						<span
-							key={`${j}flatline`}
+							key={`${j}sabbath`}
 							className="ico sabbath"
 							style={{
 								position: 'absolute',
 								left: '0',
 								top: j ? '96px' : '300px',
+							}}
+						/>,
+					);
+				}
+				console.log(pl.getStatus('drawlock'), pl.getStatus('protectdeck'));
+				if (pl.getStatus('drawlock')) {
+					children.push(
+						<span
+							key={`${j}drawlock`}
+							style={{
+								position: 'absolute',
+								left: '95px',
+								top: j ? '250px' : '543px',
+								width: '48px',
+								height: '48px',
+								backgroundColor: '#931',
+							}}
+						/>,
+					);
+				} else if (pl.getStatus('protectdeck')) {
+					children.push(
+						<span
+							key={`${j}protectdeck`}
+							style={{
+								position: 'absolute',
+								left: '95px',
+								top: j ? '250px' : '543px',
+								width: '48px',
+								height: '48px',
+								backgroundColor: '#ede',
 							}}
 						/>,
 					);
