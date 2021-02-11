@@ -1273,8 +1273,7 @@ impl Game {
 							}
 							let finaldmg = hitdata.dmg;
 							hitdata.blocked = trueatk - finaldmg;
-							let dmg = self.dmg(data.tgt, finaldmg);
-							hitdata.dmg = dmg;
+							hitdata.dmg = self.dmg(data.tgt, finaldmg);
 							if hitdata.dmg != 0 {
 								self.trigger_data(Event::Hit, id, data.tgt, &mut hitdata);
 							}
@@ -1324,12 +1323,11 @@ impl Game {
 			self.set(id, Stat::casts, 1);
 			self.set(id, Stat::ready, 0);
 			if frozen == 0
-				|| self.getSkill(id, Event::OwnAttack).iter().any(|&s| {
-					matches!(
-						s,
-						Skill::v_acceleration(_) | Skill::v_siphon
-					)
-				}) {
+				|| self
+					.getSkill(id, Event::OwnAttack)
+					.iter()
+					.any(|&s| matches!(s, Skill::v_acceleration(_) | Skill::v_siphon))
+			{
 				self.proc_data(Event::Attack, id, &mut data);
 				let freedom = data.freedom;
 				let stasis = data.stasis;
@@ -1456,7 +1454,7 @@ impl Game {
 		let mut dmgdata = ProcData::default();
 		dmgdata.dmg = dmg;
 		self.proc_data(Event::Dmg, id, &mut dmgdata);
-		if dmg > 0 {
+		if realdmg > 0 {
 			if !dontdie && self.truehp(id) <= 0 {
 				self.die(id);
 			} else if self.get(id, Stat::voodoo) != 0 {
@@ -1464,7 +1462,9 @@ impl Game {
 				self.dmg(foe, dmg);
 			}
 		}
-		if sosa {
+		if realdmg < 0 {
+			dmg
+		} else if sosa {
 			-capdmg
 		} else {
 			capdmg
@@ -1946,7 +1946,7 @@ impl Game {
 				self.fx(cardid, Fx::StartPos(-id));
 				self.proc_data(
 					Event::Draw,
-					id,
+					cardid,
 					&mut ProcData {
 						drawstep: isstep,
 						..Default::default()

@@ -144,8 +144,8 @@ const data = {
 	},
 	deathwish:
 		'Whenever opponent casts a spell or ability on an allied creature, if this creature is a valid target, that spell or ability targets this creature instead.',
-	deckblast:
-		'Deals spell damage to opponent for each card remaining in deck. Destroy all cards in your deck.',
+	deckblast: c =>
+		`Deals spell damage to opponent for each card remaining in deck.\nIf this spell costs 1:10, destroy all cards in your deck.`,
 	deepdive:
 		'Burrow. While burrowed, replace this ability with "2:3 Freeze target permanent." Next turn, unburrow, become airborne, and triple this creature\'s strength until its next attack.',
 	deja: 'Remove this ability and summon a copy of this creature.',
@@ -234,7 +234,7 @@ const data = {
 	foedraw: "Draw from opponent's deck",
 	forcedraw: 'When this creature damages a player, that player draws a card.',
 	forceplay:
-		"The owner of target card in hand plays that card on a random target if they are able, or the owner of target card in play activates that card's ability on a random target if they are able.",
+		"The owner of target card in hand plays that card on a random target if they are able, or the owner of target card in play without this ability activates that card's ability on a random target if they are able",
 	fractal:
 		'Fill your hand with copies of target creature. Remove all remaining 1:12.',
 	freeevade:
@@ -343,7 +343,7 @@ const data = {
 	martyr: 'Gains 1|0 for every point of damage this card receives.',
 	mend: 'Heal target creature 10.',
 	metamorph:
-		"Change your mark to target's element. Increase your mark power by 1.",
+		"Change your mark to target's element.\nIncrease your mark power by 1.",
 	midas:
 		'Target permanent becomes a Golden Relic with "2:0: Sacrifice this card and draw a card." If target is a weapon, its strength is 1. If target is a shield, its damage reduction is 1.',
 	mill: "Destroy top card of target player's deck",
@@ -381,7 +381,7 @@ const data = {
 	nymph:
 		"Transform target pillar, pendulum, or tower into a Nymph matching target's element.",
 	obsession: c =>
-		`When this card is discarded, the discarding player receives ${
+		`When this card is discarded, its owner receives ${
 			c.upped ? 13 : 10
 		} spell damage.`,
 	ouija: "Whenever a creature dies, add an Ouija Essence to opponent's hand.",
@@ -407,7 +407,8 @@ const data = {
 		'When this creature dies, transform it into an Ash.',
 		'When this creature dies, transform it into a Minor Ash.',
 	],
-	photosynthesis: 'Gain 2:5. This ability may be used multiple times per turn.',
+	photosynthesis:
+		'Gain 2:5. This ability may be used multiple times per turn unless activation cost is free.',
 	pillar: c => `Gain ${c.element ? 1 : 3}:${c.element} every turn.`,
 	pillar1: c => `Gain ${c.element ? 1 : 3}:${c.element} when played`,
 	pend: c =>
@@ -495,14 +496,18 @@ const data = {
 	salvage:
 		'Whenever a permanent is destroyed, gain 1|1. Once per turn, when opponent destroys a permanent, add a copy of that permanent to your hand.',
 	salvageoff: 'Cannot salvage another destroyed permanent until next turn.',
-	sanctify:
-		"During your opponent's turn, your hand and quanta pool are protected and you cannot be silenced.",
+	sanctify: {
+		ownattack:
+			"During your opponent's turn, your hand and quanta pool are protected and you cannot be silenced.",
+		owndraw:
+			'When drawn, your hand and quanta pool are protected and you cannot be silenced.',
+	},
 	unsanctify: {
 		ownplay:
 			"Nullify opponent's sanctuary effect from Sanctuary or Dream Catcher.",
 	},
 	scatter:
-		'Target player shuffles their hand into their deck and draws an equal number of cards. Cards drawn this way do not trigger effects that occur when a card is drawn.\nTargeting a card will only shuffle that card.\nDraw a card.',
+		'Target player shuffles their hand into their deck and draws an equal number of cards. These draws may not be prevented. Cards drawn this way do not trigger effects that occur when a card is drawn.\nTargeting a card will only shuffle that card.\nIncrease your mark power by 1.',
 	scramble: {
 		hit:
 			"Randomize up to 9 quanta randomly chosen from opponent's quanta pool on hit.",
@@ -748,7 +753,6 @@ const data = {
 		} creatures. Removes cloak`,
 	v_parallel: 'Duplicate target creature',
 	v_phoenix: ['Become an Ash on death', 'Become a Minor Ash on death'],
-	v_photosynthesis: 'Gain 2:5. May activate multiple times',
 	v_pend: c =>
 		`Oscilliate between gaining ${c.element ? 1 : 3}:${
 			c.element

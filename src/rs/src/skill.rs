@@ -640,7 +640,6 @@ pub enum Skill {
 	v_parallel,
 	v_pend,
 	v_phoenix,
-	v_photosynthesis,
 	v_plague,
 	v_platearmor(i16),
 	v_precognition,
@@ -876,7 +875,7 @@ impl Skill {
 			Self::ren => Tgt::crea,
 			Self::rewind => Tgt::crea,
 			Self::sabbath => Tgt::play,
-			Self::scatter => Tgt::Or(&[Tgt::play, Tgt::card]),
+			Self::scatter => Tgt::Or(&[Tgt::play, Tgt::And(&[Tgt::card, Tgt::notself])]),
 			Self::scramble => Tgt::play,
 			Self::scramblespam => Tgt::play,
 			Self::shuffle3 => Tgt::crea,
@@ -1185,7 +1184,10 @@ impl Skill {
 			Self::bravery => {
 				let owner = ctx.get_owner(c);
 				let foe = ctx.get_foe(owner);
-				if ctx.get(foe, Stat::sanctuary) == 0 {
+				if ctx.get(foe, Stat::sanctuary) == 0
+					&& ctx.get(foe, Stat::drawlock) == 0
+					&& ctx.get(owner, Stat::drawlock) == 0
+				{
 					for _ in 0..2 {
 						if ctx.get_player(owner).hand.is_full()
 							|| ctx.get_player(foe).hand.is_full()
@@ -1497,7 +1499,9 @@ impl Skill {
 				let foe = ctx.get_foe(owner);
 				let dmg = ctx.get_player(owner).deck.len() as i32 / ctx.get(owner, Stat::deckpower);
 				ctx.spelldmg(foe, dmg);
-				ctx.get_player_mut(owner).deck_mut().clear();
+				if ctx.get(c, Stat::costele) == etg::Time {
+					ctx.get_player_mut(owner).deck_mut().clear();
+				}
 			}
 			Self::decrsteam => {
 				if ctx.maybeDecrStatus(c, Stat::steam) != 0 {
@@ -2051,7 +2055,7 @@ impl Skill {
 				}
 			}
 			Self::gaintimecharge => {
-				if !data.drawstep && ctx.get_owner(c) == t {
+				if !data.drawstep && ctx.get_owner(c) == ctx.get_owner(t) {
 					ctx.incrStatus(c, Stat::charges, 1);
 				}
 			}
@@ -2965,10 +2969,10 @@ impl Skill {
 			Self::parallel | Self::v_parallel => {
 				ctx.fx(t, Fx::Parallel);
 				if self == Self::parallel {
-					if card::IsOf(ctx.get(c, Stat::card), card::Chimera) {
+					if card::IsOf(ctx.get(t, Stat::card), card::Chimera) {
 						return Skill::chimera.proc(ctx, c, t, data);
 					}
-				} else if card::IsOf(ctx.get(c, Stat::card), card::v_Chimera) {
+				} else if card::IsOf(ctx.get(t, Stat::card), card::v_Chimera) {
 					return Skill::v_chimera.proc(ctx, c, t, data);
 				}
 				let clone = ctx.cloneinst(t);
@@ -3047,7 +3051,7 @@ impl Skill {
 					ctx.setCrea(owner, index as i32, ash);
 				}
 			}
-			Self::photosynthesis | Self::v_photosynthesis => {
+			Self::photosynthesis => {
 				ctx.fx(c, Fx::Quanta(2, etg::Life as u16));
 				ctx.spend(ctx.get_owner(c), etg::Life, -2);
 				if ctx.get(c, Stat::cast) > 0 {
@@ -3395,7 +3399,7 @@ impl Skill {
 							ctx.set_owner(deckid, town);
 						}
 					}
-					ctx.drawcard(ctx.get_owner(c));
+					ctx.incrStatus(ctx.get_owner(c), Stat::markpower, 1);
 				}
 			}
 			Self::scramble => {
@@ -3658,8 +3662,8 @@ impl Skill {
 				}
 			}
 			Self::stasisdraw => {
-				ctx.set(t, Stat::protectdeck, 1);
 				ctx.set(t, Stat::drawlock, 1);
+				ctx.set(t, Stat::protectdeck, 1);
 			}
 			Self::steal => {
 				let owner = ctx.get_owner(c);
@@ -5042,10 +5046,7 @@ impl<'tgt> Tgt<'tgt> {
 		} else {
 			let owner = ctx.get_owner(t);
 			ctx.getIndex(t) != -1
-				&& (owner == ctx.turn
-					|| kind == etg::Spell
-					|| !ctx.is_cloaked(owner)
-					|| ctx.get(t, Stat::cloak) != 0)
+				&& (owner == ctx.turn || !ctx.is_cloaked(owner) || ctx.get(t, Stat::cloak) != 0)
 		}) && self.check(ctx, c, t)
 	}
 
@@ -5106,7 +5107,12 @@ impl<'tgt> Tgt<'tgt> {
 			}
 			Tgt::forceplay => {
 				ctx.get_kind(t) == etg::Spell
-					|| (ctx.material(t, 0) && !ctx.getSkill(t, Event::Cast).is_empty())
+					|| (ctx.material(t, 0)
+						&& ctx
+							.getSkill(t, Event::Cast)
+							.first()
+							.map(|&s| s != Skill::forceplay)
+							.unwrap_or(false))
 			}
 			Tgt::airbornecrea => ctx.material(t, etg::Creature) && ctx.get(t, Stat::airborne) != 0,
 			Tgt::golem => {

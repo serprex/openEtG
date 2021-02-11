@@ -1516,7 +1516,6 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						/>,
 					);
 				}
-				console.log(pl.getStatus('drawlock'), pl.getStatus('protectdeck'));
 				if (pl.getStatus('drawlock')) {
 					children.push(
 						<span

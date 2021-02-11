@@ -663,7 +663,6 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::v_pandemonium => 3.0,
 			Skill::v_parallel => 8.0,
 			Skill::v_phoenix => 3.0,
-			Skill::v_photosynthesis => 2.0,
 			Skill::v_plague => 5.0,
 			Skill::v_precognition => 1.0,
 			Skill::v_queen => 7.0,

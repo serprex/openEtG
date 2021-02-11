@@ -322,20 +322,17 @@ async fn handle_get_core(
 					.status(302)
 					.header(header::LOCATION, newpath)
 					.body(Bytes::new());
+			} else if card::Upped(code) {
+				let mut newpath = b"/Cards/".to_vec();
+				newpath.extend_from_slice(&encode_code(card::AsUpped(code, false)));
+				newpath.extend_from_slice(b".webp");
+				let newpath = unsafe { String::from_utf8_unchecked(newpath) };
+				return response::Builder::new()
+					.status(302)
+					.header(header::LOCATION, newpath)
+					.body(Bytes::new());
 			} else {
-				let unupped = card::AsUpped(code, false);
-				if unupped != code {
-					let mut newpath = b"/Cards/".to_vec();
-					newpath.extend_from_slice(&encode_code(unupped));
-					newpath.extend_from_slice(b".webp");
-					let newpath = unsafe { String::from_utf8_unchecked(newpath) };
-					return response::Builder::new()
-						.status(302)
-						.header(header::LOCATION, &newpath)
-						.body(Bytes::new());
-				} else {
-					return response::Builder::new().status(404).body(Bytes::new());
-				}
+				return response::Builder::new().status(404).body(Bytes::new());
 			}
 		} else {
 			return response::Builder::new().status(404).body(Bytes::new());

@@ -2095,7 +2095,7 @@ pub async fn handle_ws(
 											let notfromele = rng.gen::<bool>();
 											let bumprarity =
 												rarity + rng.gen_bool(bumprate) as usize;
-											if element > 0 && element < 13 {
+											if (element > 0 || bumprarity < 3) && element < 13 {
 												etg::card::OpenSet.random_card(
 													&mut rng,
 													false,
