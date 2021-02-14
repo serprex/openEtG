@@ -507,7 +507,7 @@ const data = {
 			"Nullify opponent's sanctuary effect from Sanctuary or Dream Catcher.",
 	},
 	scatter:
-		'Target player shuffles their hand into their deck and draws an equal number of cards. These draws may not be prevented. Cards drawn this way do not trigger effects that occur when a card is drawn.\nTargeting a card will only shuffle that card.\nIncrease your mark power by 1.',
+		'Target player mulligans their hand for an equal number of cards.\nTargeting a card will only shuffle that card.\nIncrease your mark power by 1.',
 	scramble: {
 		hit:
 			"Randomize up to 9 quanta randomly chosen from opponent's quanta pool on hit.",
@@ -627,7 +627,7 @@ const data = {
 	wisdom:
 		'Target creature or weapon gains 3|0. May target immaterial cards. If it targets an immaterial card, that card gains psionic. Psionic cards deal spell damage and typically bypass shields.',
 	yoink:
-		"Remove target card from target player's hand and add it to your hand, or draw from target player's deck.",
+		"Remove target card from opponent's hand and add it to your hand, or draw from target opponent's deck.",
 	v_ablaze: 'Gain 2|0',
 	v_acceleration: x => `Gains +${x}|-1 when it attacks`,
 	v_accelerationspell: x =>
@@ -855,7 +855,7 @@ const statusText = {
 	mode: '',
 	nightfall: auraText('Nocturnal creatures', '1|1', '2|1'),
 	nothrottle:
-		'If any of your creatures have abilities with Throttled, those abilities lose Throttled.',
+		'While this is equipped, any of your creatures whose abilities have Throttled lose Throttled.',
 	poison: (c, inst) =>
 		c === inst
 			? `Enters play with ${c.getStatus('poison')} poison counters.`

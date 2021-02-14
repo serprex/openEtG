@@ -17,7 +17,7 @@ const tipjar = [
 	'Each card in your booster pack has a 50% chance of being from the chosen element',
 	'Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily',
 	'Be sure to try the Proving Grounds Quests for some good cards',
-	'Rarity ratings: Grey commons, green uncommons, blue rares, orange shard, & pink ultra rares',
+	'Rarity ratings: Grey commons, green uncommons, blue rares, & pink ultra rares',
 	"The Library button allows you to see all of a user's cards & progress",
 	'If you are a new user, be sure to get the free Bronze & Silver packs from the Shop',
 	'Starter decks, cards from free packs, & all non-Common Daily Cards are account-bound; they cannot be traded or sold',

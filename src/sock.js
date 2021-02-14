@@ -16,6 +16,21 @@ let socket = new WebSocket(endpoint),
 	attempts = 0,
 	attemptTimeout = 0,
 	pvp = null;
+const guestStyle = {
+	overflow: 'auto',
+	fontStyle: 'italic',
+};
+const mode2Style = {
+	overflow: 'auto',
+	color: '#69f',
+};
+const chatStyle = {
+	overflow: 'auto',
+	color: '#ddd',
+};
+const defaultStyle = {
+	overflow: 'auto',
+};
 const sockEvents = {
 	clear() {
 		store.store.dispatch(store.clearChat('Main'));
@@ -46,6 +61,8 @@ const sockEvents = {
 		const state = store.store.getState();
 		if (state.opts.muteall) {
 			if (!data.mode) return;
+		} else if (state.opts.muteguests && data.guest) {
+			return;
 		} else if (
 			typeof Notification !== 'undefined' &&
 			Notification.permission !== 'denied' &&
@@ -62,10 +79,7 @@ const sockEvents = {
 			m = now.getMinutes(),
 			hs = h < 10 ? '0' + h : h.toString(),
 			ms = m < 10 ? '0' + m : m.toString(),
-			style = {},
 			text = [];
-		if (data.mode !== 1) style.color = data.mode === 2 ? '#69f' : '#ddd';
-		if (data.guest) style.fontStyle = 'italic';
 		let decklink = /\b(([01][0-9a-v]{4})+)\b/g,
 			reres,
 			lastindex = 0;
@@ -98,7 +112,16 @@ const sockEvents = {
 		if (lastindex !== data.msg.length) text.push(data.msg.slice(lastindex));
 		store.store.dispatch(
 			store.chat(
-				<div style={style}>
+				<div
+					style={
+						data.guest
+							? guestStyle
+							: data.mode === 2
+							? mode2Style
+							: data.mode !== 1
+							? chatStyle
+							: defaultStyle
+					}>
 					{`${hs}${ms} `}
 					{data.u && <b>{data.u} </b>}
 					{text}

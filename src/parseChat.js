@@ -7,9 +7,13 @@ function chatmute() {
 	const state = store.store.getState();
 	store.store.dispatch(
 		store.chatMsg(
-			`${state.opts.muteall ? 'You have chat muted. ' : ''}Muted: ${Array.from(
-				state.muted,
-			).join(', ')}`,
+			`${
+				state.opts.muteall
+					? 'You have chat muted. '
+					: state.opts.muteguest
+					? 'You have guests muted. '
+					: ''
+			}Muted: ${Array.from(state.muted).join(', ')}`,
 			'System',
 		),
 	);
@@ -32,6 +36,8 @@ export default function parseChat(e) {
 				mod: 'List mods',
 				mute: 'If no user specified, mute chat entirely',
 				unmute: 'If no user specified, unmute chat entirely',
+				muteguest: 'Mute all guests',
+				unmuteguest: 'Unmute all guests',
 				deleteme: 'Delete account',
 				w: 'Whisper',
 			};
@@ -110,6 +116,12 @@ export default function parseChat(e) {
 			chatmute();
 		} else if (msg === '/unmute') {
 			store.store.dispatch(store.setOptTemp('muteall', false));
+			chatmute();
+		} else if (msg === '/muteguest') {
+			store.store.dispatch(store.setOptTemp('muteguest', true));
+			chatmute();
+		} else if (msg === '/unmuteguest') {
+			store.store.dispatch(store.setOptTemp('muteguest', false));
 			chatmute();
 		} else if (msg.match(/^\/mute /)) {
 			store.store.dispatch(store.mute(msg.slice(6)));
