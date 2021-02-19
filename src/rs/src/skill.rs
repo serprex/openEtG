@@ -955,20 +955,24 @@ impl Skill {
 		match self {
 			Skill::evade(x)
 			| Skill::firestorm(x)
+			| Skill::immolate(x)
+			| Skill::platearmor(x)
 			| Skill::poison(x)
 			| Skill::poisonfoe(x)
 			| Skill::storm(x)
-			| Skill::thorn(x) => x as i32,
-			Skill::quanta(x) => x as i32,
+			| Skill::thorn(x)
+			| Skill::v_platearmor(x) => x as i32,
 			Skill::summon(x) => x as i32,
-			Skill::growth(x, _) => x as i32,
+			Skill::quanta(x) | Skill::v_acceleration(x) | Skill::v_accelerationspell(x) => x as i32,
+			Skill::v_drainlife(x) | Skill::v_firebolt(x) | Skill::v_icebolt(x) => x as i32,
+			Skill::growth(x, _) | Skill::icegrowth(x, _) => x as i32,
 			_ => 0,
 		}
 	}
 
 	pub fn param2(self) -> i32 {
 		match self {
-			Skill::growth(_, x) => x as i32,
+			Skill::growth(_, x) | Skill::icegrowth(_, x) => x as i32,
 			_ => 0,
 		}
 	}
@@ -1093,7 +1097,6 @@ impl Skill {
 				let town = ctx.get_owner(t);
 				let foe = ctx.get_foe(town);
 				ctx.remove(t);
-				ctx.set_owner(t, foe);
 				ctx.addCrea(foe, t);
 				if c != t {
 					ctx.addskill(t, Event::Turnstart, Skill::beguilestop);

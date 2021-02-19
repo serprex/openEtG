@@ -37,7 +37,7 @@ export function parseDeck(dcode) {
 			const di = dsplit[i],
 				dicode = parseInt(di, 32),
 				i0 = i++;
-			while (i < dsplit.length && dsplit[i] == di) {
+			while (i < dsplit.length && dsplit[i] === di) {
 				i++;
 			}
 			dcode += etgutil.encodeCount(i - i0);

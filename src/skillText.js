@@ -724,7 +724,7 @@ const data = {
 	v_lobotomize: 'Remove skills from target creature',
 	v_losecharge: (c, inst) => {
 		const charges = c.getStatus('charges');
-		return `Lasts ${charges} turn ${charges == 1 ? '' : 's'}`;
+		return `Lasts ${charges} turn ${charges === 1 ? '' : 's'}`;
 	},
 	v_luciferin:
 		'All your creatures without skills gain 1:8 when attacking. Heal self 10',

@@ -27,10 +27,10 @@ function printstat(e) {
 		if (hide.has('shard') && card.name.match(/^Shard of /)) return false;
 		if (
 			hide.has('rare') &&
-			(card.rarity == 6 || card.rarity == 8 || card.rarity == 18)
+			(card.rarity === 6 || card.rarity === 8 || card.rarity === 18)
 		)
 			return false;
-		if (hide.has('nymph') && (card.rarity == 15 || card.rarity == 20))
+		if (hide.has('nymph') && (card.rarity === 15 || card.rarity === 20))
 			return false;
 		return true;
 	}
@@ -41,16 +41,16 @@ function printstat(e) {
 		letter = this.value.charAt(i).toUpperCase();
 		if (letters.has(letter)) continue;
 		letters.add(letter);
-		if (set == 'open' || set == 'both') {
-			if (upped == 'no' || upped == 'both')
+		if (set === 'open' || set === 'both') {
+			if (upped === 'no' || upped === 'both')
 				cards.push(...OpenCards.filter(false, cardfilter));
-			if (upped == 'yes' || upped == 'both')
+			if (upped === 'yes' || upped === 'both')
 				cards.push(...OpenCards.filter(true, cardfilter));
 		}
-		if (set == 'orig' || set == 'both') {
-			if (upped == 'no' || upped == 'both')
+		if (set === 'orig' || set === 'both') {
+			if (upped === 'no' || upped === 'both')
 				cards.push(...OrigCards.filter(false, cardfilter));
-			if (upped == 'yes' || upped == 'both')
+			if (upped === 'yes' || upped === 'both')
 				cards.push(...OrigCards.filter(true, cardfilter));
 		}
 	}

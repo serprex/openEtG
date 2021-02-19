@@ -20,10 +20,10 @@ function printstat() {
 		if (hide.has('shard') && card.name.match(/^Shard of /)) return false;
 		if (
 			hide.has('rare') &&
-			(card.tier == 6 || card.tier == 8 || card.tier == 18)
+			(card.tier === 6 || card.tier === 8 || card.tier === 18)
 		)
 			return false;
-		if (hide.has('nymph') && (card.tier == 15 || card.tier == 20)) return false;
+		if (hide.has('nymph') && (card.tier === 15 || card.tier === 20)) return false;
 		return !card.name.match(/^Mark of /);
 	}
 	while (infobox.firstChild) infobox.firstChild.remove();
@@ -36,7 +36,7 @@ function printstat() {
 	}
 	for (let i = 0; i < elements.length; i++) {
 		const ele = elements[i],
-			cards = Cards.filter(false, x => x.element == ele && cardfilter(x));
+			cards = Cards.filter(false, x => x.element === ele && cardfilter(x));
 		while (many < cards.length) {
 			cards.splice((Math.random() * cards.length) | 0, 1);
 		}

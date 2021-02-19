@@ -7,11 +7,11 @@ function decodeSkillName(cell) {
 	const skid = cell & 0xffff,
 		n = enums.Skill[skid],
 		c = enums.SkillParams[skid] ?? 0;
-	return c == 0
+	return c === 0
 		? n
-		: c == 1
-		? `${n} ${cell >> 16}`
-		: `${n} ${(cell >> 16) & 0xff} ${cell >> 24}`;
+		: c === 1
+		? `${n} ${cell >>> 16}`
+		: `${n} ${(cell >>> 16) & 0xff} ${cell >>> 24}`;
 }
 
 export default class Thing {
@@ -31,7 +31,7 @@ export default class Thing {
 		let idx = 0;
 		while (idx < raw.length) {
 			const ev = enums.Event[raw[idx] & 255],
-				lastidx = idx + (raw[idx] >> 8),
+				lastidx = idx + (raw[idx] >>> 8),
 				name = [];
 			while (idx++ < lastidx) {
 				name.push(decodeSkillName(raw[idx]));
@@ -49,10 +49,10 @@ export default class Thing {
 		return status;
 	}
 	getSkill(k) {
-		const name = [];
-		for (const x of this.game.game.get_one_skill(this.id, enums.EventId[k])) {
-			name.push(decodeSkillName(x));
-		}
+		const name = Array.from(
+			this.game.game.get_one_skill(this.id, enums.EventId[k]),
+			decodeSkillName,
+		);
 		if (name.length) return name;
 	}
 	get ownerId() {

@@ -59,23 +59,6 @@ module.exports = {
 									useSpread: true,
 								},
 							],
-							[
-								'@babel/preset-env',
-								{
-									bugfixes: true,
-									useBuiltIns: 'usage',
-									corejs: 3,
-									targets: {
-										browsers: [
-											'last 2 firefox version',
-											'last 2 chrome version',
-											'last 1 ios version',
-											'last 1 and_chr version',
-											'last 1 edge version',
-										],
-									},
-								},
-							],
 						],
 						plugins: ['@babel/plugin-proposal-class-properties'],
 					},
