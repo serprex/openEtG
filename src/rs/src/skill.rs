@@ -547,11 +547,9 @@ pub enum Skill {
 	wings,
 	wisdom,
 	yoink,
-	v_ablaze,
 	v_acceleration(i8),
 	v_accelerationspell(i8),
 	v_accretion,
-	v_adrenaline,
 	v_aflatoxin,
 	v_antimatter,
 	v_bblood,
@@ -563,18 +561,15 @@ pub enum Skill {
 	v_bravery,
 	v_burrow,
 	v_butterfly,
-	v_catapult,
 	v_chimera,
 	v_cold,
 	v_cpower,
 	v_cseed,
 	v_dagger,
-	v_deadalive,
 	v_deja,
 	v_dessication,
 	v_destroy,
 	v_devour,
-	v_die,
 	v_disfield,
 	v_disshield,
 	v_dive,
@@ -586,14 +581,12 @@ pub enum Skill {
 	v_duality,
 	v_earthquake,
 	v_empathy,
-	v_enchant,
 	v_endow,
 	v_evolve,
 	v_fiery,
 	v_firebolt(u8),
 	v_firewall,
 	v_flyingweapon,
-	v_fractal,
 	v_freedom,
 	v_freeevade,
 	v_freeze,
@@ -601,29 +594,23 @@ pub enum Skill {
 	v_gas,
 	v_gpullspell,
 	v_gratitude,
-	v_growth,
-	v_growth1,
 	v_guard,
 	v_hammer,
-	v_hasten,
 	v_hatch,
 	v_heal,
 	v_holylight,
 	v_hope,
 	v_hopedr,
 	v_icebolt(u8),
-	v_ignite,
 	v_improve,
 	v_infect,
 	v_integrity,
-	v_lightning,
 	v_liquid,
 	v_lobotomize,
 	v_losecharge,
 	v_luciferin,
 	v_lycanthropy,
 	v_mend,
-	v_miracle,
 	v_mitosis,
 	v_mitosisspell,
 	v_momentum,
@@ -638,7 +625,6 @@ pub enum Skill {
 	v_pandemonium,
 	v_paradox,
 	v_parallel,
-	v_pend,
 	v_phoenix,
 	v_plague,
 	v_platearmor(i16),
@@ -661,7 +647,6 @@ pub enum Skill {
 	v_skull,
 	v_skyblitz,
 	v_slow,
-	v_snipe,
 	v_solar,
 	v_sosa,
 	v_soulcatch,
@@ -673,7 +658,6 @@ pub enum Skill {
 	v_storm3,
 	v_swarm,
 	v_swarmhp,
-	v_swave,
 	v_thorn,
 	v_unburrow,
 	v_upkeep,
@@ -721,7 +705,7 @@ pub enum Tgt<'a> {
 fn quadpillarcore(ctx: &mut Game, ele: i32, c: i32, n: i32) {
 	let owner = ctx.get_owner(c);
 	for _ in 0..n {
-		let r = ctx.upto(16);
+		let r = ctx.rng_range(0..16);
 		ctx.spend(owner, (ele >> ((r & 3) << 2)) & 15, -1);
 		if ctx.rng_ratio(2, 3) {
 			ctx.spend(owner, (ele >> (r & 12)) & 15, -1);
@@ -902,23 +886,19 @@ impl Skill {
 			Self::yoink => Tgt::And(&[Tgt::foe, Tgt::Or(&[Tgt::play, Tgt::card])]),
 			Self::v_accelerationspell(_) => Tgt::crea,
 			Self::v_accretion => Tgt::Or(&[Tgt::perm, Tgt::play]),
-			Self::v_adrenaline => Tgt::crea,
 			Self::v_aflatoxin => Tgt::crea,
 			Self::v_antimatter => Tgt::crea,
 			Self::v_bblood => Tgt::crea,
 			Self::v_bless => Tgt::crea,
 			Self::v_butterfly => Tgt::v_butterfly,
-			Self::v_catapult => Tgt::And(&[Tgt::own, Tgt::crea]),
 			Self::v_cpower => Tgt::crea,
 			Self::v_cseed => Tgt::crea,
 			Self::v_destroy => Tgt::perm,
 			Self::v_devour => Tgt::devour,
 			Self::v_drainlife(_) => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::v_earthquake => Tgt::pill,
-			Self::v_enchant => Tgt::perm,
 			Self::v_endow => Tgt::weap,
 			Self::v_firebolt(_) => Tgt::Or(&[Tgt::crea, Tgt::play]),
-			Self::v_fractal => Tgt::crea,
 			Self::v_freeze => Tgt::crea,
 			Self::v_gpullspell => Tgt::crea,
 			Self::v_guard => Tgt::crea,
@@ -926,7 +906,6 @@ impl Skill {
 			Self::v_icebolt(_) => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::v_improve => Tgt::crea,
 			Self::v_infect => Tgt::crea,
-			Self::v_lightning => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::v_liquid => Tgt::crea,
 			Self::v_lobotomize => Tgt::crea,
 			Self::v_mend => Tgt::crea,
@@ -941,9 +920,7 @@ impl Skill {
 			Self::v_rage => Tgt::crea,
 			Self::v_readiness => Tgt::crea,
 			Self::v_rewind => Tgt::crea,
-			Self::v_snipe => Tgt::crea,
 			Self::v_steal => Tgt::And(&[Tgt::foe, Tgt::perm]),
-			Self::v_swave => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::v_virusinfect => Tgt::crea,
 			Self::v_web => Tgt::crea,
 			Self::v_wisdom => Tgt::quinttog,
@@ -1018,7 +995,7 @@ impl Skill {
 					ctx.addCard(owner, c);
 				}
 			}
-			Self::adrenaline | Self::v_adrenaline => {
+			Self::adrenaline => {
 				ctx.fx(t, Fx::Adrenaline);
 				ctx.set(t, Stat::adrenaline, 1);
 			}
@@ -1118,7 +1095,7 @@ impl Skill {
 				} else {
 					t
 				};
-				if ctx.get(t, Stat::sanctuary) == 0 {
+				if !ctx.sanctified(t) {
 					let mut heal = 0;
 					for q in ctx.get_player_mut(t).quanta.iter_mut() {
 						let amt = cmp::min(*q, 3);
@@ -1187,7 +1164,7 @@ impl Skill {
 			Self::bravery => {
 				let owner = ctx.get_owner(c);
 				let foe = ctx.get_foe(owner);
-				if ctx.get(foe, Stat::sanctuary) == 0
+				if !ctx.sanctified(foe)
 					&& ctx.get(foe, Stat::drawlock) == 0
 					&& ctx.get(owner, Stat::drawlock) == 0
 				{
@@ -1220,7 +1197,7 @@ impl Skill {
 			}
 			Self::brew => {
 				let owner = ctx.get_owner(c);
-				let alchcard = etg::AlchemyList[ctx.upto(12) as usize + 1];
+				let alchcard = etg::AlchemyList[ctx.rng_range(1..=13)];
 				let inst = ctx.new_thing(card::As(ctx.get(c, Stat::card), alchcard), owner);
 				ctx.fx(inst, Fx::StartPos(c));
 				ctx.addCard(owner, inst);
@@ -1255,7 +1232,7 @@ impl Skill {
 				ctx.set(t, Stat::cast, 3);
 				ctx.set(t, Stat::castele, etg::Entropy);
 			}
-			Self::catapult | Self::v_catapult => {
+			Self::catapult => {
 				ctx.fx(t, Fx::Catapult);
 				ctx.die(t);
 				let foe = ctx.get_foe(ctx.get_owner(c));
@@ -1407,7 +1384,7 @@ impl Skill {
 				}
 			}
 			Self::cpower | Self::v_cpower => {
-				let buff = ctx.upto(25);
+				let buff = ctx.rng_range(0..25);
 				ctx.buffhp(t, buff / 5 + 1);
 				ctx.incrAtk(t, buff % 5 + 1);
 			}
@@ -1435,7 +1412,7 @@ impl Skill {
 				}
 			}
 			Self::cseed2 => {
-				let upped = ctx.upto(2) == 0;
+				let upped = ctx.rng_ratio(1, 2);
 				if let Some(card) = ctx.random_card(upped, |ctx, card| {
 					if card.kind == etg::Spell as i8 {
 						if let Some(&(k, skills)) = card.skill.first() {
@@ -1460,7 +1437,7 @@ impl Skill {
 					);
 				}
 			}
-			Self::deadalive | Self::v_deadalive => {
+			Self::deadalive => {
 				let index = ctx.getIndex(c);
 				ctx.fx(c, Fx::Death);
 				ctx.deatheffect(c, index);
@@ -1500,7 +1477,8 @@ impl Skill {
 			Self::deckblast => {
 				let owner = ctx.get_owner(c);
 				let foe = ctx.get_foe(owner);
-				let dmg = ctx.get_player(owner).deck.len() as i32 / ctx.get(owner, Stat::deckpower);
+				let pl = ctx.get_player(owner);
+				let dmg = pl.deck.len() as i32 / pl.deckpower as i32;
 				ctx.spelldmg(foe, dmg);
 				if ctx.get(c, Stat::costele) == etg::Time {
 					ctx.get_player_mut(owner).deck_mut().clear();
@@ -1572,7 +1550,7 @@ impl Skill {
 				let kind = ctx.get_kind(t);
 				if kind == etg::Player {
 					ctx.mill(t, 1);
-				} else if ctx.get(ctx.get_owner(t), Stat::sanctuary) == 0 {
+				} else if !ctx.sanctified(ctx.get_owner(t)) {
 					ctx.die(t);
 				}
 			}
@@ -1593,7 +1571,7 @@ impl Skill {
 				}
 				ctx.die(t);
 			}
-			Self::die | Self::v_die => ctx.die(c),
+			Self::die => ctx.die(c),
 			Self::disarm => {
 				if ctx.get_kind(t) == etg::Player {
 					let weapon = ctx.get_weapon(t);
@@ -1715,7 +1693,6 @@ impl Skill {
 					let foepl = ctx.get_player(foe);
 					if let Some(&card) = foepl.deck.last() {
 						let inst = ctx.cloneinst(card);
-						ctx.set_owner(inst, owner);
 						ctx.addCard(owner, inst);
 						ctx.fx(inst, Fx::StartPos(c));
 					}
@@ -1764,7 +1741,7 @@ impl Skill {
 					ctx.die(c);
 				}
 			}
-			Self::enchant | Self::v_enchant => {
+			Self::enchant => {
 				ctx.fx(t, Fx::Enchant);
 				ctx.set(t, Stat::immaterial, 1);
 			}
@@ -1863,7 +1840,7 @@ impl Skill {
 			}
 			Self::fickle => {
 				let town = ctx.get_owner(t);
-				if town == ctx.get_owner(c) || ctx.get(town, Stat::sanctuary) == 0 {
+				if !ctx.sanctified(town) {
 					let mut cards = Vec::new();
 					for (idx, &id) in ctx.get_player(town).deck.iter().enumerate() {
 						if ctx.canspend(town, ctx.get(id, Stat::costele), ctx.get(id, Stat::cost)) {
@@ -1949,14 +1926,14 @@ impl Skill {
 			}
 			Self::forcedraw => {
 				let town = ctx.get_owner(t);
-				if ctx.get(town, Stat::sanctuary) == 0 {
+				if !ctx.sanctified(town) {
 					ctx.drawcard(town);
 				}
 			}
 			Self::forceplay => {
 				let town = ctx.get_owner(t);
 				let tgting = if ctx.get_kind(t) == etg::Spell {
-					if ctx.get(town, Stat::sanctuary) != 0 {
+					if !ctx.sanctified(town) {
 						return;
 					}
 					let card = ctx.get_card(ctx.get(t, Stat::card));
@@ -2000,7 +1977,7 @@ impl Skill {
 				}
 				ctx.turn = realturn;
 			}
-			Self::fractal | Self::v_fractal => {
+			Self::fractal => {
 				ctx.fx(t, Fx::Fractal);
 				let owner = ctx.get_owner(c);
 				ctx.set_quanta(owner, etg::Aether, 0);
@@ -2132,7 +2109,7 @@ impl Skill {
 				ctx.incrStatus(c, Stat::storedatk, stored);
 				ctx.incrAtk(c, -stored);
 			}
-			Self::hasten | Self::v_hasten => {
+			Self::hasten => {
 				ctx.drawcard(ctx.get_owner(c));
 			}
 			Self::hatch => {
@@ -2176,7 +2153,7 @@ impl Skill {
 			Self::icebolt => {
 				let owner = ctx.get_owner(c);
 				let bonus = ctx.get_player(owner).quanta(etg::Water) as i32 / 5;
-				if ctx.upto(20) < 7 + bonus {
+				if ctx.rng_range(0..20) < 7 + bonus {
 					ctx.freeze(
 						t,
 						if card::Upped(ctx.get(c, Stat::card)) {
@@ -2192,7 +2169,7 @@ impl Skill {
 				data.amt = 0;
 				Skill::growth(atk, hp).proc(ctx, c, t, data);
 			}
-			Self::ignite | Self::v_ignite => {
+			Self::ignite => {
 				ctx.die(c);
 				let owner = ctx.get_owner(c);
 				let foe = ctx.get_foe(owner);
@@ -2262,7 +2239,7 @@ impl Skill {
 			}
 			Self::innovation => {
 				let town = ctx.get_owner(t);
-				if ctx.get(town, Stat::sanctuary) == 0 {
+				if !ctx.sanctified(town) {
 					ctx.die(t);
 					for _ in 0..3 {
 						ctx.drawcard(town);
@@ -2564,7 +2541,7 @@ impl Skill {
 				ctx.dmg(t, 1);
 				ctx.incrAtk(t, 3);
 			}
-			Self::lightning | Self::v_lightning => {
+			Self::lightning => {
 				ctx.spelldmg(t, 5);
 			}
 			Self::liquid => {
@@ -2598,7 +2575,7 @@ impl Skill {
 						if mode != -1 {
 							mode
 						} else {
-							ctx.get(owner, Stat::mark)
+							ctx.get_player(owner).mark
 						},
 						-1,
 					);
@@ -2609,7 +2586,7 @@ impl Skill {
 					c,
 					Stat::mode,
 					if ctx.get_kind(t) == etg::Player {
-						ctx.get(t, Stat::mark)
+						ctx.get_player(t).mark
 					} else {
 						ctx.get_card(ctx.get(t, Stat::card)).element as i32
 					},
@@ -2677,16 +2654,14 @@ impl Skill {
 			}
 			Self::metamorph => {
 				let owner = ctx.get_owner(c);
-				ctx.set(
-					owner,
-					Stat::mark,
-					if ctx.get_kind(t) == etg::Player {
-						ctx.get(t, Stat::mark)
-					} else {
-						ctx.get_card(ctx.get(t, Stat::card)).element as i32
-					},
-				);
-				ctx.incrStatus(owner, Stat::markpower, 1);
+				let newmark = if ctx.get_kind(t) == etg::Player {
+					ctx.get_player(t).mark
+				} else {
+					ctx.get_card(ctx.get(t, Stat::card)).element as i32
+				};
+				let mut pl = ctx.get_player_mut(owner);
+				pl.mark = newmark;
+				pl.markpower = pl.markpower.saturating_add(1);
 			}
 			Self::midas => {
 				let reliccard = card::As(ctx.get(t, Stat::card), card::GoldenRelic);
@@ -2720,7 +2695,7 @@ impl Skill {
 					ctx.addskill(c, Event::Play, Skill::mimic);
 				}
 			}
-			Self::miracle | Self::v_miracle => {
+			Self::miracle => {
 				let owner = ctx.get_owner(c);
 				ctx.set_quanta(owner, etg::Light, 0);
 				if ctx.get(owner, Stat::sosa) == 0 {
@@ -2759,10 +2734,10 @@ impl Skill {
 			Self::mutant => {
 				if !ctx.o_mutantactive(c) {
 					ctx.setSkill(c, Event::Cast, &[Skill::web]);
-					let cast = ctx.upto(2) + 1;
+					let cast = ctx.rng_range(1..=2);
 					ctx.set(c, Stat::cast, cast);
 				}
-				let castele = ctx.upto(13);
+				let castele = ctx.rng_range(1..=13);
 				ctx.set(c, Stat::castele, castele);
 				ctx.set(c, Stat::mutant, 1);
 			}
@@ -2797,7 +2772,7 @@ impl Skill {
 			Self::nightmare | Self::v_nightmare => {
 				let owner = ctx.get_owner(c);
 				let foe = ctx.get_foe(owner);
-				if ctx.get(foe, Stat::sanctuary) == 0 {
+				if !ctx.sanctified(foe) {
 					ctx.fx(t, Fx::Nightmare);
 					let card = ctx.get(t, Stat::card);
 					let copies = 8 - ctx.get_player(foe).hand.len() as i32;
@@ -2872,7 +2847,7 @@ impl Skill {
 						&[Skill::pillcar] => *ctx
 							.choose(&[etg::Entropy, etg::Gravity, etg::Time, etg::Aether])
 							.unwrap() as usize,
-						_ => (ctx.upto(12) + 1) as usize,
+						_ => ctx.rng_range(1..=13),
 					}
 				} else {
 					card.element as usize
@@ -2895,7 +2870,7 @@ impl Skill {
 			}
 			Self::ouija => {
 				let foe = ctx.get_foe(ctx.get_owner(c));
-				if ctx.get(foe, Stat::sanctuary) == 0 && !ctx.get_player(foe).hand.is_full() {
+				if !ctx.sanctified(foe) && !ctx.get_player(foe).hand.is_full() {
 					let inst = ctx.new_thing(card::OuijaEssence, foe);
 					ctx.fx(inst, Fx::StartPos(c));
 					ctx.addCard(foe, inst);
@@ -2913,11 +2888,10 @@ impl Skill {
 			}
 			Self::paleomagnetism => {
 				let owner = ctx.get_owner(c);
-				let e = if ctx.rng_ratio(2, 3) {
-					ctx.get(owner, Stat::mark)
-				} else {
-					ctx.get(ctx.get_foe(owner), Stat::mark)
-				};
+				let roll = ctx.rng_ratio(2, 3);
+				let e = ctx
+					.get_player(if roll { owner } else { ctx.get_foe(owner) })
+					.mark;
 				if let Some(newcard) = ctx.random_card(false, |ctx, card| {
 					card.element as i32 == e
 						&& card.rarity != -1 && card
@@ -2980,11 +2954,10 @@ impl Skill {
 				}
 				let clone = ctx.cloneinst(t);
 				let owner = ctx.get_owner(c);
-				ctx.set_owner(clone, owner);
 				ctx.fx(clone, Fx::StartPos(t));
 				ctx.addCrea(owner, clone);
 				if ctx.get(clone, Stat::mutant) != 0 {
-					let buff = ctx.upto(25);
+					let buff = ctx.rng_range(0..25);
 					ctx.buffhp(clone, buff / 5);
 					ctx.incrAtk(clone, buff % 5);
 					if self == Self::parallel {
@@ -3031,11 +3004,11 @@ impl Skill {
 					data.patience = true;
 				}
 			}
-			Self::pend | Self::v_pend => {
+			Self::pend => {
 				let pendstate = ctx.get(c, Stat::pendstate);
 				let owner = ctx.get_owner(c);
 				let ele = if pendstate != 0 {
-					ctx.get(owner, Stat::mark)
+					ctx.get_player(owner).mark
 				} else {
 					ctx.get_card(ctx.get(c, Stat::card)).element as i32
 				};
@@ -3130,7 +3103,7 @@ impl Skill {
 				{
 					ctx.addskill(c, Event::Turnstart, Skill::predatoroff);
 					ctx.queue_attack(c, 0);
-					if ctx.get(foe, Stat::sanctuary) == 0 {
+					if !ctx.sanctified(foe) {
 						if let Some(card) = ctx.get_player(foe).hand.last().cloned() {
 							ctx.die(card);
 						}
@@ -3185,7 +3158,7 @@ impl Skill {
 			}
 			Self::quantagift => {
 				let owner = ctx.get_owner(c);
-				let mark = ctx.get(owner, Stat::mark);
+				let mark = ctx.get_player(owner).mark;
 				if mark == etg::Water {
 					ctx.spend(owner, etg::Water, -3);
 				} else {
@@ -3222,11 +3195,13 @@ impl Skill {
 				}
 			}
 			Self::randomdr => {
-				let dr = ctx.upto(if card::Upped(ctx.get(c, Stat::card)) {
-					4
-				} else {
-					3
-				});
+				let dr = ctx.rng_range(
+					0..if card::Upped(ctx.get(c, Stat::card)) {
+						4
+					} else {
+						3
+					},
+				);
 				ctx.set(c, Stat::hp, dr);
 				ctx.set(c, Stat::maxhp, dr);
 			}
@@ -3350,7 +3325,7 @@ impl Skill {
 				}
 			}
 			Self::sabbath => {
-				if ctx.get(t, Stat::sanctuary) == 0 {
+				if !ctx.sanctified(t) {
 					ctx.set(t, Stat::sabbath, 1);
 				}
 				ctx.set(t, Stat::protectdeck, 1);
@@ -3385,28 +3360,32 @@ impl Skill {
 			}
 			Self::scatter => {
 				let town = ctx.get_owner(t);
-				if ctx.get(town, Stat::sanctuary) == 0 {
+				if !ctx.sanctified(town) {
 					ctx.fx(t, Fx::Sfx(Sfx::mulligan));
 					if town == t {
 						ctx.drawhand(t, ctx.get_player(t).hand.len());
 					} else {
-						let decklen = ctx.get_player(town).deck.len() as i32;
+						let decklen = ctx.get_player(town).deck.len();
 						if decklen > 0 {
-							let handidx = ctx.getIndex(t) as usize;
-							let idx = ctx.upto(decklen) as usize;
-							let pl = ctx.get_player_mut(town);
-							let deckid = pl.deck[idx];
-							pl.hand[handidx] = deckid;
-							pl.deck_mut()[idx] = t;
-							ctx.set_kind(deckid, etg::Spell);
-							ctx.set_owner(deckid, town);
+							let handidx = ctx.getIndex(t);
+							if handidx != -1 {
+								let handidx = handidx as usize;
+								let idx = ctx.rng_range(0..decklen);
+								let pl = ctx.get_player_mut(town);
+								let deckid = pl.deck[idx];
+								pl.hand[handidx] = deckid;
+								pl.deck_mut()[idx] = t;
+								ctx.set_kind(deckid, etg::Spell);
+								ctx.set_owner(deckid, town);
+							}
 						}
 					}
-					ctx.incrStatus(ctx.get_owner(c), Stat::markpower, 1);
 				}
+				let mut pl = ctx.get_player_mut(ctx.get_owner(c));
+				pl.markpower = pl.markpower.saturating_add(1);
 			}
 			Self::scramble => {
-				if ctx.get_kind(t) == etg::Player && ctx.get(t, Stat::sanctuary) == 0 {
+				if ctx.get_kind(t) == etg::Player && !ctx.sanctified(t) {
 					for _ in 0..9 {
 						if ctx.spendscramble(t, etg::Chroma, 1) {
 							ctx.spendscramble(t, etg::Chroma, -1);
@@ -3462,9 +3441,9 @@ impl Skill {
 			Self::shuffle3 => {
 				let owner = ctx.get_owner(c);
 				let decklen = ctx.get_player(owner).deck.len() as i32;
-				let idx1 = ctx.upto(decklen + 1) as usize;
-				let idx2 = ctx.upto(decklen + 2) as usize;
-				let idx3 = ctx.upto(decklen + 3) as usize;
+				let idx1 = ctx.rng_range(0..decklen + 1) as usize;
+				let idx2 = ctx.rng_range(0..decklen + 2) as usize;
+				let idx3 = ctx.rng_range(0..decklen + 3) as usize;
 				let card = ctx.get(t, Stat::card);
 				let c1 = ctx.new_thing(card, owner);
 				let c2 = ctx.new_thing(card, owner);
@@ -3475,7 +3454,7 @@ impl Skill {
 				deck.insert(idx3, c3);
 			}
 			Self::silence => {
-				if ctx.get(t, Stat::sanctuary) == 0 {
+				if !ctx.sanctified(t) {
 					ctx.set(t, Stat::casts, 0);
 				}
 			}
@@ -3486,7 +3465,7 @@ impl Skill {
 				if ctx.trueatk(c) > 0 {
 					return Skill::antimatter.proc(ctx, c, c, data);
 				}
-				let r = ctx.upto(12);
+				let r = ctx.rng_range(0..12);
 				let owner = ctx.get_owner(c);
 				if r == 0 {
 					let cap = if self == Self::singularity { 99 } else { 75 };
@@ -3505,7 +3484,7 @@ impl Skill {
 						ctx.set(c, Stat::immaterial, 1);
 					}
 				} else if r < 7 {
-					let buff = ctx.upto(25);
+					let buff = ctx.rng_range(0..25);
 					ctx.buffhp(c, buff / 5 + 1);
 					ctx.incrAtk(c, -1 - buff % 5);
 				} else if r < 9 {
@@ -3536,7 +3515,7 @@ impl Skill {
 				if throttle(ctx, c) {
 					let owner = ctx.get_owner(c);
 					let foe = ctx.get_foe(owner);
-					if ctx.get(foe, Stat::sanctuary) == 0 && ctx.spend(foe, etg::Chroma, 1) {
+					if !ctx.sanctified(foe) && ctx.spend(foe, etg::Chroma, 1) {
 						ctx.fx(c, Fx::Quanta(1, etg::Darkness as u16));
 						ctx.spend(owner, etg::Darkness, -1);
 					}
@@ -3672,14 +3651,12 @@ impl Skill {
 				let owner = ctx.get_owner(c);
 				let t = if ctx.get(t, Stat::stackable) != 0 {
 					let clone = ctx.cloneinst(t);
-					ctx.set_owner(clone, owner);
 					ctx.set(clone, Stat::charges, 1);
 					ctx.fx(clone, Fx::StartPos(t));
 					ctx.destroy(t, None);
 					clone
 				} else {
 					ctx.remove(t);
-					ctx.set_owner(t, owner);
 					t
 				};
 				ctx.set(t, Stat::casts, 0);
@@ -3718,7 +3695,7 @@ impl Skill {
 				ctx.fx(inst, Fx::StartPos(c));
 				ctx.addCrea(owner, inst);
 			}
-			Self::swave | Self::v_swave => {
+			Self::swave => {
 				if ctx.get(t, Stat::frozen) != 0 {
 					ctx.fx(t, Fx::Shatter);
 					ctx.die(t);
@@ -3783,10 +3760,10 @@ impl Skill {
 				let card = ctx.get(c, Stat::card);
 				ctx.dmg(t, if card::Upped(card) { 4 } else { 3 });
 				let town = ctx.get_owner(t);
-				let idx = ctx.upto(ctx.get_player(town).deck.len() as i32 + 1);
+				let idx = ctx.rng_range(0..=ctx.get_player(town).deck.len());
 				let newrock = ctx.new_thing(card::As(card, card::ThrowRock), town);
 				let pl = ctx.get_player_mut(town);
-				pl.deck_mut().insert(idx as usize, newrock);
+				pl.deck_mut().insert(idx, newrock);
 			}
 			Self::tick => {
 				let upped = card::Upped(ctx.get(c, Stat::card));
@@ -3844,11 +3821,9 @@ impl Skill {
 						} else {
 							ctx.get_foe(pl)
 						};
-						let idx = ctx.upto(ctx.get_player(newowner).deck.len() as i32 + 1);
+						let idx = ctx.rng_range(0..=ctx.get_player(newowner).deck.len());
 						let inst = ctx.new_thing(ctx.get(pr, Stat::card), newowner);
-						ctx.get_player_mut(newowner)
-							.deck_mut()
-							.insert(idx as usize, inst);
+						ctx.get_player_mut(newowner).deck_mut().insert(idx, inst);
 						ctx.destroy(pr, None);
 					}
 				}
@@ -4019,7 +3994,7 @@ impl Skill {
 				ctx.set(c, Stat::storedatk, 0);
 			}
 			Self::wings => {
-				if ctx.get(t, Stat::airborne) == 0 && ctx.get(t, Stat::airborne) == 0 {
+				if ctx.get(t, Stat::airborne) == 0 && ctx.get(t, Stat::ranged) == 0 {
 					data.dmg = 0;
 				}
 			}
@@ -4034,18 +4009,14 @@ impl Skill {
 					Skill::foedraw.proc(ctx, c, t, data);
 				} else {
 					let town = ctx.get_owner(t);
-					if ctx.get(town, Stat::sanctuary) == 0 {
+					if !ctx.sanctified(town) {
 						ctx.remove(t);
 						let owner = ctx.get_owner(c);
 						if !ctx.get_player(owner).hand.is_full() {
-							ctx.set_owner(t, owner);
 							ctx.addCard(owner, t);
 						}
 					}
 				}
-			}
-			Self::v_ablaze => {
-				ctx.incrAtk(c, 2);
 			}
 			Self::v_acceleration(atk) => {
 				Skill::growth(atk, -1).proc(ctx, c, 0, data);
@@ -4055,8 +4026,7 @@ impl Skill {
 				ctx.addskill(t, Event::OwnAttack, Skill::v_acceleration(atk));
 			}
 			Self::v_accretion => {
-				let tkind = ctx.get_kind(t);
-				if tkind != etg::Player {
+				if ctx.get_kind(t) != etg::Player {
 					Skill::v_destroy.proc(ctx, c, t, data);
 				}
 				ctx.buffhp(c, 15);
@@ -4096,7 +4066,7 @@ impl Skill {
 				let owner = ctx.get_owner(c);
 				let foe = ctx.get_foe(owner);
 				if ctx.get(foe, Stat::sanctuary) == 0 {
-					let n = if ctx.get(owner, Stat::mark) == etg::Fire {
+					let n = if ctx.get_player(owner).mark == etg::Fire {
 						3
 					} else {
 						2
@@ -4131,12 +4101,12 @@ impl Skill {
 					Skill::v_gpullspell,
 					Skill::v_icebolt(0),
 					Skill::v_infect,
-					Skill::v_lightning,
+					Skill::lightning,
 					Skill::v_lobotomize,
 					Skill::v_parallel,
 					Skill::v_rewind,
-					Skill::v_snipe,
-					Skill::v_swave,
+					Skill::snipe,
+					Skill::swave,
 				]) {
 					return sk.proc(ctx, c, t, data);
 				}
@@ -4169,7 +4139,7 @@ impl Skill {
 			}
 			Self::v_divinity => {
 				let owner = ctx.get_owner(c);
-				let amt = if ctx.get(owner, Stat::mark) == etg::Light {
+				let amt = if ctx.get_player(owner).mark == etg::Light {
 					24
 				} else {
 					16
@@ -4246,7 +4216,7 @@ impl Skill {
 				if ctx.get_owner(c) == ctx.get_owner(t)
 					&& ctx.get_kind(t) == etg::Creature
 					&& ctx.get(t, Stat::airborne) != 0
-					&& !data.freedom && ctx.upto(4) < ctx.get(c, Stat::charges)
+					&& !data.freedom && ctx.rng_range(0..4) < ctx.get(c, Stat::charges)
 				{
 					ctx.fx(t, Fx::Free);
 					data.freedom = true;
@@ -4261,7 +4231,7 @@ impl Skill {
 					&& ctx.get_kind(tgt) == etg::Creature
 					&& ctx.get(tgt, Stat::airborne) != 0
 					&& ctx.get_card(ctx.get(tgt, Stat::card)).element as i32 == etg::Air
-					&& ctx.upto(4) < ctx.get(c, Stat::charges)
+					&& ctx.rng_range(0..4) < ctx.get(c, Stat::charges)
 				{
 					data.evade = true;
 				}
@@ -4276,15 +4246,13 @@ impl Skill {
 				let owner = ctx.get_owner(c);
 				ctx.dmg(
 					owner,
-					if ctx.get(owner, Stat::mark) == etg::Life {
+					if ctx.get_player(owner).mark == etg::Life {
 						-5
 					} else {
 						-3
 					},
 				);
 			}
-			Self::v_growth => return Skill::growth(2, 2).proc(ctx, c, t, data),
-			Self::v_growth1 => return Skill::growth(1, 1).proc(ctx, c, t, data),
 			Self::v_guard => {
 				ctx.delay(c, 1);
 				ctx.delay(t, 1);
@@ -4326,7 +4294,7 @@ impl Skill {
 			Self::v_icebolt(cost) => {
 				let owner = ctx.get_owner(c);
 				let bonus = (ctx.get_player(owner).quanta(etg::Water) + cost) as i32 / 10;
-				if ctx.upto(20) < 7 + bonus * 2 {
+				if ctx.rng_range(0..20) < 7 + bonus * 2 {
 					ctx.freeze(
 						t,
 						if card::Upped(ctx.get(c, Stat::card)) {
@@ -4351,7 +4319,7 @@ impl Skill {
 			Self::v_integrity => {
 				const shardSkills: [[Skill; 6]; 12] = [
 					[
-						Skill::v_deadalive,
+						Skill::deadalive,
 						Skill::v_mutation,
 						Skill::v_paradox,
 						Skill::v_improve,
@@ -4360,8 +4328,8 @@ impl Skill {
 					],
 					[
 						Skill::v_infect,
-						Skill::v_growth1,
-						Skill::v_growth1,
+						Skill::growth(1, 1),
+						Skill::growth(1, 1),
 						Skill::poison(1),
 						Skill::v_aflatoxin,
 						Skill::poison(2),
@@ -4383,16 +4351,16 @@ impl Skill {
 						Skill::v_bblood,
 					],
 					[
-						Skill::v_growth,
-						Skill::v_adrenaline,
-						Skill::v_adrenaline,
-						Skill::v_adrenaline,
-						Skill::v_adrenaline,
+						Skill::growth(2, 2),
+						Skill::adrenaline,
+						Skill::adrenaline,
+						Skill::adrenaline,
+						Skill::adrenaline,
 						Skill::v_mitosis,
 					],
 					[
-						Skill::v_ablaze,
-						Skill::v_ablaze,
+						Skill::growth(2, 0),
+						Skill::growth(2, 0),
 						Skill::v_fiery,
 						Skill::v_destroy,
 						Skill::v_destroy,
@@ -4417,7 +4385,7 @@ impl Skill {
 					[
 						Skill::v_queen,
 						Skill::v_queen,
-						Skill::v_snipe,
+						Skill::snipe,
 						Skill::v_dive,
 						Skill::v_gas,
 						Skill::v_gas,
@@ -4497,22 +4465,22 @@ impl Skill {
 					Skill::v_stoneform => 1,
 					Skill::v_guard => 1,
 					Skill::v_bblood => 2,
-					Skill::v_deadalive => 1,
+					Skill::deadalive => 1,
 					Skill::v_mutation => 2,
 					Skill::v_paradox => 2,
 					Skill::v_improve => 2,
 					Skill::v_scramble => -2,
 					Skill::v_antimatter => 4,
 					Skill::v_infect => 1,
-					Skill::v_growth1 => -4,
+					Skill::growth(1, 1) => -4,
 					Skill::poison(_) => -2,
 					Skill::v_aflatoxin => 2,
 					Skill::v_devour => 3,
 					Skill::v_blackhole => 4,
-					Skill::v_growth => 2,
-					Skill::v_adrenaline => 2,
+					Skill::growth(2, 2) => 2,
+					Skill::adrenaline => 2,
 					Skill::v_mitosis => 4,
-					Skill::v_ablaze => 1,
+					Skill::growth(2, 0) => 1,
 					Skill::v_fiery => -3,
 					Skill::v_destroy => 3,
 					Skill::v_rage => 2,
@@ -4523,7 +4491,7 @@ impl Skill {
 					Skill::v_endow => 2,
 					Skill::v_luciferin => 4,
 					Skill::v_queen => 2,
-					Skill::v_snipe => 2,
+					Skill::snipe => 2,
 					Skill::v_dive => 2,
 					Skill::v_gas => 2,
 					Skill::v_scarab => 2,
@@ -4671,7 +4639,7 @@ impl Skill {
 				let card = ctx.get_card(code);
 				let nymphcode =
 					etg::NymphList[if card.element as i32 == etg::Chroma || card.rarity == 15 {
-						(ctx.upto(12) + 1) as usize
+						ctx.rng_range(1..=13)
 					} else {
 						card.element as usize
 					}] - 4000;
@@ -4783,7 +4751,7 @@ impl Skill {
 				ctx.addCrea(owner, inst);
 			}
 			Self::v_scramble => {
-				if ctx.get_kind(t) == etg::Player && ctx.get(t, Stat::sanctuary) == 0 {
+				if ctx.get_kind(t) == etg::Player && !ctx.sanctified(t) {
 					let mut n = 0;
 					while n > -9 && ctx.spend(t, etg::Chroma, 1) {
 						n -= 1;
@@ -4826,9 +4794,6 @@ impl Skill {
 				if ctx.get_kind(t) == etg::Creature {
 					ctx.delay(t, 2);
 				}
-			}
-			Self::v_snipe => {
-				ctx.dmg(t, 3);
 			}
 			Self::v_solar => {
 				let owner = ctx.get_owner(c);
@@ -4922,7 +4887,7 @@ impl Skill {
 				return Skill::v_plague.proc(ctx, c, t, data);
 			}
 			Self::v_void => {
-				let amt = if ctx.get(ctx.get_owner(c), Stat::mark) == etg::Darkness {
+				let amt = if ctx.get_player(ctx.get_owner(c)).mark == etg::Darkness {
 					3
 				} else {
 					2
@@ -4966,11 +4931,11 @@ impl Skill {
 		match self {
 			Self::accumulation => ctx.get(c, Stat::charges),
 			Self::axe => {
-				let mark = ctx.get(ctx.get_owner(c), Stat::mark);
+				let mark = ctx.get_player(ctx.get_owner(c)).mark;
 				(mark == etg::Fire || mark == etg::Time) as i32
 			}
 			Self::bow | Self::v_bow => {
-				let mark = ctx.get(ctx.get_owner(c), Stat::mark);
+				let mark = ctx.get_player(ctx.get_owner(c)).mark;
 				(mark == etg::Air || mark == etg::Light) as i32
 			}
 			Self::countimmbur => ctx
@@ -4991,7 +4956,7 @@ impl Skill {
 				.sum::<usize>() as i32,
 			Self::dagger => {
 				let owner = ctx.get_owner(c);
-				let mark = ctx.get(owner, Stat::mark);
+				let mark = ctx.get_player(owner).mark;
 				(mark == etg::Death || mark == etg::Darkness) as i32
 					+ ctx
 						.get_player(owner)
@@ -5001,11 +4966,11 @@ impl Skill {
 						.count() as i32
 			}
 			Self::disc => {
-				let mark = ctx.get(ctx.get_owner(c), Stat::mark);
+				let mark = ctx.get_player(ctx.get_owner(c)).mark;
 				(mark == etg::Entropy || mark == etg::Aether) as i32
 			}
 			Self::hammer | Self::v_hammer => {
-				let mark = ctx.get(ctx.get_owner(c), Stat::mark);
+				let mark = ctx.get_player(ctx.get_owner(c)).mark;
 				(mark == etg::Gravity || mark == etg::Earth) as i32
 			}
 			Self::hope => ctx
@@ -5021,7 +4986,7 @@ impl Skill {
 				pl.quanta(etg::Fire) as i32 / 5
 			}
 			Self::staff => {
-				let mark = ctx.get(ctx.get_owner(c), Stat::mark);
+				let mark = ctx.get_player(ctx.get_owner(c)).mark;
 				(mark == etg::Life || mark == etg::Water) as i32
 			}
 			Self::swarm => ctx
@@ -5031,7 +4996,7 @@ impl Skill {
 				.filter(|&&cr| cr != 0 && ctx.hasskill(cr, Event::Hp, Skill::swarm))
 				.count() as i32,
 			Self::v_dagger => {
-				let mark = ctx.get(ctx.get_owner(c), Stat::mark);
+				let mark = ctx.get_player(ctx.get_owner(c)).mark;
 				(mark == etg::Death || mark == etg::Darkness) as i32
 			}
 			Self::v_hopedr => ctx.get(c, Stat::hope),

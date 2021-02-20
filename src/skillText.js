@@ -198,7 +198,7 @@ const data = {
 	endow:
 		'Gain the strength, skills, and statuses of target weapon. Gain 0|2.\nCannot gain Endow skill.',
 	envenom:
-		'Target weapon gains "Give 1 poison on hit. Throttled (only triggers at most twice from Adrenaline), or target shield gains "25% chance to give non-ranged attackers 1 poison counter."',
+		'Target equipment gains "Give 1 poison on hit. Throttled (only triggers at most twice from Adrenaline)" & "25% chance to give non-ranged attackers 1 poison counter."',
 	epidemic:
 		"When any creature dies, give opponent poison counters equal to the dead creature's poison counters.",
 	epoch:
@@ -628,14 +628,11 @@ const data = {
 		'Target creature or weapon gains 3|0. May target immaterial cards. If it targets an immaterial card, that card gains psionic. Psionic cards deal spell damage and typically bypass shields.',
 	yoink:
 		"Remove target card from opponent's hand and add it to your hand, or draw from target opponent's deck.",
-	v_ablaze: 'Gain 2|0',
 	v_acceleration: x => `Gains +${x}|-1 when it attacks`,
 	v_accelerationspell: x =>
 		`Replaces target creature\'s skills with "Gains +${x}|-1 when it attacks."`,
 	v_accretion:
 		"Destroy target permanent & gain 0|15. Return to owner's hand as a Blackhole if health exceeds 45",
-	v_adrenaline:
-		'Target creature attacks multiple times per turn. Weaker creatures gain more attacks',
 	v_aflatoxin:
 		'Apply 2 poison to target. When target dies, it turns into a malignant cell',
 	v_antimatter: 'Invert strength of target',
@@ -651,21 +648,17 @@ const data = {
 	v_burrow: 'Burrow. Burrowed creatures attack with half strength',
 	v_butterfly:
 		'Target something smaller than, or weaker than, 3. Replace target\'s skills with "3:1 Destroy target permanent"',
-	v_catapult:
-		'Sacrifice target creature to deal 100HP/(100+HP) damage foe. Frozen creatures increase damage by 50%. Poisoned creatures transfer poison',
 	v_chimera:
 		'Combine all your creatures to form a Chimera with momentum & gravity pull',
 	v_cold: '30% chance to freeze attackers for 3',
 	v_cpower: 'Target gains 1 to 5 strength. Target gains 1 to 5 largeness',
 	v_cseed: 'A random effect is inflicted to target creature',
-	v_deadalive: 'Trigger a death effect',
 	v_decrsteam: 'Decrement strength from steam after attack',
 	v_deja: 'Remove active & summon copy',
 	v_dessication:
 		"Deal 2 damage to opponent's creatures. Gain 1:7 per damage dealt. Removes cloak",
 	v_destroy: 'Destroy target permanent',
 	v_devour: 'Kill smaller target creature & gain 1|1',
-	v_die: 'Sacrifice',
 	v_disfield: 'Absorb damage. Consume 1:0 per damage absorbed',
 	v_disshield: 'Absorb damage. Consume 1:1 per 3 damage absorbed',
 	v_divinity: 'Add 24 to maximum health if mark 1:8, otherwise 16 & heal same',
@@ -680,15 +673,12 @@ const data = {
 	v_duality: "Generate a copy of foe's next draw",
 	v_earthquake: 'Destroy up to 3 stacks from target permanent',
 	v_empathy: 'Heal owner per creature owned per turn. Upkeep per 8 creatures',
-	v_enchant: 'Target permanent becomes immaterial',
 	v_endow: 'Replicate attributes of target weapon',
 	v_evolve: 'Become an unburrowed Shrieker',
 	v_fiery: 'Increment damage per 5:6 owned',
 	v_firebolt: _ => 'Deals 3 damage to target. Deal 3 more per 10:6 remaining',
 	v_firewall: 'Damage attackers',
 	v_flyingweapon: 'Own weapon becomes a flying creature',
-	v_fractal:
-		'Fill your hand with copies of target creature. Remove all remaining 1:12.',
 	v_freedom:
 		'Your airborne creatures have a 25% chance to deal 50% more damage, bypass shields and evade targeting if 1:9',
 	v_freeze: c =>
@@ -699,13 +689,7 @@ const data = {
 	v_gas: 'Summon an Unstable Gas',
 	v_gpullspell: 'Target creature intercepts attacks directed to its owner',
 	v_gratitude: 'Heal owner 3, 5 if 1:5',
-	v_growth1: {
-		death: 'When a creature dies, gain 1|1',
-		cast: 'Gain 1|1',
-	},
-	v_growth: 'Gain 2|2',
 	v_guard: 'Delay target creature & attack target if grounded. Delay self',
-	v_hasten: 'Draw',
 	v_hatch: 'Become a random creature',
 	v_heal: 'Heal self 20',
 	v_holylight: 'Heal target 10. Nocturnal targets are damaged instead',
@@ -713,12 +697,10 @@ const data = {
 		'Blocks one additional damage for each creature you control that gain 1:8 when attacking.',
 	v_icebolt: _ =>
 		'Deal 2 damage to target, plus an additional 2 per 10:7 remaining. 25% plus 5% per point of damage chance to freeze target',
-	v_ignite: 'Deal 20 spell damage to foe & 1 damage to all creatures',
 	v_improve: 'Mutate target creature',
 	v_infect: 'Poison target creature',
 	v_ink: 'Summon a Cloak which lasts 1 turn',
 	v_integrity: 'Combine all shards in hand to form a Shard Golem',
-	v_lightning: 'Deal 5 spell damage to target',
 	v_liquid:
 		'Target creature is poisoned & skills replaced with "Heal owner per damage dealt"',
 	v_lobotomize: 'Remove skills from target creature',
@@ -730,7 +712,6 @@ const data = {
 		'All your creatures without skills gain 1:8 when attacking. Heal self 10',
 	v_lycanthropy: 'Gain 5|5',
 	v_mend: 'Heal target creature 5',
-	v_miracle: 'Heal self to one below maximum HP. Consumes remaining 1:8',
 	v_mitosis: 'Summon a daughter creature',
 	v_mitosisspell:
 		'Non-weapon creature gains active "Mitosis: Summon a daughter creature" costing target\'s card\'s cost',
@@ -753,10 +734,6 @@ const data = {
 		} creatures. Removes cloak`,
 	v_parallel: 'Duplicate target creature',
 	v_phoenix: ['Become an Ash on death', 'Become a Minor Ash on death'],
-	v_pend: c =>
-		`Oscilliate between gaining ${c.element ? 1 : 3}:${
-			c.element
-		} & quanta of mark`,
 	v_plague: "Poison foe's creatures. Removes cloak",
 	v_platearmor: x => `Target creature gains 0|${x}.`,
 	v_precognition: "Reveal foe's hand until end of their turn. Draw",
@@ -788,7 +765,6 @@ const data = {
 		'Attacking creatures may die & become skeletons. Smaller creatures are more likely to die',
 	v_skyblitz: 'Dive all own airborne creatures. Consumes remaining 1:9',
 	v_slow: 'Delay attackers',
-	v_snipe: 'Deal 3 damage to target creature',
 	v_solar: 'Gain 1:8 per attacker',
 	v_sosa: c =>
 		`Sacrifice ${
@@ -802,8 +778,6 @@ const data = {
 	v_storm2: "Deals 2 damage to foe's creatures. Removes cloak",
 	v_storm3: "Deals 3 damage to foe's creatures. Removes cloak",
 	v_swarm: 'Increment largeness per scarab',
-	v_swave:
-		'Deals 4 damage to target. Instantly kill creature or destroy weapon if frozen',
 	v_thorn: '75% chance to poison attackers',
 	v_upkeep: c => 'Consumes 1:' + c.element,
 	v_virusinfect: 'Sacrifice self & poison target creature',

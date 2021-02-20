@@ -1,5 +1,11 @@
 import Thing from './Thing.js';
 
+function plinfocore(info, key, val) {
+	if (val === true) info.push(key);
+	else if (val) info.push(val + key);
+}
+const infoskipkeys = new Set(['casts', 'gpull', 'hp', 'maxhp']);
+
 export default class Player extends Thing {
 	constructor(game, id) {
 		super(game, id);
@@ -52,6 +58,18 @@ export default class Player extends Thing {
 	get quanta() {
 		return this.game.get_quanta(this.id);
 	}
+	get mark() {
+		return this.game.game.get_mark(this.id);
+	}
+	get drawpower() {
+		return this.game.game.get_drawpower(this.id);
+	}
+	get deckpower() {
+		return this.game.game.get_deckpower(this.id);
+	}
+	get markpower() {
+		return this.game.game.get_markpower(this.id);
+	}
 	isCloaked() {
 		return this.game.game.is_cloaked(this.id);
 	}
@@ -64,46 +82,23 @@ export default class Player extends Thing {
 	countpermanents() {
 		return this.game.game.count_permanents(this.id);
 	}
+	info() {
+		const info = [`${this.hp}/${this.maxhp} ${this.deck_length}cards`];
+		for (const [k, v] of this.status) {
+			if (!infoskipkeys.has(k) || !v)
+				plinfocore(info, k, this.game.get(this.id, k));
+		}
+		info.push(this.drawpower + 'drawpower');
+		if (this.casts === 0) info.push('silenced');
+		if (this.gpull) info.push('gpull');
+		return info.join('\n');
+	}
 }
 
-function defineProp(key) {
+for (const key of ['maxhp', 'hp', 'atk', 'gpull', 'shardgolem', 'out']) {
 	Object.defineProperty(Player.prototype, key, {
 		get() {
 			return this.game.get(this.id, key);
 		},
 	});
 }
-defineProp('maxhp');
-defineProp('hp');
-defineProp('atk');
-defineProp('gpull');
-defineProp('deckpower');
-defineProp('drawpower');
-defineProp('markpower');
-defineProp('mark');
-defineProp('shardgolem');
-defineProp('out');
-
-function plinfocore(info, key, val) {
-	if (val === true) info.push(key);
-	else if (val) info.push(val + key);
-}
-const infoskipkeys = new Set([
-	'casts',
-	'deckpower',
-	'gpull',
-	'hp',
-	'mark',
-	'markpower',
-	'maxhp',
-]);
-Player.prototype.info = function () {
-	const info = [`${this.hp}/${this.maxhp} ${this.deck_length}cards`];
-	for (const [k, v] of this.status) {
-		if (!infoskipkeys.has(k) || !v)
-			plinfocore(info, k, this.game.get(this.id, k));
-	}
-	if (this.casts === 0) info.push('silenced');
-	if (this.gpull) info.push('gpull');
-	return info.join('\n');
-};

@@ -91,10 +91,7 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 								tgts.push(turn);
 							}
 						}
-						if matches!(
-							active,
-							Skill::catapult | Skill::v_catapult | Skill::golemhit
-						) {
+						if matches!(active, Skill::catapult | Skill::golemhit) {
 							tgts.extend(
 								pl.creatures
 									.iter()

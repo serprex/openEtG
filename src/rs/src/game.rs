@@ -12,7 +12,7 @@ use std::rc::Rc;
 
 use arrayvec::ArrayVec;
 use fxhash::{FxHashMap, FxHasher};
-use rand::distributions::{Distribution, Uniform};
+use rand::distributions::{uniform::SampleRange, uniform::SampleUniform, Distribution, Uniform};
 use rand::seq::SliceRandom;
 use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
@@ -47,6 +47,10 @@ pub struct PlayerData {
 	pub leader: i32,
 	pub weapon: i32,
 	pub shield: i32,
+	pub mark: i32,
+	pub markpower: i16,
+	pub deckpower: u8,
+	pub drawpower: u8,
 	pub creatures: Rc<[i32; 23]>,
 	pub permanents: Rc<[i32; 16]>,
 	pub quanta: [u8; 12],
@@ -292,11 +296,9 @@ pub enum Stat {
 	cloak,
 	cost,
 	costele,
-	deckpower,
 	delayed,
 	dive,
 	drawlock,
-	drawpower,
 	epoch,
 	flooding,
 	frozen,
@@ -306,8 +308,6 @@ pub enum Stat {
 	hp,
 	immaterial,
 	lives,
-	mark,
-	markpower,
 	maxhp,
 	mode,
 	momentum,
@@ -415,6 +415,22 @@ impl Game {
 		} else {
 			0
 		}
+	}
+
+	pub fn get_mark(&self, id: i32) -> i32 {
+		self.get_player(id).mark
+	}
+
+	pub fn get_drawpower(&self, id: i32) -> i32 {
+		self.get_player(id).drawpower as i32
+	}
+
+	pub fn get_deckpower(&self, id: i32) -> i32 {
+		self.get_player(id).deckpower as i32
+	}
+
+	pub fn get_markpower(&self, id: i32) -> i32 {
+		self.get_player(id).markpower as i32
 	}
 
 	pub fn get_owner(&self, id: i32) -> i32 {
@@ -572,9 +588,9 @@ impl Game {
 		hp: i32,
 		maxhp: i32,
 		mark: i32,
-		drawpower: i32,
-		deckpower: i32,
-		markpower: i32,
+		drawpower: u8,
+		deckpower: u8,
+		markpower: i16,
 		mut deck: Vec<i32>,
 	) {
 		let plen = self.players.len();
@@ -592,16 +608,19 @@ impl Game {
 				deck.push(deck[i]);
 			}
 		}
-		self.set(id, Stat::hp, hp);
-		self.set(id, Stat::maxhp, maxhp);
-		self.set(id, Stat::mark, mark);
-		self.set(id, Stat::drawpower, drawpower);
-		self.set(id, Stat::deckpower, deckpower);
-		self.set(id, Stat::markpower, markpower);
 		for code in deck.iter_mut() {
 			*code = self.new_thing(*code, id);
 		}
-		self.get_player_mut(id).deck = Rc::new(deck);
+		{
+			let mut pl = self.get_player_mut(id);
+			pl.deck = Rc::new(deck);
+			pl.thing.status.insert(Stat::hp, hp);
+			pl.thing.status.insert(Stat::maxhp, hp);
+			pl.mark = mark;
+			pl.drawpower = drawpower;
+			pl.deckpower = deckpower;
+			pl.markpower = markpower;
+		}
 		self.drawhand(id, 7);
 		if self.cards.set == CardSet::Original
 			&& self
@@ -664,6 +683,7 @@ impl Game {
 			Stat::airborne,
 			Stat::aquatic,
 			Stat::golem,
+			Stat::nightfall,
 			Stat::nocturnal,
 			Stat::pillar,
 			Stat::poisonous,
@@ -671,7 +691,9 @@ impl Game {
 			Stat::stackable,
 			Stat::swarmhp,
 			Stat::token,
+			Stat::tunnel,
 			Stat::voodoo,
+			Stat::whetstone,
 		] {
 			if let Some(val) = thing.status.get_mut(passive) {
 				*val = 0;
@@ -701,18 +723,6 @@ impl Game {
 			thing.status.insert(Stat::cast, card.cast as i32);
 			thing.status.insert(Stat::castele, card.castele as i32);
 		}
-	}
-
-	pub fn rng(&mut self) -> f64 {
-		self.rng.gen()
-	}
-
-	pub fn upto(&mut self, n: i32) -> i32 {
-		self.rng.gen_range(0..n)
-	}
-
-	pub fn rng_ratio(&mut self, numerator: u32, denominator: u32) -> bool {
-		self.rng.gen_ratio(numerator, denominator)
 	}
 
 	pub fn nextPlayer(&self, id: i32) -> i32 {
@@ -948,6 +958,18 @@ impl Game {
 }
 
 impl Game {
+	pub fn rng(&mut self) -> f64 {
+		self.rng.gen()
+	}
+
+	pub fn rng_range<T: SampleUniform, R: SampleRange<T>>(&mut self, range: R) -> T {
+		self.rng.gen_range(range)
+	}
+
+	pub fn rng_ratio(&mut self, numerator: u32, denominator: u32) -> bool {
+		self.rng.gen_ratio(numerator, denominator)
+	}
+
 	pub fn shuffle<T>(&mut self, slice: &mut [T]) {
 		slice.shuffle(&mut self.rng);
 	}
@@ -1045,7 +1067,7 @@ impl Game {
 			self.set(id, status, 1);
 			false
 		} else {
-			let cast = self.upto(2) + 1;
+			let cast = self.rng.gen_range(1..=2);
 			let castele = self.get_card(self.get(id, Stat::card)).element as i32;
 			self.set(id, Stat::cast, cast);
 			self.set(id, Stat::castele, castele);
@@ -1100,15 +1122,15 @@ impl Game {
 				Skill::gpull,
 				Skill::v_devour,
 				Skill::v_mutation,
-				Skill::v_growth,
-				Skill::v_ablaze,
+				Skill::growth(2, 2),
+				Skill::growth(2, 0),
 				Skill::poisonfoe(1),
 				Skill::v_deja,
 				Skill::v_endow,
 				Skill::v_guard,
 				Skill::v_mitosis,
 			],
-			Skill::v_growth1,
+			Skill::growth(1, 1),
 		)
 	}
 
@@ -1958,9 +1980,9 @@ impl Game {
 
 	pub fn mill(&mut self, id: i32, mut amt: i32) {
 		if self.get(id, Stat::protectdeck) == 0 {
-			let deckpower = self.get(id, Stat::deckpower);
+			let deckpower = self.get_player(id).deckpower as i32;
 			if deckpower > 1 {
-				amt *= deckpower;
+				amt = amt.saturating_mul(deckpower);
 			}
 			for _ in 0..amt {
 				self.draw(id);
@@ -1981,6 +2003,10 @@ impl Game {
 			}
 		}
 		self.get_player_mut(id).deck = deckrc;
+	}
+
+	pub fn sanctified(&self, id: i32) -> bool {
+		self.turn != id && self.get(id, Stat::sanctuary) != 0
 	}
 
 	pub fn incrStatus(&mut self, id: i32, k: Stat, amt: i32) {
@@ -2006,8 +2032,11 @@ impl Game {
 			Stat::cloak,
 			Stat::epoch,
 			Stat::flooding,
+			Stat::nightfall,
 			Stat::nothrottle,
 			Stat::stackable,
+			Stat::tunnel,
+			Stat::whetstone,
 		] {
 			if let Some(val) = thing.status.get_mut(status) {
 				*val = 0;
@@ -2023,8 +2052,8 @@ impl Game {
 				if self.cards.set != CardSet::Original {
 					self.dmg(next, self.get(next, Stat::poison));
 				}
-				let thing = self.get_thing_mut(next);
-				if let Some(sosa) = thing.status.get_mut(&Stat::sosa) {
+				let pl = self.get_player_mut(next);
+				if let Some(sosa) = pl.thing.status.get_mut(&Stat::sosa) {
 					if *sosa > 0 {
 						*sosa -= 1;
 					}
@@ -2036,11 +2065,11 @@ impl Game {
 					Stat::precognition,
 					Stat::protectdeck,
 				] {
-					if let Some(val) = thing.status.get_mut(status) {
+					if let Some(val) = pl.thing.status.get_mut(status) {
 						*val = 0;
 					}
 				}
-				for _ in 0..self.get(next, Stat::drawpower) {
+				for _ in 0..pl.drawpower {
 					self.drawstep(next);
 				}
 				self.turn = next;
@@ -2054,10 +2083,16 @@ impl Game {
 		}
 	}
 
+	fn proc_mark(&mut self, id: i32) -> bool {
+		let (mark, markpower) = {
+			let pl = self.get_player(id);
+			(pl.mark, pl.markpower as i32)
+		};
+		self.spend(id, mark, markpower * if mark > 0 { -1 } else { -3 })
+	}
+
 	pub fn o_endturn(&mut self, id: i32) {
-		let mark = self.get(id, Stat::mark);
-		let markpower = self.get(id, Stat::markpower);
-		self.spend(id, mark, markpower * if mark > 0 { -1 } else { -3 });
+		self.proc_mark(id);
 		let mut data = ProcData {
 			tgt: self.get_foe(id),
 			attackphase: true,
@@ -2095,9 +2130,7 @@ impl Game {
 	}
 
 	pub fn v_endturn(&mut self, id: i32) {
-		let mark = self.get(id, Stat::mark);
-		let markpower = self.get(id, Stat::markpower);
-		self.spend(id, mark, markpower * if mark > 0 { -1 } else { -3 });
+		self.proc_mark(id);
 		let foe = self.get_foe(id);
 		self.dmg(foe, self.get(foe, Stat::poison));
 		let mut data = ProcData::default();
@@ -2298,8 +2331,9 @@ impl Game {
 			if self.get(c, Stat::neuro) != 0 {
 				self.poison(c, 1);
 			}
-			let skill = self.getSkill(c, Event::Cast)[0];
-			self.castSpell(c, t, skill);
+			if let Some(skill) = self.getSkill(c, Event::Cast).first().cloned() {
+				self.castSpell(c, t, skill);
+			}
 		}
 	}
 

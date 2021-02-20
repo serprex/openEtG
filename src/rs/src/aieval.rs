@@ -184,9 +184,9 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			}
 			Skill::disshield | Skill::v_disshield => {
 				let owner = ctx.get_owner(c);
-				let hasentropymark = ctx.get(owner, Stat::mark) == etg::Entropy;
-				2.0 + ctx
-					.get_player(owner)
+				let pl = ctx.get_player(owner);
+				let hasentropymark = pl.mark == etg::Entropy;
+				2.0 + pl
 					.permanents
 					.iter()
 					.filter(|&&perm| perm != 0)
@@ -241,9 +241,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::foedraw => 8.0,
 			Skill::forcedraw => -10.0,
 			Skill::forceplay => 2.0,
-			Skill::fractal | Skill::v_fractal => {
-				(20 - ctx.get_player(ctx.get_owner(c)).hand.len()) as f32 / 4.0
-			}
+			Skill::fractal => (20 - ctx.get_player(ctx.get_owner(c)).hand.len()) as f32 / 4.0,
 			Skill::freedom => 4.0,
 			Skill::freeze | Skill::v_freeze | Skill::freezeperm => {
 				if card::Upped(ctx.get(c, Stat::card)) {
@@ -299,9 +297,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 					ttatk.signum()
 				}
 			}
-			Skill::hasten | Skill::v_hasten => {
-				(ctx.get_player(ctx.get_owner(c)).deck.len() as f32 / 4.0).min(6.0)
-			}
+			Skill::hasten => (ctx.get_player(ctx.get_owner(c)).deck.len() as f32 / 4.0).min(6.0),
 			Skill::hatch => 4.0,
 			Skill::heal => {
 				if ctx.get(ctx.get_foe(ctx.get_owner(c)), Stat::sosa) != 0 {
@@ -593,11 +589,9 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			}
 			Skill::thorn(chance) => chance as f32 / 15.0,
 			Skill::vend => 2.0,
-			Skill::v_ablaze => 3.0,
 			Skill::v_acceleration(x) => (ctx.truehp(c) - 2 + x as i32) as f32,
 			Skill::v_accelerationspell(x) => (x as i32 * 2) as f32,
 			Skill::v_accretion => 8.0,
-			Skill::v_adrenaline => 8.0,
 			Skill::v_aflatoxin => 5.0,
 			Skill::v_bblood => 7.0,
 			Skill::v_bless => 4.0,
@@ -605,10 +599,8 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::v_bravery => 3.0,
 			Skill::v_burrow => 1.0,
 			Skill::v_butterfly => 12.0,
-			Skill::v_catapult => 6.0,
 			Skill::v_chimera => 4.0,
 			Skill::v_cpower => 4.0,
-			Skill::v_deadalive => 2.0,
 			Skill::v_deja => 4.0,
 			Skill::v_destroy => 8.0,
 			Skill::v_divinity => 3.0,
@@ -617,32 +609,26 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::v_dshield => 4.0,
 			Skill::v_duality => 4.0,
 			Skill::v_earthquake => 4.0,
-			Skill::v_enchant => 6.0,
 			Skill::v_endow => 4.0,
 			Skill::v_firebolt(_) => 10.0,
 			Skill::v_flyingweapon => 7.0,
 			Skill::v_freedom => (ctx.get(c, Stat::charges) * 5) as f32,
 			Skill::v_gas => 5.0,
 			Skill::v_gratitude => (ctx.get(c, Stat::charges) * 4) as f32,
-			Skill::v_growth => 5.0,
-			Skill::v_growth1 => 3.0,
 			Skill::v_guard => 4.0,
 			Skill::v_hatch => 4.5,
 			Skill::v_heal => 8.0,
 			Skill::v_holylight => 3.0,
 			Skill::v_hope => 2.0,
 			Skill::v_icebolt(_) => 10.0,
-			Skill::v_ignite => 10.0,
 			Skill::v_improve => 6.0,
 			Skill::v_infect => 4.0,
 			Skill::v_integrity => 4.0,
-			Skill::v_lightning => 6.0,
 			Skill::v_liquid => 5.0,
 			Skill::v_lobotomize => 6.0,
 			Skill::v_luciferin => 3.0,
 			Skill::v_lycanthropy => 4.0,
 			Skill::v_mend => 3.0,
-			Skill::v_miracle => ctx.get(ctx.get_owner(c), Stat::maxhp) as f32 / 8.0,
 			Skill::v_momentum => 2.0,
 			Skill::v_mutation => 4.0,
 			Skill::v_nightmare => {
@@ -677,7 +663,6 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::v_skull => 5.0,
 			Skill::v_skyblitz => 10.0,
 			Skill::v_slow => 6.0,
-			Skill::v_snipe => 7.0,
 			Skill::v_sosa => 6.0,
 			Skill::v_soulcatch => 2.0,
 			Skill::v_sskin => 15.0,
@@ -686,7 +671,6 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::v_stoneform => 1.0,
 			Skill::v_storm2 => 6.0,
 			Skill::v_storm3 => 12.0,
-			Skill::v_swave => 6.0,
 			Skill::v_thorn => 5.0,
 			Skill::v_upkeep => -0.5,
 			Skill::v_virusplague => 1.0,
@@ -698,7 +682,10 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 }
 
 fn throttled(s: Skill) -> bool {
-	matches!(s, Skill::poison(_) | Skill::neuro | Skill::regen | Skill::siphon)
+	matches!(
+		s,
+		Skill::poison(_) | Skill::neuro | Skill::regen | Skill::siphon
+	)
 }
 
 fn caneventuallyactive(ctx: &Game, id: i32, cost: i32, costele: i32) -> bool {
@@ -706,19 +693,19 @@ fn caneventuallyactive(ctx: &Game, id: i32, cost: i32, costele: i32) -> bool {
 	cost <= 0
 		|| costele == etg::Chroma
 		|| pl.quanta(costele) > 0
-		|| {
-			let mark = ctx.get(id, Stat::mark);
-			mark == etg::Chroma || mark == costele
-		} || pl.permanents.iter().any(|&pr| {
-		pr != 0
-			&& (ctx.get(pr, Stat::pillar) != 0 && {
-				let element = ctx.get_card(ctx.get(pr, Stat::card)).element as i32;
-				element == etg::Chroma || element == costele
-			}) || (ctx.hasskill(pr, Event::Cast, Skill::locket) && ctx.get(pr, Stat::mode) == costele)
-			|| pl.creatures.iter().any(|&cr| {
-				cr != 0 && ctx.hasskill(cr, Event::OwnAttack, Skill::quanta(costele as i8))
-			})
-	})
+		|| pl.mark == etg::Chroma
+		|| pl.mark == costele
+		|| pl.permanents.iter().any(|&pr| {
+			pr != 0
+				&& (ctx.get(pr, Stat::pillar) != 0 && {
+					let element = ctx.get_card(ctx.get(pr, Stat::card)).element as i32;
+					element == etg::Chroma || element == costele
+				}) || (ctx.hasskill(pr, Event::Cast, Skill::locket)
+				&& ctx.get(pr, Stat::mode) == costele)
+				|| pl.creatures.iter().any(|&cr| {
+					cr != 0 && ctx.hasskill(cr, Event::OwnAttack, Skill::quanta(costele as i8))
+				})
+		})
 }
 
 #[derive(Clone, Copy)]
@@ -770,7 +757,7 @@ impl WallShield {
 				}
 			}
 			WallShield::Wings => {
-				if ctx.get(id, Stat::airborne) != 0 || ctx.get(id, Stat::ranged) != 0 {
+				if ctx.get(id, Stat::airborne) == 0 || ctx.get(id, Stat::ranged) == 0 {
 					return 0.0;
 				}
 			}
@@ -1001,12 +988,11 @@ fn evalthing(
 						adrenaline
 					};
 				if ctx.get(id, Stat::frozen) != 0
-					&& sk.iter().cloned().any(|sk| {
-						matches!(
-							sk,
-							Skill::v_acceleration(_) | Skill::v_siphon
-						)
-					}) {
+					&& sk
+						.iter()
+						.cloned()
+						.any(|sk| matches!(sk, Skill::v_acceleration(_) | Skill::v_siphon))
+				{
 					autoscore *= delayfactor
 				}
 				score += autoscore;
@@ -1237,8 +1223,7 @@ pub fn eval(ctx: &Game) -> f32 {
 			.sum::<i32>() as f32;
 		let player = ctx.get_player(pl);
 		let wall = &walls[plidx];
-		let mut pscore =
-			(ctx.get(pl, Stat::markpower) as f32).sqrt() - expected_damage + wall.dmg as f32;
+		let mut pscore = (player.markpower as f32).sqrt() - expected_damage + wall.dmg as f32;
 		let mut plhp = ctx.get(pl, Stat::hp);
 		if let Some(wshield) = wall.shield {
 			match wshield {
@@ -1287,7 +1272,7 @@ pub fn eval(ctx: &Game) -> f32 {
 		if ctx.get(pl, Stat::drawlock) == 0 {
 			if pl != turn {
 				let handlen = player.hand.len();
-				for draw in 1..=ctx.get(pl, Stat::drawpower) as usize {
+				for draw in 1..=player.drawpower as usize {
 					if player.hand.len() + draw <= 8 && player.deck.len() >= draw {
 						pscore += evalthing(
 							ctx,
