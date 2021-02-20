@@ -749,8 +749,6 @@ const data = {
 		"Remove target creature to top of owner's deck. If target is a Skeleton, transform it into a random creature. If target is a Mummy, transform it into a Pharaoh.",
 	v_salvage: 'Restore permanents destroyed by foe to hand once per turn',
 	v_salvageoff: 'Become ready to salvage again at start of next turn',
-	v_sanctuary:
-		"Heal 4 per turn. Protection during foe's turn from hand & quanta control",
 	v_scarab: 'Summon a Scarab',
 	v_scramble: "Randomly scramble foe's quanta on hit",
 	v_serendipity: c =>

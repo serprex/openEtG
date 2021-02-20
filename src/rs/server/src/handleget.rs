@@ -552,9 +552,8 @@ async fn handle_get_core(
 								codes[ij] = card::OpenSet
 									.random_card(&mut rng, false, |card| {
 										card.element == ele
-											&& !card.status.iter().any(|&(k, v)| {
-												k == etg::game::Stat::pillar && v != 0
-											}) && !codes[..ij].iter().any(|&code| code == card.code)
+											&& (card.flag & etg::game::Flag::pillar) != 0
+											&& !codes[..ij].iter().any(|&code| code == card.code)
 									})
 									.unwrap()
 									.code;

@@ -42,7 +42,7 @@ pub fn set_panic_hook() {
 mod test {
 	use crate::card::{self, CardSet};
 	use crate::etg;
-	use crate::game::{Game, GameMove, Stat};
+	use crate::game::{Flag, Game, GameMove, Stat};
 	use crate::skill::{Event, ProcData, Skill};
 
 	#[test]
@@ -306,7 +306,7 @@ mod test {
 			ctx.play(card, 0, true);
 		}
 		let pillars = ctx.get_player(p1).permanents[0];
-		assert_ne!(ctx.get(pillars, Stat::pillar), 0);
+		assert!(ctx.get(pillars, Flag::pillar));
 		assert_eq!(ctx.get(pillars, Stat::charges), 5);
 		Skill::earthquake.proc(&mut ctx, p2, pillars, &mut ProcData::default());
 		assert_eq!(ctx.get(pillars, Stat::charges), 2);
@@ -420,9 +420,9 @@ mod test {
 		Skill::web.proc(&mut ctx, dfly, dfly, &mut ProcData::default());
 		Skill::parallel.proc(&mut ctx, dfly, dfly, &mut ProcData::default());
 		let clone2 = ctx.get_player(p1).creatures[2];
-		assert_eq!(ctx.get(dfly, Stat::airborne), 0);
-		assert_ne!(ctx.get(clone, Stat::airborne), 0);
-		assert_eq!(ctx.get(clone2, Stat::airborne), 0);
+		assert!(!ctx.get(dfly, Flag::airborne));
+		assert!(ctx.get(clone, Flag::airborne));
+		assert!(!ctx.get(clone2, Flag::airborne));
 	}
 
 	#[test]
@@ -460,15 +460,15 @@ mod test {
 		assert_eq!(ctx.get(p2, Stat::poison), 6);
 		Skill::neuroify.proc(&mut ctx, p1, p2, &mut ProcData::default());
 		assert_eq!(ctx.get(p2, Stat::poison), 6);
-		assert_ne!(ctx.get(p2, Stat::neuro), 0);
+		assert!(ctx.get(p2, Flag::neuro));
 		Skill::purify.proc(&mut ctx, p1, p2, &mut ProcData::default());
 		assert_eq!(ctx.get(p2, Stat::poison), -2);
-		assert_eq!(ctx.get(p2, Stat::neuro), 0);
+		assert!(!ctx.get(p2, Flag::neuro));
 		Skill::purify.proc(&mut ctx, p1, p2, &mut ProcData::default());
 		assert_eq!(ctx.get(p2, Stat::poison), -4);
 		Skill::neuroify.proc(&mut ctx, p1, p2, &mut ProcData::default());
 		assert_eq!(ctx.get(p2, Stat::poison), 0);
-		assert_eq!(ctx.get(p2, Stat::neuro), 0);
+		assert!(!ctx.get(p2, Flag::neuro));
 	}
 
 	#[test]

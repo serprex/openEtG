@@ -140,7 +140,7 @@ const activetexts = [
 const activetextsRename = {
 	burrow: (c, x) => (c.getStatus('burrowed') ? 'unburrow' : 'burrow'),
 	quanta: (c, x) => ui.eleNames[x[1]].toLowerCase(),
-	summon: (c, x) => c.game.Cards.Codes[x[1]].name.toLowerCase(),
+	summon: (c, x) => c.game.Cards.Codes[x[1] & 0xffff].name.toLowerCase(),
 };
 function skillName(c, sk) {
 	const namelist = [];

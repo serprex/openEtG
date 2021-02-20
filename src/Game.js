@@ -119,7 +119,7 @@ export class Game {
 		return null;
 	}
 	get(id, key) {
-		return this.game.get_stat(id, enums.StatId[key]);
+		return this.game.get_stat(id, enums.StatId[key] ?? enums.FlagId[key]);
 	}
 	get_owner(id) {
 		return this.game.get_owner(id);

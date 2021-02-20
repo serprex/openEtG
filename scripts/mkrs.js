@@ -2,14 +2,37 @@ import fs from 'fs/promises';
 import OrigCards from '../src/vanilla/Cards.js';
 import OpenCards from '../src/Cards.js';
 
+const json = {
+	Card: {},
+	Event: {},
+	EventId: {},
+	Fx: {},
+	Skill: {},
+	SkillParams: {},
+	Stat: {},
+	StatId: {},
+	Flag: {},
+	FlagId: {},
+};
 const source = [
 	'#![allow(non_upper_case_globals)]',
-	'use crate::card::{Card,CardSet,Cards};use crate::game::{Fx,Stat};use crate::skill::{Event,Skill};',
+	'use crate::card::{Card,CardSet,Cards};use crate::game::{Flag,Fx,Stat};use crate::skill::{Event,Skill};',
 ];
+function flagSlice(card) {
+	const s = [];
+	for (const [k, v] of card.status) {
+		if (json.FlagId[k] !== undefined) {
+			s.push(`Flag::${k}`);
+		}
+	}
+	return `&${s.length === 1 ? s[0] : s.length ? `(${s.join('|')})` : '0'}`;
+}
 function statusSlice(card) {
 	let s = '&[';
 	for (const [k, v] of card.status) {
-		s += `(Stat::${k},${v}),`;
+		if (json.StatId[k] !== undefined) {
+			s += `(Stat::${k},${v}),`;
+		}
 	}
 	s += ']';
 	return s;
@@ -34,59 +57,6 @@ function formatSkill(name) {
 			? 'r#static'
 			: name
 	}`;
-}
-const json = {
-	Card: {},
-	Event: {},
-	EventId: {},
-	Fx: {},
-	Skill: {},
-	SkillParams: {},
-	Stat: {},
-	StatId: {},
-};
-const names = { open: [], orig: [] };
-for (const Cards of [OpenCards, OrigCards]) {
-	const open = Cards === OpenCards,
-		setname = open ? 'OpenSet' : 'OrigSet';
-	source.push(
-		`pub const ${setname}:Cards=Cards{set:CardSet::${
-			open ? 'Open' : 'Original'
-		},data:&[`,
-	);
-	const codeidx = new Map();
-	Cards.Codes.forEach(card => {
-		if (!card || card.shiny) return;
-		codeidx.set(card.code, codeidx.size);
-		json.Card[card.code] = card.name;
-		source.push(
-			`Card{code:${card.code},kind:${card.type},element:${
-				card.element
-			},rarity:${card.rarity},attack:${card.attack},health:${
-				card.health
-			},cost:${card.cost},costele:${card.costele},cast:${card.cast},castele:${
-				card.castele
-			},status:${statusSlice(card)},skill:${skillSlice(card)}},`,
-		);
-	});
-	source.push(
-		`]};pub const ${open ? 'OpenCache' : 'OrigCache'}:[&'static [u16];2]=[`,
-	);
-	for (let i = 0; i < 2; i++) {
-		source.push('&[');
-		for (const fc of Cards.filtercache[i]) {
-			source.push(`${codeidx.get(fc.code)},`);
-		}
-		source.push('],');
-	}
-	source.push('];');
-	const namejs = open ? names.open : names.orig;
-	for (const [name, card] of Object.entries(Cards.Names)) {
-		if (name !== '52Pickup') {
-			source.push(`pub const ${open ? '' : 'v_'}${name}:i32=${card.code};`);
-			namejs.push(`export const ${name} = ${card.code};`);
-		}
-	}
 }
 const [gamers, skillrs] = await Promise.all([
 	fs.readFile('./src/rs/src/game.rs', 'utf8'),
@@ -146,9 +116,19 @@ for (const stat of gamers
 	source.push(`Stat::${stat}=>${id},`);
 	stat_id.push(`${id}=>Stat::${stat},`);
 }
-source.push('}}');
-stat_id.push('_=>return None})}');
-source.push(...stat_id);
+source.push('}}', ...stat_id, '_=>return None})}');
+
+const flag_id = ['pub fn flag_id(f:i32)->Option<u64>{Some(match f{'];
+source.push('pub fn id_flag(f:u64)->i32{match f{');
+for (const fl of gamers.matchAll(/pub const ([a-z]+): u64 = 1 << \d\d?;/g)) {
+	const id = statid++;
+	const key = fl[1];
+	json.Flag[id] = key;
+	json.FlagId[key] = id;
+	source.push(`Flag::${key}=>${id},`);
+	flag_id.push(`${id}=>Flag::${key},`);
+}
+source.push('_=>0}}', ...flag_id, '_=>return None})}');
 
 source.push('pub fn id_fx(s:Fx)->i32{match s{');
 const fxprefix = '\npub enum Fx {\n',
@@ -167,9 +147,53 @@ for (const fx of gamers
 }
 source.push('}}');
 
+const names = { open: [], orig: [] };
+for (const Cards of [OpenCards, OrigCards]) {
+	const open = Cards === OpenCards,
+		setname = open ? 'OpenSet' : 'OrigSet';
+	source.push(
+		`pub const ${setname}:Cards=Cards{set:CardSet::${
+			open ? 'Open' : 'Original'
+		},data:&[`,
+	);
+	const codeidx = new Map();
+	Cards.Codes.forEach(card => {
+		if (!card || card.shiny) return;
+		codeidx.set(card.code, codeidx.size);
+		json.Card[card.code] = card.name;
+		source.push(
+			`Card{code:${card.code},kind:${card.type},element:${
+				card.element
+			},rarity:${card.rarity},attack:${card.attack},health:${
+				card.health
+			},cost:${card.cost},costele:${card.costele},cast:${card.cast},castele:${
+				card.castele
+			},flag:${flagSlice(card)},status:${statusSlice(card)},skill:${skillSlice(
+				card,
+			)}},`,
+		);
+	});
+	source.push(
+		`]};pub const ${open ? 'OpenCache' : 'OrigCache'}:[&'static [u16];2]=[`,
+	);
+	for (let i = 0; i < 2; i++) {
+		source.push('&[');
+		for (const fc of Cards.filtercache[i]) {
+			source.push(`${codeidx.get(fc.code)},`);
+		}
+		source.push('],');
+	}
+	source.push('];');
+	const namejs = open ? names.open : names.orig;
+	for (const [name, card] of Object.entries(Cards.Names)) {
+		if (name !== '52Pickup') {
+			source.push(`pub const ${open ? '' : 'v_'}${name}:i32=${card.code};`);
+			namejs.push(`export const ${name} = ${card.code};`);
+		}
+	}
+}
+
 await Promise.all([
 	fs.writeFile('./src/enum.json', JSON.stringify(json), 'utf8'),
-	fs.writeFile('./src/OpenNames.js', names.open.join('\n'), 'utf8'),
-	fs.writeFile('./src/OriginalNames.js', names.orig.join('\n'), 'utf8'),
 	fs.writeFile('./src/rs/src/generated.rs', source.join('\n'), 'utf8'),
 ]);

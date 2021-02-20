@@ -4,12 +4,12 @@ use std::iter::once;
 use crate::aieval::eval;
 use crate::card;
 use crate::etg;
-use crate::game::{Game, GameMove, Phase, Stat};
+use crate::game::{Flag, Game, GameMove, Phase, Stat};
 use crate::skill::{Event, Skill, Tgt};
 
 fn filter(ctx: &Game, skill: Skill, c: i32, t: i32) -> bool {
 	match skill {
-		Skill::v_web => ctx.get(t, Stat::airborne) != 0,
+		Skill::v_web => ctx.get(t, Flag::airborne),
 		Skill::freeze | Skill::v_freeze => ctx.get(t, Stat::frozen) < 3,
 		Skill::pacify => ctx.trueatk(t) != 0,
 		Skill::readiness => {
@@ -24,7 +24,7 @@ fn filter(ctx: &Game, skill: Skill, c: i32, t: i32) -> bool {
 fn has_sopa(ctx: &Game, id: i32) -> bool {
 	ctx.get_kind(id) == etg::Permanent
 		&& ctx.hasskill(id, Event::Cast, Skill::die)
-		&& (ctx.hasskill(id, Event::Attack, Skill::patience) || ctx.get(id, Stat::patience) != 0)
+		&& (ctx.hasskill(id, Event::Attack, Skill::patience) || ctx.get(id, Flag::patience))
 }
 
 fn proc_sopa(gclone: &mut Game, turn: i32) {
@@ -84,7 +84,7 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 				for &id in ctx.players_ref().iter() {
 					let pl = ctx.get_player(id);
 					if id == turn {
-						if (pl.shield != 0 && ctx.get(pl.shield, Stat::reflective) != 0)
+						if (pl.shield != 0 && ctx.get(pl.shield, Flag::reflective))
 							|| active == Skill::pandemonium
 						{
 							if tgting.full_check(ctx, id, turn) {
@@ -100,8 +100,7 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 							);
 						} else {
 							tgts.extend(pl.creatures.iter().cloned().filter(|&t| {
-								t != 0
-									&& ctx.get(t, Stat::voodoo) != 0 && tgting.full_check(ctx, id, t)
+								t != 0 && ctx.get(t, Flag::voodoo) && tgting.full_check(ctx, id, t)
 							}));
 						}
 					} else {
@@ -303,14 +302,14 @@ pub fn search(ctx: &Game) -> GameMove {
 		let pl = ctx.get_player(turn);
 		return if pl.hand.len() < 6
 			|| pl.hand.iter().any(|&id| {
-				ctx.get(id, Stat::pillar) != 0 || {
+				ctx.get(id, Flag::pillar) || {
 					let card = ctx.get(id, Stat::card);
 					card::IsOf(card, card::Nova)
 						|| card::IsOf(card, card::Immolation)
 						|| card::IsOf(card, card::GiftofOceanus)
 						|| card::IsOf(card, card::QuantumLocket)
 				}
-			}) || pl.deck.iter().all(|&id| ctx.get(id, Stat::pillar) == 0)
+			}) || pl.deck.iter().all(|&id| !ctx.get(id, Flag::pillar))
 		{
 			GameMove::Accept
 		} else {

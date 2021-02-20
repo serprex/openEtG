@@ -7,7 +7,7 @@ use std::ops::{Index, IndexMut};
 
 use crate::card::{self, CardSet};
 use crate::etg;
-use crate::game::{Game, Stat};
+use crate::game::{Flag, Game, Stat};
 use crate::skill::{Event, Skill};
 
 struct DamageMap(Vec<f32>);
@@ -66,7 +66,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::appease => {
 				if ctx.get_kind(c) == etg::Spell {
 					-6.0
-				} else if ctx.get(c, Stat::appeased) != 0 {
+				} else if ctx.get(c, Flag::appeased) {
 					0.0
 				} else {
 					ctx.trueatk(c) as f32 * -1.5
@@ -99,7 +99,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::brew => 4.0,
 			Skill::brokenmirror => {
 				let shield = ctx.get_shield(ctx.get_foe(ctx.get_owner(c)));
-				if shield == 0 || ctx.get(shield, Stat::reflective) == 0 {
+				if shield == 0 || !ctx.get(shield, Flag::reflective) {
 					2.0
 				} else {
 					-3.0
@@ -168,7 +168,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 					.iter()
 					.filter(|&&perm| perm != 0)
 					.map(|&perm| {
-						if ctx.get(perm, Stat::pillar) != 0 {
+						if ctx.get(perm, Flag::pillar) {
 							(if ctx.get_card(ctx.get(perm, Stat::card)).element as i32
 								== etg::Chroma
 							{
@@ -257,7 +257,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 				let mut dmg = 0.0;
 				for &cr in ctx.get_player(ctx.get_owner(c)).creatures.iter() {
 					if cr != 0
-						&& ctx.get(cr, Stat::golem) != 0
+						&& ctx.get(cr, Flag::golem)
 						&& ctx.get(cr, Stat::delayed) == 0
 						&& ctx.get(cr, Stat::frozen) == 0
 					{
@@ -287,7 +287,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 						0.0
 					}
 			}
-			Skill::guard => ttatk + (4 + ctx.get(c, Stat::airborne)) as f32,
+			Skill::guard => ttatk + (4 + ctx.get(c, Flag::airborne) as i32) as f32,
 			Skill::halveatk => {
 				if ctx.get_kind(c) == etg::Spell {
 					-ctx.get_card(ctx.get(c, Stat::card)).attack as f32 / 4.0
@@ -347,14 +347,14 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::momentum => 2.0,
 			Skill::mutation => 4.0,
 			Skill::neuro | Skill::v_neuro => {
-				if ctx.get(ctx.get_foe(ctx.get_owner(c)), Stat::neuro) != 0 {
+				if ctx.get(ctx.get_foe(ctx.get_owner(c)), Flag::neuro) {
 					4.0
 				} else {
 					6.0
 				}
 			}
 			Skill::neuroify => {
-				if ctx.get(ctx.get_foe(ctx.get_owner(c)), Stat::neuro) != 0 {
+				if ctx.get(ctx.get_foe(ctx.get_owner(c)), Flag::neuro) {
 					1.0
 				} else {
 					2.0
@@ -656,7 +656,6 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::v_regenerate => 5.0,
 			Skill::v_rewind => 6.0,
 			Skill::v_salvage => 2.0,
-			Skill::v_sanctuary => 6.0,
 			Skill::v_scarab => 4.0,
 			Skill::v_silence => 1.0,
 			Skill::v_siphon => 4.0,
@@ -697,7 +696,7 @@ fn caneventuallyactive(ctx: &Game, id: i32, cost: i32, costele: i32) -> bool {
 		|| pl.mark == costele
 		|| pl.permanents.iter().any(|&pr| {
 			pr != 0
-				&& (ctx.get(pr, Stat::pillar) != 0 && {
+				&& (ctx.get(pr, Flag::pillar) && {
 					let element = ctx.get_card(ctx.get(pr, Stat::card)).element as i32;
 					element == etg::Chroma || element == costele
 				}) || (ctx.hasskill(pr, Event::Cast, Skill::locket)
@@ -757,7 +756,7 @@ impl WallShield {
 				}
 			}
 			WallShield::Wings => {
-				if ctx.get(id, Stat::airborne) == 0 || ctx.get(id, Stat::ranged) == 0 {
+				if !ctx.get(id, Flag::airborne | Flag::ranged) {
 					return 0.0;
 				}
 			}
@@ -782,8 +781,8 @@ fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
 	let owner = ctx.get_owner(id);
 	let foe = ctx.get_foe(owner);
 	let fsh = ctx.get_shield(foe);
-	let psionic = ctx.get(id, Stat::psionic) != 0;
-	if psionic && fsh != 0 && ctx.get(fsh, Stat::reflective) != 0 {
+	let psionic = ctx.get(id, Flag::psionic);
+	if psionic && fsh != 0 && ctx.get(fsh, Flag::reflective) {
 		wall.dmg += once(tatk)
 			.chain(
 				(1..if ctx.get(id, Stat::adrenaline) == 0 {
@@ -796,15 +795,15 @@ fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
 			.sum::<i32>() as i16;
 		return 0.0;
 	}
-	let bypass = fsh == 0 || psionic || ctx.get(id, Stat::momentum) != 0;
+	let bypass = fsh == 0 || psionic || ctx.get(id, Flag::momentum);
 	let momentum = bypass
 		|| tatk <= 0
-		|| (ctx.get(id, Stat::burrowed) != 0
+		|| (ctx.get(id, Flag::burrowed)
 			&& ctx
 				.get_player(owner)
 				.permanents
 				.iter()
-				.any(|&pr| pr != 0 && ctx.get(pr, Stat::tunnel) != 0));
+				.any(|&pr| pr != 0 && ctx.get(pr, Flag::tunnel)));
 	let dr = if !momentum && fsh != 0 {
 		ctx.truedr(fsh)
 	} else {
@@ -836,7 +835,7 @@ fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
 	if momentum {
 		atk = momatk as f32;
 	}
-	if freedom > 0.0 && ctx.get(id, Stat::airborne) != 0 {
+	if freedom > 0.0 && ctx.get(id, Flag::airborne) {
 		atk = atk * (1.0 - freedom)
 			+ if (bypass && ctx.get(foe, Stat::gpull) == 0) || ctx.cardset() == CardSet::Original {
 				(momatk as f32 * 1.5).ceil()
@@ -920,7 +919,7 @@ fn evalthing(
 	let mut hp = 0;
 	if iscrea {
 		if inhand
-			|| !flooded || ctx.get(id, Stat::aquatic) != 0
+			|| !flooded || ctx.get(id, Flag::aquatic)
 			|| !ctx.material(id, 0)
 			|| ctx.getIndex(id) <= 4
 		{
@@ -931,7 +930,7 @@ fn evalthing(
 			let poison = ctx.get(id, Stat::poison);
 			if poison > 0 {
 				hp -= poison * 2;
-				if ctx.get(id, Stat::aflatoxin) != 0 {
+				if ctx.get(id, Flag::aflatoxin) {
 					score -= 2.0;
 				}
 			} else if poison < 0 {
@@ -958,7 +957,7 @@ fn evalthing(
 	let throttle = if adrenaline < 3.0
 		|| (iscrea && {
 			let weapon = ctx.get_weapon(owner);
-			weapon != 0 && ctx.get(weapon, Stat::nothrottle) != 0
+			weapon != 0 && ctx.get(weapon, Flag::nothrottle)
 		}) {
 		adrenaline
 	} else {
@@ -970,7 +969,7 @@ fn evalthing(
 				score += eval_skill(ctx, id, sk, ttatk, &damage)
 					* (if ttatk != 0.0 {
 						1.0
-					} else if ctx.get(id, Stat::immaterial) != 0 {
+					} else if ctx.get(id, Flag::immaterial) {
 						0.0
 					} else {
 						0.1
@@ -1019,22 +1018,18 @@ fn evalthing(
 			}
 		}
 	}
-	for (&k, &v) in ctx.get_thing(id).status.iter() {
-		if v != 0 {
-			match k {
-				Stat::airborne | Stat::ranged => score += 0.2,
-				Stat::nightfall => score += 0.5,
-				Stat::reflective => score += 1.0,
-				Stat::patience => score += 2.0,
-				Stat::swarmhp => score += 1.0,
-				Stat::tunnel => score += 1.0,
-				Stat::voodoo => score += 1.0,
-				_ => (),
-			}
-		}
+	let flag = ctx.get_thing(id).flag;
+	if flag.get(Flag::airborne | Flag::ranged) {
+		score += 0.2;
+	} else if flag.get(Flag::nightfall) {
+		score += 0.5;
+	} else if flag.get(Flag::patience) {
+		score += 2.0;
+	} else if flag.get(Flag::reflective | Flag::tunnel | Flag::voodoo) {
+		score += 1.0;
 	}
 	if iscrea {
-		let voodoo = ctx.get(id, Stat::voodoo) != 0;
+		let voodoo = ctx.get(id, Flag::voodoo);
 		if voodoo && ctx.material(id, 0) {
 			score += hp as f32 / 10.0;
 		}
@@ -1061,7 +1056,7 @@ fn evalthing(
 			}
 		}
 	} else {
-		score *= if ctx.get(id, Stat::immaterial) != 0 {
+		score *= if ctx.get(id, Flag::immaterial) {
 			1.4
 		} else {
 			1.25
@@ -1102,8 +1097,7 @@ pub fn eval(ctx: &Game) -> f32 {
 		wall.patience = player.permanents.iter().any(|&pr| {
 			pr != 0
 				&& ctx.get(pr, Stat::frozen) < 2
-				&& (ctx.hasskill(pr, Event::Attack, Skill::patience)
-					|| ctx.get(pr, Stat::patience) != 0)
+				&& (ctx.hasskill(pr, Event::Attack, Skill::patience) || ctx.get(pr, Flag::patience))
 		});
 		if shield != 0 {
 			for &fsh in ctx.getSkill(shield, Event::Shield) {
@@ -1112,13 +1106,13 @@ pub fn eval(ctx: &Game) -> f32 {
 						wall.shield = Some(WallShield::Chargeblock(ctx.get(shield, Stat::charges)));
 					}
 					Skill::disshield | Skill::v_disshield => {
-						if fsh == Skill::disshield || ctx.get(pl, Stat::sanctuary) == 0 {
+						if fsh == Skill::disshield || !ctx.get(pl, Flag::sanctuary) {
 							wall.shield =
 								Some(WallShield::Disentro(player.quanta(etg::Entropy) as i32));
 						}
 					}
 					Skill::disfield | Skill::v_disfield => {
-						if fsh == Skill::disfield || ctx.get(pl, Stat::sanctuary) == 0 {
+						if fsh == Skill::disfield || !ctx.get(pl, Flag::sanctuary) {
 							wall.shield = Some(WallShield::Dischroma(
 								player.quanta.iter().map(|&q| q as i32).sum::<i32>(),
 							));
@@ -1212,7 +1206,7 @@ pub fn eval(ctx: &Game) -> f32 {
 	for j in 0..pcount {
 		let plidx = (p0 + j) % pcount;
 		let pl = players[plidx];
-		if ctx.get(pl, Stat::out) != 0 {
+		if ctx.get(pl, Flag::out) {
 			continue;
 		}
 		let expected_damage = players
@@ -1233,7 +1227,7 @@ pub fn eval(ctx: &Game) -> f32 {
 						pscore -= (plhp - maxhp) as f32;
 						plhp = maxhp;
 					}
-					pscore += (ctx.get(pl, Stat::maxhp) - plhp * 12) as f32 / 4.0;
+					pscore += (maxhp - plhp * 5) as f32 / 8.0;
 				}
 				_ => (),
 			}
@@ -1241,7 +1235,7 @@ pub fn eval(ctx: &Game) -> f32 {
 		if player
 			.permanents
 			.iter()
-			.any(|&pr| pr != 0 && ctx.get(pr, Stat::cloak) != 0 && ctx.get(pr, Stat::charges) != 0)
+			.any(|&pr| pr != 0 && ctx.get(pr, Flag::cloak) && ctx.get(pr, Stat::charges) != 0)
 		{
 			pscore += 3.0;
 		}
@@ -1269,7 +1263,7 @@ pub fn eval(ctx: &Game) -> f32 {
 			.iter()
 			.map(|&hr| evalthing(ctx, &damage, hr, true, false, false))
 			.sum::<f32>();
-		if ctx.get(pl, Stat::drawlock) == 0 {
+		if !ctx.get(pl, Flag::drawlock) {
 			if pl != turn {
 				let handlen = player.hand.len();
 				for draw in 1..=player.drawpower as usize {
@@ -1289,7 +1283,7 @@ pub fn eval(ctx: &Game) -> f32 {
 			pscore -= 0.5;
 		}
 		pscore += (plhp as f32).sqrt() * 4.0 - (ctx.get(pl, Stat::poison) as f32) / 2.0;
-		if ctx.get(pl, Stat::precognition) != 0 {
+		if ctx.get(pl, Flag::precognition) {
 			pscore += 0.5;
 		}
 		if ctx.get(pl, Stat::casts) == 0 {
@@ -1298,10 +1292,10 @@ pub fn eval(ctx: &Game) -> f32 {
 				handlen + if handlen > 6 { 7 } else { 4 }
 			} as f32 / 4.0
 		}
-		if ctx.get(pl, Stat::sabbath) != 0 {
+		if ctx.get(pl, Flag::sabbath) {
 			pscore -= 2.0;
 		}
-		if ctx.get(pl, Stat::neuro) != 0 {
+		if ctx.get(pl, Flag::neuro) {
 			pscore -= (24 + player.hand.len()) as f32 / 8.0;
 		}
 		score += if ctx.get_leader(pl) == ctx.get_leader(turn) {

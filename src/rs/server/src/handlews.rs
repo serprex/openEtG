@@ -163,11 +163,7 @@ async fn login_success(
 			let mut rng = rand::thread_rng();
 			let ocardnymph = rng.gen_ratio(3, 100);
 			if let Some(card) = etg::card::OpenSet.random_card(&mut rng, false, |card| {
-				(card.rarity != 4) ^ ocardnymph
-					&& card
-						.status
-						.iter()
-						.all(|&(k, v)| k != etg::game::Stat::pillar || v == 0)
+				(card.rarity != 4) ^ ocardnymph && (card.flag & etg::game::Flag::pillar) == 0
 			}) {
 				let ccode = if card.rarity == 4 {
 					etg::card::AsShiny(card.code as i32, true) as u16
@@ -457,37 +453,40 @@ pub async fn handle_ws(
 							}
 						}
 						UserMessage::modmotd { m, .. } => {
-							let mbytes = m.as_bytes();
-							let mut nend = 0;
-							while nend < mbytes.len()
-								&& mbytes[nend] >= b'0' && mbytes[nend] <= b'9'
-							{
-								nend += 1;
-							}
-							let mut mstart = nend;
-							while mstart < mbytes.len() && mbytes[mstart] == b' ' {
-								mstart += 1;
-							}
-							let (digits, motd) = unsafe {
-								(
-									std::str::from_utf8_unchecked(&mbytes[..nend]),
-									std::str::from_utf8_unchecked(&mbytes[mstart..]),
-								)
-							};
-							if let Ok(id) = digits.parse::<i32>() {
-								(if motd.is_empty() {
-									client.query("delete from motd where id = $1", &[&id]).await
+							let userid = user.unwrap().lock().await.id;
+							if role_check("Mod", &tx, &client, userid).await {
+								let mbytes = m.as_bytes();
+								let mut nend = 0;
+								while nend < mbytes.len()
+									&& mbytes[nend] >= b'0' && mbytes[nend] <= b'9'
+								{
+									nend += 1;
+								}
+								let mut mstart = nend;
+								while mstart < mbytes.len() && mbytes[mstart] == b' ' {
+									mstart += 1;
+								}
+								let (digits, motd) = unsafe {
+									(
+										std::str::from_utf8_unchecked(&mbytes[..nend]),
+										std::str::from_utf8_unchecked(&mbytes[mstart..]),
+									)
+								};
+								if let Ok(id) = digits.parse::<i32>() {
+									(if motd.is_empty() {
+										client.query("delete from motd where id = $1", &[&id]).await
+									} else {
+										client.query("insert into motd (id, val) values ($1, $2) on conflict (id) do update set val = $2", &[&id, &motd]).await
+									}).ok();
 								} else {
-									client.query("insert into motd (id, val) values ($1, $2) on conflict (id) do update set val = $2", &[&id, &motd]).await
-								}).ok();
-							} else {
-								sendmsg(
-									&tx,
-									&WsResponse::chat {
-										mode: 1,
-										msg: "Invalid format",
-									},
-								);
+									sendmsg(
+										&tx,
+										&WsResponse::chat {
+											mode: 1,
+											msg: "Invalid format",
+										},
+									);
+								}
 							}
 						}
 						UserMessage::inituser { u, e, .. } => {

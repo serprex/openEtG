@@ -10,8 +10,8 @@ function decodeSkillName(cell) {
 	return c === 0
 		? n
 		: c === 1
-		? `${n} ${cell >>> 16}`
-		: `${n} ${(cell >>> 16) & 0xff} ${cell >>> 24}`;
+		? `${n} ${cell >> 16}`
+		: `${n} ${(((cell >> 16) & 0xff) << 24) >> 24} ${cell >> 24}`;
 }
 
 export default class Thing {
@@ -44,7 +44,7 @@ export default class Thing {
 		const raw = this.game.game.get_stats(this.id),
 			status = new Map();
 		for (let i = 0; i < raw.length; i += 2) {
-			status.set(enums.Stat[raw[i]], raw[i + 1]);
+			status.set(enums.Stat[raw[i]] ?? enums.Flag[raw[i]], raw[i + 1]);
 		}
 		return status;
 	}

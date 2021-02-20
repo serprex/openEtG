@@ -23,6 +23,7 @@ pub struct Card {
 	pub costele: i8,
 	pub cast: i8,
 	pub castele: i8,
+	pub flag: &'static u64,
 	pub status: &'static [(Stat, i32)],
 	pub skill: &'static [(Event, &'static [Skill])],
 }

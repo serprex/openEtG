@@ -1,5 +1,6 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
 
 use std::borrow::Cow;
 use std::cmp;
@@ -36,6 +37,7 @@ pub enum CardSet {
 pub struct ThingData {
 	pub kind: i32,
 	pub owner: i32,
+	pub flag: Flag,
 	pub status: FxHashMap<Stat, i32>,
 	pub skill: Skills,
 }
@@ -279,73 +281,157 @@ impl Fxs {
 #[derive(Clone, Copy, Hash, Eq, PartialEq)]
 pub enum Stat {
 	r#_creaturesDied,
-	additive,
 	adrenaline,
-	aflatoxin,
-	airborne,
-	appeased,
-	aquatic,
 	atk,
-	burrowed,
 	card,
 	cast,
 	castele,
 	casts,
-	chargecap,
 	charges,
-	cloak,
 	cost,
 	costele,
 	delayed,
 	dive,
-	drawlock,
 	epoch,
 	flooding,
 	frozen,
-	golem,
 	gpull,
 	hope,
 	hp,
-	immaterial,
 	lives,
 	maxhp,
 	mode,
-	momentum,
-	mutant,
-	neuro,
-	nightfall,
-	nocturnal,
-	nothrottle,
 	nova,
 	nova2,
-	out,
-	patience,
-	pendstate,
-	pillar,
 	poison,
-	poisonous,
-	precognition,
-	protectdeck,
-	psionic,
-	ranged,
 	ready,
-	reflective,
-	resigned,
-	sabbath,
-	salvaged,
-	sanctuary,
 	shardgolem,
 	sosa,
-	stackable,
 	steam,
 	storedatk,
 	storedpower,
 	swarmhp,
-	token,
-	tunnel,
-	vindicated,
-	voodoo,
-	whetstone,
+}
+
+#[derive(Copy, Clone, Default)]
+pub struct Flag(pub u64);
+
+impl Flag {
+	pub const additive: u64 = 1 << 0;
+	pub const aflatoxin: u64 = 1 << 1;
+	pub const airborne: u64 = 1 << 2;
+	pub const appeased: u64 = 1 << 3;
+	pub const aquatic: u64 = 1 << 4;
+	pub const burrowed: u64 = 1 << 5;
+	pub const cloak: u64 = 1 << 6;
+	pub const drawlock: u64 = 1 << 7;
+	pub const golem: u64 = 1 << 8;
+	pub const immaterial: u64 = 1 << 9;
+	pub const momentum: u64 = 1 << 10;
+	pub const mutant: u64 = 1 << 11;
+	pub const neuro: u64 = 1 << 12;
+	pub const nightfall: u64 = 1 << 13;
+	pub const nocturnal: u64 = 1 << 14;
+	pub const nothrottle: u64 = 1 << 15;
+	pub const out: u64 = 1 << 16;
+	pub const patience: u64 = 1 << 17;
+	pub const pendstate: u64 = 1 << 18;
+	pub const pillar: u64 = 1 << 19;
+	pub const poisonous: u64 = 1 << 20;
+	pub const precognition: u64 = 1 << 21;
+	pub const protectdeck: u64 = 1 << 22;
+	pub const psionic: u64 = 1 << 23;
+	pub const ranged: u64 = 1 << 24;
+	pub const ready: u64 = 1 << 25;
+	pub const reflective: u64 = 1 << 26;
+	pub const resigned: u64 = 1 << 27;
+	pub const sabbath: u64 = 1 << 28;
+	pub const salvaged: u64 = 1 << 29;
+	pub const sanctuary: u64 = 1 << 30;
+	pub const stackable: u64 = 1 << 31;
+	pub const token: u64 = 1 << 32;
+	pub const tunnel: u64 = 1 << 33;
+	pub const vindicated: u64 = 1 << 34;
+	pub const voodoo: u64 = 1 << 35;
+	pub const whetstone: u64 = 1 << 36;
+
+	pub fn get(self, key: u64) -> bool {
+		self.0 & key != 0
+	}
+}
+
+pub struct FlagIter {
+	value: u64,
+	result: u64,
+}
+
+impl Iterator for FlagIter {
+	type Item = u64;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		while self.value != 0 {
+			let result = if (self.value & 1) != 0 {
+				Some(self.result)
+			} else {
+				None
+			};
+
+			self.value >>= 1;
+			self.result <<= 1;
+
+			if result.is_some() {
+				return result;
+			}
+		}
+		None
+	}
+}
+
+impl IntoIterator for Flag {
+	type Item = u64;
+	type IntoIter = FlagIter;
+
+	fn into_iter(self) -> Self::IntoIter {
+		FlagIter {
+			value: self.0,
+			result: 1,
+		}
+	}
+}
+
+pub trait ThingGetter {
+	type Value;
+
+	fn get(self, ctx: &Game, id: i32) -> Self::Value;
+	fn set(self, ctx: &mut Game, id: i32, val: Self::Value);
+}
+
+impl ThingGetter for Stat {
+	type Value = i32;
+
+	fn get(self, ctx: &Game, id: i32) -> Self::Value {
+		ctx.get_thing(id).status.get(&self).cloned().unwrap_or(0)
+	}
+
+	fn set(self, ctx: &mut Game, id: i32, val: Self::Value) {
+		*ctx.get_mut(id, self) = val;
+	}
+}
+
+impl ThingGetter for u64 {
+	type Value = bool;
+
+	fn get(self, ctx: &Game, id: i32) -> Self::Value {
+		ctx.get_thing(id).flag.get(self)
+	}
+
+	fn set(self, ctx: &mut Game, id: i32, val: Self::Value) {
+		if val {
+			ctx.get_thing_mut(id).flag.0 |= self;
+		} else {
+			ctx.get_thing_mut(id).flag.0 &= !self;
+		}
+	}
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -411,7 +497,9 @@ impl Game {
 
 	pub fn get_stat(&self, id: i32, k: i32) -> i32 {
 		if let Some(k) = generated::stat_id(k) {
-			*self.get_thing(id).status.get(&k).unwrap_or(&0)
+			self.get(id, k)
+		} else if let Some(k) = generated::flag_id(k) {
+			self.get(id, k) as i32
 		} else {
 			0
 		}
@@ -657,6 +745,7 @@ impl Game {
 		thing.status.insert(Stat::maxhp, card.health as i32);
 		thing.status.insert(Stat::atk, card.attack as i32);
 		thing.status.insert(Stat::casts, 0);
+		thing.flag.0 |= *card.flag;
 		for &(k, v) in card.status.iter() {
 			thing.status.insert(k, v);
 		}
@@ -678,27 +767,16 @@ impl Game {
 		thing.status.insert(Stat::atk, card.attack as i32);
 		thing.status.insert(Stat::cost, card.cost as i32);
 		thing.status.insert(Stat::costele, card.costele as i32);
-		for passive in &[
-			Stat::additive,
-			Stat::airborne,
-			Stat::aquatic,
-			Stat::golem,
-			Stat::nightfall,
-			Stat::nocturnal,
-			Stat::pillar,
-			Stat::poisonous,
-			Stat::ranged,
-			Stat::stackable,
-			Stat::swarmhp,
-			Stat::token,
-			Stat::tunnel,
-			Stat::voodoo,
-			Stat::whetstone,
-		] {
-			if let Some(val) = thing.status.get_mut(passive) {
-				*val = 0;
-			}
-		}
+		thing.flag.0 &=
+			!(Flag::additive
+				| Flag::airborne | Flag::aquatic
+				| Flag::golem | Flag::nightfall
+				| Flag::nocturnal
+				| Flag::pillar | Flag::poisonous
+				| Flag::ranged | Flag::stackable
+				| Flag::token | Flag::tunnel
+				| Flag::voodoo | Flag::whetstone);
+		thing.flag.0 |= *card.flag;
 		for &(k, v) in card.status {
 			thing.status.insert(k, v);
 		}
@@ -708,7 +786,7 @@ impl Game {
 				.map(|&(k, v)| (k, Cow::Borrowed(v)))
 				.collect::<Vec<_>>(),
 		);
-		if thing.status.get(&Stat::mutant).cloned().unwrap_or(0) != 0 {
+		if thing.flag.get(Flag::mutant) {
 			let buff = self.rng.gen_range(0..25);
 			if card.code < 5000 {
 				self.buffhp(c, buff / 5);
@@ -735,10 +813,17 @@ impl Game {
 	}
 
 	pub fn get_stats(&self, id: i32) -> Vec<i32> {
-		self.get_thing(id)
+		let thing = self.get_thing(id);
+		thing
 			.status
 			.iter()
 			.flat_map(|(&k, &v)| once(generated::id_stat(k)).chain(once(v)))
+			.chain(
+				thing
+					.flag
+					.into_iter()
+					.flat_map(|k| once(generated::id_flag(k)).chain(once(1))),
+			)
 			.collect()
 	}
 
@@ -828,8 +913,7 @@ impl Game {
 			ckind == kind
 		} else {
 			ckind != etg::Player
-		}) && (ckind == etg::Spell
-			|| (self.get(id, Stat::immaterial) == 0 && self.get(id, Stat::burrowed) == 0))
+		}) && (ckind == etg::Spell || !self.get(id, Flag::immaterial | Flag::burrowed))
 	}
 
 	pub fn truedr(&self, id: i32) -> i32 {
@@ -856,7 +940,7 @@ impl Game {
 		self.get_player(id)
 			.permanents
 			.iter()
-			.any(|&pr| pr != 0 && self.get(pr, Stat::cloak) != 0)
+			.any(|&pr| pr != 0 && self.get(pr, Flag::cloak))
 	}
 
 	pub fn requires_target(&self, id: i32) -> bool {
@@ -930,7 +1014,7 @@ impl Game {
 					for &pr in gclone.get_player(pl).permanents.clone().iter() {
 						if pr != 0
 							&& (gclone.hasskill(pr, Event::Attack, Skill::patience)
-								|| gclone.get(pr, Stat::patience) != 0)
+								|| gclone.get(pr, Flag::patience))
 						{
 							gclone.remove(pr);
 						}
@@ -978,16 +1062,16 @@ impl Game {
 		self.props.len()
 	}
 
-	pub fn get(&self, id: i32, k: Stat) -> i32 {
-		*self.get_thing(id).status.get(&k).unwrap_or(&0)
-	}
-
 	pub fn cardset(&self) -> CardSet {
 		self.cards.set
 	}
 
-	pub fn set(&mut self, id: i32, k: Stat, val: i32) {
-		*self.get_mut(id, k) = val;
+	pub fn get<T: ThingGetter>(&self, id: i32, k: T) -> T::Value {
+		k.get(self, id)
+	}
+
+	pub fn set<T: ThingGetter>(&mut self, id: i32, k: T, val: T::Value) {
+		k.set(self, id, val);
 	}
 
 	pub fn set_kind(&mut self, id: i32, val: i32) {
@@ -1063,8 +1147,12 @@ impl Game {
 			self.addskill(id, Event::Death, ondeath);
 			false
 		} else if idx < 0 {
-			let status: Stat = [Stat::momentum, Stat::immaterial][(!idx) as usize];
-			self.set(id, status, 1);
+			let flag = if idx == -1 {
+				Flag::momentum
+			} else {
+				Flag::immaterial
+			};
+			self.set(id, flag, true);
 			false
 		} else {
 			let cast = self.rng.gen_range(1..=2);
@@ -1134,12 +1222,12 @@ impl Game {
 		)
 	}
 
-	pub fn calcCore(&self, id: i32, filterstat: Stat) -> i32 {
+	pub fn calcCore(&self, id: i32, filterstat: u64) -> i32 {
 		let owner = self.get_owner(id);
 		for j in 0..2 {
 			let pl = if j == 0 { owner } else { self.get_foe(owner) };
 			for pr in self.get_player(pl).permanents.iter().cloned() {
-				if pr != 0 && self.get(pr, filterstat) != 0 {
+				if pr != 0 && self.get(pr, filterstat) {
 					return 1;
 				}
 			}
@@ -1147,13 +1235,13 @@ impl Game {
 		0
 	}
 
-	pub fn calcCore2(&self, id: i32, filterstat: Stat) -> i32 {
+	pub fn calcCore2(&self, id: i32, filterstat: u64) -> i32 {
 		let mut bonus = 0;
 		let owner = self.get_owner(id);
 		for j in 0..2 {
 			let pl = if j == 0 { owner } else { self.get_foe(owner) };
 			for pr in self.get_player(pl).permanents.iter().cloned() {
-				if pr != 0 && self.get(pr, filterstat) != 0 {
+				if pr != 0 && self.get(pr, filterstat) {
 					if card::Upped(self.get(pr, Stat::card)) {
 						return 2;
 					}
@@ -1165,22 +1253,22 @@ impl Game {
 	}
 
 	pub fn isEclipseCandidate(&self, id: i32) -> bool {
-		self.get(id, Stat::nocturnal) != 0 && self.get_kind(id) == etg::Creature
+		self.get(id, Flag::nocturnal) && self.get_kind(id) == etg::Creature
 	}
 
 	pub fn isWhetCandidate(&self, id: i32) -> bool {
-		self.get(id, Stat::golem) != 0
+		self.get(id, Flag::golem)
 			|| self.get_kind(id) == etg::Weapon
 			|| self.cards.get(self.get(id, Stat::card)).kind as i32 == etg::Weapon
 	}
 
 	pub fn calcBonusAtk(&self, id: i32) -> i32 {
 		(if self.isEclipseCandidate(id) {
-			self.calcCore2(id, Stat::nightfall)
+			self.calcCore2(id, Flag::nightfall)
 		} else {
 			0
 		}) + (if self.isWhetCandidate(id) {
-			self.calcCore(id, Stat::whetstone)
+			self.calcCore(id, Flag::whetstone)
 		} else {
 			0
 		})
@@ -1190,11 +1278,11 @@ impl Game {
 		match self.props[id as usize] {
 			Entity::Thing(_) => {
 				(if self.isEclipseCandidate(id) {
-					self.calcCore(id, Stat::nightfall)
+					self.calcCore(id, Flag::nightfall)
 				} else {
 					0
 				}) + (if self.isWhetCandidate(id) {
-					self.calcCore2(id, Stat::whetstone)
+					self.calcCore2(id, Flag::whetstone)
 				} else {
 					0
 				}) + self.trigger_pure(Event::Hp, id, 0)
@@ -1210,7 +1298,7 @@ impl Game {
 			+ self.calcBonusAtk(id);
 		etg::calcAdrenaline(
 			adrenaline,
-			if self.get(id, Stat::burrowed) != 0 && self.cards.set != CardSet::Original {
+			if self.get(id, Flag::burrowed) && self.cards.set != CardSet::Original {
 				(dmg + 1) / 2
 			} else {
 				dmg
@@ -1255,14 +1343,14 @@ impl Game {
 				if !stasis && self.get(id, Stat::delayed) == 0 {
 					let mut trueatk = self.trueatk(id);
 					if trueatk != 0 {
-						let psionic = self.get(id, Stat::psionic) != 0;
-						let mut bypass = psionic || self.get(id, Stat::momentum) != 0;
-						if !bypass && self.get(id, Stat::burrowed) != 0 {
+						let psionic = self.get(id, Flag::psionic);
+						let mut bypass = psionic || self.get(id, Flag::momentum);
+						if !bypass && self.get(id, Flag::burrowed) {
 							bypass = self
 								.get_player(self.get_owner(id))
 								.permanents
 								.iter()
-								.any(|&pr| pr != 0 && self.get(pr, Stat::tunnel) != 0)
+								.any(|&pr| pr != 0 && self.get(pr, Flag::tunnel))
 						}
 						let gpull = self.get(data.tgt, Stat::gpull);
 						let shield = self.get_shield(data.tgt);
@@ -1358,12 +1446,12 @@ impl Game {
 					if trueatk != 0 {
 						let owner = self.get_owner(id);
 						let target = self.get_foe(owner);
-						let mut bypass = self.get(id, Stat::momentum) != 0;
+						let mut bypass = self.get(id, Flag::momentum);
 						if freedom {
 							bypass = true;
 							trueatk = (trueatk * 3 + 1) / 2
 						}
-						if self.get(id, Stat::psionic) != 0 {
+						if self.get(id, Flag::psionic) {
 							self.spelldmg(target, trueatk);
 						} else if bypass || trueatk < 0 {
 							self.dmg(target, trueatk);
@@ -1431,7 +1519,7 @@ impl Game {
 	pub fn spelldmg(&mut self, mut id: i32, dmg: i32) -> i32 {
 		match self.props[id as usize] {
 			Entity::Player(ref p) => {
-				if p.shield != 0 && self.get(p.shield, Stat::reflective) != 0 {
+				if p.shield != 0 && self.get(p.shield, Flag::reflective) {
 					id = p.foe;
 				}
 			}
@@ -1479,7 +1567,7 @@ impl Game {
 		if realdmg > 0 {
 			if !dontdie && self.truehp(id) <= 0 {
 				self.die(id);
-			} else if self.get(id, Stat::voodoo) != 0 {
+			} else if self.get(id, Flag::voodoo) {
 				let foe = self.get_foe(self.get_owner(id));
 				self.dmg(foe, dmg);
 			}
@@ -1583,7 +1671,7 @@ impl Game {
 	}
 
 	fn setShieldCore(&mut self, id: i32, shield: i32, fromhand: bool) {
-		if self.get(shield, Stat::additive) == 0
+		if !self.get(shield, Flag::additive)
 			|| ({
 				let curshield = self.get_shield(id);
 				if curshield != 0
@@ -1626,8 +1714,7 @@ impl Game {
 
 	fn addPermCore(&mut self, id: i32, perm: i32, fromhand: bool) {
 		debug_assert!(id < perm);
-		let additive = self.get(perm, Stat::additive);
-		if additive != 0 {
+		if self.get(perm, Flag::additive) {
 			let code = card::AsShiny(self.get(perm, Stat::card), false);
 			for &pr in self.get_player(id).permanents.clone().iter() {
 				if pr != 0 && code == card::AsShiny(self.get(pr, Stat::card), false) {
@@ -1678,8 +1765,7 @@ impl Game {
 			self.fx(id, Fx::Sfx(Sfx::stasis));
 		}
 		self.incrStatus(id, Stat::delayed, amt);
-		let voodoo = self.get(id, Stat::voodoo);
-		if voodoo != 0 {
+		if self.get(id, Flag::voodoo) {
 			self.delay(self.get_foe(self.get_owner(id)), amt);
 		}
 	}
@@ -1701,8 +1787,7 @@ impl Game {
 				self.fx(id, Fx::Sfx(Sfx::freeze));
 			}
 			self.set(id, Stat::frozen, amt);
-			let voodoo = self.get(id, Stat::voodoo);
-			if voodoo != 0 {
+			if self.get(id, Flag::voodoo) {
 				self.freeze(self.get_foe(self.get_owner(id)), amt);
 			}
 		}
@@ -1721,8 +1806,7 @@ impl Game {
 			self.incrStatus(id, Stat::poison, amt);
 			if amt > 0 {
 				self.fx(id, Fx::Sfx(Sfx::poison));
-				let voodoo = self.get(id, Stat::voodoo);
-				if voodoo != 0 {
+				if self.get(id, Flag::voodoo) {
 					self.poison(self.get_foe(self.get_owner(id)), amt);
 				}
 			}
@@ -1795,13 +1879,13 @@ impl Game {
 		F: Fn(&mut Game, i32),
 	{
 		for &pr in self.get_player(owner).permanents.clone().iter() {
-			if pr != 0 && self.get(pr, Stat::cloak) != 0 {
+			if pr != 0 && self.get(pr, Flag::cloak) {
 				self.die(pr);
 			}
 		}
 		if foe != 0 {
 			for &pr in self.get_player(foe).permanents.clone().iter() {
-				if pr != 0 && self.get(pr, Stat::cloak) != 0 {
+				if pr != 0 && self.get(pr, Flag::cloak) {
 					self.die(pr);
 				}
 			}
@@ -1866,7 +1950,7 @@ impl Game {
 	}
 
 	pub fn destroy(&mut self, id: i32, data: Option<&mut ProcData>) {
-		if self.get(id, Stat::stackable) == 0 || self.maybeDecrStatus(id, Stat::charges) < 2 {
+		if !self.get(id, Flag::stackable) || self.maybeDecrStatus(id, Stat::charges) < 2 {
 			self.remove(id);
 		}
 		if let Some(data) = data {
@@ -1888,7 +1972,7 @@ impl Game {
 			let mut data = ProcData::default();
 			self.trigger_data(Event::Predeath, id, 0, &mut data);
 			if !data.evade {
-				if self.get(id, Stat::aflatoxin) != 0 {
+				if self.get(id, Flag::aflatoxin) {
 					let card = self.get(id, Stat::card);
 					let cellcode = if self.cards.set == CardSet::Open {
 						card::As(card, card::MalignantCell)
@@ -1906,11 +1990,11 @@ impl Game {
 				self.deatheffect(id, idx);
 			}
 		} else if kind == etg::Player {
-			self.set(id, Stat::out, 1);
+			self.set(id, Flag::out, true);
 			if self.winner == 0 {
 				let mut winners = 0;
 				for &pl in self.players.iter() {
-					if self.get(pl, Stat::out) == 0 {
+					if !self.get(pl, Flag::out) {
 						let leader = self.get_leader(pl);
 						if winners == 0 {
 							winners = leader;
@@ -1962,7 +2046,7 @@ impl Game {
 	}
 
 	fn drawcore(&mut self, id: i32, isstep: bool) {
-		if !self.get_player(id).hand.is_full() && self.get(id, Stat::drawlock) == 0 {
+		if !self.get_player(id).hand.is_full() && !self.get(id, Flag::drawlock) {
 			let cardid = self.draw(id);
 			if cardid != 0 && self.addCard(id, cardid) != -1 {
 				self.fx(cardid, Fx::StartPos(-id));
@@ -1979,7 +2063,7 @@ impl Game {
 	}
 
 	pub fn mill(&mut self, id: i32, mut amt: i32) {
-		if self.get(id, Stat::protectdeck) == 0 {
+		if !self.get(id, Flag::protectdeck) {
 			let deckpower = self.get_player(id).deckpower as i32;
 			if deckpower > 1 {
 				amt = amt.saturating_mul(deckpower);
@@ -2006,7 +2090,7 @@ impl Game {
 	}
 
 	pub fn sanctified(&self, id: i32) -> bool {
-		self.turn != id && self.get(id, Stat::sanctuary) != 0
+		self.turn != id && self.get(id, Flag::sanctuary)
 	}
 
 	pub fn incrStatus(&mut self, id: i32, k: Stat, amt: i32) {
@@ -2025,19 +2109,13 @@ impl Game {
 
 	pub fn clearStatus(&mut self, id: i32) {
 		let thing = self.get_thing_mut(id);
-		for status in &[
-			Stat::additive,
-			Stat::charges,
-			Stat::chargecap,
-			Stat::cloak,
-			Stat::epoch,
-			Stat::flooding,
-			Stat::nightfall,
-			Stat::nothrottle,
-			Stat::stackable,
-			Stat::tunnel,
-			Stat::whetstone,
-		] {
+		thing.flag.0 &=
+			!(Flag::additive
+				| Flag::cloak | Flag::nightfall
+				| Flag::nothrottle
+				| Flag::stackable
+				| Flag::tunnel | Flag::whetstone);
+		for status in &[Stat::charges, Stat::epoch, Stat::flooding] {
 			if let Some(val) = thing.status.get_mut(status) {
 				*val = 0;
 			}
@@ -2058,13 +2136,8 @@ impl Game {
 						*sosa -= 1;
 					}
 				}
-				for status in &[
-					Stat::nova,
-					Stat::nova2,
-					Stat::sanctuary,
-					Stat::precognition,
-					Stat::protectdeck,
-				] {
+				pl.thing.flag.0 &= !(Flag::sanctuary | Flag::precognition | Flag::protectdeck);
+				for status in &[Stat::nova, Stat::nova2] {
 					if let Some(val) = pl.thing.status.get_mut(status) {
 						*val = 0;
 					}
@@ -2074,7 +2147,7 @@ impl Game {
 				}
 				self.turn = next;
 				self.proc(Event::Turnstart, next);
-				if self.get(next, Stat::resigned) != 0 {
+				if self.get(next, Flag::resigned) {
 					self.die(next);
 					continue;
 				}
@@ -2122,11 +2195,7 @@ impl Game {
 		}
 		let thing = self.get_thing_mut(id);
 		thing.status.insert(Stat::casts, 1);
-		for status in &[Stat::sabbath, Stat::drawlock] {
-			if let Some(val) = thing.status.get_mut(status) {
-				*val = 0;
-			}
-		}
+		thing.flag.0 &= !(Flag::sabbath | Flag::drawlock);
 	}
 
 	pub fn v_endturn(&mut self, id: i32) {
@@ -2146,7 +2215,7 @@ impl Game {
 					if flooding < floodingIndex {
 						floodingIndex = flooding;
 					}
-				} else if self.get(pr, Stat::patience) != 0 {
+				} else if self.get(pr, Flag::patience) {
 					patienceFlag = true;
 				}
 				self.trigger_data(Event::OwnAttack, pr, 0, &mut data);
@@ -2182,8 +2251,8 @@ impl Game {
 				if i > floodingIndex
 					&& crcard.element != etg::Water as i8
 					&& crcard.element != etg::Chroma as i8
-					&& self.get(cr, Stat::immaterial) == 0
-					&& self.get(cr, Stat::burrowed) == 0
+					&& !self.get(cr, Flag::immaterial)
+					&& !self.get(cr, Flag::burrowed)
 					&& self.getIndex(cr) != -1
 				{
 					self.die(cr);
@@ -2203,7 +2272,7 @@ impl Game {
 	}
 
 	pub fn spend(&mut self, id: i32, qtype: i32, amt: i32) -> bool {
-		if amt < 0 && self.get(id, Stat::sabbath) != 0 {
+		if amt < 0 && self.get(id, Flag::sabbath) {
 			return false;
 		}
 		self.spendscramble(id, qtype, amt)
@@ -2321,14 +2390,14 @@ impl Game {
 			if self.spend(cowner, self.get(c, Stat::costele), self.get(c, Stat::cost)) {
 				self.play(c, t, true);
 				self.proc(Event::Cardplay, c);
-				if self.get(cowner, Stat::neuro) != 0 {
+				if self.get(cowner, Flag::neuro) {
 					self.poison(cowner, 1);
 				}
 			}
 		} else if self.spend(cowner, self.get(c, Stat::castele), self.get(c, Stat::cast)) {
 			let casts = self.get(c, Stat::casts) - 1;
 			self.set(c, Stat::casts, casts);
-			if self.get(c, Stat::neuro) != 0 {
+			if self.get(c, Flag::neuro) {
 				self.poison(c, 1);
 			}
 			if let Some(skill) = self.getSkill(c, Event::Cast).first().cloned() {
@@ -2396,7 +2465,7 @@ impl Game {
 					self.die(c);
 					self.nextTurn();
 				} else {
-					self.set(c, Stat::resigned, 1);
+					self.set(c, Flag::resigned, true);
 				}
 			}
 		}
