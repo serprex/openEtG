@@ -1924,7 +1924,7 @@ impl Skill {
 			Self::forceplay => {
 				let town = ctx.get_owner(t);
 				let tgting = if ctx.get_kind(t) == etg::Spell {
-					if !ctx.sanctified(town) {
+					if ctx.sanctified(town) {
 						return;
 					}
 					let card = ctx.get_card(ctx.get(t, Stat::card));
