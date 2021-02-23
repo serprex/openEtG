@@ -2887,8 +2887,7 @@ impl Skill {
 					.get_player(if roll { owner } else { ctx.get_foe(owner) })
 					.mark;
 				if let Some(newcard) = ctx.random_card(false, |ctx, card| {
-					card.element as i32 == e
-						&& card.rarity != -1 && (*card.flag & Flag::pillar) != 0
+					card.element as i32 == e && card.rarity != -1 && (card.flag & Flag::pillar) != 0
 				}) {
 					let inst =
 						ctx.new_thing(card::As(ctx.get(c, Stat::card), newcard.code as i32), owner);

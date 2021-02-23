@@ -703,7 +703,7 @@ impl Game {
 			let mut pl = self.get_player_mut(id);
 			pl.deck = Rc::new(deck);
 			pl.thing.status.insert(Stat::hp, hp);
-			pl.thing.status.insert(Stat::maxhp, hp);
+			pl.thing.status.insert(Stat::maxhp, maxhp);
 			pl.mark = mark;
 			pl.drawpower = drawpower;
 			pl.deckpower = deckpower;
@@ -745,7 +745,7 @@ impl Game {
 		thing.status.insert(Stat::maxhp, card.health as i32);
 		thing.status.insert(Stat::atk, card.attack as i32);
 		thing.status.insert(Stat::casts, 0);
-		thing.flag.0 |= *card.flag;
+		thing.flag.0 |= card.flag;
 		for &(k, v) in card.status.iter() {
 			thing.status.insert(k, v);
 		}
@@ -776,7 +776,7 @@ impl Game {
 				| Flag::ranged | Flag::stackable
 				| Flag::token | Flag::tunnel
 				| Flag::voodoo | Flag::whetstone);
-		thing.flag.0 |= *card.flag;
+		thing.flag.0 |= card.flag;
 		for &(k, v) in card.status {
 			thing.status.insert(k, v);
 		}
