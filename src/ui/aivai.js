@@ -18,7 +18,8 @@ const seedput = document.getElementById('seed'),
 	fight = document.getElementById('fight'),
 	fight1000 = document.getElementById('fight1000'),
 	threads = document.getElementById('threads'),
-	threadspan = document.getElementById('threadspan');
+	threadspan = document.getElementById('threadspan'),
+	limit = document.getElementById('limit');
 fight.addEventListener('click', fightItOut);
 fight1000.addEventListener('click', fightItOut);
 threadspan.textContent = threads.value;
@@ -26,9 +27,9 @@ document.getElementById('threads').addEventListener('input', e => {
 	threadspan.textContent = threads.value;
 });
 function stopFight() {
-	fight.style.display = 'block';
-	fight1000.style.display = 'block';
-	stop.style.display = 'none';
+	fight.style.visibility = 'visible';
+	fight1000.style.visibility = 'visible';
+	stop.style.visibility = 'hidden';
 
 	if (aiWorker) {
 		if (aiWorker instanceof Array) {
@@ -42,9 +43,9 @@ function stopFight() {
 stop.addEventListener('click', stopFight);
 function fightItOut() {
 	const start = Date.now();
-	fight.style.display = 'none';
-	fight1000.style.display = 'none';
-	stop.style.display = 'block';
+	fight.style.visibility = 'hidden';
+	fight1000.style.visibility = 'hidden';
+	stop.style.visibility = 'visible';
 	replay.textContent = '';
 	let mode = this,
 		fc = new Uint16Array(4);
@@ -141,6 +142,9 @@ function fightItOut() {
 					(fc[2] / (fc[2] + fc[3])) *
 					100
 				).toFixed(2)}%)`;
+				if (limit.value && limit.value <= p0 + p1) {
+					return stopFight();
+				}
 			}
 		}
 	}

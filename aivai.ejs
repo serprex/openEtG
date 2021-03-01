@@ -8,17 +8,20 @@
 		margin:0;
 	}
 	input {
+		width:99%;
+	}
+	input[type="button"],input[type="number"] {
+		width:49%;
+	}
+	#controls {
 		width:420px;
-		display:block;
 	}
 	#threads {
 		width:320px;
 		margin-top:12px;
-		display:inline;
 	}
 	#replay {
 		word-break:break-all;
-		width:420px;
 	}
 	#result {
 		position:absolute;
@@ -27,12 +30,15 @@
 		white-space:pre;
 	}
 </style>
+<div id="controls">
 <input id="deck1" placeholder="Deck 1">
 <input id="deck2" placeholder="Deck 2">
 <input id="seed" placeholder="Seed">
-<input id="stop" value="Stop" type="button" style="display:none">
 <input id="fight" value="Fight Once" type="button">
+<input id="stop" value="Stop" type="button" style="visibility:hidden">
 <input id="fight1000" value="Fight!!" type="button">
+<input id="limit" type="number" placeholder="Matches">
 Threads <input id="threads" value="4" type="range" min="1" max="16"> <span id="threadspan"></span>
 <div id="replay"></div>
+</span>
 <div id="result"></div>
