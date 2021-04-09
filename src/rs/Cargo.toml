@@ -17,7 +17,7 @@ default = ["console_error_panic_hook"]
 rand = { version = "0.8", default-features = false }
 rand_pcg = { version = "0.3", default-features = false }
 fxhash = "0.2"
-arrayvec = { version = "0.5", default-features = false }
+arrayvec = { version = "0.7", default-features = false }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"

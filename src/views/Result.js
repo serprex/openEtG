@@ -117,7 +117,7 @@ const BonusList = [
 		name: 'Murderer',
 		desc: 'Kill over 5 creatures',
 		func: (game, p1, p2, stats) =>
-			game.get(p1.id, '_creaturesDied') > 5 ? 0.15 : 0,
+			game.get(p1.id, 'creaturesDied') > 5 ? 0.15 : 0,
 	},
 	{
 		name: 'Perfect Damage',
@@ -268,7 +268,7 @@ export default connect(({ user }) => ({ user }))(
 					);
 				};
 
-			replayGame.game._tracedeath();
+			replayGame.game.tracedeath();
 			for (const move of replay) {
 				if (move.x === 'cast') {
 					const c = replayGame.byId(move.c);

@@ -957,7 +957,7 @@ impl Skill {
 	pub fn proc(self, ctx: &mut Game, c: i32, t: i32, data: &mut ProcData) {
 		match self {
 			Self::r#_tracedeath => {
-				ctx.incrStatus(ctx.turn, Stat::_creaturesDied, 1);
+				ctx.incrStatus(ctx.turn, Stat::creaturesDied, 1);
 			}
 			Self::abomination => {
 				if data.tgt == c && data.active == Some(Self::mutation) {
@@ -2270,7 +2270,7 @@ impl Skill {
 						Skill::guard,
 						Skill::guard,
 						Skill::bblood,
-						Skill::bblood,
+						Skill::throwrock,
 					],
 					[
 						Skill::growth(2, 2),
@@ -2302,7 +2302,7 @@ impl Skill {
 						Skill::endow,
 						Skill::luciferin,
 						Skill::luciferin,
-						Skill::luciferin,
+						Skill::reinforce,
 					],
 					[
 						Skill::summon(5908),
@@ -2333,8 +2333,8 @@ impl Skill {
 						Skill::lobotomize,
 						Skill::lobotomize,
 						Skill::quint,
-						Skill::quint,
-						Skill::quint,
+						Skill::quinttog,
+						Skill::wisdom,
 					],
 				];
 				const ShardStats: [&[(u8, Soya)]; 12] = [
@@ -2342,9 +2342,10 @@ impl Skill {
 					&[
 						(1, Soya::Skill(Event::Death, [Skill::growth(1, 1)])),
 						(1, Soya::Flag(Flag::nocturnal)),
+						(2, Soya::Skill(Event::Hit, [Skill::poison(1)])),
 					],
 					&[(2, Soya::Flag(Flag::momentum))],
-					&[(2, Soya::Skill(Event::Hit, [Skill::poison(1)]))],
+					&[],
 					&[
 						(1, Soya::Flag(Flag::poisonous)),
 						(2, Soya::Stat(Stat::adrenaline, 1)),
@@ -2428,6 +2429,7 @@ impl Skill {
 					Skill::stoneform => 1,
 					Skill::guard => 1,
 					Skill::bblood => 2,
+					Skill::throwrock => 2,
 					Skill::deadalive => 1,
 					Skill::mutation => 2,
 					Skill::paradox => 2,
@@ -2457,6 +2459,7 @@ impl Skill {
 					Skill::mend => 1,
 					Skill::endow => 2,
 					Skill::luciferin => 3,
+					Skill::reinforce => 3,
 					Skill::summon(_) => 2,
 					Skill::snipe => 2,
 					Skill::dive => 2,
@@ -2469,6 +2472,8 @@ impl Skill {
 					Skill::steal => 3,
 					Skill::lobotomize => 2,
 					Skill::quint => 2,
+					Skill::quinttog => 2,
+					Skill::wisdom => 2,
 					_ => 0,
 				};
 				let mut shardgolem = ThingData::default();

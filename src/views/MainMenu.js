@@ -32,12 +32,10 @@ const tipjar = [
 	"Typing '/help' in chat will list all commands",
 	'Keyboard shortcuts: space ends turn, backspace cancels, w targets opponent, s targets yourself, 1 through 8 cast cards in hand',
 	'Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped',
-	'Decks submitted to arena lose hp quadratically per day, down to a minimum of a quarter of their original hp',
 	"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons",
 	'A ply is half a turn',
 	'Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm',
 	"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
-	'Cards in packs have a (45/packsize)% chance to increment rarity',
 	'Wealth T60 is a leaderboard for player wealth. Wealth is a combination of current gold & cardpool',
 ];
 

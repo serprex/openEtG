@@ -56,7 +56,7 @@ pub struct PlayerData {
 	pub creatures: Rc<[i32; 23]>,
 	pub permanents: Rc<[i32; 16]>,
 	pub quanta: [u8; 12],
-	pub hand: ArrayVec<[i32; 8]>,
+	pub hand: ArrayVec<i32, 8>,
 	pub deck: Rc<Vec<i32>>,
 }
 
@@ -280,7 +280,6 @@ impl Fxs {
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[derive(Clone, Copy, Hash, Eq, PartialEq)]
 pub enum Stat {
-	r#_creaturesDied,
 	adrenaline,
 	atk,
 	card,
@@ -290,6 +289,7 @@ pub enum Stat {
 	charges,
 	cost,
 	costele,
+	creaturesDied,
 	delayed,
 	dive,
 	epoch,
@@ -720,7 +720,7 @@ impl Game {
 			let pl = self.get_player_mut(id);
 			let pldecklen = pl.deck.len();
 			let oldhand = pl.hand.clone();
-			let newhand: ArrayVec<[i32; 8]> = pl
+			let newhand: ArrayVec<i32, 8> = pl
 				.deck_mut()
 				.drain(if pldecklen <= 7 { 0 } else { pldecklen - 7 }..)
 				.collect();
@@ -817,12 +817,12 @@ impl Game {
 		thing
 			.status
 			.iter()
-			.flat_map(|(&k, &v)| once(generated::id_stat(k)).chain(once(v)))
+			.flat_map(|(&k, &v)| std::array::IntoIter::new([generated::id_stat(k), v]))
 			.chain(
 				thing
 					.flag
 					.into_iter()
-					.flat_map(|k| once(generated::id_flag(k)).chain(once(1))),
+					.flat_map(|k| std::array::IntoIter::new([generated::id_flag(k), 1])),
 			)
 			.collect()
 	}
@@ -1036,7 +1036,7 @@ impl Game {
 		expected
 	}
 
-	pub fn r#_tracedeath(&mut self) {
+	pub fn tracedeath(&mut self) {
 		self.setSkill(1, Event::Death, &[Skill::_tracedeath]);
 	}
 }

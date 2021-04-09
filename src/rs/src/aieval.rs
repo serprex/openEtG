@@ -394,7 +394,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::phoenix => 3.0,
 			Skill::photosynthesis => 2.0,
 			Skill::plague => 5.0,
-			Skill::platearmor(x) | Skill::v_platearmor(x) => x as f32 / 5.0,
+			Skill::platearmor(x) | Skill::v_platearmor(x) => x as f32,
 			Skill::poison(x) => x as f32,
 			Skill::poisonfoe(x) => x as f32,
 			Skill::powerdrain => 6.0,
