@@ -622,8 +622,9 @@ pub async fn handle_ws(
 											today.saturating_sub(row.get::<usize, i32>(0) as u32);
 										if age > 0 {
 											let mut user = user.lock().await;
-											user.data.gold =
-												user.data.gold.saturating_add(age as i32);
+											user.data.gold = user.data.gold.saturating_add(
+												std::cmp::min(age.saturating_mul(25), 350) as i32,
+											);
 										}
 									}
 									if let Ok(trx) = client.transaction().await {
