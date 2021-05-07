@@ -770,7 +770,7 @@ pub async fn handle_ws(
 							..
 						} => {
 							let userid = user.unwrap().lock().await.id;
-							client.execute("insert into stats (user_id, \"set\", stats, players) values ($1, $2, $3, $4)", &[&userid, &set, &Json(stats), &players]).await.ok();
+							client.execute("insert into stats (user_id, \"set\", stats, players) values ($1, $2, $3, $4)", &[&userid, &set, &Json(stats), &Json(players)]).await.ok();
 						}
 						UserMessage::setgold { t, g, .. } => {
 							let userid = user.unwrap().lock().await.id;

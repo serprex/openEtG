@@ -279,14 +279,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::gpullspell | Skill::v_gpullspell => 3.0,
 			Skill::gratitude => 4.0,
 			Skill::grave => 1.0,
-			Skill::growth(atk, hp) => {
-				(atk + hp) as f32
-					- if hp < 0 {
-						(ctx.truehp(c) as f32).ln()
-					} else {
-						0.0
-					}
-			}
+			Skill::growth(atk, hp) => (atk + hp) as f32,
 			Skill::guard => ttatk + (4 + ctx.get(c, Flag::airborne) as i32) as f32,
 			Skill::halveatk => {
 				if ctx.get_kind(c) == etg::Spell {
@@ -330,6 +323,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 			Skill::liquid => 5.0,
 			Skill::livingweapon => 2.0,
 			Skill::lobotomize => 6.0,
+			Skill::locket => 1.0,
 			Skill::loot => 2.0,
 			Skill::luciferin => 3.0,
 			Skill::lycanthropy => 4.0,
@@ -927,14 +921,20 @@ fn evalthing(
 			if patience {
 				hp += 2;
 			}
-			let poison = ctx.get(id, Stat::poison);
+			let mut poison = ctx.get(id, Stat::poison);
+			for &sk in ctx.getSkill(id, Event::OwnAttack).iter() {
+				match sk {
+					Skill::growth(gatk, ghp) => poison = poison.saturating_sub(ghp as i32),
+					_ => (),
+				}
+			}
 			if poison > 0 {
-				hp -= poison * 2;
+				hp = hp.saturating_sub(poison.saturating_mul(2));
 				if ctx.get(id, Flag::aflatoxin) {
 					score -= 2.0;
 				}
 			} else if poison < 0 {
-				hp = cmp::min(hp - poison, ctx.get(id, Stat::maxhp));
+				hp = cmp::min(hp.saturating_sub(poison), ctx.get(id, Stat::maxhp));
 			}
 			if hp < 0 {
 				hp = 0;
