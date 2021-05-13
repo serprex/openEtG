@@ -1081,7 +1081,13 @@ impl Skill {
 			}
 			Self::beguilestop => {
 				if t == ctx.get_owner(c) {
-					ctx.rmskill(c, Event::Turnstart, Skill::beguilestop);
+					let thing = ctx.get_thing_mut(c);
+					if let Some(smap) = thing.skill.get_mut(Event::Turnstart) {
+						let smap = smap.to_mut();
+						if let Some(idx) = smap.iter().position(|&s| s == Skill::beguilestop) {
+							smap.remove(idx);
+						}
+					}
 					Skill::beguile.proc(ctx, c, c, data);
 				}
 			}
