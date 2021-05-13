@@ -2208,7 +2208,7 @@ pub async fn handle_ws(
 														if bp < 0 && -bp <= price as i32 {
 															happened = amt;
 														}
-													} else if bp > 0 && bp <= -(price as i32) {
+													} else if bp > 0 && bp >= -(price as i32) {
 														happened = -amt;
 													}
 													let cost = bp.abs() * happened;
@@ -2301,7 +2301,7 @@ pub async fn handle_ws(
 														}
 														BzBidOp::Update { id, bid, q } => {
 															add.entry(code16).or_default().push(BzBid {
-																u: Cow::from(u.as_str()), q, p: bid.p
+																u: bid.u.clone(), q, p: bid.p
 															});
 															rm.entry(code16).or_default().push(bid);
 															trx.execute(
