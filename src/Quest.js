@@ -149,8 +149,7 @@ quarks.basic_upgrades = {
 	info: 'Tutorial - Basic 8/10 - Upgrades',
 	urdeck:
 		'0d6qq016rk016rs016tv01711017480177b017ad017di017gt017jq017mv037qb017q6017t50180f018pi',
-	deck:
-		'0i4sa014vf0152h0155o0158r015bt015f2015id015la015of015rm015ul0161v018pi',
+	deck: '0i4sa014vf0152h0155o0158r015bt015f2015id015la015of015rm015ul0161v018pi',
 	hp: 100,
 	goldreward: 70,
 	opentext: [
@@ -214,8 +213,7 @@ quarks.necromancer = {
 	markpower: 2,
 	wintext:
 		'You defeated the horde, but you should find out where they came from',
-	info:
-		'A horde of skeletons have been seen nearby, perhaps you should go investigate?',
+	info: 'A horde of skeletons have been seen nearby, perhaps you should go investigate?',
 };
 quarks.necromancer2 = {
 	deck: '0d5bs045bu045c1025ca018pp',
@@ -234,8 +232,7 @@ quarks.necromancer3 = {
 	cardreward: '03531',
 	wintext:
 		'You defeated the evil necromancer and stopped his undead from spreading through the land!',
-	info:
-		'Deep inside the forest you find the necromancer responsible for filling the lands with undead!',
+	info: 'Deep inside the forest you find the necromancer responsible for filling the lands with undead!',
 	questdependencies: ['necromancer2'],
 };
 quarks.spirit = {
@@ -246,8 +243,7 @@ quarks.spirit = {
 		'You have defeated the evil spirit and stopped its dark influence from spreading through the land!\
 		... But a dark energy is still troubling this region... \
 		You sense a cold, chill air coming from a portal looming darkly at the back of the cave.',
-	info:
-		'You pursue the energy trail of the spirit to a dark cavern. At first you think it has eluded you, but as you turn to leave, its dark shadowy form rises in front of you',
+	info: 'You pursue the energy trail of the spirit to a dark cavern. At first you think it has eluded you, but as you turn to leave, its dark shadowy form rises in front of you',
 };
 quarks.spirit2 = {
 	deck: '015010i50u044vi034vh014vl024vn015ur025uq035ut045up015v2018pt',
@@ -257,8 +253,7 @@ quarks.spirit2 = {
 		"The portal guardian lies vanquished, but despite your best efforts you cannot close the portal from this side.\
 		Examining the guardian's remains you find an ancient tome which describes the portal before you and the lands beyond\
 		The incubus key lies in a large fortress at the center of the realm. You will have to venture forth.",
-	info:
-		"You approach the portal and a large Elemental steps out of the shadows, purple energy swirling about it.\
+	info: "You approach the portal and a large Elemental steps out of the shadows, purple energy swirling about it.\
 		'Only the worthy may pass'...You state that your only intention is to destroy the portal not pass through it.\
 		'Only the incubus key can close this portal.' The guardian glowers at you darkly.\
 		If you wish to find it you must first pass my test.' The guardian attacks!",
@@ -275,8 +270,7 @@ quarks.spirit3 = {
 		Just as you are about to land the final blow, she vanishes.\
 		You can hear her eerie voice echoing off of the wind, growing faint and distant.\
 		'Turn back foolish mortal. This road will only lead to your doom. My sisters will not be so forgiving!'",
-	info:
-		"You step through the portal and are wisked off to a shifting expanse of swampland. Purple lightning crackles above.\
+	info: "You step through the portal and are wisked off to a shifting expanse of swampland. Purple lightning crackles above.\
 		Far off, in the distant center of the dark and brooding expanse, stands an ominous fortress.\
 		The gravel road before you winds its way toward it like a great serpent slithering its way through a desolate bog.\
 		A lone maiden blocks your path. In a voice like claws upon glass she shrieks 'you do not belong here... DIE!'",
@@ -294,8 +288,7 @@ quarks.spirit4 = {
 		Just as you are about to leave, an evil laugh from behind you sends chills down your spine\
 		The shadows on the wall begin to move of their own accord. And all the doors slam shut with conviction.\
 		You turn to face your assailant, apparently a sister of the maiden you fell earlier.',
-	info:
-		"As you continue up the road, a foul stench assaults your nose... Then you hear a poping sound.\
+	info: "As you continue up the road, a foul stench assaults your nose... Then you hear a poping sound.\
 		To the side of the road a sign reads 'Danger, swamp gas is explosive. Travelers beware'\
 		You decide that NOW would be a good time to run!... But a flock of giant angry birds is in your way",
 	questdependencies: ['spirit3'],
@@ -322,8 +315,7 @@ quarks.spirit5 = {
 		Off in the distance the storm has settled above the castle, the echos of ominous thunder growing fainter.\
 		You hope it will be gone by the time you get there... but given your luck so far, you don't think it will.\
 		Storm or not, you didn't come this far just to turn back, so you continue your treck down the path.",
-	info:
-		"You turn to face your attacker, but as you call on your powers, only darkness answers.\
+	info: "You turn to face your attacker, but as you call on your powers, only darkness answers.\
 		Your allies come to your aid but their forms have all been twisted. The dark lady laughs mischeviously.\
 		'You must think yourself dreaming... Well this is the nightmare realm, and I am the one in control.\
 		I think I will toy with you first... before I swallow your soul.' The shadows lunge toward you in a vicious attack.",
@@ -344,8 +336,7 @@ quarks.bombmaker = {
 			wintext: 'Congratulations! Here, take some of my bombs as the reward!',
 		},
 	},
-	info:
-		'A bomb maker have set up shop nearby. He have put up a sign promising a reward if you can beat him and his bombs three times in a row.',
+	info: 'A bomb maker have set up shop nearby. He have put up a sign promising a reward if you can beat him and his bombs three times in a row.',
 };
 quarks.blacksummoner = {
 	deck: '0f7t5018pt',
@@ -354,8 +345,7 @@ quarks.blacksummoner = {
 	cardreward: '027t5',
 	wintext:
 		'You defeat the Dark Summoner that controlled the dragons. The dragons fly away, but two of them stay, looking at you. You decide to let them join you!',
-	info:
-		'A swarm of dragons can be seen nearby. Maybe you could manage to tame one of them?',
+	info: 'A swarm of dragons can be seen nearby. Maybe you could manage to tame one of them?',
 };
 
 quarks.icecave = {
@@ -364,8 +354,7 @@ quarks.icecave = {
 	hp: 75,
 	wintext:
 		'You get through the storm and finally reach the mysterious cave where the weapon is said to reside.',
-	info:
-		'You heard a story about a rare weapon hidden in a cave up north. You decide to look for the weapon. On the way there you are caught in the middle of a big snow storm.',
+	info: 'You heard a story about a rare weapon hidden in a cave up north. You decide to look for the weapon. On the way there you are caught in the middle of a big snow storm.',
 };
 quarks.icecave2 = {
 	deck: '085i4065ik035ia035ib025ic045id018pp',
@@ -373,8 +362,7 @@ quarks.icecave2 = {
 	hp: 75,
 	wintext:
 		'You defeat the creatures that were attacking, and can finally take the rare weapon that was hiding in the cave; a Trident! But before you can grab it, you hear strange sounds behind you...',
-	info:
-		'You enter the cave, it is dark and icy. Suddenly you meet some creatures there, which promptly attacks you. You seem to glimpse the rare weapon right behind them though...',
+	info: 'You enter the cave, it is dark and icy. Suddenly you meet some creatures there, which promptly attacks you. You seem to glimpse the rare weapon right behind them though...',
 	questdependencies: ['icecave'],
 };
 quarks.icecave3 = {
@@ -383,8 +371,7 @@ quarks.icecave3 = {
 	hp: 75,
 	wintext:
 		'After defeating the Guardians, you quickly get out of the cave, ready to head home as fast as you can...',
-	info:
-		"You look behind you and see a range of different creatures, which you can swear were not here before. 'We are the Guardians of this Cave, and we will not allow you to take our treasure!'",
+	info: "You look behind you and see a range of different creatures, which you can swear were not here before. 'We are the Guardians of this Cave, and we will not allow you to take our treasure!'",
 	questdependencies: ['icecave2'],
 };
 quarks.icecave4 = {
@@ -394,8 +381,7 @@ quarks.icecave4 = {
 	wintext:
 		'You finally get though the storm and reach the safety of the city. You got the weapon you were looking for, and some other ice souvenirs as well.',
 	cardreward: '025i8015ic',
-	info:
-		'The storm you got past while heading here is still raging, and it seems to have gotten a lot worse.',
+	info: 'The storm you got past while heading here is still raging, and it seems to have gotten a lot worse.',
 	questdependencies: ['icecave3'],
 };
 quarks.inventor = {
@@ -404,8 +390,7 @@ quarks.inventor = {
 	hp: 125,
 	wintext:
 		"You manage to get past the crazy inventor's defense system, and get closer to his big house.",
-	info:
-		"You come across a small village that claims they are being regularly attacked by machines coming from a crazy inventor living nearby. You decide to put a stop to this crazy man's evil endeavors. On your way there you suddenly see a big Armagio landing in front of you. 'Catapults!' you think, and get ready to fight.",
+	info: "You come across a small village that claims they are being regularly attacked by machines coming from a crazy inventor living nearby. You decide to put a stop to this crazy man's evil endeavors. On your way there you suddenly see a big Armagio landing in front of you. 'Catapults!' you think, and get ready to fight.",
 };
 quarks.inventor2 = {
 	deck: '065f1045ff035f7075i4065ik045ii018po',
@@ -413,8 +398,7 @@ quarks.inventor2 = {
 	hp: 120,
 	wintext:
 		'Defeating the machines that were terrorizing the village, you head inside to face the inventor.',
-	info:
-		'In front of the house some machines seems to stand guards. These must be the machines that were attacking the village!',
+	info: 'In front of the house some machines seems to stand guards. These must be the machines that were attacking the village!',
 	questdependencies: ['inventor'],
 };
 quarks.inventor3 = {
@@ -424,38 +408,24 @@ quarks.inventor3 = {
 	wintext:
 		"Even with his inventions, you manage to defeat him. 'No, please, spare me, I will never hurt anyone again!' he cries. You agree to let him go, but only if he leaves the area and never comes back. You see him walking away and can't help but thinking that you haven't seen the last of him... On your way out of the house, you find some of his inventions and decide that they can be useful!",
 	cardreward: '03561025fh025ii',
-	info:
-		"'All I wanted was to test the offensive capabilities of my machines. But now when you are here, I can test this on you!' says the crazy inventor and laughs.",
+	info: "'All I wanted was to test the offensive capabilities of my machines. But now when you are here, I can test this on you!' says the crazy inventor and laughs.",
 	questdependencies: ['inventor2'],
 };
 //Proving Grounds
 quarks.pgdragon = {
-	deck:
-		'0g4sa014vf0152h0155o0158r015bt015f2015id015la015op015rm015ul0661t018pu',
+	deck: '0g4sa014vf0152h0155o0158r015bt015f2015id015la015op015rm015ul0661t018pu',
 	name: 'Dragon Tamer',
 	hp: 150,
 	wintext:
 		'You have proved your worth for the Dragon Tamer, and he gives you two of his dragons.',
 	choicerewards: [
-		5103,
-		5201,
-		5304,
-		5403,
-		5501,
-		5602,
-		5709,
-		5802,
-		5903,
-		6006,
-		6101,
-		6207,
+		5103, 5201, 5304, 5403, 5501, 5602, 5709, 5802, 5903, 6006, 6101, 6207,
 	],
 	rewardamount: 2,
 	info: 'Fight the Dragon Tamer at the Proving Grounds!',
 };
 quarks.pgrare = {
-	deck:
-		'015360a4sa014vl0152q0155s0158v015c5065ff045fh015f7015ic015ir015lh025oi015ol015ro015ur0161u018po',
+	deck: '015360a4sa014vl0152q0155s0158v015c5065ff045fh015f7015ic015ir015lh025oi015ol015ro015ur0161u018po',
 	name: 'Master of Arms',
 	hp: 150,
 	wintext:
@@ -478,25 +448,13 @@ quarks.pgrare = {
 	info: 'Fight the Master of Arms at the Proving Grounds!',
 };
 quarks.pgshard = {
-	deck:
-		'0c4sa0250a0253e0256i0659m025cq025fu025j2025m6025pa025se025vi0262m018pm',
+	deck: '0c4sa0250a0253e0256i0659m025cq025fu025j2025m6025pa025se025vi0262m018pm',
 	name: 'Gemcutter',
 	hp: 150,
 	wintext:
 		'You have proved your worth for the Gemcutter and he gives you one of his rare shards.',
 	choicerewards: [
-		5130,
-		5230,
-		5330,
-		5430,
-		5530,
-		5630,
-		5730,
-		5830,
-		5930,
-		6030,
-		6130,
-		6230,
+		5130, 5230, 5330, 5430, 5530, 5630, 5730, 5830, 5930, 6030, 6130, 6230,
 	],
 	info: 'Fight the Gemcutter at the Proving Grounds!',
 };
@@ -510,8 +468,7 @@ quarks.pgfarmer = {
 	info: 'Fight the Farmer at the Proving Grounds!',
 };
 quarks.pggeomancer = {
-	deck:
-		'0154201576016060c4sc0150u015aa015de015gi015jm015mq015pu015t20163a067h0018pp',
+	deck: '0154201576016060c4sc0150u015aa015de015gi015jm015mq015pu015t20163a067h0018pp',
 	name: 'Geomancer',
 	hp: 150,
 	choicerewards: 'uppedpillar',
@@ -521,8 +478,7 @@ quarks.pggeomancer = {
 	info: 'Fight the Geomancer at the Proving Grounds!',
 };
 quarks.pgnymph = {
-	deck:
-		'015000153401568094sa094sc0159c015cg015fk015io015ls015p0015s4015v80162c018pi',
+	deck: '015000153401568094sa094sc0159c015cg015fk015io015ls015p0015s4015v80162c018pi',
 	name: 'Eunuch',
 	hp: 150,
 	choicerewards: 'nymph',
@@ -533,14 +489,12 @@ quarks.pgnymph = {
 
 //Elemental Temples
 quarks.elementalshrine = {
-	deck:
-		'015990c4sa014vi014vh0152m0152o0155t0155n0158p015c8015c7015f3015fb015ia015i6015lp015lr015on015ou015ri015rr015v1015ut0162a0161q018pi',
+	deck: '015990c4sa014vi014vh0152m0152o0155t0155n0158p015c8015c7015f3015fb015ia015i6015lp015lr015on015ou015ri015rr015v1015ut0162a0161q018pi',
 	name: 'Shrine Guardian',
 	hp: 100,
 	wintext:
 		"The Shrine Guardian speaks to you: 'You have bested me, but I am only the beginning. Find the Temples and challenge their guardians, and they will reward you! If you defeat them all, you will get access to the Chroma Palace, where the strongest guardian reside.'",
-	info:
-		"You walk up to the shrine. You don't know what to expect. Suddenly, you are attacked by a cloaked figure! Could it be the Shrine Guardian!?",
+	info: "You walk up to the shrine. You don't know what to expect. Suddenly, you are attacked by a cloaked figure! Could it be the Shrine Guardian!?",
 };
 quarks.aethertemple = {
 	deck: '02622036280f61o0361u0a80a018pu',
@@ -550,8 +504,7 @@ quarks.aethertemple = {
 	wintext:
 		'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
 	questdependencies: ['elementalshrine'],
-	info:
-		'As you approach the Aether Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
+	info: 'As you approach the Aether Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 };
 quarks.airtemple = {
 	deck: '0f5oc035ou045or0a7n1018pr',
@@ -561,8 +514,7 @@ quarks.airtemple = {
 	wintext:
 		'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
 	questdependencies: ['elementalshrine'],
-	info:
-		'As you approach the Air Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
+	info: 'As you approach the Air Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 };
 quarks.darktemple = {
 	deck: '0f5uk035uv045ul0a7tc018pt',
@@ -572,8 +524,7 @@ quarks.darktemple = {
 	wintext:
 		'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
 	questdependencies: ['elementalshrine'],
-	info:
-		'As you approach the Dark Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
+	info: 'As you approach the Dark Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 };
 quarks.deathtemple = {
 	deck: '03535035370a7180d52g018pk',
@@ -583,8 +534,7 @@ quarks.deathtemple = {
 	wintext:
 		'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
 	questdependencies: ['elementalshrine'],
-	info:
-		'As you approach the Death Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
+	info: 'As you approach the Death Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 };
 quarks.earthtemple = {
 	deck: '0958o0658u0658r0a77l018pm',
@@ -594,8 +544,7 @@ quarks.earthtemple = {
 	wintext:
 		'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
 	questdependencies: ['elementalshrine'],
-	info:
-		'As you approach the Earth Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
+	info: 'As you approach the Earth Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 };
 quarks.entropytemple = {
 	deck: '0f4vc034vd044ve0a6u2018pj',
@@ -605,8 +554,7 @@ quarks.entropytemple = {
 	wintext:
 		'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
 	questdependencies: ['elementalshrine'],
-	info:
-		'As you approach the Entropy Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
+	info: 'As you approach the Entropy Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 };
 quarks.firetemple = {
 	deck: '0e5f0035f3045fc0a7dk018po',
@@ -616,8 +564,7 @@ quarks.firetemple = {
 	wintext:
 		'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
 	questdependencies: ['elementalshrine'],
-	info:
-		'As you approach the Fire Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
+	info: 'As you approach the Fire Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 };
 quarks.gravitytemple = {
 	deck: '0d55k0455l0355s0a74k018pl',
@@ -627,8 +574,7 @@ quarks.gravitytemple = {
 	wintext:
 		'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
 	questdependencies: ['elementalshrine'],
-	info:
-		'As you approach the Gravity Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
+	info: 'As you approach the Gravity Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 };
 quarks.lifetemple = {
 	deck: '0d5bs065bu055c70a7ai018pn',
@@ -638,8 +584,7 @@ quarks.lifetemple = {
 	wintext:
 		'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
 	questdependencies: ['elementalshrine'],
-	info:
-		'As you approach the Life Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
+	info: 'As you approach the Life Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 };
 quarks.lighttemple = {
 	deck: '0c5l8035lo045ln0a7jv018pq',
@@ -649,8 +594,7 @@ quarks.lighttemple = {
 	wintext:
 		'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
 	questdependencies: ['elementalshrine'],
-	info:
-		'As you approach the Light Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
+	info: 'As you approach the Light Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 };
 quarks.timetemple = {
 	deck: '0e5rg045ru035rm0a7q4018ps',
@@ -660,8 +604,7 @@ quarks.timetemple = {
 	wintext:
 		'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
 	questdependencies: ['elementalshrine'],
-	info:
-		'As you approach the Time Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
+	info: 'As you approach the Time Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 };
 quarks.watertemple = {
 	deck: '0f5i4045ie035id0a7go018pp',
@@ -671,8 +614,7 @@ quarks.watertemple = {
 	wintext:
 		'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
 	questdependencies: ['elementalshrine'],
-	info:
-		'As you approach the Water Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
+	info: 'As you approach the Water Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 };
 quarks.chromatemple = {
 	deck: '064vj066qq026u10271a0174a0274e0277g027ah017dm027n0027t90280a018pi',
@@ -697,8 +639,7 @@ quarks.chromatemple = {
 		'timetemple',
 		'watertemple',
 	],
-	info:
-		'You walk up to the steps of the last temple, the Chroma Temple. It was harsh getting here, but well worth it. This is it.',
+	info: 'You walk up to the steps of the last temple, the Chroma Temple. It was harsh getting here, but well worth it. This is it.',
 };
 for (const key in quarks) {
 	let q = quarks[key];

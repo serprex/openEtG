@@ -89,14 +89,13 @@ const data = {
 		'Opponent draws up to two cards. Draw cards equal to what opponent drew.',
 	brawl:
 		'Your creatures attack. If a creature exists in opposing creature slot, the two creatures deal their damage to one another instead of opponent. Consumes all remaining 1:3.',
-	brew:
-		"Add a random Alchemy card to your hand. Possible cards include: Antimatter, Black Hole, Adrenaline, Nymph's Tears, Unstable Gas, Liquid Shadow, Aflatoxin, Basilisk Blood, Rage Potion, Luciferin, Precognition, Quintessence.",
+	brew: "Add a random Alchemy card to your hand. Possible cards include: Antimatter, Black Hole, Adrenaline, Nymph's Tears, Unstable Gas, Liquid Shadow, Aflatoxin, Basilisk Blood, Rage Potion, Luciferin, Precognition, Quintessence.",
 	brokenmirror: c =>
 		`When opponent plays a creature from their hand, summon a ${
 			c.upped ? '2|1' : '1|1'
 		} Phantom.`,
 	bubbleclear:
-		'Remove statuses (positive and negative) from target, and heal target creature 1.\nTarget gains a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages the affected card.',
+		'Remove statuses (positive and negative) from target creature or permanent, and heal target creature 1.\nTarget gains a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages the affected card.',
 	butterfly:
 		'Target creature or weapon with either strength or HP less than 3 has its skills replaced with "3:1 Destroy target permanent."',
 	burrow: c =>
@@ -121,7 +120,7 @@ const data = {
 	chromastat:
 		"Generate 1:0 for this creature's total strength & HP when this creature deals damage.",
 	clear:
-		'Remove statuses (positive and negative) from target, and heal target creature 1.',
+		'Remove statuses (positive and negative) from target creature or permanent, and heal target creature 1.',
 	cold: '30% chance to freeze non-ranged attackers for 3 turns.',
 	corpseexplosion: [
 		'Sacrifice one of your creatures to deal 1 spell damage to all creatures. Increase damage by 1 for every 8 HP of the sacrifice. Poisonous sacrifices poison opponent.',
@@ -138,8 +137,7 @@ const data = {
 	cseed2:
 		'Inflict a random effect on target card. All existing effects are possible.',
 	deadalive: {
-		hit:
-			'When this card deals damage, trigger all effects that occur when a creature dies.',
+		hit: 'When this card deals damage, trigger all effects that occur when a creature dies.',
 		cast: 'Trigger all effects that occur when a creature dies.',
 	},
 	deathwish:
@@ -215,8 +213,7 @@ const data = {
 	evadespell:
 		"Cannot be directly targeted by opponent's spells. Still affected by spells that affect all creatures.",
 	evolve: 'Transform this card into an unburrowed Shrieker.',
-	feed:
-		'Give target creature 1 poison counter, gain 3|3, and lose immaterial status until the beginning of your next turn.',
+	feed: 'Give target creature 1 poison counter, gain 3|3, and lose immaterial status until the beginning of your next turn.',
 	fickle:
 		"Swap target card in either player's hand with a random card from their deck that they have enough quanta to play.",
 	fiery: 'Gains +1 strength for every 5:6 owned.',
@@ -297,8 +294,7 @@ const data = {
 		'Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature.',
 		'Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature.\nGain 1:8 when played.',
 	],
-	hope:
-		'Blocks one additional damage for each creature you control that gain 1:8 when attacking.',
+	hope: 'Blocks one additional damage for each creature you control that gain 1:8 when attacking.',
 	icebolt:
 		'Deal 2 spell damage plus one per 5:7 you have after playing this card. 25% plus 5% per point of damage chance to freeze target.',
 	ignite:
@@ -329,8 +325,7 @@ const data = {
 		"Gains quanta matching your mark each turn, until set to gain quanta of a specific element. Doesn't operate while frozen.",
 	locketshift:
 		"Switch this card's production to match the element of any target, including immaterial and burrowed cards.",
-	loot:
-		'When one of your permanents is destroyed, gain control of a random permanent from opponent.',
+	loot: 'When one of your permanents is destroyed, gain control of a random permanent from opponent.',
 	losecharge: (c, inst) => {
 		const charges = c.getStatus('charges');
 		return charges
@@ -372,8 +367,7 @@ const data = {
 		} damage per card added in this way. Heal yourself an equal amount.`,
 	nightshade:
 		'Target creature becomes nocturnal, gains 5|5, and loses abilities.',
-	nova:
-		'Gain 1 quanta of each element. If you play three or more of this card in one turn, summon a Singularity on your side.',
+	nova: 'Gain 1 quanta of each element. If you play three or more of this card in one turn, summon a Singularity on your side.',
 	nova2:
 		'Gain 2 quanta of each element. If you play two or more of this card in one turn, summon a Singularity on your side.',
 	nullspell:
@@ -466,8 +460,7 @@ const data = {
 		}.`,
 	readiness:
 		"Target creature's active ability becomes free. If target creature's active ability has already been used this turn, it can be used again this turn.",
-	reap:
-		"Target non-Skeleton creature dies and is replaced with a Skeleton with target creature's current strength and HP, but no other active abilities or statuses.",
+	reap: "Target non-Skeleton creature dies and is replaced with a Skeleton with target creature's current strength and HP, but no other active abilities or statuses.",
 	rebirth: c =>
 		`Transform this card into a ${c.upped ? 'Minor Phoenix' : 'Phoenix'}.`,
 	reducemaxhp:
@@ -481,8 +474,7 @@ const data = {
 		"If target card is upgraded, it becomes unupgraded. If target card is unupgraded, it becomes upgraded. Gain 1 quanta of target card's element. Cannot target stacks.",
 	reinforce:
 		"Target creature gains strength and HP equal to this creature's strength and HP. Destroy this creature.",
-	ren:
-		'Target creature gains: "When dying instead return to owner\'s hand. Modified state besides this effect remains when played again."',
+	ren: 'Target creature gains: "When dying instead return to owner\'s hand. Modified state besides this effect remains when played again."',
 	rewind:
 		"Put target creature on top of its owner's deck. Removes all bonuses and modifiers on target creature.",
 	reveal: {
@@ -509,10 +501,8 @@ const data = {
 	scatter:
 		'Target player mulligans their hand for an equal number of cards.\nTargeting a card will only shuffle that card.\nIncrease your mark power by 1.',
 	scramble: {
-		hit:
-			"Randomize up to 9 quanta randomly chosen from opponent's quanta pool on hit.",
-		cast:
-			"Randomize up to 9 quanta randomly chosen from target player's quanta pool.",
+		hit: "Randomize up to 9 quanta randomly chosen from opponent's quanta pool on hit.",
+		cast: "Randomize up to 9 quanta randomly chosen from target player's quanta pool.",
 	},
 	scramblespam:
 		"Randomize up to 9 quanta randomly chosen from target player's quanta pool. This ability may be used multiple times per turn.",
@@ -541,8 +531,7 @@ const data = {
 		'Attacking creatures may randomly die and are replaced by Skeletons. Creatures with lower HP are more likely to die.',
 	skyblitz:
 		'Your airborne creatures all dive (double their strength until end of turn.) Consumes all remaining 1:9.',
-	slow:
-		'Non-ranged attackers are delayed for one turn after their attack. Delayed creatures may not attack or use abilities.',
+	slow: 'Non-ranged attackers are delayed for one turn after their attack. Delayed creatures may not attack or use abilities.',
 	snipe: 'Deal 3 damage to target creature.',
 	solar: 'Gain 1:8 for each attacker.',
 	sosa: c =>

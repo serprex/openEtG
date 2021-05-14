@@ -179,7 +179,12 @@ export const store = createStore(
 		chatid: 1,
 		muted: new Set(),
 	},
-	applyMiddleware(({ dispatch, getState }) => next => action =>
-		typeof action === 'function' ? action(dispatch, getState) : next(action),
+	applyMiddleware(
+		({ dispatch, getState }) =>
+			next =>
+			action =>
+				typeof action === 'function'
+					? action(dispatch, getState)
+					: next(action),
 	),
 );

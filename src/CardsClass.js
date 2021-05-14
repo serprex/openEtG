@@ -53,9 +53,8 @@ export default class Cards {
 	cardCmp = (x, y) => this.codeCmp(x.code, y.code);
 
 	filter(upped, filter, cmp, shiny) {
-		const keys = this.filtercache[(upped ? 1 : 0) | (shiny ? 2 : 0)].filter(
-			filter,
-		);
+		const keys =
+			this.filtercache[(upped ? 1 : 0) | (shiny ? 2 : 0)].filter(filter);
 		return cmp ? keys.sort(cmp) : keys;
 	}
 

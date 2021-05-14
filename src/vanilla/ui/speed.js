@@ -23,7 +23,8 @@ function printstat() {
 			(card.tier === 6 || card.tier === 8 || card.tier === 18)
 		)
 			return false;
-		if (hide.has('nymph') && (card.tier === 15 || card.tier === 20)) return false;
+		if (hide.has('nymph') && (card.tier === 15 || card.tier === 20))
+			return false;
 		return !card.name.match(/^Mark of /);
 	}
 	while (infobox.firstChild) infobox.firstChild.remove();

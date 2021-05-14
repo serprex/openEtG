@@ -44,7 +44,10 @@ export default connect(state => ({
 						Forum
 					</a>
 					&emsp;&emsp;
-					<a href="https://discordapp.com/invite/qAmfB8T" target="_blank" rel="noopener">
+					<a
+						href="https://discordapp.com/invite/qAmfB8T"
+						target="_blank"
+						rel="noopener">
 						Discord
 					</a>
 				</div>
