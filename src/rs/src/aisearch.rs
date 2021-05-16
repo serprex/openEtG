@@ -7,20 +7,6 @@ use crate::etg;
 use crate::game::{Flag, Game, GameMove, Phase, Stat};
 use crate::skill::{Event, Skill, Tgt};
 
-fn filter(ctx: &Game, skill: Skill, c: i32, t: i32) -> bool {
-	match skill {
-		Skill::v_web => ctx.get(t, Flag::airborne),
-		Skill::freeze | Skill::v_freeze => ctx.get(t, Stat::frozen) < 3,
-		Skill::pacify => ctx.trueatk(t) != 0,
-		Skill::readiness => {
-			!ctx.getSkill(t, Event::Cast).is_empty()
-				&& (ctx.get(t, Stat::cast) != 0 || ctx.get(t, Stat::casts) != 0)
-		}
-		Skill::silence => !ctx.getSkill(t, Event::Cast).is_empty() && ctx.get(t, Stat::casts) != 0,
-		_ => true,
-	}
-}
-
 fn has_sopa(ctx: &Game, id: i32) -> bool {
 	ctx.get_kind(id) == etg::Permanent
 		&& ctx.hasskill(id, Event::Cast, Skill::die)
@@ -226,11 +212,18 @@ fn scantgt(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32, id: i
 
 fn scancore(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32, cmd: GameMove) {
 	let mut gclone = ctx.clone();
+	let mut is_pande3 = false;
 	if (if let GameMove::Cast(id, 0) = cmd {
 		if has_sopa(&gclone, id) {
 			let turn = gclone.turn;
 			proc_sopa(&mut gclone, turn);
 			false
+		} else if ctx.getSkill(id, Event::Cast) == &[Skill::pandemonium3] {
+			if depth > 0 {
+				return;
+			}
+			is_pande3 = true;
+			true
 		} else {
 			true
 		}
@@ -250,6 +243,9 @@ fn scancore(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32, cmd:
 	}
 	if *limit > 0 {
 		if depth == 0 {
+			if is_pande3 {
+				return;
+			}
 			let mut searchcan = *candy;
 			searchcan.cmd = cmd;
 			scan(&gclone, depth + 1, &mut searchcan, limit);

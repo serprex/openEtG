@@ -2296,9 +2296,7 @@ impl Game {
 					let uni12 = Uniform::from(0..12);
 					for _ in 0..amt {
 						let q = &mut quanta[uni12.sample(&mut self.rng)];
-						if (*q as i32) < cap {
-							*q += 1;
-						}
+						*q += ((*q as i32) < cap) as u8;
 					}
 				} else {
 					let amt = cmp::min(amt, 1188);

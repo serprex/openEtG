@@ -69,7 +69,7 @@ const data = {
 	beguile:
 		"Target creature's opponent gains control of target creature until next turn.",
 	beguilestop:
-		'Return this creature to its original owner at beginning of next turn.',
+		'Return this creature to its original owner at start of next turn.',
 	bellweb: 'Target creature becomes aquatic and loses airborne status.',
 	blackhole:
 		'Remove 3 quanta per element from target player. Heal 1 per quanta removed.',
@@ -510,7 +510,7 @@ const data = {
 		'Add 3 random non-pillar cards to your hand. At least one will be 1:1.',
 		'Add 3 random upgraded non-pillar cards to your hand. At least one will be 1:1.',
 	],
-	shtriga: 'Gain immaterial at the start of your next turn.',
+	shtriga: 'Gain immaterial when your next turn starts.',
 	shuffle3: 'Shuffle 3 copies of target creature into your deck.',
 	silence:
 		'Silence target player or creature. Silenced players cannot play cards until the end of their next turn, while silenced creatures cannot use active abilities until the end of their next turn.',
@@ -545,7 +545,7 @@ const data = {
 		'Gain maximum HP and heal an amount equal to the 1:4 in your quanta pool after casting this spell.',
 	stasis: "Creatures do not attack at the end of each player's turn.",
 	stasisdraw:
-		'Target player cannot draw cards until their end of turn. Their deck is protected until start of their next turn.',
+		'Target player cannot draw cards from their deck until their end of turn. Their deck is protected until their next turn starts.',
 	static: 'Deals 2 spell damage to opponent for each attacker.',
 	steal: 'You gain control of target permanent.',
 	steam:
@@ -737,7 +737,7 @@ const data = {
 	v_rewind:
 		"Remove target creature to top of owner's deck. If target is a Skeleton, transform it into a random creature. If target is a Mummy, transform it into a Pharaoh.",
 	v_salvage: 'Restore permanents destroyed by foe to hand once per turn',
-	v_salvageoff: 'Become ready to salvage again at start of next turn',
+	v_salvageoff: 'Become ready to salvage when your next turn starts',
 	v_scarab: 'Summon a Scarab',
 	v_scramble: "Randomly scramble foe's quanta on hit",
 	v_serendipity: c =>

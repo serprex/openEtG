@@ -1030,8 +1030,7 @@ impl Skill {
 				}
 			}
 			Self::antimatter | Self::v_antimatter => {
-				let delta = ctx.trueatk(t) * -2;
-				ctx.incrAtk(t, delta);
+				ctx.incrAtk(t, ctx.trueatk(t) * -2);
 			}
 			Self::appease => {
 				ctx.set(c, Flag::appeased, true);
@@ -1411,17 +1410,17 @@ impl Skill {
 			Self::cseed2 => {
 				let upped = ctx.rng_ratio(1, 2);
 				if let Some(card) = ctx.random_card(upped, |ctx, card| {
-					if card.kind == etg::Spell as i8 {
-						if let Some(&(k, skills)) = card.skill.first() {
-							debug_assert!(k == Event::Cast);
-							if let Some(tgt) = skills.first().and_then(|sk| sk.targetting()) {
-								if tgt.check(ctx, c, t) {
-									return true;
-								}
-							}
-						}
-					}
-					false
+					card.kind == etg::Spell as i8
+						&& card
+							.skill
+							.first()
+							.and_then(|&(k, skills)| {
+								debug_assert!(k == Event::Cast);
+								skills.first()
+							})
+							.and_then(|sk| sk.targetting())
+							.map(|tgt| tgt.check(ctx, c, t))
+							.unwrap_or_default()
 				}) {
 					ctx.fx(t, Fx::Card(card.code));
 					ctx.castSpell(
@@ -2933,10 +2932,12 @@ impl Skill {
 				}
 				ctx.shuffle(&mut ids[..]);
 				for &id in ids.iter() {
-					if ctx.get(id, Flag::cloak) {
-						ctx.die(id);
-					} else {
-						Skill::cseed2.proc(ctx, c, id, data);
+					if ctx.getIndex(id) != -1 {
+						if ctx.get(id, Flag::cloak) {
+							ctx.die(id);
+						} else {
+							Skill::cseed2.proc(ctx, c, id, data);
+						}
 					}
 				}
 			}
@@ -3467,9 +3468,7 @@ impl Skill {
 				if r == 0 {
 					let cap = if self == Self::singularity { 99 } else { 75 };
 					for q in ctx.get_player_mut(ctx.get_foe(owner)).quanta.iter_mut() {
-						if *q < cap {
-							*q += 1;
-						}
+						*q += (*q < cap) as u8;
 					}
 				} else if r < 5 {
 					if self == Self::v_singularity {
@@ -3485,7 +3484,10 @@ impl Skill {
 					ctx.buffhp(c, buff / 5 + 1);
 					ctx.incrAtk(c, -1 - buff % 5);
 				} else if r < 9 {
-					ctx.set(c, Stat::adrenaline, 1);
+					let a = ctx.get_mut(c, Stat::adrenaline);
+					if *a == 0 {
+						*a = 1;
+					}
 				} else if r < 11 {
 					Skill::parallel.proc(ctx, c, c, data);
 				}
