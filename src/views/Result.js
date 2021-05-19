@@ -148,14 +148,14 @@ const BonusList = [
 	},
 	{
 		name: 'Unupped',
-		desc: '0.5% per unupped card in deck',
+		desc: '4% per unupped card in deck',
 		func: (game, p1, p2, stats) => {
 			let unupnu = 0;
 			for (const [code, count] of etgutil.iterraw(p1.data.deck)) {
 				const card = game.Cards.Codes[code];
 				if (card && !card.upped) unupnu += count;
 			}
-			return unupnu / 200;
+			return unupnu / 25;
 		},
 	},
 	{
