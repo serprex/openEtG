@@ -3,7 +3,6 @@ import { PureComponent, Component, createRef } from 'react';
 
 import * as etgutil from '../etgutil.js';
 import Cards from '../Cards.js';
-import { Box } from '../Components/index.js';
 import * as Tutor from '../Components/Tutor.js';
 import * as sock from '../sock.js';
 import * as store from '../store.js';
@@ -106,8 +105,8 @@ function DeckName({ i, name, deck, onClick }) {
 		<div
 			style={{
 				position: 'absolute',
-				left: `${4 + Math.floor(i / 14) * 150}px`,
-				top: `${32 + (i % 14) * 21}px`,
+				left: `${4 + (i % 6) * 150}px`,
+				top: `${32 + Math.floor(i / 6) * 21}px`,
 				width: '142px',
 				height: '21px',
 				overflow: 'hidden',
@@ -129,8 +128,6 @@ function DeckName({ i, name, deck, onClick }) {
 const DeckNames = connect(({ user }) => ({ user }))(function DeckNames({
 	user,
 	name,
-	page,
-	setPage,
 	onClick,
 }) {
 	let names = Object.keys(user.decks);
@@ -142,70 +139,17 @@ const DeckNames = connect(({ user }) => ({ user }))(function DeckNames({
 	} catch (_e) {
 		names = names.filter(name => ~name.indexOf(name));
 	}
-	const pages = Math.ceil(names.length / 84);
-	if (page >= pages) page = pages - 1;
-	let pagebtns = null;
-	if (pages > 1) {
-		pagebtns = [];
-		const lo = Math.max(page - 8, 0),
-			hi = Math.min(lo + 15, pages);
-		for (let i = lo; i < hi; i++) {
-			pagebtns.push(
-				<input
-					key={i}
-					type="button"
-					className={`editbtn${i === page ? ' selectedbutton' : ''}`}
-					value={`${i + 1}`}
-					onClick={() => setPage(i)}
-				/>,
-			);
-		}
-	}
-	return (
-		<>
-			{pages > 1 && (
-				<div
-					style={{
-						position: 'absolute',
-						left: '238px',
-						top: '4px',
-						width: '552px',
-					}}>
-					<input
-						type="button"
-						className="editbtn"
-						value="<<"
-						onClick={() => setPage(page - 1)}
-						style={{
-							visibility: page > 0 ? 'visible' : 'hidden',
-						}}
-					/>
-					<input
-						type="button"
-						className="editbtn"
-						value=">>"
-						onClick={() => setPage(page + 1)}
-						style={{
-							visibility: page + 1 < pages ? 'visible' : 'hidden',
-						}}
-					/>
-					{pagebtns}
-				</div>
-			)}
-			{names
-				.sort()
-				.slice(page * 84, page * 84 + 84)
-				.map((name, i) => (
-					<DeckName
-						key={name}
-						deck={user.decks[name]}
-						name={name}
-						i={i}
-						onClick={onClick}
-					/>
-				))}
-		</>
-	);
+	return names
+		.sort()
+		.map((name, i) => (
+			<DeckName
+				key={name}
+				deck={user.decks[name]}
+				name={name}
+				i={i}
+				onClick={onClick}
+			/>
+		));
 });
 
 const DeckSelector = connect(({ user }) => ({ user }))(
@@ -222,7 +166,15 @@ const DeckSelector = connect(({ user }) => ({ user }))(
 
 		render() {
 			return (
-				<Box x={0} y={270} width={900} height={330}>
+				<div
+					className="bgbox"
+					style={{
+						position: 'absolute',
+						top: '270px',
+						width: '900px',
+						height: '330px',
+						overflowY: 'auto',
+					}}>
 					<input
 						autoFocus
 						placeholder="Name"
@@ -264,13 +216,8 @@ const DeckSelector = connect(({ user }) => ({ user }))(
 						}}
 						onClick={this.props.onClose}
 					/>
-					<DeckNames
-						name={this.state.name}
-						page={this.state.page}
-						setPage={this.setPage}
-						onClick={this.props.loadDeck}
-					/>
-				</Box>
+					<DeckNames name={this.state.name} onClick={this.props.loadDeck} />
+				</div>
 			);
 		}
 	},
@@ -310,7 +257,23 @@ export default connect(({ user }) => ({
 
 		componentDidMount() {
 			this.deckRef.current.setSelectionRange(0, 999);
+			document.addEventListener('keydown', this.onkeydown);
 		}
+
+		componentWillUnmount() {
+			document.removeEventListener('keydown', this.onkeydown);
+		}
+
+		onkeydown = e => {
+			if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT')
+				return;
+			const kc = e.which,
+				ch = e.key ?? String.fromCharCode(kc);
+			let chi = '1234567890'.indexOf(ch);
+			if (~chi) {
+				this.loadDeck(this.props.user.qecks[chi]);
+			}
+		};
 
 		currentDeckCode() {
 			return (
