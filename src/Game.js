@@ -154,9 +154,6 @@ export class Game {
 	get_foe(id) {
 		return this.game.get_foe(id);
 	}
-	is_flooding(id) {
-		return this.game.is_flooding(id);
-	}
 	aiSearch() {
 		const cmd = this.game.aisearch();
 		return {

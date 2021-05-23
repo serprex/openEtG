@@ -305,7 +305,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 					ctx.get_card(ctx.get(c, Stat::card)).attack as i32
 				} else {
 					ctx.trueatk(c)
-				} * -2) as f32
+				} * -32) as f32
 			}
 			Skill::holylight => 3.0,
 			Skill::hope => 2.0,
@@ -512,7 +512,7 @@ fn eval_skill(ctx: &Game, c: i32, skills: &[Skill], ttatk: f32, damage: &DamageM
 					ctx.get_card(ctx.get(c, Stat::card)).attack as f32
 				} else {
 					ttatk
-				}) * 0.7
+				}) * 0.1
 			}
 			Skill::virtue => {
 				if ctx.get_kind(c) == etg::Spell {
@@ -777,7 +777,7 @@ fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
 	let fsh = ctx.get_shield(foe);
 	let psionic = ctx.get(id, Flag::psionic);
 	if psionic && fsh != 0 && ctx.get(fsh, Flag::reflective) {
-		wall.dmg += once(tatk)
+		let reflect_dmg = once(tatk)
 			.chain(
 				(1..if ctx.get(id, Stat::adrenaline) == 0 {
 					1
@@ -787,6 +787,11 @@ fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
 					.map(|a| ctx.trueatk_adrenaline(id, a)),
 			)
 			.sum::<i32>() as i16;
+		if ctx.get(owner, Stat::sosa) == 0 {
+			wall.dmg += reflect_dmg
+		} else {
+			wall.dmg -= reflect_dmg
+		}
 		return 0.0;
 	}
 	let bypass = fsh == 0 || psionic || ctx.get(id, Flag::momentum);
@@ -836,6 +841,15 @@ fn estimate_damage(ctx: &Game, id: i32, freedom: f32, wall: &mut Wall) -> f32 {
 			} else {
 				momatk as f32
 			} * freedom;
+	}
+	for &skill in ctx.getSkill(id, Event::Hit) {
+		if skill == Skill::vampire {
+			if ctx.get(owner, Stat::sosa) == 0 {
+				wall.dmg -= atk as i16;
+			} else {
+				wall.dmg += atk as i16;
+			}
+		}
 	}
 	if ctx.get(foe, Stat::sosa) == 0 {
 		atk

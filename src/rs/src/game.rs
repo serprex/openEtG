@@ -928,8 +928,41 @@ impl Game {
 		self.trueatk_adrenaline(id, self.get(id, Stat::adrenaline))
 	}
 
-	pub fn is_flooding(&self, id: i32) -> bool {
-		self.hasskill(id, Event::Attack, Skill::flooddeath) || self.get(id, Stat::flooding) != 0
+	pub fn visible_instances(&self, id: i32, isp1: bool, cloaked: bool) -> Vec<i32> {
+		let pl = self.get_player(id);
+		let mut ids =
+			Vec::with_capacity(pl.hand.len() + pl.permanents.len() + pl.creatures.len() + 2);
+		if isp1 || !cloaked {
+			ids.extend(pl.hand.iter().cloned());
+			if pl.weapon != 0 {
+				ids.push(pl.weapon);
+			}
+			if pl.shield != 0 {
+				ids.push(pl.shield);
+			}
+			let creas = pl.creatures.iter().cloned().filter(|&cr| cr != 0);
+			if isp1 {
+				ids.extend(creas);
+			} else {
+				ids.extend(creas.rev());
+			}
+		}
+		ids.extend(
+			pl.permanents
+				.iter()
+				.cloned()
+				.filter(|&pr| pr != 0 && (isp1 || !cloaked || self.get(pr, Flag::cloak))),
+		);
+		ids
+	}
+
+	pub fn has_flooding(&self) -> bool {
+		self.players.iter().any(|&pl| {
+			self.get_player(pl)
+				.permanents
+				.iter()
+				.any(|&pr| self.is_flooding(pr))
+		})
 	}
 
 	pub fn has_protectonce(&self, id: i32) -> bool {
@@ -1220,6 +1253,10 @@ impl Game {
 			],
 			Skill::growth(1, 1),
 		)
+	}
+
+	pub fn is_flooding(&self, id: i32) -> bool {
+		self.hasskill(id, Event::Attack, Skill::flooddeath) || self.get(id, Stat::flooding) != 0
 	}
 
 	pub fn calcCore(&self, id: i32, filterstat: u64) -> i32 {

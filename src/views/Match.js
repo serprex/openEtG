@@ -539,8 +539,7 @@ class ThingInst extends Component {
 						? props.opacity
 						: (obj.isMaterial() ? 1 : 0.7) * props.opacity,
 					color: faceDown ? undefined : obj.card.upped ? '#000' : '#fff',
-					zIndex:
-						!faceDown && !isSpell && obj.getStatus('cloak') ? '2' : undefined,
+					zIndex: '2',
 					pointerEvents: ~obj.getIndex() ? undefined : 'none',
 				}}
 				onMouseMove={!faceDown && setInfo ? this.setInfo : undefined}
@@ -1437,7 +1436,6 @@ const MatchView = connect(({ user, opts, nav }) => ({
 				endText = 'Continue';
 				cancelText = '';
 			}
-			let floodvisible = false;
 			const things = [];
 			for (let j = 0; j < 2; j++) {
 				const pl = j ? player2 : player1,
@@ -1564,30 +1562,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						/>,
 					);
 				}
-				things.push(...pl.handIds);
-				for (let i = j ? 22 : 0; i >= 0 && i < 23; i += j ? -1 : 1) {
-					const cr = pl.creatureIds[i];
-					if (cr && !(j === 1 && cloaked)) {
-						things.push(cr);
-					}
-				}
-				for (let i = 0; i < 16; i++) {
-					const pr = pl.permanentIds[i];
-					if (pr) {
-						if (game.is_flooding(pr)) floodvisible = true;
-						if (j === 0 || !cloaked || game.get(pr, 'cloak')) {
-							things.push(pr);
-						}
-					}
-				}
-				const wp = pl.weaponId,
-					sh = pl.shieldId;
-				if (wp && !(j === 1 && cloaked)) {
-					things.push(wp);
-				}
-				if (sh && !(j === 1 && cloaked)) {
-					things.push(sh);
-				}
+				things.push(...game.game.visible_instances(pl.id, j === 0, cloaked));
 				const qx = 0,
 					qy = j ? 106 : 308,
 					plquanta = pl.quanta;
@@ -1833,7 +1808,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							</>
 						)}
 					</TransitionMotion>
-					{floodvisible && floodsvg}
+					{game.game.has_flooding() && floodsvg}
 					<div
 						style={{
 							whiteSpace: 'pre-wrap',

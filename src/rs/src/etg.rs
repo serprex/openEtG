@@ -81,14 +81,6 @@ pub fn getAdrenalRow(x: i32) -> Vec<i8> {
 	}
 }
 
-pub fn hash<T: Hash>(obj: &T) -> i32 {
-	let mut hasher: FxHasher = Default::default();
-	obj.hash(&mut hasher);
-	let h64 = hasher.finish();
-	let h32 = (h64 >> 32) as u32 ^ h64 as u32;
-	h32 as i32
-}
-
 pub const Weapon: i32 = 1;
 pub const Shield: i32 = 2;
 pub const Permanent: i32 = 3;
