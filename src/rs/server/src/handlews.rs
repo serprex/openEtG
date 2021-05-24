@@ -697,7 +697,7 @@ pub async fn handle_ws(
 											let age = get_day().saturating_sub(row.get::<usize, i32>(2) as u32) as f64;
 											let sweet16 = age.powf(1.6);
 											let newscore =
-												((wilson((awon + 1) as f64, (awon + aloss + 1) as f64) - sweet16 / (sweet16 + 864.0)) * 1000.0) as i32;
+												((wilson((awon + 1) as f64, (awon + aloss + 1) as f64) - sweet16 / (sweet16 + 420.0)) * 1000.0) as i32;
 											trx.execute(
 												if won {
 													"update arena set won = won+1, score = $3 where arena_id = $1 and user_id = $2"
@@ -724,7 +724,7 @@ pub async fn handle_ws(
 									let (seed, idx) = {
 										let mut rng = rand::thread_rng();
 										let mut r = rng.gen::<f64>();
-										let mut p = 0.07;
+										let mut p = 0.05;
 										let p0 = 1.0 - p;
 										let mut idx = 0;
 										while idx < len && r > p {
@@ -770,7 +770,7 @@ pub async fn handle_ws(
 							..
 						} => {
 							let userid = user.unwrap().lock().await.id;
-							client.execute("insert into stats (user_id, \"set\", stats, players) values ($1, $2, $3, $4)", &[&userid, &set, &Json(stats), &Json(players)]).await.ok();
+							client.execute("insert into stats (user_id, \"set\", stats, players) values ($1, $2, $3, $4)", &[&userid, &set, &Json(stats), &players]).await.ok();
 						}
 						UserMessage::setgold { t, g, .. } => {
 							let userid = user.unwrap().lock().await.id;
