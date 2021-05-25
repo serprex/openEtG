@@ -1680,7 +1680,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							pointerEvents: 'none',
 							fontSize: '18px',
 							textShadow: '2px 2px 1px #000,2px 2px 2px #000',
-							zIndex: '2',
+							zIndex: '3',
 						}}>
 						{pl.deck_length || '0!!'}
 					</div>,
