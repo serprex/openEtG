@@ -19,7 +19,6 @@ function Order({ order, onClick }) {
 const CardOrders = connect(({ user }) => ({ uname: user.name }))(
 	function CardOrders({ uname, bc, onClickBuy, onClickSell, onClickCancel }) {
 		if (!bc) return null;
-		bc = bc.slice().sort((x, y) => y.p - x.p);
 		const hasMine = bc.some(({ u }) => u === uname);
 		return (
 			<>
@@ -312,6 +311,14 @@ export default connect(({ user }) => ({ user }))(
 			this.props.dispatch(
 				store.setCmds({
 					bzread: data => {
+						const bz = data.bz;
+						for (const k in bz) {
+							bz[k].sort(
+								(x, y) =>
+									Math.sign(x.p) - Math.sign(y.p) ||
+									Math.abs(x.p) - Math.abs(y.p),
+							);
+						}
 						this.setState({ bz: data.bz });
 					},
 					bzbid: data => {

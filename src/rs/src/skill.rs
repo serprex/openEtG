@@ -701,19 +701,34 @@ pub enum Tgt<'a> {
 	Or(&'a [Tgt<'a>]),
 }
 
-fn quadpillarcore(ctx: &mut Game, ele: i32, c: i32, n: i32) {
+fn quadpillarcore(ctx: &mut Game, ele: [u8; 4], c: i32, n: i32) {
 	let owner = ctx.get_owner(c);
 	for _ in 0..n {
 		let r = ctx.rng_range(0..16);
-		ctx.spend(owner, (ele >> ((r & 3) << 2)) & 15, -1);
+		ctx.spend(owner, ele[r & 3] as i32, -1);
 		if ctx.rng_ratio(2, 3) {
-			ctx.spend(owner, (ele >> (r & 12)) & 15, -1);
+			ctx.spend(owner, ele[(r >> 2) & 3] as i32, -1);
 		}
 	}
 }
-const QUAD_PILLAR_MAT: i32 = etg::Earth | etg::Fire << 4 | etg::Water << 8 | etg::Air << 12;
-const QUAD_PILLAR_SPI: i32 = etg::Death | etg::Life << 4 | etg::Light << 8 | etg::Darkness << 12;
-const QUAD_PILLAR_CAR: i32 = etg::Entropy | etg::Gravity << 4 | etg::Time << 8 | etg::Aether << 12;
+const QUAD_PILLAR_MAT: [u8; 4] = [
+	etg::Earth as u8,
+	etg::Fire as u8,
+	etg::Water as u8,
+	etg::Air as u8,
+];
+const QUAD_PILLAR_SPI: [u8; 4] = [
+	etg::Death as u8,
+	etg::Life as u8,
+	etg::Light as u8,
+	etg::Darkness as u8,
+];
+const QUAD_PILLAR_CAR: [u8; 4] = [
+	etg::Entropy as u8,
+	etg::Gravity as u8,
+	etg::Time as u8,
+	etg::Aether as u8,
+];
 
 fn legacy_banned(code: i32) -> bool {
 	matches!(
