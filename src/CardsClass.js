@@ -43,6 +43,7 @@ export default class Cards {
 		return (
 			cx.upped - cy.upped ||
 			cx.element - cy.element ||
+			cy.getStatus('pillar') - cx.getStatus('pillar') ||
 			cx.cost - cy.cost ||
 			cx.type - cy.type ||
 			(cx.code > cy.code) - (cx.code < cy.code) ||
