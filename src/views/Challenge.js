@@ -21,6 +21,7 @@ class PremadePicker extends Component {
 	render() {
 		const { onClick, onClose } = this.props;
 		const { mage, demigod } = aiDecks;
+		const searchex = new RegExp(this.state.search, 'i');
 		return (
 			<div
 				className="bgbox"
@@ -52,7 +53,7 @@ class PremadePicker extends Component {
 						verticalAlign: 'top',
 					}}>
 					{mage
-						.filter(x => !this.state.search || ~x[0].indexOf(this.state.search))
+						.filter(x => searchex.test(x[0]))
 						.map(([name, deck]) => (
 							<div key={name} onClick={() => onClick(name, deck, false)}>
 								{name}
@@ -66,7 +67,7 @@ class PremadePicker extends Component {
 						verticalAlign: 'top',
 					}}>
 					{demigod
-						.filter(x => !this.state.search || ~x[0].indexOf(this.state.search))
+						.filter(x => searchex.test(x[0]))
 						.map(([name, deck]) => (
 							<div key={name} onClick={() => onClick(name, deck, true)}>
 								{name}

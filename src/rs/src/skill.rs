@@ -881,7 +881,7 @@ impl Skill {
 			Self::silence => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::sing => Tgt::sing,
 			Self::sinkhole => Tgt::crea,
-			Self::siphonactive => Tgt::And(&[Tgt::notself, Tgt::crea]),
+			Self::siphonactive => Tgt::And(&[Tgt::notself, Tgt::Or(&[Tgt::crea, Tgt::weap])]),
 			Self::siphonstrength => Tgt::And(&[Tgt::notself, Tgt::crea]),
 			Self::snipe => Tgt::crea,
 			Self::stasisdraw => Tgt::play,
@@ -3537,18 +3537,8 @@ impl Skill {
 			}
 			Self::siphonactive => {
 				ctx.fx(c, Fx::Siphon);
-				let mut cskill: Vec<(Event, Cow<'static, [Skill]>)> = Default::default();
-				for (&k, v) in ctx.get_thing(t).skill.iter() {
-					cskill.push((
-						k,
-						v.iter()
-							.cloned()
-							.filter(|&sk| !sk.passive())
-							.collect::<Vec<_>>()
-							.into(),
-					));
-				}
-				ctx.get_thing_mut(c).skill = Skills::from(cskill);
+				let cskill = ctx.get_thing(t).skill.clone();
+				ctx.get_thing_mut(c).skill = cskill;
 				ctx.set(c, Stat::cast, ctx.get(t, Stat::cast));
 				ctx.set(c, Stat::castele, ctx.get(t, Stat::castele));
 				ctx.set(c, Stat::casts, 1);

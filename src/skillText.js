@@ -523,7 +523,7 @@ const data = {
 	siphon:
 		"Remove 1:0 randomly from opponent's quanta pool when this creature attacks. Gain 1:11 for each quanta removed. Throttled (only triggers at most twice from Adrenaline.)",
 	siphonactive:
-		"Remove target creature's skills and gain a copy of those skills. Any active copied with this skill can be used the turn it is gained.",
+		"Copy target creature or weapon's skills. Remove skills from target. Caster can be reactivated.",
 	siphonstrength: 'Target creature loses 1|0. Gain 1|0.',
 	skeleton:
 		'If this creature is targeted by Rewind, it becomes a random creature.',
