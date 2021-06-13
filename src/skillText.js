@@ -209,9 +209,8 @@ const data = {
 	evade: x => `${x}% chance to evade attacks.`,
 	evade100: 'Completely block enemy attacks.',
 	evadecrea:
-		"Cannot be directly targeted by opponent's creature's abilities. Still affected by abilities that affect all creatures.",
-	evadespell:
-		"Cannot be directly targeted by opponent's spells. Still affected by spells that affect all creatures.",
+		"Cannot be directly targeted by opponent's creature's active skills.",
+	evadespell: "Cannot be directly targeted by opponent's spells.",
 	evolve: 'Transform this card into an unburrowed Shrieker.',
 	feed: 'Give target creature 1 poison counter, gain 3|3, and lose immaterial status until the beginning of your next turn.',
 	fickle:
@@ -235,15 +234,15 @@ const data = {
 	fractal:
 		'Fill your hand with copies of target creature. Remove all remaining 1:12.',
 	freeevade:
-		"If your opponent has a shield, your airborne creatures have a 30% chance to bypass the shield. Otherwise, your creatures have a 30% chance to deal 50% more damage. Your creatures have 20% chance to evade opponent's targeted spells and abilities.",
+		"If your opponent has a shield, your airborne creatures have a 30% chance to bypass the shield. Otherwise, your creatures have a 30% chance to deal 50% more damage. Your creatures have 20% chance to evade opponent's targeted spells and skills.",
 	freeze: c =>
 		`Freeze target creature or weapon for ${
 			c.upped ? 4 : 3
-		} turns. Frozen cards cannot attack or use abilities, and do not activate per-turn abilities.`,
+		} turns. Frozen cards cannot attack or use active skills, and do not activate per-turn skills.`,
 	freezeperm: c =>
 		`Freeze target non-stacking permanent for ${
 			c.upped ? 4 : 3
-		} turns. Frozen cards cannot attack or use abilities, and do not activate per-turn abilities.`,
+		} turns. Frozen cards cannot attack or use active skills, and do not activate per-turn skills.`,
 	fungusrebirth: c =>
 		`Transform this card into a ${c.upped ? 'Toxic Fungus' : 'Fungus'}.`,
 	gaincharge2: {
@@ -306,12 +305,12 @@ const data = {
 	improve:
 		'Transform a target creature into a random mutant creature. Mutant creatures gain a random ability, 1-5 strength, and 1-5 hp.',
 	inertia: 'When any card you own is targeted by either player, gain 2:3.',
-	inflation: 'Increase the cost of all active abilities by 1.',
+	inflation: 'Increase the cost of all active skills by 1.',
 	ink: 'Summon a Cloak that lasts 1 turn.',
 	innovation:
 		"Discard target card in either player's hand. The owner of target card draws three cards. Destroy top card of your deck.",
 	integrity:
-		'Destroy all shards in your hand to play a Shard Golem with stats and abilities based on the shards destroyed.',
+		'Destroy all shards in your hand to play a Shard Golem with stats and skills based on the shards destroyed.',
 	jelly:
 		"Target creature becomes a 7|4 Pink Jelly with an active ability that turns additional creatures into Pink Jellies. That ability costs 4 quanta matching target creature's element. 1:0 creatures have an ability cost of 12:0",
 	jetstream: 'Target airborne creature gains 3|-1.',
@@ -320,7 +319,7 @@ const data = {
 		'Give target creature 1 poison counter. Target creature\'s skills are replaced with "Heal yourself equal to the damage dealt by this card."',
 	livingweapon:
 		"Equip target creature as a weapon. If target creature's owner already had a weapon equipped, return it to their hand. Heal target creature's owner equal to target creature's HP.",
-	lobotomize: "Remove target creature's abilities.",
+	lobotomize: "Remove target creature's skills. Also remove psionism.",
 	locket:
 		"Gains quanta matching your mark each turn, until set to gain quanta of a specific element. Doesn't operate while frozen.",
 	locketshift:
@@ -366,7 +365,7 @@ const data = {
 			c.upped ? '2' : '1'
 		} damage per card added in this way. Heal yourself an equal amount.`,
 	nightshade:
-		'Target creature becomes nocturnal, gains 5|5, and loses abilities.',
+		'Target creature becomes nocturnal, gains 5|5, and loses active skills.',
 	nova: 'Gain 1 quanta of each element. If you play three or more of this card in one turn, summon a Singularity on your side.',
 	nova2:
 		'Gain 2 quanta of each element. If you play two or more of this card in one turn, summon a Singularity on your side.',
@@ -460,7 +459,7 @@ const data = {
 		}.`,
 	readiness:
 		"Target creature's active ability becomes free. If target creature's active ability has already been used this turn, it can be used again this turn.",
-	reap: "Target non-Skeleton creature dies and is replaced with a Skeleton with target creature's current strength and HP, but no other active abilities or statuses.",
+	reap: "Target non-Skeleton creature dies and is replaced with a Skeleton with target creature's current strength and HP, but no other active skills or statuses.",
 	rebirth: c =>
 		`Transform this card into a ${c.upped ? 'Minor Phoenix' : 'Phoenix'}.`,
 	reducemaxhp:
@@ -469,7 +468,7 @@ const data = {
 		"Give 1 purify counter to this card's owner on hit. Throttled (only triggers at most twice from Adrenaline.)",
 	regenerate: 'Heal yourself 5 every turn or when this card attacks.',
 	regeneratespell:
-		'Replace target creature or non-stacking permanent\'s abilities with "Heal this card\'s owner 5 every turn or when this card attacks."',
+		'Replace target creature or non-stacking permanent\'s skills with "Heal this card\'s owner 5 every turn or when this card attacks."',
 	regrade:
 		"If target card is upgraded, it becomes unupgraded. If target card is unupgraded, it becomes upgraded. Gain 1 quanta of target card's element. Cannot target stacks.",
 	reinforce:
@@ -513,12 +512,12 @@ const data = {
 	shtriga: 'Gain immaterial when your next turn starts.',
 	shuffle3: 'Shuffle 3 copies of target creature into your deck.',
 	silence:
-		'Silence target player or creature. Silenced players cannot play cards until the end of their next turn, while silenced creatures cannot use active abilities until the end of their next turn.',
+		'Silence target player or creature. Silenced players cannot play cards until the end of their next turn, while silenced creatures cannot use active skills until the end of their next turn.',
 	sing: 'Target creature without this ability attacks its owner.',
 	singularity: 'That was a bad idea.',
 	sinkhole: [
-		"Burrow target creature. Replace target creature's abilities with 1:4: unburrow.",
-		"Burrow target creature. Replace target creature's abilities with 2:4: unburrow",
+		"Burrow target creature. Replace target creature's skills with 1:4: unburrow.",
+		"Burrow target creature. Replace target creature's skills with 2:4: unburrow",
 	],
 	siphon:
 		"Remove 1:0 randomly from opponent's quanta pool when this creature attacks. Gain 1:11 for each quanta removed. Throttled (only triggers at most twice from Adrenaline.)",
@@ -531,7 +530,7 @@ const data = {
 		'Attacking creatures may randomly die and are replaced by Skeletons. Creatures with lower HP are more likely to die.',
 	skyblitz:
 		'Your airborne creatures all dive (double their strength until end of turn.) Consumes all remaining 1:9.',
-	slow: 'Non-ranged attackers are delayed for one turn after their attack. Delayed creatures may not attack or use abilities.',
+	slow: 'Non-ranged attackers are delayed for one turn after their attack. Delayed creatures may not attack or use active skills.',
 	snipe: 'Deal 3 damage to target creature.',
 	solar: 'Gain 1:8 for each attacker.',
 	sosa: c =>
@@ -816,7 +815,7 @@ const statusText = {
 	mode: '',
 	nightfall: auraText('Nocturnal creatures', '1|1', '2|1'),
 	nothrottle:
-		'While this is equipped, any of your creatures whose abilities have Throttled lose Throttled.',
+		'While this is equipped, any of your creatures whose active skills have Throttled lose Throttled.',
 	poison: (c, inst) =>
 		c === inst
 			? `Enters play with ${c.getStatus('poison')} poison counters.`

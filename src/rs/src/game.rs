@@ -1173,11 +1173,11 @@ impl Game {
 		card
 	}
 
-	fn mutantactive(&mut self, id: i32, actives: &'static [Skill], ondeath: Skill) -> bool {
+	fn mutantactive(&mut self, id: i32, actives: &'static [Skill]) -> bool {
 		self.lobo(id);
 		let idx = self.rng.gen_range(-3..actives.len() as isize);
 		if idx == -3 {
-			self.addskill(id, Event::Death, ondeath);
+			self.addskills(id, Event::Death, &[Skill::growth(1, 1)]);
 			false
 		} else if idx < 0 {
 			let flag = if idx == -1 {
@@ -1222,7 +1222,6 @@ impl Game {
 				Skill::guard,
 				Skill::mitosis,
 			],
-			Skill::growth(1, 1),
 		)
 	}
 
@@ -1251,7 +1250,6 @@ impl Game {
 				Skill::v_guard,
 				Skill::v_mitosis,
 			],
-			Skill::growth(1, 1),
 		)
 	}
 
@@ -1658,6 +1656,15 @@ impl Game {
 			smap.to_mut().push(skill);
 		} else {
 			thing.skill.insert(k, Cow::from(vec![skill]));
+		}
+	}
+
+	pub fn addskills(&mut self, id: i32, k: Event, skills: &'static [Skill]) {
+		let thing = self.get_thing_mut(id);
+		if let Some(smap) = thing.skill.get_mut(k) {
+			smap.to_mut().extend(skills);
+		} else {
+			thing.skill.insert(k, Cow::from(skills));
 		}
 	}
 

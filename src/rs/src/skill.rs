@@ -1063,7 +1063,7 @@ impl Skill {
 				}
 			}
 			Self::autoburrow => {
-				ctx.addskill(c, Event::Play, Self::autoburrowproc);
+				ctx.addskills(c, Event::Play, &[Self::autoburrowproc]);
 			}
 			Self::autoburrowoff => {
 				ctx.rmskill(c, Event::Play, Self::autoburrowproc);
@@ -1090,7 +1090,7 @@ impl Skill {
 				ctx.remove(t);
 				ctx.addCrea(foe, t);
 				if c != t {
-					ctx.addskill(t, Event::Turnstart, Skill::beguilestop);
+					ctx.addskills(t, Event::Turnstart, &[Skill::beguilestop]);
 				}
 			}
 			Self::beguilestop => {
@@ -1142,17 +1142,17 @@ impl Skill {
 						if ctx.get(cr, Flag::nocturnal)
 							&& !ctx.hasskill(cr, Event::Hit, Skill::vampire)
 						{
-							ctx.addskill(cr, Event::Hit, Skill::vampire);
+							ctx.addskills(cr, Event::Hit, &[Skill::vampire]);
 						}
 						if ctx.get(cr, Flag::aquatic)
 							&& !ctx.hasskill(cr, Event::OwnAttack, Skill::quanta(etg::Light as i8))
 						{
-							ctx.addskill(cr, Event::OwnAttack, Skill::quanta(etg::Light as i8));
+							ctx.addskills(cr, Event::OwnAttack, &[Skill::quanta(etg::Light as i8)]);
 						}
 						if ctx.get(cr, Flag::golem)
 							&& !ctx.hasskill(cr, Event::Hit, Skill::reducemaxhp)
 						{
-							ctx.addskill(cr, Event::Hit, Skill::reducemaxhp);
+							ctx.addskills(cr, Event::Hit, &[Skill::reducemaxhp]);
 						}
 					}
 				}
@@ -1233,8 +1233,8 @@ impl Skill {
 			}
 			Self::bubbleclear => {
 				Skill::clear.proc(ctx, c, t, data);
-				ctx.addskill(t, Event::Prespell, Skill::protectonce);
-				ctx.addskill(t, Event::Spelldmg, Skill::protectoncedmg);
+				ctx.addskills(t, Event::Prespell, &[Skill::protectonce]);
+				ctx.addskills(t, Event::Spelldmg, &[Skill::protectoncedmg]);
 			}
 			Self::burrow => {
 				if ctx.get(c, Flag::burrowed) {
@@ -1505,12 +1505,12 @@ impl Skill {
 				ctx.set(c, Stat::castele, etg::Gravity);
 				ctx.set(c, Flag::airborne, false);
 				ctx.set(c, Flag::burrowed, true);
-				ctx.addskill(c, Event::Turnstart, Skill::deepdiveproc);
+				ctx.addskills(c, Event::Turnstart, &[Skill::deepdiveproc]);
 			}
 			Self::deepdiveproc => {
 				if t == ctx.get_owner(c) {
 					ctx.rmskill(c, Event::Turnstart, Skill::deepdiveproc);
-					ctx.addskill(c, Event::Turnstart, Skill::deepdiveproc2);
+					ctx.addskills(c, Event::Turnstart, &[Skill::deepdiveproc2]);
 					ctx.set(c, Flag::airborne, true);
 					ctx.set(c, Flag::burrowed, false);
 					ctx.set(c, Stat::dive, ctx.trueatk(c) * 2);
@@ -1688,7 +1688,7 @@ impl Skill {
 			}
 			Self::dshield => {
 				ctx.set(t, Flag::immaterial, true);
-				ctx.addskill(t, Event::Turnstart, Skill::dshieldoff);
+				ctx.addskills(t, Event::Turnstart, &[Skill::dshieldoff]);
 			}
 			Self::dshieldoff => {
 				let owner = ctx.get_owner(c);
@@ -1736,8 +1736,8 @@ impl Skill {
 			Self::embezzle => {
 				ctx.fx(t, Fx::Embezzle);
 				ctx.lobo(t);
-				ctx.addskill(t, Event::Hit, Skill::forcedraw);
-				ctx.addskill(t, Event::OwnDeath, Skill::embezzledeath);
+				ctx.addskills(t, Event::Hit, &[Skill::forcedraw]);
+				ctx.addskills(t, Event::OwnDeath, &[Skill::embezzledeath]);
 			}
 			Self::embezzledeath => {
 				ctx.mill(ctx.get_foe(ctx.get_owner(c)), 2);
@@ -1782,7 +1782,7 @@ impl Skill {
 				}
 			}
 			Self::envenom => {
-				ctx.addskill(t, Event::Shield, Skill::thorn(25));
+				ctx.addskills(t, Event::Shield, &[Skill::thorn(25)]);
 				let thing = ctx.get_thing_mut(t);
 				if let Some(hit) = thing.skill.get_mut(Event::Hit) {
 					let hit = hit.to_mut();
@@ -2145,7 +2145,7 @@ impl Skill {
 			}
 			Self::hitownertwice => {
 				if !ctx.hasskill(c, Event::Turnstart, Skill::predatoroff) {
-					ctx.addskill(c, Event::Turnstart, Skill::predatoroff);
+					ctx.addskills(c, Event::Turnstart, &[Skill::predatoroff]);
 					let owner = ctx.get_owner(c);
 					ctx.queue_attack(c, owner);
 					ctx.queue_attack(c, owner);
@@ -2628,7 +2628,7 @@ impl Skill {
 					if let Some(&pr) = ctx.choose(&candidates) {
 						ctx.fx(c, Fx::Looted);
 						Skill::steal.proc(ctx, c, pr, data);
-						ctx.addskill(c, Event::Turnstart, Skill::salvageoff);
+						ctx.addskills(c, Event::Turnstart, &[Skill::salvageoff]);
 					}
 				}
 			}
@@ -2651,7 +2651,7 @@ impl Skill {
 							k == Event::OwnPlay
 								|| k == Event::OwnDiscard || v.iter().all(|&sk| sk.passive())
 						}) {
-							ctx.addskill(cr, Event::OwnAttack, Skill::quanta(etg::Light as i8));
+							ctx.addskills(cr, Event::OwnAttack, &[Skill::quanta(etg::Light as i8)]);
 						}
 					}
 				}
@@ -2659,7 +2659,7 @@ impl Skill {
 			Self::lycanthropy => {
 				ctx.buffhp(c, 5);
 				ctx.incrAtk(c, 5);
-				ctx.rmskill(c, Event::Cast, Self::lycanthropy);
+				ctx.get_thing_mut(c).skill.remove(Event::Cast);
 				ctx.set(c, Flag::nocturnal, true);
 			}
 			Self::martyr => {
@@ -2711,7 +2711,7 @@ impl Skill {
 			Self::mimic => {
 				if c != t && ctx.get_kind(t) == etg::Creature {
 					ctx.transform(c, ctx.get(t, Stat::card));
-					ctx.addskill(c, Event::Play, Skill::mimic);
+					ctx.addskills(c, Event::Play, &[Skill::mimic]);
 				}
 			}
 			Self::miracle => {
@@ -2809,7 +2809,6 @@ impl Skill {
 				}
 			}
 			Self::nightshade => {
-				ctx.lobo(t);
 				Skill::lycanthropy.proc(ctx, t, 0, data);
 			}
 			Self::noeatspell => {
@@ -2847,8 +2846,8 @@ impl Skill {
 			Self::nullspell => {
 				if !ctx.hasskill(c, Event::Prespell, Skill::eatspell) {
 					ctx.fx(c, Fx::Nullspell);
-					ctx.addskill(c, Event::Prespell, Skill::eatspell);
-					ctx.addskill(c, Event::Turnstart, Skill::noeatspell);
+					ctx.addskills(c, Event::Prespell, &[Skill::eatspell]);
+					ctx.addskills(c, Event::Turnstart, &[Skill::noeatspell]);
 				}
 			}
 			Self::nymph => {
@@ -3118,7 +3117,7 @@ impl Skill {
 				if ctx.get_player(foe).hand.len() > 4
 					&& !ctx.hasskill(c, Event::Turnstart, Skill::predatoroff)
 				{
-					ctx.addskill(c, Event::Turnstart, Skill::predatoroff);
+					ctx.addskills(c, Event::Turnstart, &[Skill::predatoroff]);
 					ctx.queue_attack(c, 0);
 					if !ctx.sanctified(foe) {
 						if let Some(card) = ctx.get_player(foe).hand.last().cloned() {
@@ -3138,8 +3137,8 @@ impl Skill {
 					.chain(pl.permanents.clone().iter().cloned())
 				{
 					if pr != 0 {
-						ctx.addskill(pr, Event::Prespell, Skill::protectonce);
-						ctx.addskill(pr, Event::Spelldmg, Skill::protectoncedmg);
+						ctx.addskills(pr, Event::Prespell, &[Skill::protectonce]);
+						ctx.addskills(pr, Event::Spelldmg, &[Skill::protectoncedmg]);
 					}
 				}
 			}
@@ -3269,7 +3268,7 @@ impl Skill {
 			}
 			Self::regeneratespell => {
 				ctx.lobo(t);
-				ctx.addskill(t, Event::OwnAttack, Skill::regenerate);
+				ctx.addskills(t, Event::OwnAttack, &[Skill::regenerate]);
 				if ctx.get_kind(t) <= etg::Permanent {
 					ctx.clearStatus(t);
 				}
@@ -3291,7 +3290,7 @@ impl Skill {
 			Self::ren => {
 				if !ctx.hasskill(t, Event::Predeath, Skill::bounce) {
 					ctx.fx(t, Fx::Ren);
-					ctx.addskill(t, Event::Predeath, Skill::bounce);
+					ctx.addskills(t, Event::Predeath, &[Skill::bounce]);
 				}
 			}
 			Self::reveal => {
@@ -3365,7 +3364,7 @@ impl Skill {
 					let inst = ctx.new_thing(ctx.get(t, Stat::card), owner);
 					ctx.addCard(owner, inst);
 					ctx.fx(inst, Fx::StartPos(t));
-					ctx.addskill(c, Event::Turnstart, Skill::salvageoff);
+					ctx.addskills(c, Event::Turnstart, &[Skill::salvageoff]);
 				}
 			}
 			Self::salvageoff => {
@@ -3677,7 +3676,7 @@ impl Skill {
 				ctx.incrStatus(c, Stat::steam, 5);
 				ctx.incrAtk(c, 5);
 				if !ctx.hasskill(c, Event::Postauto, Skill::decrsteam) {
-					ctx.addskill(c, Event::Postauto, Skill::decrsteam);
+					ctx.addskills(c, Event::Postauto, &[Skill::decrsteam]);
 				}
 			}
 			Self::stoneform | Self::v_stoneform => {
@@ -3790,7 +3789,7 @@ impl Skill {
 						ctx.set(cr, Stat::frozen, 0);
 						if ctx.get(cr, Flag::aquatic) && !ctx.hasskill(cr, Event::Hit, Skill::regen)
 						{
-							ctx.addskill(cr, Event::Hit, Skill::regen);
+							ctx.addskills(cr, Event::Hit, &[Skill::regen]);
 						}
 					}
 				}
@@ -4159,7 +4158,7 @@ impl Skill {
 			}
 			Self::v_dshield => {
 				ctx.set(c, Flag::immaterial, true);
-				ctx.addskill(t, Event::Turnstart, Skill::dshieldoff);
+				ctx.addskills(t, Event::Turnstart, &[Skill::dshieldoff]);
 			}
 			Self::v_dshieldoff => {
 				let owner = ctx.get_owner(c);
@@ -4582,7 +4581,7 @@ impl Skill {
 			Self::v_lycanthropy => {
 				ctx.buffhp(c, 5);
 				ctx.incrAtk(c, 5);
-				ctx.rmskill(c, Event::Cast, Self::v_lycanthropy);
+				ctx.get_thing_mut(c).skill.remove(Event::Cast);
 			}
 			Self::v_mend => {
 				ctx.dmg(t, -5);
