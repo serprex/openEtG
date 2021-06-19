@@ -1438,7 +1438,7 @@ impl Skill {
 							.unwrap_or_default()
 				}) {
 					ctx.fx(t, Fx::Card(card.code));
-					ctx.castSpell(
+					ctx.castSpellNoSpell(
 						c,
 						t,
 						card.skill

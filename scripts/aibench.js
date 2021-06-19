@@ -8,7 +8,7 @@ import replays from './replays.json';
 
 async function bench(name) {
 	const replay = replays[name];
-	if (!replay) return;
+	if (!replay) return console.error(name);
 	const game = await CreateGame(replay);
 	const { moves } = replay;
 	const timing = [];
