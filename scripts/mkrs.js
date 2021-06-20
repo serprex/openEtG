@@ -16,8 +16,15 @@ const json = {
 };
 const source = [
 	'#![allow(non_upper_case_globals)]',
-	'use crate::card::{Card,CardSet,Cards};use crate::game::{Flag,Fx,Stat};use crate::skill::{Event,Skill};',
+	'use crate::card::{Card,CardSet,Cards};use crate::game::{Flag,Fx,Kind,Stat};use crate::skill::{Event,Skill};',
 ];
+function kindSlice(card) {
+	return `Kind::${
+		['Weapon', 'Shield', 'Permanent', 'Spell', 'Creature', 'Player'][
+			card.type - 1
+		]
+	}`;
+}
 function flagSlice(card) {
 	const s = [];
 	for (const [k, v] of card.status) {
@@ -162,7 +169,7 @@ for (const Cards of [OpenCards, OrigCards]) {
 		codeidx.set(card.code, codeidx.size);
 		json.Card[card.code] = card.name;
 		source.push(
-			`Card{code:${card.code},kind:${card.type},element:${
+			`Card{code:${card.code},kind:${kindSlice(card)},element:${
 				card.element
 			},rarity:${card.rarity},attack:${card.attack},health:${
 				card.health

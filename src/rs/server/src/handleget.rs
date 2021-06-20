@@ -514,7 +514,7 @@ async fn handle_get_core(
 							row[7],
 							card.element,
 							card.rarity,
-							card.kind
+							card.kind as i32
 						)
 						.ok();
 					}

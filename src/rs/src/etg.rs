@@ -3,7 +3,6 @@
 use std::default::Default;
 use std::hash::{Hash, Hasher};
 
-use fxhash::FxHasher;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
@@ -81,13 +80,6 @@ pub fn getAdrenalRow(x: i32) -> Vec<i8> {
 	}
 }
 
-pub const Weapon: i32 = 1;
-pub const Shield: i32 = 2;
-pub const Permanent: i32 = 3;
-pub const Spell: i32 = 4;
-pub const Creature: i32 = 5;
-pub const Player: i32 = 6;
-
 pub const Chroma: i32 = 0;
 pub const Entropy: i32 = 1;
 pub const Death: i32 = 2;
@@ -102,15 +94,15 @@ pub const Time: i32 = 10;
 pub const Darkness: i32 = 11;
 pub const Aether: i32 = 12;
 
-pub const PillarList: &[i32] = &[
+pub const PillarList: &[u16] = &[
 	5002, 5100, 5200, 5300, 5400, 5500, 5600, 5700, 5800, 5900, 6000, 6100, 6200,
 ];
-pub const NymphList: &[i32] = &[
+pub const NymphList: &[u16] = &[
 	0, 5120, 5220, 5320, 5420, 5520, 5620, 5720, 5820, 5920, 6020, 6120, 6220,
 ];
-pub const AlchemyList: &[i32] = &[
+pub const AlchemyList: &[u16] = &[
 	0, 5111, 5212, 5311, 5413, 5511, 5611, 5712, 5811, 5910, 6011, 6110, 6209,
 ];
-pub const ShardList: &[i32] = &[
+pub const ShardList: &[u16] = &[
 	0, 5130, 5230, 5330, 5430, 5530, 5630, 5730, 5830, 5930, 6030, 6130, 6230,
 ];

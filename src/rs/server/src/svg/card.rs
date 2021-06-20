@@ -91,7 +91,7 @@ pub fn card(code: i32) -> Option<String> {
 		}
 	}
 	result.push_str("<span class='ico t");
-	write!(result, "{}", card.kind).ok();
+	write!(result, "{}", card.kind as i32).ok();
 	result.push_str(
 		"' style='position:absolute;right:2px;bottom:2px'></span></p></foreignObject></svg>",
 	);

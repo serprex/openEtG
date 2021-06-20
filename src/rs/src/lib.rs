@@ -3,6 +3,7 @@
 pub mod aieval;
 pub mod aisearch;
 pub mod card;
+pub mod deckgen;
 pub mod etg;
 pub mod game;
 #[rustfmt::skip]
@@ -42,7 +43,7 @@ pub fn set_panic_hook() {
 mod test {
 	use crate::card::{self, CardSet};
 	use crate::etg;
-	use crate::game::{Flag, Game, GameMove, Stat};
+	use crate::game::{Flag, Game, GameMove, Kind, Stat};
 	use crate::skill::{Event, ProcData, Skill};
 
 	#[test]
@@ -51,7 +52,7 @@ mod test {
 			for card in set.data.iter() {
 				let un = set.get(card::AsUpped(card.code as i32, false));
 				let up = set.get(card::AsUpped(card.code as i32, true));
-				if card.kind == etg::Spell as i8 {
+				if card.kind == Kind::Spell {
 					assert_eq!(card.skill.len(), 1);
 					assert!(card.skill[0].0 == Event::Cast);
 					assert_eq!(card.skill[0].1.len(), 1);

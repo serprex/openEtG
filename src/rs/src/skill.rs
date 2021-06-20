@@ -10,7 +10,7 @@ use std::rc::Rc;
 
 use crate::card;
 use crate::etg;
-use crate::game::{Entity, Flag, Fx, Game, Sfx, Stat, ThingData};
+use crate::game::{Entity, Flag, Fx, Game, Kind, Sfx, Stat, ThingData};
 
 #[derive(Clone, Copy, Hash, Eq, PartialEq)]
 pub struct Event(NonZeroU8);
@@ -122,7 +122,7 @@ impl From<Skill> for ProcData {
 
 fn throttle(ctx: &Game, c: i32) -> bool {
 	ctx.get(c, Stat::adrenaline) < 3
-		|| (ctx.get_kind(c) == etg::Creature && {
+		|| (ctx.get_kind(c) == Kind::Creature && {
 			let weapon = ctx.get_weapon(ctx.get_owner(c));
 			weapon != 0 && ctx.get(weapon, Flag::nothrottle)
 		})
@@ -1053,7 +1053,7 @@ impl Skill {
 				Skill::devour.proc(ctx, c, t, data);
 			}
 			Self::equalize => {
-				if ctx.get_kind(t) == etg::Creature {
+				if ctx.get_kind(t) == Kind::Creature {
 					let ttrueatk = ctx.trueatk(t);
 					let hp = ctx.get(t, Stat::hp);
 					ctx.set(t, Stat::maxhp, ttrueatk);
@@ -1217,14 +1217,14 @@ impl Skill {
 			}
 			Self::brew => {
 				let owner = ctx.get_owner(c);
-				let alchcard = etg::AlchemyList[ctx.rng_range(1..=12)];
+				let alchcard = etg::AlchemyList[ctx.rng_range(1..=12)] as i32;
 				let inst = ctx.new_thing(card::As(ctx.get(c, Stat::card), alchcard), owner);
 				ctx.fx(inst, Fx::StartPos(c));
 				ctx.addCard(owner, inst);
 			}
 			Self::brokenmirror => {
 				let owner = ctx.get_owner(c);
-				if data.fromhand && ctx.get_kind(t) == etg::Creature && owner != ctx.get_owner(t) {
+				if data.fromhand && ctx.get_kind(t) == Kind::Creature && owner != ctx.get_owner(t) {
 					let phantom =
 						ctx.new_thing(card::As(ctx.get(c, Stat::card), card::Phantom), owner);
 					ctx.fx(phantom, Fx::StartPos(c));
@@ -1295,7 +1295,7 @@ impl Skill {
 				let rng = ctx.rng();
 				if rng < 0.5 {
 					if rng < 0.3 {
-						if ctx.get_kind(t) == etg::Creature && !ctx.get(t, Flag::ranged) {
+						if ctx.get_kind(t) == Kind::Creature && !ctx.get(t, Flag::ranged) {
 							Skill::cseed.proc(ctx, c, t, data);
 						}
 					} else if card::Upped(ctx.get(c, Stat::card)) {
@@ -1331,7 +1331,7 @@ impl Skill {
 				if self == Self::chimera {
 					ctx.set(chim, Flag::airborne, true);
 				}
-				ctx.set_kind(chim, etg::Creature);
+				ctx.set_kind(chim, Kind::Creature);
 				let crs = Rc::make_mut(&mut ctx.get_player_mut(owner).creatures);
 				crs[0] = chim;
 				for cr in crs[1..].iter_mut() {
@@ -1353,7 +1353,7 @@ impl Skill {
 						*val = 0;
 					}
 				}
-				if thing.kind == etg::Creature {
+				if thing.kind == Kind::Creature {
 					ctx.dmg(t, -1);
 					if ctx.hasskill(t, Event::Turnstart, Skill::beguilestop) {
 						Skill::beguilestop.proc(ctx, t, ctx.get_owner(t), data);
@@ -1400,7 +1400,7 @@ impl Skill {
 				ctx.incrAtk(t, buff % 5 + 1);
 			}
 			Self::creatureupkeep => {
-				if ctx.get_kind(t) == etg::Creature {
+				if ctx.get_kind(t) == Kind::Creature {
 					Skill::upkeep.proc(ctx, t, 0, data);
 				}
 			}
@@ -1425,7 +1425,7 @@ impl Skill {
 			Self::cseed2 => {
 				let upped = ctx.rng_ratio(1, 2);
 				if let Some(card) = ctx.random_card(upped, |ctx, card| {
-					card.kind == etg::Spell as i8
+					card.kind == Kind::Spell
 						&& card
 							.skill
 							.first()
@@ -1559,7 +1559,7 @@ impl Skill {
 			}
 			Self::destroycard => {
 				let kind = ctx.get_kind(t);
-				if kind == etg::Player {
+				if kind == Kind::Player {
 					ctx.mill(t, 1);
 				} else if !ctx.sanctified(ctx.get_owner(t)) {
 					ctx.die(t);
@@ -1584,7 +1584,7 @@ impl Skill {
 			}
 			Self::die => ctx.die(c),
 			Self::disarm => {
-				if ctx.get_kind(t) == etg::Player {
+				if ctx.get_kind(t) == Kind::Player {
 					let weapon = ctx.get_weapon(t);
 					if weapon != 0 {
 						ctx.unsummon(weapon);
@@ -1659,8 +1659,8 @@ impl Skill {
 				for p in 0..2 {
 					let pl = if p == 0 { owner } else { ctx.get_foe(owner) };
 					for (idx, &card) in ctx.get_player(pl).deck.iter().enumerate().rev() {
-						let kind = ctx.get_card(ctx.get(card, Stat::card)).kind as i32;
-						if kind == etg::Weapon || kind == etg::Shield {
+						let kind = ctx.get_card(ctx.get(card, Stat::card)).kind;
+						if kind == Kind::Weapon || kind == Kind::Shield {
 							if ctx.addCard(pl, card) != -1 {
 								ctx.fx(card, Fx::StartPos(-pl));
 								ctx.get_player_mut(pl).deck_mut().remove(idx);
@@ -1719,8 +1719,8 @@ impl Skill {
 				ctx.proc_data(Event::Destroy, t, data);
 			}
 			Self::eatspell => {
-				if ctx.get_kind(t) == etg::Spell
-					&& ctx.get_card(ctx.get(t, Stat::card)).kind as i32 == etg::Spell
+				if ctx.get_kind(t) == Kind::Spell
+					&& ctx.get_card(ctx.get(t, Stat::card)).kind == Kind::Spell
 				{
 					Skill::growth(1, 1).proc(ctx, c, 0, data);
 					ctx.rmskill(c, Event::Prespell, Skill::eatspell);
@@ -1826,7 +1826,7 @@ impl Skill {
 			Self::evadecrea => {
 				if data.tgt == c
 					&& ctx.get_owner(c) != ctx.get_owner(t)
-					&& ctx.get_kind(t) == etg::Creature
+					&& ctx.get_kind(t) == Kind::Creature
 				{
 					data.evade = true;
 				}
@@ -1834,8 +1834,8 @@ impl Skill {
 			Self::evadespell => {
 				if data.tgt == c
 					&& ctx.get_owner(c) != ctx.get_owner(t)
-					&& ctx.get_kind(t) == etg::Spell
-					&& ctx.get_card(ctx.get(t, Stat::card)).kind as i32 == etg::Spell
+					&& ctx.get_kind(t) == Kind::Spell
+					&& ctx.get_card(ctx.get(t, Stat::card)).kind == Kind::Spell
 				{
 					data.evade = true;
 				}
@@ -1864,7 +1864,7 @@ impl Skill {
 						let deckid = pl.deck[pick];
 						pl.hand[handidx] = deckid;
 						pl.deck_mut()[pick] = t;
-						ctx.set_kind(deckid, etg::Spell);
+						ctx.set_kind(deckid, Kind::Spell);
 						ctx.set_owner(deckid, town);
 					}
 				}
@@ -1891,9 +1891,9 @@ impl Skill {
 				}
 			}
 			Self::flooddeath => {
-				if ctx.get_kind(t) == etg::Creature
+				if ctx.get_kind(t) == Kind::Creature
 					&& !ctx.get(t, Flag::aquatic)
-					&& ctx.material(t, 0)
+					&& ctx.material(t, None)
 					&& ctx.getIndex(t) > 4
 				{
 					ctx.die(t);
@@ -1915,7 +1915,7 @@ impl Skill {
 				ctx.addCrea(ctx.get_owner(t), t);
 			}
 			Self::flyself => {
-				if ctx.get_kind(c) == etg::Weapon {
+				if ctx.get_kind(c) == Kind::Weapon {
 					Skill::flyingweapon
 				} else {
 					Skill::livingweapon
@@ -1943,12 +1943,12 @@ impl Skill {
 			}
 			Self::forceplay => {
 				let town = ctx.get_owner(t);
-				let tgting = if ctx.get_kind(t) == etg::Spell {
+				let tgting = if ctx.get_kind(t) == Kind::Spell {
 					if ctx.sanctified(town) {
 						return;
 					}
 					let card = ctx.get_card(ctx.get(t, Stat::card));
-					if card.kind as i32 == etg::Spell {
+					if card.kind == Kind::Spell {
 						card.skill[0].1[0].targetting()
 					} else {
 						None
@@ -2002,7 +2002,7 @@ impl Skill {
 			}
 			Self::freedom => {
 				if ctx.get_owner(c) == ctx.get_owner(t)
-					&& ctx.get_kind(t) == etg::Creature
+					&& ctx.get_kind(t) == Kind::Creature
 					&& ctx.get(t, Flag::airborne)
 					&& !data.freedom && ctx.rng_ratio(3, 10)
 				{
@@ -2017,7 +2017,7 @@ impl Skill {
 					if tgt != 0
 						&& tgtowner == ctx.get_owner(c)
 						&& tgtowner != ctx.get_owner(t)
-						&& ctx.get_kind(tgt) == etg::Creature
+						&& ctx.get_kind(tgt) == Kind::Creature
 						&& ctx.get(tgt, Flag::airborne)
 						&& ctx.get(tgt, Stat::frozen) == 0
 						&& ctx.rng_ratio(1, 5)
@@ -2066,18 +2066,18 @@ impl Skill {
 					},
 				);
 				let kind = ctx.get_kind(t);
-				if kind != etg::Spell && ctx.hasskill(t, Event::OwnAttack, Skill::singularity) {
+				if kind != Kind::Spell && ctx.hasskill(t, Event::OwnAttack, Skill::singularity) {
 					ctx.die(t);
 				} else {
 					ctx.remove(t);
 					let foe = ctx.get_foe(owner);
-					if kind == etg::Permanent {
+					if kind == Kind::Permanent {
 						ctx.addPerm(foe, t);
-					} else if kind == etg::Creature {
+					} else if kind == Kind::Creature {
 						ctx.addCrea(foe, t);
-					} else if kind == etg::Shield {
+					} else if kind == Kind::Shield {
 						ctx.setShield(foe, t);
-					} else if kind == etg::Weapon {
+					} else if kind == Kind::Weapon {
 						ctx.setWeapon(foe, t);
 					} else {
 						ctx.addCard(foe, t);
@@ -2090,7 +2090,7 @@ impl Skill {
 			Self::gpull => Skill::gpullspell.proc(ctx, c, c, data),
 			Self::gpullspell | Self::v_gpullspell => {
 				ctx.fx(t, Fx::Pull);
-				if ctx.get_kind(t) == etg::Creature {
+				if ctx.get_kind(t) == Kind::Creature {
 					ctx.set(ctx.get_owner(t), Stat::gpull, t);
 				} else {
 					ctx.set(t, Stat::gpull, 0);
@@ -2126,9 +2126,9 @@ impl Skill {
 			Self::hatch => {
 				ctx.fx(c, Fx::Hatch);
 				let ccard = ctx.get(c, Stat::card);
-				if let Some(rcard) = ctx.random_card(card::Upped(ccard), |ctx, card| {
-					card.kind as i32 == etg::Creature
-				}) {
+				if let Some(rcard) =
+					ctx.random_card(card::Upped(ccard), |ctx, card| card.kind == Kind::Creature)
+				{
 					ctx.transform(c, card::AsShiny(rcard.code as i32, card::Shiny(ccard)));
 				}
 			}
@@ -2137,7 +2137,7 @@ impl Skill {
 			}
 			Self::heatmirror => {
 				let owner = ctx.get_owner(c);
-				if data.fromhand && ctx.get_kind(t) == etg::Creature && owner != ctx.get_owner(t) {
+				if data.fromhand && ctx.get_kind(t) == Kind::Creature && owner != ctx.get_owner(t) {
 					let spark = ctx.new_thing(card::As(ctx.get(c, Stat::card), card::Spark), owner);
 					ctx.fx(spark, Fx::StartPos(c));
 					ctx.addCrea(owner, spark);
@@ -2204,8 +2204,7 @@ impl Skill {
 			Self::improve => {
 				ctx.fx(t, Fx::Improve);
 				ctx.set(t, Flag::mutant, true);
-				if let Some(card) =
-					ctx.random_card(false, |ctx, card| card.kind as i32 == etg::Creature)
+				if let Some(card) = ctx.random_card(false, |ctx, card| card.kind == Kind::Creature)
 				{
 					ctx.transform(t, card.code as i32);
 				}
@@ -2231,7 +2230,7 @@ impl Skill {
 							.chain(once(pl.shield))
 							.chain(pl.creatures.iter().cloned())
 							.chain(pl.permanents.iter().cloned())
-							.filter(|&id| id != 0 && ctx.material(id, 0)),
+							.filter(|&id| id != 0 && ctx.material(id, None)),
 					);
 				}
 				for &id in tgts.iter() {
@@ -2411,7 +2410,7 @@ impl Skill {
 					let code = ctx.get(ctx.get_player(owner).hand[idx], Stat::card);
 					if etg::ShardList[1..]
 						.iter()
-						.any(|&shard| card::IsOf(code, shard))
+						.any(|&shard| card::IsOf(code, shard as i32))
 					{
 						let card = ctx.get_card(code);
 						tally[card.element as usize - 1] += 1;
@@ -2604,7 +2603,7 @@ impl Skill {
 				ctx.set(
 					c,
 					Stat::mode,
-					if ctx.get_kind(t) == etg::Player {
+					if ctx.get_kind(t) == Kind::Player {
 						ctx.get_player(t).mark
 					} else {
 						ctx.get_card(ctx.get(t, Stat::card)).element as i32
@@ -2623,7 +2622,7 @@ impl Skill {
 						once(pl.weapon)
 							.chain(once(pl.shield))
 							.chain(pl.permanents.iter().cloned())
-							.filter(|&pr| pr != 0 && ctx.material(pr, 0)),
+							.filter(|&pr| pr != 0 && ctx.material(pr, None)),
 					);
 					if let Some(&pr) = ctx.choose(&candidates) {
 						ctx.fx(c, Fx::Looted);
@@ -2634,7 +2633,7 @@ impl Skill {
 			}
 			Self::losecharge | Self::v_losecharge => {
 				if ctx.maybeDecrStatus(c, Stat::charges) == 0 {
-					if ctx.get_kind(c) == etg::Creature {
+					if ctx.get_kind(c) == Kind::Creature {
 						ctx.die(c);
 					} else {
 						ctx.remove(c);
@@ -2673,7 +2672,7 @@ impl Skill {
 			}
 			Self::metamorph => {
 				let owner = ctx.get_owner(c);
-				let newmark = if ctx.get_kind(t) == etg::Player {
+				let newmark = if ctx.get_kind(t) == Kind::Player {
 					ctx.get_player(t).mark
 				} else {
 					ctx.get_card(ctx.get(t, Stat::card)).element as i32
@@ -2709,7 +2708,7 @@ impl Skill {
 				}
 			}
 			Self::mimic => {
-				if c != t && ctx.get_kind(t) == etg::Creature {
+				if c != t && ctx.get_kind(t) == Kind::Creature {
 					ctx.transform(c, ctx.get(t, Stat::card));
 					ctx.addskills(c, Event::Play, &[Skill::mimic]);
 				}
@@ -2775,7 +2774,7 @@ impl Skill {
 			Self::neuro | Self::v_neuro => {
 				if throttle(ctx, c) {
 					ctx.poison(t, 1);
-					if self == Self::neuro || ctx.get_kind(t) == etg::Player {
+					if self == Self::neuro || ctx.get_kind(t) == Kind::Player {
 						ctx.set(t, Flag::neuro, true);
 					}
 				}
@@ -2871,7 +2870,7 @@ impl Skill {
 					card.element as usize
 				}];
 				let town = ctx.get_owner(t);
-				let nymph = ctx.new_thing(card::As(code, nymphcode), town);
+				let nymph = ctx.new_thing(card::As(code, nymphcode as i32), town);
 				ctx.fx(nymph, Fx::StartPos(t));
 				ctx.addCrea(town, nymph);
 				ctx.destroy(t, None);
@@ -3000,7 +2999,7 @@ impl Skill {
 			}
 			Self::patience => {
 				if !data.patience
-					&& ctx.get_kind(t) == etg::Creature
+					&& ctx.get_kind(t) == Kind::Creature
 					&& data.attackphase && ctx.get_owner(c) == ctx.get_owner(t)
 					&& ctx.get(c, Stat::frozen) == 0
 				{
@@ -3249,7 +3248,7 @@ impl Skill {
 				let maxhp = ctx.get_mut(t, Stat::maxhp);
 				*maxhp = cmp::max(*maxhp - dmg, 1);
 				let maxhp = *maxhp;
-				if maxhp > 500 && ctx.get_kind(t) == etg::Player {
+				if maxhp > 500 && ctx.get_kind(t) == Kind::Player {
 					ctx.set(t, Stat::maxhp, 500);
 				}
 				let hp = ctx.get_mut(t, Stat::hp);
@@ -3269,7 +3268,7 @@ impl Skill {
 			Self::regeneratespell => {
 				ctx.lobo(t);
 				ctx.addskills(t, Event::OwnAttack, &[Skill::regenerate]);
-				if ctx.get_kind(t) <= etg::Permanent {
+				if ctx.get_kind(t) <= Kind::Permanent {
 					ctx.clearStatus(t);
 				}
 			}
@@ -3308,8 +3307,8 @@ impl Skill {
 				}
 			}
 			Self::ricochet => {
-				if ctx.get_kind(t) == etg::Spell
-					&& ctx.get_card(ctx.get(t, Stat::card)).kind as i32 == etg::Spell
+				if ctx.get_kind(t) == Kind::Spell
+					&& ctx.get_card(ctx.get(t, Stat::card)).kind == Kind::Spell
 				{
 					if let Some(skill) = data.active {
 						if let Some(tgting) = skill.targetting() {
@@ -3346,7 +3345,7 @@ impl Skill {
 				ctx.set(t, Flag::protectdeck, true);
 			}
 			Self::sadism => {
-				if ctx.get_kind(t) != etg::Player {
+				if ctx.get_kind(t) != Kind::Player {
 					let dmg = data.dmg;
 					if dmg > 0 {
 						ctx.dmg(ctx.get_owner(c), -dmg);
@@ -3390,7 +3389,7 @@ impl Skill {
 								let deckid = pl.deck[idx];
 								pl.hand[handidx] = deckid;
 								pl.deck_mut()[idx] = t;
-								ctx.set_kind(deckid, etg::Spell);
+								ctx.set_kind(deckid, Kind::Spell);
 								ctx.set_owner(deckid, town);
 							}
 						}
@@ -3400,7 +3399,7 @@ impl Skill {
 				pl.markpower = pl.markpower.saturating_add(1);
 			}
 			Self::scramble => {
-				if ctx.get_kind(t) == etg::Player && !ctx.sanctified(t) {
+				if ctx.get_kind(t) == Kind::Player && !ctx.sanctified(t) {
 					for _ in 0..9 {
 						if ctx.spendscramble(t, etg::Chroma, 1) {
 							ctx.spendscramble(t, etg::Chroma, -1);
@@ -3559,7 +3558,7 @@ impl Skill {
 				} else {
 					(card::v_Skeleton, card::v_MalignantCell)
 				};
-				if ctx.get_kind(t) == etg::Creature
+				if ctx.get_kind(t) == Kind::Creature
 					&& !card::IsOf(ctx.get(t, Stat::card), cardskele)
 				{
 					let thp = ctx.truehp(t);
@@ -3584,7 +3583,7 @@ impl Skill {
 				let owner = ctx.get_owner(c);
 				ctx.set_quanta(owner, etg::Air, 0);
 				for &cr in ctx.get_player(owner).creatures.clone().iter() {
-					if cr != 0 && ctx.get(cr, Flag::airborne) && ctx.material(cr, 0) {
+					if cr != 0 && ctx.get(cr, Flag::airborne) && ctx.material(cr, None) {
 						ctx.fx(cr, Fx::Dive);
 						ctx.incrStatus(cr, Stat::dive, ctx.trueatk(cr));
 					}
@@ -3641,7 +3640,7 @@ impl Skill {
 				ctx.buffhp(owner, ctx.get_player(owner).quanta(etg::Earth) as i32);
 			}
 			Self::stasis => {
-				if ctx.get_kind(t) == etg::Creature && data.attackphase && !data.stasis {
+				if ctx.get_kind(t) == Kind::Creature && data.attackphase && !data.stasis {
 					ctx.fx(t, Fx::Sfx(Sfx::stasis));
 					data.stasis = true;
 				}
@@ -3664,9 +3663,9 @@ impl Skill {
 				};
 				ctx.set(t, Stat::casts, 0);
 				let kind = ctx.get_kind(t);
-				if kind == etg::Permanent {
+				if kind == Kind::Permanent {
 					ctx.addPerm(owner, t);
-				} else if kind == etg::Weapon {
+				} else if kind == Kind::Weapon {
 					ctx.setWeapon(owner, t);
 				} else {
 					ctx.setShield(owner, t);
@@ -3703,7 +3702,7 @@ impl Skill {
 					ctx.fx(t, Fx::Shatter);
 					ctx.die(t);
 				} else {
-					if ctx.get_kind(t) == etg::Player {
+					if ctx.get_kind(t) == Kind::Player {
 						let weapon = ctx.get_weapon(t);
 						if weapon != 0 && ctx.get(weapon, Stat::frozen) != 0 {
 							ctx.fx(weapon, Fx::Shatter);
@@ -3742,7 +3741,7 @@ impl Skill {
 							.cloned()
 							.enumerate()
 							.filter(|&(idx, id)| {
-								ctx.get_card(ctx.get(id, Stat::card)).kind as i32 == etg::Creature
+								ctx.get_card(ctx.get(id, Stat::card)).kind == Kind::Creature
 							})
 							.map(|(idx, id)| idx),
 					);
@@ -3814,7 +3813,7 @@ impl Skill {
 						once(plpl.weapon)
 							.chain(once(plpl.shield))
 							.chain(plpl.permanents.iter().cloned())
-							.filter(|&pr| pr != 0 && ctx.material(pr, 0)),
+							.filter(|&pr| pr != 0 && ctx.material(pr, None)),
 					);
 					if let Some(&pr) = ctx.choose(&perms) {
 						ctx.fx(pr, Fx::Shuffled);
@@ -3842,7 +3841,7 @@ impl Skill {
 					.filter(|&(idx, id)| {
 						let code = ctx.get(id, Stat::card);
 						let card = ctx.get_card(code);
-						card.kind as i32 == etg::Creature && card::AsShiny(code, false) != tcodedull
+						card.kind == Kind::Creature && card::AsShiny(code, false) != tcodedull
 					})
 					.map(|(idx, id)| idx)
 					.collect::<Vec<_>>();
@@ -3986,7 +3985,7 @@ impl Skill {
 				ctx.set(t, Flag::airborne, false);
 			}
 			Self::weight => {
-				if ctx.get_kind(t) == etg::Creature && ctx.truehp(t) > 5 {
+				if ctx.get_kind(t) == Kind::Creature && ctx.truehp(t) > 5 {
 					data.dmg = 0;
 				}
 			}
@@ -4007,7 +4006,7 @@ impl Skill {
 				}
 			}
 			Self::yoink => {
-				if ctx.get_kind(t) == etg::Player {
+				if ctx.get_kind(t) == Kind::Player {
 					Skill::foedraw.proc(ctx, c, t, data);
 				} else {
 					let town = ctx.get_owner(t);
@@ -4028,7 +4027,7 @@ impl Skill {
 				ctx.addskill(t, Event::OwnAttack, Skill::v_acceleration(atk));
 			}
 			Self::v_accretion => {
-				if ctx.get_kind(t) != etg::Player {
+				if ctx.get_kind(t) != Kind::Player {
 					Skill::v_destroy.proc(ctx, c, t, data);
 				}
 				ctx.buffhp(c, 15);
@@ -4091,7 +4090,7 @@ impl Skill {
 				*ctx.get_mut(c, Stat::atk) /= 2;
 			}
 			Self::v_cold => {
-				if ctx.get_kind(t) == etg::Creature && data.dmg > 0 && ctx.rng_ratio(3, 10) {
+				if ctx.get_kind(t) == Kind::Creature && data.dmg > 0 && ctx.rng_ratio(3, 10) {
 					ctx.freeze(t, 3);
 				}
 			}
@@ -4200,7 +4199,7 @@ impl Skill {
 				);
 			}
 			Self::v_firewall => {
-				if ctx.get_kind(t) == etg::Creature {
+				if ctx.get_kind(t) == Kind::Creature {
 					ctx.dmg(t, 1);
 				}
 			}
@@ -4216,7 +4215,7 @@ impl Skill {
 			}
 			Self::v_freedom => {
 				if ctx.get_owner(c) == ctx.get_owner(t)
-					&& ctx.get_kind(t) == etg::Creature
+					&& ctx.get_kind(t) == Kind::Creature
 					&& ctx.get(t, Flag::airborne)
 					&& !data.freedom && ctx.rng_range(0..4) < ctx.get(c, Stat::charges)
 				{
@@ -4230,7 +4229,7 @@ impl Skill {
 				if tgt != 0
 					&& tgtowner == ctx.get_owner(c)
 					&& tgtowner != ctx.get_owner(t)
-					&& ctx.get_kind(tgt) == etg::Creature
+					&& ctx.get_kind(tgt) == Kind::Creature
 					&& ctx.get(tgt, Flag::airborne)
 					&& ctx.get_card(ctx.get(tgt, Stat::card)).element as i32 == etg::Air
 					&& ctx.rng_range(0..4) < ctx.get(c, Stat::charges)
@@ -4266,7 +4265,7 @@ impl Skill {
 				ctx.fx(t, Fx::Hatch);
 				if let Some(card) =
 					ctx.random_card(card::Upped(ctx.get(c, Stat::card)), |ctx, card| {
-						card.kind == etg::Creature as i8
+						card.kind == Kind::Creature
 							&& !legacy_banned(card::AsUpped(card.code as i32, false))
 					}) {
 					ctx.transform(c, card.code as i32);
@@ -4312,7 +4311,7 @@ impl Skill {
 				ctx.fx(t, Fx::Improve);
 				ctx.set(t, Flag::mutant, true);
 				if let Some(card) = ctx.random_card(false, |ctx, card| {
-					card.kind == etg::Creature as i8 && !legacy_banned(card.code as i32)
+					card.kind == Kind::Creature && !legacy_banned(card.code as i32)
 				}) {
 					ctx.transform(t, card.code as i32);
 				}
@@ -4429,7 +4428,7 @@ impl Skill {
 					let code = ctx.get(ctx.get_player(owner).hand[idx], Stat::card);
 					if etg::ShardList[1..]
 						.iter()
-						.any(|&shard| card::IsOf(code, shard))
+						.any(|&shard| card::IsOf(code, shard as i32))
 					{
 						let card = ctx.get_card(code);
 						tally[card.element as usize - 1] += 1;
@@ -4644,7 +4643,7 @@ impl Skill {
 						card.element as usize
 					}] - 4000;
 				let town = ctx.get_owner(t);
-				let nymph = ctx.new_thing(card::As(code, nymphcode), town);
+				let nymph = ctx.new_thing(card::As(code, nymphcode as i32), town);
 				ctx.fx(nymph, Fx::StartPos(t));
 				ctx.addCrea(town, nymph);
 				ctx.destroy(t, None);
@@ -4746,7 +4745,7 @@ impl Skill {
 				ctx.addCrea(owner, inst);
 			}
 			Self::v_scramble => {
-				if ctx.get_kind(t) == etg::Player && !ctx.sanctified(t) {
+				if ctx.get_kind(t) == Kind::Player && !ctx.sanctified(t) {
 					let mut n = 0;
 					while n > -9 && ctx.spend(t, etg::Chroma, 1) {
 						n -= 1;
@@ -4766,7 +4765,7 @@ impl Skill {
 							&& !card::IsOf(card.code as i32, card::v_Miracle)
 							&& !etg::ShardList[1..]
 								.iter()
-								.any(|&shard| !card::IsOf(card.code as i32, shard))
+								.any(|&shard| !card::IsOf(card.code as i32, shard as i32))
 							&& (i > 0 || anyentro || card.element as i32 == etg::Entropy)
 					}) {
 						if card.element as i32 == etg::Entropy {
@@ -4786,7 +4785,7 @@ impl Skill {
 				}
 			}
 			Self::v_slow => {
-				if ctx.get_kind(t) == etg::Creature {
+				if ctx.get_kind(t) == Kind::Creature {
 					ctx.delay(t, 2);
 				}
 			}
@@ -4819,7 +4818,7 @@ impl Skill {
 				let card = ctx.get(t, Stat::card);
 				if ctx.get(t, Flag::stackable) {
 					ctx.destroy(t, None);
-					if kind == etg::Shield {
+					if kind == Kind::Shield {
 						let shield = ctx.get_shield(owner);
 						if shield != 0 && card == ctx.get(shield, Stat::card) {
 							ctx.incrStatus(shield, Stat::charges, 1);
@@ -4840,9 +4839,9 @@ impl Skill {
 					if card::IsOf(card, card::v_Sundial) {
 						ctx.incrStatus(t, Stat::charges, 1);
 					}
-					if kind == etg::Permanent {
+					if kind == Kind::Permanent {
 						ctx.addPerm(owner, t);
-					} else if kind == etg::Weapon {
+					} else if kind == Kind::Weapon {
 						ctx.setWeapon(owner, t);
 					} else {
 						ctx.setShield(owner, t);
@@ -4867,7 +4866,7 @@ impl Skill {
 				ctx.set(c, Stat::swarmhp, hp - 1);
 			}
 			Self::v_thorn => {
-				if ctx.get_kind(c) == etg::Creature && data.dmg > 0 && ctx.rng_ratio(3, 4) {
+				if ctx.get_kind(c) == Kind::Creature && data.dmg > 0 && ctx.rng_ratio(3, 4) {
 					ctx.poison(t, 1);
 				}
 			}
@@ -5001,7 +5000,7 @@ impl Skill {
 impl<'tgt> Tgt<'tgt> {
 	pub fn full_check(self, ctx: &Game, c: i32, t: i32) -> bool {
 		let kind = ctx.get_kind(t);
-		(if kind == etg::Player {
+		(if kind == Kind::Player {
 			!ctx.get(t, Flag::out)
 		} else {
 			let owner = ctx.get_owner(t);
@@ -5016,36 +5015,38 @@ impl<'tgt> Tgt<'tgt> {
 			Tgt::foe => ctx.get_owner(c) != ctx.get_owner(t),
 			Tgt::notself => c != t,
 			Tgt::all => true,
-			Tgt::card => c != t && ctx.get_kind(t) == etg::Spell,
-			Tgt::pill => ctx.material(t, etg::Permanent) && ctx.get(t, Flag::pillar),
+			Tgt::card => c != t && ctx.get_kind(t) == Kind::Spell,
+			Tgt::pill => ctx.material(t, Some(Kind::Permanent)) && ctx.get(t, Flag::pillar),
 			Tgt::weap => {
 				let tkind = ctx.get_kind(t);
-				ctx.material(t, 0)
-					&& (tkind == etg::Weapon
-						|| (tkind != etg::Spell && {
+				ctx.material(t, None)
+					&& (tkind == Kind::Weapon
+						|| (tkind != Kind::Spell && {
 							let card = ctx.get(t, Stat::card);
-							card != 0 && ctx.get_card(card).kind as i32 == etg::Weapon
+							card != 0 && ctx.get_card(card).kind == Kind::Weapon
 						}))
 			}
 			Tgt::shie => {
 				let tkind = ctx.get_kind(t);
-				ctx.material(t, 0)
-					&& (tkind == etg::Shield
-						|| (tkind != etg::Spell && {
+				ctx.material(t, None)
+					&& (tkind == Kind::Shield
+						|| (tkind != Kind::Spell && {
 							let card = ctx.get(t, Stat::card);
-							card != 0 && ctx.get_card(card).kind as i32 == etg::Shield
+							card != 0 && ctx.get_card(card).kind == Kind::Shield
 						}))
 			}
-			Tgt::playerweap => ctx.get_kind(t) == etg::Weapon,
-			Tgt::perm => ctx.material(t, etg::Permanent),
+			Tgt::playerweap => ctx.get_kind(t) == Kind::Weapon,
+			Tgt::perm => ctx.material(t, Some(Kind::Permanent)),
 			Tgt::nonstack => !ctx.get(t, Flag::stackable),
-			Tgt::permstack => ctx.material(t, etg::Permanent) && ctx.get(t, Flag::stackable),
-			Tgt::crea => ctx.material(t, etg::Creature),
-			Tgt::creacrea => ctx.material(t, etg::Creature) && ctx.get_kind(t) == etg::Creature,
-			Tgt::play => ctx.get_kind(t) == etg::Player,
-			Tgt::notplay => ctx.get_kind(t) != etg::Player,
+			Tgt::permstack => ctx.material(t, Some(Kind::Permanent)) && ctx.get(t, Flag::stackable),
+			Tgt::crea => ctx.material(t, Some(Kind::Creature)),
+			Tgt::creacrea => {
+				ctx.material(t, Some(Kind::Creature)) && ctx.get_kind(t) == Kind::Creature
+			}
+			Tgt::play => ctx.get_kind(t) == Kind::Player,
+			Tgt::notplay => ctx.get_kind(t) != Kind::Player,
 			Tgt::sing => {
-				ctx.material(t, etg::Creature)
+				ctx.material(t, Some(Kind::Creature))
 					&& ctx
 						.getSkill(t, Event::Cast)
 						.iter()
@@ -5053,37 +5054,39 @@ impl<'tgt> Tgt<'tgt> {
 			}
 			Tgt::butterfly => {
 				let tkind = ctx.get_kind(t);
-				(tkind == etg::Creature || tkind == etg::Weapon)
+				(tkind == Kind::Creature || tkind == Kind::Weapon)
 					&& !ctx.get(t, Flag::immaterial | Flag::burrowed)
-					&& (ctx.trueatk(t) < 3 || (tkind == etg::Creature && ctx.truehp(t) < 3))
+					&& (ctx.trueatk(t) < 3 || (tkind == Kind::Creature && ctx.truehp(t) < 3))
 			}
-			Tgt::v_butterfly => ctx.material(t, etg::Creature) && ctx.trueatk(t) < 3,
-			Tgt::devour => ctx.material(t, etg::Creature) && ctx.truehp(t) < ctx.truehp(c),
-			Tgt::paradox => ctx.material(t, etg::Creature) && ctx.truehp(t) < ctx.trueatk(t),
+			Tgt::v_butterfly => ctx.material(t, Some(Kind::Creature)) && ctx.trueatk(t) < 3,
+			Tgt::devour => ctx.material(t, Some(Kind::Creature)) && ctx.truehp(t) < ctx.truehp(c),
+			Tgt::paradox => ctx.material(t, Some(Kind::Creature)) && ctx.truehp(t) < ctx.trueatk(t),
 			Tgt::notskele => {
-				ctx.material(t, etg::Creature)
+				ctx.material(t, Some(Kind::Creature))
 					&& !card::IsOf(ctx.get(t, Stat::card), card::Skeleton)
 			}
 			Tgt::forceplay => {
-				ctx.get_kind(t) == etg::Spell
-					|| (ctx.material(t, 0)
+				ctx.get_kind(t) == Kind::Spell
+					|| (ctx.material(t, None)
 						&& ctx
 							.getSkill(t, Event::Cast)
 							.first()
 							.map(|&s| s != Skill::forceplay)
 							.unwrap_or(false))
 			}
-			Tgt::airbornecrea => ctx.material(t, etg::Creature) && ctx.get(t, Flag::airborne),
+			Tgt::airbornecrea => {
+				ctx.material(t, Some(Kind::Creature)) && ctx.get(t, Flag::airborne)
+			}
 			Tgt::golem => {
 				let tkind = ctx.get_kind(t);
-				(tkind == etg::Weapon || tkind == etg::Creature) && ctx.get(t, Flag::golem)
+				(tkind == Kind::Weapon || tkind == Kind::Creature) && ctx.get(t, Flag::golem)
 			}
-			Tgt::groundcrea => ctx.material(t, etg::Creature) && !ctx.get(t, Flag::airborne),
+			Tgt::groundcrea => ctx.material(t, Some(Kind::Creature)) && !ctx.get(t, Flag::airborne),
 			Tgt::wisdom => {
 				let tkind = ctx.get_kind(t);
-				(tkind == etg::Creature || tkind == etg::Weapon) && !ctx.get(t, Flag::burrowed)
+				(tkind == Kind::Creature || tkind == Kind::Weapon) && !ctx.get(t, Flag::burrowed)
 			}
-			Tgt::quinttog => ctx.get_kind(t) == etg::Creature && !ctx.get(t, Flag::burrowed),
+			Tgt::quinttog => ctx.get_kind(t) == Kind::Creature && !ctx.get(t, Flag::burrowed),
 			Tgt::And(terms) => terms.iter().all(|term| term.check(ctx, c, t)),
 			Tgt::Or(terms) => terms.iter().any(|term| term.check(ctx, c, t)),
 		}

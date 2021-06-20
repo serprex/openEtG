@@ -7,7 +7,7 @@ use std::ops::{Index, IndexMut};
 
 use crate::card::{self, CardSet};
 use crate::etg;
-use crate::game::{Flag, Game, Stat};
+use crate::game::{Flag, Game, Kind, Stat};
 use crate::skill::{Event, Skill};
 
 struct DamageMap(Vec<f32>);
@@ -187,7 +187,7 @@ fn eval_skill(
 			Skill::aflatoxin => 5.0,
 			Skill::aggroskele => 2.0,
 			Skill::alphawolf => {
-				if ctx.get_kind(c) == etg::Spell {
+				if ctx.get_kind(c) == Kind::Spell {
 					3.0
 				} else {
 					0.0
@@ -195,7 +195,7 @@ fn eval_skill(
 			}
 			Skill::antimatter | Skill::v_antimatter => 12.0,
 			Skill::appease => {
-				if ctx.get_kind(c) == etg::Spell {
+				if ctx.get_kind(c) == Kind::Spell {
 					-6.0
 				} else if ctx.get(c, Flag::appeased) {
 					0.0
@@ -292,7 +292,7 @@ fn eval_skill(
 			Skill::deathwish => 1.0,
 			Skill::deckblast => ctx.get_player(ctx.get_owner(c)).deck.len() as f32 / 2.0,
 			Skill::deepdive | Skill::deepdiveproc => {
-				if ctx.get_kind(c) == etg::Spell {
+				if ctx.get_kind(c) == Kind::Spell {
 					ctx.get_card(ctx.get(c, Stat::card)).attack as f32
 				} else {
 					ttatk / 1.5
@@ -300,7 +300,7 @@ fn eval_skill(
 			}
 			Skill::deja => 4.0,
 			Skill::deployblobs => {
-				(8 + if ctx.get_kind(c) == etg::Spell {
+				(8 + if ctx.get_kind(c) == Kind::Spell {
 					let card = ctx.get_card(ctx.get(c, Stat::card));
 					cmp::min(card.attack, card.health) as i32
 				} else {
@@ -310,7 +310,7 @@ fn eval_skill(
 			Skill::destroy => 8.0,
 			Skill::destroycard => 1.0,
 			Skill::devour | Skill::v_devour => {
-				(2 + if ctx.get_kind(c) == etg::Spell {
+				(2 + if ctx.get_kind(c) == Kind::Spell {
 					ctx.get_card(ctx.get(c, Stat::card)).health as i32
 				} else {
 					ctx.truehp(c)
@@ -335,7 +335,7 @@ fn eval_skill(
 				(2 + quantamap.get(ctx.get_owner(c), etg::Entropy) as i32) as f32
 			}
 			Skill::dive | Skill::v_dive => {
-				if ctx.get_kind(c) == etg::Spell {
+				if ctx.get_kind(c) == Kind::Spell {
 					ctx.get_card(ctx.get(c, Stat::card)).attack as f32
 				} else {
 					ttatk - ctx.get(c, Stat::dive) as f32 / 1.5
@@ -396,7 +396,7 @@ fn eval_skill(
 				dmg
 			}
 			Skill::gpull => {
-				if ctx.get_kind(c) == etg::Spell || c != ctx.get(ctx.get_owner(c), Stat::gpull) {
+				if ctx.get_kind(c) == Kind::Spell || c != ctx.get(ctx.get_owner(c), Stat::gpull) {
 					2.0
 				} else {
 					0.0
@@ -408,7 +408,7 @@ fn eval_skill(
 			Skill::growth(atk, hp) => (atk + hp) as f32,
 			Skill::guard => ttatk + (4 + ctx.get(c, Flag::airborne) as i32) as f32,
 			Skill::halveatk => {
-				if ctx.get_kind(c) == etg::Spell {
+				if ctx.get_kind(c) == Kind::Spell {
 					-ctx.get_card(ctx.get(c, Stat::card)).attack as f32 / 4.0
 				} else if ttatk == 0.0 {
 					0.0
@@ -427,7 +427,7 @@ fn eval_skill(
 			}
 			Skill::heatmirror => 2.0,
 			Skill::hitownertwice => {
-				(if ctx.get_kind(c) == etg::Spell {
+				(if ctx.get_kind(c) == Kind::Spell {
 					ctx.get_card(ctx.get(c, Stat::card)).attack as i32
 				} else {
 					ctx.trueatk(c)
@@ -521,7 +521,7 @@ fn eval_skill(
 			Skill::precognition => 1.0,
 			Skill::predator => {
 				let foehandlen = ctx.get_player(ctx.get_foe(ctx.get_owner(c))).hand.len() as i32;
-				if foehandlen > 4 && ctx.get_kind(c) != etg::Spell {
+				if foehandlen > 4 && ctx.get_kind(c) != Kind::Spell {
 					ttatk + cmp::max(foehandlen - 6, 1) as f32
 				} else {
 					1.0
@@ -550,7 +550,7 @@ fn eval_skill(
 				}
 			}
 			Skill::reducemaxhp => {
-				(if ctx.get_kind(c) == etg::Spell {
+				(if ctx.get_kind(c) == Kind::Spell {
 					ctx.get_card(ctx.get(c, Stat::card)).attack as f32
 				} else {
 					ttatk
@@ -619,7 +619,7 @@ fn eval_skill(
 			Skill::tesseractsummon => 8.0,
 			Skill::throwrock => 4.0,
 			Skill::tick => {
-				if ctx.get_kind(c) == etg::Spell {
+				if ctx.get_kind(c) == Kind::Spell {
 					1.0
 				} else {
 					1.0 + (ctx.get(c, Stat::maxhp) - ctx.truehp(c)) as f32
@@ -634,14 +634,14 @@ fn eval_skill(
 			Skill::upkeep => -0.5,
 			Skill::upload => 3.0,
 			Skill::vampire => {
-				(if ctx.get_kind(c) == etg::Spell {
+				(if ctx.get_kind(c) == Kind::Spell {
 					ctx.get_card(ctx.get(c, Stat::card)).attack as f32
 				} else {
 					ttatk
 				}) * 0.1
 			}
 			Skill::virtue => {
-				if ctx.get_kind(c) == etg::Spell {
+				if ctx.get_kind(c) == Kind::Spell {
 					let foeshield = ctx.get_shield(ctx.get_foe(ctx.get_owner(c)));
 					if foeshield != 0 {
 						cmp::min(
@@ -664,7 +664,7 @@ fn eval_skill(
 			Skill::vengeance => 2.0,
 			Skill::vindicate => 3.0,
 			Skill::pillar | Skill::pend | Skill::pillmat | Skill::pillspi | Skill::pillcar => {
-				if ctx.get_kind(c) == etg::Spell {
+				if ctx.get_kind(c) == Kind::Spell {
 					0.1
 				} else {
 					(ctx.get(c, Stat::charges) as f32).sqrt()
@@ -865,7 +865,7 @@ impl WallShield {
 				return 0.0;
 			}
 			WallShield::Weight => {
-				if ctx.get_kind(id) == etg::Creature && ctx.truehp(id) > 5 {
+				if ctx.get_kind(id) == Kind::Creature && ctx.truehp(id) > 5 {
 					return 0.0;
 				}
 			}
@@ -1009,19 +1009,15 @@ fn evalthing(
 				0.0
 			};
 		}
-		if cdata.kind == etg::Spell as i8 {
+		if cdata.kind == Kind::Spell {
 			return eval_skill(ctx, id, cdata.skill[0].1, 0.0, damage, quantamap);
 		}
 	}
-	let kind = if inhand {
-		cdata.kind as i32
-	} else {
-		ctx.get_kind(id)
-	};
-	let iscrea = kind == etg::Creature;
+	let kind = if inhand { cdata.kind } else { ctx.get_kind(id) };
+	let iscrea = kind == Kind::Creature;
 	let mut score = 0.0;
 	let mut delaymix = cmp::max(ctx.get(id, Stat::frozen), ctx.get(id, Stat::delayed)) as f32;
-	let (ttatk, ctrueatk, adrenaline, delayfactor) = if iscrea || kind == etg::Weapon {
+	let (ttatk, ctrueatk, adrenaline, delayfactor) = if iscrea || kind == Kind::Weapon {
 		let ttatk = damage[id];
 		let ctrueatk = ctx.trueatk(id);
 		let adrenaline = if ctx.get(id, Stat::adrenaline) == 0 {
@@ -1050,7 +1046,7 @@ fn evalthing(
 	if iscrea {
 		if inhand
 			|| !flooded || ctx.get(id, Flag::aquatic)
-			|| !ctx.material(id, 0)
+			|| !ctx.material(id, None)
 			|| ctx.getIndex(id) <= 4
 		{
 			hp = ctx.truehp(id);
@@ -1183,7 +1179,7 @@ fn evalthing(
 	}
 	if iscrea {
 		let voodoo = ctx.get(id, Flag::voodoo);
-		if voodoo && ctx.material(id, 0) {
+		if voodoo && ctx.material(id, None) {
 			score += hp as f32 / 10.0;
 		}
 		if hp != 0 && ctx.get(owner, Stat::gpull) == id {
@@ -1204,7 +1200,7 @@ fn evalthing(
 			}
 		} else {
 			score *= if hp != 0 {
-				if ctx.material(id, 0) {
+				if ctx.material(id, None) {
 					1.0 + (cmp::min(hp, 33) as f32).ln() / 7.0
 				} else {
 					1.3

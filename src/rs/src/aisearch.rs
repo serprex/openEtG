@@ -3,12 +3,11 @@ use std::iter::once;
 
 use crate::aieval::eval;
 use crate::card;
-use crate::etg;
-use crate::game::{Flag, Game, GameMove, Phase, Stat};
+use crate::game::{Flag, Game, GameMove, Kind, Phase, Stat};
 use crate::skill::{Event, Skill, Tgt};
 
 fn has_sopa(ctx: &Game, id: i32) -> bool {
-	ctx.get_kind(id) == etg::Permanent
+	ctx.get_kind(id) == Kind::Permanent
 		&& ctx.hasskill(id, Event::Cast, Skill::die)
 		&& (ctx.hasskill(id, Event::Attack, Skill::patience) || ctx.get(id, Flag::patience))
 }
@@ -269,7 +268,7 @@ fn scan(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32) {
 			let card = ctx.get_card(ctx.get(id, Stat::card));
 			(
 				id,
-				(if card.kind == etg::Spell as i8 {
+				(if card.kind == Kind::Spell {
 					ctx.getSkill(id, Event::Cast).first()
 				} else {
 					None

@@ -10,7 +10,7 @@ import * as Components from '../Components/index.js';
 import * as store from '../store.js';
 import * as Rng from '../Rng.js';
 import aiDecks from '../Decks.json';
-import deckgen from '../deckgen/index.js';
+import deckgen from '../deckgen.js';
 
 class PremadePicker extends Component {
 	constructor(props) {
@@ -133,23 +133,28 @@ class PlayerEditor extends Component {
 							parseInput(data, 'markpower', state.mark, 1188);
 							parseInput(data, 'drawpower', state.draw, 8);
 							parseInput(data, 'deckpower', state.deckpower);
+							let deck;
 							switch (state.deckgen) {
 								case 'mage':
 								case 'demigod':
-									[data.name, data.deck] = Rng.choose(aiDecks[state.deckgen]);
+									[data.name, deck] = Rng.choose(aiDecks[state.deckgen]);
+									deck = Promise.resolve(deck);
 									break;
 								case 'rng':
-									data.deck = deckgen(
+									deck = deckgen(
 										state.rnguprate * 100 || 0,
 										data.markpower,
 										state.rngmaxrare | 0 || 9,
 									);
 									break;
 								default:
-									if (state.deck) data.deck = state.deck;
+									if (state.deck) deck = Promise.resolve(state.deck);
 							}
 							if (state.name) data.name = state.name;
-							props.updatePlayer(data);
+							deck.then(x => {
+								data.deck = x;
+								props.updatePlayer(data);
+							});
 						}}
 					/>
 				</div>

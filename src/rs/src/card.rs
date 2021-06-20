@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 
 pub use crate::game::CardSet;
-use crate::game::Stat;
+use crate::game::{Kind, Stat};
 pub use crate::generated::*;
 use crate::skill::{Event, Skill};
 
@@ -14,7 +14,7 @@ pub struct Cards {
 #[derive(Clone, Copy)]
 pub struct Card {
 	pub code: u16,
-	pub kind: i8,
+	pub kind: Kind,
 	pub element: i8,
 	pub rarity: i8,
 	pub attack: i8,

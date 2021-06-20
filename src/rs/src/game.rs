@@ -33,9 +33,26 @@ pub enum CardSet {
 	Original,
 }
 
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[derive(Clone, Copy, Hash, Eq, PartialEq, Ord, PartialOrd)]
+pub enum Kind {
+	Weapon = 1,
+	Shield = 2,
+	Permanent = 3,
+	Spell = 4,
+	Creature = 5,
+	Player = 6,
+}
+
+impl Default for Kind {
+	fn default() -> Kind {
+		Kind::Weapon
+	}
+}
+
 #[derive(Clone, Default)]
 pub struct ThingData {
-	pub kind: i32,
+	pub kind: Kind,
 	pub owner: i32,
 	pub flag: Flag,
 	pub status: FxHashMap<Stat, i32>,
@@ -527,10 +544,10 @@ impl Game {
 		}
 	}
 
-	pub fn get_kind(&self, id: i32) -> i32 {
+	pub fn get_kind(&self, id: i32) -> Kind {
 		match self.props[id as usize] {
 			Entity::Thing(ref thing) => thing.kind,
-			_ => etg::Player,
+			_ => Kind::Player,
 		}
 	}
 
@@ -655,7 +672,7 @@ impl Game {
 		let id = self.new_id(Entity::Player(Default::default()));
 		let thing = self.get_thing_mut(id);
 		thing.owner = id;
-		thing.kind = etg::Player;
+		thing.kind = Kind::Player;
 		thing.status.insert(Stat::casts, 1);
 		Rc::make_mut(&mut self.players).push(id);
 		id
@@ -726,7 +743,7 @@ impl Game {
 			pl.deck_mut().extend_from_slice(&oldhand);
 			pl.hand = newhand;
 			for &id in pl.hand.clone().iter() {
-				self.set_kind(id, etg::Spell);
+				self.set_kind(id, Kind::Spell);
 			}
 		}
 	}
@@ -859,60 +876,61 @@ impl Game {
 	pub fn getIndex(&self, id: i32) -> i32 {
 		let owner = self.get_owner(id);
 		match self.get_kind(id) {
-			etg::Player => self
+			Kind::Player => self
 				.players
 				.iter()
 				.position(|&pid| pid == id)
 				.map(|p| p as i32)
 				.unwrap_or(-1),
-			etg::Weapon => {
+			Kind::Weapon => {
 				if self.get_weapon(owner) == id {
 					0
 				} else {
 					-1
 				}
 			}
-			etg::Shield => {
+			Kind::Shield => {
 				if self.get_shield(owner) == id {
 					0
 				} else {
 					-1
 				}
 			}
-			etg::Creature => self
+			Kind::Creature => self
 				.get_player(owner)
 				.creatures
 				.iter()
 				.position(|&pid| pid == id)
 				.map(|p| p as i32)
 				.unwrap_or(-1),
-			etg::Permanent => self
+			Kind::Permanent => self
 				.get_player(owner)
 				.permanents
 				.iter()
 				.position(|&pid| pid == id)
 				.map(|p| p as i32)
 				.unwrap_or(-1),
-			etg::Spell => self
+			Kind::Spell => self
 				.get_player(owner)
 				.hand
 				.iter()
 				.position(|&pid| pid == id)
 				.map(|p| p as i32)
 				.unwrap_or(-1),
-			_ => -1,
 		}
 	}
 
-	pub fn material(&self, id: i32, kind: i32) -> bool {
+	pub fn material(&self, id: i32, kind: Option<Kind>) -> bool {
 		let ckind = self.get_kind(id);
-		(if kind == etg::Permanent {
-			ckind <= kind
-		} else if kind != 0 {
-			ckind == kind
+		(if let Some(kind) = kind {
+			if kind == Kind::Permanent {
+				ckind <= kind
+			} else {
+				ckind == kind
+			}
 		} else {
-			ckind != etg::Player
-		}) && (ckind == etg::Spell || !self.get(id, Flag::immaterial | Flag::burrowed))
+			ckind != Kind::Player
+		}) && (ckind == Kind::Spell || !self.get(id, Flag::immaterial | Flag::burrowed))
 	}
 
 	pub fn truedr(&self, id: i32) -> i32 {
@@ -1003,7 +1021,7 @@ impl Game {
 		self.turn == owner
 			&& self.phase == Phase::Play
 			&& self.getIndex(id) != -1
-			&& if self.get_kind(id) == etg::Spell {
+			&& if self.get_kind(id) == Kind::Spell {
 				self.get(owner, Stat::casts) != 0
 					&& self.canspend(owner, self.get(id, Stat::costele), self.get(id, Stat::cost))
 			} else {
@@ -1106,7 +1124,7 @@ impl Game {
 		k.set(self, id, val);
 	}
 
-	pub fn set_kind(&mut self, id: i32, val: i32) {
+	pub fn set_kind(&mut self, id: i32, val: Kind) {
 		match self.props[id as usize] {
 			Entity::Thing(ref mut thing) => Rc::make_mut(thing).kind = val,
 			_ => (),
@@ -1287,13 +1305,13 @@ impl Game {
 	}
 
 	pub fn isEclipseCandidate(&self, id: i32) -> bool {
-		self.get(id, Flag::nocturnal) && self.get_kind(id) == etg::Creature
+		self.get(id, Flag::nocturnal) && self.get_kind(id) == Kind::Creature
 	}
 
 	pub fn isWhetCandidate(&self, id: i32) -> bool {
 		self.get(id, Flag::golem)
-			|| self.get_kind(id) == etg::Weapon
-			|| self.cards.get(self.get(id, Stat::card)).kind as i32 == etg::Weapon
+			|| self.get_kind(id) == Kind::Weapon
+			|| self.cards.get(self.get(id, Stat::card)).kind == Kind::Weapon
 	}
 
 	pub fn calcBonusAtk(&self, id: i32) -> i32 {
@@ -1365,7 +1383,7 @@ impl Game {
 		loop {
 			let mut data = data.clone();
 			let kind = self.get_kind(id);
-			if kind == etg::Creature {
+			if kind == Kind::Creature {
 				self.dmg_die(id, self.get(id, Stat::poison), true);
 			}
 			self.set(id, Stat::casts, 1);
@@ -1432,7 +1450,7 @@ impl Game {
 			self.maybeDecrStatus(id, Stat::delayed);
 			self.set(id, Stat::dive, 0);
 			if self.getIndex(id) != -1 {
-				if self.get_kind(id) == etg::Creature && self.truehp(id) <= 0 {
+				if self.get_kind(id) == Kind::Creature && self.truehp(id) <= 0 {
 					self.die(id);
 					if self.getIndex(id) == -1 {
 						return;
@@ -1459,7 +1477,7 @@ impl Game {
 		loop {
 			let mut data = data.clone();
 			let kind = self.get_kind(id);
-			if kind == etg::Creature {
+			if kind == Kind::Creature {
 				let poison = self.get(id, Stat::poison);
 				self.dmg_die(id, poison, true);
 			}
@@ -1492,7 +1510,7 @@ impl Game {
 							let mut hitdata = ProcData::default();
 							hitdata.dmg = trueatk;
 							self.trigger_data(Event::Hit, id, target, &mut hitdata);
-						} else if kind == etg::Creature && self.get(target, Stat::gpull) != 0 {
+						} else if kind == Kind::Creature && self.get(target, Stat::gpull) != 0 {
 							let dmg = self.dmg(self.get(target, Stat::gpull), trueatk);
 							if self
 								.getSkill(id, Event::Hit)
@@ -1527,7 +1545,7 @@ impl Game {
 			self.maybeDecrStatus(id, Stat::delayed);
 			self.set(id, Stat::dive, 0);
 			if self.getIndex(id) != -1 {
-				if self.get_kind(id) == etg::Creature && self.truehp(id) <= 0 {
+				if self.get_kind(id) == Kind::Creature && self.truehp(id) <= 0 {
 					self.die(id);
 					return;
 				}
@@ -1574,25 +1592,25 @@ impl Game {
 			return 0;
 		}
 		let mut kind = self.get_kind(id);
-		if kind == etg::Weapon {
+		if kind == Kind::Weapon {
 			if dmg < 0 {
 				return 0;
 			} else {
 				id = self.get_owner(id);
-				kind = etg::Player;
+				kind = Kind::Player;
 			}
 		}
 		let sosa = self.get(id, Stat::sosa) != 0;
 		let realdmg = if sosa { -dmg } else { dmg };
 		let capdmg = if realdmg < 0 {
 			cmp::max(self.get(id, Stat::hp) - self.get(id, Stat::maxhp), realdmg)
-		} else if kind != etg::Player {
+		} else if kind != Kind::Player {
 			cmp::min(self.truehp(id), realdmg)
 		} else {
 			realdmg
 		};
 		*self.get_mut(id, Stat::hp) -= capdmg;
-		if kind != etg::Player {
+		if kind != Kind::Player {
 			self.fx(id, Fx::Dmg(capdmg));
 		}
 		let mut dmgdata = ProcData::default();
@@ -1620,7 +1638,7 @@ impl Game {
 			let mut maxhp = self.get(id, Stat::maxhp) + amt;
 			if maxhp > 500 {
 				let kind = self.get_kind(id);
-				if kind == etg::Player {
+				if kind == Kind::Player {
 					maxhp = 500;
 				}
 			}
@@ -1687,7 +1705,7 @@ impl Game {
 		id
 	}
 
-	fn place(&mut self, kind: i32, id: i32, thingid: i32, fromhand: bool) {
+	fn place(&mut self, kind: Kind, id: i32, thingid: i32, fromhand: bool) {
 		self.set_owner(thingid, id);
 		self.set_kind(thingid, kind);
 		self.proc_data(
@@ -1706,7 +1724,7 @@ impl Game {
 
 	fn setWeaponCore(&mut self, id: i32, weapon: i32, fromhand: bool) {
 		self.get_player_mut(id).weapon = weapon;
-		self.place(etg::Weapon, id, weapon, fromhand);
+		self.place(Kind::Weapon, id, weapon, fromhand);
 	}
 
 	pub fn setShield(&mut self, id: i32, shield: i32) {
@@ -1732,7 +1750,7 @@ impl Game {
 			}) {
 			self.get_player_mut(id).shield = shield;
 		}
-		self.place(etg::Shield, id, shield, fromhand);
+		self.place(Kind::Shield, id, shield, fromhand);
 	}
 
 	pub fn addCrea(&mut self, id: i32, crea: i32) {
@@ -1745,7 +1763,7 @@ impl Game {
 		for cr in Rc::make_mut(&mut pl.creatures).iter_mut() {
 			if *cr == 0 {
 				*cr = crea;
-				self.place(etg::Creature, id, crea, fromhand);
+				self.place(Kind::Creature, id, crea, fromhand);
 				return;
 			}
 		}
@@ -1763,7 +1781,7 @@ impl Game {
 				if pr != 0 && code == card::AsShiny(self.get(pr, Stat::card), false) {
 					let charges = self.get(perm, Stat::charges);
 					self.incrStatus(pr, Stat::charges, charges);
-					self.place(etg::Permanent, id, pr, fromhand);
+					self.place(Kind::Permanent, id, pr, fromhand);
 					self.fx(perm, Fx::EndPos(pr));
 					return;
 				}
@@ -1773,7 +1791,7 @@ impl Game {
 		for pr in Rc::make_mut(&mut pl.permanents).iter_mut() {
 			if *pr == 0 {
 				*pr = perm;
-				self.place(etg::Permanent, id, perm, fromhand);
+				self.place(Kind::Permanent, id, perm, fromhand);
 				return;
 			}
 		}
@@ -1782,13 +1800,13 @@ impl Game {
 	pub fn setCrea(&mut self, id: i32, index: i32, crea: i32) {
 		let pl = self.get_player_mut(id);
 		Rc::make_mut(&mut pl.creatures)[index as usize] = crea;
-		self.place(etg::Creature, id, crea, false);
+		self.place(Kind::Creature, id, crea, false);
 	}
 
 	pub fn addCard(&mut self, id: i32, cardid: i32) -> i32 {
 		if !self.get_player(id).hand.is_full() {
 			self.set_owner(cardid, id);
-			self.set_kind(cardid, etg::Spell);
+			self.set_kind(cardid, Kind::Spell);
 			let pl = self.get_player_mut(id);
 			pl.hand.push(cardid);
 			(pl.hand.len() - 1) as i32
@@ -1798,7 +1816,7 @@ impl Game {
 	}
 
 	pub fn delay(&mut self, mut id: i32, amt: i32) {
-		if self.get_kind(id) == etg::Player {
+		if self.get_kind(id) == Kind::Player {
 			id = self.get_weapon(id);
 			if id == 0 {
 				return;
@@ -1814,7 +1832,7 @@ impl Game {
 	}
 
 	pub fn freeze(&mut self, mut id: i32, amt: i32) {
-		if self.get_kind(id) == etg::Player {
+		if self.get_kind(id) == Kind::Player {
 			id = self.get_weapon(id);
 			if id == 0 {
 				return;
@@ -1837,7 +1855,7 @@ impl Game {
 	}
 
 	pub fn poison(&mut self, mut id: i32, amt: i32) {
-		if self.get_kind(id) == etg::Weapon {
+		if self.get_kind(id) == Kind::Weapon {
 			id = self.get_owner(id);
 		}
 		let ownpoison = self.getSkill(id, Event::OwnPoison);
@@ -1941,12 +1959,12 @@ impl Game {
 		};
 		for i in 0..23 {
 			let cr = crs[i];
-			if cr != 0 && self.material(cr, 0) {
+			if cr != 0 && self.material(cr, None) {
 				func(self, cr);
 			}
 			if let Some(ref foecrs) = foecrs {
 				let cr = foecrs[i];
-				if cr != 0 && self.material(cr, 0) {
+				if cr != 0 && self.material(cr, None) {
 					func(self, cr);
 				}
 			}
@@ -1958,9 +1976,9 @@ impl Game {
 		if index != -1 {
 			let owner = self.get_owner(id);
 			match self.get_kind(id) {
-				etg::Weapon => self.get_player_mut(owner).weapon = 0,
-				etg::Shield => self.get_player_mut(owner).shield = 0,
-				etg::Creature => {
+				Kind::Weapon => self.get_player_mut(owner).weapon = 0,
+				Kind::Shield => self.get_player_mut(owner).shield = 0,
+				Kind::Creature => {
 					let mut pl = self.get_player_mut(owner);
 					if let Entry::Occupied(o) = pl.thing.status.entry(Stat::gpull) {
 						if *o.get() == id {
@@ -1969,13 +1987,13 @@ impl Game {
 					}
 					Rc::make_mut(&mut pl.creatures)[index as usize] = 0;
 				}
-				etg::Permanent => {
+				Kind::Permanent => {
 					Rc::make_mut(&mut self.get_player_mut(owner).permanents)[index as usize] = 0;
 				}
-				etg::Spell => {
+				Kind::Spell => {
 					self.get_player_mut(owner).hand.remove(index as usize);
 				}
-				_ => (),
+				Kind::Player => (),
 			}
 		}
 		index
@@ -2007,11 +2025,11 @@ impl Game {
 			return;
 		}
 		let kind = self.get_kind(id);
-		if kind <= etg::Permanent {
+		if kind <= Kind::Permanent {
 			self.proc(Event::Destroy, id);
-		} else if kind == etg::Spell {
+		} else if kind == Kind::Spell {
 			self.proc(Event::Discard, id);
-		} else if kind == etg::Creature {
+		} else if kind == Kind::Creature {
 			let mut data = ProcData::default();
 			self.trigger_data(Event::Predeath, id, 0, &mut data);
 			if !data.evade {
@@ -2025,14 +2043,14 @@ impl Game {
 					if card != cellcode {
 						let owner = self.get_owner(id);
 						let cell = self.new_thing(cellcode, owner);
-						self.set_kind(cell, etg::Creature);
+						self.set_kind(cell, Kind::Creature);
 						Rc::make_mut(&mut self.get_player_mut(owner).creatures)[idx as usize] =
 							cell;
 					}
 				}
 				self.deatheffect(id, idx);
 			}
-		} else if kind == etg::Player {
+		} else if kind == Kind::Player {
 			self.set(id, Flag::out, true);
 			if self.winner == 0 {
 				let mut winners = 0;
@@ -2402,23 +2420,23 @@ impl Game {
 	}
 
 	pub fn play(&mut self, c: i32, t: i32, fromhand: bool) {
-		let kind = self.get_card(self.get(c, Stat::card)).kind as i32;
+		let kind = self.get_card(self.get(c, Stat::card)).kind;
 		self.remove(c);
-		if kind == etg::Spell {
+		if kind == Kind::Spell {
 			self.castSpell(c, t, self.getSkill(c, Event::Cast)[0])
 		} else {
 			let owner = self.get_owner(c);
 			self.set(c, Stat::casts, 0);
-			if kind == etg::Creature {
+			if kind == Kind::Creature {
 				self.fx(c, Fx::Sfx(Sfx::creaPlay));
-			} else if kind <= etg::Permanent {
+			} else if kind <= Kind::Permanent {
 				self.fx(c, Fx::Sfx(Sfx::permPlay));
 			}
 			match kind {
-				etg::Weapon => self.setWeaponCore(owner, c, fromhand),
-				etg::Shield => self.setShieldCore(owner, c, fromhand),
-				etg::Permanent => self.addPermCore(owner, c, fromhand),
-				etg::Creature => self.addCreaCore(owner, c, fromhand),
+				Kind::Weapon => self.setWeaponCore(owner, c, fromhand),
+				Kind::Shield => self.setShieldCore(owner, c, fromhand),
+				Kind::Permanent => self.addPermCore(owner, c, fromhand),
+				Kind::Creature => self.addCreaCore(owner, c, fromhand),
 				_ => (),
 			}
 		}
@@ -2427,7 +2445,7 @@ impl Game {
 	pub fn useactive(&mut self, c: i32, t: i32) {
 		let cowner = self.get_owner(c);
 		let kind = self.get_kind(c);
-		if kind == etg::Spell {
+		if kind == Kind::Spell {
 			if self.spend(cowner, self.get(c, Stat::costele), self.get(c, Stat::cost)) {
 				self.play(c, t, true);
 				self.proc(Event::Cardplay, c);

@@ -6,7 +6,7 @@ import * as sock from './sock.js';
 import * as store from './store.js';
 import * as userutil from './userutil.js';
 import * as util from './util.js';
-import deckgen from './deckgen/index.js';
+import deckgen from './deckgen.js';
 import CreateGame from './Game.js';
 
 export async function run(gamethunk) {
@@ -97,7 +97,7 @@ const randomNames = [
 	'Tammi',
 	'Yuriko',
 ];
-export function mkAi(level, daily, datafn = null) {
+export async function mkAi(level, daily, datafn = null) {
 	const urdeck = sock.getDeck(),
 		{ user } = store.store.getState(),
 		minsize = user ? 30 : 10;
@@ -110,7 +110,7 @@ export function mkAi(level, daily, datafn = null) {
 		store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
 		return;
 	}
-	const deck = level === 0 ? deckgen(0, 1, 2) : deckgen(0.4, 2, 3);
+	const deck = await (level === 0 ? deckgen(0, 1, 2) : deckgen(0.4, 2, 3));
 	store.store.dispatch(store.setOptTemp('aideck', deck));
 
 	const data = {

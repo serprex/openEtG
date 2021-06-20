@@ -2087,9 +2087,9 @@ pub async fn handle_ws(
 										}
 										let code: u16 = if rarity == 4 {
 											if element > 0 && element < 13 {
-												etg::etg::NymphList[element as usize] as u16
+												etg::etg::NymphList[element as usize]
 											} else {
-												etg::etg::NymphList[rng.gen_range(1..13)] as u16
+												etg::etg::NymphList[rng.gen_range(1..13)]
 											}
 										} else {
 											let notfromele = rng.gen::<bool>();

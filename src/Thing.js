@@ -1,4 +1,3 @@
-import * as etg from './etg.js';
 import skillText from './skillText.js';
 import Card from './Card.js';
 import enums from './enum.json';
@@ -99,16 +98,17 @@ export default class Thing {
 	}
 	info() {
 		const info =
-			this.type === etg.Creature || this.type === etg.Weapon
+			this.type === this.game.wasm.Kind.Creature ||
+			this.type === this.game.wasm.Kind.Weapon
 				? `${this.trueatk()}|${this.truehp()}/${this.maxhp}`
-				: this.type === etg.Shield
+				: this.type === this.game.wasm.Kind.Shield
 				? this.truedr().toString()
 				: '';
 		const stext = skillText(this);
 		return !info ? stext : stext ? info + '\n' + stext : info;
 	}
 	isMaterial(type) {
-		return this.game.game.material(this.id, type | 0);
+		return this.game.game.material(this.id, type);
 	}
 	canactive() {
 		return this.game.game.canactive(this.id);
