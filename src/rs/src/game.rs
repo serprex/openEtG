@@ -308,7 +308,6 @@ pub enum Stat {
 	shardgolem,
 	sosa,
 	steam,
-	storedatk,
 	storedpower,
 	swarmhp,
 }

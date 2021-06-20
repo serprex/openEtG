@@ -658,7 +658,7 @@ fn eval_skill(
 			Skill::virusplague => 1.0,
 			Skill::void => 5.0,
 			Skill::web | Skill::v_web => 1.0,
-			Skill::wind => ctx.get(c, Stat::storedatk) as f32 / 2.0,
+			Skill::wind => ctx.get(c, Stat::storedpower) as f32 / 2.0,
 			Skill::wisdom => 4.0,
 			Skill::yoink => 4.0,
 			Skill::vengeance => 2.0,

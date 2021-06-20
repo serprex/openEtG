@@ -2117,7 +2117,7 @@ impl Skill {
 			}
 			Self::halveatk => {
 				let stored = (ctx.get(c, Stat::atk) + 1) / 2;
-				ctx.incrStatus(c, Stat::storedatk, stored);
+				ctx.incrStatus(c, Stat::storedpower, stored);
 				ctx.incrAtk(c, -stored);
 			}
 			Self::hasten => {
@@ -3991,9 +3991,9 @@ impl Skill {
 				}
 			}
 			Self::wind => {
-				let stored = ctx.get(c, Stat::storedatk);
+				let stored = ctx.get(c, Stat::storedpower);
 				ctx.incrAtk(c, stored);
-				ctx.set(c, Stat::storedatk, 0);
+				ctx.set(c, Stat::storedpower, 0);
 			}
 			Self::wings => {
 				if !ctx.get(t, Flag::airborne | Flag::ranged) {

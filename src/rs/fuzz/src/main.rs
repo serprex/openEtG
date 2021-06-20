@@ -1,9 +1,11 @@
 extern crate etg;
 extern crate rand;
 extern crate rand_pcg;
+extern crate rayon;
 
 use std::env::args;
 use std::iter::repeat;
+use std::sync::Mutex;
 use std::time::SystemTime;
 
 use etg::aisearch;
@@ -12,6 +14,7 @@ use etg::etg::*;
 use etg::game::{CardSet, Game, Phase};
 
 use rand::{Rng, SeedableRng};
+use rayon::prelude::*;
 
 fn main() {
 	let seed = args()
@@ -24,9 +27,10 @@ fn main() {
 				.as_secs()
 		});
 	println!("seed = {}", seed);
-	let mut rng = rand_pcg::Pcg32::seed_from_u64(seed);
-	for i in 0..usize::MAX {
-		let (set, pillar, sose) = if rng.gen() {
+	let rng = Mutex::new(rand_pcg::Pcg32::seed_from_u64(seed));
+	(0..usize::MAX).into_par_iter().for_each(|_| {
+		let seed = rng.lock().unwrap().gen();
+		let (set, pillar, sose) = if seed & 1 == 1 {
 			(CardSet::Open, card::QuantumPillar, card::ShardofSerendipity)
 		} else {
 			(
@@ -35,7 +39,8 @@ fn main() {
 				card::v_ShardofSerendipity,
 			)
 		};
-		let mut game = Game::new(rng.gen(), set);
+		println!("{}", seed);
+		let mut game = Game::new(seed, set);
 		let players = [game.new_player(), game.new_player()];
 		for &p in players.iter() {
 			game.set_leader(p, p);
@@ -60,6 +65,5 @@ fn main() {
 			let cmd = aisearch::search(&game);
 			game.r#move(cmd);
 		}
-		println!("{}", i);
-	}
+	});
 }
