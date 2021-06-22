@@ -499,11 +499,15 @@ fn eval_skill(
 			Skill::pacify => 5.0,
 			Skill::pairproduce => 2.0,
 			Skill::paleomagnetism => {
-				if card::Upped(ctx.get(c, Stat::card)) {
-					4.0
+				let owner = ctx.get_owner(c);
+				(if card::Upped(ctx.get(c, Stat::card)) {
+					2.0
 				} else {
-					5.0
-				}
+					1.0
+				} + 64.0
+					/ (quantamap.get(owner, ctx.get_player(owner).mark) * 3
+						+ quantamap.get(owner, ctx.get_player(ctx.get_foe(owner)).mark)) as f32)
+					.ln()
 			}
 			Skill::pandemonium => 3.0,
 			Skill::pandemonium2 => 4.0,
@@ -1378,7 +1382,7 @@ pub fn eval(ctx: &Game) -> f32 {
 		let mut plhp = ctx.get(pl, Stat::hp);
 		if let Some(wshield) = wall.shield {
 			match wshield {
-				WallShield::Chargeblock(charges) => pscore += (charges * 4) as f32,
+				WallShield::Chargeblock(charges) => pscore += (charges * 2) as f32,
 				WallShield::Voidshell(maxhp) => {
 					if plhp > maxhp {
 						pscore -= (plhp - maxhp) as f32;
