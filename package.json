@@ -21,8 +21,7 @@
     "redux": "^4.0.5",
     "spritesheet-js": "^1.2.6",
     "webpack": "^5.31.1",
-    "webpack-cli": "^4.6.0",
-    "worker-loader": "^3.0.8"
+    "webpack-cli": "^4.6.0"
   },
   "scripts": {
     "test": "cargo test --manifest-path=./src/rs/Cargo.toml",

@@ -12,9 +12,9 @@ import * as Components from '../Components/index.js';
 import * as store from '../store.js';
 import { mkQuestAi } from '../Quest.js';
 import enums from '../enum.json';
-import AsyncWorker from '../AsyncWorker.js';
+import AiWorker from '../AiWorker.js';
 
-const aiWorker = new AsyncWorker(import('../ai.worker.js'));
+const aiWorker = new AiWorker();
 
 function updateMap(map, k, f) {
 	return new Map(map).set(k, f(map.get(k)));

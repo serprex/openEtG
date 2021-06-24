@@ -2,9 +2,8 @@ import CreateGame from '../Game.js';
 import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
 import { randint } from '../util.js';
-import AsyncWorker from '../AsyncWorker.js';
+import AiWorker from '../AiWorker.js';
 
-const AiWorker = import('../ai.worker.js');
 let aiWorker = null;
 
 const deckeles = [
@@ -51,10 +50,9 @@ function fightItOut() {
 		fc = new Uint16Array(4);
 	if (mode === fight1000) {
 		aiWorker = [];
-		for (let i = 0; i < threads.value; i++)
-			aiWorker.push(new AsyncWorker(AiWorker));
+		for (let i = 0; i < threads.value; i++) aiWorker.push(new AiWorker());
 	} else {
-		aiWorker = new AsyncWorker(AiWorker);
+		aiWorker = new AiWorker();
 	}
 	const decks = deckeles.map(item => {
 		const deckstr = item.value.trim();

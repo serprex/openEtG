@@ -1,5 +1,4 @@
 import(/* webpackPreload: true */ '../Game.js');
-import(/* webpackPrefetch: true */ '../ai.worker.js');
 
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
