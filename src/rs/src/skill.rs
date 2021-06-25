@@ -1443,7 +1443,7 @@ impl Skill {
 						t,
 						card.skill
 							.first()
-							.and_then(|&(k, skills)| skills.first().cloned())
+							.and_then(|&(_, skills)| skills.first().cloned())
 							.unwrap(),
 					);
 				}
@@ -1479,7 +1479,7 @@ impl Skill {
 									as u32
 							})
 							.sum::<u32>();
-						if ctx.rng_ratio(1, totaldw) {
+						if totaldw > 0 && ctx.rng_ratio(1, totaldw) {
 							data.tgt = c;
 						}
 					}
