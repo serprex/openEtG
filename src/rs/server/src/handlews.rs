@@ -416,6 +416,15 @@ pub async fn handle_ws(
 							let userid = user.unwrap().lock().await.id;
 							rm_role_handler("Mod", &tx, &client, userid, &m).await;
 						}
+						UserMessage::modresetpass { ref u, m, .. } => {
+							if u == "serprex" {
+								let mut wusers = users.write().await;
+								if let Some(user) = wusers.load(&*client, &m).await {
+									let mut user = user.lock().await;
+									user.auth = String::new();
+								}
+							}
+						}
 						UserMessage::codesmithadd { m, .. } => {
 							let userid = user.unwrap().lock().await.id;
 							add_role_handler("Codesmith", &tx, &client, userid, &m).await;

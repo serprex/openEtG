@@ -19,6 +19,7 @@ let socket = new WebSocket(endpoint),
 const guestStyle = {
 	overflow: 'auto',
 	fontStyle: 'italic',
+	color: '#ccc',
 };
 const mode2Style = {
 	overflow: 'auto',

@@ -135,7 +135,7 @@ export default function parseChat(e) {
 			sock.userEmit('modclear');
 		} else if (
 			user &&
-			msg.match(/^\/(mod(guest|mute|add|rm|motd)|codesmith(add|rm)) /)
+			msg.match(/^\/(mod(guest|mute|add|rm|motd|resetpass)|codesmith(add|rm)) /)
 		) {
 			const sp = msg.indexOf(' ');
 			sock.userEmit(msg.slice(1, sp), { m: msg.slice(sp + 1) });

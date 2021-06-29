@@ -24,6 +24,11 @@ pub enum UserMessage {
 		a: String,
 		m: String,
 	},
+	modresetpass {
+		u: String,
+		a: String,
+		m: String,
+	},
 	codesmithadd {
 		u: String,
 		a: String,
@@ -378,6 +383,7 @@ impl UserMessage {
 		match *self {
 			UserMessage::modadd { ref u, ref a, .. }
 			| UserMessage::modrm { ref u, ref a, .. }
+			| UserMessage::modresetpass { ref u, ref a, .. }
 			| UserMessage::codesmithadd { ref u, ref a, .. }
 			| UserMessage::codesmithrm { ref u, ref a, .. }
 			| UserMessage::modguest { ref u, ref a, .. }
