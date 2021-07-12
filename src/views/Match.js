@@ -260,6 +260,7 @@ function SpellDisplay(props) {
 										top: `${item.style.y}px`,
 										opacity: item.style.opacity,
 										zIndex: '3',
+										pointerEvents: 'none',
 									}}
 								/>
 								{p1 && props.playByPlayMode !== 'noline' && (

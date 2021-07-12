@@ -270,11 +270,7 @@ export function Card(props) {
 			{!!card.rarity && (
 				<span
 					className={`ico r${card.rarity}`}
-					style={{
-						position: 'absolute',
-						right: '2px',
-						top: '40px',
-					}}
+					style={{ position: 'absolute', right: '2px', top: '40px' }}
 				/>
 			)}
 			{!!card.cost && (
@@ -306,8 +302,8 @@ export function DeckDisplay(props) {
 	let mark = -1,
 		j = -1;
 	const children = [],
-		codeCount = [],
-		bcodeCount = [];
+		cardMinus = [],
+		cardCount = [];
 	for (let i = 0; i < props.deck.length; i++) {
 		const code = props.deck[i],
 			card = props.cards.Codes[code];
@@ -315,13 +311,16 @@ export function DeckDisplay(props) {
 			j++;
 			let opacity;
 			if (props.pool && !card.isFree()) {
-				const bcode = etgutil.asShiny(etgutil.asUpped(code, 0), 0);
-				codeCount[code] = (codeCount[code] ?? 0) + 1;
-				bcodeCount[bcode] = (bcodeCount[bcode] ?? 0) + 1;
-				if (
-					codeCount[code] > (props.pool[code] ?? 0) ||
-					(!card.getStatus('pillar') && bcodeCount[bcode] > 6)
-				) {
+				const tooMany =
+					!card.getStatus('pillar') &&
+					props.cards.cardCount(cardCount, card) >= 6;
+				const notEnough = !props.cards.checkPool(
+					props.pool,
+					cardCount,
+					cardMinus,
+					card,
+				);
+				if (tooMany || notEnough) {
 					opacity = '.5';
 				}
 			}

@@ -1,6 +1,6 @@
+import Card from './Card.js';
 import * as etg from './etg.js';
 import * as etgutil from './etgutil.js';
-import Card from './Card.js';
 
 export default class Cards {
 	constructor(CardsJson) {
@@ -10,7 +10,7 @@ export default class Cards {
 
 		CardsJson.forEach((data, type) => {
 			const keys = data[0],
-				cardinfo = {};
+				cardinfo = Object.create(null);
 			for (let i = 1; i < data.length; i++) {
 				cardinfo.E = i - 1;
 				for (const carddata of data[i]) {
@@ -59,37 +59,59 @@ export default class Cards {
 		return cmp ? keys.sort(cmp) : keys;
 	}
 
-	sumCardMinus(cardMinus, code) {
-		let sum = 0;
-		for (let i = 0; i < 4; i++) {
-			sum +=
-				cardMinus[etgutil.asShiny(etgutil.asUpped(code, i & 1), i & 2)] ?? 0;
+	cardCount(counts, card) {
+		return (
+			counts[etgutil.asShiny(etgutil.asUpped(card.code, false), false)] ?? 0
+		);
+	}
+
+	checkPool(pool, cardCount, cardMinus, card) {
+		const uncode = etgutil.asShiny(etgutil.asUpped(card.code, false), false);
+
+		if ((cardMinus[card.code] ?? 0) + 1 <= pool[card.code]) {
+			cardMinus[card.code] = (cardMinus[card.code] ?? 0) + 1;
+			cardCount[uncode] = (cardCount[uncode] ?? 0) + 1;
+			return true;
 		}
-		return sum;
+
+		if (
+			card.rarity === -1 ||
+			(card.rarity === 4 && card.shiny) ||
+			(!card.upped && !card.shiny)
+		) {
+			return false;
+		}
+
+		const amount = card.upped && card.shiny ? 36 : 6;
+		if ((cardMinus[uncode] ?? 0) + amount <= pool[uncode]) {
+			cardMinus[uncode] = (cardMinus[uncode] ?? 0) + amount;
+			cardCount[uncode] = (cardCount[uncode] ?? 0) + 1;
+			return true;
+		}
+		return false;
 	}
 
 	filterDeck(deck, pool, preserve) {
-		const cardMinus = [];
+		const cardMinus = [],
+			cardCount = [];
 		for (let i = deck.length - 1; i >= 0; i--) {
 			let code = deck[i],
 				card = this.Codes[code];
 			if (!card.getStatus('pillar')) {
-				if (this.sumCardMinus(cardMinus, code) === 6) {
+				if (this.cardCount(cardCount, code) >= 6) {
 					deck.splice(i, 1);
 					continue;
 				}
 			}
 			if (!card.isFree()) {
-				if ((cardMinus[code] ?? 0) < (pool[code] ?? 0)) {
-					cardMinus[code] = (cardMinus[code] ?? 0) + 1;
-				} else {
+				if (!this.checkPool(pool, cardCount, cardMinus, card)) {
 					code = etgutil.asShiny(code, !card.shiny);
 					card = this.Codes[code];
-					if (card.isFree()) {
+					if (
+						card.isFree() ||
+						this.checkPool(pool, cardCount, cardMinus, card)
+					) {
 						deck[i] = code;
-					} else if ((cardMinus[code] ?? 0) < (pool[code] ?? 0)) {
-						deck[i] = code;
-						cardMinus[code] = (cardMinus[code] ?? 0) + 1;
 					} else if (!preserve) {
 						deck.splice(i, 1);
 					}
@@ -105,7 +127,8 @@ export default class Cards {
 			user.accountbound ?? '',
 			etgutil.deck2pool(user.pool),
 		);
-		const cardMinus = [];
+		const cardMinus = [],
+			cardCount = [];
 		let dlen = 0;
 		for (let i = deck.length - 1; i >= 0; i--) {
 			const code = deck[i];
@@ -114,16 +137,16 @@ export default class Cards {
 			const card = this.Codes[code];
 			if (
 				!card ||
-				(!card.getStatus('pillar') && this.sumCardMinus(cardMinus, code) === 6)
+				(!card.getStatus('pillar') && this.cardCount(cardCount, card) >= 6)
 			) {
 				return false;
 			}
-			if (!card.isFree() && pool) {
-				if ((cardMinus[code] ?? 0) < (pool[code] ?? 0)) {
-					cardMinus[code] = (cardMinus[code] ?? 0) + 1;
-				} else {
-					return false;
-				}
+			if (
+				!card.isFree() &&
+				pool &&
+				!this.checkPool(pool, cardCount, cardMinus, card)
+			) {
+				return false;
 			}
 		}
 		if (dlen < minsize || dlen > 60) return false;

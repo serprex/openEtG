@@ -63,7 +63,7 @@ export default connect(({ user }) => ({ user }))(
 			function unpolishCard(card) {
 				if (card.rarity || (card.shiny && card.upped)) {
 					if (!card.shiny) return 'You cannot unpolish non-shiny cards.';
-					if (!card.rarity === 4) return 'You cannot unpolish Nymphs.';
+					if (card.rarity === 4) return 'You cannot unpolish Nymphs.';
 					sock.userExec('unpolish', { card: card.code });
 				} else return 'You cannot unpolish pillars.';
 			}
@@ -195,10 +195,9 @@ export default connect(({ user }) => ({ user }))(
 								newstate.downgrade = false;
 							}
 							if (card.rarity === 4) {
-								newstate.info3 =
-									'This card cannot be ' +
-									(card.shiny ? 'un' : '') +
-									'polished.';
+								newstate.info3 = `This card cannot be ${
+									card.shiny ? 'un' : ''
+								} polished.`;
 								newstate.canLish = false;
 							} else if (card.shiny) {
 								newstate.info3 = card.isFree()
