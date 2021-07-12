@@ -3097,6 +3097,9 @@ impl Skill {
 						.cloned()
 						.filter(|&cr| cr != 0),
 				);
+				if candidates.len() > 1 {
+					candidates.retain(|&id| id != t);
+				}
 				if let Some(&id) = ctx.choose(&candidates) {
 					let halfhp = (ctx.truehp(t) + 1) / 2;
 					let halfatk = (ctx.trueatk(t) + 1) / 2;
