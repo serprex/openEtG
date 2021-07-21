@@ -406,12 +406,58 @@ function CardSelectorColumn(props) {
 		}
 		return card;
 	}
+	function poolCount(code) {
+		return (
+			props.cardpool[code] - ((props.cardminus && props.cardminus[code]) ?? 0)
+		);
+	}
 	const children = [],
 		countTexts = [];
 	for (let j = 0; j < props.cards.length; j++) {
 		const y = props.y + j * 19,
 			card = props.cards[j],
 			code = card.code;
+		let opacity = '.5';
+		if (props.cardpool) {
+			const scode = etgutil.asShiny(code, true);
+			const cardAmount = card.isFree()
+					? '-'
+					: code in props.cardpool
+					? poolCount(code)
+					: 0,
+				shinyAmount =
+					props.filterboth && !props.shiny && scode in props.cardpool
+						? poolCount(scode)
+						: 0;
+			if (!props.cardpool || cardAmount !== 0 || shinyAmount !== 0) {
+				opacity = undefined;
+			} else if (card.upped) {
+				if (
+					poolCount(etgutil.asUpped(code, false)) >=
+					(card.rarity === -1 ? 1 : 6) * (card.upped && card.shiny ? 6 : 1)
+				) {
+					opacity = undefined;
+				} else if (
+					card.rarity === 4 &&
+					poolCount(etgutil.asUpped(scode, false)) >= 1
+				) {
+					opacity = undefined;
+				}
+			}
+			countTexts.push(
+				<div
+					key={countTexts.length}
+					className={`selectortext ${
+						props.maxedIndicator && !card.getStatus('pillar') && cardAmount >= 6
+							? cardAmount >= 12
+								? ' beigeback'
+								: ' lightback'
+							: ''
+					}`}>
+					{cardAmount + (shinyAmount ? '/' + shinyAmount : '')}
+				</div>,
+			);
+		}
 		children.push(
 			<CardImage
 				key={code}
@@ -419,6 +465,7 @@ function CardSelectorColumn(props) {
 					position: 'absolute',
 					left: `${props.x}px`,
 					top: `${y}px`,
+					opacity,
 				}}
 				card={card}
 				onClick={props.onClick && (() => props.onClick(maybeShiny(card)))}
@@ -434,33 +481,6 @@ function CardSelectorColumn(props) {
 				}
 			/>,
 		);
-		if (props.cardpool) {
-			const scode = etgutil.asShiny(code, true);
-			const cardAmount = card.isFree()
-					? '-'
-					: code in props.cardpool
-					? props.cardpool[code] -
-					  ((props.cardminus && props.cardminus[code]) ?? 0)
-					: 0,
-				shinyAmount =
-					props.filterboth && !props.shiny && scode in props.cardpool
-						? props.cardpool[scode] -
-						  ((props.cardminus && props.cardminus[scode]) ?? 0)
-						: 0;
-			countTexts.push(
-				<div
-					key={countTexts.length}
-					className={`selectortext ${
-						props.maxedIndicator && !card.getStatus('pillar') && cardAmount >= 6
-							? cardAmount >= 12
-								? ' beigeback'
-								: ' lightback'
-							: ''
-					}`}>
-					{cardAmount + (shinyAmount ? '/' + shinyAmount : '')}
-				</div>,
-			);
-		}
 	}
 	return (
 		<>
@@ -487,7 +507,6 @@ export class CardSelectorCore extends Component {
 			props.filter !== state.filter ||
 			props.element !== state.element ||
 			props.rarity !== state.rarity ||
-			props.showall !== state.showall ||
 			props.shiny !== state.shiny ||
 			props.filterboth !== state.filterboth
 		) {
@@ -502,12 +521,6 @@ export class CardSelectorCore extends Component {
 							((i % 3 === 0 && x.type === etg.Creature) ||
 								(i % 3 === 1 && x.type <= etg.Permanent) ||
 								(i % 3 === 2 && x.type === etg.Spell)) &&
-							(!props.cardpool ||
-								x.code in props.cardpool ||
-								(props.filterboth &&
-									etgutil.asShiny(x.code, true) in props.cardpool) ||
-								props.showall ||
-								x.isFree()) &&
 							(!props.rarity || props.rarity === x.rarity),
 						props.cards.cardCmp,
 						props.shiny && !props.filterboth,
@@ -521,7 +534,6 @@ export class CardSelectorCore extends Component {
 				filter: props.filter,
 				element: props.element,
 				rarity: props.rarity,
-				showall: props.showall,
 				shiny: props.shiny,
 				filterboth: props.filterboth,
 				columns,
@@ -550,7 +562,6 @@ export class CardSelector extends Component {
 		super(props);
 		this.state = {
 			shiny: false,
-			showall: props.showall ?? false,
 			element: 0,
 			rarity: 0,
 		};
@@ -569,16 +580,6 @@ export class CardSelector extends Component {
 					}}
 					onClick={() => this.setState({ shiny: !this.state.shiny })}
 				/>
-				<input
-					type="button"
-					value={this.state.showall ? 'Auto Hide' : 'Show All'}
-					style={{
-						position: 'absolute',
-						left: '4px',
-						top: '530px',
-					}}
-					onClick={() => this.setState({ showall: !this.state.showall })}
-				/>
 				<RaritySelector
 					x={80}
 					y={338}
@@ -596,7 +597,6 @@ export class CardSelector extends Component {
 					x={100}
 					y={272}
 					shiny={this.state.shiny}
-					showall={this.state.showall}
 					rarity={this.state.rarity}
 					element={this.state.element}
 				/>

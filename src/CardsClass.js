@@ -74,15 +74,22 @@ export default class Cards {
 			return true;
 		}
 
-		if (
-			card.rarity === -1 ||
-			(card.rarity === 4 && card.shiny) ||
-			(!card.upped && !card.shiny)
-		) {
+		if (!card.upped && !card.shiny) {
 			return false;
 		}
 
-		const amount = card.upped && card.shiny ? 36 : 6;
+		if (card.rarity === 4 && card.shiny) {
+			const scode = etgutil.asShiny(uncode, true);
+			if ((cardMinus[scode] ?? 0) + 1 <= pool[scode]) {
+				cardMinus[scode] = (cardMinus[scode] ?? 0) + 1;
+				cardCount[scode] = (cardCount[scode] ?? 0) + 1;
+				return true;
+			}
+			return false;
+		}
+
+		const amount =
+			(card.rarity === -1 ? 1 : 6) * (card.upped && card.shiny ? 6 : 1);
 		if ((cardMinus[uncode] ?? 0) + amount <= pool[uncode]) {
 			cardMinus[uncode] = (cardMinus[uncode] ?? 0) + amount;
 			cardCount[uncode] = (cardCount[uncode] ?? 0) + 1;
