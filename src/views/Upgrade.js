@@ -182,14 +182,14 @@ export default connect(({ user }) => ({ user }))(
 							if (card.upped) {
 								newstate.info1 = card.isFree()
 									? ''
-									: card.rarity !== -1
+									: card.rarity !== -1 && !(card.rarity === 4 && card.shiny)
 									? 'Convert into 6 downgraded copies.'
 									: 'Convert into a downgraded version.';
 								newstate.downgrade = true;
 							} else {
 								newstate.info1 = card.isFree()
 									? '50$ to upgrade'
-									: card.rarity !== -1
+									: card.rarity !== -1 && !(card.rarity === 4 || card.shiny)
 									? 'Convert 6 into an upgraded version.'
 									: 'Convert into an upgraded version.';
 								newstate.downgrade = false;
