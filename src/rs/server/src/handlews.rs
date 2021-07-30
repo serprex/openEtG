@@ -7,7 +7,7 @@ use bb8_postgres::tokio_postgres::{
 	types::{Json, ToSql},
 	Client, GenericClient,
 };
-use futures::{FutureExt, StreamExt};
+use futures::{SinkExt, StreamExt, TryFutureExt};
 use fxhash::FxHashMap;
 use openssl::hash::MessageDigest;
 use openssl::pkcs5::pbkdf2_hmac;
@@ -52,12 +52,12 @@ where
 	if let Ok(valstr) = serde_json::to_string(val) {
 		let msg = Message::text(valstr);
 		for sock in socks.read().await.values() {
-			sock.tx.send(Ok(msg.clone())).ok();
+			sock.tx.send(msg.clone()).ok();
 		}
 	}
 }
 
-type WsSender = mpsc::UnboundedSender<Result<Message, warp::Error>>;
+type WsSender = mpsc::UnboundedSender<Message>;
 
 pub struct Sock {
 	tx: WsSender,
@@ -74,7 +74,7 @@ where
 	T: serde::Serialize,
 {
 	if let Ok(valstr) = serde_json::to_string(val) {
-		tx.send(Ok(Message::text(valstr))).ok();
+		tx.send(Message::text(valstr)).ok();
 	}
 }
 
@@ -186,7 +186,7 @@ async fn login_success(
 	}
 
 	if let Ok(userstr) = serde_json::to_string(&WsResponse::login(&*user)) {
-		if tx.send(Ok(Message::text(userstr))).is_ok() {
+		if tx.send(Message::text(userstr)).is_ok() {
 			usersocks
 				.write()
 				.await
@@ -356,14 +356,14 @@ pub async fn handle_ws(
 ) {
 	let sockid = NEXT_SOCK_ID.fetch_add(1, Ordering::Relaxed);
 
-	let (user_ws_tx, mut user_ws_rx) = ws.split();
+	let (mut user_ws_tx, mut user_ws_rx) = ws.split();
 	let (tx, rx) = mpsc::unbounded_channel();
-	let rx = UnboundedReceiverStream::new(rx);
-	tokio::spawn(rx.forward(user_ws_tx).map(|result| {
-		if let Err(e) = result {
-			println!("send err {}", e);
+	let mut rx = UnboundedReceiverStream::new(rx);
+	tokio::spawn(async move {
+		while let Some(result) = rx.next().await {
+			user_ws_tx.send(result).unwrap_or_else(|e| println!("send err {}", e)).await;
 		}
-	}));
+	});
 
 	socks.write().await.insert(
 		sockid,
@@ -1148,8 +1148,8 @@ pub async fn handle_ws(
 																	data: &gamedata,
 																}) {
 																	let pvpgive = Message::text(pvpgive);
-																	tx.send(Ok(pvpgive.clone())).ok();
-																	foesock.tx.send(Ok(pvpgive)).ok();
+																	tx.send(pvpgive.clone()).ok();
+																	foesock.tx.send(pvpgive).ok();
 																}
 															}
 														}
@@ -1235,7 +1235,7 @@ pub async fn handle_ws(
 														let name: String = row.get(1);
 														if let Some(sockid) = rusersocks.get(&name) {
 															if let Some(sock) = rsocks.get(sockid) {
-																sock.tx.send(Ok(Message::text(movejson.clone()))).ok();
+																sock.tx.send(Message::text(movejson.clone())).ok();
 															}
 														}
 													}
@@ -1662,7 +1662,7 @@ pub async fn handle_ws(
 										})
 										.ok()
 										.and_then(|msgstr| {
-											sock.tx.send(Ok(Message::text(msgstr))).ok()
+											sock.tx.send(Message::text(msgstr)).ok()
 										})
 										.is_some()
 										{
