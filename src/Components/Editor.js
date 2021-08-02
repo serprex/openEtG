@@ -72,6 +72,7 @@ export default class Editor extends PureComponent {
 					filterboth={!!this.props.pool}
 					cardpool={this.props.pool}
 					cardminus={this.props.cardMinus}
+					noupped={this.props.noupped}
 				/>
 				<input
 					type="button"

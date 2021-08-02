@@ -512,6 +512,7 @@ export class CardSelectorCore extends Component {
 		) {
 			const columns = [];
 			for (let i = 0; i < 6; i++) {
+				if (props.noupped && i > 2) break;
 				columns.push(
 					props.cards.filter(
 						i > 2,

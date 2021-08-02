@@ -136,6 +136,7 @@ export default connect(({ user }) => ({ user }))(
 						cardMinus={this.state.cardMinus}
 						setDeck={this.setDeck}
 						setMark={dmark => this.setState({ dmark })}
+						noupped={!this.props.acard.upped}
 					/>
 					<AttrUi
 						y={0}
@@ -173,10 +174,13 @@ export default connect(({ user }) => ({ user }))(
 						type="button"
 						value="Save & Exit"
 						onClick={() => {
-							if (this.state.deck.length < 30 || sumscore > arpts) {
+							if (
+								!Cards.isDeckLegal(this.state.deck, this.props.user) ||
+								sumscore > arpts
+							) {
 								this.props.dispatch(
 									store.chatMsg(
-										'35 cards required before submission',
+										'Invalid deck, 35 cards required before submission',
 										'System',
 									),
 								);
