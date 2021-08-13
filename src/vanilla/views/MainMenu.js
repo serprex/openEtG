@@ -57,17 +57,6 @@ export default connect(({ user, orig, opts }) => ({
 	class OriginalMainMenu extends Component {
 		state = { origname: '', origpass: '' };
 
-		componentDidMount() {
-			this.props.dispatch(
-				store.setCmds({
-					setorigpool: data => {
-						this.props.dispatch(store.chatMsg('Imported', 'System'));
-						this.props.dispatch(store.updateOrig({ pool: data.pool }));
-					},
-				}),
-			);
-		}
-
 		mkAi4 = () => {
 			const e1 = Rng.upto(12) + 1,
 				e2 = Rng.upto(12) + 1,
@@ -263,45 +252,6 @@ export default connect(({ user, orig, opts }) => ({
 							top: '170px',
 						}}
 					/>
-					<input
-						value={this.state.origname}
-						placeholder="Original Username"
-						onChange={e => this.setState({ origname: e.target.value })}
-						style={{
-							position: 'absolute',
-							left: '700px',
-							top: '110px',
-						}}
-					/>
-					<input
-						type="password"
-						value={this.state.origpass}
-						placeholder="Original Password"
-						onChange={e => this.setState({ origpass: e.target.value })}
-						style={{
-							position: 'absolute',
-							left: '700px',
-							top: '140px',
-						}}
-					/>
-					<input
-						type="button"
-						value="Import"
-						onClick={() =>
-							userEmit('origimport', {
-								name: this.state.origname,
-								pass: this.state.origpass,
-							})
-						}
-						style={{
-							position: 'absolute',
-							left: '700px',
-							top: '170px',
-						}}
-					/>
-					<div style={{ position: 'absolute', left: '700px', top: '200px' }}>
-						Only nymphs & marks
-					</div>
 					<Components.ExitBtn x={9} y={140} />
 					<Components.Text
 						text={`${this.props.orig.electrum}$`}

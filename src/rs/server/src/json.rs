@@ -235,12 +235,6 @@ pub enum UserMessage {
 		rmpool: Option<String>,
 		electrum: Option<i16>,
 	},
-	origimport {
-		u: String,
-		a: String,
-		name: String,
-		pass: String,
-	},
 	roll {
 		u: String,
 		a: String,
@@ -419,7 +413,6 @@ impl UserMessage {
 			| UserMessage::reloadmoves { ref u, ref a, .. }
 			| UserMessage::updateorig { ref u, ref a, .. }
 			| UserMessage::origadd { ref u, ref a, .. }
-			| UserMessage::origimport { ref u, ref a, .. }
 			| UserMessage::roll { ref u, ref a, .. }
 			| UserMessage::upgrade { ref u, ref a, .. }
 			| UserMessage::downgrade { ref u, ref a, .. }
@@ -585,9 +578,6 @@ pub enum WsResponse<'a> {
 		#[serde(rename = "X")]
 		sides: u32,
 		sum: u64,
-	},
-	setorigpool {
-		pool: &'a Cardpool,
 	},
 	tradecanceled {
 		u: &'a str,
