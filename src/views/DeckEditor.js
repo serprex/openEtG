@@ -1,13 +1,13 @@
+import { Component, createRef, PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { PureComponent, Component, createRef } from 'react';
 
-import * as etgutil from '../etgutil.js';
 import Cards from '../Cards.js';
+import Editor from '../Components/Editor.js';
 import * as Tutor from '../Components/Tutor.js';
+import * as etgutil from '../etgutil.js';
 import * as sock from '../sock.js';
 import * as store from '../store.js';
 import { chain } from '../util.js';
-import Editor from '../Components/Editor.js';
 
 function processDeck(pool, dcode) {
 	let mark = 0,
@@ -186,11 +186,7 @@ const DeckSelector = connect(({ user }) => ({ user }))(
 							}
 						}}
 						onClick={e => e.target.setSelectionRange(0, 999)}
-						style={{
-							position: 'absolute',
-							left: '4px',
-							top: '4px',
-						}}
+						style={{ position: 'absolute', left: '4px', top: '4px' }}
 					/>
 					<input
 						type="button"
@@ -202,6 +198,16 @@ const DeckSelector = connect(({ user }) => ({ user }))(
 						}}
 						onClick={() => {
 							this.props.saveDeck(this.props.user.selectedDeck);
+							this.props.saveDeck(this.state.name, true);
+							this.props.onClose();
+						}}
+					/>
+					<input
+						type="button"
+						value="Rename"
+						style={{ position: 'absolute', left: '258px', top: '4px' }}
+						onClick={() => {
+							sock.userExec('rmdeck', { name: this.props.user.selectedDeck });
 							this.props.saveDeck(this.state.name, true);
 							this.props.onClose();
 						}}
@@ -319,13 +325,8 @@ export default connect(({ user }) => ({
 						setMark={mark => this.setState({ mark })}
 					/>
 					<Tutor.Tutor x={4} y={220} panels={Tutor.Editor} />
-					<label
-						style={{
-							position: 'absolute',
-							left: '536px',
-							top: '238px',
-						}}>
-						Deck&nbsp;
+					<label style={{ position: 'absolute', left: '536px', top: '238px' }}>
+						Deck &nbsp;
 						<input
 							autoFocus
 							value={this.currentDeckCode()}
@@ -353,12 +354,7 @@ export default connect(({ user }) => ({
 							}}
 						/>
 					</label>
-					<div
-						style={{
-							position: 'absolute',
-							top: '8px',
-							left: '8px',
-						}}>
+					<div style={{ position: 'absolute', top: '8px', left: '8px' }}>
 						{this.props.user.selectedDeck}
 					</div>
 					<input
@@ -377,11 +373,7 @@ export default connect(({ user }) => ({
 						onClick={() =>
 							this.setState(processDeck(this.state.pool, sock.getDeck()))
 						}
-						style={{
-							position: 'absolute',
-							left: '8px',
-							top: '162px',
-						}}
+						style={{ position: 'absolute', left: '8px', top: '162px' }}
 					/>
 					<input
 						type="button"
@@ -390,11 +382,7 @@ export default connect(({ user }) => ({
 							this.saveDeck(this.props.user.selectedDeck, true);
 							this.props.dispatch(store.doNav(import('../views/MainMenu.js')));
 						}}
-						style={{
-							position: 'absolute',
-							left: '8px',
-							top: '110px',
-						}}
+						style={{ position: 'absolute', left: '8px', top: '110px' }}
 					/>
 					<Qecks onClick={this.loadDeck} />
 					{this.state.deckmode && (
