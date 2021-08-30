@@ -181,37 +181,46 @@ const DeckSelector = connect(({ user }) => ({ user }))(
 						value={this.state.name}
 						onChange={e => this.setState({ name: e.target.value })}
 						onKeyPress={e => {
-							if (e.which === 13) {
+							if (
+								e.which === 13 &&
+								(e.target.value || this.props.user.decks[''])
+							) {
 								this.props.loadDeck(e.target.value);
 							}
 						}}
 						onClick={e => e.target.setSelectionRange(0, 999)}
 						style={{ position: 'absolute', left: '4px', top: '4px' }}
 					/>
-					<input
-						type="button"
-						value="Create"
-						style={{
-							position: 'absolute',
-							left: '158px',
-							top: '4px',
-						}}
-						onClick={() => {
-							this.props.saveDeck(this.props.user.selectedDeck);
-							this.props.saveDeck(this.state.name, true);
-							this.props.onClose();
-						}}
-					/>
-					<input
-						type="button"
-						value="Rename"
-						style={{ position: 'absolute', left: '258px', top: '4px' }}
-						onClick={() => {
-							sock.userExec('rmdeck', { name: this.props.user.selectedDeck });
-							this.props.saveDeck(this.state.name, true);
-							this.props.onClose();
-						}}
-					/>
+					{this.state.name && (
+						<>
+							<input
+								type="button"
+								value="Create"
+								style={{
+									position: 'absolute',
+									left: '158px',
+									top: '4px',
+								}}
+								onClick={() => {
+									this.props.saveDeck(this.props.user.selectedDeck);
+									this.props.saveDeck(this.state.name, true);
+									this.props.onClose();
+								}}
+							/>
+							<input
+								type="button"
+								value="Rename"
+								style={{ position: 'absolute', left: '258px', top: '4px' }}
+								onClick={() => {
+									sock.userExec('rmdeck', {
+										name: this.props.user.selectedDeck,
+									});
+									this.props.saveDeck(this.state.name, true);
+									this.props.onClose();
+								}}
+							/>
+						</>
+					)}
 					<input
 						type="button"
 						value="Exit"
@@ -300,7 +309,6 @@ export default connect(({ user }) => ({
 		};
 
 		loadDeck = name => {
-			if (!name) return;
 			this.saveDeck(this.props.user.selectedDeck);
 			sock.userExec('setdeck', { name });
 		};

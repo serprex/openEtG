@@ -32,7 +32,6 @@ export default function parseChat(e) {
 				clear: 'Clear chat',
 				who: 'List users online',
 				roll: 'Server rolls XdY publicly',
-				decks: 'List all decks. Accepts a regex filter',
 				mod: 'List mods',
 				mute: 'If no user specified, mute chat entirely',
 				unmute: 'If no user specified, unmute chat entirely',
@@ -78,39 +77,6 @@ export default function parseChat(e) {
 				data.X = ndn[1] >>> 0;
 			}
 			sock.userEmit('roll', data);
-		} else if (msg.match(/^\/decks/) && user) {
-			let names = Object.keys(user.decks);
-			try {
-				const rx = msg.length > 7 && new RegExp(msg.slice(7));
-				if (rx) {
-					names = names.filter(name => name.match(rx));
-				}
-			} catch (_e) {}
-			store.store.dispatch(
-				store.chat(
-					names.sort().map(name => {
-						const deck = user.decks[name];
-						return (
-							<div>
-								<a
-									href={`deck/${deck}`}
-									target="_blank"
-									className={
-										'ico ce' +
-										etgutil.fromTrueMark(parseInt(deck.slice(-3), 32))
-									}
-								/>
-								<span
-									onClick={e => {
-										sock.userExec('setdeck', { name });
-									}}>
-									{name}
-								</span>
-							</div>
-						);
-					}),
-				),
-			);
 		} else if (msg === '/mute') {
 			store.store.dispatch(store.setOptTemp('muteall', true));
 			chatmute();
