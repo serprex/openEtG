@@ -1,7 +1,7 @@
 {
 	"parser": "babel",
 	"useTabs": true,
-	"jsxBracketSameLine": true,
+	"bracketSameLine": true,
 	"trailingComma": "all",
 	"singleQuote": true,
 	"endOfLine": "lf",

@@ -151,6 +151,6 @@ module.exports = {
 		}),
 	],
 	watchOptions: {
-		ignored: ['src/enum.json', 'src/rs/src/generated.rs']
-	}
+		ignored: ['src/enum.json', 'src/rs/src/generated.rs'],
+	},
 };

@@ -1,4 +1,4 @@
-import {deckgen_duo, deckgen_bow} from './Game.js';
+import { deckgen_duo, deckgen_bow } from './Game.js';
 
 export default function deckgen(uprate, markpower, maxRarity) {
 	const r = Math.random() * 13,
