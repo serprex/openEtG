@@ -413,23 +413,25 @@ export default connect(({ user }) => ({ user }))(
 									top: '8px',
 								}}
 							/>
-							<input
-								type="button"
-								value="Buy"
-								onClick={() => {
-									sock.userEmit('bzbid', {
-										price: this.state.buy,
-										cards:
-											etgutil.encodeCount(this.state.buyq || 1) +
-											etgutil.encodeCode(this.state.bcard.code),
-									});
-								}}
-								style={{
-									position: 'absolute',
-									left: '100px',
-									top: '40px',
-								}}
-							/>
+							{this.state.buy > userutil.sellValue(this.state.bcard) && (
+								<input
+									type="button"
+									value="Buy"
+									onClick={() => {
+										sock.userEmit('bzbid', {
+											price: this.state.buy,
+											cards:
+												etgutil.encodeCount(this.state.buyq || 1) +
+												etgutil.encodeCode(this.state.bcard.code),
+										});
+									}}
+									style={{
+										position: 'absolute',
+										left: '100px',
+										top: '40px',
+									}}
+								/>
+							)}
 							<input
 								placeholder="Price"
 								value={this.state.buy || ''}
