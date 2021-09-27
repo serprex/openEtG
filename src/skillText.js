@@ -544,7 +544,7 @@ const data = {
 		'Gain maximum HP and heal an amount equal to the 1:4 in your quanta pool after casting this spell.',
 	stasis: "Creatures do not attack at the end of each player's turn.",
 	stasisdraw:
-		'Target player cannot draw cards from their deck until their end of turn. Their deck is protected until their next turn starts.',
+		'Target player cannot draw cards from their deck until their end of turn, instead drawing unupgraded singularities. Their deck is protected until their next turn starts.',
 	static: 'Deals 2 spell damage to opponent for each attacker.',
 	steal: 'You gain control of target permanent.',
 	steam:

@@ -2107,8 +2107,12 @@ impl Game {
 	}
 
 	fn drawcore(&mut self, id: i32, isstep: bool) {
-		if !self.get_player(id).hand.is_full() && !self.get(id, Flag::drawlock) {
-			let cardid = self.draw(id);
+		if !self.get_player(id).hand.is_full() {
+			let cardid = if self.get(id, Flag::drawlock) {
+				self.new_thing(card::Singularity, id)
+			} else {
+				self.draw(id)
+			};
 			if cardid != 0 && self.addCard(id, cardid) != -1 {
 				self.fx(cardid, Fx::StartPos(-id));
 				self.proc_data(
