@@ -74,7 +74,7 @@ export default class Cards {
 			return true;
 		}
 
-		if (!card.upped && !card.shiny) {
+		if ((!card.upped && !card.shiny) || this.Names.Relic) {
 			return false;
 		}
 

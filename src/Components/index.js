@@ -431,7 +431,7 @@ function CardSelectorColumn(props) {
 						: 0;
 			if (!props.cardpool || cardAmount !== 0 || shinyAmount !== 0) {
 				opacity = undefined;
-			} else if (card.upped) {
+			} else if (card.upped && !card.Cards.Names.Relic) {
 				if (
 					poolCount(etgutil.asUpped(code, false)) >=
 					(card.rarity === -1 ? 1 : 6) * (card.upped && card.shiny ? 6 : 1)

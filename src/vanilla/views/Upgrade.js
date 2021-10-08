@@ -111,9 +111,9 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 						cardpool={cardpool}
 						cardminus={cardminus}
 						filter={card =>
-							!card.isFree() &&
-							card.code in cardpool &&
-							(cardminus[card.code] ?? 0) < cardpool[card.code]
+							card.isFree() ||
+							(card.code in cardpool &&
+								(cardminus[card.code] ?? 0) < cardpool[card.code])
 						}
 						onMouseOver={card => this.setState({ card })}
 						onClick={card => {
