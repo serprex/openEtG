@@ -4,8 +4,9 @@ use std::collections::{BTreeMap, HashMap};
 use std::convert::{Infallible, TryFrom};
 use std::fmt::Write;
 use std::sync::Arc;
-use std::time::SystemTime;
+use std::time::{Duration, SystemTime};
 
+use httpdate::HttpDate;
 use tokio::sync::RwLock;
 use warp::http::{self, header, response, HeaderValue, Response};
 use warp::hyper::body::Bytes;
@@ -15,7 +16,6 @@ use etg::card;
 
 use crate::etgutil::{decode_code, encode_code};
 use crate::handlews::AsyncUsers;
-use crate::http_date::HttpDate;
 use crate::{svg, PgPool};
 
 #[derive(Clone, Copy)]
@@ -234,8 +234,7 @@ impl TryFrom<CachedResponse> for Response<Bytes> {
 		if cached.mtime > 0 {
 			builder = builder.header(
 				header::LAST_MODIFIED,
-				time::OffsetDateTime::from_unix_timestamp(cached.mtime as i64)
-					.format("%a, %d %b %Y %T GMT"),
+				HttpDate::from(SystemTime::UNIX_EPOCH + Duration::from_secs(cached.mtime)).to_string(),
 			);
 		}
 		builder.body(cached.content.clone())

@@ -4,7 +4,6 @@ mod etgutil;
 mod generated;
 mod handleget;
 mod handlews;
-mod http_date;
 mod json;
 mod svg;
 mod users;
@@ -13,13 +12,13 @@ use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 
 use bb8_postgres::{bb8::Pool, tokio_postgres, PostgresConnectionManager};
+use httpdate::HttpDate;
 use warp::filters::header;
 use warp::ws::Ws;
 use warp::Filter;
 
 use crate::handleget::{AcceptEncoding, AsyncCache};
 use crate::handlews::{AsyncSocks, AsyncUserSocks, AsyncUsers};
-use crate::http_date::HttpDate;
 
 pub type PgPool = Arc<Pool<PostgresConnectionManager<tokio_postgres::NoTls>>>;
 
