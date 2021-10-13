@@ -1,7 +1,7 @@
 #![allow(non_camel_case_types)]
 
 use std::collections::{BTreeMap, HashMap};
-use std::convert::{Infallible, TryFrom};
+use std::convert::Infallible;
 use std::fmt::Write;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
@@ -165,7 +165,6 @@ pub enum CacheControl {
 #[derive(Clone, Copy)]
 pub enum ContentType {
 	ApplicationJavascript,
-	ApplicationJson,
 	ApplicationOctetStream,
 	ApplicationOgg,
 	ApplicationWasm,
@@ -195,14 +194,12 @@ pub struct CachedResponse {
 	pub content: Bytes,
 }
 
-impl TryFrom<CachedResponse> for Response<Bytes> {
-	type Error = http::Error;
-
-	fn try_from(cached: CachedResponse) -> Result<Self, Self::Error> {
+impl CachedResponse {
+	fn response(&self) -> Result<Response<Bytes>, http::Error> {
 		let mut builder = Response::builder()
 			.header(
 				header::CONTENT_ENCODING,
-				HeaderValue::from_static(match cached.encoding {
+				HeaderValue::from_static(match self.encoding {
 					Encoding::br => "br",
 					Encoding::gzip => "gzip",
 					Encoding::identity => "identity",
@@ -210,7 +207,7 @@ impl TryFrom<CachedResponse> for Response<Bytes> {
 			)
 			.header(
 				header::CACHE_CONTROL,
-				HeaderValue::from_static(match cached.cache {
+				HeaderValue::from_static(match self.cache {
 					CacheControl::NoStore => "no-store",
 					CacheControl::NoCache => "no-cache",
 					CacheControl::Immutable => "immutable",
@@ -218,9 +215,8 @@ impl TryFrom<CachedResponse> for Response<Bytes> {
 			)
 			.header(
 				header::CONTENT_TYPE,
-				HeaderValue::from_static(match cached.kind {
+				HeaderValue::from_static(match self.kind {
 					ContentType::ApplicationJavascript => "application/javascript",
-					ContentType::ApplicationJson => "application/json",
 					ContentType::ApplicationOctetStream => "application/octet-stream",
 					ContentType::ApplicationOgg => "application/ogg",
 					ContentType::ApplicationWasm => "application/wasm",
@@ -231,13 +227,14 @@ impl TryFrom<CachedResponse> for Response<Bytes> {
 					ContentType::TextPlain => "text/plain",
 				}),
 			);
-		if cached.mtime > 0 {
+		if self.mtime > 0 {
 			builder = builder.header(
 				header::LAST_MODIFIED,
-				HttpDate::from(SystemTime::UNIX_EPOCH + Duration::from_secs(cached.mtime)).to_string(),
+				HttpDate::from(SystemTime::UNIX_EPOCH + Duration::from_secs(self.mtime))
+					.to_string(),
 			);
 		}
-		builder.body(cached.content.clone())
+		builder.body(self.content.clone())
 	}
 }
 
@@ -284,7 +281,7 @@ async fn handle_get_core(
 				{
 					response::Builder::new().status(304).body(Bytes::new())
 				} else {
-					Response::<Bytes>::try_from(cached.clone())
+					cached.response()
 				};
 			}
 		} else {
@@ -594,7 +591,9 @@ async fn handle_get_core(
 	} else {
 		return response::Builder::new().status(404).body(Bytes::new());
 	};
-	Response::<Bytes>::try_from(compress_and_cache(cache, accept, path.to_string(), res).await)
+	compress_and_cache(cache, accept, path.to_string(), res)
+		.await
+		.response()
 }
 
 pub async fn handle_get(

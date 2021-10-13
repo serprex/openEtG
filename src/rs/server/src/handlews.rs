@@ -361,7 +361,10 @@ pub async fn handle_ws(
 	let mut rx = UnboundedReceiverStream::new(rx);
 	tokio::spawn(async move {
 		while let Some(result) = rx.next().await {
-			user_ws_tx.send(result).unwrap_or_else(|e| println!("send err {}", e)).await;
+			user_ws_tx
+				.send(result)
+				.unwrap_or_else(|e| println!("send err {}", e))
+				.await;
 		}
 	});
 
@@ -1536,9 +1539,7 @@ pub async fn handle_ws(
 											msg: &msg,
 										})
 										.ok()
-										.and_then(|msgstr| {
-											sock.tx.send(Message::text(msgstr)).ok()
-										})
+										.and_then(|msgstr| sock.tx.send(Message::text(msgstr)).ok())
 										.is_some()
 										{
 											sent = true;
