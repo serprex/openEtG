@@ -613,13 +613,7 @@ fn eval_skill(
 			Skill::summon(Phantom) => 3.0,
 			Skill::summon(PhantomUp) => 3.5,
 			Skill::swave => 6.0,
-			Skill::tempering => {
-				if card::Upped(ctx.get(c, Stat::card)) {
-					2.0
-				} else {
-					4.0
-				}
-			}
+			Skill::tempering(x) => x as f32,
 			Skill::tesseractsummon => 8.0,
 			Skill::throwrock => 4.0,
 			Skill::tick => {

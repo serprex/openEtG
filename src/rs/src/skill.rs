@@ -516,7 +516,7 @@ pub enum Skill {
 	summon(u16),
 	swarm,
 	swave,
-	tempering,
+	tempering(i16),
 	tesseractsummon,
 	thorn(i16),
 	throwrock,
@@ -607,7 +607,6 @@ pub enum Skill {
 	v_integrity,
 	v_liquid,
 	v_lobotomize,
-	v_losecharge,
 	v_luciferin,
 	v_lycanthropy,
 	v_mend,
@@ -888,7 +887,7 @@ impl Skill {
 			Self::steal => Tgt::And(&[Tgt::foe, Tgt::perm]),
 			Self::storm(_) => Tgt::play,
 			Self::swave => Tgt::Or(&[Tgt::crea, Tgt::play]),
-			Self::tempering => Tgt::weap,
+			Self::tempering(i16) => Tgt::weap,
 			Self::throwrock => Tgt::crea,
 			Self::trick => Tgt::crea,
 			Self::unsummon => Tgt::crea,
@@ -952,6 +951,7 @@ impl Skill {
 			| Skill::poison(x)
 			| Skill::poisonfoe(x)
 			| Skill::storm(x)
+			| Skill::tempering(x)
 			| Skill::thorn(x)
 			| Skill::v_platearmor(x) => x as i32,
 			Skill::summon(x) => x as i32,
@@ -1875,7 +1875,7 @@ impl Skill {
 				ctx.set(t, Stat::frozen, 0);
 			}
 			Self::firebrand => {
-				if data.tgt == c && data.active == Some(Skill::tempering) {
+				if data.tgt == c && matches!(data.active, Some(Skill::tempering(_))) {
 					ctx.incrStatus(c, Stat::charges, 1);
 				}
 			}
@@ -2302,7 +2302,7 @@ impl Skill {
 					[
 						Skill::growth(1, 0),
 						Skill::growth(2, 0),
-						Skill::tempering,
+						Skill::tempering(5),
 						Skill::destroy,
 						Skill::destroy,
 						Skill::rage,
@@ -2463,13 +2463,7 @@ impl Skill {
 					Skill::mitosis => 3,
 					Skill::growth(1, 0) => 1,
 					Skill::growth(2, 0) => 2,
-					Skill::tempering => {
-						if card::Upped(soicode) {
-							2
-						} else {
-							1
-						}
-					}
+					Skill::tempering(_) => 2,
 					Skill::destroy => 3,
 					Skill::rage => 2,
 					Skill::steam => 2,
@@ -2631,7 +2625,7 @@ impl Skill {
 					}
 				}
 			}
-			Self::losecharge | Self::v_losecharge => {
+			Self::losecharge => {
 				if ctx.maybeDecrStatus(c, Stat::charges) == 0 {
 					if ctx.get_kind(c) == Kind::Creature {
 						ctx.die(c);
@@ -3466,6 +3460,7 @@ impl Skill {
 				deck.insert(idx1, c1);
 				deck.insert(idx2, c2);
 				deck.insert(idx3, c3);
+				Skill::losecharge.proc(ctx, c, c, data);
 			}
 			Self::silence => {
 				if !ctx.sanctified(t) {
@@ -3715,15 +3710,8 @@ impl Skill {
 					ctx.spelldmg(t, 4);
 				}
 			}
-			Self::tempering => {
-				ctx.incrAtk(
-					t,
-					if card::Upped(ctx.get(c, Stat::card)) {
-						5
-					} else {
-						3
-					},
-				);
+			Self::tempering(atk) => {
+				ctx.incrAtk(t, atk as i32);
 				ctx.set(t, Stat::frozen, 0);
 			}
 			Self::tesseractsummon => {

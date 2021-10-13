@@ -1,5 +1,5 @@
-import * as etg from './etg.js';
 import Card from './Card.js';
+import * as etg from './etg.js';
 
 const skipstat = new Set(['hp', 'maxhp', 'atk', 'card', 'cast', 'castele']);
 
@@ -47,7 +47,7 @@ const data = {
 			c.upped ? 3 : 2
 		}|-1 when it attacks."`,
 	accretion:
-		'Destroy target permanent and gain 0|10. If using this ability leaves this creature at more than 30 HP, destroy this creature and add a black hole to your hand.',
+		'Destroy target permanent & gain 0|10. If using this ability leaves this creature at more than 30 HP, destroy this creature & add a black hole to your hand.',
 	accumulation: 'Playing additional repulsors adds to damage reduction.',
 	adrenaline:
 		'Target creature attacks multiple times per turn. Creatures with lower strength attack more times per turn.',
@@ -59,23 +59,22 @@ const data = {
 	antimatter:
 		"If target creature or weapon's attack is positive, it becomes negative. Otherwise, it becomes positive.",
 	appease:
-		"Sacrifice target creature you own and gain 1|1. If this ability isn't used, this creature will attack its owner. This creature attacks normally the turn it is played or if it loses this ability.",
+		"Sacrifice target creature you own & gain 1|1. If this ability isn't used, this creature will attack its owner. This creature attacks normally the turn it is played or if it loses this ability.",
 	autoburrow:
 		'Until end of turn, your creatures with burrow enter play burrowed.',
 	axedraw:
 		'Gains 1 strength for every card drawn by any player. Strength gained is removed after attack.',
-	bblood: 'Give target creature 0|20 and delay it for 5 turns.',
+	bblood: 'Give target creature 0|20 & delay it for 5 turns.',
 	becomearctic: 'If frozen, this creature instead turns into an Arctic Squid.',
 	beguile:
 		"Target creature's opponent gains control of target creature until next turn.",
 	beguilestop:
 		'Return this creature to its original owner at start of next turn.',
-	bellweb: 'Target creature becomes aquatic and loses airborne status.',
+	bellweb: 'Target creature becomes aquatic & loses airborne status.',
 	blackhole:
 		'Remove 3 quanta per element from target player. Heal 1 per quanta removed.',
 	bless: 'Target gains 3|3.',
-	blockwithcharge:
-		'Each stack fully blocks one attacker and is then destroyed.',
+	blockwithcharge: 'Each stack fully blocks one attacker & is then destroyed.',
 	bloodmoon:
 		'Aquatic creatures gain "Gain 1:8 when it attacks."\nGolems gain "Damage dealt by this card also reduces the defender\'s maximum HP."\nNocturnal creatures gain "Heal yourself equal to the damage dealt by this card."',
 	bolsterintodeck: 'Add 3 copies of target creature on top of your deck.',
@@ -95,7 +94,7 @@ const data = {
 			c.upped ? '2|1' : '1|1'
 		} Phantom.`,
 	bubbleclear:
-		'Remove statuses (positive and negative) from target creature or permanent, and heal target creature 1.\nTarget gains a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages the affected card.',
+		'Remove statuses (positive & negative) from target creature or permanent, & heal target creature 1.\nTarget gains a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages the affected card.',
 	butterfly:
 		'Target creature or weapon with either strength or HP less than 3 has its skills replaced with "3:1 Destroy target permanent."',
 	burrow: c =>
@@ -107,7 +106,7 @@ const data = {
 	catlife: c =>
 		`Has ${c.getStatus(
 			'lives',
-		)} lives. When it dies, this creature loses a life and revives with ${
+		)} lives. When it dies, this creature loses a life & revives with ${
 			asCard(c).attack
 		}|${asCard(c).health} stats.`,
 	cell: 'Becomes a Malignant Cell if poisoned.',
@@ -116,11 +115,11 @@ const data = {
 			c.upped ? '20% chance to evade attacks. ' : ''
 		}Non-ranged attacking creatures have a 30% chance to have a random effect cast on them.`,
 	chimera:
-		"Combine all your creatures to form a Chimera with momentum, gravity pull, and the total of your creatures' combined strength and HP.",
+		"Combine all your creatures to form a Chimera with momentum, gravity pull, & the total of your creatures' combined strength & HP.",
 	chromastat:
 		"Generate 1:0 for this creature's total strength & HP when this creature deals damage.",
 	clear:
-		'Remove statuses (positive and negative) from target creature or permanent, and heal target creature 1.',
+		'Remove statuses (positive & negative) from target creature or permanent, & heal target creature 1.',
 	cold: '30% chance to freeze non-ranged attackers for 3 turns.',
 	corpseexplosion: [
 		'Sacrifice one of your creatures to deal 1 spell damage to all creatures. Increase damage by 1 for every 8 HP of the sacrifice. Poisonous sacrifices poison opponent.',
@@ -129,11 +128,11 @@ const data = {
 	counter:
 		'When this creature is attacked by another creature, if this creature is able to attack, it deals its damage to the attacking creature.',
 	countimmbur: 'Gains 1|0 for every immaterial or burrowed card in play.',
-	cpower: 'Target randomly gains between 1 and 5 strength and HP.',
+	cpower: 'Target randomly gains between 1 to 5 strength & HP.',
 	creatureupkeep:
 		"Whenever a creature attacks, its owner must pay one quanta of the creature's element or the creature is destroyed.",
 	cseed:
-		'Inflict a random effect on target creature. Possible effects include damage, lobotomize, parallel universe, gravity pull, reverse time, and freeze.',
+		'Inflict a random effect on target creature. Possible effects include damage, lobotomize, parallel universe, gravity pull, reverse time, & freeze.',
 	cseed2:
 		'Inflict a random effect on target card. All existing effects are possible.',
 	deadalive: {
@@ -145,8 +144,8 @@ const data = {
 	deckblast: c =>
 		`Deals spell damage to opponent for each card remaining in deck.\nIf this spell costs 1:10, destroy all cards in your deck.`,
 	deepdive:
-		'Burrow. While burrowed, replace this ability with "2:3 Freeze target permanent." Next turn, unburrow, become airborne, and triple this creature\'s strength until its next attack.',
-	deja: 'Remove this ability and summon a copy of this creature.',
+		'Burrow. While burrowed, replace this ability with "2:3 Freeze target permanent." Next turn, unburrow, become airborne, & triple this creature\'s strength until its next attack.',
+	deja: 'Remove this ability & summon a copy of this creature.',
 	deployblobs: 'Summon 3 Blobs. Gain -2|-2.',
 	despair:
 		'Non-ranged attackers have a 40% chance plus 5% per 1:11 producing creature you control to gain -1|-1.',
@@ -154,22 +153,22 @@ const data = {
 	destroycard:
 		"Discard target card, or destroy top card of target player's deck.",
 	detain:
-		'Target creature with less HP than this creature gets -1|-1 and is burrowed. Gain 1|1.',
+		'Target creature with less HP than this creature gets -1|-1 & is burrowed. Gain 1|1.',
 	devour:
 		'Target creature with less HP than this creature dies. Gain 1|1. If target creature was poisonous, become poisoned.',
 	die: 'Sacrifice this card.',
 	disarm:
-		'When this creature damages opponent, return their weapon to their hand. Modified stats and statuses remain on the card when it is played again.',
+		'When this creature damages opponent, return their weapon to their hand. Modified stats & statuses remain on the card when it is played again.',
 	discping:
-		'Deal 1 damage to target creature and return this card to your hand. Modified stats and statuses remain on the card when it is played again.',
+		'Deal 1 damage to target creature & return this card to your hand. Modified stats & statuses remain on the card when it is played again.',
 	disfield: 'Block all damage from attackers. Consumes 1:0 per damage blocked.',
 	disshield:
 		'Block all damage from attackers.. Consume 1:1 per 3 damage blocked. Not prevented by Sanctuary.',
-	divinity: 'Add 24 to maximum health and heal yourself 16.',
+	divinity: 'Add 24 to maximum health & heal yourself 16.',
 	dive: "Double this creature's strength through next attack. Does not stack.",
 	dmgproduce: 'Generate 1:0 for each damage dealt by this card.',
 	draft:
-		"If target creature is airborne, it loses airborne and takes 3 spell damage. If target creature isn't airborne, it becomes airborne and gains 3|0",
+		"If target creature is airborne, it loses airborne & takes 3 spell damage. If target creature isn't airborne, it becomes airborne & gains 3|0",
 	drainlife:
 		'Deal 2 spell damage plus one per 5:11 you have after playing this card. Heal for the amount of damage done.',
 	drawcopy:
@@ -194,7 +193,7 @@ const data = {
 		'At the end of your turn, heal 1 for each creature you own. For every 8 creatures you own (rounded down), pay 1:5 at the end of your turn.',
 	enchant: 'Target permanent becomes immaterial.',
 	endow:
-		'Gain the strength, skills, and statuses of target weapon. Gain 0|2.\nCannot gain Endow skill.',
+		'Gain the strength, skills, & statuses of target weapon. Gain 0|2.\nCannot gain Endow skill.',
 	envenom:
 		'Target equipment gains "Give 1 poison on hit. Throttled (only triggers at most twice from Adrenaline)" & "25% chance to give non-ranged attackers 1 poison counter."',
 	epidemic:
@@ -212,12 +211,13 @@ const data = {
 		"Cannot be directly targeted by opponent's creature's active skills.",
 	evadespell: "Cannot be directly targeted by opponent's spells.",
 	evolve: 'Transform this card into an unburrowed Shrieker.',
-	feed: 'Give target creature 1 poison counter, gain 3|3, and lose immaterial status until the beginning of your next turn.',
+	feed: 'Give target creature 1 poison counter, gain 3|3, & lose immaterial status until the beginning of your next turn.',
 	fickle:
 		"Swap target card in either player's hand with a random card from their deck that they have enough quanta to play.",
 	fiery: 'Gains +1 strength for every 5:6 owned.',
 	firebolt:
 		'Deal 3 spell damage plus one per 4:6 you have after playing this card. If target is frozen, it loses frozen status.',
+	firebrand: x => 'Last an additional turn when targeted with Tempering.',
 	firestorm: x =>
 		`Deal ${x} spell damage to all of target player\'s creatures, thawing them. Removes cloak.`,
 	firewall: 'Deals 1 damage to each non-ranged attacking creature.',
@@ -234,15 +234,15 @@ const data = {
 	fractal:
 		'Fill your hand with copies of target creature. Remove all remaining 1:12.',
 	freeevade:
-		"If your opponent has a shield, your airborne creatures have a 30% chance to bypass the shield. Otherwise, your creatures have a 30% chance to deal 50% more damage. Your creatures have 20% chance to evade opponent's targeted spells and skills.",
+		"If your opponent has a shield, your airborne creatures have a 30% chance to bypass the shield. Otherwise, your creatures have a 30% chance to deal 50% more damage. Your creatures have 20% chance to evade opponent's targeted spells & skills.",
 	freeze: c =>
 		`Freeze target creature or weapon for ${
 			c.upped ? 4 : 3
-		} turns. Frozen cards cannot attack or use active skills, and do not activate per-turn skills.`,
+		} turns. Frozen cards cannot attack or use active skills, & do not activate per-turn skills.`,
 	freezeperm: c =>
 		`Freeze target non-stacking permanent for ${
 			c.upped ? 4 : 3
-		} turns. Frozen cards cannot attack or use active skills, and do not activate per-turn skills.`,
+		} turns. Frozen cards cannot attack or use active skills, & do not activate per-turn skills.`,
 	fungusrebirth: c =>
 		`Transform this card into a ${c.upped ? 'Toxic Fungus' : 'Fungus'}.`,
 	gaincharge2: {
@@ -253,11 +253,11 @@ const data = {
 		'Gain one stack for every card you draw. Does not gain a stack from your draw at the start of your turn.',
 	gas: 'Summon an Unstable Gas.',
 	grave:
-		'When another creature dies, unburrow and transform this creature into a fresh copy of the dying creature. This creature retains nocturnal.',
+		'When another creature dies, unburrow & transform this creature into a fresh copy of the dying creature. This creature retains nocturnal.',
 	give: c =>
 		`Give target card you own, either in hand or in play, to your opponent. Heal yourself ${
 			c.upped ? 10 : 5
-		}. This card bypasses sanctuary, and can target immaterial or burrowed cards.`,
+		}. This card bypasses sanctuary, & can target immaterial or burrowed cards.`,
 	golemhit:
 		'Target golem attacks. This ability can target immaterial or burrowed cards.',
 	gpull:
@@ -276,7 +276,7 @@ const data = {
 	icegrowth: (atk, hp) =>
 		`When this card would be frozen, instead gain ${atk}|${hp}.`,
 	guard:
-		"Delay target creature and this creature. If target creature isn't airborne or this creature is airborne, this creature deals damage equal to its strength to target creature.",
+		"Delay target creature & this creature. If target creature isn't airborne or this creature is airborne, this creature deals damage equal to its strength to target creature.",
 	halveatk: "This creature's strength is halved after it attacks.",
 	hasten: {
 		cast: 'Draw a card.',
@@ -303,7 +303,7 @@ const data = {
 			+x + 1
 		}:6 plus 1 quanta of each other element.`,
 	improve:
-		'Transform a target creature into a random mutant creature. Mutant creatures gain a random ability, 1-5 strength, and 1-5 hp.',
+		'Transform a target creature into a random mutant creature. Mutant creatures gain a random ability; & randomly gains between 1 to 5 strength & hp.',
 	inertia: 'When any card you own is targeted by either player, gain 2:3.',
 	inflation: 'Increase the cost of all active skills by 1.',
 	ink: 'Summon a Cloak that lasts 1 turn.',
@@ -439,7 +439,7 @@ const data = {
 	purify:
 		'Remove all poison counters and sacrifice status from target creature or player. Target creature or player gains two purify counters.',
 	quantagift:
-		'Gain 2:7 and 2 quanta matching your mark. If your mark is 1:7, instead gain only 3:7 total. If your mark is 1:0, gain an additional 4:0',
+		'Gain 2:7 and 2 quanta matching your mark. If your mark is 1:7, instead gain only 3:7 total. If your mark is 1:0, gain an additional 4:0.',
 	quanta: x => ({
 		ownattack: `Gain 1:${x} when it attacks.`,
 		owndeath: `When this creature dies, gain 1:${x}.`,
@@ -510,7 +510,8 @@ const data = {
 		'Add 3 random upgraded non-pillar cards to your hand. At least one will be 1:1.',
 	],
 	shtriga: 'Gain immaterial when your next turn starts.',
-	shuffle3: 'Shuffle 3 copies of target creature into your deck.',
+	shuffle3:
+		'Shuffle 3 copies of target creature into your deck & expend a charge. Destroyed when all charges expended.',
 	silence:
 		'Silence target player or creature. Silenced players cannot play cards until the end of their next turn, while silenced creatures cannot use active skills until the end of their next turn.',
 	sing: 'Target creature without this ability attacks its owner.',
@@ -558,10 +559,8 @@ const data = {
 		'Base HP is equal to the number of Scarabs you control, including this one.',
 	swave:
 		"Deal 4 spell damage to target creature or player. If target creature is frozen, it dies. If target player's weapon is frozen, destroy it.",
-	tempering: c =>
-		`Target weapon gains ${
-			c.upped ? 5 : 3
-		} strength. If target weapon is frozen, it loses frozen status.`,
+	tempering: x =>
+		`Target weapon gains ${x} strength. If target weapon is frozen, it loses frozen status.`,
 	tesseractsummon:
 		'Summon 2 random creatures from your deck. Opponent summons 1 random creature from their deck. Freeze these creatures for a number of turns equal to \u00bc of their quanta cost, rounded up.',
 	thorn: x => `${x}% chance to give non-ranged attackers 1 poison counter.`,
@@ -622,166 +621,162 @@ const data = {
 	v_accretion:
 		"Destroy target permanent & gain 0|15. Return to owner's hand as a Blackhole if health exceeds 45",
 	v_aflatoxin:
-		'Apply 2 poison to target. When target dies, it turns into a malignant cell',
-	v_antimatter: 'Invert strength of target',
-	v_bblood: 'Target creature gains 0|20 & is delayed 6 turns',
+		'Apply 2 poison to target. When target dies, it turns into a malignant cell.',
+	v_antimatter: 'Invert strength of target.',
+	v_bblood: 'Target creature gains 0|20 & is delayed 6 turns.',
 	v_blackhole:
-		'Absorb 3 quanta per element from target player. Heal 1 per absorbed quantum',
-	v_bless: 'Target gains 3|3',
-	v_blockwithcharge: 'Block attack per stack',
+		'Absorb 3 quanta per element from target player. Heal 1 per absorbed quantum.',
+	v_bless: 'Target gains 3|3.',
+	v_blockwithcharge: 'Block attack per stack.',
 	v_boneyard: c =>
 		`When a creature dies, summon a ${c.upped ? '1|1' : '2|2'} Skeleton`,
 	v_bravery:
-		'Foe draws 2, 3 if own mark is 1:6, cards, you draw an equal amount of cards',
-	v_burrow: 'Burrow. Burrowed creatures attack with half strength',
+		'Foe draws 2, 3 if own mark is 1:6, cards, you draw an equal amount of cards.',
+	v_burrow: 'Burrow. Burrowed creatures attack with half strength.',
 	v_butterfly:
 		'Target something smaller than, or weaker than, 3. Replace target\'s skills with "3:1 Destroy target permanent"',
 	v_chimera:
-		'Combine all your creatures to form a Chimera with momentum & gravity pull',
-	v_cold: '30% chance to freeze attackers for 3',
-	v_cpower: 'Target gains 1 to 5 strength. Target gains 1 to 5 largeness',
-	v_cseed: 'A random effect is inflicted to target creature',
-	v_decrsteam: 'Decrement strength from steam after attack',
-	v_deja: 'Remove active & summon copy',
+		'Combine all your creatures to form a Chimera with momentum & gravity pull.',
+	v_cold: '30% chance to freeze attackers for 3.',
+	v_cpower: 'Target gains 1 to 5 strength. Target gains 1 to 5 hp.',
+	v_cseed: 'A random effect is inflicted to target creature.',
+	v_decrsteam: 'Decrement strength from steam after attack.',
+	v_deja: 'Remove active & summon copy.',
 	v_dessication:
 		"Deal 2 damage to opponent's creatures. Gain 1:7 per damage dealt. Removes cloak",
-	v_destroy: 'Destroy target permanent',
-	v_devour: 'Kill smaller target creature & gain 1|1',
-	v_disfield: 'Absorb damage. Consume 1:0 per damage absorbed',
-	v_disshield: 'Absorb damage. Consume 1:1 per 3 damage absorbed',
-	v_divinity: 'Add 24 to maximum health if mark 1:8, otherwise 16 & heal same',
-	v_dive: 'Double strength until next attack',
+	v_destroy: 'Destroy target permanent.',
+	v_devour: 'Kill smaller target creature & gain 1|1.',
+	v_disfield: 'Absorb damage. Consume 1:0 per damage absorbed.',
+	v_disshield: 'Absorb damage. Consume 1:1 per 3 damage absorbed.',
+	v_divinity: 'Add 24 to maximum health if mark 1:8, otherwise 16 & heal same.',
+	v_dive: 'Double strength until next attack.',
 	v_drainlife: _ =>
-		'Drain 2HP from target, plus an extra 2HP per 10:11 remaining',
+		'Drain 2HP from target, plus an extra 2HP per 10:11 remaining.',
 	v_dryspell: [
-		'Deal 1 damage to all creatures. Gain 1:7 per damage dealt. Removes cloak',
+		'Deal 1 damage to all creatures. Gain 1:7 per damage dealt. Removes cloak.',
 		"Deal 2 damage to all opponent's creatures. Gain 1:7 per damage dealt. Removes cloak",
 	],
-	v_dshield: 'Become immaterial until next turn',
+	v_dshield: 'Become immaterial until next turn.',
 	v_duality: "Generate a copy of foe's next draw",
-	v_earthquake: 'Destroy up to 3 stacks from target permanent',
-	v_empathy: 'Heal owner per creature owned per turn. Upkeep per 8 creatures',
-	v_endow: 'Replicate attributes of target weapon',
-	v_evolve: 'Become an unburrowed Shrieker',
-	v_fiery: 'Increment damage per 5:6 owned',
-	v_firebolt: _ => 'Deals 3 damage to target. Deal 3 more per 10:6 remaining',
-	v_firewall: 'Damage attackers',
-	v_flyingweapon: 'Own weapon becomes a flying creature',
+	v_earthquake: 'Destroy up to 3 stacks from target permanent.',
+	v_empathy: 'Heal owner per creature owned per turn. Upkeep per 8 creatures.',
+	v_endow: 'Replicate attributes of target weapon.',
+	v_evolve: 'Become an unburrowed Shrieker.',
+	v_fiery: 'Increment damage per 5:6 owned.',
+	v_firebolt: _ => 'Deals 3 damage to target. Deal 3 more per 10:6 remaining.',
+	v_firewall: 'Damage attackers.',
+	v_flyingweapon: 'Own weapon becomes a flying creature.',
 	v_freedom:
-		'Your airborne creatures have a 25% chance to deal 50% more damage, bypass shields and evade targeting if 1:9',
+		'Your airborne creatures have a 25% chance to deal 50% more damage, bypass shields and evade targeting if 1:9.',
 	v_freeze: c =>
 		`Freeze target for ${
 			c.upped ? 4 : 3
 		} turns. Being frozen disables attacking & per turn skills`,
-	v_gaincharge2: 'Gain 2 stacks per death',
-	v_gas: 'Summon an Unstable Gas',
-	v_gpullspell: 'Target creature intercepts attacks directed to its owner',
-	v_gratitude: 'Heal owner 3, 5 if 1:5',
-	v_guard: 'Delay target creature & attack target if grounded. Delay self',
-	v_hatch: 'Become a random creature',
-	v_heal: 'Heal self 20',
-	v_holylight: 'Heal target 10. Nocturnal targets are damaged instead',
+	v_gaincharge2: 'Gain 2 stacks per death.',
+	v_gas: 'Summon an Unstable Gas.',
+	v_gpullspell: 'Target creature intercepts attacks directed to its owner.',
+	v_gratitude: 'Heal owner 3, 5 if 1:5.',
+	v_guard: 'Delay target creature & attack target if grounded. Delay self.',
+	v_hatch: 'Become a random creature.',
+	v_heal: 'Heal self 20.',
+	v_holylight: 'Heal target 10. Nocturnal targets are damaged instead.',
 	v_hope:
 		'Blocks one additional damage for each creature you control that gain 1:8 when attacking.',
 	v_icebolt: _ =>
-		'Deal 2 damage to target, plus an additional 2 per 10:7 remaining. 25% plus 5% per point of damage chance to freeze target',
-	v_improve: 'Mutate target creature',
-	v_infect: 'Poison target creature',
-	v_ink: 'Summon a Cloak which lasts 1 turn',
-	v_integrity: 'Combine all shards in hand to form a Shard Golem',
+		'Deal 2 damage to target, plus an additional 2 per 10:7 remaining. 25% plus 5% per point of damage chance to freeze target.',
+	v_improve: 'Mutate target creature.',
+	v_infect: 'Poison target creature.',
+	v_ink: 'Summon a Cloak which lasts 1 turn.',
+	v_integrity: 'Combine all shards in hand to form a Shard Golem.',
 	v_liquid:
 		'Target creature is poisoned & skills replaced with "Heal owner per damage dealt"',
-	v_lobotomize: 'Remove skills from target creature',
-	v_losecharge: (c, inst) => {
-		const charges = c.getStatus('charges');
-		return `Lasts ${charges} turn ${charges === 1 ? '' : 's'}`;
-	},
+	v_lobotomize: 'Remove skills from target creature.',
 	v_luciferin:
-		'All your creatures without skills gain 1:8 when attacking. Heal self 10',
-	v_lycanthropy: 'Gain 5|5',
-	v_mend: 'Heal target creature 5',
-	v_mitosis: 'Summon a daughter creature',
+		'All your creatures without skills gain 1:8 when attacking. Heal self 10.',
+	v_lycanthropy: 'Gain 5|5.',
+	v_mend: 'Heal target creature 5.',
+	v_mitosis: 'Summon a daughter creature.',
 	v_mitosisspell:
-		'Non-weapon creature gains active "Mitosis: Summon a daughter creature" costing target\'s card\'s cost',
-	v_momentum: 'Target ignores shield effects & gains 1|1',
+		'Non-weapon creature gains active "Mitosis: Summon a daughter creature" costing target\'s card\'s cost.',
+	v_momentum: 'Target ignores shield effects & gains 1|1.',
 	v_mutation:
-		'Mutate target creature into an abomination, or maybe something more. Slight chance of death',
+		'Mutate target creature into an abomination, or maybe something more. Slight chance of death.',
 	v_neuro:
-		'Apply poison on hit, also inflicting neurotoxin. Neurotoxin applies poison per card played by victim. Throttled',
+		'Apply poison on hit, also inflicting neurotoxin. Neurotoxin applies poison per card played by victim. Throttled.',
 	v_nightmare:
 		"Fill foe's hand with copies of target creature's card. Drain 2HP per added card",
 	v_nova:
 		'Gain 1 quanta of each element. If you play three or more of this card in one turn, summon a Singularity on your side.',
 	v_nova2:
 		'Gain 2 quanta of each element. If you play two or more of this card in one turn, summon a Singularity on your side.',
-	v_nymph: 'Turn target pillar into a Nymph of same element',
+	v_nymph: 'Turn target pillar into a Nymph of same element.',
 	v_obsession: c => `Damage owner ${c.upped ? 13 : 10} on discard`,
 	v_pandemonium: c =>
 		`Random effects are inflicted to ${
 			c.upped ? "oppenent's" : 'all'
 		} creatures. Removes cloak`,
-	v_parallel: 'Duplicate target creature',
-	v_phoenix: ['Become an Ash on death', 'Become a Minor Ash on death'],
+	v_parallel: 'Duplicate target creature.',
+	v_phoenix: ['Become an Ash on death.', 'Become a Minor Ash on death.'],
 	v_plague: "Poison foe's creatures. Removes cloak",
 	v_platearmor: x => `Target creature gains 0|${x}.`,
 	v_precognition: "Reveal foe's hand until end of their turn. Draw",
-	v_purify: 'Replace poison statuses with 2 purify. Removes sacrifice',
-	v_queen: 'Summon a Firefly',
+	v_purify: 'Replace poison statuses with 2 purify. Removes sacrifice.',
+	v_queen: 'Summon a Firefly.',
 	v_rage: c => `Target creature gains ${c.upped ? '+6|-6' : '+5|-5'}`,
 	v_readiness:
 		"Target creature's active becomes costless. Skill can be reactivated",
 	v_rebirth: c => `Become a ${c.upped ? 'Minor ' : ''}Phoenix`,
-	v_regenerate: 'Heal owner 5',
-	v_relic: 'Worthless',
+	v_regenerate: 'Heal owner 5.',
+	v_relic: 'Worthless.',
 	v_rewind:
 		"Remove target creature to top of owner's deck. If target is a Skeleton, transform it into a random creature. If target is a Mummy, transform it into a Pharaoh.",
-	v_salvage: 'Restore permanents destroyed by foe to hand once per turn',
-	v_salvageoff: 'Become ready to salvage when your next turn starts',
-	v_scarab: 'Summon a Scarab',
+	v_salvage: 'Restore permanents destroyed by foe to hand once per turn.',
+	v_salvageoff: 'Become ready to salvage when your next turn starts.',
+	v_scarab: 'Summon a Scarab.',
 	v_scramble: "Randomly scramble foe's quanta on hit",
 	v_serendipity: c =>
 		`Generate 3 random${
 			c.upped ? ' upgraded' : ''
 		} cards in hand. One will be 1:1`,
 	v_silence:
-		'Foe cannot play cards during their next turn, or target creature gains summoning sickness',
-	v_singularity: 'Not well behaved',
-	v_siphon: 'Siphon 1:0 from foe as 1:11. Throttled',
+		'Foe cannot play cards during their next turn, or target creature gains summoning sickness.',
+	v_singularity: 'Not well behaved.',
+	v_siphon: 'Siphon 1:0 from foe as 1:11. Throttled.',
 	v_skull:
-		'Attacking creatures may die & become skeletons. Smaller creatures are more likely to die',
-	v_skyblitz: 'Dive all own airborne creatures. Consumes remaining 1:9',
-	v_slow: 'Delay attackers',
-	v_solar: 'Gain 1:8 per attacker',
+		'Attacking creatures may die & become skeletons. Smaller creatures are more likely to die.',
+	v_skyblitz: 'Dive all own airborne creatures. Consumes remaining 1:9.',
+	v_slow: 'Delay attackers.',
+	v_solar: 'Gain 1:8 per attacker.',
 	v_sosa: c =>
 		`Sacrifice ${
 			c.upped ? 40 : 48
 		}HP. Consume all non 1:2. Invert damage for 2 turns`,
 	v_soulcatch: c => `When a creature dies, gain ${c.upped ? 3 : 2}:2`,
-	v_sskin: 'Increment maximum HP per 1:4 owned. Heal same',
-	v_steal: 'Steal target permanent',
-	v_steam: 'Gain 5|0',
-	v_stoneform: 'Gain 0|20',
+	v_sskin: 'Increment maximum HP per 1:4 owned. Heal same.',
+	v_steal: 'Steal target permanent.',
+	v_steam: 'Gain 5|0.',
+	v_stoneform: 'Remove this ability & gain 0|20.',
 	v_storm2: "Deals 2 damage to foe's creatures. Removes cloak",
 	v_storm3: "Deals 3 damage to foe's creatures. Removes cloak",
-	v_swarm: 'Increment largeness per scarab',
-	v_thorn: '75% chance to poison attackers',
+	v_swarm: 'Increment hp per scarab.',
+	v_thorn: '75% chance to poison attackers.',
 	v_upkeep: c => 'Consumes 1:' + c.element,
-	v_virusinfect: 'Sacrifice self & poison target creature',
+	v_virusinfect: 'Sacrifice self & poison target creature.',
 	v_virusplague: "Sacrifice self & poison foe's creatures",
 	v_void: "Reduce foe's maximum HP by 2, 3 if mark is 1:11",
-	v_web: 'Target creature loses airborne',
-	v_wisdom: 'Target gains 4|0. May target immaterial, granting psionic',
+	v_web: 'Target creature loses airborne.',
+	v_wisdom: 'Target gains 4|0. May target immaterial, granting psionic.',
 };
 for (const [k, v] of [
-	['dagger', '1:2 1:11. Gains 1 strength per Cloak you control.'],
-	['hammer', '1:3 1:4'],
-	['bow', '1:8 1:9'],
-	['staff', '1:5 1:7'],
-	['disc', '1:1 1:12'],
-	['axe', '1:6 1:10'],
-	['v_dagger', '1:2 1:11'],
-	['v_hammer', '1:3 1:4'],
-	['v_bow', '1:9'],
+	['dagger.', '1:2 1:11. Gains 1 strength per Cloak you control.'],
+	['hammer', '1:3 1:4.'],
+	['bow', '1:8 1:9.'],
+	['staff', '1:5 1:7.'],
+	['disc', '1:1 1:12.'],
+	['axe', '1:6 1:10.'],
+	['v_dagger', '1:2 1:11.'],
+	['v_hammer', '1:3 1:4.'],
+	['v_bow', '1:9.'],
 ]) {
 	data[k] = 'Gains 1 strength if your mark is ' + v;
 }
@@ -810,7 +805,7 @@ const statusText = {
 		c.getStatus('charges') === 1
 			? ''
 			: `Enters play with ${c.getStatus('charges')} ${
-					c.getStatus('stackable') ? 'stacks' : 'charges'
+					c.getStatus('stackable') ? 'stacks' : 'charges.'
 			  }`,
 	mode: '',
 	nightfall: auraText('Nocturnal creatures', '1|1', '2|1'),
@@ -824,11 +819,11 @@ const statusText = {
 	tunnel: 'Any of your creatures that are burrowed bypass shields.',
 	voodoo:
 		'Whenever this creature takes non-lethal damage or is affected by any status, that status or damage is also applied to opponent.',
-	whetstone: auraText('Weapons and golems', '1|1', '1|2'),
+	whetstone: auraText('Weapons & golems', '1|1', '1|2'),
 	flooding:
-		'Non aquatic creatures past first five (seven on first effective turn) creature slots die on turn end. Consumes 1:7',
+		'Non aquatic creatures past first five (seven on first effective turn) creature slots die on turn end. Consumes 1:7.',
 	patience:
-		'Each turn delay own creatures. They gain 2|2. 5|5 if flooded. Unique',
+		'Each turn delay own creatures. They gain 2|2. 5|5 if flooded. Unique.',
 };
 function processEntry(c, event, entry) {
 	return typeof entry === 'string'
