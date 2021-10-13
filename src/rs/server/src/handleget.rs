@@ -4,7 +4,7 @@ use std::collections::{BTreeMap, HashMap};
 use std::convert::Infallible;
 use std::fmt::Write;
 use std::sync::Arc;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 use httpdate::HttpDate;
 use tokio::sync::RwLock;
@@ -125,16 +125,16 @@ pub async fn compress_and_cache(
 		Encoding::identity => Ok(resp.content),
 	} {
 		Ok(compressed) => {
+			let mtime = resp.mtime.unwrap_or_else(SystemTime::now);
 			let cached_resp = CachedResponse {
 				encoding: encoding,
 				cache: resp.cache,
 				kind: resp.kind,
-				mtime: resp
-					.mtime
-					.unwrap_or_else(SystemTime::now)
+				mtime: mtime
 					.duration_since(SystemTime::UNIX_EPOCH)
 					.unwrap()
 					.as_secs(),
+				mtimestring: Some(HttpDate::from(mtime).to_string()),
 				content: Bytes::from(compressed),
 				file: resp.file,
 			};
@@ -149,6 +149,7 @@ pub async fn compress_and_cache(
 			cache: resp.cache,
 			kind: resp.kind,
 			mtime: 0,
+			mtimestring: None,
 			content: Bytes::from(content),
 			file: resp.file,
 		},
@@ -190,6 +191,7 @@ pub struct CachedResponse {
 	pub cache: CacheControl,
 	pub kind: ContentType,
 	pub mtime: u64,
+	pub mtimestring: Option<String>,
 	pub file: Option<String>,
 	pub content: Bytes,
 }
@@ -227,12 +229,8 @@ impl CachedResponse {
 					ContentType::TextPlain => "text/plain",
 				}),
 			);
-		if self.mtime > 0 {
-			builder = builder.header(
-				header::LAST_MODIFIED,
-				HttpDate::from(SystemTime::UNIX_EPOCH + Duration::from_secs(self.mtime))
-					.to_string(),
-			);
+		if let Some(ref mtimestring) = self.mtimestring {
+			builder = builder.header(header::LAST_MODIFIED, mtimestring);
 		}
 		builder.body(self.content.clone())
 	}
