@@ -381,7 +381,7 @@ async fn handle_get_core(
 			file: Some(String::from("../../../ui.css")),
 		}
 	} else if path.starts_with("/sound/") {
-		let mut uppath = String::from("../../../bundle");
+		let mut uppath = String::from("../../..");
 		uppath.push_str(&path);
 		let data = tokio::fs::read(&uppath).await.unwrap_or(Vec::new());
 		let mtime = tokio::fs::metadata(&uppath)
