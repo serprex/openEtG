@@ -1,6 +1,5 @@
 import { Component } from 'react';
 import { connect } from 'react-redux';
-import { Motion, TransitionMotion, spring } from '@serprex/react-motion';
 
 import { playSound } from '../audio.js';
 import * as ui from '../ui.js';
@@ -164,6 +163,102 @@ function activeText(c) {
 	return aauto ? skillName(c, aauto) : '';
 }
 
+class Tween extends Component {
+	wait = false;
+	ms0 = 0;
+	_mounted = false;
+
+	state = {
+		next: null,
+		state: null,
+		prev: null,
+	};
+
+	step = ts => {
+		if (this._mounted) {
+			this.setState(
+				state => {
+					const newstate = this.props.proc(
+						ts - this.ms0,
+						this.state.prev,
+						this.state.next,
+					);
+					if (newstate !== this.state.next) {
+						requestAnimationFrame(this.step);
+					}
+					return { state: newstate, start: false };
+				},
+				() => {
+					this.wait = false;
+				},
+			);
+		}
+	};
+
+	static getDerivedStateFromProps(props, state) {
+		return !state.next
+			? props.initial
+				? {
+						next: props,
+						state: props.initial,
+						prev: props.initial,
+						start: true,
+				  }
+				: { next: props, state: props, prev: props, start: true }
+			: (state.state && props.compare(state.state, props)) ||
+			  props.compare(state.next, props)
+			? null
+			: { next: props, prev: state.state, start: true };
+	}
+
+	componentDidMount() {
+		this._mounted = true;
+	}
+
+	componentWillUnmount() {
+		this._mounted = false;
+	}
+
+	componentDidUpdate() {
+		if (!this.wait && this.state.start) {
+			this.ms0 = performance.now();
+			this.wait = true;
+			requestAnimationFrame(this.step);
+		}
+	}
+
+	render() {
+		return this.props.children(this.state.state);
+	}
+}
+
+class Animation extends Component {
+	state = {};
+
+	step = ts => {
+		if (this._mounted) {
+			this.setState(state =>
+				this.props.proc(ts - this.start, state, this.props),
+			);
+			requestAnimationFrame(this.step);
+		}
+	};
+
+	componentDidMount() {
+		this.start = performance.now();
+		this._mounted = true;
+		requestAnimationFrame(this.step);
+	}
+
+	componentWillUnmount() {
+		this._mounted = false;
+	}
+
+	render() {
+		return this.props.children(this.state);
+	}
+}
+
 function PagedModal(props) {
 	return (
 		<div
@@ -231,54 +326,57 @@ function LastCard({ opacity, name }) {
 }
 
 function SpellDisplay(props) {
-	return (
-		<TransitionMotion
-			styles={props.spells.map(({ id, spell }, i) => ({
-				key: `${id}`,
-				style: {
-					y: spring(540 - (props.spells.length - i) * 20),
-					opacity: spring(1),
-				},
-				data: spell,
-			}))}
-			willEnter={item => ({ y: 0, opacity: 0 })}
-			willLeave={() => ({ y: spring(600), opacity: spring(0) })}>
-			{styles => (
-				<>
-					{styles.map(item => {
-						const p1 = props.idtrack.get(item.data.t);
-						return (
-							<Components.OnDelay
-								key={item.key}
-								ms={1984}
-								onTimeout={() => props.removeSpell(+item.key)}>
-								<Components.CardImage
-									card={item.data}
-									style={{
-										position: 'absolute',
-										left: '800px',
-										top: `${item.style.y}px`,
-										opacity: item.style.opacity,
-										zIndex: '3',
-										pointerEvents: 'none',
-									}}
-								/>
-								{p1 && props.playByPlayMode !== 'noline' && (
-									<ArrowLine
-										opacity={item.style.opacity}
-										x0={800}
-										y0={item.style.y + 10}
-										x1={p1.x}
-										y1={p1.y}
-									/>
-								)}
-							</Components.OnDelay>
-						);
-					})}
-				</>
-			)}
-		</TransitionMotion>
-	);
+	return props.spells.map(({ id, spell, t }, i) => {
+		const p1 = props.idtrack.get(spell.t);
+		const y = 540 - (props.spells.length - i) * 20;
+		return (
+			<Animation
+				key={id}
+				proc={ms => {
+					let yc, opacity;
+					if (ms < 50 * Math.PI) {
+						yc = y * Math.sin(ms / 100);
+						opacity = 1 - Math.cos(ms / 100);
+					} else if (ms > 1984) {
+						yc = y + ms - 1980;
+						opacity = 1 - (ms - 1980) / (600 - y);
+					} else {
+						yc = y;
+						opacity = 1;
+					}
+					if (yc > 600) {
+						props.removeSpell(id);
+						return null;
+					}
+					return { y: yc, opacity };
+				}}>
+				{item => (
+					<>
+						<Components.CardImage
+							card={spell}
+							style={{
+								position: 'absolute',
+								left: '800px',
+								top: `${item.y}px`,
+								opacity: item.opacity,
+								zIndex: '3',
+								pointerEvents: 'none',
+							}}
+						/>
+						{p1 && props.playByPlayMode !== 'noline' && (
+							<ArrowLine
+								opacity={item.opacity}
+								x0={800}
+								y0={item.y + 10}
+								x1={p1.x}
+								y1={p1.y}
+							/>
+						)}
+					</>
+				)}
+			</Animation>
+		);
+	});
 }
 
 function ArrowLine({ x0, y0, x1, y1, opacity }) {
@@ -553,6 +651,143 @@ class ThingInst extends Component {
 	}
 }
 
+class Things extends Component {
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			things: new Set(props.things),
+			death: new Map(),
+			birth: new Map(),
+		};
+	}
+
+	static getDerivedStateFromProps(props, state) {
+		if (
+			props.things.length === state.things.length &&
+			props.things.every(id => state.things.has(id))
+		) {
+			return null;
+		}
+		const things = new Set(props.things),
+			death = new Map(state.death),
+			birth = new Map(state.birth);
+		for (const id of death.keys()) {
+			if (things.has(id)) {
+				death.delete(id);
+			}
+		}
+		for (const id of things) {
+			if (!state.things.has(id)) {
+				const start = props.startPos.get(id);
+				let pos;
+				if (start < 0) {
+					pos = {
+						x: 103,
+						y: -start === props.p1id ? 551 : 258,
+					};
+				} else if (start) {
+					pos = { x: -99, y: -99, ...props.idtrack.get(start) };
+				}
+				if (!pos) {
+					pos = ui.tgtToPos(props.game.byId(id), props.p1id);
+				}
+				if (pos) {
+					pos.opacity = 0;
+					birth.set(id, pos);
+				}
+			}
+		}
+		for (const id of state.things) {
+			if (!things.has(id) && props.game.has_id(id)) {
+				const endpos = props.endPos.get(id);
+				let pos;
+				if (endpos < 0) {
+					pos = {
+						x: 103,
+						y: -endpos === props.p1id ? 551 : 258,
+					};
+				} else {
+					pos = props.idtrack.get(endpos || id);
+				}
+				if (pos) death.set(id, pos);
+			}
+		}
+		return {
+			things,
+			death,
+			birth,
+		};
+	}
+
+	makeThing(id, obj, pos, opacity) {
+		const props = this.props;
+		return (
+			<Tween
+				key={id}
+				initial={this.state.birth.get(id)}
+				x={pos.x}
+				y={pos.y}
+				opacity={opacity}
+				compare={(prev, next) =>
+					prev.x === next.x &&
+					prev.y === next.y &&
+					prev.opacity === next.opacity
+				}
+				proc={(ms, prev, next) => {
+					if (ms > 96 * Math.PI) {
+						if (next.opacity === 0) {
+							const death = new Set(this.state.death),
+								birth = new Map(this.state.birth);
+							death.delete(id);
+							birth.delete(id);
+							this.setState({ death, birth });
+						}
+						return next;
+					}
+					const pos = {
+						x: prev.x + (next.x - prev.x) * Math.sin(ms / 192),
+						y: prev.y + (next.y - prev.y) * Math.sin(ms / 192),
+						opacity:
+							prev.opacity + (next.opacity - prev.opacity) * Math.sin(ms / 192),
+					};
+					props.idtrack.set(id, { x: pos.x, y: pos.y });
+					return pos;
+				}}>
+				{pos => (
+					<ThingInst
+						lofiArt={props.lofiArt}
+						game={props.game}
+						id={id}
+						p1id={props.p1id}
+						setInfo={props.setInfo}
+						onMouseOut={props.onMouseOut}
+						onClick={props.onClick}
+						targeting={props.targeting}
+						pos={pos}
+						opacity={pos.opacity}
+					/>
+				)}
+			</Tween>
+		);
+	}
+
+	render() {
+		const props = this.props,
+			children = [];
+		for (const id of props.things) {
+			const obj = props.game.byId(id),
+				pos = ui.tgtToPos(obj, props.p1id);
+			children.push(this.makeThing(id, obj, pos, 1));
+		}
+		for (const [id, pos] of this.state.death) {
+			const obj = props.game.byId(id);
+			children.push(this.makeThing(id, obj, pos, 0));
+		}
+		return children;
+	}
+}
+
 function addNoHealData(game, newdata) {
 	const dataNext = {
 		...game.data.dataNext,
@@ -678,49 +913,43 @@ const MatchView = connect(({ user, opts, nav }) => ({
 				id,
 				(pos = 0) => (offset = pos) + 16,
 			);
-			const pos = this.idtrack.get(id);
+			const pos = this.idtrack.get(id) ?? { x: -99, y: -99 };
+			const y0 = pos.y + offset;
 			const TextEffect = pos && (
-				<Motion
+				<Animation
 					key={key}
-					defaultStyle={{
-						x: pos.x,
-						y: pos.y + offset,
-						fade: 1,
-					}}
-					style={{
-						x: spring(pos.x),
-						y: spring(pos.y - 36, {
-							stiffness: 84,
-							dampen: 12,
-						}),
-						fade: spring(0, {
-							stiffness: 108,
-							dampen: 12,
-						}),
-					}}
-					onRest={() => {
-						this.setState(state => {
-							const effects = new Set(state.effects);
-							effects.delete(TextEffect);
-							const st = {
-								fxTextPos: updateMap(
-									state.fxTextPos,
-									id,
-									pos => pos && pos - 16,
-								),
-								effects,
-							};
-							return onRest ? onRest(state, st) : st;
-						});
+					proc={ms => {
+						if (ms > 360) {
+							this.setState(state => {
+								const effects = new Set(state.effects);
+								effects.delete(TextEffect);
+								const st = {
+									fxTextPos: updateMap(
+										state.fxTextPos,
+										id,
+										pos => pos && pos - 16,
+									),
+									effects,
+								};
+								return onRest ? onRest(state, st) : st;
+							});
+							return null;
+						}
+						const yy = ms / 5;
+						return {
+							y: y0 + yy,
+							fade: 1 - Math.tan(yy / 91),
+						};
 					}}>
-					{pos => (
+					{state => (
 						<Components.Text
 							text={text}
 							style={{
 								position: 'absolute',
 								left: `${pos.x}px`,
-								top: `${pos.y}px`,
-								opacity: `${pos.fade}`,
+								top: `${state.y}px`,
+								opacity: `${state.fade}`,
+								zIndex: '5',
 								transform: 'translate(-50%,-50%)',
 								textAlign: 'center',
 								pointerEvents: 'none',
@@ -728,7 +957,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							}}
 						/>
 					)}
-				</Motion>
+				</Animation>
 			);
 			return TextEffect;
 		};
@@ -900,27 +1129,23 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							const playerName =
 								game.data.players[game.byId(id).getIndex()].name;
 							const LastCardEffect = (
-								<Components.Delay
+								<Animation
 									key={effectId}
-									ms={3210}
-									first={<LastCard opacity={1} name={playerName} />}
-									second={
-										<Motion
-											defaultStyle={{ opacity: 1 }}
-											style={{ opacity: spring(0) }}
-											onRest={() => {
-												this.setState(state => {
-													const effects = new Set(state.effects);
-													effects.delete(LastCardEffect);
-													return { effects };
-												});
-											}}>
-											{({ opacity }) => (
-												<LastCard opacity={opacity} name={playerName} />
-											)}
-										</Motion>
-									}
-								/>
+									proc={ms => {
+										if (ms > 864 * Math.PI) {
+											this.setState(state => {
+												const effects = new Set(state.effects);
+												effects.delete(LastCardEffect);
+												return { effects };
+											});
+											return null;
+										}
+										return { opacity: Math.min(Math.sin(ms / 864) * 1.25, 1) };
+									}}>
+									{({ opacity }) => (
+										<LastCard opacity={opacity} name={playerName} />
+									)}
+								</Animation>
 							);
 							newstate.effects.add(LastCardEffect);
 							break;
@@ -1335,7 +1560,6 @@ const MatchView = connect(({ user, opts, nav }) => ({
 		}
 
 		componentWillUnmount() {
-			clearInterval(this.gameInterval);
 			document.removeEventListener('keydown', this.onkeydown);
 			window.removeEventListener('beforeunload', this.onbeforeunload);
 			this.props.dispatch(store.setCmds({}));
@@ -1614,7 +1838,18 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						: ''
 				}`;
 				children.push(
-					<Motion key={`${j}hp`} style={{ x1: spring(x1), x2: spring(x2) }}>
+					<Tween
+						key={`${j}hp`}
+						x1={x1}
+						x2={x2}
+						compare={(prev, next) => prev.x1 === next.x1 && prev.x2 === next.x2}
+						proc={(ms, prev, next) => {
+							if (ms > 96 * Math.PI) return next;
+							return {
+								x1: prev.x1 + (next.x1 - prev.x1) * Math.sin(ms / 192),
+								x2: prev.x2 + (next.x2 - prev.x2) * Math.sin(ms / 192),
+							};
+						}}>
 						{({ x1, x2 }) => (
 							<>
 								<div
@@ -1652,7 +1887,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 								)}
 							</>
 						)}
-					</Motion>,
+					</Tween>,
 					<Components.Text
 						key={`${j}hptext`}
 						text={hptext}
@@ -1724,91 +1959,19 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						)
 					)}
 					{children}
-					<TransitionMotion
-						styles={things.map(id => {
-							const obj = game.byId(id),
-								pos = ui.tgtToPos(obj, player1.id),
-								style = { opacity: spring(1) };
-							if (pos) {
-								style.x = spring(pos.x);
-								style.y = spring(pos.y);
-							}
-
-							return {
-								key: `${id}`,
-								style,
-								data: id,
-							};
-						})}
-						willEnter={item => {
-							const startpos = this.state.startPos.get(item.data);
-							let pos;
-							if (startpos < 0) {
-								pos = {
-									x: 103,
-									y: -startpos === player1.id ? 551 : 258,
-								};
-							} else if (startpos) {
-								pos = this.idtrack.get(startpos);
-							}
-							if (!pos) {
-								pos = { x: item.style.x?.val ?? 0, y: item.style.y?.val ?? 0 };
-							}
-
-							return {
-								opacity: 0,
-								...pos,
-							};
-						}}
-						willLeave={item => {
-							if (!game.has_id(item.data)) return null;
-							const endpos = this.state.endPos.get(item.data);
-							let pos;
-							if (endpos < 0) {
-								pos = {
-									x: 103,
-									y: -endpos === player1.id ? 551 : 258,
-								};
-							} else {
-								pos = this.idtrack.get(endpos || item.data);
-							}
-
-							return pos
-								? {
-										x: spring(pos.x),
-										y: spring(pos.y),
-										opacity: spring(0),
-								  }
-								: null;
-						}}>
-						{interpStyles => (
-							<>
-								{interpStyles.map(item => {
-									if (
-										Number.isFinite(item.style.x) &&
-										Number.isFinite(item.style.y)
-									) {
-										this.idtrack.set(item.data, item.style);
-									}
-									return (
-										<ThingInst
-											key={item.key}
-											lofiArt={props.lofiArt}
-											game={game}
-											id={item.data}
-											p1id={player1.id}
-											setInfo={this.setInfo}
-											onMouseOut={this.clearCard}
-											onClick={this.thingClick}
-											targeting={this.state.targeting}
-											pos={item.style}
-											opacity={item.style.opacity}
-										/>
-									);
-								})}
-							</>
-						)}
-					</TransitionMotion>
+					<Things
+						startPos={this.state.startPos}
+						endPos={this.state.endPos}
+						idtrack={this.idtrack}
+						lofiArt={props.lofiArt}
+						game={game}
+						p1id={player1.id}
+						setInfo={this.setInfo}
+						onMouseOut={this.clearCard}
+						onClick={this.thingClick}
+						targeting={this.state.targeting}
+						things={things}
+					/>
 					{game.game.has_flooding() && floodsvg}
 					<div
 						style={{

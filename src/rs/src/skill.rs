@@ -2908,7 +2908,7 @@ impl Skill {
 				}) {
 					let inst =
 						ctx.new_thing(card::As(ctx.get(c, Stat::card), newcard.code as i32), owner);
-					ctx.fx(inst, Fx::StartPos(inst));
+					ctx.fx(inst, Fx::StartPos(c));
 					ctx.addPerm(owner, inst);
 				}
 			}

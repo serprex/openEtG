@@ -22,50 +22,6 @@ export function Box(props) {
 	);
 }
 
-export class OnDelay extends Component {
-	constructor(props) {
-		super(props);
-		this._timeout = 0;
-	}
-
-	componentDidMount() {
-		this._timeout = setTimeout(() => {
-			if (this._timeout) {
-				this._timeout = 0;
-				if (this.props.onTimeout) {
-					this.props.onTimeout();
-				}
-			}
-		}, this.props.ms);
-	}
-
-	componentWillUnmount() {
-		if (this._timeout) {
-			clearTimeout(this._timeout);
-			this._timeout = 0;
-		}
-	}
-
-	render() {
-		return this.props.children || null;
-	}
-}
-
-export class Delay extends Component {
-	constructor(props) {
-		super(props);
-		this.state = { on: false };
-	}
-
-	render() {
-		return (
-			<OnDelay ms={this.props.ms} onTimeout={() => this.setState({ on: true })}>
-				{this.state.on ? this.props.second : this.props.first}
-			</OnDelay>
-		);
-	}
-}
-
 export function CardImage(props) {
 	const { card } = props,
 		bgcol = ui.maybeLightenStr(card);
