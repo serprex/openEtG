@@ -629,7 +629,9 @@ const data = {
 	v_bless: 'Target gains 3|3.',
 	v_blockwithcharge: 'Block attack per stack.',
 	v_boneyard: c =>
-		`When a creature dies, summon a ${c.upped ? '1|1' : '2|2'} Skeleton`,
+		`When a non-Skeleton creature dies, summon a ${
+			c.upped ? '2|2' : '1|1'
+		} Skeleton`,
 	v_bravery:
 		'Foe draws 2, 3 if own mark is 1:6, cards, you draw an equal amount of cards.',
 	v_burrow: 'Burrow. Burrowed creatures attack with half strength.',
