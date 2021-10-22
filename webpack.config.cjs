@@ -3,7 +3,7 @@ const path = require('path'),
 	WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 
 module.exports = {
-	experiments: { asyncWebAssembly: true },
+	experiments: { asyncWebAssembly: true, topLevelAwait: true },
 	devtool: 'source-map',
 	entry: {
 		aivai: './src/ui/aivai.js',

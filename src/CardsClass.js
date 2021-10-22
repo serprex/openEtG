@@ -1,37 +1,33 @@
 import Card from './Card.js';
-import * as etg from './etg.js';
+import etgwasm from './wasm.js';
 import * as etgutil from './etgutil.js';
+import enums from './enum.json';
+const wasm = await etgwasm;
 
 export default class Cards {
-	constructor(CardsJson) {
+	constructor(set) {
+		set = wasm.CardSet[set];
 		this.filtercache = [[], [], [], []];
 		this.Codes = [];
 		this.Names = Object.create(null);
 
-		CardsJson.forEach((data, type) => {
-			const keys = data[0],
-				cardinfo = Object.create(null);
-			for (let i = 1; i < data.length; i++) {
-				cardinfo.E = i - 1;
-				for (const carddata of data[i]) {
-					keys.forEach((key, i) => {
-						cardinfo[key] = carddata[i];
-					});
-					const cardcode = cardinfo.Code,
-						card = new Card(this, type + 1, cardinfo);
-					this.Codes[cardcode] = card;
-					if (!card.upped) this.Names[cardinfo.Name.replace(/\W/g, '')] = card;
-					cardinfo.Code = etgutil.asShiny(cardcode, true);
-					const shiny = new Card(this, type + 1, cardinfo);
-					this.Codes[cardinfo.Code] = shiny;
-					const cacheidx = card.upped ? 1 : 0;
+		for (const code of wasm.card_codes(set)) {
+			for (let shiny = 0; shiny < 2; shiny++) {
+				for (let upped = 0; upped < 2; upped++) {
+					const upcode = etgutil.asUpped(code, upped),
+						realcode = etgutil.asShiny(upcode, shiny),
+						card = new Card(this, set, upcode, realcode, wasm);
+					this.Codes[realcode] = card;
 					if (!card.getStatus('token')) {
-						this.filtercache[cacheidx].push(card);
-						this.filtercache[cacheidx | 2].push(shiny);
+						this.filtercache[(card.upped ? 1 : 0) | (card.shiny ? 2 : 0)].push(
+							card,
+						);
 					}
 				}
 			}
-		});
+			const name = enums.Card[code];
+			this.Names[name.replace(/\W/g, '')] = this.Codes[code];
+		}
 		for (const fc of this.filtercache) {
 			fc.sort(this.cardCmp, this);
 		}

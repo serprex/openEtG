@@ -3,7 +3,6 @@
 
 use std::borrow::Cow;
 use std::cmp;
-use std::convert::TryFrom;
 use std::iter::once;
 use std::num::NonZeroU8;
 use std::rc::Rc;
@@ -1189,9 +1188,7 @@ impl Skill {
 					&& !ctx.get(owner, Flag::drawlock)
 				{
 					for _ in 0..2 {
-						if ctx.get_player(owner).hand.is_full()
-							|| ctx.get_player(foe).hand.is_full()
-						{
+						if ctx.get_player(owner).hand_full() || ctx.get_player(foe).hand_full() {
 							break;
 						}
 						ctx.drawcard(owner);
@@ -1699,7 +1696,7 @@ impl Skill {
 			}
 			Self::duality | Self::v_duality => {
 				let owner = ctx.get_owner(c);
-				if !ctx.get_player(owner).hand.is_full() {
+				if !ctx.get_player(owner).hand_full() {
 					let foe = ctx.get_foe(owner);
 					let foepl = ctx.get_player(foe);
 					if let Some(&card) = foepl.deck.last() {
@@ -1924,7 +1921,7 @@ impl Skill {
 			}
 			Self::foedraw => {
 				let owner = ctx.get_owner(c);
-				if !ctx.get_player(owner).hand.is_full() {
+				if !ctx.get_player(owner).hand_full() {
 					let foe = ctx.get_foe(owner);
 					if !ctx.get(foe, Flag::protectdeck) {
 						let id = ctx.draw(foe);
@@ -1974,7 +1971,7 @@ impl Skill {
 									.chain(once(pl.shield))
 									.chain(pl.creatures.iter().cloned())
 									.chain(pl.permanents.iter().cloned())
-									.chain(pl.hand.iter().cloned())
+									.chain(pl.hand_iter())
 									.filter(|&id| id != 0 && tgting.full_check(ctx, t, id)),
 							);
 						}
@@ -1992,7 +1989,7 @@ impl Skill {
 				ctx.fx(t, Fx::Fractal);
 				let owner = ctx.get_owner(c);
 				ctx.set_quanta(owner, etg::Aether, 0);
-				let copies = 8 - ctx.get_player(owner).hand.len();
+				let copies = 8 - ctx.get_player(owner).hand_len();
 				let code = ctx.get(t, Stat::card);
 				for _ in 0..copies {
 					let inst = ctx.new_thing(code, owner);
@@ -2405,7 +2402,7 @@ impl Skill {
 				let mut stat2 = 2;
 				let owner = ctx.get_owner(c);
 				let mut idx = 0;
-				let mut len = ctx.get_player(owner).hand.len();
+				let mut len = ctx.get_player(owner).hand_len();
 				while idx < len {
 					let code = ctx.get(ctx.get_player(owner).hand[idx], Stat::card);
 					if etg::ShardList[1..]
@@ -2415,7 +2412,7 @@ impl Skill {
 						let card = ctx.get_card(code);
 						tally[card.element as usize - 1] += 1;
 						stat2 += if card::Upped(code) { 4 } else { 3 };
-						ctx.get_player_mut(owner).hand.remove(idx);
+						ctx.get_player_mut(owner).hand_remove(idx);
 						len -= 1;
 					} else {
 						idx += 1;
@@ -2787,7 +2784,7 @@ impl Skill {
 				if !ctx.sanctified(foe) {
 					ctx.fx(t, Fx::Nightmare);
 					let card = ctx.get(t, Stat::card);
-					let copies = 8 - ctx.get_player(foe).hand.len() as i32;
+					let copies = 8 - ctx.get_player(foe).hand_len() as i32;
 					let dmg = if self == Self::nightmare {
 						ctx.spelldmg(foe, copies * if card::Upped(card) { 2 } else { 1 })
 					} else {
@@ -2881,7 +2878,7 @@ impl Skill {
 			}
 			Self::ouija => {
 				let foe = ctx.get_foe(ctx.get_owner(c));
-				if !ctx.sanctified(foe) && !ctx.get_player(foe).hand.is_full() {
+				if !ctx.sanctified(foe) && !ctx.get_player(foe).hand_full() {
 					let inst = ctx.new_thing(card::OuijaEssence, foe);
 					ctx.fx(inst, Fx::StartPos(c));
 					ctx.addCard(foe, inst);
@@ -2933,7 +2930,7 @@ impl Skill {
 							.chain(once(pl.shield))
 							.chain(pl.creatures.clone().iter().cloned())
 							.chain(pl.permanents.clone().iter().cloned())
-							.chain(pl.hand.clone().iter().cloned())
+							.chain(pl.hand_iter())
 							.filter(|&id| id != 0),
 					);
 				}
@@ -3110,13 +3107,13 @@ impl Skill {
 			}
 			Self::predator => {
 				let foe = ctx.get_foe(ctx.get_owner(c));
-				if ctx.get_player(foe).hand.len() > 4
+				if ctx.get_player(foe).hand_len() > 4
 					&& !ctx.hasskill(c, Event::Turnstart, Skill::predatoroff)
 				{
 					ctx.addskills(c, Event::Turnstart, &[Skill::predatoroff]);
 					ctx.queue_attack(c, 0);
 					if !ctx.sanctified(foe) {
-						if let Some(card) = ctx.get_player(foe).hand.last().cloned() {
+						if let Some(card) = ctx.get_player(foe).hand_last() {
 							ctx.die(card);
 						}
 					}
@@ -3320,7 +3317,7 @@ impl Skill {
 											.chain(once(pl.shield))
 											.chain(pl.creatures.iter().cloned())
 											.chain(pl.permanents.iter().cloned())
-											.chain(pl.hand.iter().cloned())
+											.chain(pl.hand_iter())
 											.filter(|&id| id != 0 && tgting.check(ctx, t, id))
 											.map(|id| (id, caster)),
 									);
@@ -3374,7 +3371,7 @@ impl Skill {
 				if !ctx.sanctified(town) {
 					ctx.fx(t, Fx::Sfx(Sfx::mulligan));
 					if town == t {
-						ctx.drawhand(t, ctx.get_player(t).hand.len());
+						ctx.drawhand(t, ctx.get_player(t).hand_len());
 					} else {
 						let decklen = ctx.get_player(town).deck.len();
 						if decklen > 0 {
@@ -3410,7 +3407,7 @@ impl Skill {
 			}
 			Self::serendipity => {
 				let owner = ctx.get_owner(c);
-				let num = cmp::min(8 - ctx.get_player(owner).hand.len(), 3);
+				let num = cmp::min(8 - ctx.get_player(owner).hand_len(), 3);
 				let mut anyentro = false;
 				let ccard = ctx.get(c, Stat::card);
 				for i in (0..num).rev() {
@@ -3871,7 +3868,7 @@ impl Skill {
 			}
 			Self::unsummon => {
 				let town = ctx.get_owner(t);
-				if ctx.get_player(town).hand.is_full() {
+				if ctx.get_player(town).hand_full() {
 					return Skill::rewind.proc(ctx, c, t, data);
 				} else {
 					ctx.remove(t);
@@ -4004,7 +4001,7 @@ impl Skill {
 					if !ctx.sanctified(town) {
 						ctx.remove(t);
 						let owner = ctx.get_owner(c);
-						if !ctx.get_player(owner).hand.is_full() {
+						if !ctx.get_player(owner).hand_full() {
 							ctx.addCard(owner, t);
 						}
 					}
@@ -4064,9 +4061,7 @@ impl Skill {
 						2
 					};
 					for _ in 0..n {
-						if ctx.get_player(owner).hand.is_full()
-							|| ctx.get_player(foe).hand.is_full()
-						{
+						if ctx.get_player(owner).hand_full() || ctx.get_player(foe).hand_full() {
 							return;
 						}
 						ctx.drawcard(owner);
@@ -4414,7 +4409,7 @@ impl Skill {
 				let mut atk = hp + 3;
 				let owner = ctx.get_owner(c);
 				let mut idx = 0;
-				let mut len = ctx.get_player(owner).hand.len();
+				let mut len = ctx.get_player(owner).hand_len();
 				while idx < len {
 					let code = ctx.get(ctx.get_player(owner).hand[idx], Stat::card);
 					if etg::ShardList[1..]
@@ -4435,7 +4430,7 @@ impl Skill {
 							hp += 1;
 							atk += 1;
 						}
-						ctx.get_player_mut(owner).hand.remove(idx);
+						ctx.get_player_mut(owner).hand_remove(idx);
 						len -= 1;
 					} else {
 						idx += 1;
@@ -4746,7 +4741,7 @@ impl Skill {
 			}
 			Self::v_serendipity => {
 				let owner = ctx.get_owner(c);
-				let num = cmp::min(8 - ctx.get_player(owner).hand.len(), 3);
+				let num = cmp::min(8 - ctx.get_player(owner).hand_len(), 3);
 				let mut anyentro = false;
 				let ccard = ctx.get(c, Stat::card);
 				for i in (0..num).rev() {

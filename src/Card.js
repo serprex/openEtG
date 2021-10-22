@@ -2,88 +2,25 @@ import * as etg from './etg.js';
 import * as util from './util.js';
 import * as etgutil from './etgutil.js';
 import skillText from './skillText.js';
-
-const statuscache = new Map(),
-	activecache = new Map(),
-	activecastcache = new Map(),
-	emptyMap = new Map();
-
-function readCost(coststr, defaultElement) {
-	if (typeof coststr === 'number')
-		return new Int8Array([coststr, defaultElement]);
-	const cidx = coststr.indexOf(':'),
-		cost = +(~cidx ? coststr.substr(0, cidx) : coststr);
-	return isNaN(cost)
-		? null
-		: new Int8Array([cost, ~cidx ? +coststr.substr(cidx + 1) : defaultElement]);
-}
+import enums from './enum.json';
+import { read_skill, read_status } from './util.js';
 
 export default class Card {
-	constructor(Cards, type, info) {
+	constructor(Cards, set, code, realcode, wasm) {
 		this.Cards = Cards;
-		this.type = type;
-		this.element = info.E;
-		this.name = info.Name;
-		this.code = info.Code;
-		this.rarity = info.R | 0;
-		this.attack = info.Attack | 0;
-		this.health = info.Health | 0;
-		if (info.Cost) {
-			[this.cost, this.costele] = readCost(info.Cost, this.element);
-		} else {
-			this.cost = 0;
-			this.costele = 0;
-		}
-		this.cast = 0;
-		this.castele = 0;
-		if (info.Skill) {
-			if (this.type === etg.Spell) {
-				this.active = new Map([['cast', [info.Skill]]]);
-				this.cast = this.cost;
-				this.castele = this.costele;
-			} else if (activecache.has(info.Skill)) {
-				this.active = activecache.get(info.Skill);
-				const castinfo = activecastcache.get(info.Skill);
-				if (castinfo) {
-					[this.cast, this.castele] = castinfo;
-				}
-			} else {
-				this.active = new Map();
-				for (const active of util.iterSplit(info.Skill, '+')) {
-					const eqidx = active.indexOf('='),
-						a0 = ~eqidx ? active.substr(0, eqidx) : 'ownattack',
-						cast = readCost(a0, this.element),
-						key = cast ? 'cast' : a0,
-						curval = this.active.get(key),
-						name = active.substr(eqidx + 1);
-					if (curval === undefined) {
-						this.active.set(key, [name]);
-					} else {
-						curval.push(name);
-					}
-					if (cast) {
-						[this.cast, this.castele] = cast;
-						activecastcache.set(info.Skill, cast);
-					}
-				}
-				activecache.set(info.Skill, this.active);
-			}
-		} else this.active = emptyMap;
-		if (info.Status) {
-			if (statuscache.has(info.Status)) {
-				this.status = statuscache.get(info.Status);
-			} else {
-				this.status = new Map();
-				for (const status of util.iterSplit(info.Status, '+')) {
-					const eqidx = status.indexOf('=');
-					this.status.set(
-						~eqidx ? status.substr(0, eqidx) : status,
-						+(eqidx === -1 || status.substr(eqidx + 1)),
-					);
-				}
-				statuscache.set(info.Status, this.status);
-			}
-		} else this.status = emptyMap;
+		this.type = wasm.card_type(set, code);
+		this.element = wasm.card_element(set, code);
+		this.name = enums.Card[code];
+		this.code = realcode;
+		this.rarity = wasm.card_rarity(set, code);
+		this.attack = wasm.card_attack(set, code);
+		this.health = wasm.card_health(set, code);
+		this.cost = wasm.card_cost(set, code);
+		this.costele = wasm.card_costele(set, code);
+		this.cast = wasm.card_cast(set, code);
+		this.castele = wasm.card_castele(set, code);
+		this.active = read_skill(wasm.card_skills(set, code));
+		this.status = read_status(wasm.card_stats(set, code));
 	}
 
 	get shiny() {

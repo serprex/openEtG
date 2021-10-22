@@ -2,7 +2,7 @@
 name = "etg"
 version = "0.1.0"
 authors = ["serprex"]
-edition = "2018"
+edition = "2021"
 description = "openEtG rust module"
 license = "MIT"
 repository = "https://github.com/serprex/openEtG"
@@ -17,7 +17,6 @@ default = ["console_error_panic_hook"]
 rand = { version = "0.8", default-features = false }
 rand_pcg = { version = "0.3", default-features = false }
 fxhash = "0.2"
-arrayvec = { version = "0.7", default-features = false }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"

@@ -6,24 +6,12 @@ import Player from './Player.js';
 import Thing from './Thing.js';
 import enums from './enum.json';
 import { randint } from './util.js';
+import etgwasm from './wasm.js';
 
-const etgwasm = import('./rs/pkg/etg_bg.wasm').then(() =>
-	import('./rs/pkg/etg.js'),
-);
-
-export async function deckgen_duo(uprate, markpower, maxRarity) {
-	return etgutil.encodedeck(
-		(await etgwasm).deckgen_duo(uprate, markpower, maxRarity, randint()),
-	);
-}
-export async function deckgen_bow(uprate, markpower, maxRarity) {
-	return etgutil.encodedeck(
-		(await etgwasm).deckgen_bow(uprate, markpower, maxRarity, randint()),
-	);
-}
 export default async function CreateGame(data) {
 	return new Game(data, await etgwasm);
 }
+
 export class Game {
 	constructor(data, Wasm) {
 		this.wasm = Wasm;

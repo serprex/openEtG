@@ -1,7 +1,10 @@
 #![allow(non_snake_case)]
 
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
+
 pub use crate::game::CardSet;
-use crate::game::{Kind, Stat};
+use crate::game::{Flag, Kind, Stat};
 pub use crate::generated::*;
 use crate::skill::{Event, Skill};
 
@@ -84,15 +87,15 @@ impl Cards {
 }
 
 impl Card {
-	pub fn upped(&self) -> bool {
+	pub const fn upped(&self) -> bool {
 		Upped(self.code as i32)
 	}
 
-	pub fn shiny(&self) -> bool {
+	pub const fn shiny(&self) -> bool {
 		Shiny(self.code as i32)
 	}
 
-	pub fn isOf(&self, code: i32) -> bool {
+	pub const fn isOf(&self, code: i32) -> bool {
 		IsOf(self.code as i32, code)
 	}
 }
@@ -130,4 +133,108 @@ pub const fn AsShiny(code: i32, shiny: bool) -> i32 {
 	} else {
 		code & 0x3fff
 	}
+}
+
+pub fn cardSetCards(set: CardSet) -> &'static Cards {
+	match set {
+		CardSet::Original => &OrigSet,
+		_ => &OpenSet,
+	}
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn card_codes(set: CardSet) -> Vec<u16> {
+	cardSetCards(set)
+		.data
+		.iter()
+		.map(|&card| card.code)
+		.filter(|&code| !Upped(code as i32))
+		.collect::<Vec<_>>()
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn card_type(set: CardSet, code: i32) -> Option<Kind> {
+	cardSetCards(set).try_get(code).map(|&card| card.kind)
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn card_element(set: CardSet, code: i32) -> Option<i8> {
+	cardSetCards(set).try_get(code).map(|&card| card.element)
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn card_rarity(set: CardSet, code: i32) -> Option<i8> {
+	cardSetCards(set).try_get(code).map(|&card| card.rarity)
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn card_attack(set: CardSet, code: i32) -> Option<i8> {
+	cardSetCards(set).try_get(code).map(|&card| card.attack)
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn card_health(set: CardSet, code: i32) -> Option<i8> {
+	cardSetCards(set).try_get(code).map(|&card| card.health)
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn card_cost(set: CardSet, code: i32) -> Option<i8> {
+	cardSetCards(set).try_get(code).map(|&card| card.cost)
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn card_costele(set: CardSet, code: i32) -> Option<i8> {
+	cardSetCards(set).try_get(code).map(|&card| card.costele)
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn card_cast(set: CardSet, code: i32) -> Option<i8> {
+	cardSetCards(set).try_get(code).map(|&card| card.cast)
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn card_castele(set: CardSet, code: i32) -> Option<i8> {
+	cardSetCards(set).try_get(code).map(|&card| card.castele)
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn card_stats(set: CardSet, code: i32) -> Option<Vec<i32>> {
+	cardSetCards(set).try_get(code).map(|&card| {
+		card.status
+			.iter()
+			.flat_map(|&(k, v)| [id_stat(k), v].into_iter())
+			.chain(
+				Flag(*card.flag)
+					.into_iter()
+					.flat_map(|k| [id_flag(k), 1].into_iter()),
+			)
+			.collect()
+	})
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn card_skills(set: CardSet, code: i32) -> Option<Vec<i32>> {
+	cardSetCards(set).try_get(code).map(|&card| {
+		card.skill
+			.iter()
+			.flat_map(|&(k, v)| {
+				std::iter::once(u8::from(k) as i32 | (v.len() as i32) << 8).chain(
+					v.iter()
+						.map(|&sk| id_skill(sk) | sk.param1() << 16 | sk.param2() << 24),
+				)
+			})
+			.collect::<Vec<_>>()
+	})
 }

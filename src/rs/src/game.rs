@@ -5,13 +5,11 @@
 use std::borrow::Cow;
 use std::cmp;
 use std::collections::hash_map::Entry;
-use std::convert::TryFrom;
 use std::default::Default;
 use std::hash::{Hash, Hasher};
 use std::iter::once;
 use std::rc::Rc;
 
-use arrayvec::ArrayVec;
 use fxhash::{FxHashMap, FxHasher};
 use rand::distributions::{uniform::SampleRange, uniform::SampleUniform, Distribution, Uniform};
 use rand::seq::SliceRandom;
@@ -73,7 +71,7 @@ pub struct PlayerData {
 	pub creatures: Rc<[i32; 23]>,
 	pub permanents: Rc<[i32; 16]>,
 	pub quanta: [u8; 12],
-	pub hand: ArrayVec<i32, 8>,
+	pub hand: [i32; 8],
 	pub deck: Rc<Vec<i32>>,
 }
 
@@ -84,6 +82,77 @@ impl PlayerData {
 
 	pub fn deck_mut(&mut self) -> &mut Vec<i32> {
 		Rc::make_mut(&mut self.deck)
+	}
+
+	pub fn hand_full(&self) -> bool {
+		self.hand[7] != 0
+	}
+
+	pub fn hand_len(&self) -> usize {
+		for (idx, &id) in self.hand.iter().enumerate() {
+			if id == 0 {
+				return idx;
+			}
+		}
+		return 8;
+	}
+
+	pub fn hand_last(&self) -> Option<i32> {
+		if self.hand[0] == 0 {
+			None
+		} else {
+			let mut idx = 7;
+			loop {
+				if self.hand[idx] != 0 {
+					return Some(self.hand[idx]);
+				}
+				idx -= 1;
+			}
+		}
+	}
+
+	pub fn hand_push(&mut self, id: i32) -> i32 {
+		for (idx, handid) in self.hand.iter_mut().enumerate() {
+			if *handid == 0 {
+				*handid = id;
+				return idx as i32;
+			}
+		}
+
+		return -1;
+	}
+
+	pub fn hand_remove(&mut self, idx: usize) {
+		for i in idx..7 {
+			self.hand[i] = self.hand[i + 1];
+		}
+		self.hand[7] = 0;
+	}
+
+	pub fn hand_iter(&self) -> HandIter {
+		HandIter {
+			hand: self.hand,
+			idx: 0,
+		}
+	}
+}
+
+pub struct HandIter {
+	hand: [i32; 8],
+	idx: usize,
+}
+
+impl Iterator for HandIter {
+	type Item = i32;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		if let Some(&id) = self.hand.get(self.idx) {
+			if id != 0 {
+				self.idx += 1;
+				return Some(id);
+			}
+		}
+		None
 	}
 }
 
@@ -585,11 +654,11 @@ impl Game {
 	}
 
 	pub fn full_hand(&self, id: i32) -> bool {
-		self.get_player(id).hand.is_full()
+		self.get_player(id).hand_full()
 	}
 
 	pub fn empty_hand(&self, id: i32) -> bool {
-		self.get_player(id).hand.is_empty()
+		self.get_player(id).hand[0] == 0
 	}
 
 	pub fn has_id(&self, id: i32) -> bool {
@@ -605,7 +674,7 @@ impl Game {
 	}
 
 	pub fn get_hand(&self, id: i32) -> Vec<i32> {
-		self.get_player(id).hand.iter().cloned().collect()
+		self.get_player(id).hand_iter().collect()
 	}
 
 	pub fn deck_length(&self, id: i32) -> usize {
@@ -735,14 +804,18 @@ impl Game {
 		{
 			let pl = self.get_player_mut(id);
 			let pldecklen = pl.deck.len();
-			let oldhand = pl.hand.clone();
-			let newhand: ArrayVec<i32, 8> = pl
+			let oldhand = pl.hand;
+			let mut newhand = [0; 8];
+			for (idx, id) in pl
 				.deck_mut()
 				.drain(if pldecklen <= 7 { 0 } else { pldecklen - 7 }..)
-				.collect();
+				.enumerate()
+			{
+				newhand[idx] = id;
+			}
 			pl.deck_mut().extend_from_slice(&oldhand);
 			pl.hand = newhand;
-			for &id in pl.hand.clone().iter() {
+			for id in pl.hand_iter() {
 				self.set_kind(id, Kind::Spell);
 			}
 		}
@@ -833,12 +906,12 @@ impl Game {
 		thing
 			.status
 			.iter()
-			.flat_map(|(&k, &v)| std::array::IntoIter::new([generated::id_stat(k), v]))
+			.flat_map(|(&k, &v)| [generated::id_stat(k), v].into_iter())
 			.chain(
 				thing
 					.flag
 					.into_iter()
-					.flat_map(|k| std::array::IntoIter::new([generated::id_flag(k), 1])),
+					.flat_map(|k| [generated::id_flag(k), 1].into_iter()),
 			)
 			.collect()
 	}
@@ -948,9 +1021,9 @@ impl Game {
 	pub fn visible_instances(&self, id: i32, isp1: bool, cloaked: bool) -> Vec<i32> {
 		let pl = self.get_player(id);
 		let mut ids =
-			Vec::with_capacity(pl.hand.len() + pl.permanents.len() + pl.creatures.len() + 2);
+			Vec::with_capacity(pl.hand_len() + pl.permanents.len() + pl.creatures.len() + 2);
 		if isp1 || !cloaked {
-			ids.extend(pl.hand.iter().cloned());
+			ids.extend(pl.hand_iter());
 			if pl.weapon != 0 {
 				ids.push(pl.weapon);
 			}
@@ -1804,12 +1877,11 @@ impl Game {
 	}
 
 	pub fn addCard(&mut self, id: i32, cardid: i32) -> i32 {
-		if !self.get_player(id).hand.is_full() {
+		if !self.get_player(id).hand_full() {
 			self.set_owner(cardid, id);
 			self.set_kind(cardid, Kind::Spell);
 			let pl = self.get_player_mut(id);
-			pl.hand.push(cardid);
-			(pl.hand.len() - 1) as i32
+			pl.hand_push(cardid)
 		} else {
 			-1
 		}
@@ -1991,7 +2063,7 @@ impl Game {
 					Rc::make_mut(&mut self.get_player_mut(owner).permanents)[index as usize] = 0;
 				}
 				Kind::Spell => {
-					self.get_player_mut(owner).hand.remove(index as usize);
+					self.get_player_mut(owner).hand_remove(index as usize);
 				}
 				Kind::Player => (),
 			}
@@ -2002,7 +2074,7 @@ impl Game {
 	pub fn unsummon(&mut self, id: i32) {
 		self.remove(id);
 		let owner = self.get_owner(id);
-		let handfull = self.get_player(owner).hand.is_full();
+		let handfull = self.get_player(owner).hand_full();
 		if handfull {
 			self.get_player_mut(owner).deck_mut().push(id);
 		} else {
@@ -2107,7 +2179,7 @@ impl Game {
 	}
 
 	fn drawcore(&mut self, id: i32, isstep: bool) {
-		if !self.get_player(id).hand.is_full() {
+		if !self.get_player(id).hand_full() {
 			let cardid = if self.get(id, Flag::drawlock) {
 				self.new_thing(card::Singularity, id)
 			} else {
@@ -2143,7 +2215,10 @@ impl Game {
 		let pl = self.get_player_mut(id);
 		let mut deckrc = pl.deck.clone();
 		let deck = Rc::make_mut(&mut deckrc);
-		deck.extend(pl.hand.drain(..));
+		for id in pl.hand_iter() {
+			deck.push(id);
+		}
+		pl.hand = [0; 8];
 		deck[..].shuffle(&mut self.rng);
 		for _ in 0..size {
 			if let Some(cardid) = deck.pop() {
@@ -2516,7 +2591,7 @@ impl Game {
 				}
 			}
 			GameMove::Mulligan => {
-				let handlen = self.get_player(self.turn).hand.len();
+				let handlen = self.get_player(self.turn).hand_len();
 				self.fx(self.turn, Fx::Sfx(Sfx::mulligan));
 				self.drawhand(self.turn, handlen - 1);
 			}

@@ -2,7 +2,7 @@
 name = "etg-fuzz"
 version = "0.1.0"
 authors = ["serprex"]
-edition = "2018"
+edition = "2021"
 description = "openEtG fuzzer"
 license = "MIT"
 repository = "https://github.com/serprex/openEtG"

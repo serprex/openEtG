@@ -221,8 +221,8 @@ fn eval_skill(
 				cmp::min(
 					2,
 					8 - cmp::max(
-						ctx.get_player(owner).hand.len() - 1,
-						ctx.get_player(ctx.get_foe(owner)).hand.len(),
+						ctx.get_player(owner).hand_len() - 1,
+						ctx.get_player(ctx.get_foe(owner)).hand_len(),
 					),
 				) as f32
 			}
@@ -251,7 +251,7 @@ fn eval_skill(
 			Skill::cseed2 => 4.0,
 			Skill::creatureupkeep => {
 				let owner = ctx.get_owner(c);
-				std::array::IntoIter::new([(owner, 1), (ctx.get_foe(owner), -1)])
+				[(owner, 1), (ctx.get_foe(owner), -1)].into_iter()
 					.map(|(pl, multiply)| {
 						let mut score = 0;
 						let mut ecount = [0u8; 12];
@@ -322,7 +322,7 @@ fn eval_skill(
 				let weapon = ctx.get_weapon(foe);
 				if weapon == 0 {
 					0.1
-				} else if ctx.get_player(foe).hand.is_full() {
+				} else if ctx.get_player(foe).hand_full() {
 					0.5
 				} else {
 					ctx.get(weapon, Stat::cost) as f32
@@ -367,7 +367,7 @@ fn eval_skill(
 			Skill::foedraw => 8.0,
 			Skill::forcedraw => -10.0,
 			Skill::forceplay => 2.0,
-			Skill::fractal => (20 - ctx.get_player(ctx.get_owner(c)).hand.len()) as f32 / 4.0,
+			Skill::fractal => (20 - ctx.get_player(ctx.get_owner(c)).hand_len()) as f32 / 4.0,
 			Skill::freedom => 4.0,
 			Skill::freeze | Skill::v_freeze | Skill::freezeperm => {
 				if card::Upped(ctx.get(c, Stat::card)) {
@@ -488,7 +488,7 @@ fn eval_skill(
 					.iter()
 					.map(|&inst| card::IsOf(ctx.get(inst, Stat::card), card::Nightmare) as usize)
 					.sum::<usize>();
-				((24 - ctx.get_player(ctx.get_foe(owner)).hand.len()) >> n) as f32
+				((24 - ctx.get_player(ctx.get_foe(owner)).hand_len()) >> n) as f32
 			}
 			Skill::nightshade => 6.0,
 			Skill::nova => 4.0,
@@ -524,7 +524,7 @@ fn eval_skill(
 			Skill::powerdrain => 6.0,
 			Skill::precognition => 1.0,
 			Skill::predator => {
-				let foehandlen = ctx.get_player(ctx.get_foe(ctx.get_owner(c))).hand.len() as i32;
+				let foehandlen = ctx.get_player(ctx.get_foe(ctx.get_owner(c))).hand_len() as i32;
 				if foehandlen > 4 && ctx.get_kind(c) != Kind::Spell {
 					ttatk + cmp::max(foehandlen - 6, 1) as f32
 				} else {
@@ -757,7 +757,7 @@ fn eval_skill(
 					.iter()
 					.map(|&inst| card::IsOf(ctx.get(inst, Stat::card), card::v_Nightmare) as usize)
 					.sum::<usize>();
-				((24 - ctx.get_player(ctx.get_foe(owner)).hand.len()) >> n) as f32
+				((24 - ctx.get_player(ctx.get_foe(owner)).hand_len()) >> n) as f32
 			}
 			Skill::v_cold => 7.0,
 			Skill::v_firewall => 7.0,
@@ -1234,7 +1234,7 @@ pub fn eval(ctx: &Game) -> f32 {
 	}
 	let turnfoe = ctx.get_foe(turn);
 	let turnfoepl = ctx.get_player(turnfoe);
-	if turnfoepl.deck.is_empty() && !turnfoepl.hand.is_full() {
+	if turnfoepl.deck.is_empty() && !turnfoepl.hand_full() {
 		return 99999990.0;
 	}
 	let quantamap = QuantaMap::new(ctx);
@@ -1436,9 +1436,9 @@ pub fn eval(ctx: &Game) -> f32 {
 			.sum::<f32>();
 		if !ctx.get(pl, Flag::drawlock) {
 			if pl != turn {
-				let handlen = player.hand.len();
+				let handlen = player.hand_len();
 				for draw in 1..=player.drawpower as usize {
-					if player.hand.len() + draw <= 8 && player.deck.len() >= draw {
+					if player.hand_len() + draw <= 8 && player.deck.len() >= draw {
 						pscore += evalthing(
 							ctx,
 							&damage,
@@ -1461,7 +1461,7 @@ pub fn eval(ctx: &Game) -> f32 {
 		}
 		if ctx.get(pl, Stat::casts) == 0 {
 			pscore -= {
-				let handlen = player.hand.len();
+				let handlen = player.hand_len();
 				handlen + if handlen > 6 { 7 } else { 4 }
 			} as f32 / 4.0
 		}
@@ -1469,7 +1469,7 @@ pub fn eval(ctx: &Game) -> f32 {
 			pscore -= 2.0;
 		}
 		if ctx.get(pl, Flag::neuro) {
-			pscore -= (24 + player.hand.len()) as f32 / 8.0;
+			pscore -= (24 + player.hand_len()) as f32 / 8.0;
 		}
 		score += if ctx.get_leader(pl) == ctx.get_leader(turn) {
 			pscore

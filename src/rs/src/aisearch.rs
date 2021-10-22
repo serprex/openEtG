@@ -91,7 +91,7 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 					} else {
 						tgts.extend(
 							once(turn)
-								.chain(pl.hand.iter().cloned())
+								.chain(pl.hand_iter())
 								.filter(|&t| tgting.full_check(ctx, id, t)),
 						)
 					}
@@ -154,7 +154,7 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 				}
 			}
 		}
-		if !gclone.get_player(turn).hand.is_full() {
+		if !gclone.get_player(turn).hand_full() {
 			if gclone
 				.get_player(turn)
 				.creatures
@@ -185,7 +185,7 @@ where
 		.chain(once(pl.shield))
 		.chain(pl.creatures.iter().cloned())
 		.chain(pl.permanents.iter().cloned())
-		.chain(pl.hand.iter().cloned())
+		.chain(pl.hand_iter())
 	{
 		if id != 0 {
 			func(ctx, id);
@@ -295,8 +295,8 @@ pub fn search(ctx: &Game) -> GameMove {
 	if ctx.phase == Phase::Mulligan {
 		let turn = ctx.turn;
 		let pl = ctx.get_player(turn);
-		return if pl.hand.len() < 6
-			|| pl.hand.iter().any(|&id| {
+		return if pl.hand_len() < 6
+			|| pl.hand_iter().any(|id| {
 				ctx.get(id, Flag::pillar) || {
 					let card = ctx.get(id, Stat::card);
 					card::IsOf(card, card::Nova)

@@ -1,6 +1,5 @@
 use std::cell::RefCell;
 
-use arrayvec::ArrayVec;
 use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 
@@ -313,38 +312,53 @@ impl Builder {
 		for i in 1..=12 {
 			self.ecost[i] += self.ecost[0] / 12.0;
 		}
-		let mut qc = ArrayVec::<u8, 12>::from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+		const MATBITS: u16 =
+			1 << MATERIAL[0] | 1 << MATERIAL[1] | 1 << MATERIAL[2] | 1 << MATERIAL[3];
+		const SPIBITS: u16 =
+			1 << SPIRITUAL[0] | 1 << SPIRITUAL[1] | 1 << SPIRITUAL[2] | 1 << SPIRITUAL[3];
+		const CARBITS: u16 =
+			1 << CARDINAL[0] | 1 << CARDINAL[1] | 1 << CARDINAL[2] | 1 << CARDINAL[3];
+		let mut qc: u16 = 0x1ffe;
 		loop {
-			qc.retain(|e| self.ecost[*e as usize] >= 2.0);
-			if (qc.len() > 2) {
-				if (qc.iter().all(|e| MATERIAL.contains(&e))) {
-					self.deck.push(self.up_code(card::MaterialPillar as u16));
-					for &e in MATERIAL.iter() {
-						self.ecost[e as usize] -= 2.0;
-					}
-				} else if (qc.iter().all(|e| SPIRITUAL.contains(&e))) {
-					self.deck.push(self.up_code(card::SpiritualPillar as u16));
-					for &e in SPIRITUAL.iter() {
-						self.ecost[e as usize] -= 2.0;
-					}
-				} else if (qc.iter().all(|e| CARDINAL.contains(&e))) {
-					self.deck.push(self.up_code(card::CardinalPillar as u16));
-					for &e in CARDINAL.iter() {
-						self.ecost[e as usize] -= 2.0;
-					}
+			for i in 1..=12 {
+				if self.ecost[i] < 2.0 {
+					qc &= !(1 << i);
 				}
+			}
+			if qc.count_ones() < 3 {
+				break;
+			}
+			let hasmat = (qc & MATBITS).count_ones() > 2;
+			let hasspi = (qc & SPIBITS).count_ones() > 2;
+			let hascar = (qc & CARBITS).count_ones() > 2;
+			let quadcount = (hasmat as i32) + (hasspi as i32) + (hascar as i32);
+			if quadcount == 1 && hasmat {
+				self.deck.push(self.up_code(card::MaterialPillar as u16));
+				for &e in MATERIAL.iter() {
+					self.ecost[e as usize] -= 2.0;
+				}
+			} else if quadcount == 1 && hasspi {
+				self.deck.push(self.up_code(card::SpiritualPillar as u16));
+				for &e in SPIRITUAL.iter() {
+					self.ecost[e as usize] -= 2.0;
+				}
+			} else if quadcount == 1 && hascar {
+				self.deck.push(self.up_code(card::CardinalPillar as u16));
+				for &e in CARDINAL.iter() {
+					self.ecost[e as usize] -= 2.0;
+				}
+			} else {
 				self.deck.push(self.up_code(card::QuantumPillar as u16));
 				for i in 1..=12 {
 					self.ecost[i] -= 1.25;
 				}
-			} else {
-				break;
 			}
 		}
-		for i in 0..qc.len() {
-			let e = qc[i];
-			for j in (0..self.ecost[e as usize] as i32).step_by(5) {
-				self.deck.push(self.up_code(etg::PillarList[e as usize]));
+		for i in 1..=12 {
+			if qc & (1 << i) != 0 {
+				for j in (0..self.ecost[i] as i32).step_by(5) {
+					self.deck.push(self.up_code(etg::PillarList[i]));
+				}
 			}
 		}
 	}

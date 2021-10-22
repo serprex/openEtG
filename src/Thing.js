@@ -1,17 +1,6 @@
 import skillText from './skillText.js';
-import Card from './Card.js';
 import enums from './enum.json';
-
-function decodeSkillName(cell) {
-	const skid = cell & 0xffff,
-		n = enums.Skill[skid],
-		c = enums.SkillParams[skid] ?? 0;
-	return c === 0
-		? n
-		: c === 1
-		? `${n} ${cell >> 16}`
-		: `${n} ${(((cell >> 16) & 0xff) << 24) >> 24} ${cell >> 24}`;
-}
+import { decodeSkillName, read_skill, read_status } from './util.js';
 
 export default class Thing {
 	constructor(game, id) {
@@ -25,27 +14,10 @@ export default class Thing {
 		return this.card.name;
 	}
 	get active() {
-		const raw = this.game.game.get_skills(this.id),
-			skills = new Map();
-		let idx = 0;
-		while (idx < raw.length) {
-			const ev = enums.Event[raw[idx] & 255],
-				lastidx = idx + (raw[idx] >>> 8),
-				name = [];
-			while (idx++ < lastidx) {
-				name.push(decodeSkillName(raw[idx]));
-			}
-			if (name.length) skills.set(ev, name);
-		}
-		return skills;
+		return read_skill(this.game.game.get_skills(this.id));
 	}
 	get status() {
-		const raw = this.game.game.get_stats(this.id),
-			status = new Map();
-		for (let i = 0; i < raw.length; i += 2) {
-			status.set(enums.Stat[raw[i]] ?? enums.Flag[raw[i]], raw[i + 1]);
-		}
-		return status;
+		return read_status(this.game.game.get_stats(this.id));
 	}
 	getSkill(k) {
 		const name = Array.from(

@@ -31,7 +31,7 @@
     "build-atlas-css": "node --experimental-modules --experimental-json-modules ./scripts/mkatlascss.js ./assets/atlas.css ./assets/atlas.png",
     "build-atlas-webp": "cwebp -m 6 -q 100 assets/atlas.png -o assets/atlas.webp",
     "build-mkrs": "node --experimental-modules --experimental-json-modules ./scripts/mkrs.js",
-    "build-mkrs-server": "node --experimental-modules --experimental-json-modules ./scripts/mkrs-server.js"
+    "build-mkrs-server": "node --experimental-modules --experimental-json-modules --experimental-wasm-modules ./scripts/mkrs-server.js"
   },
   "license": "MIT"
 }

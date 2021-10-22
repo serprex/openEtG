@@ -1,6 +1,49 @@
 import fs from 'fs/promises';
-import OrigCards from '../src/vanilla/Cards.js';
-import OpenCards from '../src/Cards.js';
+
+import OpenCardsJson from '../src/Cards.json';
+import OrigCardsJson from '../src/vanilla/Cards.json';
+
+import Card from './Card.js';
+import { asShiny } from '../src/etgutil.js';
+
+export default class Cards {
+	constructor(CardsJson) {
+		this.filtercache = [[], [], [], []];
+		this.Codes = [];
+		this.Names = Object.create(null);
+
+		CardsJson.forEach((data, type) => {
+			const keys = data[0],
+				cardinfo = Object.create(null);
+			for (let i = 1; i < data.length; i++) {
+				cardinfo.E = i - 1;
+				for (const carddata of data[i]) {
+					keys.forEach((key, i) => {
+						cardinfo[key] = carddata[i];
+					});
+					const cardcode = cardinfo.Code,
+						card = new Card(this, type + 1, cardinfo);
+					this.Codes[cardcode] = card;
+					if (!card.upped) this.Names[cardinfo.Name.replace(/\W/g, '')] = card;
+					cardinfo.Code = asShiny(cardcode, true);
+					const shiny = new Card(this, type + 1, cardinfo);
+					this.Codes[cardinfo.Code] = shiny;
+					const cacheidx = card.upped ? 1 : 0;
+					if (!card.status.get('token')) {
+						this.filtercache[cacheidx].push(card);
+						this.filtercache[cacheidx | 2].push(shiny);
+					}
+				}
+			}
+		});
+		for (const fc of this.filtercache) {
+			fc.sort(this.cardCmp, this);
+		}
+	}
+}
+
+const OpenCards = new Cards(OpenCardsJson);
+const OrigCards = new Cards(OrigCardsJson);
 
 const json = {
 	Card: {},
@@ -154,7 +197,10 @@ for (const fx of gamers
 }
 source.push('}}');
 
-const names = { open: [], orig: [] };
+const names = {
+	open: [],
+	orig: [],
+};
 for (const Cards of [OpenCards, OrigCards]) {
 	const open = Cards === OpenCards,
 		setname = open ? 'OpenSet' : 'OrigSet';
