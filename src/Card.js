@@ -1,12 +1,12 @@
+import enums from './enum.json';
 import * as etg from './etg.js';
-import * as util from './util.js';
 import * as etgutil from './etgutil.js';
 import skillText from './skillText.js';
-import enums from './enum.json';
 import { read_skill, read_status } from './util.js';
+import wasm from './wasm.js';
 
 export default class Card {
-	constructor(Cards, set, code, realcode, wasm) {
+	constructor(Cards, set, code, realcode) {
 		this.Cards = Cards;
 		this.type = wasm.card_type(set, code);
 		this.element = wasm.card_element(set, code);

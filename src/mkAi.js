@@ -1,18 +1,17 @@
 import * as etgutil from './etgutil.js';
 import Cards from './Cards.js';
 import Decks from './Decks.json';
-import * as Rng from './Rng.js';
-import * as sock from './sock.js';
-import * as store from './store.js';
+import * as sock from './sock.jsx';
+import * as store from './store.jsx';
 import * as userutil from './userutil.js';
-import * as util from './util.js';
+import { choose, randint, shuffle } from './util.js';
 import deckgen from './deckgen.js';
-import CreateGame from './Game.js';
+import Game from './Game.js';
 
-export async function run(gamethunk) {
-	const game = await gamethunk;
-	if (game)
-		store.store.dispatch(store.doNav(import('./views/Match.js'), { game }));
+export function run(game) {
+	if (game) {
+		store.store.dispatch(store.doNav(import('./views/Match.jsx'), { game }));
+	}
 }
 
 export function mkPremade(level, daily, datafn = null) {
@@ -36,10 +35,10 @@ export function mkPremade(level, daily, datafn = null) {
 			foedata = Decks[name][user[level === 1 ? 'dailymage' : 'dailydg']];
 		}
 	}
-	if (!foedata) foedata = Rng.choose(Decks[name]);
+	if (!foedata) foedata = choose(Decks[name]);
 	const data = {
 		level: level,
-		seed: util.randint(),
+		seed: randint(),
 		cost,
 		rematch: () => run(mkPremade(level)),
 		players: [
@@ -64,8 +63,8 @@ export function mkPremade(level, daily, datafn = null) {
 		data.players[1].markpower = 3;
 		data.players[1].drawpower = 2;
 	}
-	Rng.shuffle(data.players);
-	return CreateGame(datafn ? datafn(data) : data);
+	shuffle(data.players);
+	return new Game(datafn ? datafn(data) : data);
 }
 const randomNames = [
 	'Adrienne',
@@ -97,7 +96,7 @@ const randomNames = [
 	'Tammi',
 	'Yuriko',
 ];
-export async function mkAi(level, daily, datafn = null) {
+export function mkAi(level, daily, datafn = null) {
 	const urdeck = sock.getDeck(),
 		{ user } = store.store.getState(),
 		minsize = user ? 30 : 10;
@@ -110,12 +109,12 @@ export async function mkAi(level, daily, datafn = null) {
 		store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
 		return;
 	}
-	const deck = await (level === 0 ? deckgen(0, 1, 2) : deckgen(0.4, 2, 3));
+	const deck = level === 0 ? deckgen(0, 1, 2) : deckgen(0.4, 2, 3);
 	store.store.dispatch(store.setOptTemp('aideck', deck));
 
 	const data = {
 		level: level,
-		seed: util.randint(),
+		seed: randint(),
 		cost,
 		rematch: () => run(mkAi(level)),
 		players: [
@@ -128,7 +127,7 @@ export async function mkAi(level, daily, datafn = null) {
 			{
 				idx: 2,
 				ai: 1,
-				name: Rng.choose(randomNames),
+				name: choose(randomNames),
 				deck: deck,
 				hp: level === 0 ? 100 : level === 1 ? 125 : 150,
 				drawpower: level > 1 ? 2 : 1,
@@ -137,6 +136,6 @@ export async function mkAi(level, daily, datafn = null) {
 		],
 	};
 	if (daily !== undefined) data.daily = daily;
-	Rng.shuffle(data.players);
-	return CreateGame(datafn ? datafn(data) : data);
+	shuffle(data.players);
+	return new Game(datafn ? datafn(data) : data);
 }

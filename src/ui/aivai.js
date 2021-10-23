@@ -1,4 +1,5 @@
-import CreateGame from '../Game.js';
+import Game from '../Game.js';
+import wasm from '../wasm.js';
 import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
 import { randint } from '../util.js';
@@ -95,10 +96,10 @@ function fightItOut() {
 				deck,
 			}));
 			if (seed & 1) players.reverse();
-			const game = await CreateGame({ seed, set, players });
+			const game = new Game({ seed, set, players });
 			const realp1 = game.byUser(0).id;
 
-			while (game.phase < game.wasm.Phase.End) {
+			while (game.phase < wasm.Phase.End) {
 				const msg = await worker.send({
 					data: game.data,
 					moves: game.replay,

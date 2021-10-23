@@ -1,6 +1,6 @@
 import * as etgutil from './etgutil.js';
-import * as sock from './sock.js';
-import * as store from './store.js';
+import * as sock from './sock.jsx';
+import * as store from './store.jsx';
 
 let guestname;
 function chatmute() {
@@ -55,7 +55,7 @@ export default function parseChat(e) {
 				sock.userEmit('delete');
 				store.store.dispatch(store.setUser(null));
 				store.store.dispatch(store.setOpt('remember', false));
-				store.store.dispatch(store.doNav(import('./views/Login.js')));
+				store.store.dispatch(store.doNav(import('./views/Login.jsx')));
 			} else {
 				store.store.dispatch(
 					store.chatMsg(
@@ -64,8 +64,6 @@ export default function parseChat(e) {
 					),
 				);
 			}
-		} else if (msg === '/vanilla') {
-			store.store.dispatch(store.doNav(import('./vanilla/views/Editor.js')));
 		} else if (msg.match(/^\/roll( |$)\d*d?\d*$/)) {
 			const data = { u: user ? user.name : '' };
 			const ndn = msg.slice(6).split('d');

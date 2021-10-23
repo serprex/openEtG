@@ -8,8 +8,8 @@ module.exports = {
 	entry: {
 		aivai: './src/ui/aivai.js',
 		art: './src/ui/art.js',
-		deck: './src/ui/deck.js',
-		main: './src/ui/main.js',
+		deck: './src/ui/deck.jsx',
+		main: './src/ui/main.jsx',
 		mosaic: './src/ui/mosaic.js',
 		vboltcalc: './src/vanilla/ui/boltcalc.js',
 		vdeckinfo: './src/vanilla/ui/deckinfo.js',
@@ -46,7 +46,7 @@ module.exports = {
 				},
 			},
 			{
-				test: /\.m?jsx?$/,
+				test: /\.m?jsx$/,
 				exclude: /node_modules/,
 				use: {
 					loader: 'babel-loader',

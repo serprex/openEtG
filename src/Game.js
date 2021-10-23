@@ -2,23 +2,18 @@ import * as etg from './etg.js';
 import * as etgutil from './etgutil.js';
 import OriginalCards from './vanilla/Cards.js';
 import OpenCards from './Cards.js';
-import Player from './Player.js';
 import Thing from './Thing.js';
+import Player from './Player.js';
 import enums from './enum.json';
 import { randint } from './util.js';
-import etgwasm from './wasm.js';
+import wasm from './wasm.js';
 
-export default async function CreateGame(data) {
-	return new Game(data, await etgwasm);
-}
-
-export class Game {
-	constructor(data, Wasm) {
-		this.wasm = Wasm;
+export default class Game {
+	constructor(data) {
 		this.data = data;
-		this.game = new Wasm.Game(
+		this.game = new wasm.Game(
 			data.seed,
-			Wasm.CardSet[data.set] ?? Wasm.CardSet.Open,
+			wasm.CardSet[data.set] ?? wasm.CardSet.Open,
 		);
 		this.cache = new Map([[this.id, this]]);
 		this.replay = [];
@@ -81,7 +76,6 @@ export class Game {
 
 	clone() {
 		const obj = Object.create(Game.prototype);
-		obj.wasm = this.wasm;
 		obj.data = this.data;
 		obj.game = this.game.clonegame();
 		obj.cache = new Map([[this.id, obj]]);
@@ -172,15 +166,10 @@ export class Game {
 	}
 	next(cmd, fx = true) {
 		if (this.replay) this.replay.push(cmd);
-		return this.game.next(
-			this.wasm.GameMoveType[cmd.x],
-			cmd.c | 0,
-			cmd.t | 0,
-			fx,
-		);
+		return this.game.next(wasm.GameMoveType[cmd.x], cmd.c | 0, cmd.t | 0, fx);
 	}
 	withMoves(moves) {
-		const newgame = new Game(this.data, this.wasm);
+		const newgame = new Game(this.data);
 		for (const move of moves) {
 			newgame.next(move, false);
 		}

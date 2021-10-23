@@ -1,6 +1,7 @@
 import skillText from './skillText.js';
 import enums from './enum.json';
 import { decodeSkillName, read_skill, read_status } from './util.js';
+import wasm from './wasm.js';
 
 export default class Thing {
 	constructor(game, id) {
@@ -70,10 +71,9 @@ export default class Thing {
 	}
 	info() {
 		const info =
-			this.type === this.game.wasm.Kind.Creature ||
-			this.type === this.game.wasm.Kind.Weapon
+			this.type === wasm.Kind.Creature || this.type === wasm.Kind.Weapon
 				? `${this.trueatk()}|${this.truehp()}/${this.maxhp}`
-				: this.type === this.game.wasm.Kind.Shield
+				: this.type === wasm.Kind.Shield
 				? this.truedr().toString()
 				: '';
 		const stext = skillText(this);

@@ -1,8 +1,7 @@
 import Card from './Card.js';
-import etgwasm from './wasm.js';
+import wasm from './wasm.js';
 import * as etgutil from './etgutil.js';
 import enums from './enum.json';
-const wasm = await etgwasm;
 
 export default class Cards {
 	constructor(set) {
@@ -16,7 +15,7 @@ export default class Cards {
 				for (let upped = 0; upped < 2; upped++) {
 					const upcode = etgutil.asUpped(code, upped),
 						realcode = etgutil.asShiny(upcode, shiny),
-						card = new Card(this, set, upcode, realcode, wasm);
+						card = new Card(this, set, upcode, realcode);
 					this.Codes[realcode] = card;
 					if (!card.getStatus('token')) {
 						this.filtercache[(card.upped ? 1 : 0) | (card.shiny ? 2 : 0)].push(

@@ -1,8 +1,8 @@
-import CreateGame from './Game.js';
+import Game from './Game.js';
 
 let game = null,
 	premoves = null;
-onmessage = async function (e) {
+onmessage = function (e) {
 	const {
 		id,
 		data: { data, moves },
@@ -13,7 +13,7 @@ onmessage = async function (e) {
 		JSON.stringify(data) !== JSON.stringify(game.data) ||
 		JSON.stringify(premoves) !== JSON.stringify(moves.slice(0, premoves.length))
 	) {
-		game = await CreateGame(data);
+		game = new Game(data);
 		premoves = null;
 	}
 	for (let i = premoves !== null ? premoves.length : 0; i < moves.length; i++) {

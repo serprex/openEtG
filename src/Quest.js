@@ -1,11 +1,10 @@
 import * as etg from './etg.js';
-import * as sock from './sock.js';
-import * as store from './store.js';
-import * as util from './util.js';
-import * as Rng from './Rng.js';
-import * as etgutil from './etgutil.js';
+import * as sock from './sock.jsx';
+import * as store from './store.jsx';
+import { randint, randomcard, shuffle } from './util.js';
+import { decodedeck } from './etgutil.js';
 import Cards from './Cards.js';
-import CreateGame from './Game.js';
+import Game from './Game.js';
 
 export function requireQuest(quest, user) {
 	return quest.questdependencies.every(dependency => user.quests[dependency]);
@@ -297,7 +296,7 @@ quarks.spirit5 = {
 	deck: '0b606015ur025us035up025uu025v2035vb015uo025uv015v8025ul018pi',
 	name: 'Spirit of the Dark Maiden',
 	morph: (ctx, card) =>
-		Rng.randomcard(
+		randomcard(
 			Cards,
 			card.upped,
 			x => x.element === etg.Darkness && x.type === card.type,
@@ -739,7 +738,7 @@ export const root = {
 		},
 	],
 };
-export async function mkQuestAi(quest, datafn) {
+export function mkQuestAi(quest, datafn) {
 	const markpower = quest.markpower ?? 1;
 	const drawpower = quest.drawpower ?? 1;
 	const hp = quest.hp ?? 100;
@@ -748,7 +747,7 @@ export async function mkQuestAi(quest, datafn) {
 	let urdeck = quest.urdeck;
 	if (!urdeck) {
 		urdeck = sock.getDeck();
-		if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user)) {
+		if (!Cards.isDeckLegal(decodedeck(urdeck), user)) {
 			store.store.dispatch(store.chatMsg('Invalid deck', 'System'));
 			return;
 		}
@@ -757,7 +756,7 @@ export async function mkQuestAi(quest, datafn) {
 		quest,
 		wintext: quest.wintext ?? '',
 		noheal: quest.noheal,
-		seed: util.randint(),
+		seed: randint(),
 		players: [
 			{
 				idx: 1,
@@ -783,8 +782,8 @@ export async function mkQuestAi(quest, datafn) {
 		data.choicerewards = quest.choicerewards;
 		data.rewardamount = quest.rewardamount;
 	}
-	Rng.shuffle(data.players);
-	const game = await CreateGame(datafn ? datafn(data) : data);
+	shuffle(data.players);
+	const game = new Game(datafn ? datafn(data) : data);
 	if (quest.morph) {
 		for (const card of game.byUser(user.name).deck) {
 			game.game.transform(card.id, quest.morph(card.card));
