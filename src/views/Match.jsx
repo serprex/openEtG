@@ -233,6 +233,8 @@ class Tween extends Component {
 }
 
 class Animation extends Component {
+	_mounted = false;
+	start = 0;
 	state = {};
 
 	step = ts => {
@@ -255,7 +257,10 @@ class Animation extends Component {
 	}
 
 	render() {
-		return this.props.children(this.state);
+		for (const key in this.state) {
+			return this.props.children(this.state);
+		}
+		return null;
 	}
 }
 
