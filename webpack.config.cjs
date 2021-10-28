@@ -18,6 +18,7 @@ module.exports = {
 		vspeed: './src/vanilla/ui/speed.js',
 	},
 	output: {
+		clean: true,
 		path: path.resolve(__dirname, 'bundle'),
 		filename: 'hash/[contenthash].js',
 		chunkFilename: 'hash/[contenthash].js',
