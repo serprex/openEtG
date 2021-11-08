@@ -742,7 +742,7 @@ class Things extends Component {
 				proc={(ms, prev, next) => {
 					if (ms > 96 * Math.PI) {
 						if (next.opacity === 0) {
-							const death = new Set(this.state.death),
+							const death = new Map(this.state.death),
 								birth = new Map(this.state.birth);
 							death.delete(id);
 							birth.delete(id);
