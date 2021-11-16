@@ -151,7 +151,7 @@ export default class Game {
 	aiSearch() {
 		const cmd = this.game.aisearch();
 		return {
-			x: ['end', 'cast', 'accept', 'mulligan', 'foe', 'resign'][cmd.x],
+			x: wasm.GameMoveType[cmd.x],
 			c: cmd.c,
 			t: cmd.t,
 		};

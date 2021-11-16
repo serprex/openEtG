@@ -8,8 +8,10 @@ export default class AiWorker {
 					resolve(worker);
 				} else {
 					const pending = this.pending.get(e.data.id);
-					if (pending) pending(e);
-					this.pending.delete(e.id);
+					if (pending) {
+						pending(e);
+						this.pending.delete(e.data.id);
+					}
 				}
 			});
 		});
