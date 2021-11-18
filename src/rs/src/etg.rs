@@ -1,7 +1,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 use std::default::Default;
-use std::hash::{Hash, Hasher};
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;

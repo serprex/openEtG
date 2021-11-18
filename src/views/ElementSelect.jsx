@@ -177,7 +177,8 @@ export default connect(({ user }) => ({ user }))(
 							}}
 							onClick={() => {
 								sock.emit({
-									x: 'inituser',
+									x: 'a',
+									z: 'inituser',
 									u: this.props.user.name,
 									a: this.props.user.auth,
 									e: i === 14 ? (Math.random() * 12 + 1) | 0 : i,

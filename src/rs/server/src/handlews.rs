@@ -23,7 +23,8 @@ use crate::cardpool::Cardpool;
 use crate::etgutil::{decode_code, encode_code, encode_count, iterraw};
 use crate::generated::{DG_COUNT, MAGE_COUNT, ORIGINAL_STARTERS, STARTERS};
 use crate::json::{
-	ArenaInfo, BzBid, GamesData, GamesDataPlayer, GamesMove, LegacyUser, UserMessage, WsResponse,
+	ArenaInfo, AuthMessage, BzBid, GamesData, GamesDataPlayer, GamesMove, LegacyUser, UserMessage,
+	WsResponse,
 };
 use crate::users::{self, HashAlgo, UserData, UserObject, Users};
 use crate::{get_day, svg, PgPool};
@@ -377,28 +378,29 @@ pub async fn handle_ws(
 		},
 	);
 
-	'msgloop: while let Some(result) = user_ws_rx.next().await {
-		if let Ok(msg) = result {
-			if let Ok(msg) = msg.to_str() {
-				if let Ok(msg) = serde_json::from_str::<UserMessage>(msg) {
-					let mut client = pgpool
-						.get()
-						.await
-						.expect("Failed to acquire sql connection");
+	'msgloop: while let Some(Ok(result)) = user_ws_rx.next().await {
+		let msg = if let Ok(msg) = result.to_str() {
+			msg
+		} else {
+			continue;
+		};
+		if let Ok(msg) = serde_json::from_str::<UserMessage>(msg) {
+			let mut client = pgpool
+				.get()
+				.await
+				.expect("Failed to acquire sql connection");
 
-					let user = if let Some((u, a)) = msg.get_ua() {
-						if let Ok(row) = client
-							.query_one("select id, auth from users where name = $1", &[&u])
-							.await
-						{
-							if a == row.get::<usize, &str>(1) {
-								let user = users.write().await.load(&*client, u).await;
-								if user.is_none() {
-									continue;
-								}
-								let rightsock = usersocks.read().await.get(u) == Some(&sockid);
+			match msg {
+				UserMessage::a { u, a, msg } => {
+					let user = if let Ok(row) = client
+						.query_one("select id, auth from users where name = $1", &[&u])
+						.await
+					{
+						if a == row.get::<usize, &str>(1) {
+							if let Some(user) = users.write().await.load(&*client, &u).await {
+								let rightsock = usersocks.read().await.get(&u) == Some(&sockid);
 								if !rightsock {
-									usersocks.write().await.insert(String::from(u), sockid);
+									usersocks.write().await.insert(u.clone(), sockid);
 								}
 								user
 							} else {
@@ -408,18 +410,18 @@ pub async fn handle_ws(
 							continue;
 						}
 					} else {
-						None
+						continue;
 					};
 					match msg {
-						UserMessage::modadd { m, .. } => {
-							let userid = user.unwrap().lock().await.id;
+						AuthMessage::modadd { m } => {
+							let userid = user.lock().await.id;
 							add_role_handler("Mod", &tx, &client, userid, &m).await;
 						}
-						UserMessage::modrm { m, .. } => {
-							let userid = user.unwrap().lock().await.id;
+						AuthMessage::modrm { m } => {
+							let userid = user.lock().await.id;
 							rm_role_handler("Mod", &tx, &client, userid, &m).await;
 						}
-						UserMessage::modresetpass { ref u, m, .. } => {
+						AuthMessage::modresetpass { m } => {
 							if u == "serprex" {
 								let mut wusers = users.write().await;
 								if let Some(user) = wusers.load(&*client, &m).await {
@@ -428,16 +430,16 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::codesmithadd { m, .. } => {
-							let userid = user.unwrap().lock().await.id;
+						AuthMessage::codesmithadd { m } => {
+							let userid = user.lock().await.id;
 							add_role_handler("Codesmith", &tx, &client, userid, &m).await;
 						}
-						UserMessage::codesmithrm { m, .. } => {
-							let userid = user.unwrap().lock().await.id;
+						AuthMessage::codesmithrm { m } => {
+							let userid = user.lock().await.id;
 							rm_role_handler("Codesmith", &tx, &client, userid, &m).await;
 						}
-						UserMessage::modguest { m, .. } => {
-							let userid = user.unwrap().lock().await.id;
+						AuthMessage::modguest { m } => {
+							let userid = user.lock().await.id;
 							if role_check("Mod", &tx, &client, userid).await {
 								client
 									.execute(
@@ -452,20 +454,20 @@ pub async fn handle_ws(
 									.ok();
 							}
 						}
-						UserMessage::modmute { m, .. } => {
-							let userid = user.unwrap().lock().await.id;
+						AuthMessage::modmute { m } => {
+							let userid = user.lock().await.id;
 							if role_check("Mod", &tx, &client, userid).await {
 								broadcast(&socks, &WsResponse::mute { m: &m }).await;
 							}
 						}
-						UserMessage::modclear { .. } => {
-							let userid = user.unwrap().lock().await.id;
+						AuthMessage::modclear => {
+							let userid = user.lock().await.id;
 							if role_check("Mod", &tx, &client, userid).await {
 								broadcast(&socks, &WsResponse::clear).await;
 							}
 						}
-						UserMessage::modmotd { m, .. } => {
-							let userid = user.unwrap().lock().await.id;
+						AuthMessage::modmotd { m } => {
+							let userid = user.lock().await.id;
 							if role_check("Mod", &tx, &client, userid).await {
 								let mbytes = m.as_bytes();
 								let mut nend = 0;
@@ -501,9 +503,8 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::inituser { u, e, .. } => {
+						AuthMessage::inituser { e } => {
 							if e > 0 && e < 14 {
-								let user = user.unwrap();
 								let mut user = user.lock().await;
 								let sid = STARTERS[(e - 1) as usize];
 								user.data.accountbound = Cardpool::from(sid.0);
@@ -533,8 +534,8 @@ pub async fn handle_ws(
 									.await;
 							}
 						}
-						UserMessage::loginoriginal { .. } => {
-							let userid = user.unwrap().lock().await.id;
+						AuthMessage::loginoriginal => {
+							let userid = user.lock().await.id;
 							if let Ok(row) = client
 								.query_opt(
 									"select data from user_data where user_id = $1 and type_id = 2",
@@ -550,10 +551,10 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::initoriginal { e, name, .. } => {
+						AuthMessage::initoriginal { e, name } => {
 							if e > 0 && e < 14 {
 								let sid = ORIGINAL_STARTERS[e as usize - 1];
-								let userid = user.unwrap().lock().await.id;
+								let userid = user.lock().await.id;
 								let userdata = LegacyUser {
 									pool: Cardpool::from(sid.0),
 									deck: String::from(sid.1),
@@ -564,7 +565,7 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::logout { u, .. } => {
+						AuthMessage::logout => {
 							let mut wusers = users.write().await;
 							let mut wusersocks = usersocks.write().await;
 							wusersocks.remove(&u);
@@ -572,8 +573,8 @@ pub async fn handle_ws(
 							drop(wusersocks);
 							wusers.evict(&client, &u).await;
 						}
-						UserMessage::delete { u, .. } => {
-							let userid = user.unwrap().lock().await.id;
+						AuthMessage::delete => {
+							let userid = user.lock().await.id;
 							let params: &[&(dyn ToSql + Sync)] = &[&userid];
 							if let Ok(trx) = client.transaction().await {
 								if let (Ok(_), Ok(_), Ok(_), Ok(_)) = join!(
@@ -596,16 +597,14 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::setarena {
+						AuthMessage::setarena {
 							d,
 							r#mod,
 							lv,
 							hp,
 							draw,
 							mark,
-							..
 						} => {
-							let user = user.unwrap();
 							let (userid, ocard) = {
 								let user = user.lock().await;
 								(user.id, user.data.ocard as i32)
@@ -616,15 +615,7 @@ pub async fn handle_ws(
 								let draw = draw as i32;
 								let lv = if lv == 0 { 1i32 } else { 2i32 };
 								if r#mod {
-									client.execute("update arena set deck = $3, hp = $4, draw = $5, mark = $6 where user_id = $1 and arena_id = $2",
-										&[
-											&userid,
-											&lv,
-											&d,
-											&hp,
-											&draw,
-											&mark,
-										]).await.ok();
+									client.execute("update arena set deck = $3, hp = $4, draw = $5, mark = $6 where user_id = $1 and arena_id = $2", &[&userid, &lv, &d, &hp, &draw, &mark]).await.ok();
 								} else {
 									let oldage = client.query_one("select day from arena where user_id = $1 and arena_id = $2",
 																  &[&userid, &lv]).await;
@@ -650,8 +641,8 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::arenainfo { .. } => {
-							let userid = user.unwrap().lock().await.id;
+						AuthMessage::arenainfo => {
+							let userid = user.lock().await.id;
 							if let Ok(rows) = client.query(
 								"select arena_id, \"day\", draw, mark, hp, won, loss, code, deck, \"rank\", bestrank from arena where user_id = $1",
 								&[&userid],
@@ -691,7 +682,7 @@ pub async fn handle_ws(
 								sendmsg(&tx, &WsResponse::arenainfo { a1, a2 });
 							}
 						}
-						UserMessage::modarena { aname, won, lv, .. } => {
+						AuthMessage::modarena { aname, won, lv } => {
 							let mut wusers = users.write().await;
 							if let Some(auserid) =
 								if let Some(other) = wusers.load(&*client, &aname).await {
@@ -722,7 +713,7 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::foearena { lv, .. } => {
+						AuthMessage::foearena { lv } => {
 							let arenaid = if lv == 0 { 1i32 } else { 2i32 };
 							if let Ok(row) = client
 								.query_one(
@@ -749,10 +740,7 @@ pub async fn handle_ws(
 										}
 										(rng.gen::<u32>(), idx)
 									};
-									if let Ok(row) = client.query_one(
-										"select u.name, a.deck, a.hp, a.mark, a.draw, a.code from arena a join users u on u.id = a.user_id where a.arena_id = $1 order by a.\"rank\" limit 1 offset $2",
-										&[&arenaid, &idx]
-										).await {
+									if let Ok(row) = client.query_one("select u.name, a.deck, a.hp, a.mark, a.draw, a.code from arena a join users u on u.id = a.user_id where a.arena_id = $1 order by a.\"rank\" limit 1 offset $2", &[&arenaid, &idx]).await {
 										let name: String = row.get(0);
 										let mut deck: String = row.get(1);
 										let hp: i32 = row.get(2);
@@ -761,31 +749,21 @@ pub async fn handle_ws(
 										let code: i32 = row.get(5);
 										deck.push_str("05");
 										deck.push_str(unsafe { std::str::from_utf8_unchecked(&encode_code(etg::card::AsUpped(code, lv != 0))) });
-										sendmsg(&tx, &WsResponse::foearena {
-											seed: seed,
-											name: &name,
-											hp: hp,
-											mark: mark,
-											draw: draw,
-											deck: &deck,
-											rank: idx,
-											lv: lv,
-										});
+										sendmsg(&tx, &WsResponse::foearena { seed: seed, name: &name, hp: hp, mark: mark, draw: draw, deck: &deck, rank: idx, lv: lv });
 									}
 								}
 							}
 						}
-						UserMessage::stat {
+						AuthMessage::stat {
 							set,
 							stats,
 							players,
-							..
 						} => {
-							let userid = user.unwrap().lock().await.id;
+							let userid = user.lock().await.id;
 							client.execute("insert into stats (user_id, \"set\", stats, players) values ($1, $2, $3, $4)", &[&userid, &set, &Json(stats), &players]).await.ok();
 						}
-						UserMessage::setgold { t, g, .. } => {
-							let userid = user.unwrap().lock().await.id;
+						AuthMessage::setgold { t, g } => {
+							let userid = user.lock().await.id;
 							if role_check("Codesmith", &tx, &client, userid).await {
 								if let Some(tgt) = users.write().await.load(&*client, &t).await {
 									let mut tgt = tgt.lock().await;
@@ -803,8 +781,8 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::addpool { t, pool, bound, .. } => {
-							let userid = user.unwrap().lock().await.id;
+						AuthMessage::addpool { t, pool, bound } => {
+							let userid = user.lock().await.id;
 							if role_check("Codesmith", &tx, &client, userid).await {
 								if let Some(tgt) = users.write().await.load(&*client, &t).await {
 									let mut tgt = tgt.lock().await;
@@ -832,7 +810,7 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::codecreate { t, .. } => {
+						AuthMessage::codecreate { t } => {
 							if t.is_empty() {
 								sendmsg(
 									&tx,
@@ -842,7 +820,7 @@ pub async fn handle_ws(
 									},
 								);
 							} else {
-								let userid = user.unwrap().lock().await.id;
+								let userid = user.lock().await.id;
 								if role_check("Codesmith", &tx, &client, userid).await {
 									use rand::distributions::Alphanumeric;
 									let mut codebin = [0u8; 8];
@@ -877,7 +855,7 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::codesubmit { code, .. } => {
+						AuthMessage::codesubmit { code } => {
 							if let Ok(trx) = client.transaction().await {
 								if let Ok(row) = trx
 									.query_one(
@@ -898,7 +876,6 @@ pub async fn handle_ws(
 												.is_ok()
 											{
 												if trx.commit().await.is_ok() {
-													let user = user.unwrap();
 													let mut user = user.lock().await;
 													user.data.gold =
 														user.data.gold.saturating_add(g);
@@ -929,7 +906,6 @@ pub async fn handle_ws(
 												.is_ok()
 											{
 												if trx.commit().await.is_ok() {
-													let user = user.unwrap();
 													let mut user = user.lock().await;
 													let c = user
 														.data
@@ -989,7 +965,7 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::codesubmit2 { code, card, .. } => {
+						AuthMessage::codesubmit2 { code, card } => {
 							if let Ok(trx) = client.transaction().await {
 								if let Ok(row) = trx
 									.query_one(
@@ -1037,7 +1013,6 @@ pub async fn handle_ws(
 														.is_ok()
 													{
 														if trx.commit().await.is_ok() {
-															let user = user.unwrap();
 															let mut user = user.lock().await;
 															let c = user
 																.data
@@ -1091,17 +1066,14 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::foewant {
-							u,
+						AuthMessage::foewant {
 							f,
 							set,
 							deck,
 							deckcheck,
-							..
 						} => {
 							if u != f {
 								let (userid, deck) = {
-									let user = user.unwrap();
 									let user = user.lock().await;
 									(
 										user.id,
@@ -1196,14 +1168,13 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::r#move {
+						AuthMessage::r#move {
 							id,
 							hash,
 							prehash,
 							cmd,
-							..
 						} => {
-							let userid = user.unwrap().lock().await.id;
+							let userid = user.lock().await.id;
 							if let Ok(trx) = client.transaction().await {
 								if let (Ok(moves), Ok(users)) = (
 									trx.query_one(
@@ -1249,8 +1220,8 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::reloadmoves { id, .. } => {
-							let userid = user.unwrap().lock().await.id;
+						AuthMessage::reloadmoves { id } => {
+							let userid = user.lock().await.id;
 							if let Ok(moves) = client.query_one("select g.moves from games g join match_request mr on mr.game_id = g.id join users u on u.id = mr.user_id where g.id = $1 and u.id = $2", &[&id, &userid]).await {
 								let movelist: Vec<Json<GamesMove>> = moves.get(0);
 								sendmsg(&tx, &WsResponse::reloadmoves {
@@ -1258,8 +1229,8 @@ pub async fn handle_ws(
 								});
 							}
 						}
-						UserMessage::updateorig { deck, .. } => {
-							let userid = user.unwrap().lock().await.id;
+						AuthMessage::updateorig { deck } => {
+							let userid = user.lock().await.id;
 							if let Ok(trx) = client.transaction().await {
 								if let Ok(row) = trx.query_one("select data from user_data where user_id = $1 and type_id = 2 for update", &[&userid]).await {
 									let Json(mut data) = row.get::<usize, Json<Map<String, Value>>>(0);
@@ -1272,13 +1243,12 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::origadd {
+						AuthMessage::origadd {
 							pool,
 							rmpool,
 							electrum,
-							..
 						} => {
-							let userid = user.unwrap().lock().await.id;
+							let userid = user.lock().await.id;
 							if let Ok(trx) = client.transaction().await {
 								if let Ok(row) = trx.query_one("select id, data from user_data where user_id = $1 and type_id = 2 for update", &[&userid]).await {
 									let rowid: i64 = row.get(0);
@@ -1304,7 +1274,7 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::canceltrade { u, f, .. } => {
+						AuthMessage::canceltrade { f } => {
 							if u != f {
 								if let Some(foesockid) = usersocks.read().await.get(&f) {
 									if let Some(foesock) = socks.read().await.get(&foesockid) {
@@ -1322,7 +1292,7 @@ pub async fn handle_ws(
 													msg: "has canceled the trade",
 												},
 											);
-											let userid = user.unwrap().lock().await.id;
+											let userid = user.lock().await.id;
 											let foeuserid = foeuser.lock().await.id;
 											client.execute(
 												"delete from trade_request where (user_id = $1 and for_user_id = $2) or (user_id = $2 and for_user_id = $1)",
@@ -1332,11 +1302,11 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::reloadtrade { u, f, .. } => {
+						AuthMessage::reloadtrade { f } => {
 							if u != f {
 								let mut wusers = users.write().await;
 								if let Some(foeuser) = wusers.load(&*client, &f).await {
-									let userid = user.unwrap().lock().await.id;
+									let userid = user.lock().await.id;
 									let foeuserid = foeuser.lock().await.id;
 									if let Ok(trade) = client.query_one(
 										"select cards, g from trade_request where user_id = $2 and for_user_id = $1", &[&userid, &foeuserid]).await {
@@ -1351,21 +1321,18 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::offertrade {
-							u,
+						AuthMessage::offertrade {
 							f,
 							forcards,
 							forg,
 							cards,
 							g,
-							..
 						} => {
 							if u != f {
 								if let Some(foesockid) = usersocks.read().await.get(&f) {
 									if let Some(foesock) = socks.read().await.get(&foesockid) {
 										let mut wusers = users.write().await;
 										if let Some(foeuser) = wusers.load(&*client, &f).await {
-											let user = user.unwrap();
 											let (mut user, mut foeuser) =
 												ordered_lock(&user, &foeuser).await;
 											if let Ok(trx) = client.transaction().await {
@@ -1375,95 +1342,95 @@ pub async fn handle_ws(
 													(&forcards, forg32)
 												{
 													if let Ok(rows) = trx.execute(
-														"delete from trade_request where user_id = $2 and for_user_id = $1 and cards = $5 and g = $6 and forcards = $3 and forg = $4",
-														&[&user.id, &foeuser.id, &cards, &g32, forcardsref, &forg32]).await {
-														if rows > 0 {
-															if trx.execute("delete from trade_request where (user_id = $1 and for_user_id = $2) or (user_id = $2 and for_user_id = $1)", &[&user.id, &foeuser.id]).await.is_ok() && trx.commit().await.is_ok() {
-																let p1gdelta = forg32 - g32;
-																let p2gdelta = -p1gdelta;
-																let mut err: Option<&'static str> = None;
-																if user.data.gold < -p1gdelta || foeuser.data.gold < -p2gdelta {
-																	err = Some("Not enough gold between players");
-																}
-																{
-																	let mut usertally = HashMap::<u16, u16>::new();
-																	for (code, count) in iterraw(cards.as_bytes()) {
-																		let code = code as u16;
-																		let c = usertally.entry(code).or_default();
-																		if let Some(newc) = c.checked_add(count as u16) {
-																			*c = newc;
-																			if user.data.pool.0.get(&code).cloned().unwrap_or(0) < newc {
-																				err = Some("Not enough cards between players");
+															"delete from trade_request where user_id = $2 and for_user_id = $1 and cards = $5 and g = $6 and forcards = $3 and forg = $4",
+															&[&user.id, &foeuser.id, &cards, &g32, forcardsref, &forg32]).await {
+															if rows > 0 {
+																if trx.execute("delete from trade_request where (user_id = $1 and for_user_id = $2) or (user_id = $2 and for_user_id = $1)", &[&user.id, &foeuser.id]).await.is_ok() && trx.commit().await.is_ok() {
+																	let p1gdelta = forg32 - g32;
+																	let p2gdelta = -p1gdelta;
+																	let mut err: Option<&'static str> = None;
+																	if user.data.gold < -p1gdelta || foeuser.data.gold < -p2gdelta {
+																		err = Some("Not enough gold between players");
+																	}
+																	{
+																		let mut usertally = HashMap::<u16, u16>::new();
+																		for (code, count) in iterraw(cards.as_bytes()) {
+																			let code = code as u16;
+																			let c = usertally.entry(code).or_default();
+																			if let Some(newc) = c.checked_add(count as u16) {
+																				*c = newc;
+																				if user.data.pool.0.get(&code).cloned().unwrap_or(0) < newc {
+																					err = Some("Not enough cards between players");
+																				}
+																			} else {
+																				err = Some("Overflow in card totals");
 																			}
-																		} else {
-																			err = Some("Overflow in card totals");
+																		}
+																	}
+																	{
+																		let mut foetally = HashMap::<u16, u16>::new();
+																		for (code, count) in iterraw(forcardsref.as_bytes()) {
+																			let code = code as u16;
+																			let c = foetally.entry(code).or_default();
+																			if let Some(newc) = c.checked_add(count as u16) {
+																				*c = newc;
+																				if foeuser.data.pool.0.get(&code).cloned().unwrap_or(0) < newc {
+																					err = Some("Not enough cards between players");
+																				}
+																			} else {
+																				err = Some("Overflow in card totals");
+																			}
+																		}
+																	}
+																	if let Some(err) = err {
+																		sendmsg(&tx, &WsResponse::tradecanceled {
+																			u: &f,
+																		});
+																		sendmsg(&tx, &WsResponse::chat {
+																			mode: 1,
+																			msg: err,
+																		});
+																		sendmsg(&foesock.tx, &WsResponse::tradecanceled {
+																			u: &u,
+																		});
+																		sendmsg(&foesock.tx, &WsResponse::chat {
+																			mode: 1,
+																			msg: err,
+																		});
+																	} else {
+																		sendmsg(&tx, &WsResponse::tradedone{
+																			oldcards: &cards,
+																			newcards: forcardsref,
+																			g: p1gdelta,
+																		});
+																		sendmsg(&foesock.tx, &WsResponse::tradedone {
+																			oldcards: forcardsref,
+																			newcards: &cards,
+																			g: p2gdelta,
+																		});
+																		user.data.gold = user.data.gold.saturating_add(p1gdelta);
+																		foeuser.data.gold = foeuser.data.gold.saturating_add(p2gdelta);
+																		for (code, count) in iterraw(cards.as_bytes()) {
+																			let code = code as u16;
+																			let count = count as u16;
+																			let foec = foeuser.data.pool.0.entry(code).or_default();
+																			let userc = user.data.pool.0.entry(code).or_default();
+																			*userc -= count;
+																			*foec = foec.saturating_add(count);
+																		}
+																		for (code, count) in iterraw(forcardsref.as_bytes()) {
+																			let code = code as u16;
+																			let count = count as u16;
+																			let foec = foeuser.data.pool.0.entry(code).or_default();
+																			let userc = user.data.pool.0.entry(code).or_default();
+																			*foec -= count;
+																			*userc = userc.saturating_add(count);
 																		}
 																	}
 																}
-																{
-																	let mut foetally = HashMap::<u16, u16>::new();
-																	for (code, count) in iterraw(forcardsref.as_bytes()) {
-																		let code = code as u16;
-																		let c = foetally.entry(code).or_default();
-																		if let Some(newc) = c.checked_add(count as u16) {
-																			*c = newc;
-																			if foeuser.data.pool.0.get(&code).cloned().unwrap_or(0) < newc {
-																				err = Some("Not enough cards between players");
-																			}
-																		} else {
-																			err = Some("Overflow in card totals");
-																		}
-																	}
-																}
-																if let Some(err) = err {
-																	sendmsg(&tx, &WsResponse::tradecanceled {
-																		u: &f,
-																	});
-																	sendmsg(&tx, &WsResponse::chat {
-																		mode: 1,
-																		msg: err,
-																	});
-																	sendmsg(&foesock.tx, &WsResponse::tradecanceled {
-																		u: &u,
-																	});
-																	sendmsg(&foesock.tx, &WsResponse::chat {
-																		mode: 1,
-																		msg: err,
-																	});
-																} else {
-																	sendmsg(&tx, &WsResponse::tradedone{
-																		oldcards: &cards,
-																		newcards: forcardsref,
-																		g: p1gdelta,
-																	});
-																	sendmsg(&foesock.tx, &WsResponse::tradedone {
-																		oldcards: forcardsref,
-																		newcards: &cards,
-																		g: p2gdelta,
-																	});
-																	user.data.gold = user.data.gold.saturating_add(p1gdelta);
-																	foeuser.data.gold = foeuser.data.gold.saturating_add(p2gdelta);
-																	for (code, count) in iterraw(cards.as_bytes()) {
-																		let code = code as u16;
-																		let count = count as u16;
-																		let foec = foeuser.data.pool.0.entry(code).or_default();
-																		let userc = user.data.pool.0.entry(code).or_default();
-																		*userc -= count;
-																		*foec = foec.saturating_add(count);
-																	}
-																	for (code, count) in iterraw(forcardsref.as_bytes()) {
-																		let code = code as u16;
-																		let count = count as u16;
-																		let foec = foeuser.data.pool.0.entry(code).or_default();
-																		let userc = user.data.pool.0.entry(code).or_default();
-																		*foec -= count;
-																		*userc = userc.saturating_add(count);
-																	}
-																}
+																continue 'msgloop;
 															}
-															continue 'msgloop;
 														}
-													}
 												}
 												let params: &[&(dyn ToSql + Sync)] = &[
 													&user.id,
@@ -1490,8 +1457,7 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::passchange { p, .. } => {
-							let user = user.unwrap();
+						AuthMessage::passchange { p } => {
 							let mut user = user.lock().await;
 							if p.is_empty() {
 								user.auth = String::new();
@@ -1510,7 +1476,7 @@ pub async fn handle_ws(
 							}
 							sendmsg(&tx, &WsResponse::passchange { auth: &user.auth });
 						}
-						UserMessage::challrecv { u, f, trade, .. } => {
+						AuthMessage::challrecv { f, trade } => {
 							if let Some(foesockid) = usersocks.read().await.get(&f) {
 								if let Some(foesock) = socks.read().await.get(&foesockid) {
 									sendmsg(
@@ -1528,7 +1494,7 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::chat { u, to, msg, .. } => {
+						AuthMessage::chat { to, msg } => {
 							if let Some(to) = to {
 								let mut sent = false;
 								if let Some(tosockid) = usersocks.read().await.get(&to) {
@@ -1580,256 +1546,7 @@ pub async fn handle_ws(
 								.await;
 							}
 						}
-						UserMessage::guestchat { u, msg } => {
-							if let Ok(None) = client
-								.query_opt("select 1 from strings where key = 'GuestBanned'", &[])
-								.await
-							{
-								let mut guestname = String::from("Guest_");
-								guestname.push_str(&u);
-								broadcast(
-									&socks,
-									&WsResponse::chatguest {
-										guest: true,
-										u: &guestname,
-										msg: &msg,
-									},
-								)
-								.await;
-							}
-						}
-						UserMessage::login { u, a, p } => {
-							let username = u;
-							if username.is_empty() {
-								sendmsg(&tx, &WsResponse::loginfail { err: "No name" });
-							} else {
-								let mut wusers = users.write().await;
-								let user =
-									if let Some(user) = wusers.load(&*client, &username).await {
-										user
-									} else {
-										let user = Arc::new(Mutex::new(UserObject {
-											name: username.clone(),
-											id: -1,
-											auth: String::new(),
-											salt: String::new(),
-											iter: 0,
-											algo: users::HASH_ALGO,
-											data: UserData {
-												oracle: u32::MAX,
-												..Default::default()
-											},
-										}));
-										wusers.insert(username.clone(), user.clone());
-										user
-									};
-								let mut user = user.lock().await;
-								let password = p.as_ref();
-								let auth = a.as_ref();
-
-								if if let Some(authstr) = auth {
-									authstr == &user.auth
-								} else if let Some(psw) = password {
-									let mut keybuf = [0u8; 64];
-									if user.salt.is_empty() {
-										user.initsalt();
-									}
-									pbkdf2_hmac(
-										psw.as_bytes(),
-										user.salt.as_bytes(),
-										user.iter as usize,
-										MessageDigest::from(user.algo),
-										&mut keybuf,
-									)
-									.ok();
-									let realkey = user.auth.as_bytes();
-									if realkey.is_empty() {
-										user.auth = base64::encode(&mut keybuf[..]);
-										true
-									} else {
-										let mut realkeybuf = [0u8; 64];
-										base64::decode_config_slice(
-											user.auth.as_bytes(),
-											base64::STANDARD,
-											&mut realkeybuf,
-										)
-										.ok();
-										keybuf == realkeybuf
-									}
-								} else {
-									user.auth.is_empty()
-								} {
-									login_success(
-										&usersocks,
-										&tx,
-										sockid,
-										&mut *user,
-										&username,
-										&mut client,
-									)
-									.await;
-								} else {
-									sendmsg(
-										&tx,
-										&WsResponse::loginfail {
-											err: "Authentication failed",
-										},
-									);
-								}
-							}
-						}
-						UserMessage::konglogin { u, g, .. } => {
-							if let Ok(row) = client
-								.query_one("select val from strings where key = 'kongapi'", &[])
-								.await
-							{
-								let key: String = row.get(0);
-
-								use hyper_tls::HttpsConnector;
-								use warp::hyper;
-								let https = hyper::Client::builder()
-									.build::<_, hyper::Body>(HttpsConnector::new());
-								let konguri: Result<hyper::Uri, _> = format!("https://api.kongregate.com/api/authenticate.json?user_id={}&game_auth_token={}&api_key={}", u, g, key).parse();
-								if let Ok(konguri) = konguri {
-									if let Ok(mut res) = https.get(konguri).await {
-										let rawbody = res.body_mut();
-										let mut output = Vec::<u8>::new();
-										while let Some(Ok(chunk)) = rawbody.next().await {
-											output.extend(&chunk);
-										}
-										if let Ok(Value::Object(body)) =
-											serde_json::from_slice::<Value>(&output)
-										{
-											let success = body
-												.get("success")
-												.and_then(|v| v.as_bool())
-												.unwrap_or(false);
-											if success {
-												let mut name = String::from("Kong:");
-												name.push_str(
-													body.get("username")
-														.and_then(|v| v.as_str())
-														.unwrap_or(""),
-												);
-												let mut wusers = users.write().await;
-												if let Some(user) =
-													wusers.load(&*client, &name).await
-												{
-													let mut user = user.lock().await;
-													user.auth = g.clone();
-													login_success(
-														&usersocks,
-														&tx,
-														sockid,
-														&mut user,
-														&name,
-														&mut client,
-													)
-													.await;
-												} else {
-													let mut newuser = UserObject {
-														name: name.clone(),
-														id: -1,
-														auth: g.clone(),
-														salt: String::new(),
-														iter: 0,
-														algo: HashAlgo::Sha512,
-														data: Default::default(),
-													};
-													login_success(
-														&usersocks,
-														&tx,
-														sockid,
-														&mut newuser,
-														&name,
-														&mut client,
-													)
-													.await;
-													wusers.insert(
-														name,
-														Arc::new(Mutex::new(newuser)),
-													);
-												}
-											} else {
-												sendmsg(
-													&tx,
-													&WsResponse::loginfail {
-														err: &format!(
-															"{}: {}",
-															body["error"],
-															body["error_description"]
-														),
-													},
-												);
-											}
-										} else {
-											sendmsg(
-												&tx,
-												&WsResponse::loginfail {
-													err: "Failed to parse Kongregate's response",
-												},
-											);
-										}
-									} else {
-										sendmsg(
-											&tx,
-											&WsResponse::loginfail {
-												err: "Kongregate refused request",
-											},
-										);
-									}
-								}
-							} else {
-								sendmsg(
-									&tx,
-									&WsResponse::loginfail {
-										err: "Global error: no kong api in db",
-									},
-								);
-							}
-						}
-						UserMessage::r#mod | UserMessage::codesmith => {
-							let xstr = if let UserMessage::codesmith { .. } = msg {
-								"mod"
-							} else {
-								"codesmith"
-							};
-							if let Ok(rows) = client.
-								query("select u.name from user_role ur join users u on u.id = ur.user_id join roles r on r.id = ur.role_id where r.val = $1 order by u.name", &[if xstr == "mod" { &"Mod" } else { &"Codesmith" }]).await {
-									let mut msgmsg = String::new();
-									for (idx, row) in rows.iter().enumerate() {
-										if idx != 0 {
-											msgmsg.push_str(", ");
-										}
-										msgmsg.push_str(row.get(0))
-									}
-									sendmsg(&tx, &WsResponse::chat { mode: 1, msg: &msgmsg });
-								}
-						}
-						UserMessage::motd => {
-							if let Ok(rows) = client
-								.query("select id, val from motd order by id", &[])
-								.await
-							{
-								for row in rows.iter() {
-									let msgmsg = format!(
-										"motd {} {}",
-										row.get::<usize, i32>(0),
-										row.get::<usize, &str>(1)
-									);
-									sendmsg(
-										&tx,
-										&WsResponse::chat {
-											mode: 1,
-											msg: &msgmsg,
-										},
-									);
-								}
-							}
-						}
-						UserMessage::roll {
-							u, rolls, sides, ..
-						} => {
+						AuthMessage::roll { rolls, sides } => {
 							let mut sum = 0u64;
 							{
 								let range = Uniform::new_inclusive(1, sides as u64);
@@ -1849,93 +1566,10 @@ pub async fn handle_ws(
 							)
 							.await;
 						}
-						UserMessage::librarywant { f } => {
-							if let Some(user) = users.write().await.load(&*client, &f).await {
-								let user = user.lock().await;
-								let mut gold = user.data.gold;
-								let mut pool = user.data.pool.clone();
-								if let Ok(bids) = client
-									.query(
-										"select code, q, p from bazaar where user_id = $1",
-										&[&user.id],
-									)
-									.await
-								{
-									for bid in bids.iter() {
-										let code: i32 = bid.get(0);
-										let q: i32 = bid.get(1);
-										let p: i32 = bid.get(2);
-										if p < 0 {
-											let amt = pool.0.entry(code as u16).or_insert(0);
-											*amt = amt.saturating_add(q as u16);
-										} else {
-											gold += p * q;
-										}
-									}
-								}
-								sendmsg(
-									&tx,
-									&WsResponse::librarygive {
-										pool: &pool,
-										bound: &user.data.accountbound,
-										gold: gold,
-										pvpwins: user.data.pvpwins,
-										pvplosses: user.data.pvplosses,
-										aiwins: user.data.aiwins,
-										ailosses: user.data.ailosses,
-									},
-								);
-							} else {
-								sendmsg(
-									&tx,
-									&WsResponse::chat {
-										mode: 1,
-										msg: "User does not exist",
-									},
-								);
-							}
-						}
-						UserMessage::arenatop { lv, .. } => {
-							let today = get_day();
-							if let Ok(rows) = client.query("select u.name, a.score, a.won, a.loss, a.day, a.code from arena a join users u on u.id = a.user_id where a.arena_id = $1 order by a.\"rank\" limit 30", &[if lv == 0 { &1i32 } else { &2i32 }]).await {
-								let mut top = Vec::with_capacity(rows.len());
-								for row in rows {
-									top.push((
-										row.get::<usize, String>(0),
-										row.get::<usize, i32>(1),
-										row.get::<usize, i32>(2),
-										row.get::<usize, i32>(3),
-										today.saturating_sub(row.get::<usize, i32>(4) as u32),
-										row.get::<usize, i32>(5),
-									));
-								}
-								sendmsg(
-									&tx,
-									&WsResponse::arenatop { lv, top: &top }
-								);
-							}
-						}
-						UserMessage::wealthtop => {
-							if let Ok(rows) = client
-								.query(
-									"select name, wealth from users order by wealth desc limit 60",
-									&[],
-								)
-								.await
-							{
-								let mut top = Vec::with_capacity(rows.len() * 2);
-								for row in rows {
-									top.push(Value::from(row.get::<usize, String>(0)));
-									top.push(Value::from(row.get::<usize, i32>(1)));
-								}
-								sendmsg(&tx, &WsResponse::wealthtop { top: &top });
-							}
-						}
-						UserMessage::booster {
+						AuthMessage::booster {
 							pack,
 							bulk,
 							element,
-							..
 						} => {
 							const PACKS: [(u8, u8, &'static [i32], f64); 4] = [
 								(10, 15, &[], 0.03448275862068971),
@@ -1943,7 +1577,6 @@ pub async fn handle_ws(
 								(5, 80, &[1, 3], 0.017472777918460383),
 								(1, 250, &[0, 0, 0], 0.0),
 							];
-							let user = user.unwrap();
 							let mut user = user.lock().await;
 							if let Some(&(amount, cost, rares, bumprate)) = PACKS.get(pack as usize)
 							{
@@ -2029,9 +1662,7 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::bzbid {
-							u, price, cards, ..
-						} => {
+						AuthMessage::bzbid { price, cards } => {
 							let mut add: FxHashMap<u16, Vec<BzBid>> = Default::default();
 							let mut rm: FxHashMap<u16, Vec<BzBid>> = Default::default();
 							if let Ok(trx) = client.transaction().await {
@@ -2040,7 +1671,6 @@ pub async fn handle_ws(
 									.await
 									.is_ok()
 								{
-									let user = user.unwrap();
 									let mut user = user.lock().await;
 									let mut sells: Vec<BzBidSell> = Default::default();
 									for (code, mut count) in iterraw(cards.as_bytes()) {
@@ -2081,124 +1711,124 @@ pub async fn handle_ws(
 												}
 											}
 											if let Ok(bids) = trx.query("select b.id, u.name u, b.p, b.q from bazaar b join users u on b.user_id = u.id where b.code = $1 order by b.p desc", &[&code]).await {
-												let mut ops: Vec<BzBidOp> = Vec::new();
-												for bid in bids.iter() {
-													let id: i64 = bid.get(0);
-													let bu: String = bid.get(1);
-													let bp: i32 = bid.get(2);
-													let bq: i32 = bid.get(3);
-													let amt = std::cmp::min(bq, count as i32);
-													let mut happened = 0;
-													if price > 0 {
-														if bp < 0 && -bp <= price as i32 {
-															happened = amt;
-														}
-													} else if bp > 0 && bp >= -(price as i32) {
-														happened = -amt;
-													}
-													let cost = bp.abs() * happened;
-													if happened != 0 && if price > 0 {
-														user.data.gold >= cost
-													} else {
-														codecount >= happened
-													} {
-														user.data.gold -= cost;
-														let c = user.data.pool.0.entry(code16).or_default();
-														let newc = (*c as i32) + happened;
-														*c = if newc < 0 { 0 } else if newc > 65535 { 65535 } else { newc as u16 };
-														codecount += happened;
-														sells.push(BzBidSell { u: bu.clone(), code: code16, amt: amt as u16, p: bp });
-														if bq > count as i32 {
-															ops.push(BzBidOp::Update {
-																id,
-																bid: BzBid { u: Cow::from(bu.clone()), q: bq, p: bp },
-																q: bq - count as i32,
-															});
-															count = 0;
-														} else {
-															ops.push(BzBidOp::Delete {
-																id,
-																bid: BzBid { u: Cow::from(bu.clone()), q: bq, p: bp },
-															});
-															count -= bq as u32;
-														}
-														if count == 0 {
-															break
-														}
-													}
-												}
-												if count > 0 {
-													let mut bidmade = false;
-													if price > 0 {
-														if user.data.gold >= price as i32 * count as i32 {
-															user.data.gold -= price as i32 * count as i32;
-															bidmade = true;
-														}
-													} else if codecount >= count as i32 {
-														let c = user.data.pool.0.entry(code16).or_default();
-														if let Some(newc) = c.checked_sub(count as u16) {
-															*c = newc;
-															bidmade = true;
-														}
-														#[allow(unused_assignments)] {
-															codecount -= count as i32;
-														}
-													}
-													if bidmade {
-														let mut hadmerge = false;
+														let mut ops: Vec<BzBidOp> = Vec::new();
 														for bid in bids.iter() {
 															let id: i64 = bid.get(0);
 															let bu: String = bid.get(1);
 															let bp: i32 = bid.get(2);
 															let bq: i32 = bid.get(3);
-															if bu == u && bp == price as i32 {
-																ops.push(BzBidOp::Update {
-																	id,
-																	bid: BzBid { u: Cow::from(u.as_str()), q: bq, p: bp },
-																	q: bq + count as i32
-																});
-																hadmerge = true;
-																break;
+															let amt = std::cmp::min(bq, count as i32);
+															let mut happened = 0;
+															if price > 0 {
+																if bp < 0 && -bp <= price as i32 {
+																	happened = amt;
+																}
+															} else if bp > 0 && bp >= -(price as i32) {
+																happened = -amt;
+															}
+															let cost = bp.abs() * happened;
+															if happened != 0 && if price > 0 {
+																user.data.gold >= cost
+															} else {
+																codecount >= happened
+															} {
+																user.data.gold -= cost;
+																let c = user.data.pool.0.entry(code16).or_default();
+																let newc = (*c as i32) + happened;
+																*c = if newc < 0 { 0 } else if newc > 65535 { 65535 } else { newc as u16 };
+																codecount += happened;
+																sells.push(BzBidSell { u: bu.clone(), code: code16, amt: amt as u16, p: bp });
+																if bq > count as i32 {
+																	ops.push(BzBidOp::Update {
+																		id,
+																		bid: BzBid { u: Cow::from(bu.clone()), q: bq, p: bp },
+																		q: bq - count as i32,
+																	});
+																	count = 0;
+																} else {
+																	ops.push(BzBidOp::Delete {
+																		id,
+																		bid: BzBid { u: Cow::from(bu.clone()), q: bq, p: bp },
+																	});
+																	count -= bq as u32;
+																}
+																if count == 0 {
+																	break
+																}
 															}
 														}
-														if !hadmerge {
-															ops.push(BzBidOp::Insert { q: count as i32, p: price as i32 });
+														if count > 0 {
+															let mut bidmade = false;
+															if price > 0 {
+																if user.data.gold >= price as i32 * count as i32 {
+																	user.data.gold -= price as i32 * count as i32;
+																	bidmade = true;
+																}
+															} else if codecount >= count as i32 {
+																let c = user.data.pool.0.entry(code16).or_default();
+																if let Some(newc) = c.checked_sub(count as u16) {
+																	*c = newc;
+																	bidmade = true;
+																}
+																#[allow(unused_assignments)] {
+																	codecount -= count as i32;
+																}
+															}
+															if bidmade {
+																let mut hadmerge = false;
+																for bid in bids.iter() {
+																	let id: i64 = bid.get(0);
+																	let bu: String = bid.get(1);
+																	let bp: i32 = bid.get(2);
+																	let bq: i32 = bid.get(3);
+																	if bu == u && bp == price as i32 {
+																		ops.push(BzBidOp::Update {
+																			id,
+																			bid: BzBid { u: Cow::from(u.as_str()), q: bq, p: bp },
+																			q: bq + count as i32
+																		});
+																		hadmerge = true;
+																		break;
+																	}
+																}
+																if !hadmerge {
+																	ops.push(BzBidOp::Insert { q: count as i32, p: price as i32 });
+																}
+															}
+														}
+														for op in ops.into_iter() {
+															if match op {
+																BzBidOp::Delete { id, bid } => {
+																	rm.entry(code16).or_default().push(bid);
+																	trx.execute(
+																		"delete from bazaar where id = $1",
+																		&[&id]
+																		).await
+																}
+																BzBidOp::Insert { q, p } => {
+																	add.entry(code16).or_default().push(BzBid {
+																		u: Cow::from(u.as_str()), q, p,
+																	});
+																	trx.execute(
+																		"insert into bazaar (user_id, code, q, p) values ($1, $2, $3, $4)",
+																		&[&user.id, &code, &q, &p]
+																		).await
+																}
+																BzBidOp::Update { id, bid, q } => {
+																	add.entry(code16).or_default().push(BzBid {
+																		u: bid.u.clone(), q, p: bid.p
+																	});
+																	rm.entry(code16).or_default().push(bid);
+																	trx.execute(
+																		"update bazaar set q = $2 where id = $1",
+																		&[&id, &q]
+																		).await
+																}
+															}.is_err() {
+																continue 'msgloop;
+															}
 														}
 													}
-												}
-												for op in ops.into_iter() {
-													if match op {
-														BzBidOp::Delete { id, bid } => {
-															rm.entry(code16).or_default().push(bid);
-															trx.execute(
-																"delete from bazaar where id = $1",
-																&[&id]
-																).await
-														}
-														BzBidOp::Insert { q, p } => {
-															add.entry(code16).or_default().push(BzBid {
-																u: Cow::from(u.as_str()), q, p,
-															});
-															trx.execute(
-																"insert into bazaar (user_id, code, q, p) values ($1, $2, $3, $4)",
-																&[&user.id, &code, &q, &p]
-																).await
-														}
-														BzBidOp::Update { id, bid, q } => {
-															add.entry(code16).or_default().push(BzBid {
-																u: bid.u.clone(), q, p: bid.p
-															});
-															rm.entry(code16).or_default().push(bid);
-															trx.execute(
-																"update bazaar set q = $2 where id = $1",
-																&[&id, &q]
-																).await
-														}
-													}.is_err() {
-														continue 'msgloop;
-													}
-												}
-											}
 										}
 									}
 									sendmsg(
@@ -2293,8 +1923,7 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						UserMessage::bzcancel { u, c, .. } => {
-							let user = user.unwrap();
+						AuthMessage::bzcancel { c } => {
 							let mut user = user.lock().await;
 							if let Ok(bids) = client.query(
 								"delete from bazaar where user_id = $1 and code = $2 returning q, p",
@@ -2320,59 +1949,11 @@ pub async fn handle_ws(
 								});
 							}
 						}
-						UserMessage::bzread => {
-							let mut bz: FxHashMap<u16, Vec<_>> = Default::default();
-							if let Ok(bids) = client.query("select u.name, b.code, b.q, b.p from bazaar b join users u on b.user_id = u.id", &[]).await {
-								for bid in bids.iter() {
-									let name: String = bid.get(0);
-									let code: i32 = bid.get(1);
-									let q: i32 = bid.get(2);
-									let p: i32 = bid.get(3);
-									bz.entry(code as u16).or_default().push(BzBid {
-										u: Cow::Owned(name), q, p
-									});
-								}
-							}
-							sendmsg(&tx, &WsResponse::bzread { bz: &bz });
-						}
-						UserMessage::chatus { hide, afk } => {
-							if let Some(sock) = socks.write().await.get_mut(&sockid) {
-								if let Some(hide) = hide {
-									sock.hide = hide;
-								}
-								if let Some(afk) = afk {
-									sock.afk = afk;
-								}
-							}
-						}
-						UserMessage::who => {
-							let mut res = String::new();
-							{
-								let rusersocks = usersocks.read().await;
-								let rsocks = socks.read().await;
-								for (name, id) in rusersocks.iter() {
-									if let Some(sock) = rsocks.get(id) {
-										if !sock.hide {
-											if !res.is_empty() {
-												res.push_str(", ");
-											}
-											res.push_str(name);
-											if sock.afk {
-												res.push_str(" (afk)");
-											}
-										}
-									}
-								}
-							}
-							sendmsg(&tx, &WsResponse::chat { mode: 1, msg: &res });
-						}
-						UserMessage::addgold { g, .. } => {
-							let user = user.unwrap();
+						AuthMessage::addgold { g } => {
 							let mut user = user.lock().await;
 							user.data.gold = user.data.gold.saturating_add(g as i32);
 						}
-						UserMessage::addloss { pvp, l, g, .. } => {
-							let user = user.unwrap();
+						AuthMessage::addloss { pvp, l, g } => {
 							let mut user = user.lock().await;
 							if pvp {
 								user.data.pvplosses = user.data.pvplosses.saturating_add(1);
@@ -2388,8 +1969,7 @@ pub async fn handle_ws(
 								user.data.gold = user.data.gold.saturating_add(g as i32);
 							}
 						}
-						UserMessage::addwin { pvp, .. } => {
-							let user = user.unwrap();
+						AuthMessage::addwin { pvp } => {
 							let mut user = user.lock().await;
 							if pvp {
 								user.data.pvpwins = user.data.pvpwins.saturating_add(1);
@@ -2399,30 +1979,26 @@ pub async fn handle_ws(
 								user.data.ailosses = user.data.ailosses.saturating_sub(1);
 							}
 						}
-						UserMessage::setstreak { l, n, .. } => {
-							let user = user.unwrap();
+						AuthMessage::setstreak { l, n } => {
 							let mut user = user.lock().await;
 							user.data.streak.resize(l as usize + 1, Some(0));
 							user.data.streak[l as usize] = Some(n);
 						}
-						UserMessage::addcards { c, .. } => {
-							let user = user.unwrap();
+						AuthMessage::addcards { c } => {
 							let mut user = user.lock().await;
 							for (code, count) in iterraw(c.as_bytes()) {
 								let q = user.data.pool.0.entry(code as u16).or_default();
 								*q = q.saturating_add(count as u16);
 							}
 						}
-						UserMessage::addboundcards { c, .. } => {
-							let user = user.unwrap();
+						AuthMessage::addboundcards { c } => {
 							let mut user = user.lock().await;
 							for (code, count) in iterraw(c.as_bytes()) {
 								let q = user.data.accountbound.0.entry(code as u16).or_default();
 								*q = q.saturating_add(count as u16);
 							}
 						}
-						UserMessage::donedaily { daily, c, .. } => {
-							let user = user.unwrap();
+						AuthMessage::donedaily { daily, c } => {
 							let mut user = user.lock().await;
 							if (daily < 3 || daily == 5) && user.data.ostreakday == 0 {
 								user.data.gold =
@@ -2444,34 +2020,29 @@ pub async fn handle_ws(
 							}
 							user.data.daily |= 1 << daily;
 						}
-						UserMessage::changeqeck { number, name, .. } => {
-							let user = user.unwrap();
+						AuthMessage::changeqeck { number, name } => {
 							let mut user = user.lock().await;
 							if (number as usize) < user.data.qecks.len() {
 								user.data.qecks[number as usize] = name;
 							}
 						}
-						UserMessage::setdeck { name, d, .. } => {
-							let user = user.unwrap();
+						AuthMessage::setdeck { name, d } => {
 							let mut user = user.lock().await;
 							if let Some(d) = d {
 								user.data.decks.insert(name.clone(), d);
 							}
 							user.data.selecteddeck = name;
 						}
-						UserMessage::rmdeck { name, .. } => {
-							let user = user.unwrap();
+						AuthMessage::rmdeck { name } => {
 							let mut user = user.lock().await;
 							user.data.decks.remove(&name);
 						}
-						UserMessage::setquest { quest, .. } => {
-							let user = user.unwrap();
+						AuthMessage::setquest { quest } => {
 							let mut user = user.lock().await;
 							user.data.quests.insert(quest, 1);
 						}
-						UserMessage::upgrade { card, .. } => {
+						AuthMessage::upgrade { card } => {
 							if let Some(carddata) = etg::card::OpenSet.try_get(card as i32) {
-								let user = user.unwrap();
 								let mut user = user.lock().await;
 								let copies = if carddata.rarity != -1
 									&& !(carddata.rarity == 4 && etg::card::Shiny(card as i32))
@@ -2489,9 +2060,8 @@ pub async fn handle_ws(
 								);
 							}
 						}
-						UserMessage::downgrade { card, .. } => {
+						AuthMessage::downgrade { card } => {
 							if let Some(carddata) = etg::card::OpenSet.try_get(card as i32) {
-								let user = user.unwrap();
 								let mut user = user.lock().await;
 								let copies = if carddata.rarity != -1
 									&& !(carddata.rarity == 4 && etg::card::Shiny(card as i32))
@@ -2509,9 +2079,8 @@ pub async fn handle_ws(
 								);
 							}
 						}
-						UserMessage::polish { card, .. } => {
+						AuthMessage::polish { card } => {
 							if let Some(carddata) = etg::card::OpenSet.try_get(card as i32) {
-								let user = user.unwrap();
 								let mut user = user.lock().await;
 								let copies = if carddata.rarity != -1 { 6 } else { 2 };
 								transmute(
@@ -2523,9 +2092,8 @@ pub async fn handle_ws(
 								);
 							}
 						}
-						UserMessage::unpolish { card, .. } => {
+						AuthMessage::unpolish { card } => {
 							if let Some(carddata) = etg::card::OpenSet.try_get(card as i32) {
-								let user = user.unwrap();
 								let mut user = user.lock().await;
 								let copies = if carddata.rarity != -1 { 6 } else { 2 };
 								transmute(
@@ -2537,18 +2105,15 @@ pub async fn handle_ws(
 								);
 							}
 						}
-						UserMessage::uppillar { c, .. } => {
-							let user = user.unwrap();
+						AuthMessage::uppillar { c } => {
 							let mut user = user.lock().await;
 							upshpi(&mut user.data, c, |code| etg::card::AsUpped(code, true));
 						}
-						UserMessage::shpillar { c, .. } => {
-							let user = user.unwrap();
+						AuthMessage::shpillar { c } => {
 							let mut user = user.lock().await;
 							upshpi(&mut user.data, c, |code| etg::card::AsShiny(code, true));
 						}
-						UserMessage::upshall { .. } => {
-							let user = user.unwrap();
+						AuthMessage::upshall => {
 							let mut user = user.lock().await;
 							let base = user
 								.data
@@ -2645,10 +2210,367 @@ pub async fn handle_ws(
 							}
 						}
 					}
-				} else {
-					println!("failed to parse {}", msg);
+				}
+				UserMessage::guestchat { u, msg } => {
+					if let Ok(None) = client
+						.query_opt("select 1 from strings where key = 'GuestBanned'", &[])
+						.await
+					{
+						let mut guestname = String::from("Guest_");
+						guestname.push_str(&u);
+						broadcast(
+							&socks,
+							&WsResponse::chatguest {
+								guest: true,
+								u: &guestname,
+								msg: &msg,
+							},
+						)
+						.await;
+					}
+				}
+				UserMessage::login { u, a, p } => {
+					let username = u;
+					if username.is_empty() {
+						sendmsg(&tx, &WsResponse::loginfail { err: "No name" });
+					} else {
+						let mut wusers = users.write().await;
+						let user = if let Some(user) = wusers.load(&*client, &username).await {
+							user
+						} else {
+							let user = Arc::new(Mutex::new(UserObject {
+								name: username.clone(),
+								id: -1,
+								auth: String::new(),
+								salt: String::new(),
+								iter: 0,
+								algo: users::HASH_ALGO,
+								data: UserData {
+									oracle: u32::MAX,
+									..Default::default()
+								},
+							}));
+							wusers.insert(username.clone(), user.clone());
+							user
+						};
+						let mut user = user.lock().await;
+						let password = p.as_ref();
+						let auth = a.as_ref();
+
+						if if let Some(authstr) = auth {
+							authstr == &user.auth
+						} else if let Some(psw) = password {
+							let mut keybuf = [0u8; 64];
+							if user.salt.is_empty() {
+								user.initsalt();
+							}
+							pbkdf2_hmac(
+								psw.as_bytes(),
+								user.salt.as_bytes(),
+								user.iter as usize,
+								MessageDigest::from(user.algo),
+								&mut keybuf,
+							)
+							.ok();
+							let realkey = user.auth.as_bytes();
+							if realkey.is_empty() {
+								user.auth = base64::encode(&mut keybuf[..]);
+								true
+							} else {
+								let mut realkeybuf = [0u8; 64];
+								base64::decode_config_slice(
+									user.auth.as_bytes(),
+									base64::STANDARD,
+									&mut realkeybuf,
+								)
+								.ok();
+								keybuf == realkeybuf
+							}
+						} else {
+							user.auth.is_empty()
+						} {
+							login_success(
+								&usersocks,
+								&tx,
+								sockid,
+								&mut *user,
+								&username,
+								&mut client,
+							)
+							.await;
+						} else {
+							sendmsg(
+								&tx,
+								&WsResponse::loginfail {
+									err: "Authentication failed",
+								},
+							);
+						}
+					}
+				}
+				UserMessage::konglogin { u, g } => {
+					if let Ok(row) = client
+						.query_one("select val from strings where key = 'kongapi'", &[])
+						.await
+					{
+						let key: String = row.get(0);
+
+						use hyper_tls::HttpsConnector;
+						use warp::hyper;
+						let https =
+							hyper::Client::builder().build::<_, hyper::Body>(HttpsConnector::new());
+						let konguri: Result<hyper::Uri, _> = format!("https://api.kongregate.com/api/authenticate.json?user_id={}&game_auth_token={}&api_key={}", u, g, key).parse();
+						if let Ok(konguri) = konguri {
+							if let Ok(mut res) = https.get(konguri).await {
+								let rawbody = res.body_mut();
+								let mut output = Vec::<u8>::new();
+								while let Some(Ok(chunk)) = rawbody.next().await {
+									output.extend(&chunk);
+								}
+								if let Ok(Value::Object(body)) =
+									serde_json::from_slice::<Value>(&output)
+								{
+									let success = body
+										.get("success")
+										.and_then(|v| v.as_bool())
+										.unwrap_or(false);
+									if success {
+										let mut name = String::from("Kong:");
+										name.push_str(
+											body.get("username")
+												.and_then(|v| v.as_str())
+												.unwrap_or(""),
+										);
+										let mut wusers = users.write().await;
+										if let Some(user) = wusers.load(&*client, &name).await {
+											let mut user = user.lock().await;
+											user.auth = g.clone();
+											login_success(
+												&usersocks,
+												&tx,
+												sockid,
+												&mut user,
+												&name,
+												&mut client,
+											)
+											.await;
+										} else {
+											let mut newuser = UserObject {
+												name: name.clone(),
+												id: -1,
+												auth: g.clone(),
+												salt: String::new(),
+												iter: 0,
+												algo: HashAlgo::Sha512,
+												data: Default::default(),
+											};
+											login_success(
+												&usersocks,
+												&tx,
+												sockid,
+												&mut newuser,
+												&name,
+												&mut client,
+											)
+											.await;
+											wusers.insert(name, Arc::new(Mutex::new(newuser)));
+										}
+									} else {
+										sendmsg(
+											&tx,
+											&WsResponse::loginfail {
+												err: &format!(
+													"{}: {}",
+													body["error"], body["error_description"]
+												),
+											},
+										);
+									}
+								} else {
+									sendmsg(
+										&tx,
+										&WsResponse::loginfail {
+											err: "Failed to parse Kongregate's response",
+										},
+									);
+								}
+							} else {
+								sendmsg(
+									&tx,
+									&WsResponse::loginfail {
+										err: "Kongregate refused request",
+									},
+								);
+							}
+						}
+					} else {
+						sendmsg(
+							&tx,
+							&WsResponse::loginfail {
+								err: "Global error: no kong api in db",
+							},
+						);
+					}
+				}
+				UserMessage::r#mod | UserMessage::codesmith => {
+					let xstr = if let UserMessage::codesmith { .. } = msg {
+						"mod"
+					} else {
+						"codesmith"
+					};
+					if let Ok(rows) = client.query("select u.name from user_role ur join users u on u.id = ur.user_id join roles r on r.id = ur.role_id where r.val = $1 order by u.name", &[if xstr == "mod" { &"Mod" } else { &"Codesmith" }]).await {
+						let mut msgmsg = String::new();
+						for (idx, row) in rows.iter().enumerate() {
+							if idx != 0 {
+								msgmsg.push_str(", ");
+							}
+							msgmsg.push_str(row.get(0))
+						}
+						sendmsg(&tx, &WsResponse::chat { mode: 1, msg: &msgmsg });
+					}
+				}
+				UserMessage::motd => {
+					if let Ok(rows) = client
+						.query("select id, val from motd order by id", &[])
+						.await
+					{
+						for row in rows.iter() {
+							let msgmsg = format!(
+								"motd {} {}",
+								row.get::<usize, i32>(0),
+								row.get::<usize, &str>(1)
+							);
+							sendmsg(
+								&tx,
+								&WsResponse::chat {
+									mode: 1,
+									msg: &msgmsg,
+								},
+							);
+						}
+					}
+				}
+				UserMessage::librarywant { f } => {
+					if let Some(user) = users.write().await.load(&*client, &f).await {
+						let user = user.lock().await;
+						let mut gold = user.data.gold;
+						let mut pool = user.data.pool.clone();
+						if let Ok(bids) = client
+							.query(
+								"select code, q, p from bazaar where user_id = $1",
+								&[&user.id],
+							)
+							.await
+						{
+							for bid in bids.iter() {
+								let code: i32 = bid.get(0);
+								let q: i32 = bid.get(1);
+								let p: i32 = bid.get(2);
+								if p < 0 {
+									let amt = pool.0.entry(code as u16).or_insert(0);
+									*amt = amt.saturating_add(q as u16);
+								} else {
+									gold += p * q;
+								}
+							}
+						}
+						sendmsg(
+							&tx,
+							&WsResponse::librarygive {
+								pool: &pool,
+								bound: &user.data.accountbound,
+								gold: gold,
+								pvpwins: user.data.pvpwins,
+								pvplosses: user.data.pvplosses,
+								aiwins: user.data.aiwins,
+								ailosses: user.data.ailosses,
+							},
+						);
+					} else {
+						sendmsg(
+							&tx,
+							&WsResponse::chat {
+								mode: 1,
+								msg: "User does not exist",
+							},
+						);
+					}
+				}
+				UserMessage::arenatop { lv } => {
+					let today = get_day();
+					if let Ok(rows) = client.query("select u.name, a.score, a.won, a.loss, a.day, a.code from arena a join users u on u.id = a.user_id where a.arena_id = $1 order by a.\"rank\" limit 30", &[if lv == 0 { &1i32 } else { &2i32 }]).await {
+						let mut top = Vec::with_capacity(rows.len());
+						for row in rows {
+							top.push((row.get::<usize, String>(0), row.get::<usize, i32>(1), row.get::<usize, i32>(2), row.get::<usize, i32>(3), today.saturating_sub(row.get::<usize, i32>(4) as u32), row.get::<usize, i32>(5)));
+						}
+						sendmsg(&tx, &WsResponse::arenatop { lv, top: &top });
+					}
+				}
+				UserMessage::wealthtop => {
+					if let Ok(rows) = client
+						.query(
+							"select name, wealth from users order by wealth desc limit 60",
+							&[],
+						)
+						.await
+					{
+						let mut top = Vec::with_capacity(rows.len() * 2);
+						for row in rows {
+							top.push(Value::from(row.get::<usize, String>(0)));
+							top.push(Value::from(row.get::<usize, i32>(1)));
+						}
+						sendmsg(&tx, &WsResponse::wealthtop { top: &top });
+					}
+				}
+				UserMessage::bzread => {
+					let mut bz: FxHashMap<u16, Vec<_>> = Default::default();
+					if let Ok(bids) = client.query("select u.name, b.code, b.q, b.p from bazaar b join users u on b.user_id = u.id", &[]).await {
+						for bid in bids.iter() {
+							let name: String = bid.get(0);
+							let code: i32 = bid.get(1);
+							let q: i32 = bid.get(2);
+							let p: i32 = bid.get(3);
+							bz.entry(code as u16).or_default().push(BzBid {
+								u: Cow::Owned(name), q, p
+							});
+						}
+					}
+					sendmsg(&tx, &WsResponse::bzread { bz: &bz });
+				}
+				UserMessage::chatus { hide, afk } => {
+					if let Some(sock) = socks.write().await.get_mut(&sockid) {
+						if let Some(hide) = hide {
+							sock.hide = hide;
+						}
+						if let Some(afk) = afk {
+							sock.afk = afk;
+						}
+					}
+				}
+				UserMessage::who => {
+					let mut res = String::new();
+					{
+						let rusersocks = usersocks.read().await;
+						let rsocks = socks.read().await;
+						for (name, id) in rusersocks.iter() {
+							if let Some(sock) = rsocks.get(id) {
+								if !sock.hide {
+									if !res.is_empty() {
+										res.push_str(", ");
+									}
+									res.push_str(name);
+									if sock.afk {
+										res.push_str(" (afk)");
+									}
+								}
+							}
+						}
+					}
+					sendmsg(&tx, &WsResponse::chat { mode: 1, msg: &res });
 				}
 			}
+		} else {
+			println!("failed to parse {}", msg);
 		}
 	}
 

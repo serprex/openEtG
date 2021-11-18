@@ -251,7 +251,8 @@ fn eval_skill(
 			Skill::cseed2 => 4.0,
 			Skill::creatureupkeep => {
 				let owner = ctx.get_owner(c);
-				[(owner, 1), (ctx.get_foe(owner), -1)].into_iter()
+				[(owner, 1), (ctx.get_foe(owner), -1)]
+					.into_iter()
 					.map(|(pl, multiply)| {
 						let mut score = 0;
 						let mut ecount = [0u8; 12];

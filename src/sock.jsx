@@ -276,7 +276,8 @@ export function emit(data) {
 }
 export function userEmit(x, data = {}) {
 	const { user } = store.store.getState();
-	data.x = x;
+	data.x = 'a';
+	data.z = x;
 	data.u = user.name;
 	data.a = user.auth;
 	emit(data);
