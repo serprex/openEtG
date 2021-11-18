@@ -9,9 +9,9 @@ import { chain } from '../util.js';
 import Editor from '../Components/Editor.jsx';
 
 const artable = {
-	hp: { min: 50, max: 200, incr: 30, cost: 1 },
-	mark: { cost: 30 },
-	draw: { cost: 90 },
+	hp: { min: 60, incr: 20, cost: 1 },
+	mark: { cost: 20 },
+	draw: { cost: 100 },
 };
 function attrval(x, d) {
 	x = +x;
@@ -44,20 +44,19 @@ function AttrUi({ y, name, value, sumscore, arpts, onChange }) {
 					}}
 				/>
 			)}
-			{(!data.max || value + incr <= data.max) &&
-				sumscore + incr * artable[name].cost <= arpts && (
-					<input
-						type="button"
-						value="+"
-						onClick={() => onChange(value + incr)}
-						style={{
-							position: 'absolute',
-							left: '82px',
-							top,
-							width: '14px',
-						}}
-					/>
-				)}
+			{sumscore + incr * artable[name].cost <= arpts && (
+				<input
+					type="button"
+					value="+"
+					onClick={() => onChange(value + incr)}
+					style={{
+						position: 'absolute',
+						left: '82px',
+						top,
+						width: '14px',
+					}}
+				/>
+			)}
 			<div
 				style={{
 					position: 'absolute',
@@ -103,8 +102,8 @@ export default connect(({ user }) => ({ user }))(
 				}
 			}
 			this.state = {
-				hp: attrval(props.ainfo.hp, 170),
-				mark: attrval(props.ainfo.mark, 1),
+				hp: attrval(props.ainfo.hp, 140),
+				mark: attrval(props.ainfo.mark, 2),
 				draw: attrval(props.ainfo.draw, 2),
 				pool,
 				deck,
@@ -168,7 +167,7 @@ export default connect(({ user }) => ({ user }))(
 							left: '4px',
 							top: '188px',
 						}}>
-						{(arpts - sumscore) / 30}
+						{(arpts - sumscore) / 20}
 					</div>
 					<input
 						type="button"

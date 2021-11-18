@@ -2199,12 +2199,8 @@ impl Game {
 		}
 	}
 
-	pub fn mill(&mut self, id: i32, mut amt: i32) {
+	pub fn mill(&mut self, id: i32, amt: i32) {
 		if !self.get(id, Flag::protectdeck) {
-			let deckpower = self.get_player(id).deckpower as i32;
-			if deckpower > 1 {
-				amt = amt.saturating_mul(deckpower);
-			}
 			for _ in 0..amt {
 				self.draw(id);
 			}
