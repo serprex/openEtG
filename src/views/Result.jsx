@@ -44,8 +44,7 @@ const BonusList = [
 	{
 		name: 'Creatureless',
 		desc: 'Never play a creature',
-		func: (game, p1, p2, stats) =>
-			stats.creaturesPlayed.get(p1.id) === 0 ? 0.1 : 0,
+		func: (game, p1, p2, stats) => (stats.creaturesPlayed === 0 ? 0.1 : 0),
 	},
 	{
 		name: 'Current Health',
@@ -116,8 +115,7 @@ const BonusList = [
 	{
 		name: 'Murderer',
 		desc: 'Kill over 5 creatures',
-		func: (game, p1, p2, stats) =>
-			game.get(p1.id, 'creaturesDied') > 5 ? 0.15 : 0,
+		func: (game, p1, p2, stats) => (stats.creaturesDied > 5 ? 0.15 : 0),
 	},
 	{
 		name: 'Perfect Damage',
@@ -127,8 +125,7 @@ const BonusList = [
 	{
 		name: 'Pillarless',
 		desc: 'Never play a pillar',
-		func: (game, p1, p2, stats) =>
-			stats.pillarsPlayed.get(p1.id) === 0 ? 0.05 : 0,
+		func: (game, p1, p2, stats) => (stats.pillarsPlayed === 0 ? 0.05 : 0),
 	},
 	{
 		name: 'Purity',
@@ -166,8 +163,7 @@ const BonusList = [
 	{
 		name: 'Weapon Master',
 		desc: 'Play over 2 weapons',
-		func: (game, p1, p2, stats) =>
-			stats.weaponsPlayed.get(p1.id) > 2 ? 0.1 : 0,
+		func: (game, p1, p2, stats) => (stats.weaponsPlayed > 2 ? 0.1 : 0),
 	},
 ];
 
@@ -250,36 +246,34 @@ export default connect(({ user }) => ({ user }))(
 
 		async computeBonuses(game, lefttext, streakrate) {
 			if (game.data.endurance !== undefined) return 1;
-			const replay = game.replay,
-				replayGame = new Game({
+			const replayGame = new Game({
 					seed: game.data.seed,
 					set: game.data.set,
 					players: game.data.players,
 				}),
 				replayStats = {
-					weaponsPlayed: new Map(),
-					creaturesPlayed: new Map(),
-					pillarsPlayed: new Map(),
-				},
-				incrStat = key => {
-					replayStats[key].set(
-						replayGame.turn,
-						(replayStats[key].get(replayGame.turn) ?? 0) + 1,
-					);
+					weaponsPlayed: 0,
+					creaturesPlayed: 0,
+					pillarsPlayed: 0,
+					creaturesDied: 0,
 				};
 
 			replayGame.game.tracedeath();
-			for (const move of replay) {
-				if (move.x === 'cast') {
+			for (const move of game.replay) {
+				if (replayGame.turn === this.state.player1.id && move.x === 'cast') {
 					const c = replayGame.byId(move.c);
 					if (c.type === etg.Spell) {
-						if (c.card.type === etg.Creature) incrStat('creaturesPlayed');
-						if (c.card.type === etg.Weapon) incrStat('weaponsPlayed');
-						if (c.getStatus('pillar')) incrStat('pillarsPlayed');
+						if (c.card.type === etg.Creature) replayStats.creaturesPlayed++;
+						if (c.card.type === etg.Weapon) replayStats.weaponsPlayed++;
+						if (c.getStatus('pillar')) replayStats.pillarsPlayed++;
 					}
 				}
 				replayGame.next(move);
 			}
+			replayStats.creaturesDied = replayGame.get(
+				this.state.player1.id,
+				'creaturesDied',
+			);
 
 			const bonus = BonusList.reduce((bsum, bonus) => {
 				const b = bonus.func(

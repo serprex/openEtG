@@ -1160,7 +1160,7 @@ impl Game {
 	}
 
 	pub fn tracedeath(&mut self) {
-		self.setSkill(1, Event::Death, &[Skill::_tracedeath]);
+		self.setSkill(0, Event::Death, &[Skill::_tracedeath]);
 	}
 }
 
