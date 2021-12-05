@@ -1,8 +1,8 @@
 import fs from 'fs/promises';
 import AllCards from '../src/AllCards.js';
-import Decks from '../src/Decks.json';
-import starter from '../src/starter.json';
-import originalstarter from '../src/original-starter.json';
+import Decks from '../src/Decks.json' assert { type: 'json' };
+import starter from '../src/starter.json' assert { type: 'json' };
+import originalstarter from '../src/original-starter.json' assert { type: 'json' };
 
 const source = ["pub const CARD_STRINGS:&[(u16,&'static str,&'static str)]=&["];
 AllCards.Codes.forEach((card, code) => {

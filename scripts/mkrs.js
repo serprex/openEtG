@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
-import OpenCardsJson from '../src/Cards.json';
-import OrigCardsJson from '../src/vanilla/Cards.json';
+import OpenCardsJson from '../src/Cards.json' assert { type: 'json' };
+import OrigCardsJson from '../src/vanilla/Cards.json' assert { type: 'json' };
 
 import Card from './Card.js';
 import { asShiny } from '../src/etgutil.js';

@@ -1,4 +1,4 @@
-import atlas from '../../assets/atlas.json';
+import atlas from '../../assets/atlas.json' assert { type: 'json' };
 const aname = document.getElementById('aname');
 const a2n = {
 	e: 'Timpa & Ravi',

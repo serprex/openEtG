@@ -1,6 +1,6 @@
 import * as etgutil from './etgutil.js';
 import Cards from './Cards.js';
-import Decks from './Decks.json';
+import Decks from './Decks.json' assert { type: 'json' };
 import * as sock from './sock.jsx';
 import * as store from './store.jsx';
 import * as userutil from './userutil.js';

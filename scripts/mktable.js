@@ -7,7 +7,7 @@ function writetd(...args) {
 }
 import * as etg from '../src/etg.js';
 import Cards from '../src/Cards.js';
-import decks from '../src/Decks.json';
+import decks from '../src/Decks.json' assert { type: 'json' };
 import { eleNames } from '../src/ui.js';
 if (process.argv.length < 3) {
 	write('[right][table]');

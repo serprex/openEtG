@@ -1,4 +1,4 @@
-import config from '../wsconfig.json';
+import config from '../wsconfig.json' assert { type: 'json' };
 
 import Cards from './Cards.js';
 import * as etgutil from './etgutil.js';

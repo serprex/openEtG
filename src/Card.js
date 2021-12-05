@@ -1,4 +1,4 @@
-import enums from './enum.json';
+import enums from './enum.json' assert { type: 'json' };
 import * as etg from './etg.js';
 import * as etgutil from './etgutil.js';
 import skillText from './skillText.js';

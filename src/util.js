@@ -1,4 +1,4 @@
-import enums from './enum.json';
+import enums from './enum.json' assert { type: 'json' };
 
 export function randint() {
 	return (Math.random() * 0x100000000) | 0;

@@ -10,7 +10,7 @@ import * as sock from '../sock.jsx';
 import * as Components from '../Components/index.jsx';
 import * as store from '../store.jsx';
 import { mkQuestAi } from '../Quest.js';
-import enums from '../enum.json';
+import enums from '../enum.json' assert { type: 'json' };
 import wasm from '../wasm.js';
 import AiWorker from '../AiWorker.js';
 

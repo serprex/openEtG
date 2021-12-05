@@ -1,6 +1,6 @@
 #!/usr/bin/node --experimental-modules
 import fs from 'fs';
-import assets from '../assets/atlas.json';
+import assets from '../assets/atlas.json' assert { type: 'json' };
 let pngw = 0,
 	pngh = 0,
 	pngp = 0;

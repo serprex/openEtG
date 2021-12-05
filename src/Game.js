@@ -4,7 +4,7 @@ import OriginalCards from './vanilla/Cards.js';
 import OpenCards from './Cards.js';
 import Thing from './Thing.js';
 import Player from './Player.js';
-import enums from './enum.json';
+import enums from './enum.json' assert { type: 'json' };
 import { randint } from './util.js';
 import wasm from './wasm.js';
 

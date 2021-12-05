@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { connect } from 'react-redux';
 
 import * as etg from '../../etg.js';
-import aiDecks from '../Decks.json';
+import aiDecks from '../Decks.json' assert { type: 'json' };
 import * as etgutil from '../../etgutil.js';
 import Game from '../../Game.js';
 import { choose, randint, randomcard, shuffle, upto } from '../../util.js';

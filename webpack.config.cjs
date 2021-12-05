@@ -1,6 +1,5 @@
 const path = require('path'),
-	HtmlPlugin = require('html-webpack-plugin'),
-	WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
+	HtmlPlugin = require('html-webpack-plugin');
 
 module.exports = {
 	experiments: {
@@ -65,18 +64,13 @@ module.exports = {
 								},
 							],
 						],
+						plugins: ['@babel/plugin-syntax-import-assertions'],
 					},
 				},
 			},
 		],
 	},
 	plugins: [
-		new WasmPackPlugin({
-			crateDirectory: path.resolve(__dirname, 'src/rs'),
-			outDir: path.resolve(__dirname, 'src/rs/pkg'),
-			outName: 'etg',
-			extraArgs: '--no-typescript --weak-refs',
-		}),
 		new HtmlPlugin({
 			chunks: ['main'],
 			filename: 'index.html',

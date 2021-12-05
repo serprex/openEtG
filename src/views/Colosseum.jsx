@@ -3,7 +3,7 @@ import { Fragment } from 'react';
 import * as etg from '../etg.js';
 import * as mkAi from '../mkAi.js';
 import * as sock from '../sock.jsx';
-import Decks from '../Decks.json';
+import Decks from '../Decks.json' assert { type: 'json' };
 import * as Components from '../Components/index.jsx';
 import * as store from '../store.jsx';
 

@@ -13,7 +13,7 @@ function updateTable(e) {
 			const dts = dt.split('x'),
 				d = +dts[0],
 				n = +dts[1];
-			for (const j = 0; j < n; j++) {
+			for (let j = 0; j < n; j++) {
 				dmg.push(d);
 			}
 		} else {

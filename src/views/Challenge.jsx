@@ -8,7 +8,7 @@ import Game from '../Game.js';
 import * as etgutil from '../etgutil.js';
 import * as Components from '../Components/index.jsx';
 import * as store from '../store.jsx';
-import aiDecks from '../Decks.json';
+import aiDecks from '../Decks.json' assert { type: 'json' };
 import deckgen from '../deckgen.js';
 
 class PremadePicker extends Component {

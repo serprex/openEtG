@@ -1,7 +1,7 @@
 import Card from './Card.js';
 import wasm from './wasm.js';
 import * as etgutil from './etgutil.js';
-import enums from './enum.json';
+import enums from './enum.json' assert { type: 'json' };
 
 export default class Cards {
 	constructor(set) {

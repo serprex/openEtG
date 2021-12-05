@@ -13,7 +13,7 @@ function hookRowMouseover(tr) {
 		}
 	});
 }
-import CardData from '../Cards.json';
+import CardData from '../Cards.json' assert { type: 'json' };
 const Cards = new Map([['4ta', 'Relic']]);
 for (let i = 0; i < CardData.length; i++) {
 	const Cardi = CardData[i];

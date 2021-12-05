@@ -5,7 +5,7 @@ const { performance } = perf_hooks;
 
 import wasm from '../src/wasm.js';
 import Game from '../src/Game.js';
-import replays from './replays.json';
+import replays from './replays.json' assert { type: 'json' };
 
 async function bench(name) {
 	const replay = replays[name];
