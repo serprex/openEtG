@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import Cards from '../AllCards.js';
 import { Card, DeckDisplay } from '../Components/index.jsx';
 import { decodedeck } from '../etgutil.js';
@@ -45,4 +45,4 @@ class App extends Component {
 	}
 }
 
-render(<App />, document.getElementById('deck'));
+createRoot(document.getElementById('deck')).render(<App />);

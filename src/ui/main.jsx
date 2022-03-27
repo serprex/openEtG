@@ -1,4 +1,4 @@
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 
 import { store, chatMsg, doNav } from '../store.jsx';
@@ -16,17 +16,15 @@ import { emit } from '../sock.jsx';
 emit({ x: 'motd' });
 
 import App from '../views/App.jsx';
-render(
+createRoot(document.getElementById('leftpane')).render(
 	<Provider store={store}>
 		<App />
 	</Provider>,
-	document.getElementById('leftpane'),
 );
 import('../views/Rightpane.jsx').then(Rightpane =>
-	render(
+	createRoot(document.getElementById('rightpane')).render(
 		<Provider store={store}>
 			<Rightpane.default />
 		</Provider>,
-		document.getElementById('rightpane'),
 	),
 );
