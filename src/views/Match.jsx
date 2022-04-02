@@ -693,8 +693,7 @@ class Things extends Component {
 					};
 				} else if (start) {
 					pos = { x: -99, y: -99, ...props.idtrack.get(start) };
-				}
-				if (!pos) {
+				} else {
 					pos = ui.tgtToPos(props.game.byId(id), props.p1id);
 				}
 				if (pos) {
@@ -742,11 +741,13 @@ class Things extends Component {
 				proc={(ms, prev, next) => {
 					if (ms > 96 * Math.PI) {
 						if (next.opacity === 0) {
-							const death = new Map(this.state.death),
-								birth = new Map(this.state.birth);
-							death.delete(id);
-							birth.delete(id);
-							this.setState({ death, birth });
+							this.setState(state => {
+								const death = new Map(state.death),
+									birth = new Map(state.birth);
+								death.delete(id);
+								birth.delete(id);
+								return { death, birth };
+							});
 						}
 						return next;
 					}
