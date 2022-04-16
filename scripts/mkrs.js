@@ -4,7 +4,10 @@ import OpenCardsJson from '../src/Cards.json' assert { type: 'json' };
 import OrigCardsJson from '../src/vanilla/Cards.json' assert { type: 'json' };
 
 import Card from './Card.js';
-import { asShiny } from '../src/etgutil.js';
+
+function asShiny(code, shiny) {
+	return shiny ? code | 0x4000 : code & 0x3fff;
+}
 
 export default class Cards {
 	constructor(CardsJson) {
@@ -40,6 +43,22 @@ export default class Cards {
 			fc.sort(this.cardCmp, this);
 		}
 	}
+
+	codeCmp = (x, y) => {
+		const cx = this.Codes[asShiny(x, false)],
+			cy = this.Codes[asShiny(y, false)];
+		return (
+			cx.upped - cy.upped ||
+			cx.element - cy.element ||
+			(cy.status.get('pillar') | 0) - (cx.status.get('pillar') | 0) ||
+			cx.cost - cy.cost ||
+			cx.type - cy.type ||
+			(cx.code > cy.code) - (cx.code < cy.code) ||
+			(x > y) - (x < y)
+		);
+	};
+
+	cardCmp = (x, y) => this.codeCmp(x.code, y.code);
 }
 
 const OpenCards = new Cards(OpenCardsJson);
@@ -197,10 +216,6 @@ for (const fx of gamers
 }
 source.push('}}');
 
-const names = {
-	open: [],
-	orig: [],
-};
 for (const Cards of [OpenCards, OrigCards]) {
 	const open = Cards === OpenCards,
 		setname = open ? 'OpenSet' : 'OrigSet';
@@ -237,11 +252,9 @@ for (const Cards of [OpenCards, OrigCards]) {
 		source.push('],');
 	}
 	source.push('];');
-	const namejs = open ? names.open : names.orig;
 	for (const [name, card] of Object.entries(Cards.Names)) {
 		if (name !== '52Pickup') {
 			source.push(`pub const ${open ? '' : 'v_'}${name}:i32=${card.code};`);
-			namejs.push(`export const ${name} = ${card.code};`);
 		}
 	}
 }

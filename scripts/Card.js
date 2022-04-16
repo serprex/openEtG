@@ -1,5 +1,3 @@
-import * as etg from '../src/etg.js';
-
 function* iterSplit(src, str) {
 	let i = 0;
 	while (true) {
@@ -35,7 +33,7 @@ export default class Card {
 		this.cast = 0;
 		this.castele = 0;
 		if (info.Skill) {
-			if (this.type === etg.Spell) {
+			if (this.type === 4) {
 				this.active = new Map([['cast', [info.Skill]]]);
 				this.cast = this.cost;
 				this.castele = this.costele;
