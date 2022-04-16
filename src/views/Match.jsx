@@ -332,7 +332,7 @@ function LastCard({ opacity, name }) {
 
 function SpellDisplay(props) {
 	return props.spells.map(({ id, spell, t }, i) => {
-		const p1 = props.idtrack.get(spell.t);
+		const p1 = props.getIdTrack(spell.t);
 		const y = 540 - (props.spells.length - i) * 20;
 		return (
 			<Animation
@@ -692,7 +692,7 @@ class Things extends Component {
 						y: -start === props.p1id ? 551 : 258,
 					};
 				} else if (start) {
-					pos = { x: -99, y: -99, ...props.idtrack.get(start) };
+					pos = { x: -99, y: -99, ...props.getIdTrack(start) };
 				} else {
 					pos = ui.tgtToPos(props.game.byId(id), props.p1id);
 				}
@@ -712,7 +712,7 @@ class Things extends Component {
 						y: -endpos === props.p1id ? 551 : 258,
 					};
 				} else {
-					pos = props.idtrack.get(endpos || id);
+					pos = props.getIdTrack(endpos || id);
 				}
 				if (pos) death.set(id, pos);
 			}
@@ -757,7 +757,7 @@ class Things extends Component {
 						opacity:
 							prev.opacity + (next.opacity - prev.opacity) * Math.sin(ms / 192),
 					};
-					props.idtrack.set(id, { x: pos.x, y: pos.y });
+					props.setIdTrack(id, { x: pos.x, y: pos.y });
 					return pos;
 				}}>
 				{pos => (
@@ -826,7 +826,7 @@ function tgtclass(p1id, obj, targeting) {
 }
 
 function FoePlays({
-	idtrack,
+	getIdTrack,
 	foeplays,
 	setCard,
 	setLine,
@@ -850,7 +850,7 @@ function FoePlays({
 							if (play.card) setCard(e, play.card);
 							else clearCard();
 							if (play.t) {
-								setLine(idtrack.get(play.c), idtrack.get(play.t));
+								setLine(getIdTrack(play.c), getIdTrack(play.t));
 							} else {
 								setLine(null, null);
 							}
@@ -876,13 +876,13 @@ const MatchView = connect(({ user, opts, nav }) => ({
 			super(props);
 			this.aiDelay = 0;
 			this.streakback = 0;
-			this.idtrack = new Map();
 			const player1 = props.replay
 				? props.game.byId(props.game.turn)
 				: props.game.byUser(props.user ? props.user.name : '');
 			this.state = {
 				game: null,
 				tooltip: null,
+				idtrack: new Map(),
 				showFoeplays: false,
 				foeplays: new Map(),
 				resigning: false,
@@ -919,7 +919,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 				id,
 				(pos = 0) => (offset = pos) + 16,
 			);
-			const pos = this.idtrack.get(id) ?? { x: -99, y: -99 };
+			const pos = this.getIdTrack(id) ?? { x: -99, y: -99 };
 			const y0 = pos.y + offset;
 			const TextEffect = pos && (
 				<Animation
@@ -1626,6 +1626,24 @@ const MatchView = connect(({ user, opts, nav }) => ({
 			});
 		}
 
+		setIdTrack = (id, pos) =>
+			this.setState(state => ({
+				idtrack: new Map(state.idtrack).set(id, pos),
+			}));
+
+		getIdTrack = id =>
+			id === this.state.player1
+				? ui.tgtToPos(
+						this.getGame().byId(this.state.player1),
+						this.state.player1,
+				  )
+				: id === this.state.player2
+				? ui.tgtToPos(
+						this.getGame().byId(this.state.player2),
+						this.state.player1,
+				  )
+				: this.state.idtrack.get(id);
+
 		render() {
 			const { props } = this,
 				game = this.getGame(),
@@ -1684,7 +1702,6 @@ const MatchView = connect(({ user, opts, nav }) => ({
 									}))
 							? 1
 							: null;
-				this.idtrack.set(pl.id, plpos);
 				children.push(
 					<div
 						key={j}
@@ -1942,7 +1959,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 					{cloaked && cloaksvg}
 					{this.state.showFoeplays ? (
 						<FoePlays
-							idtrack={this.idtrack}
+							getIdTrack={this.getIdTrack}
 							foeplays={this.state.foeplays.get(player2.id)}
 							setCard={(e, play) => this.setCard(e, play, e.pageX)}
 							setLine={(line0, line1) => this.setState({ line0, line1 })}
@@ -1953,7 +1970,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						this.props.playByPlayMode !== 'disabled' && (
 							<SpellDisplay
 								playByPlayMode={this.props.playByPlayMode}
-								idtrack={this.idtrack}
+								getIdTrack={this.getIdTrack}
 								game={game}
 								spells={this.state.spells}
 								removeSpell={id => {
@@ -1968,7 +1985,8 @@ const MatchView = connect(({ user, opts, nav }) => ({
 					<Things
 						startPos={this.state.startPos}
 						endPos={this.state.endPos}
-						idtrack={this.idtrack}
+						getIdTrack={this.getIdTrack}
+						setIdTrack={this.setIdTrack}
 						lofiArt={props.lofiArt}
 						game={game}
 						p1id={player1.id}
