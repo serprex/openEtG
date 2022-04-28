@@ -32,20 +32,15 @@ pub enum CardSet {
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-#[derive(Clone, Copy, Hash, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Copy, Default, Hash, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Kind {
+	#[default]
 	Weapon = 1,
 	Shield = 2,
 	Permanent = 3,
 	Spell = 4,
 	Creature = 5,
 	Player = 6,
-}
-
-impl Default for Kind {
-	fn default() -> Kind {
-		Kind::Weapon
-	}
 }
 
 #[derive(Clone, Default)]
