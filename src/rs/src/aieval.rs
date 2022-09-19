@@ -213,7 +213,7 @@ fn eval_skill(
 				.map(|&q| cmp::min(q, 3) as f32 / 12.0)
 				.sum(),
 			Skill::bless => 4.0,
-			Skill::bloodmoon => 10.0,
+			Skill::bloodmoon => 4.5,
 			Skill::boneyard => 3.0,
 			Skill::bounce => 1.0,
 			Skill::bravery => {
@@ -637,7 +637,7 @@ fn eval_skill(
 					ctx.get_card(ctx.get(c, Stat::card)).attack as f32
 				} else {
 					ttatk
-				}) * 0.1
+				}) * 0.2
 			}
 			Skill::virtue => {
 				if ctx.get_kind(c) == Kind::Spell {
