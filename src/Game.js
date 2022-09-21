@@ -34,9 +34,9 @@ export default class Game {
 			);
 		}
 		for (let i = 0; i < players.length; i++) {
-			let dp = data.players[i],
-				mark = 0;
-			const deck = [];
+			let mark = 0;
+			const dp = data.players[i],
+				deck = [];
 			for (const code of etgutil.iterdeck(dp.deck)) {
 				let idx;
 				if (this.Cards.Codes[code]) {
