@@ -2551,6 +2551,7 @@ impl Skill {
 				ctx.incrAtk(t, 3);
 			}
 			Self::lightning => {
+				ctx.fx(t, Fx::Lightning);
 				ctx.spelldmg(t, 5);
 			}
 			Self::liquid => {

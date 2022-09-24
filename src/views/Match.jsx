@@ -235,13 +235,11 @@ class Tween extends Component {
 class Animation extends Component {
 	_mounted = false;
 	start = 0;
-	state = {};
+	state = { child: null };
 
 	step = ts => {
 		if (this._mounted) {
-			this.setState(state =>
-				this.props.proc(ts - this.start, state, this.props),
-			);
+			this.setState({ child: this.props.proc(ts - this.start) });
 			requestAnimationFrame(this.step);
 		}
 	};
@@ -257,10 +255,7 @@ class Animation extends Component {
 	}
 
 	render() {
-		for (const key in this.state) {
-			return this.props.children(this.state);
-		}
-		return null;
+		return this.state.child;
 	}
 }
 
@@ -353,33 +348,32 @@ function SpellDisplay(props) {
 						props.removeSpell(id);
 						return null;
 					}
-					return { y: yc, opacity };
-				}}>
-				{item => (
-					<>
-						<Components.CardImage
-							card={spell}
-							style={{
-								position: 'absolute',
-								left: '800px',
-								top: `${item.y}px`,
-								opacity: item.opacity,
-								zIndex: '3',
-								pointerEvents: 'none',
-							}}
-						/>
-						{p1 && props.playByPlayMode !== 'noline' && (
-							<ArrowLine
-								opacity={item.opacity}
-								x0={800}
-								y0={item.y + 10}
-								x1={p1.x}
-								y1={p1.y}
+					return (
+						<>
+							<Components.CardImage
+								card={spell}
+								style={{
+									position: 'absolute',
+									left: '800px',
+									top: `${yc}px`,
+									opacity: opacity,
+									zIndex: '3',
+									pointerEvents: 'none',
+								}}
 							/>
-						)}
-					</>
-				)}
-			</Animation>
+							{p1 && props.playByPlayMode !== 'noline' && (
+								<ArrowLine
+									opacity={opacity}
+									x0={800}
+									y0={yc + 10}
+									x1={p1.x}
+									y1={p1.y}
+								/>
+							)}
+						</>
+					);
+				}}
+			/>
 		);
 	});
 }
@@ -941,29 +935,27 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							});
 							return null;
 						}
-						const yy = ms / 5;
-						return {
-							y: y0 + yy,
-							fade: 1 - Math.tan(yy / 91),
-						};
-					}}>
-					{state => (
-						<Components.Text
-							text={text}
-							style={{
-								position: 'absolute',
-								left: `${pos.x}px`,
-								top: `${state.y}px`,
-								opacity: `${state.fade}`,
-								zIndex: '5',
-								transform: 'translate(-50%,-50%)',
-								textAlign: 'center',
-								pointerEvents: 'none',
-								textShadow: '1px 1px 2px #000',
-							}}
-						/>
-					)}
-				</Animation>
+						const yy = ms / 5,
+							y = y0 + yy,
+							fade = 1 - Math.tan(yy / 91);
+						return (
+							<Components.Text
+								text={text}
+								style={{
+									position: 'absolute',
+									left: `${pos.x}px`,
+									top: `${y}px`,
+									opacity: `${fade}`,
+									zIndex: '5',
+									transform: 'translate(-50%,-50%)',
+									textAlign: 'center',
+									pointerEvents: 'none',
+									textShadow: '1px 1px 2px #000',
+								}}
+							/>
+						);
+					}}
+				/>
 			);
 			return TextEffect;
 		};
@@ -1146,12 +1138,14 @@ const MatchView = connect(({ user, opts, nav }) => ({
 											});
 											return null;
 										}
-										return { opacity: Math.min(Math.sin(ms / 864) * 1.25, 1) };
-									}}>
-									{({ opacity }) => (
-										<LastCard opacity={opacity} name={playerName} />
-									)}
-								</Animation>
+										return (
+											<LastCard
+												opacity={Math.min(Math.sin(ms / 864) * 1.25, 1)}
+												name={playerName}
+											/>
+										);
+									}}
+								/>
 							);
 							newstate.effects.add(LastCardEffect);
 							break;
@@ -1160,6 +1154,54 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							newstate.effects.add(
 								this.Text(effectId, state, newstate, id, `+${param}`),
 							);
+							break;
+						case 'Lightning':
+							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							const pos = this.getIdTrack(id) ?? { x: -99, y: -99 };
+							const LightningEffect = (
+								<Animation
+									key={effectId}
+									proc={ms => {
+										if (ms > 128) {
+											this.setState(state => {
+												const effects = new Set(state.effects);
+												effects.delete(LightningEffect);
+												return { effects };
+											});
+											return null;
+										}
+										const path = ['M 32 0'];
+										for (let i = 1; i < ms; i += 20 * Math.random()) {
+											const r = Math.log(i) * 8;
+											path.push(
+												` L ${
+													32 - Math.round(Math.random() * r - r / 2)
+												} ${Math.round(i / 2)}`,
+											);
+										}
+										return (
+											<svg
+												height="64"
+												width="64"
+												style={{
+													position: 'absolute',
+													left: `${pos.x - 32}px`,
+													top: `${pos.y - 32}px`,
+													pointerEvents: 'none',
+													zIndex: '4',
+												}}>
+												<path
+													d={path.join('')}
+													stroke="#fff"
+													strokeWidth="2"
+													fill="none"
+												/>
+											</svg>
+										);
+									}}
+								/>
+							);
+							newstate.effects.add(LightningEffect);
 							break;
 						case 'Lives':
 							if (!newstate.effects) newstate.effects = new Set(state.effects);

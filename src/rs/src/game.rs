@@ -287,6 +287,7 @@ pub enum Fx {
 	Heal(i32),
 	Improve,
 	LastCard,
+	Lightning,
 	Liquid,
 	Lives(i32),
 	Lobotomize,
