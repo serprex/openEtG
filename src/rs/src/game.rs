@@ -436,15 +436,15 @@ impl<'a> StatusEntry<'a> {
 }
 
 impl Status {
-	pub fn get(&self, stat: &Stat) -> Option<&i32> {
-		match self.0.binary_search_by_key(stat, |kv| kv.0) {
+	pub fn get(&self, stat: Stat) -> Option<i32> {
+		match self.0.binary_search_by_key(&stat, |kv| kv.0) {
 			Err(_) => None,
-			Ok(idx) => Some(&self.0[idx].1),
+			Ok(idx) => Some(self.0[idx].1),
 		}
 	}
 
-	pub fn get_mut(&mut self, stat: &Stat) -> Option<&mut i32> {
-		match self.0.binary_search_by_key(stat, |kv| kv.0) {
+	pub fn get_mut(&mut self, stat: Stat) -> Option<&mut i32> {
+		match self.0.binary_search_by_key(&stat, |kv| kv.0) {
 			Err(_) => None,
 			Ok(idx) => Some(&mut self.0[idx].1),
 		}
@@ -573,7 +573,7 @@ impl ThingGetter for Stat {
 	type Value = i32;
 
 	fn get(self, ctx: &Game, id: i32) -> Self::Value {
-		ctx.get_thing(id).status.get(&self).cloned().unwrap_or(0)
+		ctx.get_thing(id).status.get(self).unwrap_or(0)
 	}
 
 	fn set(self, ctx: &mut Game, id: i32, val: Self::Value) {
@@ -2329,7 +2329,7 @@ impl Game {
 				| Flag::nothrottle
 				| Flag::stackable
 				| Flag::tunnel | Flag::whetstone);
-		for status in &[Stat::charges, Stat::epoch, Stat::flooding] {
+		for status in [Stat::charges, Stat::epoch, Stat::flooding] {
 			if let Some(val) = thing.status.get_mut(status) {
 				*val = 0;
 			}
@@ -2345,13 +2345,13 @@ impl Game {
 					self.dmg(next, self.get(next, Stat::poison));
 				}
 				let pl = self.get_player_mut(next);
-				if let Some(sosa) = pl.thing.status.get_mut(&Stat::sosa) {
+				if let Some(sosa) = pl.thing.status.get_mut(Stat::sosa) {
 					if *sosa > 0 {
 						*sosa -= 1;
 					}
 				}
 				pl.thing.flag.0 &= !(Flag::sanctuary | Flag::precognition | Flag::protectdeck);
-				for status in &[Stat::nova, Stat::nova2] {
+				for status in [Stat::nova, Stat::nova2] {
 					if let Some(val) = pl.thing.status.get_mut(status) {
 						*val = 0;
 					}

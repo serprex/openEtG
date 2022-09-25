@@ -1345,7 +1345,7 @@ impl Skill {
 				ctx.fx(t, Fx::Clear);
 				let thing = ctx.get_thing_mut(t);
 				thing.flag.0 &= !(Flag::aflatoxin | Flag::neuro | Flag::momentum | Flag::psionic);
-				for status in &[Stat::poison, Stat::adrenaline, Stat::delayed, Stat::frozen] {
+				for status in [Stat::poison, Stat::adrenaline, Stat::delayed, Stat::frozen] {
 					if let Some(val) = thing.status.get_mut(status) {
 						*val = 0;
 					}
@@ -3157,7 +3157,7 @@ impl Skill {
 					*poison = -2;
 				}
 				thing.flag.0 &= !(Flag::aflatoxin | Flag::neuro);
-				if let Some(val) = thing.status.get_mut(&Stat::sosa) {
+				if let Some(val) = thing.status.get_mut(Stat::sosa) {
 					*val = 0;
 				}
 			}
