@@ -1763,7 +1763,7 @@ impl Skill {
 				if ctx.hasskill(c, Event::Cast, Skill::endow) {
 					ctx.rmskill(c, Event::Cast, Skill::endow);
 				}
-				for (&k, &v) in ctx.get_thing(t).status.clone().iter() {
+				for &(k, v) in ctx.get_thing(t).status.clone().iter() {
 					match k {
 						Stat::hp
 						| Stat::maxhp

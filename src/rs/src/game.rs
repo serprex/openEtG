@@ -10,7 +10,7 @@ use std::hash::{Hash, Hasher};
 use std::iter::once;
 use std::rc::Rc;
 
-use fxhash::{FxHashMap, FxHasher};
+use fxhash::FxHasher64;
 use rand::distributions::{uniform::SampleRange, uniform::SampleUniform, Distribution, Uniform};
 use rand::seq::SliceRandom;
 use rand::{Rng, SeedableRng};
@@ -48,7 +48,7 @@ pub struct ThingData {
 	pub kind: Kind,
 	pub owner: i32,
 	pub flag: Flag,
-	pub status: FxHashMap<Stat, i32>,
+	pub status: Status,
 	pub skill: Skills,
 }
 
@@ -360,7 +360,7 @@ impl Fxs {
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-#[derive(Clone, Copy, Hash, Eq, PartialEq)]
+#[derive(Clone, Copy, Hash, Ord, PartialOrd, Eq, PartialEq)]
 pub enum Stat {
 	adrenaline,
 	atk,
@@ -392,6 +392,88 @@ pub enum Stat {
 	steam,
 	storedpower,
 	swarmhp,
+}
+
+#[derive(Clone, Default)]
+pub struct Status(Vec<(Stat, i32)>);
+
+pub struct StatusVacant<'a> {
+	pub status: &'a mut Status,
+	pub idx: usize,
+	pub stat: Stat,
+}
+
+pub struct StatusOccupied<'a> {
+	pub status: &'a mut Status,
+	pub idx: usize,
+}
+
+impl<'a> StatusOccupied<'a> {
+	pub fn get(&self) -> &i32 {
+		&self.status.0[self.idx].1
+	}
+
+	pub fn remove(mut self) {
+		self.status.0.remove(self.idx);
+	}
+}
+
+pub enum StatusEntry<'a> {
+	Vacant(StatusVacant<'a>),
+	Occupied(StatusOccupied<'a>),
+}
+
+impl<'a> StatusEntry<'a> {
+	pub fn or_insert(self, val: i32) -> &'a mut i32 {
+		match self {
+			StatusEntry::Vacant(hole) => {
+				hole.status.0.insert(hole.idx, (hole.stat, val));
+				&mut hole.status.0[hole.idx].1
+			},
+			StatusEntry::Occupied(spot) => &mut spot.status.0[spot.idx].1,
+		}
+	}
+}
+
+impl Status {
+	pub fn get(&self, stat: &Stat) -> Option<&i32> {
+		match self.0.binary_search_by_key(stat, |kv| kv.0) {
+			Err(_) => None,
+			Ok(idx) => Some(&self.0[idx].1),
+		}
+	}
+
+	pub fn get_mut(&mut self, stat: &Stat) -> Option<&mut i32> {
+		match self.0.binary_search_by_key(stat, |kv| kv.0) {
+			Err(_) => None,
+			Ok(idx) => Some(&mut self.0[idx].1),
+		}
+	}
+
+	pub fn insert(&mut self, stat: Stat, val: i32) {
+		match self.0.binary_search_by_key(&stat, |kv| kv.0) {
+			Err(idx) => self.0.insert(idx, (stat, val)),
+			Ok(idx) => self.0[idx].1 = val,
+		}
+	}
+
+	pub fn entry(&mut self, stat: Stat) -> StatusEntry {
+		match self.0.binary_search_by_key(&stat, |kv| kv.0) {
+			Err(idx) => StatusEntry::Vacant(StatusVacant {
+				status: self,
+				idx: idx,
+				stat: stat,
+			}),
+			Ok(idx) => StatusEntry::Occupied(StatusOccupied {
+				status: self,
+				idx: idx,
+			}),
+		}
+	}
+
+	pub fn iter(&self) -> impl Iterator<Item = &(Stat, i32)> {
+		self.0.iter()
+	}
 }
 
 #[derive(Copy, Clone, Default)]
@@ -698,7 +780,7 @@ impl Game {
 	}
 
 	pub fn hash(&self) -> i32 {
-		let mut hasher: FxHasher = Default::default();
+		let mut hasher: FxHasher64 = Default::default();
 		self.phase.hash(&mut hasher);
 		self.turn.hash(&mut hasher);
 		self.winner.hash(&mut hasher);
@@ -716,7 +798,7 @@ impl Game {
 				}
 				Entity::Thing(t) => t,
 			};
-			for (&k, &v) in thing.status.iter() {
+			for &(k, v) in thing.status.iter() {
 				if v != 0 {
 					k.hash(&mut hasher);
 					v.hash(&mut hasher);
@@ -902,7 +984,7 @@ impl Game {
 		thing
 			.status
 			.iter()
-			.flat_map(|(&k, &v)| [generated::id_stat(k), v].into_iter())
+			.flat_map(|&(k, v)| [generated::id_stat(k), v].into_iter())
 			.chain(
 				thing
 					.flag
@@ -1242,7 +1324,7 @@ impl Game {
 	}
 
 	pub fn get_mut(&mut self, id: i32, k: Stat) -> &mut i32 {
-		self.get_thing_mut(id).status.entry(k).or_default()
+		self.get_thing_mut(id).status.entry(k).or_insert(0)
 	}
 
 	pub fn get_card(&self, code: i32) -> &'static Card {
@@ -2048,7 +2130,7 @@ impl Game {
 				Kind::Shield => self.get_player_mut(owner).shield = 0,
 				Kind::Creature => {
 					let mut pl = self.get_player_mut(owner);
-					if let Entry::Occupied(o) = pl.thing.status.entry(Stat::gpull) {
+					if let StatusEntry::Occupied(o) = pl.thing.status.entry(Stat::gpull) {
 						if *o.get() == id {
 							o.remove();
 						}
