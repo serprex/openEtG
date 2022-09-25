@@ -2,9 +2,8 @@ import * as etgutil from './etgutil.js';
 import * as sock from './sock.jsx';
 import * as store from './store.jsx';
 
-let guestname;
-function chatmute() {
-	const state = store.store.getState();
+const guestname = `${(Math.random() * 89999 + 10000) | 0}`;
+function chatmute(state) {
 	store.store.dispatch(
 		store.chatMsg(
 			`${
@@ -20,13 +19,14 @@ function chatmute() {
 }
 export default function parseChat(e) {
 	e.cancelBubble = true;
-	const kc = e.which || e.keyCode,
-		{ user } = store.store.getState();
+	const kc = e.which || e.keyCode;
 	if (kc === 13) {
 		e.preventDefault();
 		let chatinput = e.target,
 			msg = chatinput.value.trim();
 		chatinput.value = '';
+		const storeState = store.store.getState(),
+			{ user } = storeState;
 		if (msg === '/help') {
 			const cmds = {
 				clear: 'Clear chat',
@@ -44,14 +44,11 @@ export default function parseChat(e) {
 				store.store.dispatch(store.chatMsg(`${cmd} ${cmds[cmd]}`));
 			}
 		} else if (msg === '/clear') {
-			store.store.dispatch(
-				store.clearChat(store.store.getState().opts.channel),
-			);
+			store.store.dispatch(store.clearChat(storeState.opts.channel));
 		} else if (msg === '/who') {
 			sock.emit({ x: 'who' });
 		} else if (msg === '/deleteme') {
-			const { opts, user } = store.store.getState();
-			if (opts.foename === user.name + 'yesdelete') {
+			if (storeState.opts.foename === user.name + 'yesdelete') {
 				sock.userEmit('delete');
 				store.store.dispatch(store.setUser(null));
 				store.store.dispatch(store.setOpt('remember', false));
@@ -77,22 +74,22 @@ export default function parseChat(e) {
 			sock.userEmit('roll', data);
 		} else if (msg === '/mute') {
 			store.store.dispatch(store.setOptTemp('muteall', true));
-			chatmute();
+			chatmute(storeState);
 		} else if (msg === '/unmute') {
 			store.store.dispatch(store.setOptTemp('muteall', false));
-			chatmute();
+			chatmute(storeState);
 		} else if (msg === '/muteguest') {
 			store.store.dispatch(store.setOptTemp('muteguest', true));
-			chatmute();
+			chatmute(storeState);
 		} else if (msg === '/unmuteguest') {
 			store.store.dispatch(store.setOptTemp('muteguest', false));
-			chatmute();
+			chatmute(storeState);
 		} else if (msg.match(/^\/mute /)) {
 			store.store.dispatch(store.mute(msg.slice(6)));
-			chatmute();
+			chatmute(storeState);
 		} else if (msg.match(/^\/unmute /)) {
 			store.store.dispatch(store.unmute(msg.slice(8)));
-			chatmute();
+			chatmute(storeState);
 		} else if (msg.match(/^\/(motd|mod|codesmith)$/)) {
 			sock.emit({ x: msg.slice(1) });
 		} else if (user && msg === '/modclear') {
@@ -119,25 +116,26 @@ export default function parseChat(e) {
 			store.store.dispatch(store.setOptTemp('runcountcur', 1));
 			store.store.dispatch(store.chatMsg(msg.slice(1), 'System'));
 		} else if (!msg.match(/^\/[^/]/) || (user && msg.match(/^\/w( |")/))) {
-			msg = msg.replace(/^\/\//, '/');
-			if (user) {
-				const data = { msg: msg };
-				if (msg.match(/^\/w( |")/)) {
-					const match = msg.match(/^\/w"([^"]*)"/);
-					const to = (match && match[1]) || msg.slice(3, msg.indexOf(' ', 4));
-					if (!to) return;
-					chatinput.value = msg.slice(0, 4 + to.length);
-					data.msg = msg.slice(4 + to.length);
-					data.to = to;
+			if (!msg.match(/^\s*$/)) {
+				msg = msg.replace(/^\/\//, '/');
+				if (user) {
+					const data = { msg };
+					if (msg.match(/^\/w( |")/)) {
+						const match = msg.match(/^\/w"([^"]*)"/);
+						const to = (match && match[1]) || msg.slice(3, msg.indexOf(' ', 4));
+						if (!to) return;
+						chatinput.value = msg.slice(0, 4 + to.length);
+						data.msg = msg.slice(4 + to.length);
+						data.to = to;
+					}
+					sock.userEmit('chat', data);
+				} else {
+					sock.emit({
+						x: 'guestchat',
+						msg: msg,
+						u: storeState.opts.username || guestname,
+					});
 				}
-				if (!data.msg.match(/^\s*$/)) sock.userEmit('chat', data);
-			} else {
-				const name =
-					store.store.getState().opts.username ||
-					guestname ||
-					(guestname = `${(Math.random() * 89999 + 10000) | 0}`);
-				if (!msg.match(/^\s*$/))
-					sock.emit({ x: 'guestchat', msg: msg, u: name });
 			}
 		} else store.store.dispatch(store.chatMsg('Not a command: ' + msg));
 	}
