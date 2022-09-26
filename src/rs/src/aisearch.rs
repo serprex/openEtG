@@ -211,17 +211,17 @@ fn scantgt(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32, id: i
 
 fn scancore(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32, cmd: GameMove) {
 	let mut gclone = ctx.clone();
-	let mut is_pande3 = false;
+	let mut blockscan = false;
 	if (if let GameMove::Cast(id, 0) = cmd {
 		if has_sopa(&gclone, id) {
 			let turn = gclone.turn;
 			proc_sopa(&mut gclone, turn);
 			false
-		} else if ctx.getSkill(id, Event::Cast) == &[Skill::pandemonium3] {
+		} else if matches!(ctx.getSkill(id, Event::Cast), &[Skill::pandemonium] | &[Skill::pandemonium2] | &[Skill::pandemonium3] | &[Skill::cseed] | &[Skill::cseed2] | &[Skill::mutation] | &[Skill::improve]) || ctx.hasskill(id, Event::Shield, Skill::randomdr) || ctx.hasskill(id, Event::OwnPlay, Skill::mutant) {
 			if depth > 0 {
 				return;
 			}
-			is_pande3 = true;
+			blockscan = true;
 			true
 		} else {
 			true
@@ -241,10 +241,7 @@ fn scancore(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32, cmd:
 		}
 	}
 	if *limit > 0 {
-		if depth == 0 {
-			if is_pande3 {
-				return;
-			}
+		if !blockscan && depth == 0 {
 			let mut searchcan = *candy;
 			searchcan.cmd = cmd;
 			scan(&gclone, depth + 1, &mut searchcan, limit);
