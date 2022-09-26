@@ -222,7 +222,7 @@ const data = {
 		`Deal ${x} spell damage to all of target player\'s creatures, thawing them. Removes cloak.`,
 	firewall: 'Deals 1 damage to each non-ranged attacking creature.',
 	flooddeath:
-		"Each player's non-aquatic creatures past their first five creature slots die at the end of that player's turn. Consumes 1:7 each turn. Does not stack.",
+		"Each player's non-aquatic creatures past their first five creature slots die at the end of that player's turn. Pay 1:7 at the end of your turn. If you cannot, destroy this card. Does not stack.",
 	flyself:
 		'If this card is equipped as a weapon, it casts Flying Weapon on itself. If this card is a creature, it casts Living Weapon on itself.',
 	flyingweapon:
