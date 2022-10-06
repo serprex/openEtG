@@ -601,8 +601,8 @@ pub async fn handle_get(
 	pgpool: PgPool,
 	users: AsyncUsers,
 	cache: AsyncCache,
-) -> Result<Response<Bytes>, std::convert::Infallible> {
-	Ok(handle_get_core(path, ims, accept, pgpool, users, cache)
+) -> Response<Bytes> {
+	handle_get_core(path, ims, accept, pgpool, users, cache)
 		.await
-		.unwrap())
+		.unwrap()
 }

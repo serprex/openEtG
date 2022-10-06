@@ -142,7 +142,7 @@ async fn main() {
 		.and(warp::any().map(move || pgpool.clone()))
 		.and(warp::any().map(move || users.clone()))
 		.and(warp::any().map(move || cache.clone()))
-		.and_then(handleget::handle_get);
+		.then(handleget::handle_get);
 	let (_, server) = warp::serve(ws.or(full))
 		.bind_with_graceful_shutdown(([0, 0, 0, 0], listenport), async move {
 			while closerx.changed().await.is_ok() {}
