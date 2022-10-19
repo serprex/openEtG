@@ -1759,11 +1759,19 @@ impl Skill {
 				ctx.buffhp(c, 2);
 				ctx.set(c, Stat::cast, ctx.get(t, Stat::cast));
 				ctx.set(c, Stat::castele, ctx.get(t, Stat::castele));
-				ctx.get_thing_mut(c).skill = ctx.get_thing(t).skill.clone();
+				let tgt = ctx.get_thing(t);
+				let tstatus = tgt.status.clone();
+				{
+					let newskill = tgt.skill.clone();
+					let tflag = tgt.flag.0;
+					let mut sader = ctx.get_thing_mut(c);
+					sader.skill = newskill;
+					sader.flag.0 |= tflag;
+				}
 				if ctx.hasskill(c, Event::Cast, Skill::endow) {
 					ctx.rmskill(c, Event::Cast, Skill::endow);
 				}
-				for &(k, v) in ctx.get_thing(t).status.clone().iter() {
+				for &(k, v) in tstatus.clone().iter() {
 					match k {
 						Stat::hp
 						| Stat::maxhp

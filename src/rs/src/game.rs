@@ -4,7 +4,6 @@
 
 use std::borrow::Cow;
 use std::cmp;
-use std::collections::hash_map::Entry;
 use std::default::Default;
 use std::hash::{Hash, Hasher};
 use std::iter::once;

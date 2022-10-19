@@ -1242,7 +1242,7 @@ pub fn eval(ctx: &Game) -> f32 {
 	let players = ctx.players_ref();
 	let pcount = players.len();
 	let p0 = players.iter().position(|&pl| pl == turn).unwrap();
-	let mut walls: Vec<Wall> = Vec::new();
+	let mut walls: Vec<Wall> = Vec::with_capacity(pcount);
 	walls.resize(pcount, Default::default());
 	for j in 0..pcount {
 		let plidx = (p0 + j) % pcount;
