@@ -4948,7 +4948,16 @@ impl Skill {
 						.get_player(owner)
 						.permanents
 						.iter()
-						.filter(|&&pr| pr != 0 && ctx.get(pr, Flag::cloak))
+						.filter(|&&pr| {
+							pr != 0 && {
+								let card = ctx.get(pr, Stat::card);
+								card::IsOf(card, card::Cloak)
+									|| card::IsOf(card, card::Nightfall) || card::IsOf(
+									card,
+									card::OuijaEssence,
+								)
+							}
+						})
 						.count() as i32
 			}
 			Self::disc => {

@@ -217,7 +217,18 @@ fn scancore(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32, cmd:
 			let turn = gclone.turn;
 			proc_sopa(&mut gclone, turn);
 			false
-		} else if matches!(ctx.getSkill(id, Event::Cast), &[Skill::pandemonium] | &[Skill::pandemonium2] | &[Skill::pandemonium3] | &[Skill::cseed] | &[Skill::cseed2] | &[Skill::mutation] | &[Skill::improve]) || ctx.hasskill(id, Event::Shield, Skill::randomdr) || ctx.hasskill(id, Event::OwnPlay, Skill::mutant) {
+		} else if matches!(
+			ctx.getSkill(id, Event::Cast),
+			&[Skill::pandemonium]
+				| &[Skill::pandemonium2]
+				| &[Skill::pandemonium3]
+				| &[Skill::cseed]
+				| &[Skill::cseed2]
+				| &[Skill::mutation]
+				| &[Skill::improve]
+		) || ctx.hasskill(id, Event::Shield, Skill::randomdr)
+			|| ctx.hasskill(id, Event::OwnPlay, Skill::mutant)
+		{
 			if depth > 0 {
 				return;
 			}

@@ -770,7 +770,10 @@ const data = {
 	v_wisdom: 'Target gains 4|0. May target immaterial, granting psionic.',
 };
 for (const [k, v] of [
-	['dagger.', '1:2 1:11. Gains 1 strength per Cloak you control.'],
+	[
+		'dagger',
+		'1:2 1:11. Gains 1 strength per Cloak, Nightfall, Eclipse, Ouija Essence, or Ouija Source you control.',
+	],
 	['hammer', '1:3 1:4.'],
 	['bow', '1:8 1:9.'],
 	['staff', '1:5 1:7.'],

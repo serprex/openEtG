@@ -428,7 +428,7 @@ impl<'a> StatusEntry<'a> {
 			StatusEntry::Vacant(hole) => {
 				hole.status.0.insert(hole.idx, (hole.stat, val));
 				&mut hole.status.0[hole.idx].1
-			},
+			}
 			StatusEntry::Occupied(spot) => &mut spot.status.0[spot.idx].1,
 		}
 	}
