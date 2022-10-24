@@ -10,6 +10,9 @@ repository = "https://github.com/serprex/openEtG"
 [profile.dev]
 opt-level = 1
 
+[profile.release]
+lto = "thin"
+
 [dependencies]
 async-compression = { version = "0.3", features = ["tokio", "gzip", "brotli"] }
 base64 = "0.13"
