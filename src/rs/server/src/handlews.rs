@@ -1548,8 +1548,8 @@ pub async fn handle_ws(
 						}
 						AuthMessage::roll { rolls, sides } => {
 							let mut sum = 0u64;
-							{
-								let range = Uniform::new_inclusive(1, sides as u64);
+							if sides > 0 {
+								let range = Uniform::from(1..=sides as u64);
 								let mut rng = rand::thread_rng();
 								for _ in 0..rolls {
 									sum = sum.saturating_add(range.sample(&mut rng));
