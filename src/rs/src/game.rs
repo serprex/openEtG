@@ -373,7 +373,6 @@ pub enum Stat {
 	creaturesDied,
 	delayed,
 	dive,
-	epoch,
 	flooding,
 	frozen,
 	gpull,
@@ -2328,7 +2327,7 @@ impl Game {
 				| Flag::nothrottle
 				| Flag::stackable
 				| Flag::tunnel | Flag::whetstone);
-		for status in [Stat::charges, Stat::epoch, Stat::flooding] {
+		for status in [Stat::charges, Stat::flooding] {
 			if let Some(val) = thing.status.get_mut(status) {
 				*val = 0;
 			}

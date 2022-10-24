@@ -5,17 +5,17 @@ import enums from './enum.json' assert { type: 'json' };
 
 export default class Cards {
 	constructor(set) {
-		set = wasm.CardSet[set];
+		this.set = wasm.CardSet[set];
 		this.filtercache = [[], [], [], []];
 		this.Codes = [];
 		this.Names = Object.create(null);
 
-		for (const code of wasm.card_codes(set)) {
+		for (const code of wasm.card_codes(this.set)) {
 			for (let shiny = 0; shiny < 2; shiny++) {
 				for (let upped = 0; upped < 2; upped++) {
 					const upcode = etgutil.asUpped(code, upped),
 						realcode = etgutil.asShiny(upcode, shiny),
-						card = new Card(this, set, upcode, realcode);
+						card = new Card(this, upcode, realcode);
 					this.Codes[realcode] = card;
 					if (!card.getStatus('token')) {
 						this.filtercache[(card.upped ? 1 : 0) | (card.shiny ? 2 : 0)].push(

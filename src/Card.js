@@ -6,21 +6,52 @@ import { read_skill, read_status } from './util.js';
 import wasm from './wasm.js';
 
 export default class Card {
-	constructor(Cards, set, code, realcode) {
+	constructor(Cards, code, realcode) {
 		this.Cards = Cards;
-		this.type = wasm.card_type(set, code);
-		this.element = wasm.card_element(set, code);
-		this.name = enums.Card[code];
+		this.index = wasm.card_index(Cards.set, code);
 		this.code = realcode;
-		this.rarity = wasm.card_rarity(set, code);
-		this.attack = wasm.card_attack(set, code);
-		this.health = wasm.card_health(set, code);
-		this.cost = wasm.card_cost(set, code);
-		this.costele = wasm.card_costele(set, code);
-		this.cast = wasm.card_cast(set, code);
-		this.castele = wasm.card_castele(set, code);
-		this.active = read_skill(wasm.card_skills(set, code));
-		this.status = read_status(wasm.card_stats(set, code));
+		this.active = read_skill(wasm.card_skills(Cards.set, this.index));
+		this.status = read_status(wasm.card_stats(Cards.set, this.index));
+	}
+
+	get type() {
+		return wasm.card_type(this.Cards.set, this.index);
+	}
+
+	get element() {
+		return wasm.card_element(this.Cards.set, this.index);
+	}
+
+	get rarity() {
+		return wasm.card_rarity(this.Cards.set, this.index);
+	}
+
+	get attack() {
+		return wasm.card_attack(this.Cards.set, this.index);
+	}
+
+	get health() {
+		return wasm.card_health(this.Cards.set, this.index);
+	}
+
+	get cost() {
+		return wasm.card_cost(this.Cards.set, this.index);
+	}
+
+	get costele() {
+		return wasm.card_costele(this.Cards.set, this.index);
+	}
+
+	get cast() {
+		return wasm.card_cast(this.Cards.set, this.index);
+	}
+
+	get castele() {
+		return wasm.card_castele(this.Cards.set, this.index);
+	}
+
+	get name() {
+		return enums.Card[etgutil.asShiny(this.code, false)];
 	}
 
 	get shiny() {

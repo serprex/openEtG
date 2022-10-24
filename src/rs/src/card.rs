@@ -47,6 +47,10 @@ impl Cards {
 			.ok()
 	}
 
+	pub fn try_get_index(&self, index: usize) -> Option<&'static Card> {
+		self.data.get(index)
+	}
+
 	pub fn filter<Ffilt>(&self, upped: bool, ffilt: Ffilt) -> Vec<&'static Card>
 	where
 		Ffilt: Fn(&'static Card) -> bool,
@@ -135,7 +139,7 @@ pub const fn AsShiny(code: i32, shiny: bool) -> i32 {
 	}
 }
 
-pub fn cardSetCards(set: CardSet) -> &'static Cards {
+const fn cardSetCards(set: CardSet) -> &'static Cards {
 	match set {
 		CardSet::Original => &OrigSet,
 		_ => &OpenSet,
@@ -153,64 +157,71 @@ pub fn card_codes(set: CardSet) -> Vec<u16> {
 		.collect::<Vec<_>>()
 }
 
+
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_type(set: CardSet, code: i32) -> Option<Kind> {
-	cardSetCards(set).try_get(code).map(|&card| card.kind)
+pub fn card_index(set: CardSet, code: u16) -> Option<usize> {
+	cardSetCards(set).data.binary_search_by_key(&code, |card| card.code).ok()
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_element(set: CardSet, code: i32) -> Option<i8> {
-	cardSetCards(set).try_get(code).map(|&card| card.element)
+pub fn card_type(set: CardSet, index: usize) -> Option<Kind> {
+	cardSetCards(set).try_get_index(index).map(|&card| card.kind)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_rarity(set: CardSet, code: i32) -> Option<i8> {
-	cardSetCards(set).try_get(code).map(|&card| card.rarity)
+pub fn card_element(set: CardSet, index: usize) -> Option<i8> {
+	cardSetCards(set).try_get_index(index).map(|&card| card.element)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_attack(set: CardSet, code: i32) -> Option<i8> {
-	cardSetCards(set).try_get(code).map(|&card| card.attack)
+pub fn card_rarity(set: CardSet, index: usize) -> Option<i8> {
+	cardSetCards(set).try_get_index(index).map(|&card| card.rarity)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_health(set: CardSet, code: i32) -> Option<i8> {
-	cardSetCards(set).try_get(code).map(|&card| card.health)
+pub fn card_attack(set: CardSet, index: usize) -> Option<i8> {
+	cardSetCards(set).try_get_index(index).map(|&card| card.attack)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_cost(set: CardSet, code: i32) -> Option<i8> {
-	cardSetCards(set).try_get(code).map(|&card| card.cost)
+pub fn card_health(set: CardSet, index: usize) -> Option<i8> {
+	cardSetCards(set).try_get_index(index).map(|&card| card.health)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_costele(set: CardSet, code: i32) -> Option<i8> {
-	cardSetCards(set).try_get(code).map(|&card| card.costele)
+pub fn card_cost(set: CardSet, index: usize) -> Option<i8> {
+	cardSetCards(set).try_get_index(index).map(|&card| card.cost)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_cast(set: CardSet, code: i32) -> Option<i8> {
-	cardSetCards(set).try_get(code).map(|&card| card.cast)
+pub fn card_costele(set: CardSet, index: usize) -> Option<i8> {
+	cardSetCards(set).try_get_index(index).map(|&card| card.costele)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_castele(set: CardSet, code: i32) -> Option<i8> {
-	cardSetCards(set).try_get(code).map(|&card| card.castele)
+pub fn card_cast(set: CardSet, index: usize) -> Option<i8> {
+	cardSetCards(set).try_get_index(index).map(|&card| card.cast)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_stats(set: CardSet, code: i32) -> Option<Vec<i32>> {
-	cardSetCards(set).try_get(code).map(|&card| {
+pub fn card_castele(set: CardSet, index: usize) -> Option<i8> {
+	cardSetCards(set).try_get_index(index).map(|&card| card.castele)
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn card_stats(set: CardSet, index: usize) -> Option<Vec<i32>> {
+	cardSetCards(set).try_get_index(index).map(|&card| {
 		card.status
 			.iter()
 			.flat_map(|&(k, v)| [id_stat(k), v].into_iter())
@@ -225,8 +236,8 @@ pub fn card_stats(set: CardSet, code: i32) -> Option<Vec<i32>> {
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_skills(set: CardSet, code: i32) -> Option<Vec<i32>> {
-	cardSetCards(set).try_get(code).map(|&card| {
+pub fn card_skills(set: CardSet, index: usize) -> Option<Vec<i32>> {
+	cardSetCards(set).try_get_index(index).map(|&card| {
 		card.skill
 			.iter()
 			.flat_map(|&(k, v)| {

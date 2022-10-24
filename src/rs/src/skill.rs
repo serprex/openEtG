@@ -1811,14 +1811,14 @@ impl Skill {
 				ctx.poison(ctx.get_foe(ctx.get_owner(c)), ctx.get(t, Stat::poison));
 			}
 			Self::epoch => {
-				let epoch = ctx.get_mut(c, Stat::epoch);
+				let epoch = ctx.get_mut(c, Stat::charges);
 				*epoch += 1;
 				if *epoch > 1 {
 					Skill::silence.proc(ctx, c, ctx.get_owner(t), data);
 				}
 			}
 			Self::epochreset => {
-				ctx.set(c, Stat::epoch, 0);
+				ctx.set(c, Stat::charges, 0);
 			}
 			Self::evade(chance) => {
 				if ctx.rng_ratio(chance as u32, 100) {
