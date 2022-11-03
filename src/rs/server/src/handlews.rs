@@ -379,11 +379,7 @@ pub async fn handle_ws(
 	);
 
 	'msgloop: while let Some(Ok(result)) = user_ws_rx.next().await {
-		let msg = if let Ok(msg) = result.to_str() {
-			msg
-		} else {
-			continue;
-		};
+		let Ok(msg) = result.to_str() else { continue };
 		if let Ok(msg) = serde_json::from_str::<UserMessage>(msg) {
 			let mut client = pgpool
 				.get()
