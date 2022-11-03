@@ -132,7 +132,7 @@ const data = {
 	creatureupkeep:
 		"Whenever a creature attacks, its owner must pay one quanta of the creature's element or the creature is destroyed.",
 	cseed:
-		'Inflict a random effect on target creature. Possible effects include damage, lobotomize, parallel universe, gravity pull, reverse time, & freeze.',
+		'Inflict a random effect on target creature. Possible effects include damage, lobotomize, parallel universe, gravity pull, rewind, & freeze.',
 	cseed2:
 		'Inflict a random effect on target card. All existing effects are possible.',
 	deadalive: {
@@ -387,9 +387,9 @@ const data = {
 		],
 	},
 	pandemonium:
-		'Inflict a random effect on every creature. Possible effects include damage, lobotomize, parallel universe, gravity pull, reverse time, and freeze. Removes cloak.',
+		'Inflict a random effect on every creature. Possible effects include damage, lobotomize, parallel universe, gravity pull, rewind, and freeze. Removes cloak.',
 	pandemonium2:
-		"Inflict a random effect on each of target player's creatures. Possible effects include damage, lobotomize, parallel universe, gravity pull, reverse time, and freeze. Removes cloak.",
+		"Inflict a random effect on each of target player's creatures. Possible effects include damage, lobotomize, parallel universe, gravity pull, rewind, and freeze. Removes cloak.",
 	pandemonium3:
 		'Inflict a random effect on every card in play or any hand. All existing effects are possible. Removes cloak.',
 	paradox: 'Target creature with more strength than HP dies.',
