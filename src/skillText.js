@@ -380,12 +380,10 @@ const data = {
 	ouija: "Whenever a creature dies, add an Ouija Essence to opponent's hand.",
 	pacify: "Set target creature or weapon's strength to 0.",
 	pairproduce: 'Your pillars, pendulums, and towers trigger as if end of turn.',
-	paleomagnetism: {
-		ownattack: [
-			"Summon a pillar or pendulum every turn. \u2154 chance it matches your mark, otherwise it matches your opponent's mark.",
-			"Summon a tower or pendulum every turn and when this card is played. \u2154 chance it matches your mark, otherwise it matches your opponent's mark.",
-		],
-	},
+	paleomagnetism: c =>
+		`Summon a ${
+			c.upped ? 'tower' : 'pillar'
+		} or pendulum every turn. \u2154 chance it matches your mark, otherwise it matches your opponent's mark.`,
 	pandemonium:
 		'Inflict a random effect on every creature. Possible effects include damage, lobotomize, parallel universe, gravity pull, rewind, and freeze. Removes cloak.',
 	pandemonium2:
