@@ -2410,11 +2410,11 @@ pub async fn handle_ws(
 				}
 				UserMessage::r#mod | UserMessage::codesmith => {
 					let xstr = if let UserMessage::codesmith { .. } = msg {
-						"mod"
+						"Codesmith"
 					} else {
-						"codesmith"
+						"Mod"
 					};
-					if let Ok(rows) = client.query("select u.name from user_role ur join users u on u.id = ur.user_id join roles r on r.id = ur.role_id where r.val = $1 order by u.name", &[if xstr == "mod" { &"Mod" } else { &"Codesmith" }]).await {
+					if let Ok(rows) = client.query("select u.name from user_role ur join users u on u.id = ur.user_id join roles r on r.id = ur.role_id where r.val = $1 order by u.name", &[&xstr]).await {
 						let mut msgmsg = String::new();
 						for (idx, row) in rows.iter().enumerate() {
 							if idx != 0 {
