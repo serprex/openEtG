@@ -211,7 +211,7 @@ const data = {
 		"Cannot be directly targeted by opponent's creature's active skills.",
 	evadespell: "Cannot be directly targeted by opponent's spells.",
 	evolve: 'Transform this card into an unburrowed Shrieker.',
-	feed: 'Give target creature 1 poison counter, gain 3|3, & lose immaterial status until the beginning of your next turn.',
+	feed: 'Give target creature 1 poison counter, gain 3|3, & lose immaterial.',
 	fickle:
 		"Swap target card in either player's hand with a random card from their deck that they have enough quanta to play.",
 	fiery: 'Gains +1 strength for every 5:6 owned.',
@@ -770,7 +770,7 @@ const data = {
 for (const [k, v] of [
 	[
 		'dagger',
-		'1:2 1:11. Gains 1 strength per Cloak, Nightfall, Eclipse, Ouija Essence, or Ouija Source you control.',
+		'1:2 1:11. Gains 1 strength per Darkness or Death non-pillar permanent you control.',
 	],
 	['hammer', '1:3 1:4.'],
 	['bow', '1:8 1:9.'],
@@ -781,7 +781,7 @@ for (const [k, v] of [
 	['v_hammer', '1:3 1:4.'],
 	['v_bow', '1:9.'],
 ]) {
-	data[k] = 'Gains 1 strength if your mark is ' + v;
+	data[k] = `Gains 1 strength if your mark is ${v}`;
 }
 for (const [k, v] of [
 	['pillmat', '1:4 1:6 1:7 1:9'],
@@ -816,7 +816,9 @@ const statusText = {
 		'While this is equipped, any of your creatures whose active skills have Throttled lose Throttled.',
 	poison: (c, inst) =>
 		c === inst
-			? `Enters play with ${c.getStatus('poison')} poison counters.`
+			? `Enters play with ${c.getStatus('poison')} poison counter${
+					c.getStatus('poison') == 1 ? '' : 's'
+			  }.`
 			: inst.getStatus('poison') + ' poison',
 	stackable: '',
 	tunnel: 'Any of your creatures that are burrowed bypass shields.',

@@ -4949,14 +4949,11 @@ impl Skill {
 						.permanents
 						.iter()
 						.filter(|&&pr| {
-							pr != 0 && {
-								let card = ctx.get(pr, Stat::card);
-								card::IsOf(card, card::Cloak)
-									|| card::IsOf(card, card::Nightfall) || card::IsOf(
-									card,
-									card::OuijaEssence,
-								)
-							}
+							pr != 0
+								&& {
+									let card = ctx.get_card(ctx.get(pr, Stat::card));
+									(card.flag & Flag::pillar) == 0 && matches!(card.element as i32, etg::Darkness | etg::Death)
+								}
 						})
 						.count() as i32
 			}
