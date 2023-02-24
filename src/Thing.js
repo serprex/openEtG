@@ -70,10 +70,11 @@ export default class Thing {
 		return this.game.getIndex(this.id);
 	}
 	info() {
+		const type = this.type == wasm.Kind.Spell ? this.card.type : this.type;
 		const info =
-			this.type === wasm.Kind.Creature || this.type === wasm.Kind.Weapon
+			type === wasm.Kind.Creature || type === wasm.Kind.Weapon
 				? `${this.trueatk()}|${this.truehp()}/${this.maxhp}`
-				: this.type === wasm.Kind.Shield
+				: type === wasm.Kind.Shield
 				? this.truedr().toString()
 				: '';
 		const stext = skillText(this);

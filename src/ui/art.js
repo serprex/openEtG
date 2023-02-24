@@ -1,3 +1,4 @@
+import enums from '../enum.json' assert { type: 'json' };
 function hookRowMouseover(tr) {
 	tr.addEventListener('mouseover', function (e) {
 		let i = 1;
@@ -12,19 +13,6 @@ function hookRowMouseover(tr) {
 			imgs[i - 1].style.visibility = 'hidden';
 		}
 	});
-}
-import CardData from '../Cards.json' assert { type: 'json' };
-const Cards = new Map([['4ta', 'Relic']]);
-for (let i = 0; i < CardData.length; i++) {
-	const Cardi = CardData[i];
-	for (let j = 1; j < Cardi.length; j++) {
-		const Cardj = Cardi[j];
-		for (let k = 0; k < Cardj.length; k++) {
-			const [name, code] = Cardj[k];
-			Cards.set(code.toString(32), name);
-			Cards.set((code | 0x4000).toString(32), name);
-		}
-	}
 }
 const imgs = new Array(8),
 	imgdiv = document.getElementById('imgdiv');
@@ -525,7 +513,8 @@ for (const credit of [
 		incx(credit[i][0], credit[i][1]);
 	}
 	for (const code of credit[credit.length - 1]) {
-		incx(Cards.get(code), `Cards/${code}.webp`);
+		const name = enums.Card[parseInt(code, 32) & 0x3fff];
+		incx(name, `Cards/${code}.webp`);
 	}
 	table.appendChild(tr);
 }
