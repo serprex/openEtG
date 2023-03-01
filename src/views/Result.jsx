@@ -509,7 +509,7 @@ export default connect(({ user }) => ({ user }))(
 									width: '700px',
 									position: 'absolute',
 									left: '100px',
-									top: this.state.cardreward ? '100px' : '250px',
+									bottom: this.state.cardreward ? '444px' : '180px',
 								}}
 							/>
 						</>

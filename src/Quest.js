@@ -59,8 +59,8 @@ quarks.basic_duos = {
 	hp: 30,
 	goldreward: 20,
 	opentext: [
-		'Last time, we learned about generating quanta with pillars. They\'re the easiest (and usually fastest) way to generate quanta of a single element. Playing with a single element makes it very easy to build your deck, since you\'ll only need one kind of pillar. "Mono" decks (those with only one element) are usually stable and have far fewer problems with not drawing enough quanta to play their cards.\n\n' +
-			"However, mono decks can only use cards from a single element, and a single element often won't have all the cards you want to use. Sometimes, you'll find you want to use more than one element in your deck to have access to more complex strategies or to cover the weaknesses of a single element.\n\n" +
+		'Last time, we learned about generating quanta with pillars. They\'re the easiest (and usually fastest) way to generate quanta of a single element. Playing with a single element makes it very easy to build your deck, since you\'ll only need one kind of pillar. "Mono" decks (those with only one element) are usually stable and have far fewer problems with not drawing enough quanta to play their cards.',
+		"However, mono decks can only use cards from a single element, and a single element often won't have all the cards you want to use. Sometimes, you'll find you want to use more than one element in your deck to have access to more complex strategies or to cover the weaknesses of a single element.\n\n" +
 			"You could do this by just using some pillars from each element, but there's another way. Pendulums work like pillars, in that at the end of the turn you play them, they will generate one quanta of their element. However, on the second turn, the pendulum will swing to your mark's element and generate one of those at the end of the turn. After that, the pendulum will swing back to its element, and will continue to switch between its element and your mark's element every turn.\n\n" +
 			'This is a great way to make sure you receive quanta from two different elements.',
 		'For this battle, your deck is again full of dragons, but this time they are split between two different elements! Fortunately, your pillars have been replaced with pendulums. Try it out and see if you get the quanta you need to play your dragons.',
@@ -77,8 +77,8 @@ quarks.basic_rainbows = {
 	hp: 50,
 	goldreward: 25,
 	opentext: [
-		'Monos and duos aren\'t the only types of deck. There are trios and quads, which can be much more difficult and may not be the best place to start if you\'re new to the game, though feel free to give it a shot! Quads in particular can be made easier by using "cardinal", "material", or "spiritual" pillars, which generate quanta from four different elements each.\n\n' +
-			"However, there are also quantum pillars. They generate three quanta every turn. In exchange for the speed of gaining quanta being tripled, the quanta they generate is random, so you'll be able to use cards from every element as long as your quantum pillars generate what you need.\n\n" +
+		'Monos and duos aren\'t the only types of deck. There are trios and quads, which can be much more difficult and may not be the best place to start if you\'re new to the game, though feel free to give it a shot! Quads in particular can be made easier by using "cardinal", "material", or "spiritual" pillars, which generate quanta from four different elements each.',
+		"However, there are also quantum pillars. They generate three quanta every turn. In exchange for the speed of gaining quanta being tripled, the quanta they generate is random, so you'll be able to use cards from every element as long as your quantum pillars generate what you need.\n\n" +
 			'You can use quantum pendulums as well, if you want to use cards of every element while still focusing on a single one. Like regular pendulums, quantum pendulums will alternate between generating three random quanta and one quanta matching your mark.\n\n' +
 			'Of course, you could set your mark to "chroma", and then you\'d generate three random per turn from that as well!\n\n' +
 			'"Rainbow" decks (which is what decks that use most or all elements are called) can be very strong because they have cards available to cover every weakness, but they are also at the mercy of pillars that may not produce what they want.',
