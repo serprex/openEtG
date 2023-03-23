@@ -9,7 +9,7 @@ trim_trailing_whitespace = true
 
 
 [*.js,*.jsx]
-insert_final_newline = false
+insert_final_newline = true
 
 [*.yml]
 indentstyle = space

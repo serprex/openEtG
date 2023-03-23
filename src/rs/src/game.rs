@@ -1766,7 +1766,7 @@ impl Game {
 		dmgdata.dmg = dmg;
 		self.proc_data(Event::Dmg, id, &mut dmgdata);
 		if realdmg > 0 {
-			if !dontdie && self.truehp(id) <= 0 {
+			if (!dontdie || kind == Kind::Player) && self.truehp(id) <= 0 {
 				self.die(id);
 			} else if self.get(id, Flag::voodoo) {
 				let foe = self.get_foe(self.get_owner(id));
@@ -2687,3 +2687,4 @@ impl Game {
 		}
 	}
 }
+
