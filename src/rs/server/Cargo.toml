@@ -15,7 +15,7 @@ lto = "thin"
 
 [dependencies]
 async-compression = { version = "0.3", features = ["tokio", "gzip", "brotli"] }
-base64 = "0.13"
+base64 = "0.21"
 bb8-postgres = { version = "0.8", features = ["with-serde_json-1"] }
 etg = { version = "0.1", path = "../" }
 futures = { version = "0.3", default-features = false, features = ["alloc"] }

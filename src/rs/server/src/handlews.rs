@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
+use base64::engine::{Engine, general_purpose::STANDARD};
 use bb8_postgres::tokio_postgres::{
 	types::{Json, ToSql},
 	Client, GenericClient,
@@ -1468,7 +1469,7 @@ pub async fn handle_ws(
 									&mut keybuf,
 								)
 								.ok();
-								user.auth = base64::encode(&mut keybuf[..]);
+								user.auth = STANDARD.encode(&mut keybuf[..]);
 							}
 							sendmsg(&tx, &WsResponse::passchange { auth: &user.auth });
 						}
@@ -2270,16 +2271,14 @@ pub async fn handle_ws(
 							.ok();
 							let realkey = user.auth.as_bytes();
 							if realkey.is_empty() {
-								user.auth = base64::encode(&mut keybuf[..]);
+								user.auth = STANDARD.encode(&mut keybuf[..]);
 								true
 							} else {
 								let mut realkeybuf = [0u8; 64];
-								base64::decode_config_slice(
+								STANDARD.decode_slice_unchecked(
 									user.auth.as_bytes(),
-									base64::STANDARD,
 									&mut realkeybuf,
-								)
-								.ok();
+								).ok();
 								keybuf == realkeybuf
 							}
 						} else {
