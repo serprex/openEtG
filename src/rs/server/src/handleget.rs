@@ -21,45 +21,25 @@ use crate::{svg, PgPool};
 #[derive(Clone, Copy)]
 pub enum Encoding {
 	br,
-	gzip,
 	identity,
 }
-
-impl std::str::FromStr for Encoding {
-	type Err = ();
-
-	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		Ok(match s {
-			"br" => Encoding::br,
-			"gzip" => Encoding::gzip,
-			"identity" => Encoding::identity,
-			_ => return Err(()),
-		})
-	}
-}
-
 pub struct AcceptEncoding(pub Encoding);
 
 impl std::str::FromStr for AcceptEncoding {
 	type Err = Infallible;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		let mut result = Encoding::identity;
-		for code in s.split(',') {
-			match code.trim() {
-				"br" => return Ok(AcceptEncoding(Encoding::br)),
-				"gzip" => result = Encoding::gzip,
-				_ => (),
-			}
-		}
-		Ok(AcceptEncoding(result))
+		Ok(AcceptEncoding(if s.split(',').any(|code| code.trim() == "br") {
+			Encoding::br
+		} else {
+			Encoding::identity
+		}))
 	}
 }
 
 #[derive(Default)]
 pub struct Cache {
 	br: HashMap<String, CachedResponse>,
-	gzip: HashMap<String, CachedResponse>,
 	identity: HashMap<String, CachedResponse>,
 }
 
@@ -67,7 +47,6 @@ impl Cache {
 	pub fn get_map(&self, encoding: Encoding) -> &HashMap<String, CachedResponse> {
 		match encoding {
 			Encoding::br => &self.br,
-			Encoding::gzip => &self.gzip,
 			Encoding::identity => &self.identity,
 		}
 	}
@@ -75,14 +54,12 @@ impl Cache {
 	pub fn get_map_mut(&mut self, encoding: Encoding) -> &mut HashMap<String, CachedResponse> {
 		match encoding {
 			Encoding::br => &mut self.br,
-			Encoding::gzip => &mut self.gzip,
 			Encoding::identity => &mut self.identity,
 		}
 	}
 
 	pub fn remove(&mut self, path: &str) {
 		self.br.remove(path);
-		self.gzip.remove(path);
 		self.identity.remove(path);
 	}
 }
@@ -95,29 +72,17 @@ pub async fn compress_and_cache(
 	path: String,
 	resp: PlainResponse,
 ) -> CachedResponse {
-	use async_compression::tokio::write::{BrotliEncoder, GzipEncoder};
-	use tokio::io::AsyncWriteExt;
+	use std::io::Write;
 	match match encoding {
 		Encoding::br => {
-			let mut encoder = BrotliEncoder::new(Vec::new());
-			if encoder.write_all(&resp.content).await.is_ok() {
-				if encoder.shutdown().await.is_ok() {
-					Ok(encoder.into_inner())
-				} else {
-					Err(resp.content)
-				}
-			} else {
-				Err(resp.content)
-			}
-		}
-		Encoding::gzip => {
-			let mut encoder = GzipEncoder::new(Vec::new());
-			if encoder.write_all(&resp.content).await.is_ok() {
-				if encoder.shutdown().await.is_ok() {
-					Ok(encoder.into_inner())
-				} else {
-					Err(resp.content)
-				}
+			let mut brwriter = brotli::CompressorWriter::new(
+				Vec::with_capacity(resp.content.len()),
+				4096,
+				9,
+				18
+			);
+			if brwriter.write_all(&resp.content).is_ok() {
+				Ok(brwriter.into_inner())
 			} else {
 				Err(resp.content)
 			}
@@ -203,7 +168,6 @@ impl CachedResponse {
 				header::CONTENT_ENCODING,
 				HeaderValue::from_static(match self.encoding {
 					Encoding::br => "br",
-					Encoding::gzip => "gzip",
 					Encoding::identity => "identity",
 				}),
 			)

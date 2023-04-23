@@ -14,21 +14,21 @@ opt-level = 1
 lto = "thin"
 
 [dependencies]
-async-compression = { version = "0.3", features = ["tokio", "gzip", "brotli"] }
 base64 = "0.21"
 bb8-postgres = { version = "0.8", features = ["with-serde_json-1"] }
+brotli = "3"
 etg = { version = "0.1", path = "../" }
+form_urlencoded = "1"
 futures = { version = "0.3", default-features = false, features = ["alloc"] }
-form_urlencoded = "1.0"
 fxhash = "0.2"
 getrandom = "0.2"
 hyper-tls = "0.5"
 openssl = "0.10"
 rand = "0.8"
 rand_pcg = "0.3"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 httpdate = "1"
-tokio = { version = "1.0", features = ["full"] }
+tokio = { version = "1", features = ["full"] }
 tokio-stream = "0.1"
 warp = { version = "0.3", default-features = false, features = ["websocket"] }
