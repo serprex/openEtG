@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 use std::sync::Arc;
 
-use base64::engine::{Engine, general_purpose::STANDARD};
+use base64::engine::{Engine, general_purpose::STANDARD_NO_PAD};
 use bb8_postgres::tokio_postgres::{types::Json, Client, GenericClient};
 use openssl::hash::MessageDigest;
 use serde::{Deserialize, Serialize};
@@ -117,7 +117,7 @@ impl UserObject {
 		let mut saltstr = [0u8; 20];
 		let mut saltbin = [0u8; 15];
 		getrandom::getrandom(&mut saltbin).expect("Where, O entropy, is your sting?");
-		STANDARD.encode_slice(&saltbin, &mut saltstr).ok();
+		STANDARD_NO_PAD.encode_slice(&saltbin, &mut saltstr).ok();
 		self.salt = String::from(unsafe { std::str::from_utf8_unchecked(&saltstr) });
 		self.iter = HASH_ITER;
 		self.algo = HASH_ALGO;
