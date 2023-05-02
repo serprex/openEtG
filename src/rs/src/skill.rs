@@ -3480,9 +3480,12 @@ impl Skill {
 				if ctx.trueatk(c) > 0 {
 					return Skill::antimatter.proc(ctx, c, c, data);
 				}
-				let r = ctx.rng_range(0..12);
-				let owner = ctx.get_owner(c);
+				let mut r = ctx.rng_range(0..12);
+				if self == Self::singularity && r > 9 {
+					r = 0;
+				}
 				if r == 0 {
+					let owner = ctx.get_owner(c);
 					let cap = if self == Self::singularity { 99 } else { 75 };
 					for q in ctx.get_player_mut(ctx.get_foe(owner)).quanta.iter_mut() {
 						*q += (*q < cap) as u8;
