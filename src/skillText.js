@@ -422,7 +422,7 @@ const data = {
 		cast: `Give ${x === '1' ? '' : x + ' '}poison counter${
 			x === '1' ? '' : 's'
 		} to opponent.`,
-		play: 'When this card enters play, give 1 poison counter to opponent.',
+		owndeath: `When this creature dies, give poison counter to opponent.`,
 	}),
 	powerdrain:
 		"Remove half of target creature's strength and HP, rounded up. Add an equal amount of strength and HP to a random creature you control.",
