@@ -164,11 +164,10 @@ function activeText(c) {
 }
 
 class Tween extends Component {
-	wait = false;
-	ms0 = 0;
 	_mounted = false;
 
 	state = {
+		ms0: 0,
 		next: null,
 		state: null,
 		prev: null,
@@ -176,22 +175,15 @@ class Tween extends Component {
 
 	step = ts => {
 		if (this._mounted) {
-			this.setState(
-				state => {
-					const newstate = this.props.proc(
-						ts - this.ms0,
-						this.state.prev,
-						this.state.next,
-					);
-					if (newstate !== this.state.next) {
-						requestAnimationFrame(this.step);
-					}
-					return { state: newstate, start: false };
-				},
-				() => {
-					this.wait = false;
-				},
-			);
+			this.setState(state => {
+				const ms0 = state.ms0 || ts;
+				const newstate = this.props.proc(
+					ts - ms0,
+					this.state.prev,
+					this.state.next,
+				);
+				return { state: newstate, ms0 };
+			});
 		}
 	};
 
@@ -202,29 +194,25 @@ class Tween extends Component {
 						next: props,
 						state: props.initial,
 						prev: props.initial,
-						start: true,
 				  }
-				: { next: props, state: props, prev: props, start: true }
+				: { next: props, state: props, prev: props }
 			: (state.state && props.compare(state.state, props)) ||
 			  props.compare(state.next, props)
 			? null
-			: { next: props, prev: state.state, start: true };
+			: { next: props, prev: state.state, ms0: 0 };
 	}
 
 	componentDidMount() {
 		this._mounted = true;
+		requestAnimationFrame(this.step);
+	}
+
+	componentDidUpdate() {
+		if (this.state.state !== this.state.next) requestAnimationFrame(this.step);
 	}
 
 	componentWillUnmount() {
 		this._mounted = false;
-	}
-
-	componentDidUpdate() {
-		if (!this.wait && this.state.start) {
-			this.ms0 = performance.now();
-			this.wait = true;
-			requestAnimationFrame(this.step);
-		}
 	}
 
 	render() {
@@ -239,14 +227,18 @@ class Animation extends Component {
 
 	step = ts => {
 		if (this._mounted) {
+			this.start ||= ts;
 			this.setState({ child: this.props.proc(ts - this.start) });
-			requestAnimationFrame(this.step);
 		}
 	};
 
 	componentDidMount() {
-		this.start = performance.now();
 		this._mounted = true;
+		this.start = 0;
+		requestAnimationFrame(this.step);
+	}
+
+	componentDidUpdate() {
 		requestAnimationFrame(this.step);
 	}
 
@@ -961,7 +953,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 		};
 
 		StatChange = (key, state, newstate, id, hp, atk) => {
-			if (!newstate.fxStatChange) newstate.fxStatChange = state.fxStatChange;
+			newstate.fxStatChange ??= state.fxStatChange;
 			let oldentry, newentry;
 			newstate.fxStatChange = updateMap(newstate.fxStatChange, id, e => {
 				oldentry = e;
@@ -984,7 +976,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 				);
 				return newentry;
 			});
-			if (!newstate.effects) newstate.effects = new Set(state.effects);
+			newstate.effects ??= new Set(state.effects);
 			if (oldentry) {
 				newstate.effects.delete(oldentry.dom);
 			}
@@ -1073,21 +1065,17 @@ const MatchView = connect(({ user, opts, nav }) => ({
 					effectId++;
 					switch (kind) {
 						case 'StartPos':
-							newstate.startPos = (
-								newstate.startPos ?? new Map(state.startPos)
-							).set(id, param);
+							newstate.startPos ??= new Map(state.startPos);
+							newstate.startPos.set(id, param);
 							break;
 						case 'EndPos':
-							if (!newstate.startPos)
-								newstate.startPos = new Map(state.startPos);
+							newstate.startPos ??= new Map(state.startPos);
+							newstate.endPos ??= new Map(state.endPos);
 							newstate.startPos.delete(id);
-							newstate.endPos = (newstate.endPos ?? new Map(state.endPos)).set(
-								id,
-								param,
-							);
+							newstate.endPos.set(id, param);
 							break;
 						case 'Card':
-							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
 								this.Text(
 									effectId,
@@ -1099,19 +1087,19 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							);
 							break;
 						case 'Poison':
-							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
 								this.Text(effectId, state, newstate, id, `Poison ${param}`),
 							);
 							break;
 						case 'Delay':
-							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
 								this.Text(effectId, state, newstate, id, `Delay ${param}`),
 							);
 							break;
 						case 'Freeze':
-							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
 								this.Text(effectId, state, newstate, id, `Freeze ${param}`),
 							);
@@ -1123,7 +1111,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							this.StatChange(effectId, state, newstate, id, 0, param);
 							break;
 						case 'LastCard':
-							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects ??= new Set(state.effects);
 							const playerName =
 								game.data.players[game.byId(id).getIndex()].name;
 							const LastCardEffect = (
@@ -1150,13 +1138,13 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							newstate.effects.add(LastCardEffect);
 							break;
 						case 'Heal':
-							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
 								this.Text(effectId, state, newstate, id, `+${param}`),
 							);
 							break;
 						case 'Lightning':
-							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects ??= new Set(state.effects);
 							const pos = this.getIdTrack(id) ?? { x: -99, y: -99 };
 							const LightningEffect = (
 								<Animation
@@ -1204,13 +1192,13 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							newstate.effects.add(LightningEffect);
 							break;
 						case 'Lives':
-							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
 								this.Text(effectId, state, newstate, id, `${param} lives`),
 							);
 							break;
 						case 'Quanta':
-							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
 								this.Text(
 									effectId,
@@ -1225,7 +1213,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							playSound(wasm.Sfx[param]);
 							break;
 						default:
-							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
 								this.Text(effectId, state, newstate, id, kind),
 							);
