@@ -1,4 +1,5 @@
 import { Component, Fragment } from 'react';
+import { connect } from 'react-redux';
 
 import * as audio from '../audio.js';
 import * as etg from '../etg.js';
@@ -514,50 +515,56 @@ export class CardSelectorCore extends Component {
 	}
 }
 
-export class CardSelector extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			shiny: false,
-			element: 0,
-			rarity: 0,
-		};
-	}
+export const CardSelector = connect(({ opts }) => ({
+	shiny: opts.toggleshiny,
+}))(
+	class CardSelector extends Component {
+		constructor(props) {
+			super(props);
+			this.state = {
+				element: 0,
+				rarity: 0,
+			};
+		}
 
-	render() {
-		return (
-			<>
-				<input
-					type="button"
-					value="Toggle Shiny"
-					style={{
-						position: 'absolute',
-						left: '4px',
-						top: '578px',
-					}}
-					onClick={() => this.setState({ shiny: !this.state.shiny })}
-				/>
-				<RaritySelector
-					x={80}
-					y={338}
-					value={this.state.rarity}
-					onChange={rarity => this.setState({ rarity })}
-				/>
-				<ElementSelector
-					x={4}
-					y={316}
-					value={this.state.element}
-					onChange={element => this.setState({ element })}
-				/>
-				<CardSelectorCore
-					{...this.props}
-					x={100}
-					y={272}
-					shiny={this.state.shiny}
-					rarity={this.state.rarity}
-					element={this.state.element}
-				/>
-			</>
-		);
-	}
-}
+		render() {
+			return (
+				<>
+					<input
+						type="button"
+						value="Toggle Shiny"
+						style={{
+							position: 'absolute',
+							left: '4px',
+							top: '578px',
+						}}
+						onClick={() =>
+							this.props.dispatch(
+								store.setOpt('toggleshiny', !this.props.shiny),
+							)
+						}
+					/>
+					<RaritySelector
+						x={80}
+						y={338}
+						value={this.state.rarity}
+						onChange={rarity => this.setState({ rarity })}
+					/>
+					<ElementSelector
+						x={4}
+						y={316}
+						value={this.state.element}
+						onChange={element => this.setState({ element })}
+					/>
+					<CardSelectorCore
+						{...this.props}
+						x={100}
+						y={272}
+						rarity={this.state.rarity}
+						element={this.state.element}
+					/>
+				</>
+			);
+		}
+	},
+);

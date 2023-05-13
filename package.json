@@ -18,7 +18,7 @@
     "react-redux": "^8.0.5",
     "redux": "^4.2.1",
     "spritesheet-js": "^1.2.8",
-    "webpack": "^5.82.0",
+    "webpack": "^5.82.1",
     "webpack-cli": "^5.1.1"
   },
   "scripts": {

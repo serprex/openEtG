@@ -238,9 +238,7 @@ const DeckSelector = connect(({ user }) => ({ user }))(
 	},
 );
 
-export default connect(({ user }) => ({
-	user,
-}))(
+export default connect(({ user }) => ({ user }))(
 	class DeckEditor extends Component {
 		constructor(props) {
 			super(props);
@@ -292,8 +290,9 @@ export default connect(({ user }) => ({
 
 		currentDeckCode() {
 			return (
-				etgutil.encodedeck(this.state.deck) +
-				etgutil.toTrueMarkSuffix(this.state.mark)
+				etgutil.encodedeck(
+					this.state.deck.map(code => etgutil.asShiny(code, false)),
+				) + etgutil.toTrueMarkSuffix(this.state.mark)
 			);
 		}
 

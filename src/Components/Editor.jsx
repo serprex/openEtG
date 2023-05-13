@@ -27,7 +27,7 @@ export default class Editor extends PureComponent {
 			newdeck.splice(idx, 1);
 			this.props.setDeck(newdeck);
 		} else {
-			code = etgutil.asShiny(code, 1);
+			code = etgutil.asShiny(code, true);
 			const idx = this.props.deck.indexOf(code);
 			if (~idx) {
 				const newdeck = this.props.deck.slice();
