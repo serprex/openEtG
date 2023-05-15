@@ -1,5 +1,4 @@
 import { Component } from 'react';
-import { connect } from 'react-redux';
 
 import { ExitBtn } from '../../Components/index.jsx';
 import * as sock from '../../sock.jsx';

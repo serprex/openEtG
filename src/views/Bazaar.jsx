@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 
 import Cards from '../Cards.js';
 import * as etg from '../etg.js';
@@ -16,76 +16,75 @@ function Order({ order, onClick }) {
 		</div>
 	);
 }
-const CardOrders = connect(({ user }) => ({ uname: user.name }))(
-	function CardOrders({ uname, bc, onClickBuy, onClickSell, onClickCancel }) {
-		if (!bc) return null;
-		const hasMine = bc.some(({ u }) => u === uname);
-		return (
-			<>
+function CardOrders({ bc, onClickBuy, onClickSell, onClickCancel }) {
+	const uname = useSelector(({ user }) => user.name);
+	if (!bc) return null;
+	const hasMine = bc.some(({ u }) => u === uname);
+	return (
+		<>
+			<div
+				style={{
+					position: 'absolute',
+					left: '100px',
+					top: '72px',
+					width: '230px',
+					height: '192px',
+					color: '#4f8',
+				}}>
+				<div>Buys</div>
+				{bc
+					.filter(x => x.p > 0 && x.u !== uname)
+					.map((buy, i) => (
+						<Order key={i} order={buy} onClick={onClickBuy} />
+					))}
+			</div>
+			<div
+				style={{
+					position: 'absolute',
+					left: '330px',
+					top: '72px',
+					width: '230px',
+					height: '192px',
+					color: '#f84',
+				}}>
+				<div>Sells</div>
+				{bc
+					.filter(x => x.p < 0 && x.u !== uname)
+					.map((sell, i) => (
+						<Order key={i} order={sell} onClick={onClickSell} />
+					))}
+			</div>
+			{hasMine && (
 				<div
 					style={{
 						position: 'absolute',
-						left: '100px',
+						left: '560px',
 						top: '72px',
 						width: '230px',
 						height: '192px',
-						color: '#4f8',
 					}}>
-					<div>Buys</div>
 					{bc
-						.filter(x => x.p > 0 && x.u !== uname)
-						.map((buy, i) => (
-							<Order key={i} order={buy} onClick={onClickBuy} />
+						.filter(x => x.u === uname)
+						.map((order, i) => (
+							<div
+								key={i}
+								style={{
+									color: order.p > 0 ? '#4f8' : '#f84',
+								}}>
+								{order.q} @ {Math.abs(order.p)}
+							</div>
 						))}
+					<input
+						type="button"
+						value="Cancel"
+						style={{ display: 'block' }}
+						onClick={onClickCancel}
+					/>
 				</div>
-				<div
-					style={{
-						position: 'absolute',
-						left: '330px',
-						top: '72px',
-						width: '230px',
-						height: '192px',
-						color: '#f84',
-					}}>
-					<div>Sells</div>
-					{bc
-						.filter(x => x.p < 0 && x.u !== uname)
-						.map((sell, i) => (
-							<Order key={i} order={sell} onClick={onClickSell} />
-						))}
-				</div>
-				{hasMine && (
-					<div
-						style={{
-							position: 'absolute',
-							left: '560px',
-							top: '72px',
-							width: '230px',
-							height: '192px',
-						}}>
-						{bc
-							.filter(x => x.u === uname)
-							.map((order, i) => (
-								<div
-									key={i}
-									style={{
-										color: order.p > 0 ? '#4f8' : '#f84',
-									}}>
-									{order.q} @ {Math.abs(order.p)}
-								</div>
-							))}
-						<input
-							type="button"
-							value="Cancel"
-							style={{ display: 'block' }}
-							onClick={onClickCancel}
-						/>
-					</div>
-				)}
-			</>
-		);
-	},
-);
+			)}
+		</>
+	);
+}
 
 const OrderSummary = connect(({ user }) => ({ uname: user.name }))(
 	class OrderSummary extends Component {
@@ -204,15 +203,12 @@ const OrderSummary = connect(({ user }) => ({ uname: user.name }))(
 	},
 );
 
-function defVal(x, y) {
-	return x === undefined ? y : x;
-}
-const OrderBook = connect(({ opts }) => ({
-	deal: defVal(opts.orderFilter_Deal, false),
-	buy: defVal(opts.orderFilter_Buy, true),
-	sell: defVal(opts.orderFilter_Sell, true),
-	mine: defVal(opts.orderFilter_Mine, false),
-}))(function OrderBook({ dispatch, bz, onClick, deal, buy, sell, mine }) {
+function OrderBook({ bz, onClick }) {
+	const deal = useSelector(({ opts }) => opts.orderFilter_Deal ?? false);
+	const buy = useSelector(({ opts }) => opts.orderFilter_Buy ?? true);
+	const sell = useSelector(({ opts }) => opts.orderFilter_Sell ?? true);
+	const mine = useSelector(({ opts }) => opts.orderFilter_Mine ?? false);
+
 	return (
 		<div
 			className="bgbox"
@@ -228,7 +224,9 @@ const OrderBook = connect(({ opts }) => ({
 					type="checkbox"
 					checked={deal}
 					onChange={e =>
-						dispatch(store.setOptTemp('orderFilter_Deal', e.target.checked))
+						store.store.dispatch(
+							store.setOptTemp('orderFilter_Deal', e.target.checked),
+						)
 					}
 				/>{' '}
 				Deals
@@ -238,7 +236,9 @@ const OrderBook = connect(({ opts }) => ({
 					type="checkbox"
 					checked={buy}
 					onChange={e =>
-						dispatch(store.setOptTemp('orderFilter_Buy', e.target.checked))
+						store.store.dispatch(
+							store.setOptTemp('orderFilter_Buy', e.target.checked),
+						)
 					}
 				/>{' '}
 				Buys
@@ -248,7 +248,9 @@ const OrderBook = connect(({ opts }) => ({
 					type="checkbox"
 					checked={sell}
 					onChange={e =>
-						dispatch(store.setOptTemp('orderFilter_Sell', e.target.checked))
+						store.store.dispatch(
+							store.setOptTemp('orderFilter_Sell', e.target.checked),
+						)
 					}
 				/>{' '}
 				Sells
@@ -258,7 +260,9 @@ const OrderBook = connect(({ opts }) => ({
 					type="checkbox"
 					checked={mine}
 					onChange={e =>
-						dispatch(store.setOptTemp('orderFilter_Mine', e.target.checked))
+						store.store.dispatch(
+							store.setOptTemp('orderFilter_Mine', e.target.checked),
+						)
 					}
 				/>{' '}
 				Mine
@@ -277,7 +281,7 @@ const OrderBook = connect(({ opts }) => ({
 			)}
 		</div>
 	);
-});
+}
 
 export default connect(({ user }) => ({ user }))(
 	class Bazaar extends Component {

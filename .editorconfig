@@ -7,7 +7,7 @@ charset = utf-8
 indent_style = tab
 trim_trailing_whitespace = true
 
-[*.js,*.jsx]
+[*.js,*.jsx,*.json]
 insert_final_newline = true
 
 [*.yml]

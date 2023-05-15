@@ -1,4 +1,4 @@
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Fragment } from 'react';
 import * as etg from '../etg.js';
 import * as mkAi from '../mkAi.js';
@@ -45,7 +45,8 @@ function mkDaily(type) {
 	}
 	mkAi.run(game);
 }
-export default connect(({ user }) => ({ user }))(function Colosseum({ user }) {
+export default function Colosseum(props) {
+	const user = useSelector(({ user }) => user);
 	const [magename, magedeck] = Decks.mage[user.dailymage],
 		[dgname, dgdeck] = Decks.demigod[user.dailydg];
 	const events = [
@@ -157,4 +158,4 @@ export default connect(({ user }) => ({ user }))(function Colosseum({ user }) {
 			)}
 		</>
 	);
-});
+}
