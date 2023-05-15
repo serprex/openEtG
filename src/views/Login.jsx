@@ -188,57 +188,55 @@ if (typeof kongregateAPI === 'undefined') {
 		},
 	);
 } else {
-	View = connect()(
-		class Login extends Component {
-			state = { guest: false };
+	View = class Login extends Component {
+		state = { guest: false };
 
-			componentDidMount() {
-				kongregateAPI.loadAPI(() => {
-					const kong = kongregateAPI.getAPI();
-					if (kong.services.isGuest()) {
-						this.setState({ guest: true });
-					} else {
-						this.props.dispatch(
-							store.setCmds({
-								login: data => {
-									if (!data.err) {
-										delete data.x;
-										this.props.dispatch(store.setUser(data));
-										if (!data.accountbound && !data.pool) {
-											this.props.dispatch(
-												store.doNav(import('./ElementSelect.jsx')),
-											);
-										} else {
-											this.props.dispatch(store.doNav(MainMenu));
-										}
+		componentDidMount() {
+			kongregateAPI.loadAPI(() => {
+				const kong = kongregateAPI.getAPI();
+				if (kong.services.isGuest()) {
+					this.setState({ guest: true });
+				} else {
+					store.store.dispatch(
+						store.setCmds({
+							login: data => {
+								if (!data.err) {
+									delete data.x;
+									store.store.dispatch(store.setUser(data));
+									if (!data.accountbound && !data.pool) {
+										store.store.dispatch(
+											store.doNav(import('./ElementSelect.jsx')),
+										);
 									} else {
-										this.props.dispatch(store.chatMsg(data.err));
-										alert(data.err);
+										store.store.dispatch(store.doNav(MainMenu));
 									}
-								},
-							}),
-						);
-						sock.emit({
-							x: 'konglogin',
-							u: kong.services.getUserId(),
-							g: kong.services.getGameAuthToken(),
-						});
-					}
-				});
-			}
-
-			render() {
-				if (this.state.guest) {
-					return (
-						<>
-							Log in to use Kongregate, or play at{' '}
-							<a href="https://etg.dek.im">etg.dek.im</a>
-						</>
+								} else {
+									store.store.dispatch(store.chatMsg(data.err));
+									alert(data.err);
+								}
+							},
+						}),
 					);
+					sock.emit({
+						x: 'konglogin',
+						u: kong.services.getUserId(),
+						g: kong.services.getGameAuthToken(),
+					});
 				}
-				return 'Logging in..';
+			});
+		}
+
+		render() {
+			if (this.state.guest) {
+				return (
+					<>
+						Log in to use Kongregate, or play at{' '}
+						<a href="https://etg.dek.im">etg.dek.im</a>
+					</>
+				);
 			}
-		},
-	);
+			return 'Logging in..';
+		}
+	};
 }
 export default View;

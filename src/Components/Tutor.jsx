@@ -1,39 +1,32 @@
-import { Component } from 'react';
-import { connect } from 'react-redux';
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Text } from './index.jsx';
 
-export const Tutor = connect(({ opts }) => ({ enableTut: !opts.disableTut }))(
-	class Tutor extends Component {
-		constructor(props) {
-			super(props);
-			this.state = { showtut: null };
-		}
-
-		render() {
-			return (
-				this.props.enableTut && (
-					<>
-						<span
-							className="imgb ico e13"
-							onMouseEnter={() => {
-								this.setState({ showtut: this.props.panels });
-							}}
-							onMouseLeave={() => {
-								this.setState({ showtut: null });
-							}}
-							style={{
-								position: 'absolute',
-								left: this.props.x + 'px',
-								top: this.props.y + 'px',
-							}}
-						/>
-						{this.state.showtut}
-					</>
-				)
-			);
-		}
-	},
-);
+export function Tutor(props) {
+	const enableTut = !useSelector(({ opts }) => opts.disableTut);
+	const [tut, setTut] = useState(null);
+	return (
+		enableTut && (
+			<>
+				<span
+					className="imgb ico e13"
+					onMouseEnter={() => {
+						setTut(props.panels);
+					}}
+					onMouseLeave={() => {
+						setTut(null);
+					}}
+					style={{
+						position: 'absolute',
+						left: props.x + 'px',
+						top: props.y + 'px',
+					}}
+				/>
+				{tut}
+			</>
+		)
+	);
+}
 
 function mkTutor(...data) {
 	return (

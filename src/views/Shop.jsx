@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { Component } from 'react';
+import { useState, Component, Fragment } from 'react';
 
 import * as sock from '../sock.jsx';
 import Cards from '../Cards.js';
@@ -28,52 +28,46 @@ const packdata = [
 	{ cost: 250, type: 'Nymph', info: '1 Nymph' },
 ];
 
-class PackDisplay extends Component {
-	constructor(props) {
-		super(props);
-		this.state = { hovercard: null };
-	}
-
-	render() {
-		const { cards } = this.props;
-		const dlen = etgutil.decklength(cards);
-		let cardchildren;
-		if (dlen < 51) {
-			cardchildren = (
+function PackDisplay(props) {
+	const [hoverCard, setHoverCard] = useState(null);
+	const { cards } = props;
+	const dlen = etgutil.decklength(cards);
+	let cardchildren;
+	if (dlen < 51) {
+		cardchildren = (
+			<Components.DeckDisplay
+				cards={Cards}
+				x={64}
+				deck={etgutil.decodedeck(cards)}
+				onMouseOver={(i, card) => setHoverCard(card)}
+			/>
+		);
+	} else {
+		const deck = etgutil.decodedeck(cards);
+		cardchildren = (
+			<>
 				<Components.DeckDisplay
 					cards={Cards}
 					x={64}
-					deck={etgutil.decodedeck(cards)}
-					onMouseOver={(i, card) => this.setState({ hovercard: card })}
+					deck={deck.slice(0, 50)}
+					onMouseOver={(i, card) => setHoverCard(card)}
 				/>
-			);
-		} else {
-			const deck = etgutil.decodedeck(cards);
-			cardchildren = (
-				<>
-					<Components.DeckDisplay
-						cards={Cards}
-						x={64}
-						deck={deck.slice(0, 50)}
-						onMouseOver={(i, card) => this.setState({ hovercard: card })}
-					/>
-					<Components.DeckDisplay
-						cards={Cards}
-						x={-97}
-						y={244}
-						deck={deck.slice(50)}
-						onMouseOver={(i, card) => this.setState({ hovercard: card })}
-					/>
-				</>
-			);
-		}
-		return (
-			<Components.Box x={40} y={16} width={710} height={568}>
-				<Components.Card card={this.state.hovercard} x={2} y={2} />
-				{cardchildren}
-			</Components.Box>
+				<Components.DeckDisplay
+					cards={Cards}
+					x={-97}
+					y={244}
+					deck={deck.slice(50)}
+					onMouseOver={(i, card) => setHoverCard(card)}
+				/>
+			</>
 		);
 	}
+	return (
+		<Components.Box x={40} y={16} width={710} height={568}>
+			<Components.Card card={hoverCard} x={2} y={2} />
+			{cardchildren}
+		</Components.Box>
+	);
 }
 
 export default connect(({ user, opts }) => ({
@@ -291,10 +285,9 @@ export default connect(({ user, opts }) => ({
 							</>
 						)}
 					{packdata.map((pack, n) => (
-						<>
+						<Fragment key={pack.type}>
 							<img
 								src={`/assets/pack${n}.webp`}
-								key={pack.type}
 								className="imgb"
 								onClick={() => {
 									this.setState({
@@ -318,7 +311,7 @@ export default connect(({ user, opts }) => ({
 									textAlign: 'center',
 								}}
 							/>
-						</>
+						</Fragment>
 					))}
 					{elebuttons}
 					{this.state.cards && <PackDisplay cards={this.state.cards} />}

@@ -1,5 +1,5 @@
-import { Component, Fragment } from 'react';
-import { connect } from 'react-redux';
+import { useMemo, useState, Component, Fragment } from 'react';
+import { useSelector } from 'react-redux';
 
 import * as audio from '../audio.js';
 import * as etg from '../etg.js';
@@ -349,25 +349,25 @@ export function ElementSelector(props) {
 	return children;
 }
 
-function CardSelectorColumn(props) {
-	function maybeShiny(card) {
-		if (props.filterboth && !props.shiny) {
-			const shiny = card.asShiny(true);
-			if (
-				shiny.code in props.cardpool &&
-				props.cardpool[shiny.code] >
-					((props.cardminus && props.cardminus[shiny.code]) ?? 0)
-			) {
-				return card.asShiny(true);
-			}
+function maybeShiny(props, card) {
+	if (props.filterboth && !props.shiny) {
+		const shiny = card.asShiny(true);
+		if (
+			shiny.code in props.cardpool &&
+			props.cardpool[shiny.code] >
+				((props.cardminus && props.cardminus[shiny.code]) ?? 0)
+		) {
+			return card.asShiny(true);
 		}
-		return card;
 	}
-	function poolCount(code) {
-		return (
-			props.cardpool[code] - ((props.cardminus && props.cardminus[code]) ?? 0)
-		);
-	}
+	return card;
+}
+function poolCount(props, code) {
+	return (
+		props.cardpool[code] - ((props.cardminus && props.cardminus[code]) ?? 0)
+	);
+}
+function CardSelectorColumn(props) {
 	const children = [],
 		countTexts = [];
 	for (let j = 0; j < props.cards.length; j++) {
@@ -380,23 +380,23 @@ function CardSelectorColumn(props) {
 			const cardAmount = card.isFree()
 					? '-'
 					: code in props.cardpool
-					? poolCount(code)
+					? poolCount(props, code)
 					: 0,
 				shinyAmount =
 					props.filterboth && !props.shiny && scode in props.cardpool
-						? poolCount(scode)
+						? poolCount(props, scode)
 						: 0;
 			if (!props.cardpool || cardAmount !== 0 || shinyAmount !== 0) {
 				opacity = undefined;
 			} else if (card.upped && !card.Cards.Names.Relic) {
 				if (
-					poolCount(etgutil.asUpped(code, false)) >=
+					poolCount(props, etgutil.asUpped(code, false)) >=
 					(card.rarity === -1 ? 1 : 6) * (card.upped && card.shiny ? 6 : 1)
 				) {
 					opacity = undefined;
 				} else if (
 					card.rarity === 4 &&
-					poolCount(etgutil.asUpped(scode, false)) >= 1
+					poolCount(props, etgutil.asUpped(scode, false)) >= 1
 				) {
 					opacity = undefined;
 				}
@@ -425,7 +425,9 @@ function CardSelectorColumn(props) {
 					opacity,
 				}}
 				card={card}
-				onClick={props.onClick && (() => props.onClick(maybeShiny(card)))}
+				onClick={
+					props.onClick && (() => props.onClick(maybeShiny(props, card)))
+				}
 				onContextMenu={
 					props.onContextMenu &&
 					(e => {
@@ -434,7 +436,8 @@ function CardSelectorColumn(props) {
 					})
 				}
 				onMouseOver={
-					props.onMouseOver && (() => props.onMouseOver(maybeShiny(card)))
+					props.onMouseOver &&
+					(() => props.onMouseOver(maybeShiny(props, card)))
 				}
 			/>,
 		);
@@ -454,117 +457,80 @@ function CardSelectorColumn(props) {
 		</>
 	);
 }
-export class CardSelectorCore extends Component {
-	state = {};
 
-	static getDerivedStateFromProps(props, state) {
-		if (
-			props.cards !== state.cards ||
-			props.cardpool !== state.cardpool ||
-			props.filter !== state.filter ||
-			props.element !== state.element ||
-			props.rarity !== state.rarity ||
-			props.shiny !== state.shiny ||
-			props.filterboth !== state.filterboth
-		) {
-			const columns = [];
-			for (let i = 0; i < 6; i++) {
-				if (props.noupped && i > 2) break;
-				columns.push(
-					props.cards.filter(
-						i > 2,
-						x =>
-							(!props.filter || props.filter(x)) &&
-							(x.element === props.element || props.rarity === 4) &&
-							((i % 3 === 0 && x.type === etg.Creature) ||
-								(i % 3 === 1 && x.type <= etg.Permanent) ||
-								(i % 3 === 2 && x.type === etg.Spell)) &&
-							(!props.rarity || props.rarity === x.rarity),
-						props.cards.cardCmp,
-						props.shiny && !props.filterboth,
-					),
-				);
-			}
-
-			return {
-				cards: props.cards,
-				cardpool: props.cardpool,
-				filter: props.filter,
-				element: props.element,
-				rarity: props.rarity,
-				shiny: props.shiny,
-				filterboth: props.filterboth,
-				columns,
-			};
-		}
-		return null;
-	}
-
-	render() {
-		const props = this.props;
-
-		return this.state.columns.map((cards, i) => (
-			<CardSelectorColumn
-				key={i}
-				{...props}
-				cards={cards}
-				x={props.x + i * 133}
-				y={props.y}
-			/>
-		));
-	}
-}
-
-export const CardSelector = connect(({ opts }) => ({
-	shiny: opts.toggleshiny,
-}))(
-	class CardSelector extends Component {
-		constructor(props) {
-			super(props);
-			this.state = {
-				element: 0,
-				rarity: 0,
-			};
-		}
-
-		render() {
-			return (
-				<>
-					<input
-						type="button"
-						value="Toggle Shiny"
-						style={{
-							position: 'absolute',
-							left: '4px',
-							top: '578px',
-						}}
-						onClick={() =>
-							this.props.dispatch(
-								store.setOpt('toggleshiny', !this.props.shiny),
-							)
-						}
-					/>
-					<RaritySelector
-						x={80}
-						y={338}
-						value={this.state.rarity}
-						onChange={rarity => this.setState({ rarity })}
-					/>
-					<ElementSelector
-						x={4}
-						y={316}
-						value={this.state.element}
-						onChange={element => this.setState({ element })}
-					/>
-					<CardSelectorCore
-						{...this.props}
-						x={100}
-						y={272}
-						rarity={this.state.rarity}
-						element={this.state.element}
-					/>
-				</>
+export function CardSelectorCore(props) {
+	const columns = useMemo(() => {
+		const columns = [];
+		const count = props.noupped ? 3 : 6;
+		for (let i = 0; i < count; i++) {
+			columns.push(
+				props.cards.filter(
+					i > 2,
+					x =>
+						(!props.filter || props.filter(x)) &&
+						(x.element === props.element || props.rarity === 4) &&
+						((i % 3 === 0 && x.type === etg.Creature) ||
+							(i % 3 === 1 && x.type <= etg.Permanent) ||
+							(i % 3 === 2 && x.type === etg.Spell)) &&
+						(!props.rarity || props.rarity === x.rarity),
+					props.cards.cardCmp,
+					props.shiny && !props.filterboth,
+				),
 			);
 		}
-	},
-);
+
+		return columns;
+	}, [
+		props.cards,
+		props.cardpool,
+		props.filter,
+		props.element,
+		props.rarity,
+		props.shiny,
+		props.filterboth,
+		props.noupped,
+	]);
+
+	return columns.map((cards, i) => (
+		<CardSelectorColumn
+			key={i}
+			{...props}
+			cards={cards}
+			x={props.x + i * 133}
+			y={props.y}
+		/>
+	));
+}
+
+export function CardSelector(props) {
+	const [element, setElement] = useState(0);
+	const [rarity, setRarity] = useState(0);
+	const shiny = useSelector(({ opts }) => opts.toggleshiny);
+
+	return (
+		<>
+			<input
+				type="button"
+				value="Toggle Shiny"
+				style={{
+					position: 'absolute',
+					left: '4px',
+					top: '578px',
+				}}
+				onClick={() =>
+					store.store.dispatch(store.setOpt('toggleshiny', !shiny))
+				}
+			/>
+			<RaritySelector x={80} y={338} value={rarity} onChange={setRarity} />
+			<ElementSelector x={4} y={316} value={element} onChange={setElement} />
+			<CardSelectorCore
+				{...props}
+				x={100}
+				y={272}
+				rarity={rarity}
+				element={element}
+				shiny={shiny}
+			/>
+		</>
+	);
+}

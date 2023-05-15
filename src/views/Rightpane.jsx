@@ -1,21 +1,24 @@
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import Chat from '../Components/Chat.jsx';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 import parseChat from '../parseChat.js';
 
-const ChannelTab = connect(({ opts }, props) => ({
-	className: opts.channel === props.channel ? 'tabsel' : 'tab',
-}))(function ChannelTab(props) {
+function ChannelTab(props) {
+	const channel = useSelector(({ opts }) => opts.channel);
+	const className = channel === props.channel ? 'tabsel' : 'tab';
+
 	return (
 		<span
-			className={props.className}
-			onClick={e => props.dispatch(store.setOptTemp('channel', props.channel))}>
+			className={className}
+			onClick={e =>
+				store.store.dispatch(store.setOptTemp('channel', props.channel))
+			}>
 			{props.channel}
 		</span>
 	);
-});
+}
 const channelTabs = (
 	<div>
 		<ChannelTab channel="Main" />
@@ -26,14 +29,14 @@ const channelTabs = (
 	</div>
 );
 
-export default connect(state => ({
-	offline: state.opts.offline,
-	afk: state.opts.afk,
-	showRightpane: !state.opts.hideRightpane,
-	channel: state.opts.channel,
-}))(function Rightpane(props) {
+export default function Rightpane(props) {
+	const offline = useSelector(({ opts }) => opts.offline);
+	const afk = useSelector(({ opts }) => opts.afk);
+	const showRightpane = !useSelector(({ opts }) => opts.hideRightpane);
+	const channel = useSelector(({ opts }) => opts.channel);
+
 	return (
-		props.showRightpane && (
+		showRightpane && (
 			<>
 				<div style={{ marginBottom: '8px' }}>
 					<a href="artcredit.htm" target="_blank">
@@ -54,10 +57,10 @@ export default connect(state => ({
 				<label>
 					<input
 						type="checkbox"
-						checked={props.offline}
+						checked={offline}
 						onChange={e => {
 							sock.emit({ x: 'chatus', hide: e.target.checked });
-							props.dispatch(store.setOpt('offline', e.target.checked));
+							store.store.dispatch(store.setOpt('offline', e.target.checked));
 						}}
 					/>
 					Appear Offline
@@ -65,16 +68,16 @@ export default connect(state => ({
 				<label>
 					<input
 						type="checkbox"
-						checked={props.afk}
+						checked={afk}
 						onChange={e => {
 							sock.emit({ x: 'chatus', afk: e.target.checked });
-							props.dispatch(store.setOptTemp('afk', e.target.checked));
+							store.store.dispatch(store.setOptTemp('afk', e.target.checked));
 						}}
 					/>
 					Afk
 				</label>
 				{channelTabs}
-				<Chat channel={props.channel} />
+				<Chat channel={channel} />
 				<textarea
 					className="chatinput"
 					placeholder="Chat"
@@ -83,4 +86,4 @@ export default connect(state => ({
 			</>
 		)
 	);
-});
+}

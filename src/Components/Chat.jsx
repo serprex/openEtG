@@ -1,10 +1,10 @@
-import { createRef, PureComponent } from 'react';
+import { createRef, Component } from 'react';
 import { connect } from 'react-redux';
 
 export default connect((state, props) => ({
 	chat: state.chat.get(props.channel),
 }))(
-	class Chat extends PureComponent {
+	class Chat extends Component {
 		chatRef = createRef();
 
 		getSnapshotBeforeUpdate(prevProps, prevState) {

@@ -1,9 +1,6 @@
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-export default connect(state => ({
-	view: state.nav.view,
-	props: state.nav.props,
-	navkey: state.nav.key,
-}))(function App(props) {
-	return <props.view key={props.navkey} {...props.props} />;
-});
+export default function App(props) {
+	const nav = useSelector(({ nav }) => nav);
+	return <nav.view key={nav.key} {...nav.props} />;
+}

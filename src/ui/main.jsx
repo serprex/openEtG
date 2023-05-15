@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 
-import { store, chatMsg, doNav } from '../store.jsx';
+import { store, chatMsg } from '../store.jsx';
 
 let lastError = 0;
 window.onerror = function (...args) {
@@ -13,9 +13,8 @@ window.onerror = function (...args) {
 };
 
 import { emit } from '../sock.jsx';
-emit({ x: 'motd' });
-
 import App from '../views/App.jsx';
+
 createRoot(document.getElementById('leftpane')).render(
 	<Provider store={store}>
 		<App />
@@ -28,3 +27,5 @@ import('../views/Rightpane.jsx').then(Rightpane =>
 		</Provider>,
 	),
 );
+
+emit({ x: 'motd' });

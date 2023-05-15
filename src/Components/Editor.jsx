@@ -1,9 +1,9 @@
-import { PureComponent } from 'react';
+import { Component } from 'react';
 
 import * as Components from '../Components/index.jsx';
 import * as etgutil from '../etgutil.js';
 
-export default class Editor extends PureComponent {
+export default class Editor extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
