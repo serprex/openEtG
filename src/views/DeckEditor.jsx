@@ -179,7 +179,7 @@ function DeckSelector(props) {
 						}}
 						onClick={() => {
 							props.saveDeck(user.selectedDeck);
-							props.saveDeck(state.name, true);
+							props.saveDeck(name, true);
 							props.onClose();
 						}}
 					/>
