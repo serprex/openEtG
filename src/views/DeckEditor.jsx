@@ -262,6 +262,13 @@ export default connect(({ user }) => ({ user }))(
 
 		currentDeckCode() {
 			return (
+				etgutil.encodedeck(this.state.deck) +
+				etgutil.toTrueMarkSuffix(this.state.mark)
+			);
+		}
+
+		currentDeckCodeUnpolish() {
+			return (
 				etgutil.encodedeck(
 					this.state.deck.map(code => etgutil.asShiny(code, false)),
 				) + etgutil.toTrueMarkSuffix(this.state.mark)
@@ -308,7 +315,7 @@ export default connect(({ user }) => ({ user }))(
 						Deck &nbsp;
 						<input
 							autoFocus
-							value={this.currentDeckCode()}
+							value={this.currentDeckCodeUnpolish()}
 							onChange={e => {
 								let dcode = e.target.value.trim();
 								if (~dcode.indexOf(' ')) {
