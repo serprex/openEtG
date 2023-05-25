@@ -6,7 +6,7 @@ import Thing from './Thing.js';
 import Player from './Player.js';
 import enums from './enum.json' assert { type: 'json' };
 import { randint } from './util.js';
-import wasm from './wasm.js';
+import * as wasm from './rs/pkg/etg.js';
 
 export default class Game {
 	constructor(data) {

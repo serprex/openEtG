@@ -3,7 +3,7 @@ import * as etg from './etg.js';
 import * as etgutil from './etgutil.js';
 import skillText from './skillText.js';
 import { read_skill, read_status } from './util.js';
-import wasm from './wasm.js';
+import * as wasm from './rs/pkg/etg.js';
 
 export default class Card {
 	constructor(Cards, code, realcode) {

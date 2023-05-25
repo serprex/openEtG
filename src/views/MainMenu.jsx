@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useMemo, Component } from 'react';
 import { connect } from 'react-redux';
 
 import * as audio from '../audio.js';
@@ -54,26 +54,31 @@ function Rect(props) {
 	);
 }
 
+const CostRewardHeadersText = (
+	<>
+		<span
+			style={{
+				position: 'absolute',
+				top: '24px',
+				right: '114px',
+			}}>
+			Cost
+		</span>
+		<span
+			style={{
+				position: 'absolute',
+				top: '24px',
+				right: '4px',
+			}}>
+			Reward
+		</span>
+	</>
+);
 function CostRewardHeaders(props) {
 	return (
 		<Rect x={props.x} y={props.y} wid={props.wid} hei={props.hei}>
 			{props.children}
-			<span
-				style={{
-					position: 'absolute',
-					top: '24px',
-					right: '114px',
-				}}>
-				Cost
-			</span>
-			<span
-				style={{
-					position: 'absolute',
-					top: '24px',
-					right: '4px',
-				}}>
-				Reward
-			</span>
+			{CostRewardHeadersText}
 		</Rect>
 	);
 }
@@ -102,8 +107,7 @@ function TitleText(props) {
 		<div style={{ fontSize: '20px', textAlign: 'center' }}>{props.text}</div>
 	);
 }
-function AiButton(props) {
-	const { name, onClick, onMouseOver, y, lv } = props;
+function AiButton({ name, onClick, onMouseOver, y, lv }) {
 	return (
 		<>
 			<input
@@ -181,8 +185,17 @@ export default connect(({ user, opts }) => ({
 				const tipText = this.props.user
 					? tipjar[this.state.tipNumber]
 					: "To register, just type desired username & password in the fields to the right, then click 'Login'";
-				if (tipText !== this.state.tipText) this.setState({ tipText });
+				this.setState(state =>
+					tipText === state.tipText ? null : { tipText },
+				);
 			}
+		};
+
+		logout = cmd => {
+			sock.userEmit('logout');
+			this.props.dispatch(store.setUser(null));
+			this.props.dispatch(store.setOpt('remember', false));
+			this.props.dispatch(store.doNav(import('./Login.jsx')));
 		};
 
 		componentWillUnmount() {
@@ -234,56 +247,113 @@ export default connect(({ user, opts }) => ({
 			);
 		}
 
-		mkSetTip(text) {
-			return () => {
-				if (this.state.tipText !== text) {
-					this.setState({ tipText: text });
+		setTipCache = {};
+		mkSetTip(tipText) {
+			return (this.setTipCache[tipText] ||= () =>
+				this.setState(state =>
+					state.tipText === tipText ? null : { tipText },
+				));
+		}
+
+		arenaAi(i) {
+			const cost = userutil.arenaCost(i);
+			return e => {
+				if (
+					!Cards.isDeckLegal(
+						etgutil.decodedeck(sock.getDeck()),
+						this.props.user,
+					)
+				) {
+					store.store.dispatch(store.chatMsg('Invalid deck', 'System'));
+				} else if (this.props.user.gold < cost) {
+					this.props.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
+				} else {
+					sock.userEmit('foearena', { lv: i });
+					e.target.style.display = 'none';
 				}
 			};
 		}
+
+		changeFunc = () => {
+			if (this.state.newpass === this.state.newpass2) {
+				sock.userEmit('passchange', { p: this.state.newpass });
+				this.setState({
+					changepass: false,
+					newpass: '',
+					newpass2: '',
+				});
+			} else {
+				this.setState({ newpass: '', newpass2: '' });
+				this.props.dispatch(store.chatMsg('Passwords do not match', 'System'));
+			}
+		};
 
 		setPbpSetting = e => {
 			this.props.dispatch(store.setOpt('playByPlayMode', e.target.value));
 		};
 
+		CostRewardHeadersVdom = (
+			<CostRewardHeaders x={304} y={120} wid={292} hei={240}>
+				<TitleText text="Battle" />
+				<AiButton
+					name="Commoner"
+					y={48}
+					lv={0}
+					onClick={() => mkAi.run(mkAi.mkAi(0))}
+					onMouseOver={this.mkSetTip(
+						'Commoners have no upgraded cards & mostly common cards',
+					)}
+				/>
+				<AiButton
+					name="Mage"
+					y={72}
+					lv={1}
+					onClick={() => mkAi.run(mkAi.mkPremade(1))}
+					onMouseOver={this.mkSetTip(
+						'Mages have preconstructed decks with a couple rares',
+					)}
+				/>
+				<AiButton
+					name="Champion"
+					y={96}
+					lv={2}
+					onClick={() => mkAi.run(mkAi.mkAi(2))}
+					onMouseOver={this.mkSetTip('Champions have some upgraded cards')}
+				/>
+				<AiButton
+					name="Demigod"
+					y={120}
+					lv={3}
+					onClick={() => mkAi.run(mkAi.mkPremade(3))}
+					onMouseOver={this.mkSetTip(
+						'Demigods are extremely powerful. Come prepared',
+					)}
+				/>
+				<AiButton
+					name="Arena 1"
+					onClick={this.arenaAi(0)}
+					onMouseOver={this.mkSetTip(
+						'In the arena you will face decks from other players',
+					)}
+					y={144}
+					lv={4}
+				/>
+				<AiButton
+					name="Arena 2"
+					onClick={this.arenaAi(1)}
+					onMouseOver={this.mkSetTip(
+						'In the arena you will face upgraded decks from other players',
+					)}
+					y={168}
+					lv={5}
+				/>
+			</CostRewardHeaders>
+		);
+
 		render() {
 			if (!this.props.user) return null;
-			const self = this,
-				leadc = [],
-				arenac = [];
+			const leadc = [];
 			for (let i = 0; i < 2; i++) {
-				function arenaAi(e) {
-					if (
-						!Cards.isDeckLegal(
-							etgutil.decodedeck(sock.getDeck()),
-							self.props.user,
-						)
-					) {
-						store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
-						return;
-					}
-					const cost = userutil.arenaCost(i);
-					if (self.props.user.gold < cost) {
-						self.props.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
-						return;
-					}
-					sock.userEmit('foearena', { lv: i });
-					e.target.style.display = 'none';
-				}
-				if (self.props.user) {
-					arenac.push(
-						<AiButton
-							name={`Arena ${i + 1}`}
-							key={i}
-							onClick={arenaAi}
-							onMouseOver={this.mkSetTip(
-								'In the arena you will face decks from other players',
-							)}
-							y={144 + i * 24}
-							lv={4 + i}
-						/>,
-					);
-				}
 				leadc.push(
 					<input
 						type="button"
@@ -305,14 +375,8 @@ export default connect(({ user, opts }) => ({
 				);
 			}
 
-			function logout(cmd) {
-				sock.userEmit(cmd);
-				self.props.dispatch(store.setUser(null));
-				self.props.dispatch(store.setOpt('remember', false));
-				self.props.dispatch(store.doNav(import('./Login.jsx')));
-			}
 			const quickslots = [];
-			if (self.props.user) {
+			if (this.props.user) {
 				for (let i = 0; i < 10; i++) {
 					quickslots.push(
 						<input
@@ -320,31 +384,19 @@ export default connect(({ user, opts }) => ({
 							key={i}
 							value={i + 1}
 							className={`editbtn ${
-								self.props.user.selectedDeck === self.props.user.qecks[i]
+								this.props.user.selectedDeck === this.props.user.qecks[i]
 									? ' selectedbutton'
 									: ''
 							}`}
+							onMouseOver={() =>
+								this.setState({ tipText: this.props.user.qecks[i] ?? '' })
+							}
 							onClick={() => {
 								sock.userExec('setdeck', {
-									name: self.props.user.qecks[i] ?? '',
+									name: this.props.user.qecks[i] ?? '',
 								});
 							}}
 						/>,
-					);
-				}
-			}
-			function changeFunc() {
-				if (self.state.newpass === self.state.newpass2) {
-					sock.userEmit('passchange', { p: self.state.newpass });
-					self.setState({
-						changepass: false,
-						newpass: '',
-						newpass2: '',
-					});
-				} else {
-					self.setState({ newpass: '', newpass2: '' });
-					self.props.dispatch(
-						store.chatMsg('Passwords do not match', 'System'),
 					);
 				}
 			}
@@ -391,7 +443,7 @@ export default connect(({ user, opts }) => ({
 						<Rect x={86} y={92} wid={196} hei={120}>
 							<TitleText text="Stats" />
 							<Components.Text
-								text={`${self.props.user.name}\n${self.props.user.gold}$\nPvE ${self.props.user.aiwins} - ${self.props.user.ailosses}\nPvP ${self.props.user.pvpwins} - ${self.props.user.pvplosses}`}
+								text={`${this.props.user.name}\n${this.props.user.gold}$\nPvE ${this.props.user.aiwins} - ${this.props.user.ailosses}\nPvP ${this.props.user.pvpwins} - ${this.props.user.pvplosses}`}
 							/>
 						</Rect>
 						<Rect x={304} y={380} wid={292} hei={130}>
@@ -541,46 +593,7 @@ export default connect(({ user, opts }) => ({
 							/>
 							<div style={{ marginTop: '4px' }}>{leadc}</div>
 						</Rect>
-						<CostRewardHeaders x={304} y={120} wid={292} hei={240}>
-							<TitleText text="Battle" />
-							<AiButton
-								name="Commoner"
-								y={48}
-								lv={0}
-								onClick={() => mkAi.run(mkAi.mkAi(0))}
-								onMouseOver={this.mkSetTip(
-									'Commoners have no upgraded cards & mostly common cards',
-								)}
-							/>
-							<AiButton
-								name="Mage"
-								y={72}
-								lv={1}
-								onClick={() => mkAi.run(mkAi.mkPremade(1))}
-								onMouseOver={this.mkSetTip(
-									'Mages have preconstructed decks with a couple rares',
-								)}
-							/>
-							<AiButton
-								name="Champion"
-								y={96}
-								lv={2}
-								onClick={() => mkAi.run(mkAi.mkAi(2))}
-								onMouseOver={this.mkSetTip(
-									'Champions have some upgraded cards',
-								)}
-							/>
-							<AiButton
-								name="Demigod"
-								y={120}
-								lv={3}
-								onClick={() => mkAi.run(mkAi.mkPremade(3))}
-								onMouseOver={this.mkSetTip(
-									'Demigods are extremely powerful. Come prepared for anything',
-								)}
-							/>
-							{arenac}
-						</CostRewardHeaders>
+						{this.CostRewardHeadersVdom}
 						<Rect x={620} y={92} wid={196} hei={176}>
 							<TitleText text="Cards" />
 							<input
@@ -597,7 +610,7 @@ export default connect(({ user, opts }) => ({
 								}}
 							/>
 							<LabelText
-								text={'Deck: ' + self.props.user.selectedDeck}
+								text={'Deck: ' + this.props.user.selectedDeck}
 								style={{
 									width: '180px',
 									overflow: 'hidden',
@@ -667,7 +680,7 @@ export default connect(({ user, opts }) => ({
 								type="button"
 								value="Library"
 								onClick={() => {
-									const name = self.props.foename || self.props.user.name;
+									const name = this.props.foename || this.props.user.name;
 									if (name)
 										this.props.dispatch(
 											store.doNav(import('./Library.jsx'), {
@@ -687,7 +700,7 @@ export default connect(({ user, opts }) => ({
 							<input
 								type="button"
 								value="PvP"
-								onClick={() => sock.sendChallenge(self.props.foename)}
+								onClick={() => sock.sendChallenge(this.props.foename)}
 								style={{
 									position: 'absolute',
 									left: '10px',
@@ -699,7 +712,7 @@ export default connect(({ user, opts }) => ({
 								value="Trade"
 								onClick={() => {
 									sock.userEmit('offertrade', {
-										f: self.props.foename,
+										f: this.props.foename,
 										cards: '',
 										g: 0,
 										forcards: null,
@@ -707,7 +720,7 @@ export default connect(({ user, opts }) => ({
 									});
 									this.props.dispatch(
 										store.doNav(import('./Trade.jsx'), {
-											foe: self.props.foename,
+											foe: this.props.foename,
 										}),
 									);
 								}}
@@ -723,7 +736,7 @@ export default connect(({ user, opts }) => ({
 								value="Reward"
 								onClick={() => {
 									sock.userEmit('codesubmit', {
-										code: self.props.foename,
+										code: this.props.foename,
 									});
 								}}
 								onMouseOver={this.mkSetTip('Redeem a reward code')}
@@ -738,7 +751,7 @@ export default connect(({ user, opts }) => ({
 							<input
 								type="button"
 								value="Logout"
-								onClick={() => logout('logout')}
+								onClick={this.logout}
 								onMouseOver={this.mkSetTip('Click here to log out')}
 								style={{
 									position: 'absolute',
@@ -760,7 +773,7 @@ export default connect(({ user, opts }) => ({
 												})
 											}
 											onKeyPress={e => {
-												if (e.which === 13) changeFunc();
+												if (e.which === 13) this.changeFunc();
 											}}
 											style={{
 												position: 'absolute',
@@ -778,7 +791,7 @@ export default connect(({ user, opts }) => ({
 												})
 											}
 											onKeyPress={e => {
-												if (e.which === 13) changeFunc();
+												if (e.which === 13) this.changeFunc();
 											}}
 											style={{
 												position: 'absolute',
@@ -790,7 +803,7 @@ export default connect(({ user, opts }) => ({
 										<input
 											type="button"
 											value="Change Password"
-											onClick={changeFunc}
+											onClick={this.changeFunc}
 											style={{
 												position: 'absolute',
 												left: '8px',

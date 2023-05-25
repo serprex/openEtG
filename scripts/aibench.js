@@ -3,7 +3,7 @@
 import perf_hooks from 'perf_hooks';
 const { performance } = perf_hooks;
 
-import wasm from '../src/wasm.js';
+import * as wasm from '../src/rs/pkg/etg.js';
 import Game from '../src/Game.js';
 import replays from './replays.json' assert { type: 'json' };
 

@@ -482,7 +482,6 @@ export function CardSelectorCore(props) {
 		return columns;
 	}, [
 		props.cards,
-		props.cardpool,
 		props.filter,
 		props.element,
 		props.rarity,

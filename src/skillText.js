@@ -855,7 +855,7 @@ function getDataFromName(name) {
 	if (cache.has(name)) return cache.get(name);
 	const [base, ...args] = name.split(' '),
 		baseData = data[base],
-		value = baseData && baseData(...args);
+		value = baseData?.(...args);
 	cache.set(name, value);
 	return value;
 }

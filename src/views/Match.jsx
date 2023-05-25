@@ -11,7 +11,7 @@ import * as Components from '../Components/index.jsx';
 import * as store from '../store.jsx';
 import { mkQuestAi } from '../Quest.js';
 import enums from '../enum.json' assert { type: 'json' };
-import wasm from '../wasm.js';
+import * as wasm from '../rs/pkg/etg.js';
 import AiWorker from '../AiWorker.js';
 
 const aiWorker = new AiWorker();

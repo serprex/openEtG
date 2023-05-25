@@ -1,4 +1,4 @@
-import wasm from './wasm.js';
+import * as wasm from './rs/pkg/etg.js';
 import { randint } from './util.js';
 import { encodedeck } from './etgutil.js';
 

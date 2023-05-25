@@ -1,5 +1,5 @@
 import Game from '../Game.js';
-import wasm from '../wasm.js';
+import * as wasm from '../rs/pkg/etg.js';
 import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
 import { randint } from '../util.js';
