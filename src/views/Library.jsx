@@ -19,12 +19,12 @@ export default class Library extends Component {
 	}
 
 	componentDidMount() {
-		sock.emit({ x: 'librarywant', f: this.props.name });
 		store.store.dispatch(
 			store.setCmds({
 				librarygive: data => this.setState(data),
 			}),
 		);
+		sock.emit({ x: 'librarywant', f: this.props.name });
 	}
 
 	render() {

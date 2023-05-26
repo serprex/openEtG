@@ -1,11 +1,11 @@
-import { Component } from 'react';
-import { connect } from 'react-redux';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import Cards from '../Cards.js';
 import Game from '../Game.js';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
-import * as etgutil from '../etgutil.js';
+import { decklength, decodedeck, encodeCode, asUpped } from '../etgutil.js';
 import { randint, shuffle } from '../util.js';
 import * as Components from '../Components/index.jsx';
 
@@ -14,7 +14,7 @@ function RenderInfo(props) {
 	if (info) {
 		const testDeck = () => {
 			const deck = sock.getDeck();
-			if (etgutil.decklength(deck) < 9 || etgutil.decklength(adeck) < 9) {
+			if (decklength(deck) < 9 || decklength(adeck) < 9) {
 				store.store.dispatch(store.chatMsg('Deck too small'));
 				return;
 			}
@@ -37,15 +37,14 @@ function RenderInfo(props) {
 			});
 			store.store.dispatch(store.doNav(import('./Match.jsx'), { game }));
 		};
-		const card =
-			info.card && (y ? etgutil.asUpped(info.card, true) : info.card);
-		const adeck = card && '05' + etgutil.encodeCode(card) + info.deck;
+		const card = info.card && (y ? asUpped(info.card, true) : info.card);
+		const adeck = card && '05' + encodeCode(card) + info.deck;
 		return (
 			<>
 				{adeck && (
 					<Components.DeckDisplay
 						cards={Cards}
-						deck={etgutil.decodedeck(adeck)}
+						deck={decodedeck(adeck)}
 						renderMark
 						y={y}
 					/>
@@ -174,57 +173,40 @@ function ArenaCard(props) {
 	);
 }
 
-export default connect(({ user }) => ({
-	name: user.name,
-	ocard: user.ocard,
-}))(
-	class ArenaInfo extends Component {
-		constructor(props) {
-			super(props);
-			this.state = {};
-		}
+export default function ArenaInfo(props) {
+	const uname = useSelector(({ user }) => user.name);
+	const ocard = useSelector(({ user }) => user.ocard);
+	const [{ A, B }, setAB] = useState({});
+	useEffect(() => {
+		store.store.dispatch(store.setCmds({ arenainfo: setAB }));
+		sock.userEmit('arenainfo');
+	}, []);
 
-		componentDidMount() {
-			sock.userEmit('arenainfo');
-			store.store.dispatch(
-				store.setCmds({
-					arenainfo: ({ A, B }) => this.setState({ A, B }),
-				}),
-			);
-		}
-
-		render() {
-			return (
+	return (
+		<>
+			<Components.Text
+				style={{
+					position: 'absolute',
+					left: '96px',
+					top: '560px',
+				}}
+				text={
+					'Earn 5$ when your deck is faced, & 10$ more when it wins\nEarn 25$ per age of old deck when creating new deck, up to 350$'
+				}
+			/>
+			<Components.ExitBtn x={8} y={300} />
+			<RenderInfo info={A} y={0} name={props.name} />
+			<RenderInfo info={B} y={300} name={props.name} />
+			{!!ocard && (
 				<>
-					<Components.Text
-						style={{
-							position: 'absolute',
-							left: '96px',
-							top: '560px',
-						}}
-						text={
-							'Earn 5$ when your deck is faced, & 10$ more when it wins\nEarn 25$ per age of current deck when creating a new deck, up to 350$'
-						}
+					<ArenaCard info={A} y={8} card={Cards.Codes[asUpped(ocard, false)]} />
+					<ArenaCard
+						info={B}
+						y={300}
+						card={Cards.Codes[asUpped(ocard, true)]}
 					/>
-					<Components.ExitBtn x={8} y={300} />
-					<RenderInfo info={this.state.A} y={0} name={this.props.name} />
-					<RenderInfo info={this.state.B} y={300} name={this.props.name} />
-					{!!this.props.ocard && (
-						<>
-							<ArenaCard
-								info={this.state.A}
-								y={8}
-								card={Cards.Codes[etgutil.asUpped(this.props.ocard, false)]}
-							/>
-							<ArenaCard
-								info={this.state.B}
-								y={300}
-								card={Cards.Codes[etgutil.asUpped(this.props.ocard, true)]}
-							/>
-						</>
-					)}
 				</>
-			);
-		}
-	},
-);
+			)}
+		</>
+	);
+}

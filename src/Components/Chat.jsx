@@ -9,13 +9,10 @@ export default connect((state, props) => ({
 
 		getSnapshotBeforeUpdate(prevProps, prevState) {
 			const chat = this.chatRef.current;
-			if (
-				prevProps.channel !== this.props.channel ||
+			return prevProps.channel !== this.props.channel ||
 				Math.abs(chat.scrollTop - chat.scrollHeight + chat.offsetHeight) < 8
-			) {
-				return -1;
-			}
-			return chat.scrollTop;
+				? -1
+				: chat.scrollTop;
 		}
 
 		componentDidUpdate(prevProps, prevState, snapshot) {

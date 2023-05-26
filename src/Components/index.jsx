@@ -1,11 +1,11 @@
-import { useMemo, useState, Component, Fragment } from 'react';
+import { useMemo, useState, Fragment } from 'react';
 import { useSelector } from 'react-redux';
 
-import * as audio from '../audio.js';
+import { playSound } from '../audio.js';
 import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
 import * as store from '../store.jsx';
-import * as ui from '../ui.js';
+import { maybeLightenStr } from '../ui.js';
 
 export function Box(props) {
 	return (
@@ -25,7 +25,7 @@ export function Box(props) {
 
 export function CardImage(props) {
 	const { card } = props,
-		bgcol = ui.maybeLightenStr(card);
+		bgcol = maybeLightenStr(card);
 	return (
 		<div
 			className="cardslot"
@@ -57,23 +57,11 @@ export function CardImage(props) {
 	);
 }
 
-export class Text extends Component {
-	constructor(props) {
-		super(props);
+export function Text(props) {
+	let { text, icoprefix = 'ce' } = props;
+	if (text) text = text.toString();
 
-		this.state = {
-			text: '',
-			icoprefix: 'ce',
-			elec: null,
-		};
-	}
-
-	static getDerivedStateFromProps(props, state) {
-		let { text, icoprefix = 'ce' } = props;
-		text = text ? text.toString() : '';
-		if (text === state.text && icoprefix === props.icoprefix) {
-			return null;
-		}
+	const elec = useMemo(() => {
 		const sep = /\d\d?:\d\d?|\$|\n/g;
 		const ico = `ico ${icoprefix}`;
 		let reres,
@@ -114,16 +102,14 @@ export class Text extends Component {
 		if (lastindex !== text.length) {
 			elec.push(<Fragment key={elec.length}>{text.slice(lastindex)}</Fragment>);
 		}
-		return { text, icoprefix, elec };
-	}
+		return elec;
+	}, [text, icoprefix]);
 
-	render() {
-		return (
-			<div className={this.props.className} style={this.props.style}>
-				{this.state.elec}
-			</div>
-		);
-	}
+	return (
+		<div className={props.className} style={props.style}>
+			{elec}
+		</div>
+	);
 }
 
 export function IconBtn(props) {
@@ -136,7 +122,7 @@ export function IconBtn(props) {
 				top: props.y + 'px',
 			}}
 			onClick={e => {
-				audio.playSound('click');
+				playSound('click');
 				if (props.click) props.click.call(e.target, e);
 			}}
 			onMouseOver={props.onMouseOver}
@@ -168,7 +154,7 @@ export function Card(props) {
 	const { card } = props;
 	if (!card) return null;
 	const textColor = card.upped ? '#000' : '',
-		backColor = ui.maybeLightenStr(card);
+		backColor = maybeLightenStr(card);
 	return (
 		<div
 			style={{
