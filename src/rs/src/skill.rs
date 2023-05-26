@@ -546,8 +546,6 @@ pub enum Skill {
 	wings,
 	wisdom,
 	yoink,
-	v_acceleration(i8),
-	v_accelerationspell(i8),
 	v_accretion,
 	v_aflatoxin,
 	v_antimatter,
@@ -568,7 +566,6 @@ pub enum Skill {
 	v_deja,
 	v_dessication,
 	v_destroy,
-	v_devour,
 	v_disfield,
 	v_disshield,
 	v_dive,
@@ -577,7 +574,6 @@ pub enum Skill {
 	v_dryspell,
 	v_dshield,
 	v_dshieldoff,
-	v_duality,
 	v_earthquake,
 	v_empathy,
 	v_endow,
@@ -621,14 +617,11 @@ pub enum Skill {
 	v_nymph,
 	v_obsession,
 	v_pandemonium,
-	v_paradox,
 	v_parallel,
 	v_phoenix,
 	v_plague,
 	v_platearmor(i16),
-	v_precognition,
 	v_queen,
-	v_rage,
 	v_readiness,
 	v_rebirth,
 	v_regenerate,
@@ -897,7 +890,6 @@ impl Skill {
 			Self::web => Tgt::airbornecrea,
 			Self::wisdom => Tgt::wisdom,
 			Self::yoink => Tgt::And(&[Tgt::foe, Tgt::Or(&[Tgt::play, Tgt::card])]),
-			Self::v_accelerationspell(_) => Tgt::crea,
 			Self::v_accretion => Tgt::Or(&[Tgt::perm, Tgt::play]),
 			Self::v_aflatoxin => Tgt::crea,
 			Self::v_antimatter => Tgt::crea,
@@ -907,7 +899,6 @@ impl Skill {
 			Self::v_cpower => Tgt::crea,
 			Self::v_cseed => Tgt::crea,
 			Self::v_destroy => Tgt::perm,
-			Self::v_devour => Tgt::devour,
 			Self::v_drainlife(_) => Tgt::Or(&[Tgt::crea, Tgt::play]),
 			Self::v_earthquake => Tgt::pill,
 			Self::v_endow => Tgt::weap,
@@ -927,10 +918,8 @@ impl Skill {
 			Self::v_mutation => Tgt::crea,
 			Self::v_nightmare => Tgt::crea,
 			Self::v_nymph => Tgt::pill,
-			Self::v_paradox => Tgt::paradox,
 			Self::v_parallel => Tgt::crea,
 			Self::v_platearmor(_) => Tgt::crea,
-			Self::v_rage => Tgt::crea,
 			Self::v_readiness => Tgt::crea,
 			Self::v_rewind => Tgt::crea,
 			Self::v_steal => Tgt::And(&[Tgt::foe, Tgt::perm]),
@@ -954,7 +943,7 @@ impl Skill {
 			| Skill::thorn(x)
 			| Skill::v_platearmor(x) => x as i32,
 			Skill::summon(x) => x as i32,
-			Skill::quanta(x) | Skill::v_acceleration(x) | Skill::v_accelerationspell(x) => x as i32,
+			Skill::quanta(x) => x as i32,
 			Skill::v_drainlife(x) | Skill::v_firebolt(x) | Skill::v_icebolt(x) => x as i32,
 			Skill::growth(x, _) | Skill::icegrowth(x, _) => x as i32,
 			_ => 0,
@@ -1569,7 +1558,7 @@ impl Skill {
 				ctx.set(t, Flag::airborne, false);
 				ctx.set(t, Flag::burrowed, true);
 			}
-			Self::devour | Self::v_devour => {
+			Self::devour => {
 				ctx.fx(t, Fx::Sfx(Sfx::devour));
 				ctx.fx(t, Fx::Devoured);
 				ctx.buffhp(c, 1);
@@ -1694,7 +1683,7 @@ impl Skill {
 					ctx.rmskill(c, Event::Turnstart, Skill::dshieldoff);
 				}
 			}
-			Self::duality | Self::v_duality => {
+			Self::duality => {
 				let owner = ctx.get_owner(c);
 				if !ctx.get_player(owner).hand_full() {
 					let foe = ctx.get_foe(owner);
@@ -2954,7 +2943,7 @@ impl Skill {
 					}
 				}
 			}
-			Self::paradox | Self::v_paradox => {
+			Self::paradox => {
 				ctx.fx(t, Fx::Paradox);
 				ctx.die(t);
 			}
@@ -3109,7 +3098,7 @@ impl Skill {
 					ctx.incrAtk(id, halfatk);
 				}
 			}
-			Self::precognition | Self::v_precognition => {
+			Self::precognition => {
 				let owner = ctx.get_owner(c);
 				ctx.drawcard(owner);
 				ctx.set(owner, Flag::precognition, true);
@@ -3199,7 +3188,7 @@ impl Skill {
 			Self::r#static => {
 				ctx.spelldmg(ctx.get_foe(ctx.get_owner(c)), 2);
 			}
-			Self::rage | Self::v_rage => {
+			Self::rage => {
 				let dmg = if card::Upped(ctx.get(c, Stat::card)) {
 					6
 				} else {
@@ -3207,7 +3196,7 @@ impl Skill {
 				};
 				ctx.incrAtk(t, dmg);
 				ctx.spelldmg(t, dmg);
-				if self == Self::rage {
+				if ctx.cardset() == card::CardSet::Open {
 					ctx.set(t, Stat::frozen, 0);
 				}
 			}
@@ -3348,11 +3337,8 @@ impl Skill {
 				ctx.set(t, Flag::protectdeck, true);
 			}
 			Self::sadism => {
-				if ctx.get_kind(t) != Kind::Player {
-					let dmg = data.dmg;
-					if dmg > 0 {
-						ctx.dmg(ctx.get_owner(c), -dmg);
-					}
+				if ctx.get_kind(t) != Kind::Player && data.dmg > 0 {
+					ctx.dmg(ctx.get_owner(c), -data.dmg);
 				}
 			}
 			Self::salvage => {
@@ -4019,13 +4005,6 @@ impl Skill {
 					}
 				}
 			}
-			Self::v_acceleration(atk) => {
-				Skill::growth(atk, -1).proc(ctx, c, 0, data);
-			}
-			Self::v_accelerationspell(atk) => {
-				ctx.lobo(t);
-				ctx.addskill(t, Event::OwnAttack, Skill::v_acceleration(atk));
-			}
 			Self::v_accretion => {
 				if ctx.get_kind(t) != Kind::Player {
 					Skill::v_destroy.proc(ctx, c, t, data);
@@ -4320,7 +4299,7 @@ impl Skill {
 					[
 						Skill::deadalive,
 						Skill::v_mutation,
-						Skill::v_paradox,
+						Skill::paradox,
 						Skill::v_improve,
 						Skill::v_scramble,
 						Skill::v_antimatter,
@@ -4334,11 +4313,11 @@ impl Skill {
 						Skill::poison(2),
 					],
 					[
-						Skill::v_devour,
-						Skill::v_devour,
-						Skill::v_devour,
-						Skill::v_devour,
-						Skill::v_devour,
+						Skill::devour,
+						Skill::devour,
+						Skill::devour,
+						Skill::devour,
+						Skill::devour,
 						Skill::v_blackhole,
 					],
 					[
@@ -4363,7 +4342,7 @@ impl Skill {
 						Skill::v_fiery,
 						Skill::v_destroy,
 						Skill::v_destroy,
-						Skill::v_rage,
+						Skill::rage,
 					],
 					[
 						Skill::v_steam,
@@ -4394,8 +4373,8 @@ impl Skill {
 						Skill::v_scarab,
 						Skill::v_deja,
 						Skill::v_deja,
-						Skill::v_precognition,
-						Skill::v_precognition,
+						Skill::precognition,
+						Skill::precognition,
 					],
 					[
 						Skill::vampire,
@@ -4466,7 +4445,7 @@ impl Skill {
 					Skill::v_bblood => 2,
 					Skill::deadalive => 1,
 					Skill::v_mutation => 2,
-					Skill::v_paradox => 2,
+					Skill::paradox => 2,
 					Skill::v_improve => 2,
 					Skill::v_scramble => -2,
 					Skill::v_antimatter => 4,
@@ -4474,7 +4453,7 @@ impl Skill {
 					Skill::growth(1, 1) => -4,
 					Skill::poison(_) => -2,
 					Skill::v_aflatoxin => 2,
-					Skill::v_devour => 3,
+					Skill::devour => 3,
 					Skill::v_blackhole => 4,
 					Skill::growth(2, 2) => 2,
 					Skill::adrenaline => 2,
@@ -4482,7 +4461,7 @@ impl Skill {
 					Skill::growth(2, 0) => 1,
 					Skill::v_fiery => -3,
 					Skill::v_destroy => 3,
-					Skill::v_rage => 2,
+					Skill::rage => 2,
 					Skill::v_steam => 2,
 					Skill::v_freeze => 2,
 					Skill::v_nymph => 4,
@@ -4496,7 +4475,7 @@ impl Skill {
 					Skill::v_scarab => 2,
 					Skill::v_deja => 4,
 					Skill::v_neuro => -2,
-					Skill::v_precognition => 2,
+					Skill::precognition => 2,
 					Skill::v_siphon => -1,
 					Skill::vampire => -2,
 					Skill::v_liquid => 2,

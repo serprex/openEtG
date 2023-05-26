@@ -190,7 +190,7 @@ impl CachedResponse {
 					ContentType::ImageWebp => "image/webp",
 					ContentType::TextCss => "text/css",
 					ContentType::TextHtml => "text/html",
-					ContentType::TextPlain => "text/plain",
+					ContentType::TextPlain => "text/plain; charset=utf-8",
 				}),
 			);
 		if let Some(ref mtimestring) = self.mtimestring {

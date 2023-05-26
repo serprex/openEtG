@@ -447,10 +447,13 @@ const data = {
 		'Target creature becomes immaterial. If target creature is frozen, it loses frozen status.',
 	quinttog:
 		"If target creature isn't immaterial, it gains immaterial status, and if it is also frozen, it loses frozen status. If target creature is immaterial, it loses immaterial status. ",
-	rage: [
-		'Target creature gains +5|-5. If target creature is frozen, it loses frozen status.',
-		'Target creature gains +6|-6. If target creature is frozen, it loses frozen status.',
-	],
+	rage: c => {
+		const n = c.upped ? 6 : 5;
+		let msg = `Target creature gains +${n}|-${n}.`;
+		if (!c.Cards.Names.Relic)
+			msg += ' If target creature is frozen, it loses frozen status.';
+		return msg;
+	},
 	randomdr: c =>
 		`When this card is played, its damage reduction is set randomly between 0 and ${
 			c.upped ? 3 : 2
@@ -613,9 +616,6 @@ const data = {
 		'Target creature or weapon gains 3|0. May target immaterial cards. If it targets an immaterial card, that card gains psionic. Psionic cards deal spell damage and typically bypass shields.',
 	yoink:
 		"Remove target card from opponent's hand and add it to your hand, or draw from target opponent's deck.",
-	v_acceleration: x => `Gains +${x}|-1 when it attacks`,
-	v_accelerationspell: x =>
-		`Replaces target creature\'s skills with "Gains +${x}|-1 when it attacks."`,
 	v_accretion:
 		"Destroy target permanent & gain 0|15. Return to owner's hand as a Blackhole if health exceeds 45",
 	v_aflatoxin:
@@ -645,7 +645,6 @@ const data = {
 	v_dessication:
 		"Deal 2 damage to opponent's creatures. Gain 1:7 per damage dealt. Removes cloak",
 	v_destroy: 'Destroy target permanent.',
-	v_devour: 'Kill smaller target creature & gain 1|1.',
 	v_disfield: 'Absorb damage. Consume 1:0 per damage absorbed.',
 	v_disshield: 'Absorb damage. Consume 1:1 per 3 damage absorbed.',
 	v_divinity: 'Add 24 to maximum health if mark 1:8, otherwise 16 & heal same.',
@@ -657,7 +656,6 @@ const data = {
 		"Deal 2 damage to all opponent's creatures. Gain 1:7 per damage dealt. Removes cloak",
 	],
 	v_dshield: 'Become immaterial until next turn.',
-	v_duality: "Generate a copy of foe's next draw",
 	v_earthquake: 'Destroy up to 3 stacks from target permanent.',
 	v_empathy: 'Heal owner per creature owned per turn. Upkeep per 8 creatures.',
 	v_endow: 'Replicate attributes of target weapon.',
@@ -719,10 +717,8 @@ const data = {
 	v_phoenix: ['Become an Ash on death.', 'Become a Minor Ash on death.'],
 	v_plague: "Poison foe's creatures. Removes cloak",
 	v_platearmor: x => `Target creature gains 0|${x}.`,
-	v_precognition: "Reveal foe's hand until end of their turn. Draw",
 	v_purify: 'Replace poison statuses with 2 purify. Removes sacrifice.',
 	v_queen: 'Summon a Firefly.',
-	v_rage: c => `Target creature gains ${c.upped ? '+6|-6' : '+5|-5'}`,
 	v_readiness:
 		"Target creature's active becomes costless. Skill can be reactivated",
 	v_rebirth: c => `Become a ${c.upped ? 'Minor ' : ''}Phoenix`,

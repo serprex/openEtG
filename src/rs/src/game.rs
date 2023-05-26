@@ -1406,7 +1406,7 @@ impl Game {
 				Skill::v_lycanthropy,
 				Skill::v_infect,
 				Skill::gpull,
-				Skill::v_devour,
+				Skill::devour,
 				Skill::v_mutation,
 				Skill::growth(2, 2),
 				Skill::growth(2, 0),
@@ -1637,7 +1637,7 @@ impl Game {
 				|| self
 					.getSkill(id, Event::OwnAttack)
 					.iter()
-					.any(|&s| matches!(s, Skill::v_acceleration(_) | Skill::v_siphon))
+					.any(|&s| matches!(s, Skill::growth(_, _) | Skill::v_siphon))
 			{
 				self.proc_data(Event::Attack, id, &mut data);
 				let freedom = data.freedom;
@@ -2687,4 +2687,3 @@ impl Game {
 		}
 	}
 }
-

@@ -310,7 +310,7 @@ fn eval_skill(
 			}
 			Skill::destroy => 8.0,
 			Skill::destroycard => 1.0,
-			Skill::devour | Skill::v_devour => {
+			Skill::devour => {
 				(2 + if ctx.get_kind(c) == Kind::Spell {
 					ctx.get_card(ctx.get(c, Stat::card)).health as i32
 				} else {
@@ -538,7 +538,7 @@ fn eval_skill(
 			Skill::quanta(_) => 0.1,
 			Skill::quint => 6.0,
 			Skill::quinttog => 7.0,
-			Skill::rage | Skill::v_rage => {
+			Skill::rage => {
 				if card::Upped(ctx.get(c, Stat::card)) {
 					5.0
 				} else {
@@ -708,8 +708,6 @@ fn eval_skill(
 			}
 			Skill::thorn(chance) => chance as f32 / 15.0,
 			Skill::vend => 1.0,
-			Skill::v_acceleration(x) => (ctx.truehp(c) - 2 + x as i32) as f32,
-			Skill::v_accelerationspell(x) => (x as i32 * 2) as f32,
 			Skill::v_accretion => 8.0,
 			Skill::v_aflatoxin => 5.0,
 			Skill::v_bblood => 7.0,
@@ -726,7 +724,6 @@ fn eval_skill(
 			Skill::v_drainlife(_) => 10.0,
 			Skill::v_dryspell => 5.0,
 			Skill::v_dshield => 4.0,
-			Skill::v_duality => 4.0,
 			Skill::v_earthquake => 4.0,
 			Skill::v_endow => 4.0,
 			Skill::v_firebolt(_) => 10.0,
@@ -769,7 +766,6 @@ fn eval_skill(
 			Skill::v_parallel => 8.0,
 			Skill::v_phoenix => 3.0,
 			Skill::v_plague => 5.0,
-			Skill::v_precognition => 1.0,
 			Skill::v_queen => 7.0,
 			Skill::v_readiness => 3.0,
 			Skill::v_regenerate => 5.0,
@@ -1133,11 +1129,11 @@ fn evalthing(
 					} else {
 						adrenaline
 					};
-				if ctx.get(id, Stat::frozen) != 0
+				if ctx.cardset() == CardSet::Original && ctx.get(id, Stat::frozen) != 0
 					&& sk
 						.iter()
 						.cloned()
-						.any(|sk| matches!(sk, Skill::v_acceleration(_) | Skill::v_siphon))
+						.any(|sk| matches!(sk, Skill::growth(_, _) | Skill::v_siphon))
 				{
 					autoscore *= delayfactor
 				}

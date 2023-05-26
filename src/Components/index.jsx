@@ -58,8 +58,8 @@ export function CardImage(props) {
 }
 
 export function Text(props) {
-	let { text, icoprefix = 'ce' } = props;
-	if (text) text = text.toString();
+	const { text, icoprefix = 'ce' } = props;
+	const str = text ? text.toString() : '';
 
 	const elec = useMemo(() => {
 		const sep = /\d\d?:\d\d?|\$|\n/g;
@@ -67,12 +67,12 @@ export function Text(props) {
 		let reres,
 			lastindex = 0;
 		const elec = [];
-		while ((reres = sep.exec(text))) {
+		while ((reres = sep.exec(str))) {
 			const piece = reres[0];
 			if (reres.index !== lastindex) {
 				elec.push(
 					<Fragment key={elec.length}>
-						{text.slice(lastindex, reres.index)}
+						{str.slice(lastindex, reres.index)}
 					</Fragment>,
 				);
 			}
@@ -99,11 +99,11 @@ export function Text(props) {
 			}
 			lastindex = reres.index + piece.length;
 		}
-		if (lastindex !== text.length) {
-			elec.push(<Fragment key={elec.length}>{text.slice(lastindex)}</Fragment>);
+		if (lastindex !== str.length) {
+			elec.push(<Fragment key={elec.length}>{str.slice(lastindex)}</Fragment>);
 		}
 		return elec;
-	}, [text, icoprefix]);
+	}, [str, icoprefix]);
 
 	return (
 		<div className={props.className} style={props.style}>
