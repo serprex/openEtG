@@ -2415,22 +2415,26 @@ impl Skill {
 						idx += 1;
 					}
 				}
-				let mut shlist = Vec::with_capacity(12);
 				let mut shmax = 0;
+				let mut shidx = 0;
+				let mut shlen = 0;
 				for (idx, &count) in tally.iter().enumerate() {
 					let count = count as usize;
-					if count != 0 && count >= shmax {
-						if count > shmax {
-							shmax = count;
-							shlist.clear();
+					if count > shmax {
+						shmax = count;
+						shidx = idx;
+						shlen = 1;
+					} else if count != 0 && count == shmax {
+						shlen += 1;
+						if (ctx.rng_ratio(1, shlen)) {
+							shidx = idx;
 						}
-						shlist.push(idx);
 					}
 				}
 				shmax = cmp::min(shmax - 1, 5);
 				let soicode = ctx.get(c, Stat::card);
 				let active =
-					match shardSkills[ctx.choose(&shlist).cloned().unwrap_or(0)][shmax..=shmax] {
+					match shardSkills[shidx][shmax..=shmax] {
 						[Skill::summon(code)] => Cow::from(vec![Skill::summon(card::AsUpped(
 							code as i32,
 							card::Upped(soicode as i32),
