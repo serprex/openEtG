@@ -658,7 +658,7 @@ pub enum Skill {
 	v_wisdom,
 }
 
-#[derive(Eq, PartialEq, Clone, Copy, Hash)]
+#[derive(Clone, Copy)]
 pub enum Tgt<'a> {
 	own,
 	foe,
@@ -721,7 +721,7 @@ const QUAD_PILLAR_CAR: [u8; 4] = [
 	etg::Aether as u8,
 ];
 
-fn legacy_banned(code: i32) -> bool {
+const fn legacy_banned(code: i32) -> bool {
 	matches!(
 		code,
 		card::v_ShardofFocus
@@ -740,7 +740,7 @@ enum Soya {
 }
 
 impl Skill {
-	pub fn passive(self) -> bool {
+	pub const fn passive(self) -> bool {
 		matches!(
 			self,
 			Self::abomination
@@ -766,7 +766,7 @@ impl Skill {
 		)
 	}
 
-	pub fn targetting(self) -> Option<Tgt<'static>> {
+	pub const fn targetting(self) -> Option<Tgt<'static>> {
 		Some(match self {
 			Self::acceleration => Tgt::crea,
 			Self::accretion => Tgt::perm,
@@ -930,7 +930,7 @@ impl Skill {
 		})
 	}
 
-	pub fn param1(self) -> i32 {
+	pub const fn param1(self) -> i32 {
 		match self {
 			Skill::evade(x)
 			| Skill::firestorm(x)
@@ -950,7 +950,7 @@ impl Skill {
 		}
 	}
 
-	pub fn param2(self) -> i32 {
+	pub const fn param2(self) -> i32 {
 		match self {
 			Skill::growth(_, x) | Skill::icegrowth(_, x) => x as i32,
 			_ => 0,
@@ -1327,7 +1327,7 @@ impl Skill {
 			}
 			Self::chromastat => {
 				let n = cmp::min(ctx.truehp(c) + ctx.trueatk(c), 1188);
-				ctx.fx(c, Fx::Quanta(n as u16, etg::Chroma as u16));
+				ctx.fx(c, Fx::Quanta(n as u16, etg::Chroma as u8));
 				ctx.spend(ctx.get_owner(c), etg::Chroma, -n);
 			}
 			Self::clear => {
@@ -1628,6 +1628,7 @@ impl Skill {
 			Self::drainlife => {
 				let owner = ctx.get_owner(c);
 				let bonus = ctx.get_player(owner).quanta(etg::Darkness) as i32 / 5;
+				ctx.fx(t, Fx::Bolt(bonus as u16, etg::Darkness as u8));
 				let heal = ctx.spelldmg(t, 2 + bonus);
 				ctx.dmg(owner, -heal);
 			}
@@ -1865,6 +1866,7 @@ impl Skill {
 			}
 			Self::firebolt => {
 				let bonus = ctx.get_player(ctx.get_owner(c)).quanta(etg::Fire) as i32 / 4;
+				ctx.fx(t, Fx::Bolt(bonus as u16, etg::Fire as u8));
 				ctx.spelldmg(t, 3 + bonus);
 				ctx.set(t, Stat::frozen, 0);
 			}
@@ -2158,6 +2160,7 @@ impl Skill {
 			Self::icebolt => {
 				let owner = ctx.get_owner(c);
 				let bonus = ctx.get_player(owner).quanta(etg::Water) as i32 / 5;
+				ctx.fx(t, Fx::Bolt(bonus as u16, etg::Water as u8));
 				if ctx.rng_range(0..20) < 7 + bonus {
 					ctx.freeze(
 						t,
@@ -3036,7 +3039,7 @@ impl Skill {
 				}
 			}
 			Self::photosynthesis => {
-				ctx.fx(c, Fx::Quanta(2, etg::Life as u16));
+				ctx.fx(c, Fx::Quanta(2, etg::Life as u8));
 				ctx.spend(ctx.get_owner(c), etg::Life, -2);
 				if ctx.get(c, Stat::cast) > 0 {
 					ctx.set(c, Stat::casts, 1);
@@ -3163,7 +3166,7 @@ impl Skill {
 				}
 			}
 			Self::quanta(e) => {
-				ctx.fx(c, Fx::Quanta(1, e as u16));
+				ctx.fx(c, Fx::Quanta(1, e as u8));
 				ctx.spend(ctx.get_owner(c), e as i32, -1);
 			}
 			Self::quantagift => {
@@ -3525,7 +3528,7 @@ impl Skill {
 					let owner = ctx.get_owner(c);
 					let foe = ctx.get_foe(owner);
 					if !ctx.sanctified(foe) && ctx.spend(foe, etg::Chroma, 1) {
-						ctx.fx(c, Fx::Quanta(1, etg::Darkness as u16));
+						ctx.fx(c, Fx::Quanta(1, etg::Darkness as u8));
 						ctx.spend(owner, etg::Darkness, -1);
 					}
 				}
@@ -3620,7 +3623,7 @@ impl Skill {
 				}
 			}
 			Self::soulcatch => {
-				ctx.fx(c, Fx::Quanta(3, etg::Death as u16));
+				ctx.fx(c, Fx::Quanta(3, etg::Death as u8));
 				ctx.spend(ctx.get_owner(c), etg::Death, -3);
 			}
 			Self::spores => {

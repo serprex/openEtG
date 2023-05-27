@@ -262,6 +262,7 @@ pub enum Fx {
 	Aflatoxin,
 	Appeased,
 	Atk(i32),
+	Bolt(u16, u8),
 	Card(u16),
 	Catapult,
 	Clear,
@@ -310,7 +311,7 @@ pub enum Fx {
 	Sinkhole,
 	Siphon,
 	StartPos(i32),
-	Quanta(u16, u16),
+	Quanta(u16, u8),
 	Quintessence,
 	Ready,
 	Web,
@@ -330,7 +331,7 @@ impl Fx {
 			Fx::Poison(amt) => amt,
 			Fx::Sfx(sfx) => sfx as i32,
 			Fx::StartPos(src) => src,
-			Fx::Quanta(amt, e) => (amt as i32) | (e as i32) << 8,
+			Fx::Quanta(amt, e) | Fx::Bolt(amt, e) => (amt as i32) << 8 | (e as i32),
 			_ => 0,
 		}
 	}

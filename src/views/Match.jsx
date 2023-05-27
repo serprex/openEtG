@@ -1074,6 +1074,77 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							newstate.startPos.delete(id);
 							newstate.endPos.set(id, param);
 							break;
+						case 'Bolt': {
+							newstate.effects ??= new Set(state.effects);
+							const pos = this.getIdTrack(id) ?? { x: -99, y: -99 },
+								color = ui.strcols[param & 255],
+								upcolor = ui.strcols[(param & 255) + 13],
+								bolts = (param >> 8) + 1,
+								duration = 96 + bolts * 32;
+							const BoltEffect = (
+								<Animation
+									key={effectId}
+									proc={ms => {
+										if (ms > duration) {
+											this.setState(state => {
+												const effects = new Set(state.effects);
+												effects.delete(BoltEffect);
+												return { effects };
+											});
+											return null;
+										}
+										const circles = [];
+										for (let i = 0; i < bolts; i++) {
+											const r =
+												Math.sin((ms / duration) * Math.PI) *
+												(12 + Math.sqrt(i));
+											for (let j = 0; j < 3; j++) {
+												const a = ms / 256 + i / 3 + j * ((Math.PI * 2) / 3);
+												circles.push(
+													<circle
+														key={i * 3 + j}
+														cx={64 + Math.cos(a) * (9 + i * 2)}
+														cy={64 + Math.sin(a) * (9 + i * 2)}
+														r={r}
+														fill="url('#g')"
+													/>,
+												);
+											}
+										}
+										return (
+											<svg
+												height="128"
+												width="128"
+												style={{
+													position: 'absolute',
+													left: `${pos.x - 64}px`,
+													top: `${pos.y - 64}px`,
+													pointerEvents: 'none',
+													zIndex: '4',
+												}}>
+												<defs>
+													<radialGradient id="g">
+														<stop
+															offset="10%"
+															stop-color={upcolor}
+															stop-opacity="1"
+														/>
+														<stop
+															offset="60%"
+															stop-color={color}
+															stop-opacity="0"
+														/>
+													</radialGradient>
+												</defs>
+												{circles}
+											</svg>
+										);
+									}}
+								/>
+							);
+							newstate.effects.add(BoltEffect);
+							break;
+						}
 						case 'Card':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
@@ -1143,7 +1214,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 								this.Text(effectId, state, newstate, id, `+${param}`),
 							);
 							break;
-						case 'Lightning':
+						case 'Lightning': {
 							newstate.effects ??= new Set(state.effects);
 							const pos = this.getIdTrack(id) ?? { x: -99, y: -99 };
 							const LightningEffect = (
@@ -1191,6 +1262,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							);
 							newstate.effects.add(LightningEffect);
 							break;
+						}
 						case 'Lives':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
@@ -1205,7 +1277,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 									state,
 									newstate,
 									id,
-									`${param & 255}:${param >> 8}`,
+									`${param >> 8}:${param & 255}`,
 								),
 							);
 							break;
