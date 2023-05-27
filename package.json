@@ -10,7 +10,7 @@
   "devDependencies": {
     "@babel/plugin-syntax-import-assertions": "^7.20.0",
     "@babel/plugin-syntax-jsx": "^7.21.4",
-    "@babel/plugin-transform-react-jsx": "^7.21.5",
+    "@babel/plugin-transform-react-jsx": "^7.22.3",
     "babel-loader": "^9.1.2",
     "html-webpack-plugin": "^5.5.1",
     "prettier": "^2.8.8",
@@ -19,7 +19,7 @@
     "react-redux": "^8.0.5",
     "redux": "^4.2.1",
     "spritesheet-js": "^1.2.8",
-    "webpack": "^5.84.0",
+    "webpack": "^5.84.1",
     "webpack-cli": "^5.1.1"
   },
   "scripts": {

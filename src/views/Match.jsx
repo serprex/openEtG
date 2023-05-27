@@ -854,7 +854,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 	user,
 	lofiArt: opts.lofiArt ?? false,
 	playByPlayMode: opts.playByPlayMode,
-	expectedDamageSamples: opts.expectedDamageSamples || '4',
+	expectedDamageSamples: opts.expectedDamageSamples | 0 || 4,
 	navProps: nav.props,
 }))(
 	class Match extends Component {
@@ -1243,7 +1243,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 				return {
 					gameHash: props.game.replay.length,
 					expectedDamage: props.game.expectedDamage(
-						props.expectedDamageSamples | 0 || 4,
+						props.expectedDamageSamples,
 					),
 					player1: player1.id,
 				};

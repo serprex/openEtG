@@ -173,7 +173,7 @@ function ArenaCard(props) {
 	);
 }
 
-export default function ArenaInfo(props) {
+export default function ArenaInfo() {
 	const uname = useSelector(({ user }) => user.name);
 	const ocard = useSelector(({ user }) => user.ocard);
 	const [{ A, B }, setAB] = useState({});
@@ -195,8 +195,8 @@ export default function ArenaInfo(props) {
 				}
 			/>
 			<Components.ExitBtn x={8} y={300} />
-			<RenderInfo info={A} y={0} name={props.name} />
-			<RenderInfo info={B} y={300} name={props.name} />
+			<RenderInfo info={A} y={0} name={uname} />
+			<RenderInfo info={B} y={300} name={uname} />
 			{!!ocard && (
 				<>
 					<ArenaCard info={A} y={8} card={Cards.Codes[asUpped(ocard, false)]} />
