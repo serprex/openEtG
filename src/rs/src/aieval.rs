@@ -1129,7 +1129,8 @@ fn evalthing(
 					} else {
 						adrenaline
 					};
-				if ctx.cardset() == CardSet::Original && ctx.get(id, Stat::frozen) != 0
+				if ctx.cardset() == CardSet::Original
+					&& ctx.get(id, Stat::frozen) != 0
 					&& sk
 						.iter()
 						.cloned()

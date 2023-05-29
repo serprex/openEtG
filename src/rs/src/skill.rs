@@ -2436,14 +2436,13 @@ impl Skill {
 				}
 				shmax = cmp::min(shmax - 1, 5);
 				let soicode = ctx.get(c, Stat::card);
-				let active =
-					match shardSkills[shidx][shmax..=shmax] {
-						[Skill::summon(code)] => Cow::from(vec![Skill::summon(card::AsUpped(
-							code as i32,
-							card::Upped(soicode as i32),
-						) as u16)]),
-						ref x => Cow::from(x),
-					};
+				let active = match shardSkills[shidx][shmax..=shmax] {
+					[Skill::summon(code)] => Cow::from(vec![Skill::summon(card::AsUpped(
+						code as i32,
+						card::Upped(soicode as i32),
+					) as u16)]),
+					ref x => Cow::from(x),
+				};
 				let activecost = match active[0] {
 					Skill::burrow => 1,
 					Skill::stoneform => 1,
@@ -4938,11 +4937,11 @@ impl Skill {
 						.permanents
 						.iter()
 						.filter(|&&pr| {
-							pr != 0
-								&& {
-									let card = ctx.get_card(ctx.get(pr, Stat::card));
-									(card.flag & Flag::pillar) == 0 && matches!(card.element as i32, etg::Darkness | etg::Death)
-								}
+							pr != 0 && {
+								let card = ctx.get_card(ctx.get(pr, Stat::card));
+								(card.flag & Flag::pillar) == 0
+									&& matches!(card.element as i32, etg::Darkness | etg::Death)
+							}
 						})
 						.count() as i32
 			}
