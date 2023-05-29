@@ -254,17 +254,7 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 			   card.flag, card.status, card.skill
 		).ok();
 	}
-	write!(source, "]}};pub const {}Cache:[&'static [u16];2]=[", set).ok();
-	let mut i: usize = 0;
-	for _ in 0..2 {
-		source.push_str("&[");
-		for _ in 0..cards.len() / 2 {
-			write!(source, "{},", i).ok();
-			i += 1;
-		}
-		source.push_str("],\n");
-	}
-	source.push_str("];\n");
+	source.push_str("]};\n");
 }
 
 fn main() {

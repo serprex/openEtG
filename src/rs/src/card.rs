@@ -55,15 +55,12 @@ impl Cards {
 	where
 		Ffilt: Fn(&'static Card) -> bool,
 	{
-		(match self.set {
-			CardSet::Open => &OpenCache,
-			CardSet::Original => &OrigCache,
-		}[upped as usize])
-			.iter()
-			.cloned()
-			.map(|c| unsafe { self.data.get_unchecked(c as usize) })
-			.filter(|c| ffilt(c))
-			.collect::<Vec<_>>()
+		let pivot = self.data.len() / 2;
+		if upped {
+			&self.data[pivot..]
+		} else {
+			&self.data[..pivot]
+		}.iter().filter(|c| ffilt(c)).collect::<Vec<_>>()
 	}
 
 	pub fn random_card<Ffilt, R>(
@@ -78,15 +75,12 @@ impl Cards {
 	{
 		use rand::seq::IteratorRandom;
 
-		(match self.set {
-			CardSet::Open => &OpenCache,
-			CardSet::Original => &OrigCache,
-		}[upped as usize])
-			.iter()
-			.cloned()
-			.map(|c| unsafe { self.data.get_unchecked(c as usize) })
-			.filter(|c| ffilt(c))
-			.choose(rng)
+		let pivot = self.data.len() / 2;
+		if upped {
+			&self.data[pivot..]
+		} else {
+			&self.data[..pivot]
+		}.iter().filter(|c| ffilt(c)).choose(rng)
 	}
 }
 
