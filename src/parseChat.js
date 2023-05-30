@@ -61,8 +61,8 @@ export default function parseChat(e) {
 					),
 				);
 			}
-		} else if (msg.match(/^\/roll( |$)\d*d?\d*$/)) {
-			const data = { u: user ? user.name : '' };
+		} else if (user && msg.match(/^\/roll( |$)\d*d?\d*$/)) {
+			const data = {};
 			const ndn = msg.slice(6).split('d');
 			if (!ndn[1]) {
 				data.A = 1;

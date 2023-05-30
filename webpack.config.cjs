@@ -1,5 +1,6 @@
 const path = require('path'),
-	HtmlPlugin = require('html-webpack-plugin');
+	HtmlPlugin = require('html-webpack-plugin'),
+	CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
 	experiments: {
@@ -73,6 +74,9 @@ module.exports = {
 		],
 	},
 	plugins: [
+		new CopyPlugin({
+			patterns: [{ from: 'favicon.ico' }],
+		}),
 		new HtmlPlugin({
 			chunks: ['main'],
 			filename: 'index.html',

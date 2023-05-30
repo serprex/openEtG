@@ -134,6 +134,7 @@ pub enum ContentType {
 	ApplicationOctetStream,
 	ApplicationOgg,
 	ApplicationWasm,
+	ImageIcon,
 	ImageSvgXml,
 	ImageWebp,
 	TextCss,
@@ -186,6 +187,7 @@ impl CachedResponse {
 					ContentType::ApplicationOctetStream => "application/octet-stream",
 					ContentType::ApplicationOgg => "application/ogg",
 					ContentType::ApplicationWasm => "application/wasm",
+					ContentType::ImageIcon => "image/x-icon",
 					ContentType::ImageSvgXml => "image/svg+xml",
 					ContentType::ImageWebp => "image/webp",
 					ContentType::TextCss => "text/css",
@@ -364,6 +366,7 @@ async fn handle_get_core(
 		|| path.ends_with(".html")
 		|| path.ends_with(".wasm")
 		|| path.ends_with(".js.map")
+		|| path.ends_with(".ico")
 	{
 		let mut uppath = String::from("../../../bundle");
 		uppath.push_str(&path);
@@ -389,6 +392,8 @@ async fn handle_get_core(
 				ContentType::TextHtml
 			} else if path.ends_with(".wasm") {
 				ContentType::ApplicationWasm
+			} else if path.ends_with(".ico") {
+				ContentType::ImageIcon
 			} else {
 				ContentType::ApplicationOctetStream
 			},
