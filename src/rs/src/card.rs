@@ -60,7 +60,10 @@ impl Cards {
 			&self.data[pivot..]
 		} else {
 			&self.data[..pivot]
-		}.iter().filter(|c| ffilt(c)).collect::<Vec<_>>()
+		}
+		.iter()
+		.filter(|c| (c.flag & Flag::token) == 0 && ffilt(c))
+		.collect::<Vec<_>>()
 	}
 
 	pub fn random_card<Ffilt, R>(
@@ -80,7 +83,10 @@ impl Cards {
 			&self.data[pivot..]
 		} else {
 			&self.data[..pivot]
-		}.iter().filter(|c| ffilt(c)).choose(rng)
+		}
+		.iter()
+		.filter(|c| (c.flag & Flag::token) == 0 && ffilt(c))
+		.choose(rng)
 	}
 }
 

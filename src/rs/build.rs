@@ -184,15 +184,31 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 							skill.insert(0, b'r');
 							skill.insert(1, b'#');
 						} else {
-							let mut replaced = false;
-							for ch in skill.iter_mut() {
-								if *ch == b' ' {
-									*ch = if replaced { b',' } else { b'(' };
-									replaced = true;
+							let mut idx = 0;
+							loop {
+								let mut replaced = false;
+								while idx < skill.len() {
+									let ch = skill[idx];
+									if ch == b' ' {
+										skill[idx] = if replaced { b',' } else { b'(' };
+										replaced = true;
+									} else if ch == b',' {
+										idx += 1;
+										break;
+									}
+									idx += 1;
 								}
-							}
-							if replaced {
-								skill.push(b')');
+								if replaced {
+									skill.insert(idx, b')');
+									idx += 1;
+								}
+								if idx < skill.len() {
+									skill.splice(idx..idx, b"Skill::".iter().cloned());
+									idx += "Skill::".len();
+									continue;
+								} else {
+									break;
+								}
 							}
 						}
 						write!(

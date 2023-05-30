@@ -497,8 +497,8 @@ async fn handle_get_core(
 
 			let mut rng = Pcg32::seed_from_u64(seed);
 			let mut eles = [false; 12];
-			let mut codes = [0u16; 42];
-			for i in 0..6 {
+			let mut codes = [0u16; 84];
+			for i in 0..12 {
 				let mut ele = rng.gen_range(0..12 - i);
 				for idx in 0..12 {
 					if !eles[idx] {
