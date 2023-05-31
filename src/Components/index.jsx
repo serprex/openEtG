@@ -336,12 +336,12 @@ export function ElementSelector(props) {
 }
 
 function maybeShiny(props, card) {
-	if (props.filterboth && !props.shiny) {
-		const shiny = card.asShiny(true);
+	if (props.filterboth && props.shiny) {
+		const shinycode = etgutil.asShiny(card.code);
 		if (
-			shiny.code in props.cardpool &&
-			props.cardpool[shiny.code] >
-				((props.cardminus && props.cardminus[shiny.code]) ?? 0)
+			shinycode in props.cardpool &&
+			props.cardpool[shinycode] >
+				((props.cardminus && props.cardminus[shinycode]) ?? 0)
 		) {
 			return card.asShiny(true);
 		}
@@ -369,7 +369,7 @@ function CardSelectorColumn(props) {
 					? poolCount(props, code)
 					: 0,
 				shinyAmount =
-					props.filterboth && !props.shiny && scode in props.cardpool
+					props.filterboth && props.shiny && scode in props.cardpool
 						? poolCount(props, scode)
 						: 0;
 			if (!props.cardpool || cardAmount !== 0 || shinyAmount !== 0) {
@@ -464,7 +464,6 @@ export function CardSelectorCore(props) {
 				),
 			);
 		}
-
 		return columns;
 	}, [
 		props.cards,
