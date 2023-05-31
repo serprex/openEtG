@@ -9,7 +9,7 @@ import { chain } from '../util.js';
 import Editor from '../Components/Editor.jsx';
 
 const artable = {
-	hp: { min: 60, incr: 20, cost: 1 },
+	hp: { min: 80, incr: 20, cost: 1 },
 	mark: { cost: 20 },
 	draw: { cost: 100 },
 };
@@ -69,7 +69,7 @@ function AttrUi({ y, name, value, sumscore, arpts, onChange }) {
 	);
 }
 
-const arpts = 380;
+const arpts = 400;
 export default connect(({ user }) => ({ user }))(
 	class ArenaEditor extends Component {
 		constructor(props) {
@@ -102,7 +102,7 @@ export default connect(({ user }) => ({ user }))(
 				}
 			}
 			this.state = {
-				hp: attrval(props.ainfo.hp, 140),
+				hp: attrval(props.ainfo.hp, 160),
 				mark: attrval(props.ainfo.mark, 2),
 				draw: attrval(props.ainfo.draw, 2),
 				pool,
