@@ -99,8 +99,8 @@ const data = {
 		'Target creature or weapon with either strength or HP less than 3 has its skills replaced with "3:1 Destroy target permanent."',
 	burrow: c =>
 		c.getStatus('burrowed')
-			? "Burrow this creature. Burrowed creatures' strength is halved while burrowed."
-			: 'Unburrow.',
+			? 'Unburrow.'
+			: 'Burrow this creature. Strength is halved while burrowed.',
 	catapult:
 		"Sacrifice target creature you control to damage opponent for 100 * Creature's HP / (100 + Creature's HP). Frozen creautres deal 1.5x more. Poisoned creatures transfer their poison to opponent.",
 	catlife: c =>
@@ -632,7 +632,7 @@ const data = {
 		} Skeleton`,
 	v_bravery:
 		'Foe draws 2, 3 if own mark is 1:6, cards, you draw an equal amount of cards.',
-	v_burrow: 'Burrow. Burrowed creatures attack with half strength.',
+	v_burrow: 'Burrow this creature. Strength is halved while burrowed.',
 	v_butterfly:
 		'Target something smaller than, or weaker than, 3. Replace target\'s skills with "3:1 Destroy target permanent"',
 	v_chimera:
