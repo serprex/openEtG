@@ -389,7 +389,7 @@ pub async fn handle_ws(
 
 			match msg {
 				UserMessage::a { u, a, msg } => {
-					let user = if let Ok(row) = client
+					let (user, userid) = if let Ok(row) = client
 						.query_one("select id, auth from users where name = $1", &[&u])
 						.await
 					{
@@ -399,7 +399,7 @@ pub async fn handle_ws(
 								if !rightsock {
 									usersocks.write().await.insert(u.clone(), sockid);
 								}
-								user
+								(user, row.get::<usize, i64>(0))
 							} else {
 								continue;
 							}
@@ -411,11 +411,9 @@ pub async fn handle_ws(
 					};
 					match msg {
 						AuthMessage::modadd { m } => {
-							let userid = user.lock().await.id;
 							add_role_handler("Mod", &tx, &client, userid, &m).await;
 						}
 						AuthMessage::modrm { m } => {
-							let userid = user.lock().await.id;
 							rm_role_handler("Mod", &tx, &client, userid, &m).await;
 						}
 						AuthMessage::modresetpass { m } => {
@@ -428,15 +426,12 @@ pub async fn handle_ws(
 							}
 						}
 						AuthMessage::codesmithadd { m } => {
-							let userid = user.lock().await.id;
 							add_role_handler("Codesmith", &tx, &client, userid, &m).await;
 						}
 						AuthMessage::codesmithrm { m } => {
-							let userid = user.lock().await.id;
 							rm_role_handler("Codesmith", &tx, &client, userid, &m).await;
 						}
 						AuthMessage::modguest { m } => {
-							let userid = user.lock().await.id;
 							if role_check("Mod", &tx, &client, userid).await {
 								client
 									.execute(
@@ -452,19 +447,16 @@ pub async fn handle_ws(
 							}
 						}
 						AuthMessage::modmute { m } => {
-							let userid = user.lock().await.id;
 							if role_check("Mod", &tx, &client, userid).await {
 								broadcast(&socks, &WsResponse::mute { m: &m }).await;
 							}
 						}
 						AuthMessage::modclear => {
-							let userid = user.lock().await.id;
 							if role_check("Mod", &tx, &client, userid).await {
 								broadcast(&socks, &WsResponse::clear).await;
 							}
 						}
 						AuthMessage::modmotd { m } => {
-							let userid = user.lock().await.id;
 							if role_check("Mod", &tx, &client, userid).await {
 								let mbytes = m.as_bytes();
 								let mut nend = 0;
@@ -532,7 +524,6 @@ pub async fn handle_ws(
 							}
 						}
 						AuthMessage::loginoriginal => {
-							let userid = user.lock().await.id;
 							if let Ok(row) = client
 								.query_opt(
 									"select data from user_data where user_id = $1 and type_id = 2",
@@ -551,7 +542,6 @@ pub async fn handle_ws(
 						AuthMessage::initoriginal { e, name } => {
 							if e > 0 && e < 14 {
 								let sid = ORIGINAL_STARTERS[e as usize - 1];
-								let userid = user.lock().await.id;
 								let userdata = LegacyUser {
 									pool: Cardpool::from(sid.0),
 									deck: String::from(sid.1),
@@ -571,7 +561,6 @@ pub async fn handle_ws(
 							wusers.evict(&client, &u).await;
 						}
 						AuthMessage::delete => {
-							let userid = user.lock().await.id;
 							let params: &[&(dyn ToSql + Sync)] = &[&userid];
 							if let Ok(trx) = client.transaction().await {
 								if let (Ok(_), Ok(_), Ok(_), Ok(_)) = join!(
@@ -639,7 +628,6 @@ pub async fn handle_ws(
 							}
 						}
 						AuthMessage::arenainfo => {
-							let userid = user.lock().await.id;
 							if let Ok(rows) = client.query(
 								"select arena_id, \"day\", draw, mark, hp, won, loss, code, deck, \"rank\", bestrank from arena where user_id = $1",
 								&[&userid],
@@ -714,13 +702,13 @@ pub async fn handle_ws(
 							let arenaid = if lv == 0 { 1i32 } else { 2i32 };
 							if let Ok(row) = client
 								.query_one(
-									"select count(*) from arena where arena_id = $1",
-									&[&arenaid],
+									"select count(*) from arena where arena_id = $1 and user_id <> $2",
+									&[&arenaid, &userid],
 								)
 								.await
 							{
 								let len = row.get::<usize, i64>(0);
-								if len != 0 {
+								if len > 0 {
 									let (seed, idx) = {
 										let mut rng = rand::thread_rng();
 										let mut r = rng.gen::<f64>();
@@ -737,7 +725,7 @@ pub async fn handle_ws(
 										}
 										(rng.gen::<u32>(), idx)
 									};
-									if let Ok(row) = client.query_one("select u.name, a.deck, a.hp, a.mark, a.draw, a.code from arena a join users u on u.id = a.user_id where a.arena_id = $1 order by a.\"rank\" limit 1 offset $2", &[&arenaid, &idx]).await {
+									if let Ok(row) = client.query_one("select u.name, a.deck, a.hp, a.mark, a.draw, a.code from arena a join users u on u.id = a.user_id where a.arena_id = $1 and a.user_id <> $2 order by a.\"rank\" limit 1 offset $3", &[&arenaid, &userid, &idx]).await {
 										let name: String = row.get(0);
 										let mut deck: String = row.get(1);
 										let hp: i32 = row.get(2);
@@ -756,11 +744,9 @@ pub async fn handle_ws(
 							stats,
 							players,
 						} => {
-							let userid = user.lock().await.id;
 							client.execute("insert into stats (user_id, \"set\", stats, players) values ($1, $2, $3, $4)", &[&userid, &set, &Json(stats), &players]).await.ok();
 						}
 						AuthMessage::setgold { t, g } => {
-							let userid = user.lock().await.id;
 							if role_check("Codesmith", &tx, &client, userid).await {
 								if let Some(tgt) = users.write().await.load(&*client, &t).await {
 									let mut tgt = tgt.lock().await;
@@ -779,7 +765,6 @@ pub async fn handle_ws(
 							}
 						}
 						AuthMessage::addpool { t, pool, bound } => {
-							let userid = user.lock().await.id;
 							if role_check("Codesmith", &tx, &client, userid).await {
 								if let Some(tgt) = users.write().await.load(&*client, &t).await {
 									let mut tgt = tgt.lock().await;
@@ -817,7 +802,6 @@ pub async fn handle_ws(
 									},
 								);
 							} else {
-								let userid = user.lock().await.id;
 								if role_check("Codesmith", &tx, &client, userid).await {
 									use rand::distributions::Alphanumeric;
 									let mut codebin = [0u8; 8];
@@ -1171,7 +1155,6 @@ pub async fn handle_ws(
 							prehash,
 							cmd,
 						} => {
-							let userid = user.lock().await.id;
 							if let Ok(trx) = client.transaction().await {
 								if let (Ok(moves), Ok(users)) = (
 									trx.query_one(
@@ -1218,7 +1201,6 @@ pub async fn handle_ws(
 							}
 						}
 						AuthMessage::reloadmoves { id } => {
-							let userid = user.lock().await.id;
 							if let Ok(moves) = client.query_one("select g.moves from games g join match_request mr on mr.game_id = g.id join users u on u.id = mr.user_id where g.id = $1 and u.id = $2", &[&id, &userid]).await {
 								let movelist: Vec<Json<GamesMove>> = moves.get(0);
 								sendmsg(&tx, &WsResponse::reloadmoves {
@@ -1227,7 +1209,6 @@ pub async fn handle_ws(
 							}
 						}
 						AuthMessage::updateorig { deck } => {
-							let userid = user.lock().await.id;
 							if let Ok(trx) = client.transaction().await {
 								if let Ok(row) = trx.query_one("select data from user_data where user_id = $1 and type_id = 2 for update", &[&userid]).await {
 									let Json(mut data) = row.get::<usize, Json<Map<String, Value>>>(0);
@@ -1245,7 +1226,6 @@ pub async fn handle_ws(
 							rmpool,
 							electrum,
 						} => {
-							let userid = user.lock().await.id;
 							if let Ok(trx) = client.transaction().await {
 								if let Ok(row) = trx.query_one("select id, data from user_data where user_id = $1 and type_id = 2 for update", &[&userid]).await {
 									let rowid: i64 = row.get(0);
@@ -1289,7 +1269,6 @@ pub async fn handle_ws(
 													msg: "has canceled the trade",
 												},
 											);
-											let userid = user.lock().await.id;
 											let foeuserid = foeuser.lock().await.id;
 											client.execute(
 												"delete from trade_request where (user_id = $1 and for_user_id = $2) or (user_id = $2 and for_user_id = $1)",
@@ -1303,7 +1282,6 @@ pub async fn handle_ws(
 							if u != f {
 								let mut wusers = users.write().await;
 								if let Some(foeuser) = wusers.load(&*client, &f).await {
-									let userid = user.lock().await.id;
 									let foeuserid = foeuser.lock().await.id;
 									if let Ok(trade) = client.query_one(
 										"select cards, g from trade_request where user_id = $2 and for_user_id = $1", &[&userid, &foeuserid]).await {
