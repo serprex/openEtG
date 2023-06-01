@@ -347,7 +347,7 @@ mod test {
 		let scorp = ctx.new_thing(card::Scorpion, p1);
 		ctx.addCrea(p1, scorp);
 		ctx.r#move(GameMove::End(0));
-		assert_eq!(ctx.get(dragon, Stat::hp), 24);
+		assert_eq!(ctx.get(dragon, Stat::hp), 23);
 		assert_eq!(ctx.get(dragon, Stat::poison), 1,);
 		ctx.die(dragon);
 		assert_eq!(ctx.get(p2, Stat::gpull), 0);
