@@ -47,7 +47,9 @@ pub fn card(code: i32) -> Option<String> {
 	let upped = card::Upped(code);
 	let shiny = card::Shiny(code);
 	let mut result = String::new();
-	result.push_str("<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' height='256' width='128'><style type='text/css'><![CDATA[text{font:12px sans-serif}]]></style><rect x='0' y='0' width='128' height='256' fill='");
+	result.push_str(concat!("<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' height='256' width='160'><style type='text/css'><![CDATA[text{font:12px sans-serif}",
+			include_str!("../../../../../assets/atlas.css"),
+					"]]></style><rect x='0' y='0' width='160' height='256' fill='"));
 	result.push_str(eleup_str(card.element, upped));
 	result.push_str("'/><text x='2' y='15'");
 	if !upped {
@@ -55,7 +57,9 @@ pub fn card(code: i32) -> Option<String> {
 	}
 	result.push('>');
 	result.push_str(card_name(card));
-	result.push_str("</text><foreignObject width='128' height='256'><p xmlns='http://www.w3.org/1999/xhtml' style='font:10px sans-serif;white-space:pre-wrap");
+	result.push_str(
+			"</text><foreignObject width='160' height='256'><p xmlns='http://www.w3.org/1999/xhtml' style='font:10px sans-serif;white-space:pre-wrap"
+			);
 	if upped {
 		result.push_str(";color:#000");
 	}
@@ -73,27 +77,17 @@ pub fn card(code: i32) -> Option<String> {
 			},
 		))
 	});
-	result.push_str(".webp' style='position:absolute;top:-130px;left:-2px'/>");
+	result.push_str(".webp' style='position:absolute;top:-130px;left:0px'/>");
 	result.push_str(card_info(card));
 	if card.rarity != 0 {
-		result.push_str("<span class='ico r");
-		write!(result, "{}", card.rarity).ok();
-		result.push_str("' style='position:absolute;right:30px;bottom:2px'></span>");
+		write!(result, "<span class='ico r{}' style='position:absolute;right:2px;top:-112px'></span>", card.rarity).ok();
 	}
 	if card.cost != 0 {
-		result.push_str("<span style='position:absolute;right:2px;top:-150px'>");
-		write!(result, "{}", card.cost).ok();
-		result.push_str("</span>");
+		write!(result, "<span style='position:absolute;right:2px;top:-150px'>{}</span>", card.cost).ok();
 		if card.element != card.costele {
-			result.push_str("<span class='ico ce");
-			write!(result, "{}", card.costele).ok();
-			result.push_str("'></span>");
+			write!(result, "<span class='ico ce{}'></span>", card.costele).ok();
 		}
 	}
-	result.push_str("<span class='ico t");
-	write!(result, "{}", card.kind as i32).ok();
-	result.push_str(
-		"' style='position:absolute;right:2px;bottom:2px'></span></p></foreignObject></svg>",
-	);
+	write!(result, "<span class='ico t{}' style='position:absolute;right:2px;top:-130px'></span></p></foreignObject></svg>", card.kind as i32).ok();
 	Some(result)
 }

@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 use std::sync::Arc;
 
-use base64::engine::{Engine, general_purpose::STANDARD_NO_PAD};
+use base64::engine::{general_purpose::STANDARD_NO_PAD, Engine};
 use bb8_postgres::tokio_postgres::{types::Json, Client, GenericClient};
 use openssl::hash::MessageDigest;
 use serde::{Deserialize, Serialize};

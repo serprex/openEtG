@@ -10,7 +10,6 @@ AllCards.Codes.forEach((card, code) => {
 	source.push(
 		`(${card.code},r#"${card.name}"#,r#"${card
 			.info()
-			.replace(/\|/g, ' / ')
 			.replace(/(\d\d?):(\d\d?) ?/g, (m, n, e) => {
 				switch (n | 0) {
 					case 0:

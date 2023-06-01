@@ -29,11 +29,13 @@ impl std::str::FromStr for AcceptEncoding {
 	type Err = Infallible;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		Ok(AcceptEncoding(if s.split(',').any(|code| code.trim() == "br") {
-			Encoding::br
-		} else {
-			Encoding::identity
-		}))
+		Ok(AcceptEncoding(
+			if s.split(',').any(|code| code.trim() == "br") {
+				Encoding::br
+			} else {
+				Encoding::identity
+			},
+		))
 	}
 }
 
@@ -75,12 +77,8 @@ pub async fn compress_and_cache(
 	use std::io::Write;
 	match match encoding {
 		Encoding::br => {
-			let mut brwriter = brotli::CompressorWriter::new(
-				Vec::with_capacity(resp.content.len()),
-				4096,
-				9,
-				18
-			);
+			let mut brwriter =
+				brotli::CompressorWriter::new(Vec::with_capacity(resp.content.len()), 4096, 9, 18);
 			if brwriter.write_all(&resp.content).is_ok() {
 				Ok(brwriter.into_inner())
 			} else {
@@ -516,7 +514,9 @@ async fn handle_get_core(
 									.random_card(&mut rng, false, |card| {
 										card.element == ele
 											&& (card.flag & etg::game::Flag::pillar) == 0
-											&& !codes[i * 7..ij].iter().any(|&code| code == card.code)
+											&& !codes[i * 7..ij]
+												.iter()
+												.any(|&code| code == card.code)
 									})
 									.unwrap()
 									.code;

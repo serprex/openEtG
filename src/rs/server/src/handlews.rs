@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
-use base64::engine::{Engine, general_purpose::STANDARD_NO_PAD};
+use base64::engine::{general_purpose::STANDARD_NO_PAD, Engine};
 use bb8_postgres::tokio_postgres::{
 	types::{Json, ToSql},
 	Client, GenericClient,
@@ -2253,10 +2253,9 @@ pub async fn handle_ws(
 								true
 							} else {
 								let mut realkeybuf = [0u8; 64];
-								STANDARD_NO_PAD.decode_slice_unchecked(
-									user.auth.as_bytes(),
-									&mut realkeybuf,
-								).ok();
+								STANDARD_NO_PAD
+									.decode_slice_unchecked(user.auth.as_bytes(), &mut realkeybuf)
+									.ok();
 								keybuf == realkeybuf
 							}
 						} else {
