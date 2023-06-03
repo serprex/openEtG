@@ -10,6 +10,7 @@ import * as store from '../../store.jsx';
 import * as Components from '../../Components/index.jsx';
 import Cards from '../Cards.js';
 import { userEmit, sendChallenge } from '../../sock.jsx';
+import * as wasm from '../../rs/pkg/etg.js';
 
 const ai4names = {
 	[etg.Air]: ['Ari', 'es'],
@@ -60,27 +61,7 @@ export default connect(({ user, orig, opts }) => ({
 			const e1 = upto(12) + 1,
 				e2 = upto(12) + 1,
 				name = ai4names[e1][0] + ai4names[e2][1],
-				deck = [];
-			for (let i = 0; i < 24; i++) {
-				const upped = Math.random() < 0.3;
-				deck.push(etg.PillarList[i < 4 ? 0 : e1] - (upped ? 2000 : 4000));
-			}
-			for (let i = 0; i < 40; i++) {
-				const e = i < 30 ? e1 : e2;
-				const card = randomcard(
-					Cards,
-					Math.random() < 0.3,
-					card =>
-						card.element === e &&
-						!card.isOf(Cards.Names.Miracle) &&
-						card.rarity !== 15 &&
-						card.rarity !== 20 &&
-						!card.name.match('^Shard of ') &&
-						!card.name.match('^Mark of '),
-				);
-				deck.push(card.code);
-			}
-			deck.push(etgutil.toTrueMark(e2));
+				deck = wasm.deckgen_ai4(e1, e2);
 			return [name, etgutil.encodedeck(deck)];
 		};
 

@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fmt::Write;
 use std::fs;
 
@@ -9,16 +9,16 @@ use serde_json::Value;
 
 #[derive(Default, Serialize)]
 struct Enums {
-	Card: HashMap<u16, String>,
-	Event: HashMap<u16, String>,
-	EventId: HashMap<String, u16>,
-	Flag: HashMap<u16, String>,
-	FlagId: HashMap<String, u16>,
-	Fx: HashMap<u16, String>,
-	Skill: HashMap<u16, String>,
-	SkillParams: HashMap<u16, u16>,
-	Stat: HashMap<u16, String>,
-	StatId: HashMap<String, u16>,
+	Card: BTreeMap<u16, String>,
+	Event: BTreeMap<u16, String>,
+	EventId: BTreeMap<String, u16>,
+	Flag: BTreeMap<u16, String>,
+	FlagId: BTreeMap<String, u16>,
+	Fx: BTreeMap<u16, String>,
+	Skill: BTreeMap<u16, String>,
+	SkillParams: BTreeMap<u16, u16>,
+	Stat: BTreeMap<u16, String>,
+	StatId: BTreeMap<String, u16>,
 }
 
 fn subsource<'a, 'b>(source: &'a str, prefix: &'b str) -> &'a str {

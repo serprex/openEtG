@@ -92,6 +92,36 @@ pub fn deckgen_bow(uprate: f64, markpower: i32, maxrarity: i32, seed: i32) -> Ve
 	}
 }
 
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn deckgen_ai4(e1: i8, e2: i8, seed: i32) -> Vec<u16> {
+	let mut rng = Pcg32::seed_from_u64(seed as u64);
+	let mut deck = Vec::with_capacity(65);
+	for _ in 0..24 {
+		let upped = rng.gen_bool(0.3);
+		deck.push(etg::PillarList[e1 as usize] - if upped { 2000 } else { 4000 });
+	}
+	for i in 0..40 {
+		let upped = rng.gen_bool(0.3);
+		let e = if i < 30 { e1 } else { e2 };
+		if let Some(card) = card::OrigSet.random_card(&mut rng, upped, |card| {
+			card.element == e
+				&& !card.isOf(card::v_Miracle)
+				&& card.rarity != 15
+				&& card.rarity != 20
+				&& !etg::ShardList.contains(&if card.code > 2999 {
+					card.code + 2000
+				} else {
+					card.code + 4000
+				})
+		}) {
+			deck.push(card.code);
+		}
+	}
+	deck.push((e2 as u16) + 9010);
+	deck
+}
+
 const HAS_BUFF: [u16; 20] = [
 	5125, 5318, 8230, 5306, 5730, 5721, 5807, 6115, 6218, 6230, 7106, 7125, 7306, 7318, 7730, 7721,
 	7807, 8115, 8218, 9015,
@@ -107,17 +137,18 @@ const HAS_BURROW: [u16; 4] = [5408, 5409, 5416, 5401];
 const HAS_LIGHT: [u16; 6] = [5811, 5820, 5908, 7811, 7801, 7820];
 
 fn scorpion(card: &'static Card, deck: &[u16]) -> bool {
-	let isdeath = card.isOf(card::Deathstalker); // Scan for Nightfall
+	let isdeath = card.isOf(card::Deathstalker);
 	deck.iter().any(|&code| {
 		HAS_BUFF.iter().any(|&buffcode| buffcode == code)
-			|| (isdeath && (code == 6106 || code == 8106))
+			|| (isdeath
+				&& (code == card::Nightfall as u16
+					|| code == card::AsUpped(card::Nightfall, true) as u16))
 	})
 }
 fn filters(code: u16, deck: &[u16], ecost: &[f32; 13]) -> bool {
 	let card = card::OpenSet.get(code as i32);
 	match card::AsUpped(code as i32, false) {
-		5114 => {
-			// dinger
+		card::SchrdingersCat => {
 			let mut n = 0;
 			deck.iter()
 				.filter(|&&dcode| {
@@ -137,9 +168,8 @@ fn filters(code: u16, deck: &[u16], ecost: &[f32; 13]) -> bool {
 				})
 				.count() > 3
 		}
-		5214 => scorpion(card, deck),
-		5325 => {
-			// tidal
+		card::Scorpion | card::Deathstalker => scorpion(card, deck),
+		card::TidalHealing => {
 			let mut aquatics: i32 = 0;
 			for &dcode in deck.iter() {
 				if card::OpenSet.get(dcode as i32).flag & Flag::aquatic != 0 {
@@ -151,12 +181,8 @@ fn filters(code: u16, deck: &[u16], ecost: &[f32; 13]) -> bool {
 			}
 			false
 		}
-		5418 => {
-			// tunneling
-			deck.iter().any(|&dcode| HAS_BURROW.contains(&dcode))
-		}
-		5430 => {
-			// soi
+		card::Tunneling => deck.iter().any(|&dcode| HAS_BURROW.contains(&dcode)),
+		card::ShardofIntegrity => {
 			let mut shardcount: i32 = 0;
 			for &dcode in deck.iter() {
 				if etg::ShardList.contains(&dcode) {
@@ -168,8 +194,7 @@ fn filters(code: u16, deck: &[u16], ecost: &[f32; 13]) -> bool {
 			}
 			false
 		}
-		5503 => {
-			// rustler
+		card::Rustler => {
 			if ecost[etg::Light as usize].abs() > 5.0 {
 				return true;
 			};
@@ -181,8 +206,7 @@ fn filters(code: u16, deck: &[u16], ecost: &[f32; 13]) -> bool {
 			}
 			return qpe > 3;
 		}
-		5812 => {
-			// hope
+		card::Hope => {
 			let mut lightprod = 0;
 			for &dcode in deck.iter() {
 				if HAS_LIGHT.contains(&dcode) {
@@ -194,8 +218,7 @@ fn filters(code: u16, deck: &[u16], ecost: &[f32; 13]) -> bool {
 			}
 			false
 		}
-		6013 => scorpion(card, deck),
-		6015 => {
+		card::DuneScorpion => {
 			// neuro
 			for &dcode in deck.iter() {
 				if (HAS_POISON.contains(&dcode)) {

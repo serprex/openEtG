@@ -1239,22 +1239,23 @@ impl Skill {
 				ctx.set(t, Stat::castele, etg::Entropy);
 			}
 			Self::catapult => {
-				ctx.fx(t, Fx::Catapult);
-				ctx.die(t);
 				let foe = ctx.get_foe(ctx.get_owner(c));
+				ctx.fx(t, Fx::Catapult);
+				ctx.fx(t, Fx::EndPos(foe));
+				ctx.die(t);
 				let truehp = ctx.truehp(t);
 				let frozen = ctx.get(t, Stat::frozen);
+				let is_open = ctx.cardset() == card::CardSet::Open;
 				ctx.dmg(
 					foe,
 					(truehp * (if frozen != 0 { 151 } else { 101 }) + 99) / (truehp + 100),
 				);
 				ctx.poison(
 					foe,
-					ctx.get(t, Stat::poison)
-						+ (self == Self::catapult && ctx.get(t, Flag::poisonous)) as i32,
+					ctx.get(t, Stat::poison) + (is_open && ctx.get(t, Flag::poisonous)) as i32,
 				);
 				if frozen != 0 {
-					ctx.freeze(foe, if self == Self::catapult { frozen } else { 3 })
+					ctx.freeze(foe, if is_open { frozen } else { 3 })
 				}
 			}
 			Self::catlife => {
