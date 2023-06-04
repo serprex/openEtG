@@ -756,7 +756,7 @@ impl Skill {
 				| Self::martyr | Self::mummy
 				| Self::obsession
 				| Self::predatoroff
-				| Self::protectonce
+				| Self::protectonce | Self::protectoncedmg
 				| Self::salvage | Self::siphon
 				| Self::skeleton | Self::swarm
 				| Self::virtue | Self::v_obsession
