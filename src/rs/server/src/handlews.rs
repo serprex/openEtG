@@ -683,7 +683,7 @@ pub async fn handle_ws(
 											let awon = row.get::<usize, i32>(0) + won as i32;
 											let aloss = row.get::<usize, i32>(1) + (!won) as i32;
 											let age = get_day().saturating_sub(row.get::<usize, i32>(2) as u32) as f64;
-											let sweet16 = age.powf(1.6);
+											let sweet16 = age.powf(if lv == 1 { 1.6 } else { 1.7 });
 											let newscore =
 												((wilson((awon + 1) as f64, (awon + aloss + 1) as f64) - sweet16 / (sweet16 + 420.0)) * 1000.0) as i32;
 											trx.execute(
