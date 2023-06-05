@@ -1,5 +1,5 @@
-import { Component } from 'react';
-import { connect } from 'react-redux';
+import { useEffect, useReducer, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import * as ui from '../ui.js';
 import { run } from '../mkAi.js';
@@ -114,197 +114,189 @@ const descriptions = [
 	</span>,
 ];
 
-export default connect(({ user }) => ({ user }))(
-	class ElementSelect extends Component {
-		constructor(props) {
-			super(props);
-
-			this.state = {
-				eledesc: -1,
-				skiptut: false,
-				username: '',
-				password: '',
-				confirmpass: '',
-				errmsg: '',
-			};
+function LoginReducer(skiptut, action) {
+	if (action === null) {
+		if (skiptut) {
+			store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
+		} else {
+			store.store.dispatch(store.setOptTemp('quest', [0]));
+			run(mkQuestAi(quarks.basic_damage));
 		}
+		return skiptut;
+	} else {
+		return action;
+	}
+}
 
-		componentDidMount() {
-			store.store.dispatch(
-				store.setCmds({
-					login: data => {
-						if (data.err) {
-							this.setState({
-								errmsg:
-									'Failed to register. Try a different username. Server response: ' +
-									data.err,
-							});
-						} else if (!data.accountbound && !data.pool) {
-							delete data.x;
-							this.props.dispatch(store.setUser(data));
-							this.setState({ user: data });
-						} else if (this.props.user) {
-							delete data.x;
-							store.store.dispatch(store.setUser(data));
-							if (this.state.skiptut) {
-								store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
-							} else {
-								store.store.dispatch(store.setOptTemp('quest', [0]));
-								run(mkQuestAi(quarks.basic_damage));
-							}
-						} else {
-							this.setState({
-								errmsg: `${data.name} already exists with that password. Click Exit to return to the login screen`,
-							});
-						}
-					},
-				}),
-			);
-		}
+export default function ElementSelect() {
+	const user = useSelector(({ user }) => user),
+		[eledesc, setEledesc] = useState(-1),
+		[skiptut, loginReducer] = useReducer(LoginReducer, false),
+		[username, setUsername] = useState(''),
+		[password, setPassword] = useState(''),
+		[confirmpass, setConfirmpass] = useState(''),
+		[err, setErr] = useState('');
 
-		render() {
-			const mainc = [];
-			if (this.props.user) {
-				for (let i = 1; i <= 14; i++) {
-					mainc.push(
-						<span
-							key={i}
-							className={`imgb ico e${i === 14 ? 13 : i === 13 ? 14 : i}`}
-							style={{
-								position: 'absolute',
-								left: '12px',
-								top: `${24 + (i - 1) * 40}px`,
-							}}
-							onClick={() => {
-								sock.emit({
-									x: 'a',
-									z: 'inituser',
-									u: this.props.user.name,
-									a: this.props.user.auth,
-									e: i === 14 ? (Math.random() * 12 + 1) | 0 : i,
-								});
-							}}
-							onMouseOver={() => this.setState({ eledesc: i - 1 })}>
-							<span
-								style={{
-									position: 'absolute',
-									left: '48px',
-									top: '6px',
-									width: '144px',
-								}}>
-								{ui.eleNames[i]}
-							</span>
-						</span>,
-					);
-				}
-			}
-			return (
-				<>
-					{this.props.user && (
-						<>
-							<span
-								style={{
-									position: 'absolute',
-									left: '200px',
-									top: '8px',
-								}}>
-								Select your starter element
-							</span>
-							{this.state.eledesc !== -1 && descriptions[this.state.eledesc]}
-						</>
-					)}
-					{!this.props.user && (
-						<div
-							style={{
-								position: 'absolute',
-								left: '30px',
-								top: '30px',
-								width: '200px',
-							}}>
-							<input
-								onChange={e => this.setState({ username: e.target.value })}
-								value={this.state.username}
-								placeholder="Username"
-								style={{ display: 'block' }}
-							/>
-							<input
-								onChange={e => this.setState({ password: e.target.value })}
-								value={this.state.password}
-								type="password"
-								placeholder="Password"
-								style={{ display: 'block' }}
-							/>
-							<input
-								onChange={e =>
-									this.setState({
-										confirmpass: e.target.value,
-									})
-								}
-								value={this.state.confirmpass}
-								type="password"
-								placeholder="Confirm"
-								style={{ display: 'block' }}
-							/>
-							<input
-								type="button"
-								value="Register"
-								style={{ display: 'block' }}
-								onClick={e => {
-									let errmsg = '';
-									if (!this.state.username) {
-										errmsg = 'Please enter a username';
-									} else if (this.state.password !== this.state.confirmpass) {
-										errmsg = 'Passwords do not match';
-									} else {
-										errmsg = 'Registering..';
-										sock.emit({
-											x: 'login',
-											u: this.state.username,
-											p: this.state.password,
-										});
-									}
-									this.setState({ errmsg });
-								}}
-							/>
-							{this.state.errmsg}
-						</div>
-					)}
-					<ExitBtn
-						x={800}
-						y={200}
-						onClick={() => {
-							if (this.props.user) {
-								sock.userEmit('delete');
-								store.store.dispatch(store.setUser(null));
-							}
-							store.store.dispatch(store.setOpt('remember', false));
-							store.store.dispatch(store.doNav(import('./Login.jsx')));
-						}}
-					/>
-					<label
+	useEffect(() => {
+		store.store.dispatch(
+			store.setCmds({
+				login: data => {
+					if (data.err) {
+						setErr(
+							`Failed to register. Try a different username. Server response: ${data.err}`,
+						);
+					} else if (!data.accountbound && !data.pool) {
+						delete data.x;
+						store.store.dispatch(store.setUser(data));
+					} else if (user) {
+						delete data.x;
+						store.store.dispatch(store.setUser(data));
+						loginReducer(null);
+					} else {
+						setErr(
+							`${data.name} already exists with that password. Click Exit to return to the login screen`,
+						);
+					}
+				},
+			}),
+		);
+	}, []);
+
+	const mainc = [];
+	if (user) {
+		for (let i = 1; i <= 14; i++) {
+			mainc.push(
+				<span
+					key={i}
+					className={`imgb ico e${i === 14 ? 13 : i === 13 ? 14 : i}`}
+					style={{
+						position: 'absolute',
+						left: '12px',
+						top: `${24 + (i - 1) * 40}px`,
+					}}
+					onClick={() => {
+						sock.userEmit('inituser', {
+							e: i === 14 ? (Math.random() * 12 + 1) | 0 : i,
+						});
+					}}
+					onMouseOver={() => setEledesc(i - 1)}>
+					<span
 						style={{
 							position: 'absolute',
-							top: '30px',
-							left: '500px',
-							width: '396px',
+							left: '48px',
+							top: '6px',
+							width: '144px',
 						}}>
-						<i style={{ display: 'block', marginBottom: '24px' }}>
-							You will be taken to the tutorial after creating your account.
-							<br />
-							You can exit the tutorial at any time.
-							<br />
-							You can access the tutorial through Quests at any time.
-						</i>
-						<input
-							type="checkbox"
-							checked={this.state.skiptut}
-							onChange={e => this.setState({ skiptut: e.target.checked })}
-						/>{' '}
-						Skip Tutorial
-					</label>
-					{mainc}
-				</>
+						{ui.eleNames[i]}
+					</span>
+				</span>,
 			);
 		}
-	},
-);
+	}
+	return (
+		<>
+			{user && (
+				<>
+					<span
+						style={{
+							position: 'absolute',
+							left: '200px',
+							top: '8px',
+						}}>
+						Select your starter element
+					</span>
+					{eledesc !== -1 && descriptions[eledesc]}
+				</>
+			)}
+			{!user && (
+				<div
+					style={{
+						position: 'absolute',
+						left: '30px',
+						top: '30px',
+						width: '200px',
+					}}>
+					<input
+						onChange={e => setUsername(e.target.value)}
+						value={username}
+						placeholder="Username"
+						style={{ display: 'block' }}
+					/>
+					<input
+						onChange={e => setPassword(e.target.value)}
+						value={password}
+						type="password"
+						placeholder="Password"
+						style={{ display: 'block' }}
+					/>
+					<input
+						onChange={e => setConfirmpass(e.target.value)}
+						value={confirmpass}
+						type="password"
+						placeholder="Confirm"
+						style={{ display: 'block' }}
+					/>
+					<input
+						type="button"
+						value="Register"
+						style={{ display: 'block' }}
+						onClick={e => {
+							let errmsg = '';
+							if (!username) {
+								errmsg = 'Please enter a username';
+							} else if (password !== confirmpass) {
+								errmsg = 'Passwords do not match';
+							} else {
+								errmsg = 'Registering..';
+								sock.emit({
+									x: 'login',
+									u: username,
+									p: password,
+								});
+							}
+							setErr(errmsg);
+						}}
+					/>
+					{err}
+				</div>
+			)}
+			<ExitBtn
+				x={800}
+				y={200}
+				onClick={() => {
+					if (user) {
+						sock.userEmit('delete');
+						store.store.dispatch(store.setUser(null));
+					}
+					store.store.dispatch(store.setOpt('remember', false));
+					store.store.dispatch(store.doNav(import('./Login.jsx')));
+				}}
+			/>
+			<label
+				style={{
+					position: 'absolute',
+					top: '30px',
+					left: '500px',
+					width: '396px',
+				}}>
+				<i
+					style={{
+						display: 'block',
+						marginBottom: '24px',
+						whiteSpace: 'pre-line',
+					}}>
+					You will be taken to the tutorial after creating your account. You can
+					exit the tutorial at any time. You can access the tutorial through
+					Quests at any time.
+				</i>
+				<input
+					type="checkbox"
+					checked={skiptut}
+					onChange={e => loginReducer(e.target.checked)}
+				/>{' '}
+				Skip Tutorial
+			</label>
+			{mainc}
+		</>
+	);
+}

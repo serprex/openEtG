@@ -1,36 +1,28 @@
-import { createRef, Component } from 'react';
-import { connect } from 'react-redux';
+import { useRef, useLayoutEffect } from 'react';
+import { useSelector } from 'react-redux';
 
-export default connect((state, props) => ({
-	chat: state.chat.get(props.channel),
-}))(
-	class Chat extends Component {
-		chatRef = createRef();
+export default function Chat(props) {
+	const chatRef = useRef(),
+		chat = chatRef.current;
+	const channelRef = useRef();
 
-		getSnapshotBeforeUpdate(prevProps, prevState) {
-			const chat = this.chatRef.current;
-			return prevProps.channel !== this.props.channel ||
-				Math.abs(chat.scrollTop - chat.scrollHeight + chat.offsetHeight) < 8
-				? -1
-				: chat.scrollTop;
-		}
+	const scrollTop =
+		chat &&
+		props.channel === channelRef.current &&
+		Math.abs(chat.scrollTop - chat.scrollHeight + chat.offsetHeight) >= 8
+			? chat.scrollTop
+			: -1;
+	channelRef.current = props.channel;
 
-		componentDidUpdate(prevProps, prevState, snapshot) {
-			const chat = this.chatRef.current;
-			chat.scrollTop = ~snapshot ? snapshot : chat.scrollHeight;
-		}
+	useLayoutEffect(() => {
+		chatRef.current.scrollTop = ~scrollTop
+			? scrollTop
+			: chatRef.current.scrollHeight;
+	});
 
-		componentDidMount() {
-			const chat = this.chatRef.current;
-			chat.scrollTop = chat.scrollHeight;
-		}
-
-		render() {
-			return (
-				<div className="chatBox" style={this.props.style} ref={this.chatRef}>
-					{this.props.chat}
-				</div>
-			);
-		}
-	},
-);
+	return (
+		<div className="chatBox" style={props.style} ref={chatRef}>
+			{useSelector(({ chat }) => chat.get(props.channel))}
+		</div>
+	);
+}
