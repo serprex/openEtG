@@ -163,7 +163,7 @@ async fn login_success(
 			user.data.ostreakday2 = today;
 			user.data.oracle = today;
 			let mut rng = rand::thread_rng();
-			let ocardnymph = rng.gen_ratio(3, 100);
+			let ocardnymph = rng.gen_bool(0.03);
 			if let Some(card) = etg::card::OpenSet.random_card(&mut rng, false, |card| {
 				(card.rarity != 4) ^ ocardnymph && (card.flag & etg::game::Flag::pillar) == 0
 			}) {

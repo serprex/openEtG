@@ -162,7 +162,4 @@ module.exports = {
 			scriptLoading: 'defer',
 		}),
 	],
-	watchOptions: {
-		ignored: ['src/enum.json', 'src/rs/src/generated.rs'],
-	},
 };
