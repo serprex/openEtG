@@ -1,5 +1,5 @@
-import { connect } from 'react-redux';
-import { useState, Component, Fragment } from 'react';
+import { useSelector } from 'react-redux';
+import { useEffect, useState, Fragment } from 'react';
 
 import * as sock from '../sock.jsx';
 import Cards from '../Cards.js';
@@ -70,273 +70,237 @@ function PackDisplay(props) {
 	);
 }
 
-export default connect(({ user, opts }) => ({
-	user,
-	bulk: typeof opts.bulk === 'string' ? opts.bulk : '1',
-}))(
-	class Shop extends Component {
-		constructor(props) {
-			super(props);
-			this.state = {
-				info1: 'Select from which element you want',
-				info2: 'Select which type of pack you want',
-				packele: -1,
-				packrarity: -1,
-				showbuy: true,
-				cards: '',
-			};
-		}
+export default function Shop() {
+	const user = useSelector(({ user }) => user);
+	const bulk = useSelector(({ opts }) => opts.bulk ?? '1');
+	const [info1, setInfo1] = useState('Select from which element you want');
+	const [info2, setInfo2] = useState('Select which type of pack you want');
+	const [ele, setEle] = useState(-1);
+	const [rarity, setRarity] = useState(-1);
+	const [buy, setBuy] = useState(true);
+	const [cards, setCards] = useState('');
 
-		componentDidMount() {
-			this.props.dispatch(
-				store.setCmds({
-					boostergive: data => {
-						const userdelta = {};
-						if (data.accountbound) {
-							userdelta.accountbound = etgutil.mergedecks(
-								this.props.user.accountbound,
-								data.cards,
-							);
-							const freepacks =
-								this.props.user.freepacks && this.props.user.freepacks.slice();
-							if (freepacks) {
-								freepacks[data.packtype]--;
-								userdelta.freepacks = freepacks;
-							}
-						} else {
-							const bdata = {};
-							parseInput(bdata, 'bulk', this.props.bulk, 99);
-							userdelta.pool = etgutil.mergedecks(
-								this.props.user.pool,
-								data.cards,
-							);
-							userdelta.gold =
-								this.props.user.gold -
-								packdata[data.packtype].cost * (bdata.bulk || 1);
-						}
-						this.props.dispatch(store.updateUser(userdelta));
-						const dlen = etgutil.decklength(data.cards);
-						if (dlen < 121) {
-							this.setState({
-								cards: data.cards,
-								showbuy: false,
-							});
-						} else {
-							this.setState({ showbuy: true });
-						}
-						this.props.dispatch(
-							store.chat(
-								<a
-									style={{ display: 'block' }}
-									href={`deck/${data.cards}`}
-									target="_blank">
-									{data.cards}
-								</a>,
-								'Packs',
-							),
+	useEffect(() => {
+		store.store.dispatch(
+			store.setCmds({
+				boostergive: data => {
+					const userdelta = {};
+					if (data.accountbound) {
+						userdelta.accountbound = etgutil.mergedecks(
+							user.accountbound,
+							data.cards,
 						);
-					},
-				}),
-			);
-		}
+						const freepacks = user.freepacks && user.freepacks.slice();
+						if (freepacks) {
+							freepacks[data.packtype]--;
+							userdelta.freepacks = freepacks;
+						}
+					} else {
+						const bdata = {};
+						parseInput(bdata, 'bulk', bulk, 99);
+						userdelta.pool = etgutil.mergedecks(user.pool, data.cards);
+						userdelta.gold =
+							user.gold - packdata[data.packtype].cost * (bdata.bulk || 1);
+					}
+					store.store.dispatch(store.updateUser(userdelta));
+					const dlen = etgutil.decklength(data.cards);
+					if (dlen < 121) {
+						setCards(data.cards);
+						setBuy(false);
+					} else {
+						setBuy(true);
+					}
+					store.store.dispatch(
+						store.chat(
+							<a
+								style={{ display: 'block' }}
+								href={`deck/${data.cards}`}
+								target="_blank">
+								{data.cards}
+							</a>,
+							'Packs',
+						),
+					);
+				},
+			}),
+		);
+	}, []);
 
-		buyPack = () => {
-			const pack = packdata[this.state.packrarity];
-			const boostdata = {
-				pack: this.state.packrarity,
-				element: this.state.packele,
-			};
-			parseInput(boostdata, 'bulk', this.props.bulk, 99);
-			boostdata.bulk ||= 1;
-			if (
-				this.props.user.gold >= pack.cost * (boostdata.bulk || 1) ||
-				(this.props.user.freepacks &&
-					this.props.user.freepacks[this.state.packrarity] > 0)
-			) {
-				sock.userEmit('booster', boostdata);
-				this.setState({ showbuy: false });
-			} else {
-				this.setState({ info2: "You can't afford that!" });
-			}
+	const buyPack = () => {
+		const pack = packdata[rarity];
+		const boostdata = {
+			pack: rarity,
+			element: ele,
 		};
+		parseInput(boostdata, 'bulk', bulk, 99);
+		boostdata.bulk ||= 1;
+		if (
+			user.gold >= pack.cost * (boostdata.bulk || 1) ||
+			(user.freepacks && user.freepacks[rarity] > 0)
+		) {
+			sock.userEmit('booster', boostdata);
+			setBuy(false);
+		} else {
+			setInfo2("You can't afford that!");
+		}
+	};
 
-		render() {
-			const hasFreePacks = !!(
-				this.props.user.freepacks &&
-				this.props.user.freepacks[this.state.packrarity]
-			);
-			const elebuttons = [];
-			for (let i = 0; i < 14; i++) {
-				elebuttons.push(
-					<Components.IconBtn
-						key={i}
-						e={'e' + i}
-						x={75 + (i >> 1) * 64}
-						y={117 + (i & 1) * 75}
-						click={() => {
-							const update = {
-								packele: i,
-								info1: `Selected Element: ${i === 13 ? 'Random' : '1:' + i}`,
-							};
-							this.setState(update);
-						}}
-					/>,
-				);
-			}
-			return (
+	const hasFreePacks = !!(user.freepacks && user.freepacks[rarity]);
+	const elebuttons = [];
+	for (let i = 0; i < 14; i++) {
+		elebuttons.push(
+			<Components.IconBtn
+				key={i}
+				e={'e' + i}
+				x={75 + (i >> 1) * 64}
+				y={117 + (i & 1) * 75}
+				click={() => {
+					setEle(i);
+					setInfo1(`Selected Element: ${i === 13 ? 'Random' : '1:' + i}`);
+				}}
+			/>,
+		);
+	}
+	return (
+		<>
+			<Components.Box x={40} y={16} width={820} height={60} />
+			<Components.Box x={40} y={89} width={494} height={168} />
+			<Components.Box x={40} y={270} width={712} height={300} />
+			<Components.Box x={768} y={90} width={94} height={184} />
+			<Components.Text
+				text={user.gold + '$'}
+				style={{
+					position: 'absolute',
+					left: '775px',
+					top: '101px',
+				}}
+			/>
+			<Components.Text
+				text={info1}
+				style={{
+					position: 'absolute',
+					left: '50px',
+					top: '25px',
+				}}
+			/>
+			<span
+				style={{
+					position: 'absolute',
+					left: '50px',
+					top: '50px',
+				}}>
+				{info2}
+			</span>
+			<Components.ExitBtn x={775} y={246} />
+			{hasFreePacks && (
+				<span
+					style={{
+						position: 'absolute',
+						left: '350px',
+						top: '26px',
+					}}>
+					{!!user.freepacks[rarity] &&
+						`Free ${packdata[rarity].type} packs left: ${user.freepacks[rarity]}`}
+				</span>
+			)}
+			{cards && (
+				<input
+					type="button"
+					value="Take Cards"
+					onClick={() => {
+						setBuy(true);
+						setCards('');
+					}}
+					style={{
+						position: 'absolute',
+						left: '775px',
+						top: '156px',
+					}}
+				/>
+			)}
+			{buy && !!~ele && !!~rarity && (
 				<>
-					<Components.Box x={40} y={16} width={820} height={60} />
-					<Components.Box x={40} y={89} width={494} height={168} />
-					<Components.Box x={40} y={270} width={712} height={300} />
-					<Components.Box x={768} y={90} width={94} height={184} />
-					<Components.Text
-						text={this.props.user.gold + '$'}
-						style={{
-							position: 'absolute',
-							left: '775px',
-							top: '101px',
-						}}
-					/>
-					<Components.Text
-						text={this.state.info1}
-						style={{
-							position: 'absolute',
-							left: '50px',
-							top: '25px',
-						}}
-					/>
-					<span
-						style={{
-							position: 'absolute',
-							left: '50px',
-							top: '50px',
-						}}>
-						{this.state.info2}
-					</span>
-					<Components.ExitBtn x={775} y={246} />
-					{hasFreePacks && (
-						<span
-							style={{
-								position: 'absolute',
-								left: '350px',
-								top: '26px',
-							}}>
-							{!!this.props.user.freepacks[this.state.packrarity] &&
-								`Free ${packdata[this.state.packrarity].type} packs left: ${
-									this.props.user.freepacks[this.state.packrarity]
-								}`}
-						</span>
-					)}
-					{this.state.cards && (
+					{!hasFreePacks && (
 						<input
 							type="button"
-							value="Take Cards"
+							value="Max Buy"
 							onClick={() => {
-								this.setState({
-									showbuy: true,
-									hideget: true,
-									cards: '',
-								});
+								const pack = packdata[rarity];
+								store.store.dispatch(
+									store.setOptTemp(
+										'bulk',
+										Math.min(Math.floor(user.gold / pack.cost), 99).toString(),
+									),
+								);
 							}}
 							style={{
 								position: 'absolute',
 								left: '775px',
-								top: '156px',
+								top: '128px',
 							}}
 						/>
 					)}
-					{this.state.showbuy &&
-						!!~this.state.packele &&
-						!!~this.state.packrarity && (
-							<>
-								{!hasFreePacks && (
-									<input
-										type="button"
-										value="Max Buy"
-										onClick={() => {
-											const pack = packdata[this.state.packrarity];
-											this.props.dispatch(
-												store.setOptTemp(
-													'bulk',
-													Math.min(
-														Math.floor(this.props.user.gold / pack.cost),
-														99,
-													).toString(),
-												),
-											);
-										}}
-										style={{
-											position: 'absolute',
-											left: '775px',
-											top: '128px',
-										}}
-									/>
-								)}
-								<input
-									type="button"
-									value="Buy Pack"
-									onClick={this.buyPack}
-									style={{
-										position: 'absolute',
-										left: '775px',
-										top: '156px',
-									}}
-								/>
-							</>
-						)}
-					{packdata.map((pack, n) => (
-						<Fragment key={pack.type}>
-							<img
-								src={`/assets/pack${n}.webp`}
-								className="imgb"
-								onClick={() => {
-									this.setState({
-										packrarity: n,
-										info2: `${pack.type} Pack: ${pack.info}`,
-									});
-								}}
-								style={{
-									position: 'absolute',
-									left: `${48 + 176 * n}px`,
-									top: '278px',
-								}}
-							/>
-							<Components.Text
-								text={pack.cost + '$'}
-								style={{
-									position: 'absolute',
-									left: `${48 + 176 * n}px`,
-									top: '542px',
-									width: '160px',
-									textAlign: 'center',
-								}}
-							/>
-						</Fragment>
-					))}
-					{elebuttons}
-					{this.state.cards && <PackDisplay cards={this.state.cards} />}
-					{!hasFreePacks && !!~this.state.packele && !!~this.state.packrarity && (
-						<input
-							type="number"
-							placeholder="Bulk"
-							value={this.props.bulk}
-							onChange={e =>
-								this.props.dispatch(store.setOptTemp('bulk', e.target.value))
-							}
-							onKeyPress={e => {
-								if (e.which === 13) this.buyPack();
-							}}
-							style={{
-								position: 'absolute',
-								top: '184px',
-								left: '777px',
-								width: '64px',
-							}}
-						/>
-					)}
-					<Tutor.Tutor x={8} y={500} panels={Tutor.Shop} />
+					<input
+						type="button"
+						value="Buy Pack"
+						onClick={buyPack}
+						style={{
+							position: 'absolute',
+							left: '775px',
+							top: '156px',
+						}}
+					/>
 				</>
-			);
-		}
-	},
-);
+			)}
+			{packdata.map((pack, n) => (
+				<Fragment key={pack.type}>
+					<img
+						src={`/assets/pack${n}.webp`}
+						className="imgb"
+						onClick={() => {
+							setRarity(n);
+							setInfo2(`${pack.type} Pack: ${pack.info}`);
+						}}
+						style={{
+							position: 'absolute',
+							left: `${48 + 176 * n}px`,
+							top: '278px',
+						}}
+					/>
+					<Components.Text
+						text={pack.cost + '$'}
+						style={{
+							position: 'absolute',
+							left: `${48 + 176 * n}px`,
+							top: '542px',
+							width: '160px',
+							textAlign: 'center',
+						}}
+					/>
+				</Fragment>
+			))}
+			{elebuttons}
+			{cards && <PackDisplay cards={cards} />}
+			{!hasFreePacks && !!~ele && !!~rarity && (
+				<input
+					type="number"
+					placeholder="Bulk"
+					value={bulk}
+					onChange={e =>
+						store.store.dispatch(store.setOptTemp('bulk', e.target.value))
+					}
+					onKeyPress={e => {
+						if (e.which === 13) buyPack();
+					}}
+					style={{
+						position: 'absolute',
+						top: '184px',
+						left: '777px',
+						width: '64px',
+					}}
+				/>
+			)}
+			<Tutor.Tutor x={8} y={500} panels={Tutor.Shop} />
+		</>
+	);
+}

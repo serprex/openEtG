@@ -199,7 +199,7 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 									idx += 1;
 								}
 								if replaced {
-									skill.insert(idx, b')');
+									skill.insert(idx - (idx < skill.len()) as usize, b')');
 									idx += 1;
 								}
 								if idx < skill.len() {

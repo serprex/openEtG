@@ -234,7 +234,7 @@ const data = {
 	fractal:
 		'Fill your hand with copies of target creature. Remove all remaining 1:12.',
 	freeevade:
-		"If your opponent has a shield, your airborne creatures have a 30% chance to bypass the shield. Otherwise, your creatures have a 30% chance to deal 50% more damage. Your creatures have 20% chance to evade opponent's targeted spells & skills.",
+		"If your opponent has a shield, your airborne creatures have a 25% chance to bypass the shield. Otherwise, your creatures have a 25% chance to deal 50% more damage. Your creatures have 20% chance to evade opponent's targeted spells & skills.",
 	freeze: c =>
 		`Freeze target creature or weapon for ${
 			c.upped ? 4 : 3
@@ -264,7 +264,6 @@ const data = {
 		"Creatures attacking this creature's owner instead attack this creature.",
 	gpullspell:
 		"Creatures attacking target creature's owner instead attack target creature.\nIf target is a player, creatures attack that player when attacking that player.",
-	gratitude: 'Heal yourself 4 at the end of your turn.',
 	growth: (atk, hp) => {
 		const x = `${atk}|${hp}`;
 		return {
@@ -467,7 +466,7 @@ const data = {
 		"Damage dealt by this card also reduces the defender's maximum HP.",
 	regen:
 		"Give 1 purify counter to this card's owner on hit. Throttled (only triggers at most twice from Adrenaline.)",
-	regenerate: 'Heal yourself 5 every turn or when this card attacks.',
+	regenerate: x => `Heal yourself ${x} every turn or when this card attacks.`,
 	regeneratespell:
 		'Replace target creature or non-stacking permanent\'s skills with "Heal this card\'s owner 5 every turn or when this card attacks."',
 	regrade:

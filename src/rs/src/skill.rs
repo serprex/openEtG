@@ -364,7 +364,6 @@ pub enum Skill {
 	golemhit,
 	gpull,
 	gpullspell,
-	gratitude,
 	grave,
 	growth(i8, i8),
 	guard,
@@ -468,7 +467,7 @@ pub enum Skill {
 	rebirth,
 	reducemaxhp,
 	regen,
-	regenerate,
+	regenerate(i16),
 	regeneratespell,
 	regrade,
 	reinforce,
@@ -938,6 +937,7 @@ impl Skill {
 			| Skill::platearmor(x)
 			| Skill::poison(x)
 			| Skill::poisonfoe(x)
+			| Skill::regenerate(x)
 			| Skill::storm(x)
 			| Skill::tempering(x)
 			| Skill::thorn(x)
@@ -2001,7 +2001,7 @@ impl Skill {
 				if ctx.get_owner(c) == ctx.get_owner(t)
 					&& ctx.get_kind(t) == Kind::Creature
 					&& ctx.get(t, Flag::airborne)
-					&& !data.freedom && ctx.rng_ratio(3, 10)
+					&& !data.freedom && ctx.rng_ratio(1, 4)
 				{
 					ctx.fx(t, Fx::Free);
 					data.freedom = true;
@@ -2092,9 +2092,6 @@ impl Skill {
 				} else {
 					ctx.set(t, Stat::gpull, 0);
 				}
-			}
-			Self::gratitude => {
-				ctx.dmg(ctx.get_owner(c), -4);
 			}
 			Self::grave => {
 				ctx.set(c, Flag::burrowed, false);
@@ -2366,7 +2363,7 @@ impl Skill {
 					&[
 						(1, Soya::Flag(Flag::poisonous)),
 						(2, Soya::Stat(Stat::adrenaline, 1)),
-						(4, Soya::Skill(Event::OwnAttack, [Skill::regenerate])),
+						(4, Soya::Skill(Event::OwnAttack, [Skill::regenerate(5)])),
 					],
 					&[(1, Soya::Skill(Event::Buff, [Skill::fiery]))],
 					&[
@@ -3260,13 +3257,13 @@ impl Skill {
 					ctx.incrStatus(ctx.get_owner(c), Stat::poison, -1);
 				}
 			}
-			Self::regenerate => {
-				ctx.fx(t, Fx::Heal(5));
-				ctx.dmg(ctx.get_owner(c), -5);
+			Self::regenerate(amt) => {
+				ctx.fx(t, Fx::Heal(amt as i32));
+				ctx.dmg(ctx.get_owner(c), -(amt as i32));
 			}
 			Self::regeneratespell => {
 				ctx.lobo(t);
-				ctx.addskills(t, Event::OwnAttack, &[Skill::regenerate]);
+				ctx.addskills(t, Event::OwnAttack, &[Skill::regenerate(5)]);
 				if ctx.get_kind(t) <= Kind::Permanent {
 					ctx.clearStatus(t);
 				}

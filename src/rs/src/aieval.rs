@@ -404,7 +404,6 @@ fn eval_skill(
 				}
 			}
 			Skill::gpullspell | Skill::v_gpullspell => 3.0,
-			Skill::gratitude => 4.0,
 			Skill::grave => 1.0,
 			Skill::growth(atk, hp) => (atk + hp) as f32,
 			Skill::guard => ttatk + (4 + ctx.get(c, Flag::airborne) as i32) as f32,
@@ -561,7 +560,7 @@ fn eval_skill(
 					ttatk
 				}) / 2.0
 			}
-			Skill::regenerate => 5.0,
+			Skill::regenerate(amt) => amt as f32,
 			Skill::regeneratespell => 5.0,
 			Skill::regrade => 3.0,
 			Skill::reinforce => 0.5,
