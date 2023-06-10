@@ -2124,6 +2124,7 @@ impl Skill {
 					ctx.random_card(card::Upped(ccard), |ctx, card| card.kind == Kind::Creature)
 				{
 					ctx.transform(c, card::AsShiny(rcard.code as i32, card::Shiny(ccard)));
+					ctx.set(c, Stat::casts, 1);
 				}
 			}
 			Self::heal => {

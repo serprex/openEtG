@@ -1,5 +1,5 @@
-import { useState, Component, createRef } from 'react';
-import { useSelector, connect } from 'react-redux';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import Cards from '../Cards.js';
 import Editor from '../Components/Editor.jsx';
@@ -9,7 +9,7 @@ import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 import { chain } from '../util.js';
 
-function processDeck(pool, dcode) {
+function processDeck(dcode) {
 	let mark = 0,
 		deck = etgutil.decodedeck(dcode);
 	for (let i = deck.length - 1; i >= 0; i--) {
@@ -22,8 +22,7 @@ function processDeck(pool, dcode) {
 		}
 	}
 	deck.sort(Cards.codeCmp).splice(60);
-	const cardMinus = Cards.filterDeck(deck, pool, true);
-	return { mark, deck, cardMinus };
+	return { mark, deck };
 }
 
 function Qecks(props) {
@@ -210,176 +209,170 @@ function DeckSelector(props) {
 	);
 }
 
-export default connect(({ user }) => ({ user }))(
-	class DeckEditor extends Component {
-		constructor(props) {
-			super(props);
-
-			const pool = [];
-			for (const [code, count] of chain(
-				etgutil.iterraw(props.user.pool),
-				etgutil.iterraw(props.user.accountbound),
-			)) {
-				if (Cards.Codes[code]) {
-					pool[code] = (pool[code] ?? 0) + count;
-				}
+export default function DeckEditor() {
+	const user = useSelector(({ user }) => user);
+	const pool = useMemo(() => {
+		const pool = [];
+		for (const [code, count] of chain(
+			etgutil.iterraw(user.pool),
+			etgutil.iterraw(user.accountbound),
+		)) {
+			if (Cards.Codes[code]) {
+				pool[code] = (pool[code] ?? 0) + count;
 			}
-			this.deckRef = createRef();
-			this.state = {
-				pool: pool,
-				deckname: '',
-				selectedDeck: null,
-			};
 		}
+		return pool;
+	}, [user.pool, user.accountbound]);
+	const deckRef = useRef();
+	useEffect(() => {
+		deckRef.current.setSelectionRange(0, 999);
+	}, []);
 
-		static getDerivedStateFromProps(nextProps, prevState) {
-			if (nextProps.user.selectedDeck === prevState.selectedDeck) return null;
-			return {
-				selectedDeck: nextProps.user.selectedDeck,
-				...processDeck(prevState.pool, sock.getDeck()),
-			};
-		}
+	const [name, setName] = useState('');
+	const [selected, setSelected] = useState(null);
 
-		componentDidMount() {
-			this.deckRef.current.setSelectionRange(0, 999);
-			document.addEventListener('keydown', this.onkeydown);
-		}
+	const [{ mark, deck }, setDeckData] = useState(() =>
+		processDeck(user.decks[user.selectedDeck] ?? ''),
+	);
+	const cardMinus = useMemo(
+		() => Cards.filterDeck(deck, pool, true),
+		[pool, deck],
+	);
 
-		componentWillUnmount() {
-			document.removeEventListener('keydown', this.onkeydown);
-		}
+	const [currentDeckCode, currentDeckCodeUnpolish] = useMemo(
+		() => [
+			etgutil.encodedeck(deck) + etgutil.toTrueMarkSuffix(mark),
+			etgutil.encodedeck(deck.map(code => etgutil.asShiny(code, false))) +
+				etgutil.toTrueMarkSuffix(mark),
+		],
+		[deck, mark],
+	);
 
-		onkeydown = e => {
-			if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT')
-				return;
-			const kc = e.which,
-				ch = e.key ?? String.fromCharCode(kc);
-			let chi = '1234567890'.indexOf(ch);
-			if (~chi) {
-				this.loadDeck(this.props.user.qecks[chi]);
-			}
-		};
-
-		currentDeckCode() {
-			return (
-				etgutil.encodedeck(this.state.deck) +
-				etgutil.toTrueMarkSuffix(this.state.mark)
-			);
-		}
-
-		currentDeckCodeUnpolish() {
-			return (
-				etgutil.encodedeck(
-					this.state.deck.map(code => etgutil.asShiny(code, false)),
-				) + etgutil.toTrueMarkSuffix(this.state.mark)
-			);
-		}
-
-		saveDeck = (name, force) => {
-			if (this.state.deck.length === 0) {
+	const saveDeck = useCallback(
+		(name, force) => {
+			if (deck.length === 0) {
 				sock.userExec('rmdeck', { name });
 				return;
 			}
-			const dcode = this.currentDeckCode();
-			if (dcode !== this.props.user.decks[name]) {
-				sock.userExec('setdeck', { d: dcode, name });
+			if (currentDeckCode !== user.decks[name]) {
+				sock.userExec('setdeck', { d: currentDeckCode, name });
 			} else if (force) sock.userExec('setdeck', { name });
-		};
+		},
+		[deck, currentDeckCode, user.decks],
+	);
 
-		loadDeck = name => {
-			this.saveDeck(this.props.user.selectedDeck);
+	const loadDeck = useCallback(
+		name => {
+			saveDeck(user.selectedDeck);
 			sock.userExec('setdeck', { name });
-		};
+			setDeckData(processDeck(sock.getDeck()));
+		},
+		[user.selectedDeck, saveDeck, setDeckData],
+	);
 
-		deckModeToggle = () => this.setState({ deckmode: !this.state.deckmode });
-		deckModeOff = () => this.setState({ deckmode: false });
+	const onkeydown = useCallback(
+		e => {
+			if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT')
+				return;
+			const kc = e.which,
+				ch = e.key ?? String.fromCharCode(kc),
+				chi = '1234567890'.indexOf(ch);
+			if (~chi) {
+				loadDeck(user.qecks[chi]);
+			}
+		},
+		[user.qecks, loadDeck],
+	);
 
-		render() {
-			return (
-				<>
-					<Editor
-						cards={Cards}
-						deck={this.state.deck}
-						mark={this.state.mark}
-						pool={this.state.pool}
-						cardMinus={this.state.cardMinus}
-						setDeck={deck => {
-							deck.sort(Cards.codeCmp);
-							const cardMinus = Cards.filterDeck(deck, this.state.pool, true);
-							this.setState({ deck, cardMinus });
-						}}
-						setMark={mark => this.setState({ mark })}
-					/>
-					<Tutor.Tutor x={4} y={220} panels={Tutor.Editor} />
-					<label style={{ position: 'absolute', left: '536px', top: '238px' }}>
-						Deck &nbsp;
-						<input
-							autoFocus
-							value={this.currentDeckCodeUnpolish()}
-							onChange={e => {
-								let dcode = e.target.value.trim();
-								if (~dcode.indexOf(' ')) {
-									const dsplit = dcode.split(' ').sort();
-									dcode = '';
-									let i = 0;
-									while (i < dsplit.length) {
-										const di = dsplit[i],
-											i0 = i++;
-										while (i < dsplit.length && dsplit[i] === di) {
-											i++;
-										}
-										dcode += etgutil.encodeCount(i - i0);
-										dcode += di;
-									}
+	useEffect(() => {
+		document.addEventListener('keydown', onkeydown);
+		return () => document.removeEventListener('keydown', onkeydown);
+	}, [onkeydown]);
+
+	const [viewDecks, setViewDecks] = useState(false);
+	const deckModeToggle = useCallback(
+		() => setViewDecks(x => !x),
+		[setViewDecks],
+	);
+	const deckModeOff = useCallback(() => setViewDecks(false), [setViewDecks]);
+
+	return (
+		<>
+			<Editor
+				cards={Cards}
+				deck={deck}
+				mark={mark}
+				pool={pool}
+				cardMinus={cardMinus}
+				setDeck={deck => setDeckData({ deck: deck.sort(Cards.codeCmp), mark })}
+				setMark={mark => setDeckData({ deck, mark })}
+			/>
+			<Tutor.Tutor x={4} y={220} panels={Tutor.Editor} />
+			<label style={{ position: 'absolute', left: '536px', top: '238px' }}>
+				Deck &nbsp;
+				<input
+					autoFocus
+					value={currentDeckCodeUnpolish}
+					onChange={e => {
+						let dcode = e.target.value.trim();
+						if (~dcode.indexOf(' ')) {
+							const dsplit = dcode.split(' ').sort();
+							dcode = '';
+							let i = 0;
+							while (i < dsplit.length) {
+								const di = dsplit[i],
+									i0 = i++;
+								while (i < dsplit.length && dsplit[i] === di) {
+									i++;
 								}
-								this.setState(processDeck(this.state.pool, dcode));
-							}}
-							ref={this.deckRef}
-							onClick={e => {
-								e.target.setSelectionRange(0, 999);
-							}}
-						/>
-					</label>
-					<div style={{ position: 'absolute', top: '8px', left: '8px' }}>
-						{this.props.user.selectedDeck}
-					</div>
-					<input
-						type="button"
-						value="Decks"
-						onClick={this.deckModeToggle}
-						style={{
-							position: 'absolute',
-							left: '8px',
-							top: '58px',
-						}}
-					/>
-					<input
-						type="button"
-						value="Revert"
-						onClick={() =>
-							this.setState(processDeck(this.state.pool, sock.getDeck()))
+								dcode += etgutil.encodeCount(i - i0);
+								dcode += di;
+							}
 						}
-						style={{ position: 'absolute', left: '8px', top: '162px' }}
-					/>
-					<input
-						type="button"
-						value="Exit"
-						onClick={() => {
-							this.saveDeck(this.props.user.selectedDeck, true);
-							this.props.dispatch(store.doNav(import('../views/MainMenu.jsx')));
-						}}
-						style={{ position: 'absolute', left: '8px', top: '110px' }}
-					/>
-					<Qecks onClick={this.loadDeck} />
-					{this.state.deckmode && (
-						<DeckSelector
-							loadDeck={this.loadDeck}
-							saveDeck={this.saveDeck}
-							onClose={this.deckModeOff}
-						/>
-					)}
-				</>
-			);
-		}
-	},
-);
+						setDeckData(processDeck(dcode));
+					}}
+					ref={deckRef}
+					onClick={e => {
+						e.target.setSelectionRange(0, 999);
+					}}
+				/>
+			</label>
+			<div style={{ position: 'absolute', top: '8px', left: '8px' }}>
+				{user.selectedDeck ?? ''}
+			</div>
+			<input
+				type="button"
+				value="Decks"
+				onClick={deckModeToggle}
+				style={{
+					position: 'absolute',
+					left: '8px',
+					top: '58px',
+				}}
+			/>
+			<input
+				type="button"
+				value="Revert"
+				onClick={() => setDeckData(processDeck(sock.getDeck()))}
+				style={{ position: 'absolute', left: '8px', top: '162px' }}
+			/>
+			<input
+				type="button"
+				value="Exit"
+				onClick={() => {
+					saveDeck(user.selectedDeck, true);
+					store.store.dispatch(store.doNav(import('../views/MainMenu.jsx')));
+				}}
+				style={{ position: 'absolute', left: '8px', top: '110px' }}
+			/>
+			<Qecks onClick={loadDeck} />
+			{viewDecks && (
+				<DeckSelector
+					loadDeck={loadDeck}
+					saveDeck={saveDeck}
+					onClose={deckModeOff}
+				/>
+			)}
+		</>
+	);
+}

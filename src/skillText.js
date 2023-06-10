@@ -281,7 +281,8 @@ const data = {
 		cast: 'Draw a card.',
 		owndiscard: 'When you discard this card, draw a card.',
 	},
-	hatch: 'Transform this creature into a random creature.',
+	hatch:
+		'Transform this creature into a random creature. Caster can be reactivated.',
 	heal: 'Heal target creature or player 20.',
 	heatmirror: c =>
 		`When your opponent plays a creature from their hand, summon a ${
