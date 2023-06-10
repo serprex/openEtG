@@ -74,9 +74,12 @@ module.exports = {
 		],
 	},
 	plugins: [
-		new CopyPlugin({
-			patterns: [{ from: 'favicon.ico' }],
-		}),
+		...['favicon.ico', 'whale144.webp', 'manifest.json', 'ui.css'].map(
+			file =>
+				new CopyPlugin({
+					patterns: [{ from: file }],
+				}),
+		),
 		new HtmlPlugin({
 			chunks: ['main'],
 			filename: 'index.html',

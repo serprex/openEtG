@@ -129,6 +129,7 @@ pub enum CacheControl {
 #[derive(Clone, Copy)]
 pub enum ContentType {
 	ApplicationJavascript,
+	ApplicationJson,
 	ApplicationOctetStream,
 	ApplicationOgg,
 	ApplicationWasm,
@@ -182,6 +183,7 @@ impl CachedResponse {
 				header::CONTENT_TYPE,
 				HeaderValue::from_static(match self.kind {
 					ContentType::ApplicationJavascript => "application/javascript",
+					ContentType::ApplicationJson => "application/json",
 					ContentType::ApplicationOctetStream => "application/octet-stream",
 					ContentType::ApplicationOgg => "application/ogg",
 					ContentType::ApplicationWasm => "application/wasm",
@@ -314,36 +316,6 @@ async fn handle_get_core(
 			mtime,
 			file: Some(uppath),
 		}
-	} else if path == "/manifest.json" {
-		let data = tokio::fs::read("../../../manifest.json")
-			.await
-			.unwrap_or(Vec::new());
-		let mtime = tokio::fs::metadata("../../../manifest.json")
-			.await
-			.ok()
-			.and_then(|md| md.modified().ok());
-		PlainResponse {
-			kind: ContentType::ApplicationJavascript,
-			cache: CacheControl::NoCache,
-			content: data,
-			mtime,
-			file: Some(String::from("../../../manifest.json")),
-		}
-	} else if path == "/ui.css" {
-		let data = tokio::fs::read("../../../ui.css")
-			.await
-			.unwrap_or(Vec::new());
-		let mtime = tokio::fs::metadata("../../../ui.css")
-			.await
-			.ok()
-			.and_then(|md| md.modified().ok());
-		PlainResponse {
-			kind: ContentType::TextCss,
-			cache: CacheControl::NoCache,
-			content: data,
-			mtime,
-			file: Some(String::from("../../../ui.css")),
-		}
 	} else if path.starts_with("/sound/") {
 		let mut uppath = String::from("../../..");
 		uppath.push_str(&path);
@@ -360,11 +332,14 @@ async fn handle_get_core(
 			file: Some(uppath),
 		}
 	} else if path.ends_with(".js")
+		|| path.ends_with(".json")
+		|| path.ends_with(".css")
 		|| path.ends_with(".htm")
 		|| path.ends_with(".html")
 		|| path.ends_with(".wasm")
 		|| path.ends_with(".js.map")
 		|| path.ends_with(".ico")
+		|| path.ends_with(".webp")
 	{
 		let mut uppath = String::from("../../../bundle");
 		uppath.push_str(&path);
@@ -386,12 +361,18 @@ async fn handle_get_core(
 			cache: cache,
 			kind: if path.ends_with(".js") {
 				ContentType::ApplicationJavascript
+			} else if path.ends_with(".json") {
+				ContentType::ApplicationJson
+			} else if path.ends_with(".css") {
+				ContentType::TextCss
 			} else if path.ends_with(".htm") || path.ends_with(".html") {
 				ContentType::TextHtml
 			} else if path.ends_with(".wasm") {
 				ContentType::ApplicationWasm
 			} else if path.ends_with(".ico") {
 				ContentType::ImageIcon
+			} else if path.ends_with(".ico") {
+				ContentType::ImageWebp
 			} else {
 				ContentType::ApplicationOctetStream
 			},

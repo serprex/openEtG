@@ -4,12 +4,18 @@
   "name": "openEtG",
   "icons": [
     {
-      "src": "/Cards/5p0.png",
-      "type": "image/png",
+      "src": "/Cards/5p0.webp",
+      "type": "image/webp",
       "sizes": "128x128"
-    }
+    },
+	{
+      "src": "/whale144.webp",
+      "type": "image/webp",
+      "sizes": "144x144"
+	}
   ],
   "start_url": "/index.html",
+  "id": "/index.html",
   "background_color": "#000",
   "display": "minimal-ui",
   "scope": "/",
