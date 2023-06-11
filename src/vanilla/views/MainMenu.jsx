@@ -1,5 +1,5 @@
-import { Component } from 'react';
-import { connect } from 'react-redux';
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import * as etg from '../../etg.js';
 import aiDecks from '../Decks.json' assert { type: 'json' };
@@ -49,201 +49,184 @@ export function parseDeck(dcode) {
 	return dcode;
 }
 
-export default connect(({ user, orig, opts }) => ({
-	user,
-	orig,
-	origfoename: opts.origfoename ?? '',
-}))(
-	class OriginalMainMenu extends Component {
-		state = { origname: '', origpass: '' };
+function mkAi4() {
+	const es = upto(144),
+		e1 = ((es / 12) | 0) + 1,
+		e2 = (es % 12) + 1,
+		deck = wasm.deckgen_ai4(e1, e2);
+	return [ai4names[e1][0] + ai4names[e2][1], etgutil.encodedeck(deck)];
+}
 
-		mkAi4 = () => {
-			const e1 = upto(12) + 1,
-				e2 = upto(12) + 1,
-				name = ai4names[e1][0] + ai4names[e2][1],
-				deck = wasm.deckgen_ai4(e1, e2);
-			return [name, etgutil.encodedeck(deck)];
-		};
+export default function OriginalMainMenu() {
+	const user = useSelector(({ user }) => user),
+		orig = useSelector(({ orig }) => orig),
+		origfoename = useSelector(({ opts }) => opts.origfoename ?? '');
+	const [origname, setName] = useState('');
+	const [origpass, setPass] = useState('');
 
-		vsAi = (level, cost, basereward, hpreward) => {
-			if (
-				hpreward > 0 &&
-				!Cards.isDeckLegal(
-					etgutil.decodedeck(this.props.orig.deck),
-					this.props.orig,
-				)
-			) {
-				this.props.dispatch(store.chatMsg(`Invalid deck`, 'System'));
-				return;
-			}
-			const [ainame, aideck] =
-				level === 'custom'
-					? ['Custom', parseDeck(this.props.origfoename)]
-					: level === 'ai4'
-					? this.mkAi4()
-					: choose(aiDecks[level]);
-			if (cost > 0) {
-				const update = { electrum: -cost };
-				userEmit('origadd', update);
-				this.props.dispatch(store.addOrig(update));
-			}
-			const game = new Game({
-				seed: randint(),
-				cardreward: '',
-				set: 'Original',
-				cost,
-				basereward,
-				hpreward,
-				spins: level === 'custom' ? 0 : level === 'ai2' ? 2 : 3,
-				rematch: () => this.vsAi(level, cost, basereward, hpreward),
-				players: shuffle([
-					{
-						idx: 1,
-						name: this.props.user.name,
-						user: this.props.user.name,
-						deck: this.props.orig.deck,
-					},
-					{
-						idx: 2,
-						ai: 1,
-						name: ainame,
-						deck: aideck,
-						hp: level === 'fg' ? 200 : level === 'ai4' ? 150 : 100,
-						drawpower: level === 'ai4' || level === 'fg' ? 2 : 1,
-						markpower: level === 'ai4' || level === 'fg' ? 3 : 1,
-					},
-				]),
-			});
-			this.props.dispatch(
-				store.doNav(import('../../views/Match.jsx'), { game }),
-			);
-		};
-
-		render() {
-			return (
-				<div
-					style={{
-						position: 'absolute',
-						width: '900px',
-						height: '600px',
-					}}>
-					<input
-						type="button"
-						value="AI2"
-						onClick={() => this.vsAi('ai2', 5, 5, 5)}
-					/>
-					<input
-						type="button"
-						value="AI3"
-						onClick={() => this.vsAi('ai3', 10, 10, 10)}
-					/>
-					<input
-						type="button"
-						value="AI4"
-						onClick={() => this.vsAi('ai4', 20, 15, 25)}
-					/>
-					<input
-						type="button"
-						value="FG"
-						onClick={() => this.vsAi('fg', 30, 30, 30)}
-					/>
-					<input
-						type="button"
-						value="Editor"
-						onClick={() =>
-							this.props.dispatch(store.doNav(import('./Editor.jsx')))
-						}
-					/>
-					<input
-						type="button"
-						value="PvP"
-						onClick={() => sendChallenge(this.props.origfoename, true)}
-						style={{
-							position: 'absolute',
-							left: '200px',
-							top: '140px',
-						}}
-					/>
-					<input
-						type="button"
-						value="Sandbox PvP"
-						onClick={() => sendChallenge(this.props.origfoename, true, false)}
-						style={{
-							position: 'absolute',
-							left: '200px',
-							top: '170px',
-							width: '96px',
-						}}
-					/>
-					<input
-						type="button"
-						value="vs AI"
-						onClick={() => this.vsAi('custom', 0, 0, 0)}
-						style={{
-							position: 'absolute',
-							left: '200px',
-							top: '200px',
-						}}
-					/>
-					<span
-						style={{
-							position: 'absolute',
-							left: '300px',
-							top: '200px',
-						}}>
-						Enter deck as Name to play against it
-					</span>
-					<input
-						placeholder="Name"
-						value={this.props.origfoename}
-						onChange={e =>
-							this.props.dispatch(
-								store.setOptTemp('origfoename', e.target.value),
-							)
-						}
-						style={{
-							position: 'absolute',
-							left: '300px',
-							top: '140px',
-						}}
-					/>
-					<input
-						type="button"
-						value="Upgrade"
-						onClick={() =>
-							this.props.dispatch(store.doNav(import('./Upgrade.jsx')))
-						}
-						style={{
-							position: 'absolute',
-							left: '500px',
-							top: '140px',
-						}}
-					/>
-					<input
-						type="button"
-						value="Bazaar"
-						onClick={() =>
-							this.props.dispatch(store.doNav(import('./Bazaar.jsx')))
-						}
-						style={{
-							position: 'absolute',
-							left: '500px',
-							top: '170px',
-						}}
-					/>
-					<Components.ExitBtn x={9} y={140} />
-					<Components.Text
-						text={`${this.props.orig.electrum}$`}
-						style={{
-							fontSize: '14px',
-							pointerEvents: 'none',
-							position: 'absolute',
-							left: '8px',
-							top: '160px',
-						}}
-					/>
-				</div>
-			);
+	const vsAi = (level, cost, basereward, hpreward) => {
+		if (
+			hpreward > 0 &&
+			!Cards.isDeckLegal(etgutil.decodedeck(orig.deck), orig)
+		) {
+			store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
+			return;
 		}
-	},
-);
+		const [ainame, aideck] =
+			level === 'custom'
+				? ['Custom', parseDeck(origfoename)]
+				: level === 'ai4'
+				? mkAi4()
+				: choose(aiDecks[level]);
+		if (cost > 0) {
+			const update = { electrum: -cost };
+			userEmit('origadd', update);
+			store.store.dispatch(store.addOrig(update));
+		}
+		const game = new Game({
+			seed: randint(),
+			cardreward: '',
+			set: 'Original',
+			cost,
+			basereward,
+			hpreward,
+			spins: level === 'custom' ? 0 : level === 'ai2' ? 2 : 3,
+			rematch: () => vsAi(level, cost, basereward, hpreward),
+			players: shuffle([
+				{
+					idx: 1,
+					name: user.name,
+					user: user.name,
+					deck: orig.deck,
+				},
+				{
+					idx: 2,
+					ai: 1,
+					name: ainame,
+					deck: aideck,
+					hp: level === 'fg' ? 200 : level === 'ai4' ? 150 : 100,
+					drawpower: level === 'ai4' || level === 'fg' ? 2 : 1,
+					markpower: level === 'ai4' || level === 'fg' ? 3 : 1,
+				},
+			]),
+		});
+		store.store.dispatch(
+			store.doNav(import('../../views/Match.jsx'), { game }),
+		);
+	};
+
+	return (
+		<div
+			style={{
+				position: 'absolute',
+				width: '900px',
+				height: '600px',
+			}}>
+			<input type="button" value="AI2" onClick={() => vsAi('ai2', 5, 5, 5)} />
+			<input
+				type="button"
+				value="AI3"
+				onClick={() => vsAi('ai3', 10, 10, 10)}
+			/>
+			<input
+				type="button"
+				value="AI4"
+				onClick={() => vsAi('ai4', 20, 15, 25)}
+			/>
+			<input type="button" value="FG" onClick={() => vsAi('fg', 30, 30, 30)} />
+			<input
+				type="button"
+				value="Editor"
+				onClick={() =>
+					store.store.dispatch(store.doNav(import('./Editor.jsx')))
+				}
+			/>
+			<input
+				type="button"
+				value="PvP"
+				onClick={() => sendChallenge(origfoename, true)}
+				style={{
+					position: 'absolute',
+					left: '200px',
+					top: '140px',
+				}}
+			/>
+			<input
+				type="button"
+				value="Sandbox PvP"
+				onClick={() => sendChallenge(origfoename, true, false)}
+				style={{
+					position: 'absolute',
+					left: '200px',
+					top: '170px',
+					width: '96px',
+				}}
+			/>
+			<input
+				type="button"
+				value="vs AI"
+				onClick={() => vsAi('custom', 0, 0, 0)}
+				style={{
+					position: 'absolute',
+					left: '200px',
+					top: '200px',
+				}}
+			/>
+			<span
+				style={{
+					position: 'absolute',
+					left: '300px',
+					top: '200px',
+				}}>
+				Enter deck as Name to play against it
+			</span>
+			<input
+				placeholder="Name"
+				value={origfoename}
+				onChange={e =>
+					store.store.dispatch(store.setOptTemp('origfoename', e.target.value))
+				}
+				style={{
+					position: 'absolute',
+					left: '300px',
+					top: '140px',
+				}}
+			/>
+			<input
+				type="button"
+				value="Upgrade"
+				onClick={() =>
+					store.store.dispatch(store.doNav(import('./Upgrade.jsx')))
+				}
+				style={{
+					position: 'absolute',
+					left: '500px',
+					top: '140px',
+				}}
+			/>
+			<input
+				type="button"
+				value="Bazaar"
+				onClick={() =>
+					store.store.dispatch(store.doNav(import('./Bazaar.jsx')))
+				}
+				style={{
+					position: 'absolute',
+					left: '500px',
+					top: '170px',
+				}}
+			/>
+			<Components.ExitBtn x={9} y={140} />
+			<Components.Text
+				text={`${orig.electrum}$`}
+				style={{
+					fontSize: '14px',
+					pointerEvents: 'none',
+					position: 'absolute',
+					left: '8px',
+					top: '160px',
+				}}
+			/>
+		</div>
+	);
+}

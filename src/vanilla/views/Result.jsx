@@ -89,11 +89,11 @@ export default connect(({ user, orig }) => ({ user, orig }))(
 					newpool = etgutil.addcard(newpool, c0.code);
 				}
 			}
-			const electrumwon = Math.floor(
-				(game.data.basereward +
+			const electrumwon =
+				((game.data.basereward +
 					game.data.hpreward * (this.state.player1.hp / 100)) *
-					(this.state.player1.hp === this.state.player1.maxhp ? 2 : 1),
-			);
+					(this.state.player1.hp === this.state.player1.maxhp ? 2 : 1)) |
+				0;
 
 			const update = {
 				electrum: game.data.cost + electrumwon,

@@ -275,7 +275,7 @@ export function DeckDisplay(props) {
 					onClick={props.onClick && (() => props.onClick(i, card))}
 					style={{
 						position: 'absolute',
-						left: `${(props.x ?? 0) + 100 + Math.floor(j / 10) * 99}px`,
+						left: `${(props.x ?? 0) + 100 + ((j / 10) | 0) * 99}px`,
 						top: `${(props.y ?? 0) + 32 + (j % 10) * 19}px`,
 						opacity,
 					}}
@@ -327,7 +327,7 @@ export function ElementSelector(props) {
 				key={i}
 				e={'e' + i}
 				x={!i || i & 1 ? props.x : props.x + 36}
-				y={316 + Math.floor((i - 1) / 2) * 32}
+				y={316 + (((i - 1) / 2) | 0) * 32}
 				click={() => props.onChange(i)}
 			/>,
 		);

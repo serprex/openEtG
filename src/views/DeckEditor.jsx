@@ -96,7 +96,7 @@ function DeckName({ i, name, deck, onClick }) {
 			style={{
 				position: 'absolute',
 				left: `${4 + (i % 6) * 150}px`,
-				top: `${32 + Math.floor(i / 6) * 21}px`,
+				top: `${32 + ((i / 6) | 0) * 21}px`,
 				width: '142px',
 				height: '21px',
 				overflow: 'hidden',

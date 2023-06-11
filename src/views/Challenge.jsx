@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, Component } from 'react';
 import { connect } from 'react-redux';
 
 import * as sock from '../sock.jsx';
@@ -11,287 +11,269 @@ import * as store from '../store.jsx';
 import aiDecks from '../Decks.json' assert { type: 'json' };
 import deckgen from '../deckgen.js';
 
-class PremadePicker extends Component {
-	constructor(props) {
-		super(props);
-		this.state = { search: '' };
-	}
+const { mage, demigod } = aiDecks;
+function PremadePicker({ onClick, onClose }) {
+	const [search, setSearch] = useState('');
 
-	render() {
-		const { onClick, onClose } = this.props;
-		const { mage, demigod } = aiDecks;
-		const searchex = new RegExp(this.state.search, 'i');
-		return (
+	const searchex = new RegExp(search, 'i');
+	return (
+		<div
+			className="bgbox"
+			style={{
+				position: 'absolute',
+				zIndex: '10',
+				left: '75px',
+				top: '100px',
+				height: '400px',
+				width: '750px',
+				overflow: 'auto',
+			}}>
+			<input
+				style={{ display: 'block' }}
+				placeholder="Search"
+				value={search}
+				onChange={e => setSearch(e.target.value)}
+			/>
+			<input
+				className="floatRight"
+				type="button"
+				value="Close"
+				onClick={onClose}
+			/>
 			<div
-				className="bgbox"
 				style={{
-					position: 'absolute',
-					zIndex: '10',
-					left: '75px',
-					top: '100px',
-					height: '400px',
-					width: '750px',
-					overflow: 'auto',
+					display: 'inline-block',
+					width: '33%',
+					verticalAlign: 'top',
 				}}>
-				<input
-					style={{ display: 'block' }}
-					placeholder="Search"
-					value={this.state.search}
-					onChange={e => this.setState({ search: e.target.value })}
-				/>
-				<input
-					className="floatRight"
-					type="button"
-					value="Close"
-					onClick={onClose}
-				/>
-				<div
-					style={{
-						display: 'inline-block',
-						width: '33%',
-						verticalAlign: 'top',
-					}}>
-					{mage
-						.filter(x => searchex.test(x[0]))
-						.map(([name, deck]) => (
-							<div key={name} onClick={() => onClick(name, deck, false)}>
-								{name}
-							</div>
-						))}
-				</div>
-				<div
-					style={{
-						display: 'inline-block',
-						width: '33%',
-						verticalAlign: 'top',
-					}}>
-					{demigod
-						.filter(x => searchex.test(x[0]))
-						.map(([name, deck]) => (
-							<div key={name} onClick={() => onClick(name, deck, true)}>
-								{name}
-							</div>
-						))}
-				</div>
+				{mage
+					.filter(x => searchex.test(x[0]))
+					.map(([name, deck]) => (
+						<div key={name} onClick={() => onClick(name, deck, false)}>
+							{name}
+						</div>
+					))}
 			</div>
-		);
-	}
+			<div
+				style={{
+					display: 'inline-block',
+					width: '33%',
+					verticalAlign: 'top',
+				}}>
+				{demigod
+					.filter(x => searchex.test(x[0]))
+					.map(([name, deck]) => (
+						<div key={name} onClick={() => onClick(name, deck, true)}>
+							{name}
+						</div>
+					))}
+			</div>
+		</div>
+	);
 }
 
-class PlayerEditor extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			deckgen: props.player.deckgen ?? '',
-			deck: props.player.deck ?? '',
-			name: props.player.name ?? '',
-			hp: props.player.hp ?? '',
-			mark: props.player.markpower ?? '',
-			draw: props.player.drawpower ?? '',
-			deckpower: props.player.deckpower ?? '',
-			premade: false,
-		};
-	}
+function PlayerEditor(props) {
+	const [deckgen, setdeckgen] = useState(props.player.deckgen ?? '');
+	const [deck, setdeck] = useState(props.player.deck ?? '');
+	const [name, setname] = useState(props.player.name ?? '');
+	const [hp, sethp] = useState(props.player.hp ?? '');
+	const [mark, setmark] = useState(props.player.markpower ?? '');
+	const [draw, setdraw] = useState(props.player.drawpower ?? '');
+	const [deckpower, setdrawpower] = useState(props.player.deckpower ?? '');
+	const [premade, setpremade] = useState(false);
+	const [rnguprate, setrnguprate] = useState(0);
+	const [rngmaxrare, setrngmaxrare] = useState(9);
 
-	render() {
-		const { props, state } = this;
-		return (
+	return (
+		<div>
 			<div>
+				<input
+					placeholder="HP"
+					className="numput"
+					value={hp}
+					onChange={e => sethp(e.target.value)}
+				/>
+				<input
+					placeholder="Mark"
+					className="numput"
+					value={mark}
+					onChange={e => setmark(e.target.value)}
+				/>
+				<input
+					placeholder="Draw"
+					className="numput"
+					value={draw}
+					onChange={e => setdraw(e.target.value)}
+				/>
+				<input
+					placeholder="Deck"
+					className="numput"
+					value={deckpower}
+					onChange={e => setdeckpower(e.target.value)}
+				/>
+				&emsp;
+				<input
+					type="button"
+					value="Ok"
+					onClick={() => {
+						const data = {};
+						parseInput(data, 'hp', hp);
+						parseInput(data, 'markpower', mark, 1188);
+						parseInput(data, 'drawpower', draw, 8);
+						parseInput(data, 'deckpower', deckpower);
+						let newdeck;
+						switch (deckgen) {
+							case 'mage':
+							case 'demigod':
+								[data.name, deck] = choose(aiDecks[deckgen]);
+								newdeck = Promise.resolve(deck);
+								break;
+							case 'rng':
+								newdeck = deckgen(
+									rnguprate * 100,
+									data.markpower,
+									rngmaxrare | 0,
+								);
+								break;
+							default:
+								newdeck = Promise.resolve(deck);
+						}
+						if (name) data.name = name;
+						newdeck.then(x => {
+							data.deck = x;
+							props.updatePlayer(data);
+						});
+					}}
+				/>
+			</div>
+			<div>
+				Deck:{' '}
+				<select value={deckgen} onChange={e => setdeckgen(e.target.value)}>
+					<option value="">Explicit</option>
+					<option value="mage">Random Mage</option>
+					<option value="demigod">Random Demigod</option>
+					<option value="rng">Random</option>
+				</select>
+			</div>
+			{deckgen === '' && (
 				<div>
 					<input
-						placeholder="HP"
-						className="numput"
-						value={state.hp}
-						onChange={e => this.setState({ hp: e.target.value })}
-					/>
-					<input
-						placeholder="Mark"
-						className="numput"
-						value={state.mark}
-						onChange={e => this.setState({ mark: e.target.value })}
-					/>
-					<input
-						placeholder="Draw"
-						className="numput"
-						value={state.draw}
-						onChange={e => this.setState({ draw: e.target.value })}
-					/>
-					<input
 						placeholder="Deck"
-						className="numput"
-						value={state.deckpower}
-						onChange={e => this.setState({ deckpower: e.target.value })}
+						value={deck}
+						onChange={e => setdeck(e.target.value)}
 					/>
 					&emsp;
 					<input
 						type="button"
-						value="Ok"
-						onClick={() => {
-							const data = {};
-							parseInput(data, 'hp', state.hp);
-							parseInput(data, 'markpower', state.mark, 1188);
-							parseInput(data, 'drawpower', state.draw, 8);
-							parseInput(data, 'deckpower', state.deckpower);
-							let deck;
-							switch (state.deckgen) {
-								case 'mage':
-								case 'demigod':
-									[data.name, deck] = choose(aiDecks[state.deckgen]);
-									deck = Promise.resolve(deck);
-									break;
-								case 'rng':
-									deck = deckgen(
-										state.rnguprate * 100 || 0,
-										data.markpower,
-										state.rngmaxrare | 0 || 9,
-									);
-									break;
-								default:
-									if (state.deck) deck = Promise.resolve(state.deck);
-							}
-							if (state.name) data.name = state.name;
-							deck.then(x => {
-								data.deck = x;
-								props.updatePlayer(data);
-							});
-						}}
+						value="Premade"
+						onClick={() => setpremade(true)}
 					/>
 				</div>
-				<div>
-					Deck:{' '}
-					<select
-						value={this.state.deckgen}
-						onChange={e => this.setState({ deckgen: e.target.value })}>
-						<option value="">Explicit</option>
-						<option value="mage">Random Mage</option>
-						<option value="demigod">Random Demigod</option>
-						<option value="rng">Random</option>
-					</select>
-				</div>
-				{this.state.deckgen === '' && (
-					<div>
-						<input
-							placeholder="Deck"
-							value={state.deck}
-							onChange={e => this.setState({ deck: e.target.value })}
-						/>
-						&emsp;
-						<input
-							type="button"
-							value="Premade"
-							onClick={() => this.setState({ premade: true })}
-						/>
-					</div>
-				)}
-				{this.state.deckgen === 'rng' && (
-					<div>
-						<input
-							placeholder="Upgrade %"
-							value={this.state.rnguprate}
-							onChange={e => this.setState({ rnguprate: e.target.value })}
-						/>
-						&emsp;
-						<input
-							placeholder="Max Rarity"
-							value={this.state.rngmaxrare}
-							onChange={e => this.setState({ rngmaxrare: e.target.value })}
-						/>
-					</div>
-				)}
+			)}
+			{deckgen === 'rng' && (
 				<div>
 					<input
-						placeholder="Name"
-						value={state.name}
-						onChange={e => this.setState({ name: e.target.value })}
+						placeholder="Upgrade %"
+						value={rnguprate}
+						onChange={e => setrnguprate(e.target.value)}
+					/>
+					&emsp;
+					<input
+						placeholder="Max Rarity"
+						value={rngmaxrare}
+						onChange={e => setrngmaxrare(e.target.value)}
 					/>
 				</div>
-				{this.state.premade && (
-					<PremadePicker
-						onClose={() => this.setState({ premade: false })}
-						onClick={(name, deck, isdg) => {
-							const state = { name, deck, premade: false };
-							if (isdg) {
-								state.hp = 200;
-								state.draw = 2;
-								state.mark = 3;
-							} else {
-								state.hp = 125;
-							}
-							this.setState(state);
-						}}
-					/>
-				)}
+			)}
+			<div>
+				<input
+					placeholder="Name"
+					value={name}
+					onChange={e => setname(e.target.value)}
+				/>
 			</div>
-		);
-	}
+			{premade && (
+				<PremadePicker
+					onClose={() => setpremade(false)}
+					onClick={(name, deck, isdg) => {
+						setpremade(false);
+						setname(name);
+						setdeck(deck);
+						if (isdg) {
+							sethp(200);
+							setdraw(2);
+							setmark(3);
+						} else {
+							sethp(125);
+						}
+					}}
+				/>
+			)}
+		</div>
+	);
 }
 
-class Group extends Component {
-	updatePlayer = (i, pl) => {
-		const players = this.props.players.slice(),
-			{ idx } = players[i];
-		players[i] = { ...this.props.players[i], ...pl };
-		this.props.updatePlayers(players);
-		this.props.removeEditing(idx);
-	};
-
-	render() {
-		const { props, state } = this;
-		return (
-			<div className="bgbox" style={{ width: '300px', marginBottom: '8px' }}>
-				{props.players.map((pl, i) => (
-					<div key={pl.idx} style={{ minHeight: '24px' }}>
-						<span onClick={() => this.props.toggleEditing(pl.idx)}>
-							{pl.name || ''} <i>{pl.user || 'AI'}</i>
-							{pl.pending === 2 && '...'}
-						</span>
-						{props.addEditing && pl.user !== props.host && (
-							<input
-								type="button"
-								value="-"
-								className="editbtn"
-								style={{ float: 'right' }}
-								onClick={() => {
-									const players = props.players.slice(),
-										[pl] = players.splice(i, 1);
-									props.updatePlayers(players);
-									props.removeEditing(pl.idx);
-								}}
-							/>
-						)}
-						{props.editing.has(pl.idx) && (
-							<PlayerEditor
-								player={pl}
-								updatePlayer={pl => this.updatePlayer(i, pl)}
-							/>
-						)}
-					</div>
-				))}
-				{props.addEditing && (
-					<div>
+function Group(props) {
+	return (
+		<div className="bgbox" style={{ width: '300px', marginBottom: '8px' }}>
+			{props.players.map((pl, i) => (
+				<div key={pl.idx} style={{ minHeight: '24px' }}>
+					<span onClick={() => this.props.toggleEditing(pl.idx)}>
+						{pl.name || ''} <i>{pl.user || 'AI'}</i>
+						{pl.pending === 2 && '...'}
+					</span>
+					{props.addEditing && pl.user !== props.host && (
 						<input
 							type="button"
-							value="+Player"
+							value="-"
+							className="editbtn"
+							style={{ float: 'right' }}
 							onClick={() => {
-								const idx = props.getNextIdx();
-								props.updatePlayers(props.players.concat([{ idx }]));
-								props.addEditing(idx);
+								const players = props.players.slice(),
+									[pl] = players.splice(i, 1);
+								props.updatePlayers(players);
+								props.removeEditing(pl.idx);
 							}}
 						/>
-						{props.removeGroup && (
-							<input
-								type="button"
-								value="-"
-								className="editbtn"
-								style={{ float: 'right' }}
-								onClick={props.removeGroup}
-							/>
-						)}
-					</div>
-				)}
-			</div>
-		);
-	}
+					)}
+					{props.editing.has(pl.idx) && (
+						<PlayerEditor
+							player={pl}
+							updatePlayer={pl => {
+								const players = props.players.slice(),
+									{ idx } = players[i];
+								players[i] = { ...props.players[i], ...pl };
+								props.updatePlayers(players);
+								props.removeEditing(idx);
+							}}
+						/>
+					)}
+				</div>
+			))}
+			{props.addEditing && (
+				<div>
+					<input
+						type="button"
+						value="+Player"
+						onClick={() => {
+							const idx = props.getNextIdx();
+							props.updatePlayers(props.players.concat([{ idx }]));
+							props.addEditing(idx);
+						}}
+					/>
+					{props.removeGroup && (
+						<input
+							type="button"
+							value="-"
+							className="editbtn"
+							style={{ float: 'right' }}
+							onClick={props.removeGroup}
+						/>
+					)}
+				</div>
+			)}
+		</div>
+	);
 }
 
 export default connect(({ user, opts }) => ({

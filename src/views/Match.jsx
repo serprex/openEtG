@@ -107,19 +107,18 @@ const instimgstyle = {
 };
 
 const activeInfo = {
-	firebolt: (c, t) =>
-		3 + Math.floor((c.owner.quanta[etg.Fire] - c.card.cost) / 4),
+	firebolt: (c, t) => 3 + (((c.owner.quanta[etg.Fire] - c.card.cost) / 4) | 0),
 	drainlife: (c, t) =>
-		2 + Math.floor((c.owner.quanta[etg.Darkness] - c.card.cost) / 5),
+		2 + (((c.owner.quanta[etg.Darkness] - c.card.cost) / 5) | 0),
 	icebolt: (c, t) => {
-		const bolts = Math.floor((c.owner.quanta[etg.Water] - c.card.cost) / 5);
+		const bolts = ((c.owner.quanta[etg.Water] - c.card.cost) / 5) | 0;
 		return `${2 + bolts} ${35 + bolts * 5}%`;
 	},
 	catapult: (c, t) =>
 		Math.ceil(
 			(t.truehp() * (t.getStatus('frozen') ? 150 : 100)) / (t.truehp() + 100),
 		),
-	corpseexplosion: (c, t) => 1 + Math.floor(c.truehp() / 8),
+	corpseexplosion: (c, t) => 1 + ((c.truehp() / 8) | 0),
 	adrenaline: (c, t) => `Extra: ${wasm.getAdrenalRow(t.trueatk()).join(',')}`,
 };
 
@@ -1924,7 +1923,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							style={{
 								position: 'absolute',
 								left: `${qx + (k & 1 ? 2 : 48)}px`,
-								top: `${qy + Math.floor((k - 1) / 2) * 18}px`,
+								top: `${qy + (((k - 1) / 2) | 0) * 18}px`,
 								fontSize: '16px',
 								pointerEvents: 'none',
 								paddingLeft: '16px',

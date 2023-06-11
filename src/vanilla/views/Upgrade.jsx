@@ -11,7 +11,7 @@ export default function OriginalUpgrade(props) {
 	const user = useSelector(({ user }) => user);
 	const orig = useSelector(({ orig }) => orig);
 	const [deck, setDeck] = useState([]);
-	const [card, setCard] = setState(null);
+	const [card, setCard] = useState(null);
 
 	const cardminus = [];
 	for (const code of deck) {

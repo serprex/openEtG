@@ -62,7 +62,7 @@ function creaturePos(j, i) {
 function permanentPos(j, i) {
 	return reflectPos(j, {
 		x: 280 + (i % 9) * 70,
-		y: 492 + Math.floor(i / 9) * 70,
+		y: 492 + ((i / 9) | 0) * 70,
 	});
 }
 function cardPos(j, i) {

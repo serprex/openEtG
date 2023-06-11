@@ -229,7 +229,7 @@ export default function Shop() {
 								store.store.dispatch(
 									store.setOptTemp(
 										'bulk',
-										Math.min(Math.floor(user.gold / pack.cost), 99).toString(),
+										Math.min((user.gold / pack.cost) | 0, 99).toString(),
 									),
 								);
 							}}

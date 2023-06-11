@@ -255,7 +255,7 @@ socket.onopen = function () {
 socket.onclose = function () {
 	if (attemptTimeout) return;
 	if (attempts < 8) attempts++;
-	const timeout = 99 + Math.floor(99 * Math.random()) * attempts;
+	const timeout = 99 + ((99 * Math.random()) | 0) * attempts;
 	attemptTimeout = setTimeout(() => {
 		attemptTimeout = 0;
 		const oldsock = socket;

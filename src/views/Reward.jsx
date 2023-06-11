@@ -109,7 +109,7 @@ export default class Reward extends Component {
 							key={i}
 							style={{
 								position: 'absolute',
-								left: `${100 + Math.floor(i / 12) * 108}px`,
+								left: `${100 + ((i / 12) | 0) * 108}px`,
 								top: `${272 + (i % 12) * 20}px`,
 							}}
 							card={Cards.Codes[reward]}
