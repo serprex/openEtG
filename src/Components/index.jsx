@@ -327,7 +327,7 @@ export function ElementSelector(props) {
 				key={i}
 				e={'e' + i}
 				x={!i || i & 1 ? props.x : props.x + 36}
-				y={316 + (((i - 1) / 2) | 0) * 32}
+				y={286 + (((i + 1) / 2) | 0) * 32}
 				click={() => props.onChange(i)}
 			/>,
 		);
