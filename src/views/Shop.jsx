@@ -124,7 +124,7 @@ export default function Shop() {
 				},
 			}),
 		);
-	}, []);
+	}, [user]);
 
 	const buyPack = () => {
 		const pack = packdata[rarity];

@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useMemo, useRef, Component } from 'react';
 import { connect } from 'react-redux';
 
 import { playSound } from '../audio.js';
@@ -404,271 +404,288 @@ function ArrowLine({ x0, y0, x1, y1, opacity }) {
 	);
 }
 
-class ThingInst extends Component {
-	state = {
-		gameHash: null,
-		dom: null,
-	};
+function ThingInst(props) {
+	const setInfo = e => props.setInfo(e, props.game.byId(props.id), props.pos.x);
 
-	setInfo = e =>
-		this.props.setInfo(
-			e,
-			this.props.game.byId(this.props.id),
-			this.props.pos.x,
-		);
+	const onClick = () => props.onClick(props.id);
 
-	onClick = () => this.props.onClick(this.props.id);
-
-	static getDerivedStateFromProps(props, state) {
+	const { dom, faceDown } = useMemo(() => {
 		const { game, p1id, id } = props,
-			gameHash = game.replay.length,
 			obj = game.byId(id);
-		if (gameHash !== state.gameHash) {
-			if (!game.has_id(id)) {
-				return { gameHash, dom: null };
-			}
-			const children = [],
-				isSpell = obj.type === etg.Spell,
-				{ card } = obj,
-				bgcolor = ui.maybeLightenStr(card);
-			const faceDown =
-				isSpell && obj.ownerId !== p1id && !game.get(p1id, 'precognition');
-			if (faceDown) {
-				return {
-					gameHash,
-					faceDown: true,
-					dom: (
-						<div
-							className="ico cback"
-							style={{
-								left: '2px',
-								top: '2px',
-							}}
-						/>
-					),
-				};
-			}
-			let statText, topText;
-			if (!isSpell) {
-				const visible = [
-					obj.getStatus('psionic'),
-					obj.getStatus('aflatoxin'),
-					!obj.getStatus('aflatoxin') && obj.getStatus('poison') > 0,
-					obj.getStatus('airborne') || obj.getStatus('ranged'),
-					obj.getStatus('momentum'),
-					obj.getStatus('adrenaline'),
-					obj.getStatus('poison') < 0,
-				];
-				const bordervisible = [
-					obj.getStatus('delayed'),
-					id === obj.owner.gpull,
-					obj.getStatus('frozen'),
-				];
-				for (let k = 0; k < 7; k++) {
-					if (visible[k]) {
-						children.push(
-							<div
-								className={`ico s${k}`}
-								key={k}
-								style={{
-									position: 'absolute',
-									bottom: '-8px',
-									left: [32, 8, 8, 0, 24, 16, 8][k] + 'px',
-									opacity: '.6',
-									zIndex: '1',
-								}}
-							/>,
-						);
-					}
-				}
-				for (let k = 0; k < 3; k++) {
-					if (bordervisible[k]) {
-						children.push(
-							<div
-								className={`ico sborder${k}`}
-								key={7 + k}
-								style={{
-									position: 'absolute',
-									left: '0',
-									top: '0',
-									width: '64px',
-									height: '64px',
-								}}
-							/>,
-						);
-					}
-				}
-				const charges = obj.getStatus('charges');
-				topText = activeText(obj);
-				if (obj.type === etg.Creature) {
-					statText = `${obj.trueatk()} | ${obj.truehp()}${
-						charges ? ` \u00d7${charges}` : ''
-					}`;
-				} else if (obj.type === etg.Permanent) {
-					if (card.getStatus('pillar')) {
-						statText = `1:${
-							obj.getStatus('pendstate') ? obj.owner.mark : card.element
-						}\u00d7${charges}`;
-						topText = '';
-					} else {
-						const ownattack = obj.getSkill('ownattack');
-						if (ownattack?.length === 1 && ownattack[0] === 'locket') {
-							const mode = obj.getStatus('mode');
-							statText = `1:${~mode ? mode : obj.owner.mark}`;
-						} else {
-							statText = `${charges || ''}`;
-						}
-					}
-				} else if (obj.type === etg.Weapon) {
-					statText = `${obj.trueatk()}${charges ? ` \u00d7${charges}` : ''}`;
-				} else if (obj.type === etg.Shield) {
-					statText = charges ? '\u00d7' + charges : obj.truedr().toString();
-				}
-			} else {
-				topText = card.name;
-				statText = `${obj.cost}:${obj.costele}`;
-			}
+		if (!game.has_id(id)) {
+			return { faceDown: false, dom: null };
+		}
+		const children = [],
+			isSpell = obj.type === etg.Spell,
+			{ card } = obj,
+			bgcolor = ui.maybeLightenStr(card);
+		const faceDown =
+			isSpell && obj.ownerId !== p1id && !game.get(p1id, 'precognition');
+		if (faceDown) {
 			return {
-				gameHash,
-				faceDown: false,
+				faceDown: true,
 				dom: (
 					<div
+						className="ico cback"
 						style={{
-							width: '64px',
-							height: '64px',
-							backgroundColor: bgcolor,
-						}}>
-						{!props.lofiArt && (
-							<img
-								className={card.shiny ? 'shiny' : ''}
-								src={`/Cards/${encodeCode(
-									card.code + (asShiny(card.code, false) < 5000 ? 4000 : 0),
-								)}.webp`}
-								style={instimgstyle}
-							/>
-						)}
-						{children}
-						{game.game.has_protectonce(id) && (
-							<div
-								className="ico protection"
-								style={{
-									position: 'absolute',
-									width: '64px',
-									height: '64px',
-								}}
-							/>
-						)}
-						<div
-							style={{
-								position: 'absolute',
-								width: '64px',
-							}}>
-							{topText && (
-								<Components.Text
-									text={topText}
-									icoprefix="se"
-									style={{
-										width: '64px',
-										whiteSpace: 'nowrap',
-										overflow: 'hidden',
-										backgroundColor: bgcolor,
-									}}
-								/>
-							)}
-							{statText && (
-								<Components.Text
-									text={statText}
-									icoprefix="se"
-									style={{
-										float: 'right',
-										backgroundColor: bgcolor,
-									}}
-								/>
-							)}
-							{!isSpell && (
-								<Components.Text
-									text={card.name}
-									icoprefix="se"
-									style={{
-										position: 'absolute',
-										top: '54px',
-										height: '10px',
-										width: '64px',
-										overflow: 'hidden',
-										whiteSpace: 'nowrap',
-										backgroundColor: bgcolor,
-									}}
-								/>
-							)}
-						</div>
-					</div>
+							left: '2px',
+							top: '2px',
+						}}
+					/>
 				),
 			};
 		}
-		return null;
-	}
+		let statText, topText;
+		if (!isSpell) {
+			const visible = [
+				obj.getStatus('psionic'),
+				obj.getStatus('aflatoxin'),
+				!obj.getStatus('aflatoxin') && obj.getStatus('poison') > 0,
+				obj.getStatus('airborne') || obj.getStatus('ranged'),
+				obj.getStatus('momentum'),
+				obj.getStatus('adrenaline'),
+				obj.getStatus('poison') < 0,
+			];
+			const bordervisible = [
+				obj.getStatus('delayed'),
+				id === obj.owner.gpull,
+				obj.getStatus('frozen'),
+			];
+			for (let k = 0; k < 7; k++) {
+				if (visible[k]) {
+					children.push(
+						<div
+							className={`ico s${k}`}
+							key={k}
+							style={{
+								position: 'absolute',
+								bottom: '-8px',
+								left: [32, 8, 8, 0, 24, 16, 8][k] + 'px',
+								opacity: '.6',
+								zIndex: '1',
+							}}
+						/>,
+					);
+				}
+			}
+			for (let k = 0; k < 3; k++) {
+				if (bordervisible[k]) {
+					children.push(
+						<div
+							className={`ico sborder${k}`}
+							key={7 + k}
+							style={{
+								position: 'absolute',
+								left: '0',
+								top: '0',
+								width: '64px',
+								height: '64px',
+							}}
+						/>,
+					);
+				}
+			}
+			const charges = obj.getStatus('charges');
+			topText = activeText(obj);
+			if (obj.type === etg.Creature) {
+				statText = `${obj.trueatk()} | ${obj.truehp()}${
+					charges ? ` \u00d7${charges}` : ''
+				}`;
+			} else if (obj.type === etg.Permanent) {
+				if (card.getStatus('pillar')) {
+					statText = `1:${
+						obj.getStatus('pendstate') ? obj.owner.mark : card.element
+					}\u00d7${charges}`;
+					topText = '';
+				} else {
+					const ownattack = obj.getSkill('ownattack');
+					if (ownattack?.length === 1 && ownattack[0] === 'locket') {
+						const mode = obj.getStatus('mode');
+						statText = `1:${~mode ? mode : obj.owner.mark}`;
+					} else {
+						statText = `${charges || ''}`;
+					}
+				}
+			} else if (obj.type === etg.Weapon) {
+				statText = `${obj.trueatk()}${charges ? ` \u00d7${charges}` : ''}`;
+			} else if (obj.type === etg.Shield) {
+				statText = charges ? '\u00d7' + charges : obj.truedr().toString();
+			}
+		} else {
+			topText = card.name;
+			statText = `${obj.cost}:${obj.costele}`;
+		}
+		return {
+			faceDown: false,
+			dom: (
+				<div
+					style={{
+						width: '64px',
+						height: '64px',
+						backgroundColor: bgcolor,
+					}}>
+					{!props.lofiArt && (
+						<img
+							className={card.shiny ? 'shiny' : ''}
+							src={`/Cards/${encodeCode(
+								card.code + (asShiny(card.code, false) < 5000 ? 4000 : 0),
+							)}.webp`}
+							style={instimgstyle}
+						/>
+					)}
+					{children}
+					{game.game.has_protectonce(id) && (
+						<div
+							className="ico protection"
+							style={{
+								position: 'absolute',
+								width: '64px',
+								height: '64px',
+							}}
+						/>
+					)}
+					<div
+						style={{
+							position: 'absolute',
+							width: '64px',
+						}}>
+						{topText && (
+							<Components.Text
+								text={topText}
+								icoprefix="se"
+								style={{
+									width: '64px',
+									whiteSpace: 'nowrap',
+									overflow: 'hidden',
+									backgroundColor: bgcolor,
+								}}
+							/>
+						)}
+						{statText && (
+							<Components.Text
+								text={statText}
+								icoprefix="se"
+								style={{
+									float: 'right',
+									backgroundColor: bgcolor,
+								}}
+							/>
+						)}
+						{!isSpell && (
+							<Components.Text
+								text={card.name}
+								icoprefix="se"
+								style={{
+									position: 'absolute',
+									top: '54px',
+									height: '10px',
+									width: '64px',
+									overflow: 'hidden',
+									whiteSpace: 'nowrap',
+									backgroundColor: bgcolor,
+								}}
+							/>
+						)}
+					</div>
+				</div>
+			),
+		};
+	}, [props.game.replay.length, props.id, props.p1id]);
 
-	render() {
-		if (this.state.dom === null) return null;
-		const { props } = this,
-			{ game, p1id, pos, setInfo } = props,
-			obj = game.byId(props.id),
-			isSpell = obj.type === etg.Spell,
-			{ faceDown } = this.state;
+	if (dom === null) return null;
+	const { game, p1id, pos } = props,
+		obj = game.byId(props.id),
+		isSpell = obj.type === etg.Spell;
 
-		return (
-			<div
-				className={`inst ${isSpell ? 'handinst ' : ''}
-					${tgtclass(p1id, obj, props.targeting)}`}
-				style={{
-					position: 'absolute',
-					left: `${pos.x - 32}px`,
-					top: `${pos.y - 32}px`,
-					opacity: faceDown
-						? props.opacity
-						: (obj.isMaterial() ? 1 : 0.7) * props.opacity,
-					color: faceDown ? undefined : obj.card.upped ? '#000' : '#fff',
-					zIndex: '2',
-					pointerEvents: ~obj.getIndex() ? undefined : 'none',
-				}}
-				onMouseMove={!faceDown && setInfo ? this.setInfo : undefined}
-				onMouseOver={!faceDown && setInfo ? this.setInfo : undefined}
-				onMouseLeave={props.onMouseOut}
-				onClick={this.onClick}>
-				{this.state.dom}
-			</div>
-		);
-	}
+	return (
+		<div
+			className={`inst ${isSpell ? 'handinst ' : ''}${tgtclass(
+				p1id,
+				obj,
+				props.targeting,
+			)}`}
+			style={{
+				position: 'absolute',
+				left: `${pos.x - 32}px`,
+				top: `${pos.y - 32}px`,
+				opacity: faceDown
+					? props.opacity
+					: (obj.isMaterial() ? 1 : 0.7) * props.opacity,
+				color: faceDown ? undefined : obj.card.upped ? '#000' : '#fff',
+				zIndex: '2',
+				pointerEvents: ~obj.getIndex() ? undefined : 'none',
+			}}
+			onMouseMove={!faceDown && props.setInfo ? setInfo : undefined}
+			onMouseOver={!faceDown && props.setInfo ? setInfo : undefined}
+			onMouseLeave={props.onMouseOut}
+			onClick={onClick}>
+			{dom}
+		</div>
+	);
 }
 
-class Things extends Component {
-	constructor(props) {
-		super(props);
+function makeThing(props, state, id, obj, pos, opacity) {
+	return (
+		<Tween
+			key={id}
+			initial={state.current.birth.get(id)}
+			x={pos.x}
+			y={pos.y}
+			opacity={opacity}
+			compare={(prev, next) =>
+				prev.x === next.x && prev.y === next.y && prev.opacity === next.opacity
+			}
+			proc={(ms, prev, next) => {
+				if (ms > 96 * Math.PI) {
+					if (next.opacity === 0) {
+						state.current.birth.delete(id);
+						state.current.death.delete(id);
+					}
+					return next;
+				}
+				const pos = {
+					x: prev.x + (next.x - prev.x) * Math.sin(ms / 192),
+					y: prev.y + (next.y - prev.y) * Math.sin(ms / 192),
+					opacity:
+						prev.opacity + (next.opacity - prev.opacity) * Math.sin(ms / 192),
+				};
+				props.setIdTrack(id, { x: pos.x, y: pos.y });
+				return pos;
+			}}>
+			{pos => (
+				<ThingInst
+					lofiArt={props.lofiArt}
+					game={props.game}
+					id={id}
+					p1id={props.p1id}
+					setInfo={props.setInfo}
+					onMouseOut={props.onMouseOut}
+					onClick={props.onClick}
+					targeting={props.targeting}
+					pos={pos}
+					opacity={pos.opacity}
+				/>
+			)}
+		</Tween>
+	);
+}
 
-		this.state = {
-			things: new Set(props.things),
-			death: new Map(),
-			birth: new Map(),
-		};
-	}
-
-	static getDerivedStateFromProps(props, state) {
-		if (
-			props.things.length === state.things.length &&
-			props.things.every(id => state.things.has(id))
-		) {
-			return null;
-		}
+function Things(props) {
+	const state = useRef(null);
+	if (
+		state.current &&
+		(props.things.length !== state.current.things.length ||
+			!props.things.every(id => state.current.things.has(id)))
+	) {
 		const things = new Set(props.things),
-			death = new Map(state.death),
-			birth = new Map(state.birth);
+			{ birth, death } = state.current;
 		for (const id of death.keys()) {
 			if (things.has(id)) {
 				death.delete(id);
 			}
 		}
 		for (const id of things) {
-			if (!state.things.has(id)) {
+			if (!state.current.things.has(id)) {
 				const start = props.startPos.get(id);
 				let pos;
 				if (start < 0) {
@@ -687,7 +704,7 @@ class Things extends Component {
 				}
 			}
 		}
-		for (const id of state.things) {
+		for (const id of state.current.things) {
 			if (!things.has(id) && props.game.has_id(id)) {
 				const endpos = props.endPos.get(id);
 				let pos;
@@ -702,81 +719,26 @@ class Things extends Component {
 				if (pos) death.set(id, pos);
 			}
 		}
-		return {
-			things,
-			death,
-			birth,
+		state.current.things = things;
+	} else {
+		state.current = {
+			things: new Set(props.things),
+			death: new Map(),
+			birth: new Map(),
 		};
 	}
 
-	makeThing(id, obj, pos, opacity) {
-		const props = this.props;
-		return (
-			<Tween
-				key={id}
-				initial={this.state.birth.get(id)}
-				x={pos.x}
-				y={pos.y}
-				opacity={opacity}
-				compare={(prev, next) =>
-					prev.x === next.x &&
-					prev.y === next.y &&
-					prev.opacity === next.opacity
-				}
-				proc={(ms, prev, next) => {
-					if (ms > 96 * Math.PI) {
-						if (next.opacity === 0) {
-							this.setState(state => {
-								const death = new Map(state.death),
-									birth = new Map(state.birth);
-								death.delete(id);
-								birth.delete(id);
-								return { death, birth };
-							});
-						}
-						return next;
-					}
-					const pos = {
-						x: prev.x + (next.x - prev.x) * Math.sin(ms / 192),
-						y: prev.y + (next.y - prev.y) * Math.sin(ms / 192),
-						opacity:
-							prev.opacity + (next.opacity - prev.opacity) * Math.sin(ms / 192),
-					};
-					props.setIdTrack(id, { x: pos.x, y: pos.y });
-					return pos;
-				}}>
-				{pos => (
-					<ThingInst
-						lofiArt={props.lofiArt}
-						game={props.game}
-						id={id}
-						p1id={props.p1id}
-						setInfo={props.setInfo}
-						onMouseOut={props.onMouseOut}
-						onClick={props.onClick}
-						targeting={props.targeting}
-						pos={pos}
-						opacity={pos.opacity}
-					/>
-				)}
-			</Tween>
-		);
+	const children = [];
+	for (const id of props.things) {
+		const obj = props.game.byId(id),
+			pos = ui.tgtToPos(obj, props.p1id);
+		children.push(makeThing(props, state, id, obj, pos, 1));
 	}
-
-	render() {
-		const props = this.props,
-			children = [];
-		for (const id of props.things) {
-			const obj = props.game.byId(id),
-				pos = ui.tgtToPos(obj, props.p1id);
-			children.push(this.makeThing(id, obj, pos, 1));
-		}
-		for (const [id, pos] of this.state.death) {
-			const obj = props.game.byId(id);
-			children.push(this.makeThing(id, obj, pos, 0));
-		}
-		return children;
+	for (const [id, pos] of state.current.death) {
+		const obj = props.game.byId(id);
+		children.push(makeThing(props, state, id, obj, pos, 0));
 	}
+	return children;
 }
 
 function addNoHealData(game, newdata) {
