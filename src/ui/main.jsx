@@ -14,18 +14,17 @@ window.onerror = function (...args) {
 
 import { emit } from '../sock.jsx';
 import App from '../views/App.jsx';
+import Rightpane from '../views/Rightpane.jsx';
 
 createRoot(document.getElementById('leftpane')).render(
 	<Provider store={store}>
 		<App />
 	</Provider>,
 );
-import('../views/Rightpane.jsx').then(Rightpane =>
-	createRoot(document.getElementById('rightpane')).render(
-		<Provider store={store}>
-			<Rightpane.default />
-		</Provider>,
-	),
+createRoot(document.getElementById('rightpane')).render(
+	<Provider store={store}>
+		<Rightpane />
+	</Provider>,
 );
 
 emit({ x: 'motd' });

@@ -6,10 +6,6 @@ import * as etgutil from '../etgutil.js';
 export default function Editor(props) {
 	const [card, setCard] = useState(null);
 
-	const setCardArt = c => {
-		if (c !== card) setCard(c);
-	};
-
 	const addCard = card => {
 		if (props.deck.length < 60) props.setDeck(props.deck.concat([card.code]));
 	};
@@ -47,7 +43,7 @@ export default function Editor(props) {
 		<>
 			<Components.DeckDisplay
 				cards={props.cards}
-				onMouseOver={(_, card) => setCardArt(card)}
+				onMouseOver={(_, card) => setCard(card)}
 				onClick={(i, card) => {
 					const newdeck = props.deck.slice();
 					newdeck.splice(i, 1);
@@ -58,7 +54,7 @@ export default function Editor(props) {
 			/>
 			<Components.CardSelector
 				cards={props.cards}
-				onMouseOver={setCardArt}
+				onMouseOver={setCard}
 				onClick={addCard}
 				onContextMenu={rmCard}
 				maxedIndicator={!props.acard}

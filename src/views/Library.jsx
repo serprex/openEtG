@@ -165,9 +165,7 @@ export default function Library(props) {
 				cards={Cards}
 				cardpool={showBound ? boundpool : cardpool}
 				filterboth
-				onMouseOver={c => {
-					c !== card && setCard(c);
-				}}
+				onMouseOver={setCard}
 			/>
 			{children}
 		</>
