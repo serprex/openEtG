@@ -1,4 +1,11 @@
-import { useMemo, useRef, Component } from 'react';
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+	Component,
+} from 'react';
 import { connect } from 'react-redux';
 
 import { playSound } from '../audio.js';
@@ -162,92 +169,51 @@ function activeText(c) {
 	return aauto ? skillName(c, aauto) : '';
 }
 
-class Tween extends Component {
-	_mounted = false;
+function Tween(props) {
+	const start = useRef(null),
+		raf = useRef(null),
+		[state, setState] = useState(props.initial ?? props),
+		next = useRef(props),
+		prev = useRef(props.initial ?? props);
 
-	state = {
-		ms0: 0,
-		next: null,
-		state: null,
-		prev: null,
-	};
-
-	step = ts => {
-		if (this._mounted) {
-			this.setState(state => {
-				const ms0 = state.ms0 || ts;
-				const newstate = this.props.proc(
-					ts - ms0,
-					this.state.prev,
-					this.state.next,
-				);
-				return { state: newstate, ms0 };
-			});
-		}
-	};
-
-	static getDerivedStateFromProps(props, state) {
-		return !state.next
-			? props.initial
-				? {
-						next: props,
-						state: props.initial,
-						prev: props.initial,
-				  }
-				: { next: props, state: props, prev: props }
-			: (state.state && props.compare(state.state, props)) ||
-			  props.compare(state.next, props)
-			? null
-			: { next: props, prev: state.state, ms0: 0 };
+	if (!props.compare(next.current, props)) {
+		start.current = null;
+		next.current = props;
+		prev.current = state;
 	}
 
-	componentDidMount() {
-		this._mounted = true;
-		requestAnimationFrame(this.step);
-	}
+	useEffect(() => {
+		const step = ts => {
+			start.current ??= ts;
+			const newstate = props.proc(
+				ts - start.current,
+				prev.current,
+				next.current,
+			);
+			setState(newstate);
+			if (newstate !== next.current) raf.current = requestAnimationFrame(step);
+		};
+		raf.current = requestAnimationFrame(step);
+		return () => cancelAnimationFrame(raf.current);
+	}, [next.current, props.proc]);
 
-	componentDidUpdate() {
-		if (this.state.state !== this.state.next) requestAnimationFrame(this.step);
-	}
-
-	componentWillUnmount() {
-		this._mounted = false;
-	}
-
-	render() {
-		return this.props.children(this.state.state);
-	}
+	return props.children(state);
 }
 
-class Animation extends Component {
-	_mounted = false;
-	start = 0;
-	state = { child: null };
-
-	step = ts => {
-		if (this._mounted) {
-			this.start ||= ts;
-			this.setState({ child: this.props.proc(ts - this.start) });
-		}
-	};
-
-	componentDidMount() {
-		this._mounted = true;
-		this.start = 0;
-		requestAnimationFrame(this.step);
-	}
-
-	componentDidUpdate() {
-		requestAnimationFrame(this.step);
-	}
-
-	componentWillUnmount() {
-		this._mounted = false;
-	}
-
-	render() {
-		return this.state.child;
-	}
+function Animation({ proc }) {
+	const [child, setChild] = useState(null);
+	useEffect(() => {
+		let start = null,
+			raf = null;
+		const step = ts => {
+			start ??= ts;
+			setChild(proc(ts - start));
+			raf = requestAnimationFrame(step);
+		};
+		raf = requestAnimationFrame(step);
+		return () => cancelAnimationFrame(raf);
+	}, []);
+	return child;
 }
 
 function PagedModal(props) {
@@ -624,34 +590,22 @@ function ThingInst(props) {
 	);
 }
 
-function makeThing(props, state, id, obj, pos, opacity) {
+function thingTweenCompare(prev, next) {
+	return (
+		prev.x === next.x && prev.y === next.y && prev.opacity === next.opacity
+	);
+}
+function makeThing(props, state, id, thingTweenProc, obj, pos, opacity) {
 	return (
 		<Tween
 			key={id}
+			id={id}
 			initial={state.current.birth.get(id)}
 			x={pos.x}
 			y={pos.y}
 			opacity={opacity}
-			compare={(prev, next) =>
-				prev.x === next.x && prev.y === next.y && prev.opacity === next.opacity
-			}
-			proc={(ms, prev, next) => {
-				if (ms > 96 * Math.PI) {
-					if (next.opacity === 0) {
-						state.current.birth.delete(id);
-						state.current.death.delete(id);
-					}
-					return next;
-				}
-				const pos = {
-					x: prev.x + (next.x - prev.x) * Math.sin(ms / 192),
-					y: prev.y + (next.y - prev.y) * Math.sin(ms / 192),
-					opacity:
-						prev.opacity + (next.opacity - prev.opacity) * Math.sin(ms / 192),
-				};
-				props.setIdTrack(id, { x: pos.x, y: pos.y });
-				return pos;
-			}}>
+			compare={thingTweenCompare}
+			proc={thingTweenProc}>
 			{pos => (
 				<ThingInst
 					lofiArt={props.lofiArt}
@@ -728,15 +682,37 @@ function Things(props) {
 		};
 	}
 
+	const thingTweenProc = useCallback(
+		(ms, prev, next) => {
+			const id = next.id;
+			if (ms > 96 * Math.PI) {
+				if (next.opacity === 0) {
+					state.current.birth.delete(id);
+					state.current.death.delete(id);
+				}
+				return next;
+			}
+			const pos = {
+				x: prev.x + (next.x - prev.x) * Math.sin(ms / 192),
+				y: prev.y + (next.y - prev.y) * Math.sin(ms / 192),
+				opacity:
+					prev.opacity + (next.opacity - prev.opacity) * Math.sin(ms / 192),
+			};
+			props.setIdTrack(id, { x: pos.x, y: pos.y });
+			return pos;
+		},
+		[props.setIdTrack],
+	);
+
 	const children = [];
 	for (const id of props.things) {
 		const obj = props.game.byId(id),
 			pos = ui.tgtToPos(obj, props.p1id);
-		children.push(makeThing(props, state, id, obj, pos, 1));
+		children.push(makeThing(props, state, id, thingTweenProc, obj, pos, 1));
 	}
 	for (const [id, pos] of state.current.death) {
 		const obj = props.game.byId(id);
-		children.push(makeThing(props, state, id, obj, pos, 0));
+		children.push(makeThing(props, state, id, thingTweenProc, obj, pos, 0));
 	}
 	return children;
 }
@@ -809,6 +785,16 @@ function FoePlays({
 			</div>
 		)
 	);
+}
+function hpTweenProc(ms, prev, next) {
+	if (ms > 96 * Math.PI) return next;
+	return {
+		x1: prev.x1 + (next.x1 - prev.x1) * Math.sin(ms / 192),
+		x2: prev.x2 + (next.x2 - prev.x2) * Math.sin(ms / 192),
+	};
+}
+function hpTweenCompare(prev, next) {
+	return prev.x1 === next.x1 && prev.x2 === next.x2;
 }
 
 const MatchView = connect(({ user, opts, nav }) => ({
@@ -1087,13 +1073,13 @@ const MatchView = connect(({ user, opts, nav }) => ({
 													<radialGradient id="g">
 														<stop
 															offset="10%"
-															stop-color={upcolor}
-															stop-opacity="1"
+															stopColor={upcolor}
+															stopOpacity="1"
 														/>
 														<stop
 															offset="60%"
-															stop-color={color}
-															stop-opacity="0"
+															stopColor={color}
+															stopOpacity="0"
 														/>
 													</radialGradient>
 												</defs>
@@ -1372,9 +1358,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 			}
 			if (game.Cards.Names.Relic) {
 				this.props.dispatch(
-					store.doNav(import('../vanilla/views/Result.jsx'), {
-						game: game,
-					}),
+					store.doNav(import('../vanilla/views/Result.jsx'), { game }),
 				);
 			} else {
 				this.props.dispatch(
@@ -1928,14 +1912,8 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						key={`${j}hp`}
 						x1={x1}
 						x2={x2}
-						compare={(prev, next) => prev.x1 === next.x1 && prev.x2 === next.x2}
-						proc={(ms, prev, next) => {
-							if (ms > 96 * Math.PI) return next;
-							return {
-								x1: prev.x1 + (next.x1 - prev.x1) * Math.sin(ms / 192),
-								x2: prev.x2 + (next.x2 - prev.x2) * Math.sin(ms / 192),
-							};
-						}}>
+						compare={hpTweenCompare}
+						proc={hpTweenProc}>
 						{({ x1, x2 }) => (
 							<>
 								<div

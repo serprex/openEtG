@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { useEffect, useState, Fragment } from 'react';
+import { useEffect, useMemo, useState, Fragment } from 'react';
 
 import * as sock from '../sock.jsx';
 import Cards from '../Cards.js';
@@ -28,45 +28,50 @@ const packdata = [
 	{ cost: 250, type: 'Nymph', info: '1 Nymph' },
 ];
 
-function PackDisplay(props) {
+function PackDisplay({ cards }) {
 	const [hoverCard, setHoverCard] = useState(null);
-	const { cards } = props;
-	const dlen = etgutil.decklength(cards);
-	let cardchildren;
-	if (dlen < 51) {
-		cardchildren = (
+	const children = useMemo(() => {
+		const deck = etgutil.decodedeck(cards),
+			dlen = etgutil.decklength(cards);
+		const children = [];
+		children.push(
 			<Components.DeckDisplay
+				key={0}
 				cards={Cards}
-				x={64}
-				deck={etgutil.decodedeck(cards)}
+				x={106}
+				deck={deck.slice(0, 50)}
 				onMouseOver={(i, card) => setHoverCard(card)}
-			/>
+			/>,
 		);
-	} else {
-		const deck = etgutil.decodedeck(cards);
-		cardchildren = (
-			<>
+		for (let start = 51; start < dlen; start += 70) {
+			children.push(
 				<Components.DeckDisplay
+					key={start}
 					cards={Cards}
-					x={64}
-					deck={deck.slice(0, 50)}
+					x={-92}
+					y={244 + (((start - 51) / 70) | 0) * 200}
+					deck={deck.slice(start, start + 70)}
 					onMouseOver={(i, card) => setHoverCard(card)}
-				/>
-				<Components.DeckDisplay
-					cards={Cards}
-					x={-97}
-					y={244}
-					deck={deck.slice(50)}
-					onMouseOver={(i, card) => setHoverCard(card)}
-				/>
-			</>
-		);
-	}
+				/>,
+			);
+		}
+		return children;
+	}, [cards]);
 	return (
-		<Components.Box x={40} y={16} width={710} height={568}>
-			<Components.Card card={hoverCard} x={2} y={2} />
-			{cardchildren}
-		</Components.Box>
+		<div
+			className="bgbox"
+			style={{
+				position: 'absolute',
+				left: '0px',
+				top: '12px',
+				width: '756px',
+				height: '588px',
+				zIndex: '1',
+				overflowY: 'auto',
+			}}>
+			<Components.Card card={hoverCard} x={8} y={8} />
+			{children}
+		</div>
 	);
 }
 
@@ -103,13 +108,8 @@ export default function Shop() {
 							user.gold - packdata[data.packtype].cost * (bdata.bulk || 1);
 					}
 					store.store.dispatch(store.updateUser(userdelta));
-					const dlen = etgutil.decklength(data.cards);
-					if (dlen < 121) {
-						setCards(data.cards);
-						setBuy(false);
-					} else {
-						setBuy(true);
-					}
+					setCards(data.cards);
+					setBuy(false);
 					store.store.dispatch(
 						store.chat(
 							<a
