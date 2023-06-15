@@ -28,7 +28,7 @@ function mkDaily(type) {
 			dataNext.cardreward = '';
 			dataNext.rematch = props =>
 				!(props.user.daily & (1 << type)) && mkDaily(type);
-			dataNext.rematchFilter = (props, p1id) => props.game.winner !== p1id;
+			dataNext.rematchFilter = (game, p1id) => game.winner !== p1id;
 			dataNext.dataNext = dataNext;
 			return Object.assign(data, dataNext);
 		});
