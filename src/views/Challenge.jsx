@@ -1,5 +1,5 @@
-import { useState, Component } from 'react';
-import { connect } from 'react-redux';
+import { useCallback, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import * as sock from '../sock.jsx';
 import Cards from '../Cards.js';
@@ -218,7 +218,7 @@ function Group(props) {
 		<div className="bgbox" style={{ width: '300px', marginBottom: '8px' }}>
 			{props.players.map((pl, i) => (
 				<div key={pl.idx} style={{ minHeight: '24px' }}>
-					<span onClick={() => this.props.toggleEditing(pl.idx)}>
+					<span onClick={() => props.toggleEditing(pl.idx)}>
 						{pl.name || ''} <i>{pl.user || 'AI'}</i>
 						{pl.pending === 2 && '...'}
 					</span>
@@ -276,276 +276,256 @@ function Group(props) {
 	);
 }
 
-export default connect(({ user, opts }) => ({
-	username: user.name,
-}))(
-	class Challenge extends Component {
-		constructor(props) {
-			super(props);
+function toMainMenu() {
+	store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
+}
 
-			this.nextIdx = 2;
-			this.state = {
-				groups: props.groups || [
-					[{ user: props.username, idx: 1, pending: 1 }],
-					[],
-				],
-				set: props.set || '',
-				editing: [new Set(), new Set()],
-				replay: '',
-				mydeck: sock.getDeck(),
-			};
+export default function Challenge(props) {
+	const username = useSelector(({ user }) => user.name),
+		nextIdx = useRef(2);
+
+	const [groups, setGroups] = useState(
+		() => props.groups ?? [[{ user: username, idx: 1, pending: 1 }], []],
+	);
+	const [set, setSet] = useState(props.set ?? '');
+	const [editing, setEditing] = useState(() => [new Set(), new Set()]);
+	const [replay, setReplay] = useState('');
+	const [mydeck, setMyDeck] = useState(() => sock.getDeck());
+
+	const getNextIdx = useCallback(() => nextIdx.current++, []);
+
+	const playersAsData = deck => {
+		const players = [];
+		let idx = 1;
+		for (const group of groups) {
+			if (!group.length) continue;
+			const leader = idx;
+			for (const player of group) {
+				const data = {
+					idx: idx++,
+					name: player.name,
+					user: player.user,
+					leader: leader,
+					hp: player.hp,
+					deck: player.deck || deck,
+					markpower: player.markpower,
+					deckpower: player.deckpower,
+					drawpower: player.drawpower,
+				};
+				if (!player.user) data.ai = 1;
+				players.push(data);
+			}
 		}
+		return players;
+	};
+	const aiClick = () => {
+		const deck = groups[0][0].deck || mydeck;
+		if (etgutil.decklength(deck) < 9) {
+			store.store.dispatch(store.doNav(import('./DeckEditor.jsx')));
+			return;
+		}
+		const gameData = {
+			seed: randint(),
+			cardreward: '',
+			rematch: aiClick,
+			players: playersAsData(deck),
+		};
+		shuffle(gameData.players);
+		const game = new Game(gameData);
+		store.store.dispatch(store.doNav(import('./Match.jsx'), { game }));
+	};
 
-		getNextIdx = () => this.nextIdx++;
+	const replayClick = () => {
+		let play;
+		try {
+			play = JSON.parse(replay);
+			if (!play || typeof play !== 'object') {
+				return console.log('Invalid object');
+			}
+			if (!Array.isArray(play.players)) {
+				return console.log('Replay players are not an array');
+			}
+			if (!Array.isArray(play.moves)) {
+				return console.log('Replay moves are not an array');
+			}
+		} catch {
+			return console.log('Invalid JSON');
+		}
+		const game = new Game({
+			seed: play.seed,
+			set: play.set,
+			cardreward: '',
+			goldreward: 0,
+			players: play.players,
+		});
+		store.store.dispatch(
+			store.doNav(import('./Match.jsx'), {
+				replay: play,
+				game,
+			}),
+		);
+	};
 
-		playersAsData = deck => {
-			const players = [];
-			let idx = 1;
-			for (const group of this.state.groups) {
-				if (!group.length) continue;
-				const leader = idx;
-				for (const player of group) {
-					const data = {
-						idx: idx++,
-						name: player.name,
-						user: player.user,
-						leader: leader,
-						hp: player.hp,
-						deck: player.deck || deck,
-						markpower: player.markpower,
-						deckpower: player.deckpower,
-						drawpower: player.drawpower,
-					};
-					if (!player.user) data.ai = 1;
-					players.push(data);
+	const addGroup = () => {
+		setGroups(groups => groups.concat([[]]));
+		setEditing(editing => editing.concat([new Set()]));
+	};
+
+	const updatePlayers = (i, p) =>
+		setGroups(groups => {
+			const newgroups = groups.slice();
+			newgroups[i] = p;
+			return newgroups;
+		});
+
+	const removeGroup = i => {
+		setGroups(groups => {
+			const newgroups = groups.slice();
+			newgroups.splice(i, 1);
+			return newgroups;
+		});
+		setEditing(editing => {
+			const newediting = editing.slice();
+			newediting.splice(i, 1);
+			return newediting;
+		});
+	};
+
+	const loadMyData = () => {
+		for (const group of groups) {
+			for (const player of group) {
+				if (player.user === username) {
+					return player;
 				}
 			}
-			return players;
-		};
-		allReady = () => this.state.groups.every(g => g.every(p => !p.pending));
+		}
+		return null;
+	};
 
-		aiClick = () => {
-			const deck = this.state.groups[0][0].deck || this.state.mydeck;
-			if (etgutil.decklength(deck) < 9) {
-				this.props.dispatch(store.doNav(import('./DeckEditor.jsx')));
-				return;
-			}
-			const gameData = {
-				seed: randint(),
-				cardreward: '',
-				rematch: this.aiClick,
-				players: this.playersAsData(deck),
-			};
-			shuffle(gameData.players);
-			const game = new Game(gameData);
-			this.props.dispatch(store.doNav(import('./Match.jsx'), { game }));
-		};
+	const mydata = loadMyData(),
+		amhost = username === groups[0][0].user;
+	const isMultiplayer = groups.some(g =>
+		g.some(p => p.user && p.user !== username),
+	);
+	const allReady =
+		amhost && (!isMultiplayer || groups.every(g => g.every(p => !p.pending)));
 
-		replayClick = () => {
-			let replay;
-			try {
-				replay = JSON.parse(this.state.replay);
-				if (!replay || typeof replay !== 'object') {
-					return console.log('Invalid object');
-				}
-				if (!Array.isArray(replay.players)) {
-					return console.log('Replay players are not an array');
-				}
-				if (!Array.isArray(replay.moves)) {
-					return console.log('Replay moves are not an array');
-				}
-			} catch {
-				return console.log('Invalid JSON');
-			}
-			const game = new Game({
-				seed: replay.seed,
-				set: replay.set,
-				cardreward: '',
-				goldreward: 0,
-				players: replay.players,
-			});
-			this.props.dispatch(
-				store.doNav(import('./Match.jsx'), {
-					replay,
-					game,
-				}),
-			);
-		};
-
-		exitClick = () => {
-			this.toMainMenu();
-		};
-
-		toMainMenu = () =>
-			this.props.dispatch(store.doNav(import('./MainMenu.jsx')));
-
-		addGroup = () => {
-			this.setState(state => ({
-				groups: state.groups.concat([[]]),
-				editing: state.editing.concat([new Set()]),
-			}));
-		};
-
-		updatePlayers = (i, p) =>
-			this.setState(state => {
-				const newgroups = state.groups.slice();
-				newgroups[i] = p;
-				return { groups: newgroups };
-			});
-
-		removeGroup = i => {
-			this.setState(state => {
-				const newgroups = state.groups.slice(),
-					newediting = state.editing.slice();
-				newgroups.splice(i, 1);
-				newediting.splice(i, 1);
-				return { groups: newgroups, editing: newediting };
-			});
-		};
-
-		loadMyData = () => {
-			for (const group of this.state.groups) {
-				for (const player of group) {
-					if (player.user === this.props.username) {
-						return player;
+	return (
+		<>
+			<div
+				style={{
+					position: 'absolute',
+					left: '320px',
+					top: '200px',
+				}}>
+				Warning: Lobby feature is still in development
+			</div>
+			{mydata?.deck && 'You have been assigned a deck'}
+			<input
+				value={mydeck}
+				onChange={e => setMyDeck(e.target.value)}
+				style={{
+					position: 'absolute',
+					left: '306px',
+					top: '380px',
+				}}
+			/>
+			<Components.DeckDisplay
+				cards={Cards}
+				x={206}
+				y={377}
+				deck={(mydata && mydata.deck) || etgutil.decodedeck(mydeck)}
+				renderMark
+			/>
+			<input
+				type="button"
+				value="Replay"
+				onClick={replayClick}
+				style={{
+					position: 'absolute',
+					left: '540px',
+					top: '8px',
+				}}
+			/>
+			<textarea
+				className="chatinput"
+				placeholder="Replay"
+				value={replay || ''}
+				onChange={e => setReplay(e.target.value)}
+				style={{
+					position: 'absolute',
+					left: '540px',
+					top: '32px',
+				}}
+			/>
+			{groups.map((players, i) => (
+				<Group
+					key={i}
+					players={players}
+					host={username}
+					hasUserAsPlayer={name =>
+						groups.some(g => g.some(p => p.user === name))
 					}
-				}
-			}
-			return null;
-		};
-
-		isMultiplayer = () =>
-			this.state.groups.some(g =>
-				g.some(p => p.user && p.user !== this.props.username),
-			);
-
-		render() {
-			const mydata = this.loadMyData(),
-				amhost = this.props.username === this.state.groups[0][0].user,
-				isMultiplayer = this.isMultiplayer(),
-				allReady = amhost && (!isMultiplayer || this.allReady());
-			return (
-				<>
-					<div
-						style={{
-							position: 'absolute',
-							left: '320px',
-							top: '200px',
-						}}>
-						Warning: Lobby feature is still in development
-					</div>
-					{mydata?.deck && 'You have been assigned a deck'}
-					<input
-						value={this.state.mydeck}
-						onChange={e => this.setState({ mydeck: e.target.value })}
-						style={{
-							position: 'absolute',
-							left: '306px',
-							top: '380px',
-						}}
-					/>
-					<Components.DeckDisplay
-						cards={Cards}
-						x={206}
-						y={377}
-						deck={
-							(mydata && mydata.deck) || etgutil.decodedeck(this.state.mydeck)
-						}
-						renderMark
-					/>
-					<input
-						type="button"
-						value="Replay"
-						onClick={this.replayClick}
-						style={{
-							position: 'absolute',
-							left: '540px',
-							top: '8px',
-						}}
-					/>
-					<textarea
-						className="chatinput"
-						placeholder="Replay"
-						value={this.state.replay || ''}
-						onChange={e => this.setState({ replay: e.target.value })}
-						style={{
-							position: 'absolute',
-							left: '540px',
-							top: '32px',
-						}}
-					/>
-					{this.state.groups.map((players, i) => (
-						<Group
-							key={i}
-							players={players}
-							host={this.props.username}
-							hasUserAsPlayer={name =>
-								this.state.groups.some(g => g.some(p => p.user === name))
+					updatePlayers={p => updatePlayers(i, p)}
+					removeGroup={i > 0 && (() => removeGroup(i))}
+					getNextIdx={getNextIdx}
+					editing={editing[i]}
+					addEditing={
+						amhost &&
+						(idx =>
+							setEditing(state => {
+								const newediting = editing.slice();
+								newediting[i] = new Set(newediting[i]).add(idx);
+								return newediting;
+							}))
+					}
+					toggleEditing={idx =>
+						setEditing(state => {
+							const newediting = editing.slice();
+							newediting[i] = new Set(newediting[i]);
+							if (newediting[i].has(idx)) {
+								newediting[i].delete(idx);
+							} else {
+								newediting[i].add(idx);
 							}
-							updatePlayers={p => this.updatePlayers(i, p)}
-							removeGroup={i > 0 && (() => this.removeGroup(i))}
-							getNextIdx={this.getNextIdx}
-							editing={this.state.editing[i]}
-							addEditing={
-								amhost &&
-								(idx =>
-									this.setState(state => {
-										const newediting = state.editing.slice();
-										newediting[i] = new Set(newediting[i]).add(idx);
-										return { editing: newediting };
-									}))
-							}
-							toggleEditing={idx =>
-								this.setState(state => {
-									const newediting = state.editing.slice();
-									newediting[i] = new Set(newediting[i]);
-									if (newediting[i].has(idx)) {
-										newediting[i].delete(idx);
-									} else {
-										newediting[i].add(idx);
-									}
-									return { editing: newediting };
-								})
-							}
-							removeEditing={idx =>
-								this.setState(state => {
-									const newediting = state.editing.slice();
-									newediting[i] = new Set(newediting[i]);
-									newediting[i].delete(idx);
-									return { editing: newediting };
-								})
-							}
-						/>
-					))}
-					<div style={{ width: '300px' }}>
-						{amhost && (
-							<input type="button" value="+Group" onClick={this.addGroup} />
-						)}
-						{allReady
-							? this.state.groups.length > 1 &&
-							  this.state.groups.every(x => x.length) &&
-							  this.state.editing.every(x => !x.size) && (
-									<input
-										style={{ float: 'right' }}
-										type="button"
-										value="Start"
-										onClick={() => this.aiClick()}
-									/>
-							  )
-							: null}
-					</div>
-					<input
-						style={{
-							position: 'absolute',
-							left: '800px',
-							top: '8px',
-						}}
-						type="button"
-						value="Exit"
-						onClick={this.exitClick}
-					/>
-				</>
-			);
-		}
-	},
-);
+							return newediting;
+						})
+					}
+					removeEditing={idx =>
+						setEditing(editing => {
+							const newediting = editing.slice();
+							newediting[i] = new Set(newediting[i]);
+							newediting[i].delete(idx);
+							return newediting;
+						})
+					}
+				/>
+			))}
+			<div style={{ width: '300px' }}>
+				{amhost && <input type="button" value="+Group" onClick={addGroup} />}
+				{allReady
+					? groups.length > 1 &&
+					  groups.every(x => x.length) &&
+					  editing.every(x => !x.size) && (
+							<input
+								style={{ float: 'right' }}
+								type="button"
+								value="Start"
+								onClick={() => aiClick()}
+							/>
+					  )
+					: null}
+			</div>
+			<input
+				style={{
+					position: 'absolute',
+					left: '800px',
+					top: '8px',
+				}}
+				type="button"
+				value="Exit"
+				onClick={toMainMenu}
+			/>
+		</>
+	);
+}

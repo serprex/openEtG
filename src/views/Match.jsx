@@ -2,11 +2,11 @@ import {
 	useCallback,
 	useEffect,
 	useMemo,
+	useReducer,
 	useRef,
 	useState,
-	Component,
 } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { playSound } from '../audio.js';
 import * as ui from '../ui.js';
@@ -217,6 +217,7 @@ function Animation({ proc }) {
 }
 
 function PagedModal(props) {
+	const [idx, setIdx] = useState(0);
 	return (
 		<div
 			className="bgbox"
@@ -233,30 +234,26 @@ function PagedModal(props) {
 				<input
 					value="Prev"
 					type="button"
-					style={{ visibility: props.idx > 0 ? 'visible' : 'hidden' }}
-					onClick={() => props.setPage(props.idx - 1)}
+					style={{ visibility: idx > 0 ? 'visible' : 'hidden' }}
+					onClick={() => setIdx(idx - 1)}
 				/>
 				&emsp;
-				{props.idx < props.pages.length - 1 && (
+				{idx < props.pages.length - 1 && (
 					<>
-						<input
-							value="Next"
-							type="button"
-							onClick={() => props.setPage(props.idx + 1)}
-						/>
+						<input value="Next" type="button" onClick={() => setIdx(idx + 1)} />
 						&emsp;
 					</>
 				)}
 				<input
-					value={props.idx < props.pages.length - 1 ? 'Skip' : 'Okay'}
+					value={idx < props.pages.length - 1 ? 'Skip' : 'Okay'}
 					type="button"
 					onClick={props.onClose}
 				/>
 				<span className="floatRight">
-					{`${props.idx + 1} / ${props.pages.length}`}
+					{`${idx + 1} / ${props.pages.length}`}
 				</span>
 			</div>
-			{props.pages[props.idx]}
+			{props.pages[idx]}
 		</div>
 	);
 }
@@ -283,56 +280,60 @@ function LastCard({ opacity, name }) {
 }
 
 function SpellDisplay(props) {
-	return props.spells.map(({ id, spell, t }, i) => {
-		const p1 = props.getIdTrack(spell.t);
-		const y = 540 - (props.spells.length - i) * 20;
-		return (
-			<Animation
-				key={id}
-				proc={ms => {
-					let yc, opacity;
-					if (ms < 50 * Math.PI) {
-						yc = y * Math.sin(ms / 100);
-						opacity = 1 - Math.cos(ms / 100);
-					} else if (ms > 1984) {
-						yc = y + ms - 1980;
-						opacity = 1 - (ms - 1980) / (600 - y);
-					} else {
-						yc = y;
-						opacity = 1;
-					}
-					if (yc > 600) {
-						props.removeSpell(id);
-						return null;
-					}
-					return (
-						<>
-							<Components.CardImage
-								card={spell}
-								style={{
-									position: 'absolute',
-									left: '800px',
-									top: `${yc}px`,
-									opacity: opacity,
-									zIndex: '3',
-									pointerEvents: 'none',
-								}}
-							/>
-							{p1 && props.playByPlayMode !== 'noline' && (
-								<ArrowLine
-									opacity={opacity}
-									x0={800}
-									y0={yc + 10}
-									x1={p1.x}
-									y1={p1.y}
-								/>
-							)}
-						</>
-					);
-				}}
-			/>
-		);
-	});
+	return useMemo(
+		() =>
+			props.spells.map(({ id, spell, t }, i) => {
+				const p1 = props.getIdTrack(spell.t);
+				const y = 540 - (props.spells.length - i) * 20;
+				return (
+					<Animation
+						key={id}
+						proc={ms => {
+							let yc, opacity;
+							if (ms < 50 * Math.PI) {
+								yc = y * Math.sin(ms / 100);
+								opacity = 1 - Math.cos(ms / 100);
+							} else if (ms > 1984) {
+								yc = y + ms - 1980;
+								opacity = 1 - (ms - 1980) / (600 - y);
+							} else {
+								yc = y;
+								opacity = 1;
+							}
+							if (yc > 600) {
+								props.removeSpell(id);
+								return null;
+							}
+							return (
+								<>
+									<Components.CardImage
+										card={spell}
+										style={{
+											position: 'absolute',
+											left: '800px',
+											top: `${yc}px`,
+											opacity: opacity,
+											zIndex: '3',
+											pointerEvents: 'none',
+										}}
+									/>
+									{p1 && props.playByPlayMode !== 'noline' && (
+										<ArrowLine
+											opacity={opacity}
+											x0={800}
+											y0={yc + 10}
+											x1={p1.x}
+											y1={p1.y}
+										/>
+									)}
+								</>
+							);
+						}}
+					/>
+				);
+			}),
+		[props.spells, props.getIdTrack],
+	);
 }
 
 function ArrowLine({ x0, y0, x1, y1, opacity }) {
@@ -748,41 +749,50 @@ function tgtclass(p1id, obj, targeting) {
 	return '';
 }
 
-function FoePlays({
-	getIdTrack,
-	foeplays,
-	setCard,
-	setLine,
-	clearCard,
-	showGame,
-}) {
+function FoePlays({ getIdTrack, foeplays, setCard, clearCard, showGame }) {
+	const [line, setLine] = useState(null);
 	return (
 		!!foeplays && (
-			<div
-				style={{
-					position: 'absolute',
-					left: '800px',
-					top: `${540 - foeplays.length * 20}px`,
-					zIndex: '6',
-				}}>
-				{foeplays.map((play, i) => (
-					<Components.CardImage
-						key={i}
-						card={play}
-						onMouseOver={e => {
-							if (play.card) setCard(e, play.card);
-							else clearCard();
-							if (play.t) {
-								setLine(getIdTrack(play.c), getIdTrack(play.t));
-							} else {
-								setLine(null, null);
-							}
-						}}
-						onClick={() => showGame(play.game)}
-						onMouseOut={clearCard}
-					/>
-				))}
-			</div>
+			<>
+				<div
+					style={{
+						position: 'absolute',
+						left: '800px',
+						top: `${540 - foeplays.length * 20}px`,
+						zIndex: '6',
+					}}>
+					{foeplays.map((play, i) => (
+						<Components.CardImage
+							key={i}
+							card={play}
+							onMouseOver={e => {
+								if (play.card) setCard(e, play.card);
+								else clearCard();
+								if (play.t) {
+									const line0 = getIdTrack(play.c),
+										line1 = getIdTrack(play.t);
+									setLine(
+										<ArrowLine
+											x0={line0.x}
+											y0={line0.y}
+											x1={line1.x}
+											y1={line1.y}
+										/>,
+									);
+								} else {
+									setLine(null);
+								}
+							}}
+							onClick={() => showGame(play.game)}
+							onMouseOut={() => {
+								clearCard();
+								setLine(null);
+							}}
+						/>
+					))}
+				</div>
+				{line}
+			</>
 		)
 	);
 }
@@ -797,141 +807,188 @@ function hpTweenCompare(prev, next) {
 	return prev.x1 === next.x1 && prev.x2 === next.x2;
 }
 
-const MatchView = connect(({ user, opts, nav }) => ({
-	user,
-	lofiArt: opts.lofiArt ?? false,
-	playByPlayMode: opts.playByPlayMode,
-	expectedDamageSamples: opts.expectedDamageSamples | 0 || 4,
-	navProps: nav.props,
-}))(
-	class Match extends Component {
-		constructor(props) {
-			super(props);
-			this.aiDelay = 0;
-			this.streakback = 0;
-			const player1 = props.replay
-				? props.game.byId(props.game.turn)
-				: props.game.byUser(props.user ? props.user.name : '');
-			this.state = {
-				game: null,
-				tooltip: null,
-				idtrack: new Map(),
-				showFoeplays: false,
-				foeplays: new Map(),
-				resigning: false,
-				gameHash: null,
-				expectedDamage: new Int16Array(2),
-				replayindex: 0,
-				replayhistory: [props.game],
-				player1: player1.id,
-				player2: player1.foeId,
-				fxid: 0,
-				startPos: new Map(),
-				endPos: new Map(),
-				fxTextPos: new Map(),
-				fxStatChange: new Map(),
-				effects: new Set(),
-				effectId: 0,
-				hovercard: null,
-				hoverx: null,
-				hovery: null,
-				line0: null,
-				line1: null,
-				spellid: 0,
-				spells: [],
-				popup: props.game.data.quest?.opentext,
-				popupidx: 0,
-			};
-		}
+const initialSpells = { spellid: 0, spells: [] };
+function spellsReducer(state, action) {
+	if (typeof action === 'number') {
+		return {
+			spellid: state.spellid,
+			spells: state.spells.filter(x => x.id !== action.id),
+		};
+	} else {
+		return {
+			spellid: state.spellid + 1,
+			spells: state.spells.concat([
+				{
+					id: state.spellid,
+					spell: action,
+				},
+			]),
+		};
+	}
+}
 
-		Text = (key, state, newstate, id, text, onRest) => {
-			let offset;
-			const { fxid } = newstate;
-			newstate.fxTextPos = updateMap(
-				newstate.fxTextPos ?? state.fxTextPos,
+const initialEffects = {
+	effects: new Set(),
+	startPos: new Map(),
+	endPos: new Map(),
+	fxTextPos: new Map(),
+	fxStatChange: new Map(),
+	effectId: 0,
+};
+function effectsReducer(state, action) {
+	if (typeof action === 'function') {
+		return {
+			...state,
+			...action(state),
+		};
+	} else if (action.cmd === 'rm') {
+		const neweffects = new Set(state.effects);
+		neweffects.delete(action.fx);
+		return {
+			...state,
+			effects: neweffects,
+		};
+	} else if (action.cmd === 'tpos-16') {
+		return {
+			...state,
+			fxTextPos: updateMap(state.fxTextPos, action.id, pos => pos && pos - 16),
+		};
+	} else if (action.cmd === 'rmstat') {
+		const fxStatChange = new Map(state.fxStatChange);
+		fxStatChange.delete(action.id);
+		return {
+			...state,
+			fxStatChange,
+		};
+	}
+}
+
+export default function Match(props) {
+	const user = useSelector(({ user }) => user),
+		opts = useSelector(({ opts }) => opts),
+		navProps = useSelector(({ nav }) => nav.props),
+		lofiArt = opts.lofiArt ?? false,
+		playByPlayMode = opts.playByPlayMode,
+		expectedDamageSamples = opts.expectedDamageSamples | 0 || 4;
+	const aiDelay = useRef(0);
+	const streakback = useRef(0);
+	const [tempgame, setTempgame] = useState(null);
+	const [replayhistory, setReplayHistory] = useState([props.game]);
+	const [replayindex, setreplayindex] = useState(0);
+	const game = props.replay
+		? replayhistory[replayindex]
+		: tempgame ?? props.game;
+
+	const [p1id, setPlayer1] = useState(() =>
+			props.replay
+				? props.game.turn
+				: props.game.byUser(user ? user.name : '').id,
+		),
+		player1 = game.byId(p1id);
+	const [p2id, setPlayer2] = useState(player1.foeId),
+		player2 = game.byId(p2id);
+
+	const idtrackref = useRef(null);
+	if (!idtrackref.current) {
+		const idtrack = new Map();
+		idtrackref.current = {
+			idtrack,
+			setIdTrack: (id, pos) => idtrack.set(id, pos),
+		};
+	}
+	const { setIdTrack } = idtrackref.current;
+	const getIdTrack = useCallback(
+		id =>
+			id === p1id
+				? ui.tgtToPos(game.byId(p1id), p1id)
+				: id === p2id
+				? ui.tgtToPos(game.byId(p2id), p1id)
+				: idtrackref.current.idtrack.get(id),
+		[p1id, p2id],
+	);
+	const [showFoeplays, setShowFoeplays] = useState(false);
+	const [resigning, setResigning] = useState(false);
+	const [hovercard, setHoverCard] = useState(null);
+	const [hovery, setHovery] = useState(null);
+	const [tooltip, setTooltip] = useState(null);
+	const [foeplays, setFoeplays] = useState(new Map());
+	const [spells, spellsDispatch] = useReducer(spellsReducer, initialSpells);
+	const [targeting, setTargeting] = useState(null);
+	const [effects, effectsDispatch] = useReducer(effectsReducer, initialEffects);
+	const [popup, setPopup] = useState(props.game.data.quest?.opentext);
+
+	const Text = (key, state, newstate, id, text, onRest) => {
+		let offset;
+		newstate.fxTextPos = updateMap(
+			newstate.fxTextPos ?? state.fxTextPos,
+			id,
+			(pos = 0) => (offset = pos) + 16,
+		);
+		const pos = getIdTrack(id) ?? { x: -99, y: -99 };
+		const y0 = pos.y + offset;
+		const TextEffect = pos && (
+			<Animation
+				key={key}
+				proc={ms => {
+					if (ms > 360) {
+						effectsDispatch({ cmd: 'rm', fx: TextEffect });
+						effectsDispatch({ cmd: 'tpos-16', id });
+						if (onRest) effectsDispatch(onRest);
+						return null;
+					}
+					const yy = ms / 5,
+						y = y0 + yy,
+						fade = 1 - Math.tan(yy / 91);
+					return (
+						<Components.Text
+							text={text}
+							style={{
+								position: 'absolute',
+								left: `${pos.x}px`,
+								top: `${y}px`,
+								opacity: `${fade}`,
+								zIndex: '5',
+								transform: 'translate(-50%,-50%)',
+								textAlign: 'center',
+								pointerEvents: 'none',
+								textShadow: '1px 1px 2px #000',
+							}}
+						/>
+					);
+				}}
+			/>
+		);
+		return TextEffect;
+	};
+
+	const StatChange = (key, state, newstate, id, hp, atk) => {
+		newstate.fxStatChange ??= state.fxStatChange;
+		let oldentry, newentry;
+		newstate.fxStatChange = updateMap(newstate.fxStatChange, id, e => {
+			oldentry = e;
+			newentry = e ? { ...e } : { atk: 0, hp: 0, dom: null };
+			newentry.hp += hp;
+			newentry.atk += atk;
+			newentry.dom = Text(
+				key,
+				state,
+				newstate,
 				id,
-				(pos = 0) => (offset = pos) + 16,
+				`${newentry.atk > 0 ? '+' : ''}${newentry.atk}|${
+					newentry.hp > 0 ? '+' : ''
+				}${newentry.hp}`,
+				{ cmd: 'rmstat', id },
 			);
-			const pos = this.getIdTrack(id) ?? { x: -99, y: -99 };
-			const y0 = pos.y + offset;
-			const TextEffect = pos && (
-				<Animation
-					key={key}
-					proc={ms => {
-						if (ms > 360) {
-							this.setState(state => {
-								const effects = new Set(state.effects);
-								effects.delete(TextEffect);
-								const st = {
-									fxTextPos: updateMap(
-										state.fxTextPos,
-										id,
-										pos => pos && pos - 16,
-									),
-									effects,
-								};
-								return onRest ? onRest(state, st) : st;
-							});
-							return null;
-						}
-						const yy = ms / 5,
-							y = y0 + yy,
-							fade = 1 - Math.tan(yy / 91);
-						return (
-							<Components.Text
-								text={text}
-								style={{
-									position: 'absolute',
-									left: `${pos.x}px`,
-									top: `${y}px`,
-									opacity: `${fade}`,
-									zIndex: '5',
-									transform: 'translate(-50%,-50%)',
-									textAlign: 'center',
-									pointerEvents: 'none',
-									textShadow: '1px 1px 2px #000',
-								}}
-							/>
-						);
-					}}
-				/>
-			);
-			return TextEffect;
-		};
+			return newentry;
+		});
+		newstate.effects ??= new Set(state.effects);
+		if (oldentry) newstate.effects.delete(oldentry.dom);
+		newstate.effects.add(newentry.dom);
+	};
 
-		StatChange = (key, state, newstate, id, hp, atk) => {
-			newstate.fxStatChange ??= state.fxStatChange;
-			let oldentry, newentry;
-			newstate.fxStatChange = updateMap(newstate.fxStatChange, id, e => {
-				oldentry = e;
-				newentry = e ? { ...e } : { atk: 0, hp: 0, dom: null };
-				newentry.hp += hp;
-				newentry.atk += atk;
-				newentry.dom = this.Text(
-					key,
-					state,
-					newstate,
-					id,
-					`${newentry.atk > 0 ? '+' : ''}${newentry.atk}|${
-						newentry.hp > 0 ? '+' : ''
-					}${newentry.hp}`,
-					(state, st) => {
-						st.fxStatChange = new Map(state.fxStatChange);
-						st.fxStatChange.delete(id);
-						return st;
-					},
-				);
-				return newentry;
-			});
-			newstate.effects ??= new Set(state.effects);
-			if (oldentry) {
-				newstate.effects.delete(oldentry.dom);
-			}
-			newstate.effects.add(newentry.dom);
-		};
-
-		applyNext = (cmd, iscmd) => {
-			const { game } = this.props,
+	const applyNext = useCallback(
+		(cmd, iscmd) => {
+			const { game } = props,
 				{ turn } = game,
 				prehash = iscmd || game.hash();
 			if (cmd.x === 'cast' || cmd.x === 'end') {
@@ -965,44 +1022,35 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						game: game.clone(),
 					};
 				}
-				this.setState(state => {
-					const c = cmd.x === 'cast' && cmd.c && game.byId(cmd.c),
-						t = cmd.x === 'cast' && cmd.t && game.byId(cmd.t);
-					if (c && c.ownerId !== this.state.player1 && c.owner.isCloaked()) {
-						return null;
-					}
-					const foeplays = new Map(state.foeplays),
-						delta = { foeplays };
-					foeplays.set(turn, (foeplays.get(turn) ?? []).concat([play]));
-					if (
-						cmd.x === 'cast' &&
-						iscmd &&
-						this.props.playByPlayMode !== 'disabled'
-					) {
-						delta.spells = state.spells.concat([
-							{ id: state.spellid, spell: play },
-						]);
-						delta.spellid = state.spellid + 1;
-					}
-					return delta;
-				});
+				const c = cmd.x === 'cast' && cmd.c && game.byId(cmd.c),
+					t = cmd.x === 'cast' && cmd.t && game.byId(cmd.t);
+				if (c && c.ownerId !== p1id && c.owner.isCloaked()) {
+					return null;
+				}
+				setFoeplays(foeplays =>
+					new Map(foeplays).set(
+						turn,
+						(foeplays.get(turn) ?? []).concat([play]),
+					),
+				);
+				if (cmd.x === 'cast' && iscmd && playByPlayMode !== 'disabled') {
+					spellsDispatch(play);
+				}
 			}
 			const effects = game.next(cmd);
 			if (
 				!iscmd &&
-				game.data.players.some(
-					pl => pl.user && pl.user !== this.props.user.name,
-				)
+				game.data.players.some(pl => pl.user && pl.user !== user.name)
 			) {
 				sock.userEmit('move', {
-					id: this.props.gameid,
+					id: props.gameid,
 					prehash,
 					hash: game.hash(),
 					cmd,
 				});
 			}
-			this.gameStep(game);
-			this.setState(state => {
+			gameStep(game);
+			effectsDispatch(state => {
 				const newstate = {};
 				let { effectId } = state;
 				for (let idx = 0; idx < effects.length; idx += 3) {
@@ -1023,7 +1071,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							break;
 						case 'Bolt': {
 							newstate.effects ??= new Set(state.effects);
-							const pos = this.getIdTrack(id) ?? { x: -99, y: -99 },
+							const pos = getIdTrack(id) ?? { x: -99, y: -99 },
 								color = ui.strcols[param & 255],
 								upcolor = ui.strcols[(param & 255) + 13],
 								bolts = (param >> 8) + 1,
@@ -1033,11 +1081,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 									key={effectId}
 									proc={ms => {
 										if (ms > duration) {
-											this.setState(state => {
-												const effects = new Set(state.effects);
-												effects.delete(BoltEffect);
-												return { effects };
-											});
+											effectsDispatch({ cmd: 'rm', fx: BoltEffect });
 											return null;
 										}
 										const circles = [];
@@ -1095,7 +1139,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						case 'Card':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
-								this.Text(
+								Text(
 									effectId,
 									state,
 									newstate,
@@ -1107,26 +1151,26 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						case 'Poison':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
-								this.Text(effectId, state, newstate, id, `Poison ${param}`),
+								Text(effectId, state, newstate, id, `Poison ${param}`),
 							);
 							break;
 						case 'Delay':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
-								this.Text(effectId, state, newstate, id, `Delay ${param}`),
+								Text(effectId, state, newstate, id, `Delay ${param}`),
 							);
 							break;
 						case 'Freeze':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
-								this.Text(effectId, state, newstate, id, `Freeze ${param}`),
+								Text(effectId, state, newstate, id, `Freeze ${param}`),
 							);
 							break;
 						case 'Dmg':
-							this.StatChange(effectId, state, newstate, id, -param, 0);
+							StatChange(effectId, state, newstate, id, -param, 0);
 							break;
 						case 'Atk':
-							this.StatChange(effectId, state, newstate, id, 0, param);
+							StatChange(effectId, state, newstate, id, 0, param);
 							break;
 						case 'LastCard':
 							newstate.effects ??= new Set(state.effects);
@@ -1137,11 +1181,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 									key={effectId}
 									proc={ms => {
 										if (ms > 864 * Math.PI) {
-											this.setState(state => {
-												const effects = new Set(state.effects);
-												effects.delete(LastCardEffect);
-												return { effects };
-											});
+											effectsDispatch({ cmd: 'rm', fx: LastCardEffect });
 											return null;
 										}
 										return (
@@ -1158,22 +1198,18 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						case 'Heal':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
-								this.Text(effectId, state, newstate, id, `+${param}`),
+								Text(effectId, state, newstate, id, `+${param}`),
 							);
 							break;
 						case 'Lightning': {
 							newstate.effects ??= new Set(state.effects);
-							const pos = this.getIdTrack(id) ?? { x: -99, y: -99 };
+							const pos = getIdTrack(id) ?? { x: -99, y: -99 };
 							const LightningEffect = (
 								<Animation
 									key={effectId}
 									proc={ms => {
 										if (ms > 128) {
-											this.setState(state => {
-												const effects = new Set(state.effects);
-												effects.delete(LightningEffect);
-												return { effects };
-											});
+											effectsDispatch({ cmd: 'rm', fx: LightningEffect });
 											return null;
 										}
 										const path = ['M 32 0'];
@@ -1213,13 +1249,13 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						case 'Lives':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
-								this.Text(effectId, state, newstate, id, `${param} lives`),
+								Text(effectId, state, newstate, id, `${param} lives`),
 							);
 							break;
 						case 'Quanta':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
-								this.Text(
+								Text(
 									effectId,
 									state,
 									newstate,
@@ -1233,9 +1269,7 @@ const MatchView = connect(({ user, opts, nav }) => ({
 							break;
 						default:
 							newstate.effects ??= new Set(state.effects);
-							newstate.effects.add(
-								this.Text(effectId, state, newstate, id, kind),
-							);
+							newstate.effects.add(Text(effectId, state, newstate, id, kind));
 							break;
 					}
 				}
@@ -1245,207 +1279,158 @@ const MatchView = connect(({ user, opts, nav }) => ({
 			const newTurn = game.turn;
 			if (newTurn !== turn) {
 				const pl = game.byId(newTurn);
-				if (pl.data.user === this.props.user.name) {
-					this.setState({ player1: newTurn });
+				if (pl.data.user === user.name) {
+					setPlayer1(newTurn);
 				}
-				this.setState(state => ({
-					foeplays: new Map(state.foeplays).set(newTurn, []),
-				}));
+				setFoeplays(foeplays => new Map(foeplays).set(newTurn, []));
 			}
-		};
+		},
+		[props.game, getIdTrack],
+	);
 
-		static getDerivedStateFromProps(props, state) {
-			if (props.game.replay.length !== state.gameHash) {
-				const player1 = props.game.byId(
-					props.replay ? props.game.turn : state.player1,
-				);
-				return {
-					gameHash: props.game.replay.length,
-					expectedDamage: props.game.expectedDamage(
-						props.expectedDamageSamples,
-					),
-					player1: player1.id,
-				};
+	const expectedDamages = useMemo(
+		() => props.game.expectedDamage(expectedDamageSamples),
+		[props.game, props.game.replay.length, expectedDamageSamples],
+	);
+
+	const setReplayIndex = (history, idx) => {
+		if (idx >= history.length) {
+			history = history.slice();
+			setReplayHistory(history);
+			while (idx >= history.length) {
+				const gclone = history[history.length - 1].clone();
+				gclone.next(props.replay.moves[history.length - 1], false);
+				history.push(gclone);
 			}
-			return null;
 		}
+		const game = history[idx];
+		setreplayindex(idx);
+		setPlayer1(game.turn);
+		setPlayer2(game.get_foe(game.turn));
+	};
 
-		setReplayIndex = (state, idx) => {
-			const newstate = { replayindex: idx };
-			if (idx >= state.replayhistory.length) {
-				const history = state.replayhistory.slice();
-				newstate.replayhistory = history;
-				while (idx >= history.length) {
-					const gclone = history[history.length - 1].clone();
-					gclone.next(this.props.replay.moves[history.length - 1], false);
-					history.push(gclone);
-				}
-			}
-			const game = (newstate.replayhistory ?? state.replayhistory)[idx];
-			newstate.player1 = game.turn;
-			newstate.player2 = game.get_foe(game.turn);
-			return newstate;
-		};
-
-		replayNext = () =>
-			this.setState(state => this.setReplayIndex(state, state.replayindex + 1));
-		replayPrev = () =>
-			this.setState(state => this.setReplayIndex(state, state.replayindex - 1));
-		replayNextPly = () =>
-			this.setState(state => {
-				const len = this.props.replay.moves.length;
-				let idx = state.replayindex + 1;
-				for (; idx < len; idx++) {
-					const { x } = this.props.replay.moves[idx];
-					if (x === 'end' || x === 'mulligan') break;
-				}
-				return this.setReplayIndex(state, Math.min(idx, len));
+	const gotoResult = useCallback(() => {
+		const { game } = props;
+		if (game.data.arena) {
+			sock.userEmit('modarena', {
+				aname: game.data.arena,
+				won: game.winner !== p1id,
+				lv: game.data.level - 4,
 			});
-		replayPrevPly = () =>
-			this.setState(state => {
-				let idx = state.replayindex - 1;
-				for (; idx >= 1; idx--) {
-					const { x } = this.props.replay.moves[idx - 1];
-					if (x === 'end' || x === 'mulligan') break;
+		}
+		if (game.winner === p1id) {
+			if (game.data.quest !== undefined) {
+				if (game.data.quest.autonext) {
+					mkAi.run(
+						mkQuestAi(game.data.quest.autonext, qdata =>
+							addNoHealData(game, qdata),
+						),
+					);
+					return;
+				} else if (!user.quests[game.data.quest.key]) {
+					sock.userExec('setquest', {
+						quest: game.data.quest.key,
+					});
 				}
-				return this.setReplayIndex(state, Math.max(idx, 0));
-			});
-
-		getGame = () =>
-			this.props.replay
-				? this.state.replayhistory[this.state.replayindex]
-				: this.state.game ?? this.props.game;
-
-		gotoResult = () => {
-			const { game, user } = this.props;
-			if (game.data.arena) {
-				sock.userEmit('modarena', {
-					aname: game.data.arena,
-					won: game.winner !== this.state.player1,
-					lv: game.data.level - 4,
-				});
-			}
-			if (game.winner === this.state.player1) {
-				if (game.data.quest !== undefined) {
-					if (game.data.quest.autonext) {
-						mkAi.run(
-							mkQuestAi(game.data.quest.autonext, qdata =>
-								addNoHealData(game, qdata),
-							),
-						);
-						return;
-					} else if (!user.quests[game.data.quest.key]) {
-						sock.userExec('setquest', {
-							quest: game.data.quest.key,
-						});
-					}
-				} else if (game.data.daily) {
-					const endurance = game.data.endurance;
-					if (endurance !== undefined && endurance > 0) {
-						mkAi.run(
-							mkAi.mkAi(game.data.level, true, gdata =>
-								addNoHealData(game, gdata),
-							),
-						);
-						return;
-					} else {
-						const daily = game.data.daily;
-						sock.userExec('donedaily', {
-							daily: daily === 4 ? 5 : daily === 3 ? 0 : daily,
-						});
-					}
+			} else if (game.data.daily) {
+				const endurance = game.data.endurance;
+				if (endurance !== undefined && endurance > 0) {
+					mkAi.run(
+						mkAi.mkAi(game.data.level, true, gdata =>
+							addNoHealData(game, gdata),
+						),
+					);
+					return;
+				} else {
+					const daily = game.data.daily;
+					sock.userExec('donedaily', {
+						daily: daily === 4 ? 5 : daily === 3 ? 0 : daily,
+					});
 				}
 			}
-			if (game.Cards.Names.Relic) {
-				this.props.dispatch(
-					store.doNav(import('../vanilla/views/Result.jsx'), { game }),
-				);
-			} else {
-				this.props.dispatch(
-					store.doNav(import('./Result.jsx'), {
-						game: game,
-						streakback: this.streakback,
-					}),
-				);
-			}
-		};
+		}
+		if (game.Cards.Names.Relic) {
+			store.store.dispatch(
+				store.doNav(import('../vanilla/views/Result.jsx'), { game }),
+			);
+		} else {
+			store.store.dispatch(
+				store.doNav(import('./Result.jsx'), {
+					game,
+					streakback: streakback.current,
+				}),
+			);
+		}
+	}, [props.game]);
 
-		endClick = (discard = 0) => {
-			const { game } = this.props;
-			if (
-				game.turn === this.state.player1 &&
-				game.phase === wasm.Phase.Mulligan
-			) {
-				this.applyNext({ x: 'accept' });
+	const endClick = useCallback(
+		(discard = 0) => {
+			const { game } = props;
+			if (game.turn === p1id && game.phase === wasm.Phase.Mulligan) {
+				applyNext({ x: 'accept' });
 			} else if (game.winner) {
-				this.gotoResult();
-			} else if (game.turn === this.state.player1) {
-				if (discard === 0 && game.full_hand(this.state.player1)) {
-					this.setState({
-						targeting: {
-							filter: obj =>
-								obj.type === etg.Spell && obj.ownerId === this.state.player1,
-							cb: tgt => {
-								this.endClick(tgt.id);
-								this.setState({ targeting: null });
-							},
-							text: 'Discard',
-							src: null,
+				gotoResult();
+			} else if (game.turn === p1id) {
+				if (discard === 0 && game.full_hand(p1id)) {
+					setTargeting({
+						filter: obj => obj.type === etg.Spell && obj.ownerId === p1id,
+						cb: tgt => {
+							endClick(tgt.id);
+							setTargeting(null);
 						},
+						text: 'Discard',
+						src: null,
 					});
 				} else {
-					this.applyNext({
+					applyNext({
 						x: 'end',
 						t: discard || undefined,
 					});
-					this.setState({ targeting: null });
+					setTargeting(null);
 				}
 			}
-		};
+		},
+		[props.game],
+	);
 
-		cancelClick = () => {
-			const { game } = this.props;
-			if (this.state.resigning) {
-				this.setState({ resigning: false });
-			} else if (game.turn === this.state.player1) {
-				if (
-					game.phase === wasm.Phase.Mulligan &&
-					!game.empty_hand(this.state.player1)
-				) {
-					this.applyNext({ x: 'mulligan' });
-				} else if (this.state.targeting) {
-					this.setState({ targeting: null });
-				}
-			}
-		};
-
-		resignClick = () => {
-			if (this.props.replay) {
-				this.props.dispatch(store.doNav(import('./Challenge.jsx'), {}));
-			} else if (
-				this.props.game.winner ||
-				this.props.game.get(this.state.player1, 'resigned')
-			) {
-				this.gotoResult();
-			} else if (!this.state.resigning) {
-				this.setState({ resigning: true });
+	const cancelClick = useCallback(() => {
+		const { game } = props;
+		if (resigning) {
+			setResigning(false);
+		} else if (game.turn === p1id) {
+			if (game.phase === wasm.Phase.Mulligan && !game.empty_hand(p1id)) {
+				applyNext({ x: 'mulligan' });
 			} else {
-				this.applyNext({ x: 'resign', c: this.state.player1 });
-				if (this.props.game.winner) this.gotoResult();
+				setTargeting(null);
 			}
-		};
+		}
+	}, [props.game, p1id, resigning]);
 
-		thingClick = id => {
-			const { game } = this.props;
-			this.clearCard();
-			if (this.props.replay || game.phase !== wasm.Phase.Play) return;
+	const resignClick = useCallback(() => {
+		if (props.replay) {
+			store.store.dispatch(store.doNav(import('./Challenge.jsx')));
+		} else if (props.game.winner || props.game.get(p1id, 'resigned')) {
+			gotoResult();
+		} else if (!resigning) {
+			setResigning(true);
+		} else {
+			applyNext({ x: 'resign', c: p1id });
+			if (props.game.winner) gotoResult();
+		}
+	}, [props.game, props.replay, resigning]);
+
+	const thingClick = useCallback(
+		id => {
+			const { game } = props;
+			clearCard();
+			if (props.replay || game.phase !== wasm.Phase.Play) return;
 			const obj = game.byId(id);
-			if (this.state.targeting) {
-				if (this.state.targeting.filter(obj)) {
-					this.state.targeting.cb(obj);
+			if (targeting) {
+				if (targeting.filter(obj)) {
+					targeting.cb(obj);
 				}
-			} else if (obj.ownerId === this.state.player1 && obj.canactive()) {
-				const cb = tgt => this.applyNext({ x: 'cast', c: obj.id, t: tgt?.id });
+			} else if (obj.ownerId === p1id && obj.canactive()) {
+				const cb = tgt => applyNext({ x: 'cast', c: obj.id, t: tgt?.id });
 				if (obj.type === etg.Spell && obj.card.type !== etg.Spell) {
 					cb();
 				} else {
@@ -1453,23 +1438,24 @@ const MatchView = connect(({ user, opts, nav }) => ({
 					if (!requiresTarget) {
 						cb();
 					} else {
-						this.setState({
-							targeting: {
-								filter: tgt => game.canTarget(obj.id, tgt.id),
-								cb: tgt => {
-									cb(tgt);
-									this.setState({ targeting: null });
-								},
-								text: skillName(obj, obj.getSkill('cast')),
-								src: obj,
+						setTargeting({
+							filter: tgt => game.canTarget(obj.id, tgt.id),
+							cb: tgt => {
+								cb(tgt);
+								setTargeting(null);
 							},
+							text: skillName(obj, obj.getSkill('cast')),
+							src: obj,
 						});
 					}
 				}
 			}
-		};
+		},
+		[props.game, props.replay, targeting],
+	);
 
-		gameStep(game) {
+	const gameStep = useCallback(
+		game => {
 			const turn = game.byId(game.turn);
 			if (turn.data.ai === 1) {
 				if (game.phase <= wasm.Phase.Play) {
@@ -1484,771 +1470,703 @@ const MatchView = connect(({ user, opts, nav }) => ({
 						})
 						.then(e => {
 							const now = Date.now();
-							if (game.phase === wasm.Phase.Play && now < this.aiDelay) {
+							if (game.phase === wasm.Phase.Play && now < aiDelay.current) {
 								return new Promise(resolve =>
-									setTimeout(() => resolve(e), this.aiDelay - now),
+									setTimeout(() => resolve(e), aiDelay.current - now),
 								);
 							} else {
 								return Promise.resolve(e);
 							}
 						})
 						.then(e => {
-							this.aiDelay =
-								Date.now() + (game.turn === this.state.player1 ? 2000 : 200);
-							this.applyNext(e.data.cmd, true);
+							aiDelay.current = Date.now() + (game.turn === p1id ? 2000 : 200);
+							applyNext(e.data.cmd, true);
 						});
 				}
 			}
-		}
+		},
+		[game],
+	);
 
-		onkeydown = e => {
+	const isMultiplayer = game.data.players.some(
+		pl => pl.user && pl.user !== user.name,
+	);
+
+	const onkeydown = useCallback(
+		e => {
 			if (e.target.tagName === 'TEXTAREA') return;
 			const kc = e.which,
 				ch = e.key ?? String.fromCharCode(kc);
 			let chi;
 			if (kc === 27) {
-				this.resignClick();
+				resignClick();
 			} else if (ch === ' ' || kc === 13) {
-				this.endClick();
+				endClick();
 			} else if (ch === '\b' || ch === '0') {
-				this.cancelClick();
+				cancelClick();
 			} else if (~(chi = 'sw'.indexOf(ch))) {
-				this.thingClick(chi ? this.state.player2 : this.state.player1);
+				thingClick(chi ? p2id : p1id);
 			} else if (~(chi = 'qa'.indexOf(ch))) {
-				const { shieldId } = this.props.game.byId(
-					chi ? this.state.player2 : this.state.player1,
-				);
-				if (shieldId !== 0) this.thingClick(shieldId);
+				const { shieldId } = props.game.byId(chi ? p2id : p1id);
+				if (shieldId !== 0) thingClick(shieldId);
 			} else if (~(chi = 'ed'.indexOf(ch))) {
-				const { weaponId } = this.props.game.byId(
-					chi ? this.state.player2 : this.state.player1,
-				);
-				if (weaponId !== 0) this.thingClick(weaponId);
+				const { weaponId } = props.game.byId(chi ? p2id : p1id);
+				if (weaponId !== 0) thingClick(weaponId);
 			} else if (~(chi = '12345678'.indexOf(ch))) {
-				const card = this.props.game.byId(this.state.player1).handIds[chi];
-				if (card) this.thingClick(card);
+				const card = props.game.byId(p1id).handIds[chi];
+				if (card) thingClick(card);
 			} else if (ch === 'p') {
-				if (
-					this.props.game.turn === this.state.player1.id &&
-					this.state.player2.id !== this.state.player1.foeId
-				) {
-					this.applyNext({ x: 'foe', t: this.state.player2.id });
+				if (props.game.turn === p1id && p2id !== player1.foeId) {
+					applyNext({ x: 'foe', t: p2id });
 				}
-			} else if (ch === 'l' && this.props.gameid) {
-				sock.userEmit('reloadmoves', { id: this.props.gameid });
+			} else if (ch === 'l' && props.gameid) {
+				sock.userEmit('reloadmoves', { id: props.gameid });
 			} else if (~(chi = '[]'.indexOf(ch))) {
-				this.setState(state => {
-					const { players } = this.props.game,
-						dir = chi ? players.length + 1 : 1;
-					let nextId,
-						i = 1;
-					for (; i < players.length; i++) {
-						nextId =
-							players[
-								(players.indexOf(state.player2) + i * dir) % players.length
-							];
-						if (
-							nextId !== this.state.player1 &&
-							!this.props.game.get(nextId, 'out')
-						) {
-							break;
-						}
+				const { players } = props.game,
+					dir = chi ? players.length + 1 : 1;
+				let nextId,
+					i = 1;
+				for (; i < players.length; i++) {
+					nextId = players[(players.indexOf(p2id) + i * dir) % players.length];
+					if (nextId !== p1id && !props.game.get(nextId, 'out')) {
+						break;
 					}
-					return i === players.length ? null : { player2: nextId };
-				});
+				}
+				if (i !== players.length) {
+					setPlayer2(nextId);
+				}
 			} else return;
 			e.preventDefault();
-		};
+		},
+		[props.game, thingClick, resignClick, cancelClick],
+	);
 
-		startMatch({ user, game, dispatch }) {
-			const wasPvP = game.data.players.every(pd => !pd.ai);
-			if (
-				!this.props.noloss &&
-				!game.data.endurance &&
-				!game.Cards.Names.Relic &&
-				(game.data.level !== undefined || wasPvP)
-			) {
-				sock.userExec('addloss', {
-					pvp: wasPvP,
-					l: game.data.level,
-					g: -(game.data.cost | 0),
-				});
-				this.streakback = user.streak[game.data.level];
-			}
-			dispatch(
-				store.setCmds({
-					move: ({ cmd, hash }) => {
-						const { game } = this.props;
-						if (
-							(!cmd.c || game.has_id(cmd.c)) &&
-							(!cmd.t || game.has_id(cmd.t))
-						) {
-							this.applyNext(cmd, true);
-							if (game.hash() === hash) return;
-						}
-						sock.userEmit('reloadmoves', { id: this.props.gameid });
-					},
-					reloadmoves: ({ moves }) => {
-						this.props.dispatch(
-							store.doNav(Promise.resolve({ default: MatchView }), {
-								...this.props.navProps,
-								game: game.withMoves(moves),
-								noloss: true,
-							}),
-						);
-					},
-				}),
-			);
-			this.gameStep(game);
-		}
-
-		componentDidMount() {
-			if (!this.props.replay) {
-				if (!this.props.game.data.spectate) {
-					document.addEventListener('keydown', this.onkeydown);
-					window.addEventListener('beforeunload', this.onbeforeunload);
-				}
-				this.startMatch(this.props);
-			}
-		}
-
-		componentWillUnmount() {
-			document.removeEventListener('keydown', this.onkeydown);
-			window.removeEventListener('beforeunload', this.onbeforeunload);
-			this.props.dispatch(store.setCmds({}));
-		}
-
-		onbeforeunload = e => {
-			if (
-				this.props.game.data.players.some(
-					pl => pl.user && pl.user !== this.props.user.name,
-				)
-			) {
+	const onbeforeunload = useCallback(
+		e => {
+			if (isMultiplayer) {
 				e.preventDefault();
 				e.returnValue = '';
 			}
-		};
+		},
+		[isMultiplayer],
+	);
 
-		setInfo = (e, obj, x) => {
-			const actinfo =
-				this.state.targeting &&
-				this.state.targeting.filter(obj) &&
-				activeInfo[this.state.targeting.text];
-			this.setState({
-				tooltip: (
-					<Components.Text
-						className="infobox"
-						text={`${obj.info()}${
-							actinfo ? '\n' + actinfo(this.state.targeting.src, obj) : ''
-						}`}
-						icoprefix="te"
-						style={{
-							position: 'absolute',
-							left: `${e.pageX}px`,
-							top: `${e.pageY}px`,
-							zIndex: '5',
-						}}
-					/>
-				),
-			});
-			if (obj.type !== etg.Player) {
-				this.setCard(e, obj.card, x);
-			}
-		};
-
-		clearCard = () => {
-			this.setState({
-				hovercard: null,
-				tooltip: null,
-				line0: null,
-				line1: null,
-			});
-		};
-
-		setCard(e, card, x) {
-			this.setState({
-				hovercard: card,
-				hoverx: 734,
-				hovery: e.pageY > 300 ? 44 : 300,
-			});
+	useEffect(() => {
+		if (!props.replay && !props.game.data.spectate) {
+			document.addEventListener('keydown', onkeydown);
+			window.addEventListener('beforeunload', onbeforeunload);
+			return () => {
+				document.removeEventListener('keydown', onkeydown);
+				window.removeEventListener('beforeunload', onbeforeunload);
+			};
 		}
+	}, [onkeydown, onbeforeunload]);
 
-		setIdTrack = (id, pos) =>
-			this.setState(state => ({
-				idtrack: new Map(state.idtrack).set(id, pos),
-			}));
-
-		getIdTrack = id =>
-			id === this.state.player1
-				? ui.tgtToPos(
-						this.getGame().byId(this.state.player1),
-						this.state.player1,
-				  )
-				: id === this.state.player2
-				? ui.tgtToPos(
-						this.getGame().byId(this.state.player2),
-						this.state.player1,
-				  )
-				: this.state.idtrack.get(id);
-
-		render() {
-			const { props } = this,
-				game = this.getGame(),
-				children = [],
-				player1 = game.byId(this.state.player1),
-				player2 = game.byId(this.state.player2);
-			let turntell, endText, cancelText;
-			const cloaked = player2.isCloaked();
-
-			if (game.phase !== wasm.Phase.End) {
-				turntell = this.state.targeting
-					? this.state.targeting.text
-					: `${game.turn === player1.id ? 'Your' : 'Their'} turn${
-							game.phase > wasm.Phase.Mulligan
-								? ''
-								: game.players[0] === player1.id
-								? "\nYou're first"
-								: "\nYou're second"
-					  }`;
-				if (game.turn === player1.id) {
-					endText = this.state.targeting
-						? ''
-						: game.phase === wasm.Phase.Play
-						? 'End Turn'
-						: game.turn === player1.id
-						? 'Accept'
-						: '';
-					if (game.phase !== wasm.Phase.Play) {
-						cancelText = game.turn === player1.id ? 'Mulligan' : '';
-					} else {
-						cancelText =
-							this.state.targeting || this.state.resigning ? 'Cancel' : '';
+	useEffect(() => {
+		const { game } = props;
+		if (
+			!props.noloss &&
+			!game.data.endurance &&
+			!game.Cards.Names.Relic &&
+			(game.data.level !== undefined || isMultiplayer)
+		) {
+			sock.userExec('addloss', {
+				pvp: isMultiplayer,
+				l: game.data.level,
+				g: -(game.data.cost | 0),
+			});
+			streakback.current = user.streak[game.data.level];
+		}
+		store.store.dispatch(
+			store.setCmds({
+				move: ({ cmd, hash }) => {
+					const { game } = props;
+					if (
+						(!cmd.c || game.has_id(cmd.c)) &&
+						(!cmd.t || game.has_id(cmd.t))
+					) {
+						applyNext(cmd, true);
+						if (game.hash() === hash) return;
 					}
-				} else cancelText = endText = '';
+					sock.userEmit('reloadmoves', { id: props.gameid });
+				},
+				reloadmoves: ({ moves }) => {
+					store.store.dispatch(
+						store.doNav(Promise.resolve({ default: MatchView }), {
+							...navProps,
+							game: game.withMoves(moves),
+							noloss: true,
+						}),
+					);
+				},
+			}),
+		);
+		gameStep(game);
+		return () => store.store.dispatch(store.setCmds({}));
+	}, []);
+
+	const setCard = (e, card) => {
+		setHoverCard(card);
+		setHovery(e.pageY > 300 ? 44 : 300);
+	};
+
+	const setInfo = (e, obj, x) => {
+		const actinfo =
+			targeting && targeting.filter(obj) && activeInfo[targeting.text];
+		setTooltip(
+			<Components.Text
+				className="infobox"
+				text={`${obj.info()}${
+					actinfo ? '\n' + actinfo(targeting.src, obj) : ''
+				}`}
+				icoprefix="te"
+				style={{
+					position: 'absolute',
+					left: `${e.pageX}px`,
+					top: `${e.pageY}px`,
+					zIndex: '5',
+				}}
+			/>,
+		);
+		if (obj.type !== etg.Player) {
+			setCard(e, obj.card);
+		}
+	};
+
+	const clearCard = () => {
+		setHoverCard(null);
+		setTooltip(null);
+	};
+
+	const children = [];
+	let turntell, endText, cancelText;
+	const cloaked = player2.isCloaked();
+
+	if (game.phase !== wasm.Phase.End) {
+		turntell = targeting
+			? targeting.text
+			: `${game.turn === player1.id ? 'Your' : 'Their'} turn${
+					game.phase > wasm.Phase.Mulligan
+						? ''
+						: game.players[0] === player1.id
+						? "\nYou're first"
+						: "\nYou're second"
+			  }`;
+		if (game.turn === player1.id) {
+			endText = targeting
+				? ''
+				: game.phase === wasm.Phase.Play
+				? 'End Turn'
+				: game.turn === player1.id
+				? 'Accept'
+				: '';
+			if (game.phase !== wasm.Phase.Play) {
+				cancelText = game.turn === player1.id ? 'Mulligan' : '';
 			} else {
-				turntell = `${game.turn === player1.id ? 'Your' : 'Their'} Turn\n${
-					game.winner === player1.id ? 'Won' : 'Lost'
-				}`;
-				endText = 'Continue';
-				cancelText = '';
+				cancelText = targeting || resigning ? 'Cancel' : '';
 			}
-			const things = [];
-			for (let j = 0; j < 2; j++) {
-				const pl = j ? player2 : player1,
-					plpos = ui.tgtToPos(pl, player1.id),
-					handOverlay =
-						pl.casts === 0
-							? 12
-							: pl.getStatus('sanctuary')
-							? 8
-							: (pl.getStatus('nova') >= 2 || pl.getStatus('nova2') >= 1) &&
-							  (pl.id !== player1.id ||
-									pl.handIds.some(id => {
-										const card = game.Cards.Codes[game.get(id, 'card')];
-										return card && card.isOf(game.Cards.Names.Nova);
-									}))
-							? 1
-							: null;
-				children.push(
-					<div
-						key={j}
-						className={tgtclass(player1.id, pl, this.state.targeting)}
-						style={{
-							position: 'absolute',
-							left: `${plpos.x - 48}px`,
-							top: `${plpos.y - 40}px`,
-							width: '96px',
-							height: '80px',
-							border: 'transparent 2px solid',
-							zIndex: '4',
-						}}
-						onClick={() => this.thingClick(pl.id)}
-						onMouseOver={e => this.setInfo(e, pl)}
-						onMouseMove={e => this.setInfo(e, pl)}
-					/>,
-					<span
-						key={`${j}mark`}
-						className={'ico e' + pl.mark}
-						style={{
-							position: 'absolute',
-							left: '32px',
-							top: j ? '228px' : '430px',
-							transform: 'translate(-50%,-50%)',
-							textAlign: 'center',
-							pointerEvents: 'none',
-							fontSize: '18px',
-							textShadow: '2px 2px 1px #000,2px 2px 2px #000',
-						}}>
-						{pl.markpower !== 1 && pl.markpower}
-					</span>,
-				);
-				if (pl.getStatus('sosa')) {
-					children.push(
-						<div
-							key={`${j}sosa`}
-							className={'ico sacrifice'}
-							style={{
-								position: 'absolute',
-								left: '0',
-								top: j ? '7px' : '502px',
-								pointerEvents: 'none',
-							}}
-						/>,
-					);
-				}
-				if (pl.getStatus('sabbath')) {
-					children.push(
-						<span
-							key={`${j}sabbath`}
-							className="ico sabbath"
-							style={{
-								position: 'absolute',
-								left: '0',
-								top: j ? '96px' : '300px',
-							}}
-						/>,
-					);
-				}
-				if (pl.getStatus('drawlock')) {
-					children.push(
-						<span
-							key={`${j}drawlock`}
-							style={{
-								position: 'absolute',
-								left: '95px',
-								top: j ? '250px' : '543px',
-								width: '48px',
-								height: '48px',
-								backgroundColor: '#931',
-							}}
-						/>,
-					);
-				} else if (pl.getStatus('protectdeck')) {
-					children.push(
-						<span
-							key={`${j}protectdeck`}
-							style={{
-								position: 'absolute',
-								left: '95px',
-								top: j ? '250px' : '543px',
-								width: '48px',
-								height: '48px',
-								backgroundColor: '#ede',
-							}}
-						/>,
-					);
-				}
-				if (handOverlay) {
-					children.push(
-						<span
-							key={`${j}handOverlay`}
-							style={{
-								zIndex: '1',
-								position: 'absolute',
-								left: '101px',
-								top: j ? '0px' : '300px',
-								width: '66px',
-								height: '263px',
-								backgroundColor: ui.strcols[handOverlay],
-								opacity: '.3',
-								borderRadius: '4px',
-								pointerEvents: 'none',
-							}}
-						/>,
-					);
-				}
-				things.push(...game.game.visible_instances(pl.id, j === 0, cloaked));
-				const qx = 0,
-					qy = j ? 106 : 308,
-					plquanta = pl.quanta;
-				for (let k = 1; k < 13; k++) {
-					children.push(
-						<span
-							key={`${j}q${k}`}
-							className={'ico ce' + k}
-							style={{
-								position: 'absolute',
-								left: `${qx + (k & 1 ? 2 : 48)}px`,
-								top: `${qy + (((k - 1) / 2) | 0) * 18}px`,
-								fontSize: '16px',
-								pointerEvents: 'none',
-								paddingLeft: '16px',
-							}}>
-							&nbsp;
-							{plquanta[k] || ''}
-						</span>,
-					);
-				}
-				children.push(
-					<div
-						key={`${j}hpbg`}
-						style={{
-							backgroundColor: '#000',
-							position: 'absolute',
-							left: '2px',
-							top: j ? '36px' : '531px',
-							width: '98px',
-							height: '22px',
-							pointerEvents: 'none',
-						}}
-					/>,
-				);
-				const expectedDamage = this.state.expectedDamage[pl.getIndex()];
-				const x1 = Math.max(Math.round(96 * (pl.hp / pl.maxhp)), 0),
-					x2 = Math.max(x1 - Math.round(96 * (expectedDamage / pl.maxhp)), 0);
-				const poison = pl.getStatus('poison'),
-					poisoninfo = `${
-						poison > 0 ? poison + ' 1:2' : poison < 0 ? -poison + ' 1:7' : ''
-					} ${pl.getStatus('neuro') ? ' 1:10' : ''}`;
-				const hptext = `${pl.hp}/${pl.maxhp} ${
-					!cloaked && expectedDamage ? `(${expectedDamage})` : ''
-				}\n${poisoninfo ? `\n${poisoninfo}` : ''}${
-					pl.id !== player1.id && pl.id !== player1.foeId
-						? '\n(Not targeted)'
-						: ''
-				}`;
-				children.push(
-					<Tween
-						key={`${j}hp`}
-						x1={x1}
-						x2={x2}
-						compare={hpTweenCompare}
-						proc={hpTweenProc}>
-						{({ x1, x2 }) => (
-							<>
-								<div
-									style={{
-										backgroundColor: ui.strcols[etg.Life],
-										position: 'absolute',
-										left: '3px',
-										top: j ? '37px' : '532px',
-										width: `${x1}px`,
-										height: '20px',
-										pointerEvents: 'none',
-										zIndex: '2',
-									}}
-								/>
-								{!cloaked && expectedDamage !== 0 && (
-									<div
-										style={{
-											backgroundColor:
-												ui.strcols[
-													expectedDamage >= pl.hp
-														? etg.Fire
-														: expectedDamage > 0
-														? etg.Time
-														: etg.Water
-												],
-											position: 'absolute',
-											left: `${3 + Math.min(x1, x2)}px`,
-											top: j ? '37px' : '532px',
-											width: Math.max(x1, x2) - Math.min(x1, x2) + 'px',
-											height: '20px',
-											pointerEvents: 'none',
-											zIndex: '2',
-										}}
-									/>
-								)}
-							</>
-						)}
-					</Tween>,
-					<Components.Text
-						key={`${j}hptext`}
-						text={hptext}
-						style={{
-							textAlign: 'center',
-							width: '100px',
-							pointerEvents: 'none',
-							fontSize: '12px',
-							lineHeight: '1.1',
-							position: 'absolute',
-							left: '0',
-							top: j ? '40px' : '535px',
-							textShadow: '1px 1px 1px #000,2px 2px 2px #000',
-							zIndex: '2',
-						}}
-					/>,
-					<div
-						key={`${j}deck`}
-						className={pl.deck_length ? 'ico ccback' : ''}
-						style={{
-							position: 'absolute',
-							left: '103px',
-							top: j ? '258px' : '551px',
-							textAlign: 'center',
-							paddingTop: '7px',
-							pointerEvents: 'none',
-							fontSize: '18px',
-							textShadow: '2px 2px 1px #000,2px 2px 2px #000',
-							zIndex: '3',
-						}}>
-						{pl.deck_length || '0!!'}
-					</div>,
-				);
-			}
-			return (
-				<>
-					{this.state.popup && (
-						<PagedModal
-							pages={this.state.popup}
-							idx={this.state.popupidx}
-							setPage={idx => this.setState({ popupidx: idx })}
-							onClose={() => this.setState({ popup: null })}
-						/>
-					)}
-					{svgbg}
-					{cloaked && cloaksvg}
-					{this.state.showFoeplays ? (
-						<FoePlays
-							getIdTrack={this.getIdTrack}
-							foeplays={this.state.foeplays.get(player2.id)}
-							setCard={(e, play) => this.setCard(e, play, e.pageX)}
-							setLine={(line0, line1) => this.setState({ line0, line1 })}
-							clearCard={this.clearCard}
-							showGame={game => this.setState({ game })}
-						/>
-					) : (
-						this.props.playByPlayMode !== 'disabled' && (
-							<SpellDisplay
-								playByPlayMode={this.props.playByPlayMode}
-								getIdTrack={this.getIdTrack}
-								game={game}
-								spells={this.state.spells}
-								removeSpell={id => {
-									this.setState(state => ({
-										spells: state.spells.filter(x => x.id !== id),
-									}));
-								}}
-							/>
-						)
-					)}
-					{children}
-					<Things
-						startPos={this.state.startPos}
-						endPos={this.state.endPos}
-						getIdTrack={this.getIdTrack}
-						setIdTrack={this.setIdTrack}
-						lofiArt={props.lofiArt}
-						game={game}
-						p1id={player1.id}
-						setInfo={this.setInfo}
-						onMouseOut={this.clearCard}
-						onClick={this.thingClick}
-						targeting={this.state.targeting}
-						things={things}
-					/>
-					{game.game.has_flooding() && floodsvg}
-					<div
-						style={{
-							whiteSpace: 'pre-wrap',
-							textAlign: 'center',
-							position: 'absolute',
-							left: '780px',
-							top: '40px',
-							width: '120px',
-							zIndex: '3',
-						}}>
-						{`${
-							[
-								'Commoner\n',
-								'Mage\n',
-								'Champion\n',
-								'Demigod\n',
-								'Arena1\n',
-								'Arena2\n',
-							][game.data.level] ||
-							(player2.data.leader !== undefined
-								? `${
-										game.playerDataByIdx(player2.data.leader).name ||
-										player2.data.leader
-								  }\n`
-								: '')
-						}${player2.data.name || '-'}`}
-					</div>
-					<span
-						style={{
-							position: 'absolute',
-							left: '780px',
-							top: '560px',
-							width: '120px',
-							textAlign: 'center',
-							pointerEvents: 'none',
-							whiteSpace: 'pre',
-						}}>
-						{turntell}
-					</span>
-					{this.state.effects}
-					{this.state.line0 && this.state.line1 && (
-						<ArrowLine
-							x0={this.state.line0.x}
-							y0={this.state.line0.y}
-							x1={this.state.line1.x}
-							y1={this.state.line1.y}
-						/>
-					)}
-					<Components.Card
-						x={this.state.hoverx}
-						y={this.state.hovery}
-						card={this.state.hovercard}
-					/>
-					{this.state.tooltip}
-					{this.state.foeplays.has(player2.id) &&
-						!!this.state.foeplays.get(player2.id).length && (
-							<input
-								type="button"
-								value={`History ${this.state.foeplays.get(player2.id).length}`}
-								style={{
-									position: 'absolute',
-									left: '2px',
-									top: '270px',
-									zIndex: '2',
-								}}
-								onClick={() =>
-									this.setState(state => ({
-										game: null,
-										showFoeplays: !state.showFoeplays,
-									}))
-								}
-							/>
-						)}
-					<input
-						type="button"
-						value={
-							props.replay
-								? 'Exit'
-								: this.state.resigning
-								? 'Confirm'
-								: 'Resign'
-						}
-						onClick={this.resignClick}
-						style={{
-							position: 'absolute',
-							left: '816px',
-							top: '15px',
-							zIndex: '4',
-						}}
-					/>
-					{!props.replay &&
-						!game.data.spectate &&
-						(game.turn === player1.id || !!game.winner) && (
-							<>
-								{endText && (
-									<input
-										type="button"
-										value={endText}
-										onClick={() => this.endClick()}
-										style={{
-											position: 'absolute',
-											left: '10px',
-											top: '460px',
-										}}
-									/>
-								)}
-								{cancelText && (
-									<input
-										type="button"
-										value={cancelText}
-										onClick={this.cancelClick}
-										style={{
-											position: 'absolute',
-											left: '10px',
-											top: '490px',
-										}}
-									/>
-								)}
-							</>
-						)}
-					{props.replay && (
-						<>
-							<span
-								style={{
-									position: 'absolute',
-									left: '760px',
-									top: '560px',
-								}}>
-								{game.game.aieval().toFixed(2)}
-							</span>
-							<span
-								style={{
-									position: 'absolute',
-									left: '760px',
-									top: '520px',
-								}}>
-								{this.state.replayindex}
-							</span>
-							<span
-								style={{
-									position: 'absolute',
-									left: '860px',
-									top: '520px',
-								}}>
-								{props.replay.moves.length}
-							</span>
-							<span
-								style={{
-									position: 'absolute',
-									left: '760px',
-									top: '540px',
-								}}>
-								{game.countPlies()}
-							</span>
-							{!!this.state.replayindex && (
-								<input
-									type="button"
-									value="<"
-									onClick={() => this.replayPrev()}
-									style={{
-										position: 'absolute',
-										left: '800px',
-										top: '520px',
-										width: '20px',
-									}}
-								/>
-							)}
-							{!game.winner && (
-								<input
-									type="button"
-									value=">"
-									onClick={() => this.replayNext()}
-									style={{
-										position: 'absolute',
-										left: '830px',
-										top: '520px',
-										width: '20px',
-									}}
-								/>
-							)}
-							{!!this.state.replayindex && (
-								<input
-									type="button"
-									value="<<"
-									onClick={() => this.replayPrevPly()}
-									style={{
-										position: 'absolute',
-										left: '800px',
-										top: '540px',
-										width: '20px',
-									}}
-								/>
-							)}
-							{!game.winner && (
-								<input
-									type="button"
-									value=">>"
-									onClick={() => this.replayNextPly()}
-									style={{
-										position: 'absolute',
-										left: '830px',
-										top: '540px',
-										width: '20px',
-									}}
-								/>
-							)}
-						</>
-					)}
-				</>
+		} else cancelText = endText = '';
+	} else {
+		turntell = `${game.turn === player1.id ? 'Your' : 'Their'} Turn\n${
+			game.winner === player1.id ? 'Won' : 'Lost'
+		}`;
+		endText = 'Continue';
+		cancelText = '';
+	}
+	const things = [];
+	for (let j = 0; j < 2; j++) {
+		const pl = j ? player2 : player1,
+			plpos = ui.tgtToPos(pl, player1.id),
+			handOverlay =
+				pl.casts === 0
+					? 12
+					: pl.getStatus('sanctuary')
+					? 8
+					: (pl.getStatus('nova') >= 2 || pl.getStatus('nova2') >= 1) &&
+					  (pl.id !== player1.id ||
+							pl.handIds.some(id => {
+								const card = game.Cards.Codes[game.get(id, 'card')];
+								return card && card.isOf(game.Cards.Names.Nova);
+							}))
+					? 1
+					: null;
+		children.push(
+			<div
+				key={j}
+				className={tgtclass(player1.id, pl, targeting)}
+				style={{
+					position: 'absolute',
+					left: `${plpos.x - 48}px`,
+					top: `${plpos.y - 40}px`,
+					width: '96px',
+					height: '80px',
+					border: 'transparent 2px solid',
+					zIndex: '4',
+				}}
+				onClick={() => thingClick(pl.id)}
+				onMouseOver={e => setInfo(e, pl)}
+				onMouseMove={e => setInfo(e, pl)}
+			/>,
+			<span
+				key={`${j}mark`}
+				className={'ico e' + pl.mark}
+				style={{
+					position: 'absolute',
+					left: '32px',
+					top: j ? '228px' : '430px',
+					transform: 'translate(-50%,-50%)',
+					textAlign: 'center',
+					pointerEvents: 'none',
+					fontSize: '18px',
+					textShadow: '2px 2px 1px #000,2px 2px 2px #000',
+				}}>
+				{pl.markpower !== 1 && pl.markpower}
+			</span>,
+		);
+		if (pl.getStatus('sosa')) {
+			children.push(
+				<div
+					key={`${j}sosa`}
+					className={'ico sacrifice'}
+					style={{
+						position: 'absolute',
+						left: '0',
+						top: j ? '7px' : '502px',
+						pointerEvents: 'none',
+					}}
+				/>,
 			);
 		}
-	},
-);
-export default MatchView;
+		if (pl.getStatus('sabbath')) {
+			children.push(
+				<span
+					key={`${j}sabbath`}
+					className="ico sabbath"
+					style={{
+						position: 'absolute',
+						left: '0',
+						top: j ? '96px' : '300px',
+					}}
+				/>,
+			);
+		}
+		if (pl.getStatus('drawlock')) {
+			children.push(
+				<span
+					key={`${j}drawlock`}
+					style={{
+						position: 'absolute',
+						left: '95px',
+						top: j ? '250px' : '543px',
+						width: '48px',
+						height: '48px',
+						backgroundColor: '#931',
+					}}
+				/>,
+			);
+		} else if (pl.getStatus('protectdeck')) {
+			children.push(
+				<span
+					key={`${j}protectdeck`}
+					style={{
+						position: 'absolute',
+						left: '95px',
+						top: j ? '250px' : '543px',
+						width: '48px',
+						height: '48px',
+						backgroundColor: '#ede',
+					}}
+				/>,
+			);
+		}
+		if (handOverlay) {
+			children.push(
+				<span
+					key={`${j}handOverlay`}
+					style={{
+						zIndex: '1',
+						position: 'absolute',
+						left: '101px',
+						top: j ? '0px' : '300px',
+						width: '66px',
+						height: '263px',
+						backgroundColor: ui.strcols[handOverlay],
+						opacity: '.3',
+						borderRadius: '4px',
+						pointerEvents: 'none',
+					}}
+				/>,
+			);
+		}
+		things.push(...game.game.visible_instances(pl.id, j === 0, cloaked));
+		const qx = 0,
+			qy = j ? 106 : 308,
+			plquanta = pl.quanta;
+		for (let k = 1; k < 13; k++) {
+			children.push(
+				<span
+					key={`${j}q${k}`}
+					className={'ico ce' + k}
+					style={{
+						position: 'absolute',
+						left: `${qx + (k & 1 ? 2 : 48)}px`,
+						top: `${qy + (((k - 1) / 2) | 0) * 18}px`,
+						fontSize: '16px',
+						pointerEvents: 'none',
+						paddingLeft: '16px',
+					}}>
+					&nbsp;
+					{plquanta[k] || ''}
+				</span>,
+			);
+		}
+		children.push(
+			<div
+				key={`${j}hpbg`}
+				style={{
+					backgroundColor: '#000',
+					position: 'absolute',
+					left: '2px',
+					top: j ? '36px' : '531px',
+					width: '98px',
+					height: '22px',
+					pointerEvents: 'none',
+				}}
+			/>,
+		);
+		const expectedDamage = expectedDamages[pl.getIndex()];
+		const x1 = Math.max(Math.round(96 * (pl.hp / pl.maxhp)), 0),
+			x2 = Math.max(x1 - Math.round(96 * (expectedDamage / pl.maxhp)), 0);
+		const poison = pl.getStatus('poison'),
+			poisoninfo = `${
+				poison > 0 ? poison + ' 1:2' : poison < 0 ? -poison + ' 1:7' : ''
+			} ${pl.getStatus('neuro') ? ' 1:10' : ''}`;
+		const hptext = `${pl.hp}/${pl.maxhp} ${
+			!cloaked && expectedDamage ? `(${expectedDamage})` : ''
+		}\n${poisoninfo ? `\n${poisoninfo}` : ''}${
+			pl.id !== player1.id && pl.id !== player1.foeId ? '\n(Not targeted)' : ''
+		}`;
+		children.push(
+			<Tween
+				key={`${j}hp`}
+				x1={x1}
+				x2={x2}
+				compare={hpTweenCompare}
+				proc={hpTweenProc}>
+				{({ x1, x2 }) => (
+					<>
+						<div
+							style={{
+								backgroundColor: ui.strcols[etg.Life],
+								position: 'absolute',
+								left: '3px',
+								top: j ? '37px' : '532px',
+								width: `${x1}px`,
+								height: '20px',
+								pointerEvents: 'none',
+								zIndex: '2',
+							}}
+						/>
+						{!cloaked && expectedDamage !== 0 && (
+							<div
+								style={{
+									backgroundColor:
+										ui.strcols[
+											expectedDamage >= pl.hp
+												? etg.Fire
+												: expectedDamage > 0
+												? etg.Time
+												: etg.Water
+										],
+									position: 'absolute',
+									left: `${3 + Math.min(x1, x2)}px`,
+									top: j ? '37px' : '532px',
+									width: Math.max(x1, x2) - Math.min(x1, x2) + 'px',
+									height: '20px',
+									pointerEvents: 'none',
+									zIndex: '2',
+								}}
+							/>
+						)}
+					</>
+				)}
+			</Tween>,
+			<Components.Text
+				key={`${j}hptext`}
+				text={hptext}
+				style={{
+					textAlign: 'center',
+					width: '100px',
+					pointerEvents: 'none',
+					fontSize: '12px',
+					lineHeight: '1.1',
+					position: 'absolute',
+					left: '0',
+					top: j ? '40px' : '535px',
+					textShadow: '1px 1px 1px #000,2px 2px 2px #000',
+					zIndex: '2',
+				}}
+			/>,
+			<div
+				key={`${j}deck`}
+				className={pl.deck_length ? 'ico ccback' : ''}
+				style={{
+					position: 'absolute',
+					left: '103px',
+					top: j ? '258px' : '551px',
+					textAlign: 'center',
+					paddingTop: '7px',
+					pointerEvents: 'none',
+					fontSize: '18px',
+					textShadow: '2px 2px 1px #000,2px 2px 2px #000',
+					zIndex: '3',
+				}}>
+				{pl.deck_length || '0!!'}
+			</div>,
+		);
+	}
+	return (
+		<>
+			{popup && <PagedModal pages={popup} onClose={() => setPopup(null)} />}
+			{svgbg}
+			{cloaked && cloaksvg}
+			{showFoeplays ? (
+				<FoePlays
+					getIdTrack={getIdTrack}
+					foeplays={foeplays.get(p2id)}
+					setCard={setCard}
+					clearCard={clearCard}
+					showGame={setTempgame}
+				/>
+			) : (
+				props.playByPlayMode !== 'disabled' && (
+					<SpellDisplay
+						playByPlayMode={props.playByPlayMode}
+						getIdTrack={getIdTrack}
+						game={game}
+						spells={spells.spells}
+						removeSpell={spellsDispatch}
+					/>
+				)
+			)}
+			{children}
+			<Things
+				startPos={effects.startPos}
+				endPos={effects.endPos}
+				getIdTrack={getIdTrack}
+				setIdTrack={setIdTrack}
+				lofiArt={props.lofiArt}
+				game={game}
+				p1id={player1.id}
+				setInfo={setInfo}
+				onMouseOut={clearCard}
+				onClick={thingClick}
+				targeting={targeting}
+				things={things}
+			/>
+			{game.game.has_flooding() && floodsvg}
+			<div
+				style={{
+					whiteSpace: 'pre-wrap',
+					textAlign: 'center',
+					position: 'absolute',
+					left: '780px',
+					top: '40px',
+					width: '120px',
+					zIndex: '3',
+				}}>
+				{`${
+					[
+						'Commoner\n',
+						'Mage\n',
+						'Champion\n',
+						'Demigod\n',
+						'Arena1\n',
+						'Arena2\n',
+					][game.data.level] ??
+					(player2.data.leader !== undefined
+						? `${
+								game.playerDataByIdx(player2.data.leader).name ||
+								player2.data.leader
+						  }\n`
+						: '')
+				}${player2.data.name || '-'}`}
+			</div>
+			<span
+				style={{
+					position: 'absolute',
+					left: '780px',
+					top: '560px',
+					width: '120px',
+					textAlign: 'center',
+					pointerEvents: 'none',
+					whiteSpace: 'pre',
+				}}>
+				{turntell}
+			</span>
+			{effects.effects}
+			<Components.Card x={734} y={hovery} card={hovercard} />
+			{tooltip}
+			{!!foeplays.get(p2id)?.length && (
+				<input
+					type="button"
+					value={`History ${foeplays.get(p2id).length}`}
+					style={{
+						position: 'absolute',
+						left: '2px',
+						top: '270px',
+						zIndex: '2',
+					}}
+					onClick={() => {
+						setTempgame(null);
+						setShowFoeplays(!showFoeplays);
+					}}
+				/>
+			)}
+			<input
+				type="button"
+				value={props.replay ? 'Exit' : resigning ? 'Confirm' : 'Resign'}
+				onClick={resignClick}
+				style={{
+					position: 'absolute',
+					left: '816px',
+					top: '15px',
+					zIndex: '4',
+				}}
+			/>
+			{!props.replay &&
+				!game.data.spectate &&
+				(game.turn === player1.id || !!game.winner) && (
+					<>
+						{endText && (
+							<input
+								type="button"
+								value={endText}
+								onClick={() => endClick()}
+								style={{
+									position: 'absolute',
+									left: '10px',
+									top: '460px',
+								}}
+							/>
+						)}
+						{cancelText && (
+							<input
+								type="button"
+								value={cancelText}
+								onClick={cancelClick}
+								style={{
+									position: 'absolute',
+									left: '10px',
+									top: '490px',
+								}}
+							/>
+						)}
+					</>
+				)}
+			{props.replay && (
+				<>
+					<span
+						style={{
+							position: 'absolute',
+							left: '760px',
+							top: '560px',
+						}}>
+						{game.game.aieval().toFixed(2)}
+					</span>
+					<span
+						style={{
+							position: 'absolute',
+							left: '760px',
+							top: '520px',
+						}}>
+						{replayindex}
+					</span>
+					<span
+						style={{
+							position: 'absolute',
+							left: '860px',
+							top: '520px',
+						}}>
+						{props.replay.moves.length}
+					</span>
+					<span
+						style={{
+							position: 'absolute',
+							left: '760px',
+							top: '540px',
+						}}>
+						{game.countPlies()}
+					</span>
+					{!!replayindex && (
+						<input
+							type="button"
+							value="<"
+							onClick={() => setReplayIndex(replayhistory, replayindex - 1)}
+							style={{
+								position: 'absolute',
+								left: '800px',
+								top: '520px',
+								width: '20px',
+							}}
+						/>
+					)}
+					{!game.winner && (
+						<input
+							type="button"
+							value=">"
+							onClick={() => setReplayIndex(replayhistory, replayindex + 1)}
+							style={{
+								position: 'absolute',
+								left: '830px',
+								top: '520px',
+								width: '20px',
+							}}
+						/>
+					)}
+					{!!replayindex && (
+						<input
+							type="button"
+							value="<<"
+							onClick={() => {
+								let idx = replayindex - 1;
+								for (; idx >= 1; idx--) {
+									const { x } = props.replay.moves[idx - 1];
+									if (x === 'end' || x === 'mulligan') break;
+								}
+								setReplayIndex(replayhistory, Math.max(idx, 0));
+							}}
+							style={{
+								position: 'absolute',
+								left: '800px',
+								top: '540px',
+								width: '20px',
+							}}
+						/>
+					)}
+					{!game.winner && (
+						<input
+							type="button"
+							value=">>"
+							onClick={() => {
+								const len = props.replay.moves.length;
+								let idx = replayindex + 1;
+								for (; idx < len; idx++) {
+									const { x } = props.replay.moves[idx];
+									if (x === 'end' || x === 'mulligan') break;
+								}
+								setReplayIndex(replayhistory, Math.min(idx, len));
+							}}
+							style={{
+								position: 'absolute',
+								left: '830px',
+								top: '540px',
+								width: '20px',
+							}}
+						/>
+					)}
+				</>
+			)}
+		</>
+	);
+}
