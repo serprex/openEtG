@@ -106,7 +106,6 @@ pub struct ProcData {
 	pub fromhand: bool,
 	pub freedom: bool,
 	pub flood: bool,
-	pub floodpaid: bool,
 	pub vindicated: bool,
 }
 
@@ -344,8 +343,8 @@ pub enum Skill {
 	firebrand,
 	firestorm(i16),
 	firewall,
+	flood,
 	flooddeath,
-	floodtoll,
 	flyingweapon,
 	flyself,
 	foedraw,
@@ -1887,6 +1886,9 @@ impl Skill {
 					ctx.spelldmg(t, 1);
 				}
 			}
+			Self::flood => {
+				data.flood = true;
+			}
 			Self::flooddeath => {
 				if ctx.get_kind(t) == Kind::Creature
 					&& !ctx.get(t, Flag::aquatic)
@@ -1895,16 +1897,6 @@ impl Skill {
 				{
 					ctx.die(t);
 				}
-			}
-			Self::floodtoll => {
-				let owner = ctx.get_owner(c);
-				if owner == t {
-					if !data.floodpaid && !ctx.spend(owner, etg::Water, 1) {
-						ctx.die(c);
-					}
-					data.floodpaid = true;
-				}
-				data.flood = true;
 			}
 			Self::flyingweapon => {
 				ctx.remove(t);
