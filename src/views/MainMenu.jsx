@@ -178,12 +178,10 @@ export default function MainMenu(props) {
 		playByPlayMode = opts.playByPlayMode ?? '',
 		expectedDamageSamples = opts.expectedDamageSamples || '4';
 
-	const showcard = useMemo(() => {
-		if (user.daily === 0 && user.ocard) {
-			store.store.dispatch(store.updateUser({ daily: 128 }));
-		}
-		return props.nymph ?? (!user.daily && user.ocard);
-	}, []);
+	const showcard = useMemo(
+		() => props.nymph ?? (user.daily === 0 && user.ocard),
+		[],
+	);
 
 	const [settings, setSettings] = useState(false);
 	const [changepass, setChangepass] = useState(false);
@@ -205,6 +203,9 @@ export default function MainMenu(props) {
 	);
 
 	useEffect(() => {
+		if (user.daily === 0 && user.ocard) {
+			store.store.dispatch(store.updateUser({ daily: 128 }));
+		}
 		document.addEventListener('mousemove', resetTip);
 		return () => document.removeEventListener('mousemove', resetTip);
 	}, [resetTip]);

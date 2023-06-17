@@ -4,7 +4,7 @@
 use std::borrow::Cow;
 use std::cmp;
 use std::iter::once;
-use std::num::NonZeroU8;
+use std::num::{NonZeroU32, NonZeroU8};
 use std::rc::Rc;
 
 use crate::card;
@@ -657,37 +657,196 @@ pub enum Skill {
 }
 
 #[derive(Clone, Copy)]
-pub enum Tgt<'a> {
-	own,
-	foe,
-	notself,
-	all,
-	card,
-	pill,
-	weap,
-	shie,
-	playerweap,
-	perm,
-	nonstack,
-	permstack,
-	crea,
-	creacrea,
-	play,
-	notplay,
-	sing,
-	butterfly,
-	v_butterfly,
-	devour,
-	paradox,
-	notskele,
-	forceplay,
-	airbornecrea,
-	golem,
-	groundcrea,
-	wisdom,
-	quinttog,
-	And(&'a [Tgt<'a>]),
-	Or(&'a [Tgt<'a>]),
+pub struct Tgt(NonZeroU32);
+
+impl Tgt {
+	pub const own: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(1 << 1) });
+	pub const foe: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(2 << 1) });
+	pub const notself: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(3 << 1) });
+	pub const all: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(4 << 1) });
+	pub const card: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(5 << 1) });
+	pub const pill: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(6 << 1) });
+	pub const weap: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(7 << 1) });
+	pub const shie: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(8 << 1) });
+	pub const playerweap: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(9 << 1) });
+	pub const perm: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(10 << 1) });
+	pub const nonstack: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(11 << 1) });
+	pub const permstack: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(12 << 1) });
+	pub const crea: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(13 << 1) });
+	pub const creacrea: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(14 << 1) });
+	pub const play: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(15 << 1) });
+	pub const notplay: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(16 << 1) });
+	pub const sing: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(17 << 1) });
+	pub const butterfly: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(18 << 1) });
+	pub const v_butterfly: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(19 << 1) });
+	pub const devour: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(20 << 1) });
+	pub const paradox: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(21 << 1) });
+	pub const notskele: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(22 << 1) });
+	pub const forceplay: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(23 << 1) });
+	pub const airbornecrea: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(24 << 1) });
+	pub const golem: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(25 << 1) });
+	pub const groundcrea: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(26 << 1) });
+	pub const wisdom: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(27 << 1) });
+	pub const quinttog: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(28 << 1) });
+	pub const _own: u32 = 1 << 1;
+	pub const _foe: u32 = 2 << 1;
+	pub const _notself: u32 = 3 << 1;
+	pub const _all: u32 = 4 << 1;
+	pub const _card: u32 = 5 << 1;
+	pub const _pill: u32 = 6 << 1;
+	pub const _weap: u32 = 7 << 1;
+	pub const _shie: u32 = 8 << 1;
+	pub const _playerweap: u32 = 9 << 1;
+	pub const _perm: u32 = 10 << 1;
+	pub const _nonstack: u32 = 11 << 1;
+	pub const _permstack: u32 = 12 << 1;
+	pub const _crea: u32 = 13 << 1;
+	pub const _creacrea: u32 = 14 << 1;
+	pub const _play: u32 = 15 << 1;
+	pub const _notplay: u32 = 16 << 1;
+	pub const _sing: u32 = 17 << 1;
+	pub const _butterfly: u32 = 18 << 1;
+	pub const _v_butterfly: u32 = 19 << 1;
+	pub const _devour: u32 = 20 << 1;
+	pub const _paradox: u32 = 21 << 1;
+	pub const _notskele: u32 = 22 << 1;
+	pub const _forceplay: u32 = 23 << 1;
+	pub const _airbornecrea: u32 = 24 << 1;
+	pub const _golem: u32 = 25 << 1;
+	pub const _groundcrea: u32 = 26 << 1;
+	pub const _wisdom: u32 = 27 << 1;
+	pub const _quinttog: u32 = 28 << 1;
+	pub const And: u32 = 2;
+	pub const Or: u32 = 3;
+
+	const fn or(self) -> Tgt {
+		Tgt(unsafe { NonZeroU32::new_unchecked(3 | self.0.get() << 2) })
+	}
+
+	const fn and(self) -> Tgt {
+		Tgt(unsafe { NonZeroU32::new_unchecked(1 | self.0.get() << 2) })
+	}
+
+	const fn mix(self, tgt: Tgt) -> Tgt {
+		Tgt(unsafe { NonZeroU32::new_unchecked(self.0.get() | tgt.0.get() << 6) })
+	}
+
+	pub fn full_check(self, ctx: &Game, c: i32, t: i32) -> bool {
+		let kind = ctx.get_kind(t);
+		(if kind == Kind::Player {
+			!ctx.get(t, Flag::out)
+		} else {
+			let owner = ctx.get_owner(t);
+			ctx.getIndex(t) != -1
+				&& (owner == ctx.turn || !ctx.is_cloaked(owner) || ctx.get(t, Flag::cloak))
+		}) && self.check(ctx, c, t)
+	}
+
+	pub fn check(self, ctx: &Game, c: i32, t: i32) -> bool {
+		self.check_core(ctx, c, t, &mut 0)
+	}
+
+	fn check_core(self, ctx: &Game, c: i32, t: i32, idx: &mut usize) -> bool {
+		let val = self.0.get() >> *idx;
+		if (val & 1) == 0 {
+			*idx += 6;
+			match val & 63 {
+				Tgt::_own => ctx.get_owner(c) == ctx.get_owner(t),
+				Tgt::_foe => ctx.get_owner(c) != ctx.get_owner(t),
+				Tgt::_notself => c != t,
+				Tgt::_all => true,
+				Tgt::_card => c != t && ctx.get_kind(t) == Kind::Spell,
+				Tgt::_pill => ctx.material(t, Some(Kind::Permanent)) && ctx.get(t, Flag::pillar),
+				Tgt::_weap => {
+					let tkind = ctx.get_kind(t);
+					ctx.material(t, None)
+						&& (tkind == Kind::Weapon
+							|| (tkind != Kind::Spell && {
+								let card = ctx.get(t, Stat::card);
+								card != 0 && ctx.get_card(card).kind == Kind::Weapon
+							}))
+				}
+				Tgt::_shie => {
+					let tkind = ctx.get_kind(t);
+					ctx.material(t, None)
+						&& (tkind == Kind::Shield
+							|| (tkind != Kind::Spell && {
+								let card = ctx.get(t, Stat::card);
+								card != 0 && ctx.get_card(card).kind == Kind::Shield
+							}))
+				}
+				Tgt::_playerweap => ctx.get_kind(t) == Kind::Weapon,
+				Tgt::_perm => ctx.material(t, Some(Kind::Permanent)),
+				Tgt::_nonstack => !ctx.get(t, Flag::stackable),
+				Tgt::_permstack => {
+					ctx.material(t, Some(Kind::Permanent)) && ctx.get(t, Flag::stackable)
+				}
+				Tgt::_crea => ctx.material(t, Some(Kind::Creature)),
+				Tgt::_creacrea => {
+					ctx.material(t, Some(Kind::Creature)) && ctx.get_kind(t) == Kind::Creature
+				}
+				Tgt::_play => ctx.get_kind(t) == Kind::Player,
+				Tgt::_notplay => ctx.get_kind(t) != Kind::Player,
+				Tgt::_sing => {
+					ctx.material(t, Some(Kind::Creature))
+						&& ctx
+							.getSkill(t, Event::Cast)
+							.iter()
+							.all(|&s| s != Skill::sing)
+				}
+				Tgt::_butterfly => {
+					let tkind = ctx.get_kind(t);
+					(tkind == Kind::Creature || tkind == Kind::Weapon)
+						&& !ctx.get(t, Flag::immaterial | Flag::burrowed)
+						&& (ctx.trueatk(t) < 3 || (tkind == Kind::Creature && ctx.truehp(t) < 3))
+				}
+				Tgt::_v_butterfly => ctx.material(t, Some(Kind::Creature)) && ctx.trueatk(t) < 3,
+				Tgt::_devour => {
+					ctx.material(t, Some(Kind::Creature)) && ctx.truehp(t) < ctx.truehp(c)
+				}
+				Tgt::_paradox => {
+					ctx.material(t, Some(Kind::Creature)) && ctx.truehp(t) < ctx.trueatk(t)
+				}
+				Tgt::_notskele => {
+					ctx.material(t, Some(Kind::Creature))
+						&& !card::IsOf(ctx.get(t, Stat::card), card::Skeleton)
+				}
+				Tgt::_forceplay => {
+					ctx.get_kind(t) == Kind::Spell
+						|| (ctx.material(t, None)
+							&& ctx
+								.getSkill(t, Event::Cast)
+								.first()
+								.map(|&s| s != Skill::forceplay)
+								.unwrap_or(false))
+				}
+				Tgt::_airbornecrea => {
+					ctx.material(t, Some(Kind::Creature)) && ctx.get(t, Flag::airborne)
+				}
+				Tgt::_golem => {
+					let tkind = ctx.get_kind(t);
+					(tkind == Kind::Weapon || tkind == Kind::Creature) && ctx.get(t, Flag::golem)
+				}
+				Tgt::_groundcrea => {
+					ctx.material(t, Some(Kind::Creature)) && !ctx.get(t, Flag::airborne)
+				}
+				Tgt::_wisdom => {
+					let tkind = ctx.get_kind(t);
+					(tkind == Kind::Creature || tkind == Kind::Weapon)
+						&& !ctx.get(t, Flag::burrowed)
+				}
+				Tgt::_quinttog => ctx.get_kind(t) == Kind::Creature && !ctx.get(t, Flag::burrowed),
+				_ => false,
+			}
+		} else {
+			*idx += 2;
+			if (val & 2) == 0 {
+				self.check_core(ctx, c, t, idx) && self.check_core(ctx, c, t, idx)
+			} else {
+				self.check_core(ctx, c, t, idx) || self.check_core(ctx, c, t, idx)
+			}
+		}
+	}
 }
 
 fn quadpillarcore(ctx: &mut Game, ele: [u8; 4], c: i32, n: i32) {
@@ -754,7 +913,8 @@ impl Skill {
 				| Self::martyr | Self::mummy
 				| Self::obsession
 				| Self::predatoroff
-				| Self::protectonce | Self::protectoncedmg
+				| Self::protectonce
+				| Self::protectoncedmg
 				| Self::salvage | Self::siphon
 				| Self::skeleton | Self::swarm
 				| Self::virtue | Self::v_obsession
@@ -764,65 +924,64 @@ impl Skill {
 		)
 	}
 
-	pub const fn targetting(self) -> Option<Tgt<'static>> {
+	pub const fn targetting(self) -> Option<Tgt> {
 		Some(match self {
 			Self::acceleration => Tgt::crea,
 			Self::accretion => Tgt::perm,
 			Self::adrenaline => Tgt::crea,
-			Self::aflatoxin => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::aflatoxin => Tgt::crea.mix(Tgt::play).or(),
 			Self::aggroskele => Tgt::crea,
-			Self::antimatter => Tgt::Or(&[Tgt::crea, Tgt::weap]),
-			Self::appease => Tgt::And(&[Tgt::own, Tgt::notself, Tgt::crea]),
+			Self::antimatter => Tgt::crea.mix(Tgt::weap).or(),
+			Self::appease => Tgt::own.mix(Tgt::notself.mix(Tgt::crea).and()).and(),
 			Self::bblood => Tgt::crea,
 			Self::beguile => Tgt::crea,
 			Self::bellweb => Tgt::crea,
 			Self::blackhole => Tgt::play,
-			Self::bless => Tgt::Or(&[Tgt::crea, Tgt::weap]),
+			Self::bless => Tgt::crea.mix(Tgt::weap).or(),
 			Self::bolsterintodeck => Tgt::crea,
-			Self::bubbleclear => Tgt::Or(&[Tgt::crea, Tgt::perm]),
+			Self::bubbleclear => Tgt::crea.mix(Tgt::perm).or(),
 			Self::butterfly => Tgt::butterfly,
-			Self::catapult => Tgt::And(&[Tgt::own, Tgt::crea]),
-			Self::clear => Tgt::Or(&[Tgt::crea, Tgt::perm]),
-			Self::corpseexplosion => Tgt::And(&[Tgt::own, Tgt::crea]),
-			Self::cpower => Tgt::Or(&[Tgt::crea, Tgt::weap]),
+			Self::catapult => Tgt::own.mix(Tgt::crea).and(),
+			Self::clear => Tgt::crea.mix(Tgt::perm).or(),
+			Self::corpseexplosion => Tgt::own.mix(Tgt::crea).and(),
+			Self::cpower => Tgt::crea.mix(Tgt::weap).or(),
 			Self::cseed => Tgt::crea,
 			Self::cseed2 => Tgt::all,
 			Self::destroy => Tgt::perm,
-			Self::destroycard => Tgt::Or(&[Tgt::card, Tgt::play]),
-			Self::detain => Tgt::devour,
-			Self::devour => Tgt::devour,
+			Self::destroycard => Tgt::card.mix(Tgt::play).or(),
+			Self::detain | Skill::devour => Tgt::devour,
 			Self::discping => Tgt::crea,
-			Self::drainlife => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::drainlife => Tgt::crea.mix(Tgt::play).or(),
 			Self::draft => Tgt::crea,
 			Self::dshield => Tgt::crea,
 			Self::earthquake => Tgt::permstack,
 			Self::embezzle => Tgt::crea,
 			Self::enchant => Tgt::perm,
 			Self::endow => Tgt::weap,
-			Self::envenom => Tgt::Or(&[Tgt::weap, Tgt::shie]),
-			Self::equalize => Tgt::Or(&[Tgt::crea, Tgt::And(&[Tgt::card, Tgt::notself])]),
+			Self::envenom => Tgt::weap.mix(Tgt::shie).or(),
+			Self::equalize => Tgt::crea.mix(Tgt::card.mix(Tgt::notself).and()).or(),
 			Self::feed => Tgt::crea,
 			Self::fickle => Tgt::card,
-			Self::firebolt => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::firebolt => Tgt::crea.mix(Tgt::play).or(),
 			Self::firestorm(_) => Tgt::play,
 			Self::flyingweapon => Tgt::playerweap,
 			Self::forceplay => Tgt::forceplay,
 			Self::fractal => Tgt::crea,
-			Self::freeze => Tgt::Or(&[Tgt::crea, Tgt::weap]),
-			Self::freezeperm => Tgt::And(&[Tgt::perm, Tgt::nonstack]),
-			Self::give => Tgt::And(&[Tgt::notself, Tgt::own, Tgt::notplay]),
-			Self::golemhit => Tgt::And(&[Tgt::notself, Tgt::golem]),
-			Self::gpullspell => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::freeze => Tgt::crea.mix(Tgt::weap).or(),
+			Self::freezeperm => Tgt::perm.mix(Tgt::nonstack).and(),
+			Self::give => Tgt::notself.mix(Tgt::own.mix(Tgt::notplay).and()).and(),
+			Self::golemhit => Tgt::notself.mix(Tgt::golem).and(),
+			Self::gpullspell => Tgt::crea.mix(Tgt::play).or(),
 			Self::guard => Tgt::crea,
-			Self::heal => Tgt::Or(&[Tgt::crea, Tgt::play]),
-			Self::holylight => Tgt::Or(&[Tgt::crea, Tgt::play]),
-			Self::icebolt => Tgt::Or(&[Tgt::crea, Tgt::play]),
-			Self::immolate(_) => Tgt::And(&[Tgt::own, Tgt::crea]),
+			Self::heal => Tgt::crea.mix(Tgt::play).or(),
+			Self::holylight => Tgt::crea.mix(Tgt::play).or(),
+			Self::icebolt => Tgt::crea.mix(Tgt::play).or(),
+			Self::immolate(_) => Tgt::own.mix(Tgt::crea).and(),
 			Self::improve => Tgt::crea,
 			Self::innovation => Tgt::card,
 			Self::jelly => Tgt::crea,
 			Self::jetstream => Tgt::airbornecrea,
-			Self::lightning => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::lightning => Tgt::crea.mix(Tgt::play).or(),
 			Self::liquid => Tgt::crea,
 			Self::livingweapon => Tgt::crea,
 			Self::lobotomize => Tgt::crea,
@@ -833,62 +992,60 @@ impl Skill {
 			Self::mill => Tgt::play,
 			Self::millpillar => Tgt::play,
 			Self::mitosisspell => Tgt::crea,
-			Self::momentum => Tgt::Or(&[Tgt::crea, Tgt::weap]),
+			Self::momentum => Tgt::crea.mix(Tgt::weap).or(),
 			Self::mutation => Tgt::crea,
-			Self::neuroify => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::neuroify => Tgt::crea.mix(Tgt::play).or(),
 			Self::nightmare => Tgt::crea,
 			Self::nightshade => Tgt::crea,
 			Self::nymph => Tgt::pill,
-			Self::pacify => Tgt::Or(&[Tgt::crea, Tgt::weap]),
+			Self::pacify => Tgt::crea.mix(Tgt::weap).or(),
 			Self::pandemonium2 => Tgt::play,
 			Self::paradox => Tgt::paradox,
 			Self::parallel => Tgt::crea,
 			Self::plague => Tgt::play,
-			Self::platearmor(_) => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::platearmor(_) => Tgt::crea.mix(Tgt::play).or(),
 			Self::poison(_) => Tgt::crea,
 			Self::powerdrain => Tgt::crea,
-			Self::purify => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::purify => Tgt::crea.mix(Tgt::play).or(),
 			Self::quint => Tgt::crea,
 			Self::quinttog => Tgt::quinttog,
 			Self::rage => Tgt::crea,
 			Self::readiness => Tgt::crea,
 			Self::reap => Tgt::notskele,
-			Self::regeneratespell => Tgt::Or(&[Tgt::crea, Tgt::And(&[Tgt::perm, Tgt::nonstack])]),
-			Self::regrade => Tgt::And(&[
-				Tgt::notself,
-				Tgt::notplay,
-				Tgt::Or(&[Tgt::card, Tgt::nonstack]),
-			]),
+			Self::regeneratespell => Tgt::crea.mix(Tgt::perm.mix(Tgt::nonstack).and()).or(),
+			Self::regrade => Tgt::notself
+				.mix(Tgt::notplay.mix(Tgt::card.mix(Tgt::nonstack).or()).and())
+				.and(),
 			Self::reinforce => Tgt::crea,
 			Self::ren => Tgt::crea,
 			Self::rewind => Tgt::crea,
 			Self::sabbath => Tgt::play,
-			Self::scatter => Tgt::Or(&[Tgt::play, Tgt::And(&[Tgt::card, Tgt::notself])]),
+			Self::scatter => Tgt::play.mix(Tgt::card.mix(Tgt::notself).and()).or(),
 			Self::scramble => Tgt::play,
 			Self::scramblespam => Tgt::play,
 			Self::shuffle3 => Tgt::crea,
-			Self::silence => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::silence => Tgt::crea.mix(Tgt::play).or(),
 			Self::sing => Tgt::sing,
 			Self::sinkhole => Tgt::crea,
-			Self::siphonactive => Tgt::And(&[Tgt::notself, Tgt::Or(&[Tgt::crea, Tgt::weap])]),
-			Self::siphonstrength => Tgt::And(&[Tgt::notself, Tgt::crea]),
+			Self::siphonactive => Tgt::notself.mix(Tgt::crea.mix(Tgt::weap).or()).and(),
+			Self::siphonstrength => Tgt::notself.mix(Tgt::crea).and(),
 			Self::snipe => Tgt::crea,
 			Self::stasisdraw => Tgt::play,
-			Self::steal => Tgt::And(&[Tgt::foe, Tgt::perm]),
+			Self::steal => Tgt::foe.mix(Tgt::perm).and(),
 			Self::storm(_) => Tgt::play,
-			Self::swave => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::swave => Tgt::crea.mix(Tgt::play).or(),
 			Self::tempering(i16) => Tgt::weap,
 			Self::throwrock => Tgt::crea,
 			Self::trick => Tgt::crea,
 			Self::unsummon => Tgt::crea,
 			Self::unsummonquanta => Tgt::crea,
-			Self::upload => Tgt::Or(&[Tgt::crea, Tgt::weap]),
-			Self::virusinfect => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::upload => Tgt::crea.mix(Tgt::weap).or(),
+			Self::virusinfect => Tgt::crea.mix(Tgt::play).or(),
 			Self::virusplague => Tgt::play,
 			Self::web => Tgt::airbornecrea,
 			Self::wisdom => Tgt::wisdom,
-			Self::yoink => Tgt::And(&[Tgt::foe, Tgt::Or(&[Tgt::play, Tgt::card])]),
-			Self::v_accretion => Tgt::Or(&[Tgt::perm, Tgt::play]),
+			Self::yoink => Tgt::foe.mix(Tgt::play.mix(Tgt::card).or()).and(),
+			Self::v_accretion => Tgt::perm.mix(Tgt::play).or(),
 			Self::v_aflatoxin => Tgt::crea,
 			Self::v_antimatter => Tgt::crea,
 			Self::v_bblood => Tgt::crea,
@@ -897,15 +1054,15 @@ impl Skill {
 			Self::v_cpower => Tgt::crea,
 			Self::v_cseed => Tgt::crea,
 			Self::v_destroy => Tgt::perm,
-			Self::v_drainlife(_) => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::v_drainlife(_) => Tgt::crea.mix(Tgt::play).or(),
 			Self::v_earthquake => Tgt::pill,
 			Self::v_endow => Tgt::weap,
-			Self::v_firebolt(_) => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::v_firebolt(_) => Tgt::crea.mix(Tgt::play).or(),
 			Self::v_freeze => Tgt::crea,
 			Self::v_gpullspell => Tgt::crea,
 			Self::v_guard => Tgt::crea,
-			Self::v_holylight => Tgt::Or(&[Tgt::crea, Tgt::play]),
-			Self::v_icebolt(_) => Tgt::Or(&[Tgt::crea, Tgt::play]),
+			Self::v_holylight => Tgt::crea.mix(Tgt::play).or(),
+			Self::v_icebolt(_) => Tgt::crea.mix(Tgt::play).or(),
 			Self::v_improve => Tgt::crea,
 			Self::v_infect => Tgt::crea,
 			Self::v_liquid => Tgt::crea,
@@ -920,7 +1077,7 @@ impl Skill {
 			Self::v_platearmor(_) => Tgt::crea,
 			Self::v_readiness => Tgt::crea,
 			Self::v_rewind => Tgt::crea,
-			Self::v_steal => Tgt::And(&[Tgt::foe, Tgt::perm]),
+			Self::v_steal => Tgt::foe.mix(Tgt::perm).and(),
 			Self::v_virusinfect => Tgt::crea,
 			Self::v_web => Tgt::crea,
 			Self::v_wisdom => Tgt::quinttog,
@@ -4973,102 +5130,6 @@ impl Skill {
 			Self::v_hopedr => ctx.get(c, Stat::hope),
 			Self::v_swarmhp => ctx.get(c, Stat::swarmhp),
 			_ => 0,
-		}
-	}
-}
-
-impl<'tgt> Tgt<'tgt> {
-	pub fn full_check(self, ctx: &Game, c: i32, t: i32) -> bool {
-		let kind = ctx.get_kind(t);
-		(if kind == Kind::Player {
-			!ctx.get(t, Flag::out)
-		} else {
-			let owner = ctx.get_owner(t);
-			ctx.getIndex(t) != -1
-				&& (owner == ctx.turn || !ctx.is_cloaked(owner) || ctx.get(t, Flag::cloak))
-		}) && self.check(ctx, c, t)
-	}
-
-	pub fn check(self, ctx: &Game, c: i32, t: i32) -> bool {
-		match self {
-			Tgt::own => ctx.get_owner(c) == ctx.get_owner(t),
-			Tgt::foe => ctx.get_owner(c) != ctx.get_owner(t),
-			Tgt::notself => c != t,
-			Tgt::all => true,
-			Tgt::card => c != t && ctx.get_kind(t) == Kind::Spell,
-			Tgt::pill => ctx.material(t, Some(Kind::Permanent)) && ctx.get(t, Flag::pillar),
-			Tgt::weap => {
-				let tkind = ctx.get_kind(t);
-				ctx.material(t, None)
-					&& (tkind == Kind::Weapon
-						|| (tkind != Kind::Spell && {
-							let card = ctx.get(t, Stat::card);
-							card != 0 && ctx.get_card(card).kind == Kind::Weapon
-						}))
-			}
-			Tgt::shie => {
-				let tkind = ctx.get_kind(t);
-				ctx.material(t, None)
-					&& (tkind == Kind::Shield
-						|| (tkind != Kind::Spell && {
-							let card = ctx.get(t, Stat::card);
-							card != 0 && ctx.get_card(card).kind == Kind::Shield
-						}))
-			}
-			Tgt::playerweap => ctx.get_kind(t) == Kind::Weapon,
-			Tgt::perm => ctx.material(t, Some(Kind::Permanent)),
-			Tgt::nonstack => !ctx.get(t, Flag::stackable),
-			Tgt::permstack => ctx.material(t, Some(Kind::Permanent)) && ctx.get(t, Flag::stackable),
-			Tgt::crea => ctx.material(t, Some(Kind::Creature)),
-			Tgt::creacrea => {
-				ctx.material(t, Some(Kind::Creature)) && ctx.get_kind(t) == Kind::Creature
-			}
-			Tgt::play => ctx.get_kind(t) == Kind::Player,
-			Tgt::notplay => ctx.get_kind(t) != Kind::Player,
-			Tgt::sing => {
-				ctx.material(t, Some(Kind::Creature))
-					&& ctx
-						.getSkill(t, Event::Cast)
-						.iter()
-						.all(|&s| s != Skill::sing)
-			}
-			Tgt::butterfly => {
-				let tkind = ctx.get_kind(t);
-				(tkind == Kind::Creature || tkind == Kind::Weapon)
-					&& !ctx.get(t, Flag::immaterial | Flag::burrowed)
-					&& (ctx.trueatk(t) < 3 || (tkind == Kind::Creature && ctx.truehp(t) < 3))
-			}
-			Tgt::v_butterfly => ctx.material(t, Some(Kind::Creature)) && ctx.trueatk(t) < 3,
-			Tgt::devour => ctx.material(t, Some(Kind::Creature)) && ctx.truehp(t) < ctx.truehp(c),
-			Tgt::paradox => ctx.material(t, Some(Kind::Creature)) && ctx.truehp(t) < ctx.trueatk(t),
-			Tgt::notskele => {
-				ctx.material(t, Some(Kind::Creature))
-					&& !card::IsOf(ctx.get(t, Stat::card), card::Skeleton)
-			}
-			Tgt::forceplay => {
-				ctx.get_kind(t) == Kind::Spell
-					|| (ctx.material(t, None)
-						&& ctx
-							.getSkill(t, Event::Cast)
-							.first()
-							.map(|&s| s != Skill::forceplay)
-							.unwrap_or(false))
-			}
-			Tgt::airbornecrea => {
-				ctx.material(t, Some(Kind::Creature)) && ctx.get(t, Flag::airborne)
-			}
-			Tgt::golem => {
-				let tkind = ctx.get_kind(t);
-				(tkind == Kind::Weapon || tkind == Kind::Creature) && ctx.get(t, Flag::golem)
-			}
-			Tgt::groundcrea => ctx.material(t, Some(Kind::Creature)) && !ctx.get(t, Flag::airborne),
-			Tgt::wisdom => {
-				let tkind = ctx.get_kind(t);
-				(tkind == Kind::Creature || tkind == Kind::Weapon) && !ctx.get(t, Flag::burrowed)
-			}
-			Tgt::quinttog => ctx.get_kind(t) == Kind::Creature && !ctx.get(t, Flag::burrowed),
-			Tgt::And(terms) => terms.iter().all(|term| term.check(ctx, c, t)),
-			Tgt::Or(terms) => terms.iter().any(|term| term.check(ctx, c, t)),
 		}
 	}
 }
