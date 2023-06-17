@@ -1024,17 +1024,16 @@ export default function Match(props) {
 				}
 				const c = cmd.x === 'cast' && cmd.c && game.byId(cmd.c),
 					t = cmd.x === 'cast' && cmd.t && game.byId(cmd.t);
-				if (c && c.ownerId !== p1id && c.owner.isCloaked()) {
-					return null;
-				}
-				setFoeplays(foeplays =>
-					new Map(foeplays).set(
-						turn,
-						(foeplays.get(turn) ?? []).concat([play]),
-					),
-				);
-				if (cmd.x === 'cast' && iscmd && playByPlayMode !== 'disabled') {
-					spellsDispatch(play);
+				if (!c || c.ownerId === p1id || !c.owner.isCloaked()) {
+					setFoeplays(foeplays =>
+						new Map(foeplays).set(
+							turn,
+							(foeplays.get(turn) ?? []).concat([play]),
+						),
+					);
+					if (cmd.x === 'cast' && iscmd && playByPlayMode !== 'disabled') {
+						spellsDispatch(play);
+					}
 				}
 			}
 			const effects = game.next(cmd);
