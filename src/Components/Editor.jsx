@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { createSignal } from 'solid-js';
 
 import * as Components from '../Components/index.jsx';
 import * as etgutil from '../etgutil.js';
 
 export default function Editor(props) {
-	const [card, setCard] = useState(null);
+	const [card, setCard] = createSignal(null);
 
 	const addCard = card => {
 		if (props.deck.length < 60) props.setDeck(props.deck.concat([card.code]));
@@ -27,18 +27,6 @@ export default function Editor(props) {
 		}
 	};
 
-	const marksel = [];
-	for (let i = 0; i < 13; i++) {
-		marksel.push(
-			<Components.IconBtn
-				key={i}
-				e={'e' + i}
-				x={100 + i * 32}
-				y={234}
-				click={() => props.setMark(i)}
-			/>,
-		);
-	}
 	return (
 		<>
 			<Components.DeckDisplay
@@ -74,15 +62,24 @@ export default function Editor(props) {
 				}}
 			/>
 			<span
-				className={'ico e' + props.mark}
+				class={'ico e' + props.mark}
 				style={{
 					position: 'absolute',
 					left: '66px',
 					top: '200px',
 				}}
 			/>
-			{marksel}
-			<Components.Card x={734} y={8} card={card} />
+			<For each={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}>
+				{i => (
+					<Components.IconBtn
+						e={'e' + i}
+						x={100 + i * 32}
+						y={234}
+						click={() => props.setMark(i)}
+					/>
+				)}
+			</For>
+			<Components.Card x={734} y={8} card={card()} />
 		</>
 	);
 }

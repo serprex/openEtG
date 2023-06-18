@@ -1,5 +1,5 @@
-import { useSelector } from 'react-redux';
-import { useEffect, useMemo, useState, Fragment } from 'react';
+import { createSignal, onMount } from 'solid-js';
+import { For } from 'solid-js/web';
 
 import * as sock from '../sock.jsx';
 import Cards from '../Cards.js';
@@ -28,115 +28,114 @@ const packdata = [
 	{ cost: 250, type: 'Nymph', info: '1 Nymph' },
 ];
 
-function PackDisplay({ cards }) {
-	const [hoverCard, setHoverCard] = useState(null);
-	const children = useMemo(() => {
-		const deck = etgutil.decodedeck(cards),
-			dlen = etgutil.decklength(cards);
-		const children = [];
-		children.push(
-			<Components.DeckDisplay
-				key={0}
-				cards={Cards}
-				x={106}
-				deck={deck.slice(0, 50)}
-				onMouseOver={(i, card) => setHoverCard(card)}
-			/>,
-		);
+function PackDisplay(props) {
+	const [hoverCard, setHoverCard] = createSignal(null);
+	const DeckDisplaySetCard = (i, card) => setHoverCard(card);
+	const children = () => {
+		const deck = etgutil.decodedeck(props.cards),
+			dlen = etgutil.decklength(props.cards);
+		const children = [{ x: 106, y: 0, deck: deck.slice(0, 50) }];
 		for (let start = 51; start < dlen; start += 70) {
-			children.push(
-				<Components.DeckDisplay
-					key={start}
-					cards={Cards}
-					x={-92}
-					y={244 + (((start - 51) / 70) | 0) * 200}
-					deck={deck.slice(start, start + 70)}
-					onMouseOver={(i, card) => setHoverCard(card)}
-				/>,
-			);
+			children.push({
+				x: -92,
+				y: 244 + (((start - 51) / 70) | 0) * 200,
+				deck: deck.slice(start, start + 70),
+			});
 		}
 		return children;
-	}, [cards]);
+	};
 	return (
 		<div
-			className="bgbox"
+			class="bgbox"
 			style={{
 				position: 'absolute',
 				left: '0px',
 				top: '12px',
 				width: '756px',
 				height: '588px',
-				zIndex: '1',
-				overflowY: 'auto',
+				'z-index': '1',
+				'overflow-y': 'auto',
 			}}>
-			<Components.Card card={hoverCard} x={8} y={8} />
-			{children}
+			<Components.Card card={hoverCard()} x={8} y={8} />
+			<For each={children()}>
+				{p => (
+					<Components.DeckDisplay
+						cards={Cards}
+						x={p.x}
+						y={p.y}
+						deck={p.deck}
+						onMouseOver={DeckDisplaySetCard}
+					/>
+				)}
+			</For>
 		</div>
 	);
 }
 
 export default function Shop() {
-	const user = useSelector(({ user }) => user);
-	const bulk = useSelector(({ opts }) => opts.bulk ?? '1');
-	const [info1, setInfo1] = useState('Select from which element you want');
-	const [info2, setInfo2] = useState('Select which type of pack you want');
-	const [ele, setEle] = useState(-1);
-	const [rarity, setRarity] = useState(-1);
-	const [buy, setBuy] = useState(true);
-	const [cards, setCards] = useState('');
+	const rx = store.useRedux();
+	const bulk = () => rx.opts.bulk ?? '1';
+	const [info1, setInfo1] = createSignal('Select from which element you want');
+	const [info2, setInfo2] = createSignal('Select which type of pack you want');
+	const [ele, setEle] = createSignal(-1);
+	const [rarity, setRarity] = createSignal(-1);
+	const [buy, setBuy] = createSignal(true);
+	const [cards, setCards] = createSignal('');
 
-	useEffect(() => {
+	onMount(() => {
 		store.store.dispatch(
 			store.setCmds({
 				boostergive: data => {
 					const userdelta = {};
 					if (data.accountbound) {
 						userdelta.accountbound = etgutil.mergedecks(
-							user.accountbound,
+							rx.user.accountbound,
 							data.cards,
 						);
-						const freepacks = user.freepacks && user.freepacks.slice();
+						const freepacks = rx.user.freepacks && rx.user.freepacks.slice();
 						if (freepacks) {
 							freepacks[data.packtype]--;
 							userdelta.freepacks = freepacks;
 						}
 					} else {
 						const bdata = {};
-						parseInput(bdata, 'bulk', bulk, 99);
-						userdelta.pool = etgutil.mergedecks(user.pool, data.cards);
+						parseInput(bdata, 'bulk', bulk(), 99);
+						userdelta.pool = etgutil.mergedecks(rx.user.pool, data.cards);
 						userdelta.gold =
-							user.gold - packdata[data.packtype].cost * (bdata.bulk || 1);
+							rx.user.gold - packdata[data.packtype].cost * (bdata.bulk || 1);
 					}
 					store.store.dispatch(store.updateUser(userdelta));
 					setCards(data.cards);
 					setBuy(false);
 					store.store.dispatch(
 						store.chat(
-							<a
-								style={{ display: 'block' }}
-								href={`deck/${data.cards}`}
-								target="_blank">
-								{data.cards}
-							</a>,
+							() => (
+								<a
+									style={{ display: 'block' }}
+									href={`deck/${data.cards}`}
+									target="_blank">
+									{data.cards}
+								</a>
+							),
 							'Packs',
 						),
 					);
 				},
 			}),
 		);
-	}, [user]);
+	});
 
 	const buyPack = () => {
-		const pack = packdata[rarity];
+		const pack = packdata[rarity()];
 		const boostdata = {
-			pack: rarity,
-			element: ele,
+			pack: rarity(),
+			element: ele(),
 		};
-		parseInput(boostdata, 'bulk', bulk, 99);
+		parseInput(boostdata, 'bulk', bulk(), 99);
 		boostdata.bulk ||= 1;
 		if (
-			user.gold >= pack.cost * (boostdata.bulk || 1) ||
-			(user.freepacks && user.freepacks[rarity] > 0)
+			rx.user.gold >= pack.cost * (boostdata.bulk || 1) ||
+			(rx.user.freepacks && rx.user.freepacks[rarity()] > 0)
 		) {
 			sock.userEmit('booster', boostdata);
 			setBuy(false);
@@ -145,12 +144,12 @@ export default function Shop() {
 		}
 	};
 
-	const hasFreePacks = !!(user.freepacks && user.freepacks[rarity]);
+	const hasFreePacks = () =>
+		!!(rx.user.freepacks && rx.user.freepacks[rarity()]);
 	const elebuttons = [];
 	for (let i = 0; i < 14; i++) {
 		elebuttons.push(
 			<Components.IconBtn
-				key={i}
 				e={'e' + i}
 				x={75 + (i >> 1) * 64}
 				y={117 + (i & 1) * 75}
@@ -168,7 +167,7 @@ export default function Shop() {
 			<Components.Box x={40} y={270} width={712} height={300} />
 			<Components.Box x={768} y={90} width={94} height={184} />
 			<Components.Text
-				text={user.gold + '$'}
+				text={rx.user.gold + '$'}
 				style={{
 					position: 'absolute',
 					left: '775px',
@@ -176,7 +175,7 @@ export default function Shop() {
 				}}
 			/>
 			<Components.Text
-				text={info1}
+				text={info1()}
 				style={{
 					position: 'absolute',
 					left: '50px',
@@ -189,18 +188,20 @@ export default function Shop() {
 					left: '50px',
 					top: '50px',
 				}}>
-				{info2}
+				{info2()}
 			</span>
 			<Components.ExitBtn x={775} y={246} />
-			{hasFreePacks && (
+			{hasFreePacks() && (
 				<span
 					style={{
 						position: 'absolute',
 						left: '350px',
 						top: '26px',
 					}}>
-					{!!user.freepacks[rarity] &&
-						`Free ${packdata[rarity].type} packs left: ${user.freepacks[rarity]}`}
+					{!!rx.user.freepacks[rarity()] &&
+						`Free ${packdata[rarity()].type} packs left: ${
+							rx.user.freepacks[rarity()]
+						}`}
 				</span>
 			)}
 			{cards && (
@@ -218,18 +219,18 @@ export default function Shop() {
 					}}
 				/>
 			)}
-			{buy && !!~ele && !!~rarity && (
+			{buy() && !!~ele() && !!~rarity() && (
 				<>
-					{!hasFreePacks && (
+					{!hasFreePacks() && (
 						<input
 							type="button"
 							value="Max Buy"
 							onClick={() => {
-								const pack = packdata[rarity];
+								const pack = packdata[rarity()];
 								store.store.dispatch(
 									store.setOptTemp(
 										'bulk',
-										Math.min((user.gold / pack.cost) | 0, 99).toString(),
+										Math.min((rx.user.gold / pack.cost) | 0, 99).toString(),
 									),
 								);
 							}}
@@ -252,52 +253,49 @@ export default function Shop() {
 					/>
 				</>
 			)}
-			{packdata.map((pack, n) => (
-				<Fragment key={pack.type}>
-					<img
-						src={`/assets/pack${n}.webp`}
-						className="imgb"
-						onClick={() => {
-							setRarity(n);
-							setInfo2(`${pack.type} Pack: ${pack.info}`);
-						}}
-						style={{
-							position: 'absolute',
-							left: `${48 + 176 * n}px`,
-							top: '278px',
-						}}
-					/>
-					<Components.Text
-						text={pack.cost + '$'}
-						style={{
-							position: 'absolute',
-							left: `${48 + 176 * n}px`,
-							top: '542px',
-							width: '160px',
-							textAlign: 'center',
-						}}
-					/>
-				</Fragment>
-			))}
+			<For each={packdata}>
+				{(pack, n) => (
+					<>
+						<img
+							src={`/assets/pack${n()}.webp`}
+							class="imgb"
+							onClick={() => {
+								setRarity(n());
+								setInfo2(`${pack.type} Pack: ${pack.info}`);
+							}}
+							style={{
+								position: 'absolute',
+								left: `${48 + 176 * n()}px`,
+								top: '278px',
+							}}
+						/>
+						<Components.Text
+							text={pack.cost + '$'}
+							style={{
+								position: 'absolute',
+								left: `${48 + 176 * n()}px`,
+								top: '542px',
+								width: '160px',
+								'text-align': 'center',
+							}}
+						/>
+					</>
+				)}
+			</For>
 			{elebuttons}
-			{cards && <PackDisplay cards={cards} />}
-			{!hasFreePacks && !!~ele && !!~rarity && (
+			{cards() && <PackDisplay cards={cards()} />}
+			{!hasFreePacks() && !!~ele() && !!~rarity() && (
 				<input
 					type="number"
 					placeholder="Bulk"
-					value={bulk}
+					value={bulk()}
 					onChange={e =>
 						store.store.dispatch(store.setOptTemp('bulk', e.target.value))
 					}
 					onKeyPress={e => {
 						if (e.which === 13) buyPack();
 					}}
-					style={{
-						position: 'absolute',
-						top: '184px',
-						left: '777px',
-						width: '64px',
-					}}
+					style="position:absolute;top:184px;left:777px;width:64px"
 				/>
 			)}
 			<Tutor.Tutor x={8} y={500} panels={Tutor.Shop} />

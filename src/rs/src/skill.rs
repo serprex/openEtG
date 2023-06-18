@@ -924,7 +924,7 @@ impl Skill {
 		)
 	}
 
-	pub const fn targetting(self) -> Option<Tgt> {
+	pub const fn targeting(self) -> Option<Tgt> {
 		Some(match self {
 			Self::acceleration => Tgt::crea,
 			Self::accretion => Tgt::perm,
@@ -1576,7 +1576,7 @@ impl Skill {
 								debug_assert!(k == Event::Cast);
 								skills.first()
 							})
-							.and_then(|sk| sk.targetting())
+							.and_then(|sk| sk.targeting())
 							.map(|tgt| tgt.check(ctx, c, t))
 							.unwrap_or_default()
 				}) {
@@ -1606,7 +1606,7 @@ impl Skill {
 					&& ctx.get(c, Stat::delayed) == 0
 					&& data
 						.active
-						.and_then(|sk| sk.targetting())
+						.and_then(|sk| sk.targeting())
 						.map(|tgt| tgt.check(ctx, t, c))
 						.unwrap_or(false)
 				{
@@ -2095,14 +2095,14 @@ impl Skill {
 					}
 					let card = ctx.get_card(ctx.get(t, Stat::card));
 					if card.kind == Kind::Spell {
-						card.skill[0].1[0].targetting()
+						card.skill[0].1[0].targeting()
 					} else {
 						None
 					}
 				} else {
 					ctx.getSkill(t, Event::Cast)
 						.first()
-						.and_then(|&sk| sk.targetting())
+						.and_then(|&sk| sk.targeting())
 				};
 				let realturn = ctx.turn;
 				ctx.turn = town;
@@ -3457,7 +3457,7 @@ impl Skill {
 					&& ctx.get_card(ctx.get(t, Stat::card)).kind == Kind::Spell
 				{
 					if let Some(skill) = data.active {
-						if let Some(tgting) = skill.targetting() {
+						if let Some(tgting) = skill.targeting() {
 							let town = ctx.get_owner(t);
 							let mut tgts = Vec::with_capacity(50 * ctx.players_ref().len());
 							for &caster in ctx.players().iter() {

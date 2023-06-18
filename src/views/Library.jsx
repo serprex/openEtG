@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { createMemo, createSignal, onMount } from 'solid-js';
 
 import Cards from '../Cards.js';
 import * as sock from '../sock.jsx';
@@ -8,31 +8,23 @@ import * as userutil from '../userutil.js';
 import * as Components from '../Components/index.jsx';
 
 export default function Library(props) {
-	const [data, setData] = useState({});
-	const [card, setCard] = useState(null);
-	const [showBound, setShowBound] = useState(false);
+	const [data, setData] = createSignal({});
+	const [card, setCard] = createSignal(null);
+	const [showBound, setShowBound] = createSignal(false);
 
-	useEffect(() => {
+	onMount(() => {
 		store.store.dispatch(store.setCmds({ librarygive: setData }));
 		sock.emit({ x: 'librarywant', f: props.name });
-	}, [props.name]);
+	});
 
-	const {
-		progressmax,
-		progress,
-		shinyprogress,
-		reprog,
-		reprogmax,
-		cardpool,
-		boundpool,
-	} = useMemo(() => {
+	const memo = createMemo(() => {
 		let progressmax = 0,
 			progress = 0,
 			shinyprogress = 0,
 			reprog = [],
 			reprogmax = [];
-		const cardpool = etgutil.deck2pool(data.pool),
-			boundpool = etgutil.deck2pool(data.bound),
+		const cardpool = etgutil.deck2pool(data().pool),
+			boundpool = etgutil.deck2pool(data().bound),
 			codeprog = code => {
 				const upcode = etgutil.asUpped(code, true);
 				return Math.min(
@@ -62,12 +54,12 @@ export default function Library(props) {
 			cardpool,
 			boundpool,
 		};
-	}, [data.pool, data.bound]);
+	});
 	const children = [];
 	for (let e = 0; e < 13; e++) {
 		children.push(
 			<span
-				className={`ico e${e}`}
+				class={`ico e${e}`}
 				style={{
 					position: 'absolute',
 					left: `${36 + e * 53}px`,
@@ -79,7 +71,7 @@ export default function Library(props) {
 	for (let r = 1; r < 4; r++) {
 		children.push(
 			<span
-				className={`ico r${r}`}
+				class={`ico r${r}`}
 				style={{
 					position: 'absolute',
 					left: '8px',
@@ -95,11 +87,13 @@ export default function Library(props) {
 						position: 'absolute',
 						left: `${36 + e * 53}px`,
 						top: `${64 + r * 32}px`,
-						fontSize: '12px',
-						textShadow:
-							reprog[idx] === reprogmax[idx] ? '1px 1px 2px #fff' : undefined,
+						'font-size': '12px',
+						'text-shadow':
+							memo().reprog[idx] === memo().reprogmax[idx]
+								? '1px 1px 2px #fff'
+								: undefined,
 					}}>
-					{reprog[idx] ?? 0} / {reprogmax[idx] ?? 0}
+					{memo().reprog[idx] ?? 0} / {memo().reprogmax[idx] ?? 0}
 				</span>,
 			);
 		}
@@ -111,33 +105,35 @@ export default function Library(props) {
 					position: 'absolute',
 					left: '100px',
 					top: '8px',
-					whiteSpace: 'pre',
+					'white-space': 'pre',
 				}}>
 				{`Wealth ${
-					data.gold + Math.round(userutil.calcWealth(Cards, cardpool))
-				}\nGold ${data.gold}`}
+					data().gold + Math.round(userutil.calcWealth(Cards, memo().cardpool))
+				}\nGold ${data().gold}`}
 			</span>
 			<span
 				style={{
 					position: 'absolute',
 					left: '320px',
 					top: '8px',
-					whiteSpace: 'pre',
+					'white-space': 'pre',
 				}}>
-				ZE Progress {progress} / {progressmax}
+				ZE Progress {memo().progress} / {memo().progressmax}
 				{'\nSZE Progress '}
-				{shinyprogress} / {progressmax}
+				{memo().shinyprogress} / {memo().progressmax}
 			</span>
 			<span
 				style={{
 					position: 'absolute',
 					left: '540px',
 					top: '8px',
-					whiteSpace: 'pre',
+					'white-space': 'pre',
 				}}>
-				{`PvE ${data.aiwins} - ${data.ailosses}\nPvP ${data.pvpwins} - ${data.pvplosses}`}
+				{`PvE ${data().aiwins} - ${data().ailosses}\nPvP ${data().pvpwins} - ${
+					data().pvplosses
+				}`}
 			</span>
-			<Components.Card x={734} y={8} card={card} />
+			<Components.Card x={734} y={8} card={card()} />
 			<input
 				type="button"
 				value="Toggle Bound"
@@ -146,9 +142,7 @@ export default function Library(props) {
 					left: '5px',
 					top: '554px',
 				}}
-				onClick={() => {
-					setShowBound(!showBound);
-				}}
+				onClick={() => setShowBound(showBound => !showBound)}
 			/>
 			<Components.ExitBtn x={5} y={8} />
 			<input
@@ -163,7 +157,7 @@ export default function Library(props) {
 			/>
 			<Components.CardSelector
 				cards={Cards}
-				cardpool={showBound ? boundpool : cardpool}
+				cardpool={showBound() ? memo().boundpool : memo().cardpool}
 				filterboth
 				onMouseOver={setCard}
 			/>

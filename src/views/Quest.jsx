@@ -1,83 +1,83 @@
-import { useSelector } from 'react-redux';
-
+import { createMemo } from 'solid-js';
 import * as Quest from '../Quest.js';
 import * as Components from '../Components/index.jsx';
 import * as mkAi from '../mkAi.js';
 import * as store from '../store.jsx';
 
-function QuestButton({ sel, x, y, area, user, onClick }) {
+function QuestButton(props) {
 	return (
 		<span
 			style={{
 				position: 'absolute',
-				left: `${x}px`,
-				top: `${y}px`,
-				color: `${area.key && !user.quests[area.key] ? '#f' : '#a'}${
-					sel ? 'ff' : 'aa'
-				}`,
+				left: `${props.x}px`,
+				top: `${props.y}px`,
+				color: `${
+					props.area.key && !props.user.quests[props.area.key] ? '#f' : '#a'
+				}${props.sel ? 'ff' : 'aa'}`,
 			}}
-			onClick={onClick}>
-			{(area.key && Quest.quarks[area.key].name) || area.name}
+			onClick={props.onClick}>
+			{(props.area.key && Quest.quarks[props.area.key].name) ?? props.area.name}
 		</span>
 	);
 }
 
 export default function QuestView(props) {
-	const user = useSelector(({ user }) => user);
-	const oquest = useSelector(({ opts }) => opts.quest);
-	const questAreas = [],
-		quest = oquest ?? [];
-	let qbag = Quest.root;
-	for (let qi = 0; qi < quest.length + 1; qi++) {
-		let y = 162;
-		for (let i = 0; i < qbag.children.length; i++) {
-			const area = qbag.children[i];
-			if (area.key) {
-				const quark = Quest.quarks[area.key];
-				if (quark.questdependencies && !Quest.requireQuest(quark, user)) {
-					continue;
+	const rx = store.useRedux();
+	const questInfo = createMemo(() => {
+		const questAreas = [],
+			quest = rx.opts.quest ?? [];
+		let qbag = Quest.root;
+		for (let qi = 0; qi < quest.length + 1; qi++) {
+			let y = 162;
+			for (let i = 0; i < qbag.children.length; i++) {
+				const area = qbag.children[i];
+				if (area.key) {
+					const quark = Quest.quarks[area.key];
+					if (quark.questdependencies && !Quest.requireQuest(quark, rx.user)) {
+						continue;
+					}
 				}
+				questAreas.push(
+					<QuestButton
+						x={8 + qi * 177}
+						y={y}
+						area={area}
+						user={rx.user}
+						onClick={() => {
+							const newquest = quest.slice(0, qi);
+							newquest[qi] = i;
+							store.store.dispatch(store.setOptTemp('quest', newquest));
+						}}
+						sel={quest[qi] === i}
+					/>,
+				);
+				y += 24;
 			}
-			questAreas.push(
-				<QuestButton
-					x={8 + qi * 177}
-					y={y}
-					key={area.key || area.name}
-					area={area}
-					user={user}
-					onClick={() => {
-						const newquest = quest.slice(0, qi);
-						newquest[qi] = i;
-						store.store.dispatch(store.setOptTemp('quest', newquest));
-					}}
-					sel={quest[qi] === i}
-				/>,
-			);
-			y += 24;
+			if (qi < quest.length) {
+				qbag = qbag.children[quest[qi]];
+				if (!qbag.children) break;
+			}
 		}
-		if (qi < quest.length) {
-			qbag = qbag.children[quest[qi]];
-			if (!qbag.children) break;
-		}
-	}
-	const selectedQuest = qbag.key && Quest.quarks[qbag.key];
+		const selectedQuest = qbag.key && Quest.quarks[qbag.key];
+		return { questAreas, selectedQuest };
+	});
 	return (
 		<>
 			<Components.Box x={8} y={8} width={880} height={108} />
 			<Components.ExitBtn x={750} y={120} />
 			<Components.Text
 				text={
-					selectedQuest?.info ??
+					questInfo().selectedQuest?.info ??
 					"Click the list items to see the quest lines, & the FIGHT button to challenge them!\nNames in red are the ones you haven't yet completed."
 				}
 				style={{
 					position: 'absolute',
 					left: '26px',
 					top: '26px',
-					maxWidth: '850px',
+					'max-width': '850px',
 				}}
 			/>
-			{selectedQuest?.key && (
+			{questInfo().selectedQuest?.key && (
 				<input
 					type="button"
 					value="Fight!"
@@ -86,10 +86,10 @@ export default function QuestView(props) {
 						left: '8px',
 						top: '120px',
 					}}
-					onClick={() => mkAi.run(Quest.mkQuestAi(selectedQuest))}
+					onClick={() => mkAi.run(Quest.mkQuestAi(questInfo().selectedQuest))}
 				/>
 			)}
-			{questAreas}
+			{questInfo().questAreas}
 		</>
 	);
 }

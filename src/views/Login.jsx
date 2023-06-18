@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { createSignal, onMount, Show } from 'solid-js';
+import { For } from 'solid-js/web';
 
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
@@ -8,16 +8,15 @@ const MainMenu = import('./MainMenu.jsx');
 let View;
 if (typeof kongregateAPI === 'undefined') {
 	View = function Login(props) {
-		const remember = useSelector(({ opts }) => opts.remember);
-		const username = useSelector(({ opts }) => opts.username);
-		const [commit, setCommit] = useState(null);
-		const [password, setPassword] = useState('');
+		const rx = store.useRedux();
+		const [commit, setCommit] = createSignal(null);
+		let password;
 
 		const loginClick = auth => {
-			if (username) {
-				const data = { x: 'login', u: username };
+			if (rx.opts.username) {
+				const data = { x: 'login', u: rx.opts.username };
 				if (auth) data.a = auth;
-				else data.p = password;
+				else data.p = password.value;
 				sock.emit(data);
 			}
 		};
@@ -26,14 +25,14 @@ if (typeof kongregateAPI === 'undefined') {
 			if (e.which === 13) loginClick();
 		};
 
-		useEffect(() => {
+		onMount(() => {
 			store.store.dispatch(
 				store.setCmds({
 					login: data => {
 						if (!data.err) {
 							delete data.x;
 							store.store.dispatch(store.setUser(data));
-							if (remember && typeof localStorage !== 'undefined') {
+							if (rx.opts.remember && typeof localStorage !== 'undefined') {
 								localStorage.auth = data.auth;
 							}
 							if (!data.accountbound && !data.pool) {
@@ -52,7 +51,7 @@ if (typeof kongregateAPI === 'undefined') {
 			);
 
 			if (
-				remember &&
+				rx.opts.remember &&
 				typeof localStorage !== 'undefined' &&
 				localStorage.auth
 			) {
@@ -60,33 +59,14 @@ if (typeof kongregateAPI === 'undefined') {
 			} else {
 				fetch('https://api.github.com/repos/serprex/openEtG/commits?per_page=1')
 					.then(res => res.json())
-					.then(([data]) => {
-						setCommit(
-							<a
-								target="_blank"
-								rel="noopener"
-								href={data.html_url}
-								style={{
-									maxWidth: '670px',
-									position: 'absolute',
-									left: '220px',
-									top: '460px',
-								}}>
-								{data.commit.message.split('\n').map((text, i) => (
-									<div key={i} style={{ marginBottom: '6px' }}>
-										{text}
-									</div>
-								))}
-							</a>,
-						);
-					});
+					.then(([data]) => setCommit(data));
 			}
-		}, []);
+		});
 
 		return (
 			<div
 				style={{
-					backgroundImage: 'url(assets/bg_login.webp)',
+					'background-image': 'url(assets/bg_login.webp)',
 					width: '900px',
 					height: '600px',
 				}}>
@@ -95,8 +75,8 @@ if (typeof kongregateAPI === 'undefined') {
 					autoFocus
 					tabIndex="1"
 					onKeyPress={maybeLogin}
-					value={username ?? ''}
-					onChange={e =>
+					value={rx.opts.username ?? ''}
+					onInput={e =>
 						store.store.dispatch(store.setOpt('username', e.target.value))
 					}
 					style={{
@@ -106,8 +86,7 @@ if (typeof kongregateAPI === 'undefined') {
 					}}
 				/>
 				<input
-					onChange={e => setPassword(e.target.value)}
-					value={password}
+					ref={password}
 					type="password"
 					placeholder="Password"
 					tabIndex="2"
@@ -126,7 +105,7 @@ if (typeof kongregateAPI === 'undefined') {
 					}}>
 					<input
 						type="checkbox"
-						checked={!!remember}
+						checked={!!rx.opts.remember}
 						onChange={e => {
 							if (typeof localStorage !== 'undefined' && !e.target.checked) {
 								delete localStorage.auth;
@@ -160,15 +139,32 @@ if (typeof kongregateAPI === 'undefined') {
 						width: '100px',
 					}}
 				/>
-				{commit}
+				<Show when={commit()}>
+					{data => (
+						<a
+							target="_blank"
+							rel="noopener"
+							href={data().html_url}
+							style={{
+								'max-width': '670px',
+								position: 'absolute',
+								left: '220px',
+								top: '460px',
+							}}>
+							<For each={data().commit.message.split('\n')}>
+								{text => <div style="margin-bottom:6px">{text}</div>}
+							</For>
+						</a>
+					)}
+				</Show>
 			</div>
 		);
 	};
 } else {
 	View = function Login() {
-		const [guest, setGuest] = useState(false);
+		const [guest, setGuest] = createSignal(false);
 
-		useEffect(() => {
+		onMount(() => {
 			kongregateAPI.loadAPI(() => {
 				const kong = kongregateAPI.getAPI();
 				if (kong.services.isGuest()) {
@@ -201,15 +197,13 @@ if (typeof kongregateAPI === 'undefined') {
 					});
 				}
 			});
-		}, []);
+		});
 
-		return guest ? (
-			<>
+		return (
+			<Show when={guest()} fallback={'Logging in..'}>
 				Log in to use Kongregate, or play at{' '}
 				<a href="https://etg.dek.im">etg.dek.im</a>
-			</>
-		) : (
-			'Logging in..'
+			</Show>
 		);
 	};
 }

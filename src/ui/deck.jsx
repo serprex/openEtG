@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { createRoot } from 'react-dom/client';
+import { onMount, createSignal } from 'solid-js';
+import { render } from 'solid-js/web';
 import Cards from '../AllCards.js';
 import { Card, DeckDisplay } from '../Components/index.jsx';
 import { decodedeck } from '../etgutil.js';
@@ -11,14 +11,14 @@ const wealthStyle = {
 	top: '206px',
 };
 function App() {
-	const [deck, setDeck] = useState(decodedeck(location.hash.slice(1))),
-		[card, setCard] = useState(null);
+	const [deck, setDeck] = createSignal(decodedeck(location.hash.slice(1))),
+		[card, setCard] = createSignal(null);
 
-	useEffect(() => {
+	onMount(() => {
 		window.addEventListener('hashchange', () => {
 			setDeck(decodedeck(location.hash.slice(1)));
 		});
-	}, []);
+	});
 
 	return (
 		<>
@@ -27,13 +27,13 @@ function App() {
 				renderMark
 				x={-64}
 				y={-24}
-				deck={deck}
+				deck={deck()}
 				onMouseOver={(i, card) => setCard(card)}
 			/>
-			<Card x={36} y={206} card={card} />
-			<span style={wealthStyle}>{calcWealth(Cards, deck, true)}</span>
+			<Card x={36} y={206} card={card()} />
+			<span style={wealthStyle}>{calcWealth(Cards, deck(), true)}</span>
 		</>
 	);
 }
 
-createRoot(document.getElementById('deck')).render(<App />);
+render(() => <App />, document.getElementById('deck'));

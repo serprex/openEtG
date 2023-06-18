@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { createSignal, onMount } from 'solid-js';
+import { Show } from 'solid-js/web';
 
 import Cards from '../Cards.js';
 import Game from '../Game.js';
@@ -10,143 +10,140 @@ import { randint, shuffle } from '../util.js';
 import * as Components from '../Components/index.jsx';
 
 function RenderInfo(props) {
-	const { info, y, name } = props;
-	if (info) {
-		const testDeck = () => {
-			const deck = sock.getDeck();
-			if (decklength(deck) < 9 || decklength(adeck) < 9) {
-				store.store.dispatch(store.chatMsg('Deck too small'));
-				return;
-			}
-			const game = new Game({
-				seed: randint(),
-				cardreward: '',
-				rematch: testDeck,
-				players: shuffle([
-					{ idx: 1, name, user: name, deck },
-					{
-						idx: 2,
-						ai: 1,
-						name: 'Test',
-						deck: adeck,
-						hp: info.hp,
-						markpower: info.mark,
-						drawpower: info.draw,
-					},
-				]),
-			});
-			store.store.dispatch(store.doNav(import('./Match.jsx'), { game }));
-		};
-		const card = info.card && (y ? asUpped(info.card, true) : info.card);
-		const adeck = card && '05' + encodeCode(card) + info.deck;
-		return (
-			<>
-				{adeck && (
-					<Components.DeckDisplay
-						cards={Cards}
-						deck={decodedeck(adeck)}
-						renderMark
-						y={y}
-					/>
-				)}
-				<Components.Text
-					style={{
-						position: 'absolute',
-						left: '100px',
-						top: 4 + y + 'px',
-					}}
-					text={`W-L: ${info.win ?? 0} - ${info.loss ?? 0}, Rank: ${
-						info.rank ?? 'Inactive'
-					}, ${(info.win ?? 0) * 15 + (info.loss ?? 0) * 5}$`}
+	const testDeck = () => {
+		const deck = sock.getDeck();
+		if (decklength(deck) < 9 || decklength(adeck) < 9) {
+			store.store.dispatch(store.chatMsg('Deck too small'));
+			return;
+		}
+		const game = new Game({
+			seed: randint(),
+			cardreward: '',
+			rematch: testDeck,
+			players: shuffle([
+				{ idx: 1, name: props.name, user: props.name, deck },
+				{
+					idx: 2,
+					ai: 1,
+					name: 'Test',
+					deck: adeck,
+					hp: props.info.hp,
+					markpower: props.info.mark,
+					drawpower: props.info.draw,
+				},
+			]),
+		});
+		store.store.dispatch(store.doNav(import('./Match.jsx'), { game }));
+	};
+	const card =
+		props.info.card &&
+		(props.y ? asUpped(props.info.card, true) : props.info.card);
+	const adeck = card && '05' + encodeCode(card) + props.info.deck;
+	return (
+		<>
+			{adeck && (
+				<Components.DeckDisplay
+					cards={Cards}
+					deck={decodedeck(adeck)}
+					renderMark
+					y={props.y}
 				/>
+			)}
+			<Components.Text
+				style={{
+					position: 'absolute',
+					left: '100px',
+					top: `${4 + props.y}px`,
+				}}
+				text={`W-L: ${props.info.win ?? 0} - ${props.info.loss ?? 0}, Rank: ${
+					props.info.rank ?? 'Inactive'
+				}, ${(props.info.win ?? 0) * 15 + (props.info.loss ?? 0) * 5}$`}
+			/>
+			<input
+				readOnly
+				style={{
+					position: 'absolute',
+					left: '330px',
+					top: `${4 + props.y}px`,
+					width: '190px',
+				}}
+				onClick={e => e.target.setSelectionRange(0, 999)}
+				value={adeck ?? ''}
+			/>
+			<span
+				style={{
+					position: 'absolute',
+					left: '600px',
+					top: `${4 + props.y}px`,
+				}}>
+				Best Rank: {props.info.bestrank}
+			</span>
+			<span
+				style={{
+					position: 'absolute',
+					left: '400px',
+					top: `${224 + props.y}px`,
+				}}>
+				Age: {props.info.day}
+			</span>
+			<span
+				style={{
+					position: 'absolute',
+					left: '100px',
+					top: `${224 + props.y}px`,
+				}}>
+				HP: {props.info.hp}
+			</span>
+			<span
+				style={{
+					position: 'absolute',
+					left: '200px',
+					top: `${224 + props.y}px`,
+				}}>
+				Mark: {props.info.mark}
+			</span>
+			<span
+				style={{
+					position: 'absolute',
+					left: '300px',
+					top: `${224 + props.y}px`,
+				}}>
+				Draw: {props.info.draw}
+			</span>
+			<input
+				type="button"
+				value="Modify"
+				style={{
+					position: 'absolute',
+					left: '500px',
+					top: `${224 + props.y}px`,
+				}}
+				onClick={() => {
+					store.store.dispatch(
+						store.doNav(import('./ArenaEditor.jsx'), {
+							adeck: props.info.deck,
+							acard: Cards.Codes[card],
+							ainfo: props.info,
+						}),
+					);
+				}}
+			/>
+			{adeck && (
 				<input
-					readOnly
-					style={{
-						position: 'absolute',
-						left: '330px',
-						top: 4 + y + 'px',
-						width: '190px',
-					}}
-					value={adeck ?? ''}
-				/>
-				<span
+					type="button"
+					value="Test"
 					style={{
 						position: 'absolute',
 						left: '600px',
-						top: 4 + y + 'px',
-					}}>
-					Best Rank: {info.bestrank}
-				</span>
-				<span
-					style={{
-						position: 'absolute',
-						left: '400px',
-						top: 224 + y + 'px',
-					}}>
-					Age: {info.day}
-				</span>
-				<span
-					style={{
-						position: 'absolute',
-						left: '100px',
-						top: 224 + y + 'px',
-					}}>
-					HP: {info.hp}
-				</span>
-				<span
-					style={{
-						position: 'absolute',
-						left: '200px',
-						top: 224 + y + 'px',
-					}}>
-					Mark: {info.mark}
-				</span>
-				<span
-					style={{
-						position: 'absolute',
-						left: '300px',
-						top: 224 + y + 'px',
-					}}>
-					Draw: {info.draw}
-				</span>
-				<input
-					type="button"
-					value="Modify"
-					style={{
-						position: 'absolute',
-						left: '500px',
-						top: 224 + y + 'px',
+						top: `${224 + props.y}px`,
 					}}
-					onClick={() => {
-						store.store.dispatch(
-							store.doNav(import('./ArenaEditor.jsx'), {
-								adeck: info.deck,
-								acard: Cards.Codes[card],
-								ainfo: info,
-							}),
-						);
-					}}
+					onClick={testDeck}
 				/>
-				{adeck && (
-					<input
-						type="button"
-						value="Test"
-						style={{
-							position: 'absolute',
-							left: '600px',
-							top: 224 + y + 'px',
-						}}
-						onClick={testDeck}
-					/>
-				)}
-			</>
-		);
-	} else {
-		return null;
-	}
+			)}
+		</>
+	);
 }
 function ArenaCard(props) {
-	const { info, y, card } = props;
 	return (
 		<>
 			<input
@@ -155,32 +152,31 @@ function ArenaCard(props) {
 				style={{
 					position: 'absolute',
 					left: '734px',
-					top: 260 + y + 'px',
+					top: `${260 + props.y}px`,
 				}}
 				onClick={() => {
 					store.store.dispatch(
 						store.doNav(import('./ArenaEditor.jsx'), {
 							adeck: '',
-							acard: card,
-							ainfo: { day: info ? info.day : 0 },
+							acard: props.card,
+							ainfo: { day: props.info?.day ?? 0 },
 							acreate: true,
 						}),
 					);
 				}}
 			/>
-			<Components.Card x={734} y={y} card={card} />
+			<Components.Card x={734} y={props.y} card={props.card} />
 		</>
 	);
 }
 
 export default function ArenaInfo() {
-	const uname = useSelector(({ user }) => user.name);
-	const ocard = useSelector(({ user }) => user.ocard);
-	const [{ A, B }, setAB] = useState({});
-	useEffect(() => {
+	const rx = store.useRedux();
+	const [AB, setAB] = createSignal({});
+	onMount(() => {
 		store.store.dispatch(store.setCmds({ arenainfo: setAB }));
 		sock.userEmit('arenainfo');
-	}, []);
+	});
 
 	return (
 		<>
@@ -195,15 +191,23 @@ export default function ArenaInfo() {
 				}
 			/>
 			<Components.ExitBtn x={8} y={300} />
-			<RenderInfo info={A} y={0} name={uname} />
-			<RenderInfo info={B} y={300} name={uname} />
-			{!!ocard && (
+			<Show when={AB().A}>
+				<RenderInfo info={AB().A} y={0} name={rx.user.name} />
+			</Show>
+			<Show when={AB().B}>
+				<RenderInfo info={AB().B} y={300} name={rx.user.name} />
+			</Show>
+			{!!rx.user.ocard && (
 				<>
-					<ArenaCard info={A} y={8} card={Cards.Codes[asUpped(ocard, false)]} />
 					<ArenaCard
-						info={B}
+						info={AB().A}
+						y={8}
+						card={Cards.Codes[asUpped(rx.user.ocard, false)]}
+					/>
+					<ArenaCard
+						info={AB().B}
 						y={300}
-						card={Cards.Codes[asUpped(ocard, true)]}
+						card={Cards.Codes[asUpped(rx.user.ocard, true)]}
 					/>
 				</>
 			)}

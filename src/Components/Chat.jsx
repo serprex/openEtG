@@ -1,28 +1,30 @@
-import { useRef, useLayoutEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { createEffect, createRenderEffect } from 'solid-js';
+import { For } from 'solid-js/web';
+import { useRedux } from '../store.jsx';
 
 export default function Chat(props) {
-	const chatRef = useRef(),
-		chat = chatRef.current;
-	const channelRef = useRef();
+	const rx = useRedux();
+	let chat = null,
+		scrollTop = null;
 
-	const scrollTop =
-		chat &&
-		props.channel === channelRef.current &&
-		Math.abs(chat.scrollTop - chat.scrollHeight + chat.offsetHeight) >= 8
-			? chat.scrollTop
-			: -1;
-	channelRef.current = props.channel;
-
-	useLayoutEffect(() => {
-		chatRef.current.scrollTop = ~scrollTop
-			? scrollTop
-			: chatRef.current.scrollHeight;
+	createRenderEffect(channel => {
+		rx.chat;
+		scrollTop =
+			chat &&
+			props.channel === channel &&
+			Math.abs(chat.scrollTop - chat.scrollHeight + chat.offsetHeight) >= 8
+				? chat.scrollTop
+				: -1;
+		return props.channel;
+	}, props.channel);
+	createEffect(() => {
+		rx.chat;
+		chat.scrollTop = ~scrollTop ? scrollTop : chat.scrollHeight;
 	});
 
 	return (
-		<div className="chatBox" style={props.style} ref={chatRef}>
-			{useSelector(({ chat }) => chat.get(props.channel))}
+		<div class="chatBox" style={props.style} ref={chat}>
+			<For each={rx.chat.get(props.channel)}>{span => span()}</For>
 		</div>
 	);
 }

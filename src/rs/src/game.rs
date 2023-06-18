@@ -1145,13 +1145,13 @@ impl Game {
 
 	pub fn requires_target(&self, id: i32) -> bool {
 		let skill = self.getSkill(id, Event::Cast);
-		!skill.is_empty() && skill[0].targetting().is_some()
+		!skill.is_empty() && skill[0].targeting().is_some()
 	}
 
 	pub fn can_target(&self, c: i32, t: i32) -> bool {
 		self.getSkill(c, Event::Cast)
 			.first()
-			.and_then(|sk| sk.targetting())
+			.and_then(|sk| sk.targeting())
 			.map(|tgt| tgt.full_check(self, c, t))
 			.unwrap_or(false)
 	}

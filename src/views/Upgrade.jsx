@@ -1,15 +1,18 @@
-import { useState, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { createMemo, createSignal } from 'solid-js';
 
 import * as sock from '../sock.jsx';
+import { useRedux } from '../store.jsx';
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
 import * as Components from '../Components/index.jsx';
 
 export default function Upgrade() {
-	const [showBound, setShowBound] = useState(false);
-	const [error, setError] = useState('');
-	const [state, setState] = useState({
+	const rx = useRedux();
+	const cardpool = createMemo(() => etgutil.deck2pool(rx.user.pool));
+	const boundpool = createMemo(() => etgutil.deck2pool(rx.user.accountbound));
+	const [showBound, setShowBound] = createSignal(false);
+	const [error, setError] = createSignal('');
+	const [state, setState] = createSignal({
 		card1: null,
 		card2: null,
 		canGrade: false,
@@ -19,22 +22,16 @@ export default function Upgrade() {
 		downgrade: false,
 		downlish: false,
 	});
-	const user = useSelector(({ user }) => user);
-
-	const [cardpool, boundpool] = useMemo(
-		() => [etgutil.deck2pool(user.pool), etgutil.deck2pool(user.accountbound)],
-		[user.pool, user.accountbound],
-	);
 
 	function upgradeCard(card) {
 		if (!card.isFree()) {
 			if (card.upped) return 'You cannot upgrade upgraded cards.';
 			const use = ~card.rarity && !(card.rarity === 4 && card.shiny) ? 6 : 1;
-			if (cardpool[card.code] >= use || boundpool[card.code] >= use) {
+			if (cardpool()[card.code] >= use || boundpool()[card.code] >= use) {
 				sock.userExec('upgrade', { card: card.code });
 			} else
 				return `You need at least ${use} copies to be able to upgrade this card!`;
-		} else if (user.gold >= 50) {
+		} else if (rx.user.gold >= 50) {
 			sock.userExec('uppillar', { c: card.code });
 		} else return 'You need 50$ to afford an upgraded pillar!';
 	}
@@ -49,11 +46,11 @@ export default function Upgrade() {
 			if (card.shiny) return 'You cannot polish shiny cards.';
 			if (card.rarity === 4) return 'You cannot polish Nymphs.';
 			const use = card.rarity !== -1 ? 6 : 2;
-			if (cardpool[card.code] >= use || boundpool[card.code] >= use) {
+			if (cardpool()[card.code] >= use || boundpool()[card.code] >= use) {
 				sock.userExec('polish', { card: card.code });
 			} else
 				return `You need at least ${use} copies to be able to polish this card!`;
-		} else if (user.gold >= 50) {
+		} else if (rx.user.gold >= 50) {
 			sock.userExec('shpillar', { c: card.code });
 		} else return 'You need 50$ to afford a shiny pillar!';
 	}
@@ -66,7 +63,9 @@ export default function Upgrade() {
 	}
 	function eventWrap(func) {
 		return () => {
-			const error = state.card1 ? func(state.card1) : 'Pick a card, any card.';
+			const error = state().card1
+				? func(state().card1)
+				: 'Pick a card, any card.';
 			if (error) setError(error);
 		};
 	}
@@ -76,11 +75,11 @@ export default function Upgrade() {
 	return (
 		<>
 			<Components.ExitBtn x={5} y={50} />
-			{state.canGrade && (
+			{state().canGrade && (
 				<input
 					type="button"
-					value={state.downgrade ? 'Downgrade' : 'Upgrade'}
-					onClick={eventWrap(state.downgrade ? downgradeCard : upgradeCard)}
+					value={state().downgrade ? 'Downgrade' : 'Upgrade'}
+					onClick={eventWrap(state().downgrade ? downgradeCard : upgradeCard)}
 					style={{
 						position: 'absolute',
 						left: '150px',
@@ -88,11 +87,11 @@ export default function Upgrade() {
 					}}
 				/>
 			)}
-			{state.canLish && (
+			{state().canLish && (
 				<input
 					type="button"
-					value={state.downlish ? 'Unpolish' : 'Polish'}
-					onClick={eventWrap(state.downlish ? unpolishCard : polishCard)}
+					value={state().downlish ? 'Unpolish' : 'Polish'}
+					onClick={eventWrap(state().downlish ? unpolishCard : polishCard)}
 					style={{
 						position: 'absolute',
 						left: '150px',
@@ -111,7 +110,7 @@ export default function Upgrade() {
 				}}
 			/>
 			<Components.Text
-				text={user.gold + '$'}
+				text={rx.user.gold + '$'}
 				style={{
 					position: 'absolute',
 					left: '5px',
@@ -119,7 +118,7 @@ export default function Upgrade() {
 				}}
 			/>
 			<Components.Text
-				text={state.info1}
+				text={state().info1}
 				style={{
 					position: 'absolute',
 					left: '250px',
@@ -127,7 +126,7 @@ export default function Upgrade() {
 				}}
 			/>
 			<Components.Text
-				text={state.info3}
+				text={state().info3}
 				style={{
 					position: 'absolute',
 					left: '250px',
@@ -135,15 +134,15 @@ export default function Upgrade() {
 				}}
 			/>
 			<Components.Text
-				text={error}
+				text={error()}
 				style={{
 					position: 'absolute',
 					left: '100px',
 					top: '170px',
 				}}
 			/>
-			<Components.Card x={534} y={8} card={state.card1} />
-			<Components.Card x={734} y={8} card={state.card2} />
+			<Components.Card x={534} y={8} card={state().card1} />
+			<Components.Card x={734} y={8} card={state().card2} />
 			<input
 				type="button"
 				value="Toggle Bound"
@@ -152,15 +151,15 @@ export default function Upgrade() {
 					left: '5px',
 					top: '554px',
 				}}
-				onClick={() => setShowBound(!showBound)}
+				onClick={() => setShowBound(showBound => !showBound)}
 			/>
 			<Components.CardSelector
 				cards={Cards}
-				cardpool={showBound ? boundpool : cardpool}
+				cardpool={showBound() ? boundpool() : cardpool()}
 				maxedIndicator
 				onClick={card => {
 					const newstate = {
-						...state,
+						...state(),
 						card1: card,
 						card2: card.asUpped(true),
 						canGrade: true,

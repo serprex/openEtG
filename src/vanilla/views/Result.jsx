@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { onCleanup, onMount } from 'solid-js';
 
 import { userEmit } from '../../sock.jsx';
 import * as etg from '../../etg.js';
@@ -13,39 +12,32 @@ function exitFunc() {
 }
 
 export default function OriginalResult({ game }) {
-	const user = useSelector(({ user }) => user),
-		orig = useSelector(({ orig }) => orig),
-		cardswonref = useRef(null),
-		electrumwonref = useRef(null);
+	const rx = store.useRedux(),
+		player1 = game.byUser(rx.user ? rx.user.name : '');
+	let cardswonref = null,
+		electrumwonref = null;
 
-	const player1 = game.byUser(user ? user.name : '');
+	const canRematch = () =>
+		game.data.rematch &&
+		(!game.data.rematchFilter || game.data.rematchFilter(game, player1.id));
 
-	const canRematch = useMemo(
-		() =>
-			game.data.rematch &&
-			(!game.data.rematchFilter || game.data.rematchFilter(game, player1.id)),
-		[game.data.rematch, game.data.rematchFilter],
-	);
+	const onkeydown = e => {
+		if (e.target.tagName === 'TEXTAREA') return;
+		const kc = e.which;
+		if (kc === 32 || kc === 13) exitFunc();
+		else if ((kc === 87 || e.key === 'w') && canRematch()) {
+			game.data.rematch();
+		}
+	};
 
-	const onkeydown = useCallback(
-		e => {
-			if (e.target.tagName === 'TEXTAREA') return;
-			const kc = e.which;
-			if (kc === 32 || kc === 13) exitFunc();
-			else if ((kc === 87 || e.key === 'w') && canRematch) {
-				game.data.rematch();
-			}
-		},
-		[canRematch, game.data.rematch],
-	);
-
-	useEffect(() => {
+	onMount(() => {
 		document.addEventListener('keydown', onkeydown);
-		return () => document.removeEventListener('keydown', onkeydown);
-	}, [onkeydown]);
+	});
+	onCleanup(() => {
+		document.removeEventListener('keydown', onkeydown);
+	});
 
-	useEffect(() => {
-		if (game.winner !== player1.id) return;
+	if (game.winner === player1.id) {
 		const foedecks = game.data.players.filter(pd => !pd.user);
 		if (foedecks.length === 0) return;
 		const foedeck = choose(foedecks),
@@ -71,9 +63,7 @@ export default function OriginalResult({ game }) {
 				c1 = choose(spins),
 				c2 = choose(spins);
 			cardswon.push(
-				<div
-					key={cardswon.length}
-					style={{ opacity: c0 === c1 && c1 === c2 ? undefined : '.3' }}>
+				<div style={{ opacity: c0 === c1 && c1 === c2 ? undefined : '.3' }}>
 					<Components.Card x={16 + i * 300} y={16} card={c0} />
 					<Components.Card x={48 + i * 300} y={48} card={c1} />
 					<Components.Card x={80 + i * 300} y={80} card={c2} />
@@ -97,9 +87,9 @@ export default function OriginalResult({ game }) {
 			store.store.dispatch(store.addOrig(update));
 		}
 
-		cardswonref.current = cardswon;
-		electrumwonref.current = electrumwon;
-	}, []);
+		cardswonref = cardswon;
+		electrumwonref = electrumwon;
+	}
 
 	return (
 		<>
@@ -113,7 +103,7 @@ export default function OriginalResult({ game }) {
 				}}
 				onClick={exitFunc}
 			/>
-			{canRematch && (
+			{canRematch() && (
 				<input
 					type="button"
 					value="Rematch"
@@ -125,12 +115,12 @@ export default function OriginalResult({ game }) {
 					}}
 				/>
 			)}
-			{cardswonref.current}
-			{electrumwonref.current && (
+			{cardswonref}
+			{electrumwonref && (
 				<Components.Text
-					text={`${electrumwonref.current}$`}
+					text={`${electrumwonref}$`}
 					style={{
-						textAlign: 'center',
+						'text-align': 'center',
 						width: '900px',
 						position: 'absolute',
 						left: '0px',

@@ -1,5 +1,6 @@
-import { Fragment } from 'react';
 import { createStore, applyMiddleware } from 'redux';
+import { onCleanup } from 'solid-js';
+import { createStore as createSolidStore, reconcile } from 'solid-js/store';
 
 import * as usercmd from './usercmd.js';
 import * as sfx from './audio.js';
@@ -61,7 +62,7 @@ export function chat(span, name) {
 export function chatMsg(msg, name) {
 	return {
 		type: 'CHAT',
-		span: <div>{msg}</div>,
+		span: () => <div>{msg}</div>,
 		name,
 	};
 }
@@ -162,11 +163,11 @@ export const store = createStore(
 			case 'CHAT': {
 				const chat = new Map(state.chat),
 					name = action.name ?? state.opts.channel,
-					span = <Fragment key={state.chatid}>{action.span}</Fragment>;
-				chat.set(name, (chat.get(name) || []).concat([span]));
+					span = action.span;
+				chat.set(name, (chat.get(name) ?? []).concat([span]));
 				if (action.name === 'System')
-					chat.set('Main', (chat.get('Main') || []).concat([span]));
-				return { ...state, chat, chatid: state.chatid + 1 };
+					chat.set('Main', (chat.get('Main') ?? []).concat([span]));
+				return { ...state, chat };
 			}
 		}
 		return state;
@@ -176,7 +177,6 @@ export const store = createStore(
 		opts,
 		cmds: {},
 		chat: new Map(),
-		chatid: 1,
 		muted: new Set(),
 	},
 	applyMiddleware(
@@ -188,3 +188,12 @@ export const store = createStore(
 					: next(action),
 	),
 );
+
+export function useRedux() {
+	const [state, setState] = createSolidStore(store.getState());
+	const unsubscribe = store.subscribe(() =>
+		setState(reconcile(store.getState())),
+	);
+	onCleanup(() => unsubscribe());
+	return state;
+}

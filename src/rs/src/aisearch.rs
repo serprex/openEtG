@@ -64,7 +64,7 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 			return;
 		}
 		if let Some(&active) = ctx.getSkill(id, Event::Cast).first() {
-			if let Some(tgting) = active.targetting() {
+			if let Some(tgting) = active.targeting() {
 				let mut tgts = Vec::with_capacity(50 * ctx.players_ref().len());
 				for &id in ctx.players_ref().iter() {
 					let pl = ctx.get_player(id);
@@ -142,7 +142,7 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 				&& (if let Some(tgt) = gclone
 					.getSkill(c, Event::Cast)
 					.first()
-					.and_then(|sk| sk.targetting())
+					.and_then(|sk| sk.targeting())
 				{
 					t != 0 && gclone.getIndex(t) != -1 && gclone.can_target(c, t)
 				} else {
@@ -291,7 +291,7 @@ fn scan(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32) {
 				.filter(|&id| id != 0 && ctx.canactive(id))
 				.map(|id| (id, ctx.getSkill(id, Event::Cast).first())),
 		) {
-		if let Some(tgt) = sk.and_then(|sk| sk.targetting()) {
+		if let Some(tgt) = sk.and_then(|sk| sk.targeting()) {
 			scantgt(ctx, depth, candy, limit, id, tgt);
 		} else {
 			scancore(ctx, depth, candy, limit, GameMove::Cast(id, 0));

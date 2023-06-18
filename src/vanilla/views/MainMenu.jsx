@@ -1,6 +1,3 @@
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
-
 import * as etg from '../../etg.js';
 import aiDecks from '../Decks.json' assert { type: 'json' };
 import * as etgutil from '../../etgutil.js';
@@ -58,23 +55,20 @@ function mkAi4() {
 }
 
 export default function OriginalMainMenu() {
-	const user = useSelector(({ user }) => user),
-		orig = useSelector(({ orig }) => orig),
-		origfoename = useSelector(({ opts }) => opts.origfoename ?? '');
-	const [origname, setName] = useState('');
-	const [origpass, setPass] = useState('');
+	const rx = store.useRedux();
+	const origfoename = () => rx.opts.origfoename ?? '';
 
 	const vsAi = (level, cost, basereward, hpreward) => {
 		if (
 			hpreward > 0 &&
-			!Cards.isDeckLegal(etgutil.decodedeck(orig.deck), orig)
+			!Cards.isDeckLegal(etgutil.decodedeck(rx.orig.deck), rx.orig)
 		) {
 			store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
 			return;
 		}
 		const [ainame, aideck] =
 			level === 'custom'
-				? ['Custom', parseDeck(origfoename)]
+				? ['Custom', parseDeck(origfoename())]
 				: level === 'ai4'
 				? mkAi4()
 				: choose(aiDecks[level]);
@@ -95,9 +89,9 @@ export default function OriginalMainMenu() {
 			players: shuffle([
 				{
 					idx: 1,
-					name: user.name,
-					user: user.name,
-					deck: orig.deck,
+					name: rx.user.name,
+					user: rx.user.name,
+					deck: rx.orig.deck,
 				},
 				{
 					idx: 2,
@@ -144,7 +138,7 @@ export default function OriginalMainMenu() {
 			<input
 				type="button"
 				value="PvP"
-				onClick={() => sendChallenge(origfoename, true)}
+				onClick={() => sendChallenge(origfoename(), true)}
 				style={{
 					position: 'absolute',
 					left: '200px',
@@ -154,7 +148,7 @@ export default function OriginalMainMenu() {
 			<input
 				type="button"
 				value="Sandbox PvP"
-				onClick={() => sendChallenge(origfoename, true, false)}
+				onClick={() => sendChallenge(origfoename(), true, false)}
 				style={{
 					position: 'absolute',
 					left: '200px',
@@ -182,8 +176,8 @@ export default function OriginalMainMenu() {
 			</span>
 			<input
 				placeholder="Name"
-				value={origfoename}
-				onChange={e =>
+				value={origfoename()}
+				onInput={e =>
 					store.store.dispatch(store.setOptTemp('origfoename', e.target.value))
 				}
 				style={{
@@ -218,10 +212,10 @@ export default function OriginalMainMenu() {
 			/>
 			<Components.ExitBtn x={9} y={140} />
 			<Components.Text
-				text={`${orig.electrum}$`}
+				text={`${rx.orig.electrum}$`}
 				style={{
-					fontSize: '14px',
-					pointerEvents: 'none',
+					'font-size': '14px',
+					'pointer-events': 'none',
 					position: 'absolute',
 					left: '8px',
 					top: '160px',

@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { createEffect, createMemo, createSignal, onMount } from 'solid-js';
 
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
@@ -8,17 +7,17 @@ import * as Components from '../Components/index.jsx';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 
-export default function Trade({ foe }) {
-	const user = useSelector(({ user }) => user);
-	const [confirm, setConfirm] = useState(0);
-	const [canconfirm, setCanconfirm] = useState(false);
-	const [card, setCard] = useState(null);
-	const [deck, setDeck] = useState([]);
-	const [gold, setGold] = useState(0);
-	const [offer, setOffer] = useState([]);
-	const [gopher, setGopher] = useState(0);
+export default function Trade(props) {
+	const rx = store.useRedux();
+	const [confirm, setConfirm] = createSignal(0);
+	const [canconfirm, setCanconfirm] = createSignal(false);
+	const [card, setCard] = createSignal(null);
+	const [deck, setDeck] = createSignal([]);
+	const [gold, setGold] = createSignal(0);
+	const [offer, setOffer] = createSignal([]);
+	const [gopher, setGopher] = createSignal(0);
 
-	useEffect(() => {
+	onMount(() => {
 		store.store.dispatch(
 			store.setCmds({
 				offertrade: data => {
@@ -30,47 +29,47 @@ export default function Trade({ foe }) {
 					store.store.dispatch(
 						store.updateUser({
 							pool: etgutil.mergedecks(
-								etgutil.removedecks(user.pool, data.oldcards),
+								etgutil.removedecks(rx.user.pool, data.oldcards),
 								data.newcards,
 							),
-							gold: user.gold + data.g,
+							gold: rx.user.gold + data.g,
 						}),
 					);
 					store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
 				},
 				tradecanceled: data => {
-					if (data.u === foe) {
+					if (data.u === props.foe) {
 						store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
 					}
 				},
 			}),
 		);
-	}, [user, foe]);
+	});
 
-	useEffect(() => sock.userEmit('reloadtrade', { f: foe }), [foe]);
+	createEffect(() => sock.userEmit('reloadtrade', { f: props.foe }));
 
-	const cardminus = useMemo(() => {
+	const cardminus = createMemo(() => {
 			const minus = [];
-			for (const code of deck) {
+			for (const code of deck()) {
 				minus[code] = (minus[code] ?? 0) + 1;
 			}
 			return minus;
-		}, [deck]),
-		cardpool = useMemo(() => etgutil.deck2pool(user.pool), [user.pool]);
+		}),
+		cardpool = createMemo(() => etgutil.deck2pool(rx.user.pool));
 
 	return (
 		<>
-			{(confirm === 0 || (confirm === 1 && canconfirm)) && (
+			{(confirm() === 0 || (confirm() === 1 && canconfirm())) && (
 				<input
 					type="button"
-					value={confirm === 0 ? 'Trade' : 'Confirm'}
+					value={confirm() === 0 ? 'Trade' : 'Confirm'}
 					onClick={
-						confirm === 0
+						confirm() === 0
 							? () => {
 									sock.userEmit('offertrade', {
-										f: foe,
-										cards: etgutil.encodedeck(deck),
-										g: gold,
+										f: props.foe,
+										cards: etgutil.encodedeck(deck()),
+										g: gold(),
 										forcards: null,
 										forg: null,
 									});
@@ -78,11 +77,11 @@ export default function Trade({ foe }) {
 							  }
 							: () => {
 									sock.userEmit('offertrade', {
-										f: foe,
-										cards: etgutil.encodedeck(deck),
-										g: gold,
-										forcards: etgutil.encodedeck(offer),
-										forg: gopher,
+										f: props.foe,
+										cards: etgutil.encodedeck(deck()),
+										g: gold(),
+										forcards: etgutil.encodedeck(offer()),
+										forg: gopher(),
 									});
 									setConfirm(2);
 							  }
@@ -90,28 +89,28 @@ export default function Trade({ foe }) {
 					style={{
 						position: 'absolute',
 						left: '10px',
-						top: confirm === 0 ? '40px' : '60px',
+						top: confirm() === 0 ? '40px' : '60px',
 					}}
 				/>
 			)}
 			<Components.DeckDisplay
 				cards={Cards}
-				deck={deck}
+				deck={deck()}
 				onMouseOver={(i, card) => setCard(card)}
 				onClick={i => {
-					const newdeck = deck.slice();
+					const newdeck = deck().slice();
 					newdeck.splice(i, 1);
 					setDeck(newdeck);
 				}}
 			/>
 			<Components.DeckDisplay
 				cards={Cards}
-				deck={offer}
+				deck={offer()}
 				x={450}
 				onMouseOver={(i, card) => setCard(card)}
 			/>
 			<Components.Text
-				text={`${gold + userutil.calcWealth(Cards, deck, true)}$`}
+				text={`${gold() + userutil.calcWealth(Cards, deck(), true)}$`}
 				style={{
 					position: 'absolute',
 					left: '100px',
@@ -119,7 +118,7 @@ export default function Trade({ foe }) {
 				}}
 			/>
 			<Components.Text
-				text={`(${gold}$)`}
+				text={`(${gold()}$)`}
 				style={{
 					position: 'absolute',
 					left: '250px',
@@ -127,7 +126,7 @@ export default function Trade({ foe }) {
 				}}
 			/>
 			<Components.Text
-				text={`${gopher + userutil.calcWealth(Cards, offer, true)}$`}
+				text={`${gopher() + userutil.calcWealth(Cards, offer(), true)}$`}
 				style={{
 					position: 'absolute',
 					left: '350px',
@@ -135,7 +134,7 @@ export default function Trade({ foe }) {
 				}}
 			/>
 			<Components.Text
-				text={`(${gopher}$)`}
+				text={`(${gopher()}$)`}
 				style={{
 					position: 'absolute',
 					left: '500px',
@@ -146,7 +145,7 @@ export default function Trade({ foe }) {
 				type="button"
 				value="Cancel"
 				onClick={() => {
-					sock.userEmit('canceltrade', { f: foe });
+					sock.userEmit('canceltrade', { f: props.foe });
 					store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
 				}}
 				style={{
@@ -158,39 +157,37 @@ export default function Trade({ foe }) {
 			<input
 				type="number"
 				placeholder="Gold"
-				value={gold}
+				value={gold()}
 				onChange={e =>
 					setGold(
-						Math.min(Math.min(user.gold, Math.abs(e.target.value | 0)), 65535),
+						Math.min(
+							Math.min(rx.user.gold, Math.abs(e.target.value | 0)),
+							65535,
+						),
 					)
 				}
-				style={{
-					position: 'absolute',
-					left: '8px',
-					top: '235px',
-					width: '84px',
-				}}
+				style="position:absolute;left:8px;top:235px;width:84px"
 			/>
-			{confirm === 0 && (
+			{confirm() === 0 && (
 				<Components.CardSelector
 					cards={Cards}
-					cardpool={cardpool}
-					cardminus={cardminus}
+					cardpool={cardpool()}
+					cardminus={cardminus()}
 					onMouseOver={setCard}
 					onClick={card => {
 						const code = card.code;
 						if (
-							deck.length < 30 &&
+							deck().length < 30 &&
 							!card.isFree() &&
-							code in cardpool &&
-							!(code in cardminus && cardminus[code] >= cardpool[code])
+							code in cardpool() &&
+							!(code in cardminus() && cardminus()[code] >= cardpool()[code])
 						) {
-							setDeck(deck.concat([code]));
+							setDeck(deck().concat([code]));
 						}
 					}}
 				/>
 			)}
-			<Components.Card x={734} y={8} card={card} />
+			<Components.Card x={734} y={8} card={card()} />
 		</>
 	);
 }

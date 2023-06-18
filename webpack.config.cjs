@@ -57,17 +57,8 @@ module.exports = {
 				use: {
 					loader: 'babel-loader',
 					options: {
-						plugins: [
-							'@babel/plugin-syntax-import-assertions',
-							'@babel/plugin-syntax-jsx',
-							[
-								'@babel/plugin-transform-react-jsx',
-								{
-									runtime: 'automatic',
-									useSpread: true,
-								},
-							],
-						],
+						presets: ['solid'],
+						plugins: ['@babel/plugin-syntax-import-assertions'],
 					},
 				},
 			},

@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
+import { createSignal, onMount } from 'solid-js';
 
 import { ExitBtn } from '../../Components/index.jsx';
 import * as sock from '../../sock.jsx';
 import * as store from '../../store.jsx';
 import { eleNames } from '../../ui.js';
 
-export default function OriginalLogin(props) {
-	const [select, setSelect] = useState(false);
+export default function OriginalLogin() {
+	const [select, setSelect] = createSignal(false);
 
-	useEffect(() => {
+	onMount(() => {
 		store.store.dispatch(
 			store.setCmds({
 				originaldata: data => {
@@ -23,15 +23,14 @@ export default function OriginalLogin(props) {
 			}),
 		);
 		sock.userEmit('loginoriginal');
-	}, []);
+	});
 
-	const mainc = [];
-	if (select) {
+	const mainc = () => {
+		const mainc = [];
 		for (let i = 1; i <= 13; i++) {
 			mainc.push(
 				<span
-					key={i}
-					className={`imgb ico e${i}`}
+					class={`imgb ico e${i}`}
 					style={{
 						position: 'absolute',
 						left: '12px',
@@ -55,11 +54,11 @@ export default function OriginalLogin(props) {
 				</span>,
 			);
 		}
-	}
+		return mainc;
+	};
 	return (
 		<>
-			{!select && 'Loading..'}
-			{mainc}
+			{select() ? mainc : 'Loading..'}
 			<ExitBtn x={12} y={570} />
 		</>
 	);

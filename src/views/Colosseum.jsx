@@ -1,5 +1,3 @@
-import { useSelector } from 'react-redux';
-import { Fragment } from 'react';
 import * as etg from '../etg.js';
 import * as mkAi from '../mkAi.js';
 import * as sock from '../sock.jsx';
@@ -48,33 +46,39 @@ function mkDaily(type) {
 	mkAi.run(game);
 }
 export default function Colosseum(props) {
-	const user = useSelector(({ user }) => user);
-	const [magename, magedeck] = Decks.mage[user.dailymage],
-		[dgname, dgdeck] = Decks.demigod[user.dailydg];
+	const rx = store.useRedux();
+	const [magename, magedeck] = Decks.mage[rx.user.dailymage],
+		[dgname, dgdeck] = Decks.demigod[rx.user.dailydg];
 	const events = [
-		'Novice Endurance Fight 3 Commoners in a row without healing in between. May try until you win.',
-		'Expert Endurance: Fight 2 Champions in a row. May try until you win.',
-		<>
-			Novice Duel: Fight{' '}
-			<a href={`/deck/${magedeck}`} target="_blank">
-				{magename}
-			</a>
-			. Only one attempt allowed.
-		</>,
-		<>
-			Expert Duel: Fight{' '}
-			<a href={`/deck/${dgdeck}`} target="_blank">
-				{dgname}
-			</a>
-			. Only one attempt allowed.
-		</>,
+		() =>
+			'Novice Endurance Fight 3 Commoners in a row without healing in between. May try until you win.',
+		() =>
+			'Expert Endurance: Fight 2 Champions in a row. May try until you win.',
+		() => (
+			<>
+				Novice Duel: Fight{' '}
+				<a href={`/deck/${magedeck}`} target="_blank">
+					{magename}
+				</a>
+				. Only one attempt allowed.
+			</>
+		),
+		() => (
+			<>
+				Expert Duel: Fight{' '}
+				<a href={`/deck/${dgdeck}`} target="_blank">
+					{dgname}
+				</a>
+				. Only one attempt allowed.
+			</>
+		),
 	];
-	const eventui = [];
-	for (let i = 1; i < 5; i++) {
-		const active = !(user.daily & (1 << i));
-		eventui.push(
-			<Fragment key={i}>
-				{active && (
+	const eventui = () => {
+		const eventui = [];
+		for (let i = 1; i < 5; i++) {
+			const active = !(rx.user.daily & (1 << i));
+			eventui.push(
+				active && (
 					<input
 						type="button"
 						value="Fight!"
@@ -83,9 +87,9 @@ export default function Colosseum(props) {
 							left: '50px',
 							top: `${100 + 30 * i}px`,
 						}}
-						onClick={() => mkDaily(i)}
+						onClick={[mkDaily, i]}
 					/>
-				)}
+				),
 				<span
 					style={{
 						position: 'absolute',
@@ -95,19 +99,20 @@ export default function Colosseum(props) {
 					{active
 						? events[i - 1]
 						: i > 2
-						? user.daily & (i === 3 ? 1 : 32)
+						? rx.user.daily & (i === 3 ? 1 : 32)
 							? 'You defeated this already today.'
 							: 'You failed this today. Better luck tomorrow!'
 						: 'Completed.'}
-				</span>
-			</Fragment>,
-		);
-	}
+				</span>,
+			);
+		}
+		return eventui;
+	};
 	return (
 		<>
 			<Components.ExitBtn x={50} y={50} />
 			{eventui}
-			{user.daily === 191 ? (
+			{rx.user.daily === 191 ? (
 				<>
 					<input
 						type="button"
@@ -145,13 +150,13 @@ export default function Colosseum(props) {
 						'Completing any colosseum event contributes to a 5 day reward cycle.\n' +
 						'At the end of the cycle, your streak is reset.\n\n' +
 						`Reward Cycle: 15$, 25$, 77$, 100$, 250$\n\n${
-							user.ostreak
-								? `You currently have a ${user.ostreak} day colosseum streak.`
+							rx.user.ostreak
+								? `You currently have a ${rx.user.ostreak} day colosseum streak.`
 								: "You'ven't begun a streak."
 						}\n${
-							user.ostreak && user.ostreakday
+							rx.user.ostreak && rx.user.ostreakday
 								? `You've redeemed ${
-										[250, 15, 25, 77, 100][user.ostreak % 5]
+										[250, 15, 25, 77, 100][rx.user.ostreak % 5]
 								  }$ today.`
 								: "You'ven't redeemed a colosseum streak today."
 						}`

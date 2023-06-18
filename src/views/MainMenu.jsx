@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { createSignal, onCleanup, onMount } from 'solid-js';
 
 import * as audio from '../audio.js';
 import Chat from '../Components/Chat.jsx';
@@ -87,8 +86,8 @@ function LabelText(props) {
 		<Components.Text
 			text={props.text}
 			style={{
-				fontSize: '14px',
-				pointerEvents: 'none',
+				'font-size': '14px',
+				'pointer-events': 'none',
 				...props.style,
 			}}
 		/>
@@ -104,7 +103,9 @@ function CostText(props) {
 }
 function TitleText(props) {
 	return (
-		<div style={{ fontSize: '20px', textAlign: 'center' }}>{props.text}</div>
+		<div style={{ 'font-size': '20px', 'text-align': 'center' }}>
+			{props.text}
+		</div>
 	);
 }
 function AiButton({ name, onClick, onMouseOver, y, lv }) {
@@ -150,7 +151,7 @@ const chatStyle = {
 	width: '226px',
 	height: '300px',
 	background: 'transparent',
-	fontSize: '14px',
+	'font-size': '14px',
 	opacity: '0.6',
 };
 
@@ -166,51 +167,31 @@ function logout(cmd) {
 }
 
 export default function MainMenu(props) {
-	const user = useSelector(({ user }) => user),
-		opts = useSelector(({ opts }) => opts),
-		foename = opts.foename ?? '',
-		enableSound = !!opts.enableSound,
-		enableMusic = !!opts.enableMusic,
-		hideRightpane = !!opts.hideRightpane,
-		hideMainchat = !!opts.hideMainchat,
-		disableTut = !!opts.disableTut,
-		lofiArt = !!opts.lofiArt,
-		playByPlayMode = opts.playByPlayMode ?? '',
-		expectedDamageSamples = opts.expectedDamageSamples || '4';
+	const rx = store.useRedux();
+	const foename = () => rx.opts.foename ?? '',
+		expectedDamageSamples = () => rx.opts.expectedDamageSamples || '4';
+	const showcard = () => props.nymph ?? (rx.user?.daily === 0 && rx.user.ocard);
 
-	const showcard = useMemo(
-		() => props.nymph ?? (user.daily === 0 && user.ocard),
-		[],
-	);
+	const [settings, setSettings] = createSignal(false);
+	const [changepass, setChangepass] = createSignal(false);
+	let newpass, newpass2;
 
-	const [settings, setSettings] = useState(false);
-	const [changepass, setChangepass] = useState(false);
-	const [newpass, setNewpass] = useState(false);
-	const [newpass2, setNewpass2] = useState(false);
-
-	const [tipNumber, setTipNumber] = useState(
-			() => (Math.random() * tipjar.length) | 0,
+	const [tipNumber, setTipNumber] = createSignal(
+			(Math.random() * tipjar.length) | 0,
 		),
-		[tip, setTip] = useState('');
+		[tip, setTip] = createSignal('');
 
-	const resetTip = useCallback(
-		e => {
-			if (e.target.tagName && e.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) {
-				setTip(tipjar[tipNumber]);
-			}
-		},
-		[tipNumber],
-	);
+	const resetTip = e => {
+		if (e.target.tagName && e.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) {
+			setTip(tipjar[tipNumber()]);
+		}
+	};
 
-	useEffect(() => {
-		if (user.daily === 0 && user.ocard) {
+	onMount(() => {
+		if (rx.user.daily === 0 && rx.user.ocard) {
 			store.store.dispatch(store.updateUser({ daily: 128 }));
 		}
 		document.addEventListener('mousemove', resetTip);
-		return () => document.removeEventListener('mousemove', resetTip);
-	}, [resetTip]);
-
-	useEffect(() => {
 		store.store.dispatch(
 			store.setCmds({
 				codecard: data => {
@@ -218,21 +199,19 @@ export default function MainMenu(props) {
 						store.doNav(import('./Reward.jsx'), {
 							type: data.type,
 							amount: data.num,
-							code: foename,
+							code: foename(),
 						}),
 					);
 				},
 				codegold: data => {
 					store.store.dispatch(
-						store.updateUser({
-							gold: user.gold + data.g,
-						}),
+						store.updateUser({ gold: rx.user.gold + data.g }),
 					);
 					store.store.dispatch(
 						store.chat(
 							<div>
 								{data.g}
-								<span className="ico gold" /> added!
+								<span class="ico gold" /> added!
 							</div>,
 						),
 					);
@@ -240,7 +219,7 @@ export default function MainMenu(props) {
 				codecode: data => {
 					store.store.dispatch(
 						store.updateUser({
-							pool: etgutil.addcard(user.pool, data.card),
+							pool: etgutil.addcard(rx.user.pool, data.card),
 						}),
 					);
 					store.store.dispatch(
@@ -249,16 +228,18 @@ export default function MainMenu(props) {
 				},
 			}),
 		);
-	}, [user?.gold, user?.pool, foename]);
+	});
+
+	onCleanup(() => document.removeEventListener('mousemove', resetTip));
 
 	const mkSetTip = tip => () => setTip(tip);
 
 	const arenaAi = i => {
 		const cost = userutil.arenaCost(i);
 		return e => {
-			if (!Cards.isDeckLegal(etgutil.decodedeck(sock.getDeck()), user)) {
+			if (!Cards.isDeckLegal(etgutil.decodedeck(sock.getDeck()), rx.user)) {
 				store.store.dispatch(store.chatMsg('Invalid deck', 'System'));
-			} else if (user.gold < cost) {
+			} else if (rx.user.gold < cost) {
 				store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
 			} else {
 				sock.userEmit('foearena', { lv: i });
@@ -268,85 +249,21 @@ export default function MainMenu(props) {
 	};
 
 	const changeFunc = () => {
-		if (newpass === newpass2) {
-			sock.userEmit('passchange', { p: newpass });
+		if (newpass.value === newpass2.value) {
+			sock.userEmit('passchange', { p: newpass() });
 			setChangepass(false);
-			setNewpass('');
-			setNewpass2('');
 		} else {
-			setNewpass('');
-			setNewpass2('');
 			store.store.dispatch(store.chatMsg('Passwords do not match', 'System'));
 		}
+		newpass.value = '';
+		newpass2.value = '';
 	};
-
-	const CostRewardHeadersVdom = useMemo(
-		() => (
-			<CostRewardHeaders x={304} y={120} wid={292} hei={240}>
-				<TitleText text="Battle" />
-				<AiButton
-					name="Commoner"
-					y={48}
-					lv={0}
-					onClick={() => mkAi.run(mkAi.mkAi(0))}
-					onMouseOver={mkSetTip(
-						'Commoners have no upgraded cards & mostly common cards',
-					)}
-				/>
-				<AiButton
-					name="Mage"
-					y={72}
-					lv={1}
-					onClick={() => mkAi.run(mkAi.mkPremade(1))}
-					onMouseOver={mkSetTip(
-						'Mages have preconstructed decks with a couple rares',
-					)}
-				/>
-				<AiButton
-					name="Champion"
-					y={96}
-					lv={2}
-					onClick={() => mkAi.run(mkAi.mkAi(2))}
-					onMouseOver={mkSetTip('Champions have some upgraded cards')}
-				/>
-				<AiButton
-					name="Demigod"
-					y={120}
-					lv={3}
-					onClick={() => mkAi.run(mkAi.mkPremade(3))}
-					onMouseOver={mkSetTip(
-						'Demigods are extremely powerful. Come prepared',
-					)}
-				/>
-				<AiButton
-					name="Arena 1"
-					onClick={arenaAi(0)}
-					onMouseOver={mkSetTip(
-						'In the arena you will face decks from other players',
-					)}
-					y={144}
-					lv={4}
-				/>
-				<AiButton
-					name="Arena 2"
-					onClick={arenaAi(1)}
-					onMouseOver={mkSetTip(
-						'In the arena you will face upgraded decks from other players',
-					)}
-					y={168}
-					lv={5}
-				/>
-			</CostRewardHeaders>
-		),
-		[],
-	);
 
 	const leadc = [];
 	for (let i = 0; i < 2; i++) {
 		leadc.push(
 			<input
 				type="button"
-				key={i}
 				value={`Arena${i + 1} T30`}
 				onClick={() => {
 					store.store.dispatch(
@@ -362,434 +279,456 @@ export default function MainMenu(props) {
 		);
 	}
 
-	const quickslots = useMemo(() => {
-		if (!user) return null;
+	const quickslots = () => {
 		const slots = [];
-		for (let i = 0; i < 10; i++) {
-			slots.push(
-				<input
-					type="button"
-					key={i}
-					value={i + 1}
-					className={`editbtn ${
-						user.selectedDeck === user.qecks[i] ? ' selectedbutton' : ''
-					}`}
-					onMouseOver={() => setTip(user.qecks[i] ?? '')}
-					onClick={() => {
-						sock.userExec('setdeck', { name: user.qecks[i] ?? '' });
-					}}
-				/>,
-			);
-		}
-		return slots;
-	}, [user?.selectedDeck, user?.qecks]);
-
-	return (
-		user && (
-			<div className="bg_main">
-				<>
-					<Rect x={196} y={4} wid={504} hei={48}>
-						<Components.Text text={tip} />
-						<input
-							type="button"
-							value="Next Tip"
-							onClick={() => {
-								const newTipNumber = (tipNumber + 1) % tipjar.length;
-								setTipNumber(newTipNumber);
-								setTip(tipjar[newTipNumber]);
-							}}
-							style={{
-								position: 'absolute',
-								right: '2px',
-								bottom: '2px',
-							}}
-						/>
-					</Rect>
+		if (rx.user) {
+			for (let i = 0; i < 10; i++) {
+				slots.push(
 					<input
 						type="button"
-						value="Settings"
+						value={i + 1}
+						class={`editbtn ${
+							rx.user.selectedDeck === rx.user.qecks[i] ? ' selectedbutton' : ''
+						}`}
+						onMouseOver={() => setTip(rx.user.qecks[i] ?? '')}
+						onClick={() => {
+							sock.userExec('setdeck', { name: rx.user.qecks[i] ?? '' });
+						}}
+					/>,
+				);
+			}
+		}
+		return slots;
+	};
+
+	return (
+		rx.user && (
+			<div class="bg_main">
+				<Rect x={196} y={4} wid={504} hei={48}>
+					<Components.Text text={tip()} />
+					<input
+						type="button"
+						value="Next Tip"
+						onClick={() => {
+							const newTipNumber = (tipNumber() + 1) % tipjar.length;
+							setTipNumber(newTipNumber);
+							setTip(tipjar[newTipNumber]);
+						}}
 						style={{
 							position: 'absolute',
-							left: '620px',
-							top: '558px',
-						}}
-						onClick={() => {
-							setSettings(!settings);
-							setChangepass(false);
-							setNewpass('');
-							setNewpass2('');
+							right: '2px',
+							bottom: '2px',
 						}}
 					/>
-					<Rect x={86} y={92} wid={196} hei={120}>
-						<TitleText text="Stats" />
-						<Components.Text
-							text={`${user.name}\n${user.gold}$\nPvE ${user.aiwins} - ${user.ailosses}\nPvP ${user.pvpwins} - ${user.pvplosses}`}
-						/>
-					</Rect>
-					<Rect x={304} y={380} wid={292} hei={130}>
-						<TitleText text="Miscellaneous" />
-						<div>
-							<div
-								style={{
-									display: 'inline-block',
-									width: '49%',
-									textAlign: 'center',
-								}}>
-								<input
-									type="button"
-									value="Colosseum"
-									onClick={() => {
-										store.store.dispatch(
-											store.doNav(import('./Colosseum.jsx')),
-										);
-									}}
-									onMouseOver={mkSetTip(
-										'Try some daily challenges in the Colosseum',
-									)}
-								/>
-							</div>
-							<div
-								style={{
-									display: 'inline-block',
-									width: '49%',
-									textAlign: 'center',
-								}}>
-								<input
-									type="button"
-									value="Quests"
-									onClick={() =>
-										store.store.dispatch(store.doNav(import('./Quest.jsx')))
-									}
-									onMouseOver={mkSetTip('Go on an adventure')}
-								/>
-							</div>
+				</Rect>
+				<input
+					type="button"
+					value="Settings"
+					style={{
+						position: 'absolute',
+						left: '620px',
+						top: '558px',
+					}}
+					onClick={() => {
+						setSettings(settings => !settings);
+						setChangepass(false);
+						setNewpass('');
+						setNewpass2('');
+					}}
+				/>
+				<Rect x={86} y={92} wid={196} hei={120}>
+					<TitleText text="Stats" />
+					<Components.Text
+						text={
+							rx.user &&
+							`${rx.user.name}\n${rx.user.gold}$\nPvE ${rx.user.aiwins} - ${rx.user.ailosses}\nPvP ${rx.user.pvpwins} - ${rx.user.pvplosses}`
+						}
+					/>
+				</Rect>
+				<Rect x={304} y={380} wid={292} hei={130}>
+					<TitleText text="Miscellaneous" />
+					<div>
+						<div
+							style={{
+								display: 'inline-block',
+								width: '49%',
+								'text-align': 'center',
+							}}>
+							<input
+								type="button"
+								value="Colosseum"
+								onClick={() => {
+									store.store.dispatch(store.doNav(import('./Colosseum.jsx')));
+								}}
+								onMouseOver={mkSetTip(
+									'Try some daily challenges in the Colosseum',
+								)}
+							/>
 						</div>
 						<div
 							style={{
-								marginTop: '4px',
+								display: 'inline-block',
+								width: '49%',
+								'text-align': 'center',
 							}}>
-							<div
-								style={{
-									display: 'inline-block',
-									width: '49%',
-									textAlign: 'center',
-								}}>
-								<input
-									type="button"
-									value="Arena Deck"
-									onClick={() =>
-										store.store.dispatch(store.doNav(import('./ArenaInfo.jsx')))
-									}
-									onMouseOver={mkSetTip('Check how your arena decks are doing')}
-								/>
-							</div>
-							<div
-								style={{
-									display: 'inline-block',
-									width: '49%',
-									textAlign: 'center',
-								}}>
-								<input
-									type="button"
-									value="Custom"
-									onClick={() => {
-										store.store.dispatch(
-											store.doNav(import('./Challenge.jsx'), {
-												pvp: false,
-											}),
-										);
-									}}
-									onMouseOver={mkSetTip(
-										'Setup custom games vs AI or other players',
-									)}
-								/>
-							</div>
+							<input
+								type="button"
+								value="Quests"
+								onClick={() =>
+									store.store.dispatch(store.doNav(import('./Quest.jsx')))
+								}
+								onMouseOver={mkSetTip('Go on an adventure')}
+							/>
+						</div>
+					</div>
+					<div
+						style={{
+							'margin-top': '4px',
+						}}>
+						<div
+							style={{
+								display: 'inline-block',
+								width: '49%',
+								'text-align': 'center',
+							}}>
+							<input
+								type="button"
+								value="Arena Deck"
+								onClick={() =>
+									store.store.dispatch(store.doNav(import('./ArenaInfo.jsx')))
+								}
+								onMouseOver={mkSetTip('Check how your arena decks are doing')}
+							/>
 						</div>
 						<div
 							style={{
-								marginTop: '4px',
+								display: 'inline-block',
+								width: '49%',
+								'text-align': 'center',
 							}}>
-							<div
-								style={{
-									display: 'inline-block',
-									width: '49%',
-									textAlign: 'center',
-								}}>
-								<input
-									type="button"
-									value="Legacy"
-									onClick={() => {
-										store.store.dispatch(
-											store.doNav(import('../vanilla/views/Login.jsx')),
-										);
-									}}
-									onMouseOver={mkSetTip(
-										'A mode attempting to imitate the original EtG',
-									)}
-								/>
-							</div>
-						</div>
-					</Rect>
-					{showcard ? (
-						<Components.Card x={92} y={340} card={Cards.Codes[showcard]} />
-					) : (
-						!hideMainchat && (
-							<>
-								<Chat channel="Main" style={chatStyle} />
-								<input
-									placeholder="Chat"
-									onKeyDown={parseChat}
-									style={{
-										position: 'absolute',
-										left: '99px',
-										top: '532px',
-									}}
-								/>
-							</>
-						)
-					)}
-					<Rect x={626} y={420} wid={196} hei={120}>
-						<TitleText text="Leaderboards" />
-						<input
-							type="button"
-							value="Wealth T60"
-							onClick={() => {
-								store.store.dispatch(store.doNav(import('./WealthTop.jsx')));
-							}}
-							onMouseOver={mkSetTip("See who's collected the most wealth")}
-							style={{ marginLeft: '25%' }}
-						/>
-						<div style={{ marginTop: '4px' }}>{leadc}</div>
-					</Rect>
-					{CostRewardHeadersVdom}
-					<Rect x={620} y={92} wid={196} hei={176}>
-						<TitleText text="Cards" />
-						<input
-							type="button"
-							value="Editor"
-							onClick={() => {
-								store.store.dispatch(store.doNav(import('./DeckEditor.jsx')));
-							}}
-							onMouseOver={mkSetTip('Edit & manage your decks')}
-							style={{
-								position: 'absolute',
-								left: '14px',
-								top: '108px',
-							}}
-						/>
-						<LabelText
-							text={'Deck: ' + user.selectedDeck}
-							style={{
-								width: '180px',
-								overflow: 'hidden',
-								textOverflow: 'ellipsis',
-								whiteSpace: 'nowrap',
-								marginLeft: '16px',
-							}}
-						/>
-						<div style={{ textAlign: 'center' }}>{quickslots}</div>
-						<input
-							type="button"
-							value="Shop"
-							onClick={() => {
-								store.store.dispatch(store.doNav(import('./Shop.jsx')));
-							}}
-							onMouseOver={mkSetTip(
-								'Buy booster packs which contain cards from the elements you choose',
-							)}
-							style={{
-								position: 'absolute',
-								left: '14px',
-								top: '132px',
-							}}
-						/>
-						<input
-							type="button"
-							value="Upgrade"
-							onClick={() => {
-								store.store.dispatch(store.doNav(import('./Upgrade.jsx')));
-							}}
-							onMouseOver={mkSetTip('Upgrade or sell cards')}
-							style={{
-								position: 'absolute',
-								left: '102px',
-								top: '108px',
-							}}
-						/>
-						<input
-							type="button"
-							value="Bazaar"
-							onClick={() => {
-								store.store.dispatch(store.doNav(import('./Bazaar.jsx')));
-							}}
-							onMouseOver={mkSetTip(
-								"Put up cards for sale & review other players' offers",
-							)}
-							style={{
-								position: 'absolute',
-								left: '102px',
-								top: '132px',
-							}}
-						/>
-					</Rect>
-					<Rect x={616} y={300} wid={206} hei={130}>
-						<TitleText text="Players" />
-						<input
-							placeholder="Player's Name"
-							value={foename}
-							onChange={e =>
-								store.store.dispatch(
-									store.setOptTemp('foename', e.target.value),
-								)
-							}
-							style={{ marginLeft: '24px' }}
-						/>
-						<input
-							type="button"
-							value="Library"
-							onClick={() => {
-								const name = foename || user.name;
-								if (name)
+							<input
+								type="button"
+								value="Custom"
+								onClick={() => {
 									store.store.dispatch(
-										store.doNav(import('./Library.jsx'), {
-											name,
+										store.doNav(import('./Challenge.jsx'), {
+											pvp: false,
 										}),
 									);
-							}}
-							onMouseOver={mkSetTip('See exactly what cards you or others own')}
+								}}
+								onMouseOver={mkSetTip(
+									'Setup custom games vs AI or other players',
+								)}
+							/>
+						</div>
+					</div>
+					<div
+						style={{
+							'margin-top': '4px',
+						}}>
+						<div
 							style={{
-								position: 'absolute',
-								left: '112px',
-								top: '64px',
-							}}
-						/>
-						<input
-							type="button"
-							value="PvP"
-							onClick={() => sock.sendChallenge(foename)}
-							style={{
-								position: 'absolute',
-								left: '10px',
-								top: '88px',
-							}}
-						/>
-						<input
-							type="button"
-							value="Trade"
-							onClick={() => {
-								sock.userEmit('offertrade', {
-									f: foename,
-									cards: '',
-									g: 0,
-									forcards: null,
-									forg: null,
-								});
+								display: 'inline-block',
+								width: '49%',
+								'text-align': 'center',
+							}}>
+							<input
+								type="button"
+								value="Legacy"
+								onClick={() => {
+									store.store.dispatch(
+										store.doNav(import('../vanilla/views/Login.jsx')),
+									);
+								}}
+								onMouseOver={mkSetTip(
+									'A mode attempting to imitate the original EtG',
+								)}
+							/>
+						</div>
+					</div>
+				</Rect>
+				{showcard() ? (
+					<Components.Card x={92} y={340} card={Cards.Codes[showcard()]} />
+				) : (
+					!rx.opts.hideMainchat && (
+						<>
+							<Chat channel="Main" style={chatStyle} />
+							<input
+								placeholder="Chat"
+								onKeyDown={parseChat}
+								style={{
+									position: 'absolute',
+									left: '99px',
+									top: '532px',
+								}}
+							/>
+						</>
+					)
+				)}
+				<Rect x={626} y={420} wid={196} hei={120}>
+					<TitleText text="Leaderboards" />
+					<input
+						type="button"
+						value="Wealth T60"
+						onClick={() => {
+							store.store.dispatch(store.doNav(import('./WealthTop.jsx')));
+						}}
+						onMouseOver={mkSetTip("See who's collected the most wealth")}
+						style={{ 'margin-left': '25%' }}
+					/>
+					<div style={{ 'margin-top': '4px' }}>{leadc}</div>
+				</Rect>
+				<CostRewardHeaders x={304} y={120} wid={292} hei={240}>
+					<TitleText text="Battle" />
+					<AiButton
+						name="Commoner"
+						y={48}
+						lv={0}
+						onClick={() => mkAi.run(mkAi.mkAi(0))}
+						onMouseOver={mkSetTip(
+							'Commoners have no upgraded cards & mostly common cards',
+						)}
+					/>
+					<AiButton
+						name="Mage"
+						y={72}
+						lv={1}
+						onClick={() => mkAi.run(mkAi.mkPremade(1))}
+						onMouseOver={mkSetTip(
+							'Mages have preconstructed decks with a couple rares',
+						)}
+					/>
+					<AiButton
+						name="Champion"
+						y={96}
+						lv={2}
+						onClick={() => mkAi.run(mkAi.mkAi(2))}
+						onMouseOver={mkSetTip('Champions have some upgraded cards')}
+					/>
+					<AiButton
+						name="Demigod"
+						y={120}
+						lv={3}
+						onClick={() => mkAi.run(mkAi.mkPremade(3))}
+						onMouseOver={mkSetTip(
+							'Demigods are extremely powerful. Come prepared',
+						)}
+					/>
+					<AiButton
+						name="Arena 1"
+						onClick={arenaAi(0)}
+						onMouseOver={mkSetTip(
+							'In the arena you will face decks from other players',
+						)}
+						y={144}
+						lv={4}
+					/>
+					<AiButton
+						name="Arena 2"
+						onClick={arenaAi(1)}
+						onMouseOver={mkSetTip(
+							'In the arena you will face upgraded decks from other players',
+						)}
+						y={168}
+						lv={5}
+					/>
+				</CostRewardHeaders>
+				<Rect x={620} y={92} wid={196} hei={176}>
+					<TitleText text="Cards" />
+					<input
+						type="button"
+						value="Editor"
+						onClick={() => {
+							store.store.dispatch(store.doNav(import('./DeckEditor.jsx')));
+						}}
+						onMouseOver={mkSetTip('Edit & manage your decks')}
+						style={{
+							position: 'absolute',
+							left: '14px',
+							top: '108px',
+						}}
+					/>
+					<LabelText
+						text={`Deck: ${rx.user?.selectedDeck}`}
+						style={{
+							width: '180px',
+							overflow: 'hidden',
+							'text-overflow': 'ellipsis',
+							'white-space': 'nowrap',
+							'margin-left': '16px',
+						}}
+					/>
+					<div style={{ 'text-align': 'center' }}>{quickslots}</div>
+					<input
+						type="button"
+						value="Shop"
+						onClick={() => {
+							store.store.dispatch(store.doNav(import('./Shop.jsx')));
+						}}
+						onMouseOver={mkSetTip(
+							'Buy booster packs which contain cards from the elements you choose',
+						)}
+						style={{
+							position: 'absolute',
+							left: '14px',
+							top: '132px',
+						}}
+					/>
+					<input
+						type="button"
+						value="Upgrade"
+						onClick={() => {
+							store.store.dispatch(store.doNav(import('./Upgrade.jsx')));
+						}}
+						onMouseOver={mkSetTip('Upgrade or sell cards')}
+						style={{
+							position: 'absolute',
+							left: '102px',
+							top: '108px',
+						}}
+					/>
+					<input
+						type="button"
+						value="Bazaar"
+						onClick={() => {
+							store.store.dispatch(store.doNav(import('./Bazaar.jsx')));
+						}}
+						onMouseOver={mkSetTip(
+							"Put up cards for sale & review other players' offers",
+						)}
+						style={{
+							position: 'absolute',
+							left: '102px',
+							top: '132px',
+						}}
+					/>
+				</Rect>
+				<Rect x={616} y={300} wid={206} hei={130}>
+					<TitleText text="Players" />
+					<input
+						placeholder="Player's Name"
+						value={foename()}
+						onInput={e =>
+							store.store.dispatch(store.setOptTemp('foename', e.target.value))
+						}
+						style="margin-left:24px"
+					/>
+					<input
+						type="button"
+						value="Library"
+						onClick={() => {
+							const name = foename() || rx.user.name;
+							if (name)
 								store.store.dispatch(
-									store.doNav(import('./Trade.jsx'), {
-										foe: foename,
+									store.doNav(import('./Library.jsx'), {
+										name,
 									}),
 								);
-							}}
-							onMouseOver={mkSetTip('Trade cards/$ with another player')}
-							style={{
-								position: 'absolute',
-								left: '10px',
-								top: '64px',
-							}}
-						/>
-						<input
-							type="button"
-							value="Reward"
-							onClick={() => {
-								sock.userEmit('codesubmit', {
-									code: foename,
-								});
-							}}
-							onMouseOver={mkSetTip('Redeem a reward code')}
-							style={{
-								position: 'absolute',
-								left: '112px',
-								top: '88px',
-							}}
-						/>
-					</Rect>
-					{typeof kongregateAPI === 'undefined' && (
-						<input
-							type="button"
-							value="Logout"
-							onClick={logout}
-							onMouseOver={mkSetTip('Click here to log out')}
-							style={{
-								position: 'absolute',
-								left: '744px',
-								top: '558px',
-							}}
-						/>
-					)}
-					{settings && (
-						<Components.Box x={580} y={300} width={300} height={240}>
-							{changepass ? (
-								<>
-									<input
-										placeholder="New Password"
-										value={newpass}
-										onChange={e => setNewpass(e.target.value)}
-										onKeyPress={e => {
-											if (e.which === 13) changeFunc();
-										}}
-										style={{
-											position: 'absolute',
-											left: '136px',
-											top: '4px',
-											width: '128px',
-										}}
-									/>
-									<input
-										placeholder="Confirm New"
-										value={newpass2}
-										onChange={e => setNewpass2(e.target.value)}
-										onKeyPress={e => {
-											if (e.which === 13) changeFunc();
-										}}
-										style={{
-											position: 'absolute',
-											left: '136px',
-											top: '32px',
-											width: '128px',
-										}}
-									/>
-									<input
-										type="button"
-										value="Change Password"
-										onClick={changeFunc}
-										style={{
-											position: 'absolute',
-											left: '8px',
-											top: '8px',
-											width: '120px',
-										}}
-									/>
-									<input
-										type="button"
-										value="Cancel Change"
-										onClick={() => {
-											setChangepass(false);
-											setNewpass('');
-											setNewpass2('');
-										}}
-										style={{
-											position: 'absolute',
-											left: '8px',
-											top: '32px',
-											width: '120px',
-										}}
-									/>
-								</>
-							) : (
+						}}
+						onMouseOver={mkSetTip('See exactly what cards you or others own')}
+						style={{
+							position: 'absolute',
+							left: '112px',
+							top: '64px',
+						}}
+					/>
+					<input
+						type="button"
+						value="PvP"
+						onClick={() => sock.sendChallenge(foename())}
+						style={{
+							position: 'absolute',
+							left: '10px',
+							top: '88px',
+						}}
+					/>
+					<input
+						type="button"
+						value="Trade"
+						onClick={() => {
+							sock.userEmit('offertrade', {
+								f: foename(),
+								cards: '',
+								g: 0,
+								forcards: null,
+								forg: null,
+							});
+							store.store.dispatch(
+								store.doNav(import('./Trade.jsx'), {
+									foe: foename(),
+								}),
+							);
+						}}
+						onMouseOver={mkSetTip('Trade cards/$ with another player')}
+						style={{
+							position: 'absolute',
+							left: '10px',
+							top: '64px',
+						}}
+					/>
+					<input
+						type="button"
+						value="Reward"
+						onClick={() => {
+							sock.userEmit('codesubmit', {
+								code: foename(),
+							});
+						}}
+						onMouseOver={mkSetTip('Redeem a reward code')}
+						style={{
+							position: 'absolute',
+							left: '112px',
+							top: '88px',
+						}}
+					/>
+				</Rect>
+				{typeof kongregateAPI === 'undefined' && (
+					<input
+						type="button"
+						value="Logout"
+						onClick={logout}
+						onMouseOver={mkSetTip('Click here to log out')}
+						style={{
+							position: 'absolute',
+							left: '744px',
+							top: '558px',
+						}}
+					/>
+				)}
+				{settings() && (
+					<Components.Box x={580} y={300} width={300} height={240}>
+						{changepass() ? (
+							<>
+								<input
+									placeholder="New Password"
+									ref={newpass}
+									onKeyPress={e => {
+										if (e.which === 13) changeFunc();
+									}}
+									style={{
+										position: 'absolute',
+										left: '136px',
+										top: '4px',
+										width: '128px',
+									}}
+								/>
+								<input
+									placeholder="Confirm New"
+									ref={newpass2}
+									onKeyPress={e => {
+										if (e.which === 13) changeFunc();
+									}}
+									style={{
+										position: 'absolute',
+										left: '136px',
+										top: '32px',
+										width: '128px',
+									}}
+								/>
 								<input
 									type="button"
 									value="Change Password"
-									onClick={() => setChangepass(true)}
+									onClick={changeFunc}
 									style={{
 										position: 'absolute',
 										left: '8px',
@@ -797,168 +736,194 @@ export default function MainMenu(props) {
 										width: '120px',
 									}}
 								/>
-							)}
-							<label
-								style={{
-									position: 'absolute',
-									left: '136px',
-									top: '88px',
-								}}>
 								<input
-									type="checkbox"
-									checked={enableSound}
-									onChange={e => {
-										audio.changeSound(e.target.checked);
-										store.store.dispatch(
-											store.setOpt('enableSound', e.target.checked),
-										);
+									type="button"
+									value="Cancel Change"
+									onClick={() => {
+										setChangepass(false);
+										newpass.value = '';
+										newpass2.value = '';
+									}}
+									style={{
+										position: 'absolute',
+										left: '8px',
+										top: '32px',
+										width: '120px',
 									}}
 								/>
-								Enable sound
-							</label>
-							<label
-								style={{
-									position: 'absolute',
-									left: '136px',
-									top: '53px',
-								}}>
-								<input
-									type="checkbox"
-									checked={enableMusic}
-									onChange={e => {
-										audio.changeMusic(e.target.checked);
-										store.store.dispatch(
-											store.setOpt('enableMusic', e.target.checked),
-										);
-									}}
-								/>
-								Enable music
-							</label>
-							<label
+							</>
+						) : (
+							<input
+								type="button"
+								value="Change Password"
+								onClick={() => setChangepass(true)}
 								style={{
 									position: 'absolute',
 									left: '8px',
-									top: '53px',
-								}}>
+									top: '8px',
+									width: '120px',
+								}}
+							/>
+						)}
+						<label
+							style={{
+								position: 'absolute',
+								left: '136px',
+								top: '88px',
+							}}>
+							<input
+								type="checkbox"
+								checked={!!rx.opts.enableSound}
+								onChange={e => {
+									audio.changeSound(e.target.checked);
+									store.store.dispatch(
+										store.setOpt('enableSound', e.target.checked),
+									);
+								}}
+							/>
+							Enable sound
+						</label>
+						<label
+							style={{
+								position: 'absolute',
+								left: '136px',
+								top: '53px',
+							}}>
+							<input
+								type="checkbox"
+								checked={!!rx.opts.enableMusic}
+								onChange={e => {
+									audio.changeMusic(e.target.checked);
+									store.store.dispatch(
+										store.setOpt('enableMusic', e.target.checked),
+									);
+								}}
+							/>
+							Enable music
+						</label>
+						<label
+							style={{
+								position: 'absolute',
+								left: '8px',
+								top: '53px',
+							}}>
+							<input
+								type="checkbox"
+								checked={!!rx.opts.hideMainchat}
+								onChange={e =>
+									store.store.dispatch(
+										store.setOpt('hideMainchat', e.target.checked),
+									)
+								}
+							/>
+							Hide mainchat
+						</label>
+						<label
+							style={{
+								position: 'absolute',
+								left: '8px',
+								top: '88px',
+							}}>
+							<input
+								type="checkbox"
+								checked={!!rx.opts.hideRightpane}
+								onChange={e =>
+									store.store.dispatch(
+										store.setOpt('hideRightpane', e.target.checked),
+									)
+								}
+							/>
+							Hide rightpane
+						</label>
+						<label
+							style={{
+								position: 'absolute',
+								left: '8px',
+								top: '123px',
+							}}>
+							<input
+								type="checkbox"
+								checked={!!rx.opts.disableTut}
+								onChange={e =>
+									store.store.dispatch(
+										store.setOpt('disableTut', e.target.checked),
+									)
+								}
+							/>
+							Hide help
+						</label>
+						<label
+							style={{
+								position: 'absolute',
+								left: '136px',
+								top: '123px',
+							}}>
+							<input
+								type="checkbox"
+								checked={!!rx.opts.lofiArt}
+								onChange={e =>
+									store.store.dispatch(
+										store.setOpt('lofiArt', e.target.checked),
+									)
+								}
+							/>
+							Lofi Art
+						</label>
+						<span
+							style={{
+								position: 'absolute',
+								left: '8px',
+								top: '158px',
+							}}>
+							Play by play
+							<label>
 								<input
-									type="checkbox"
-									checked={hideMainchat}
-									onChange={e =>
-										store.store.dispatch(
-											store.setOpt('hideMainchat', e.target.checked),
-										)
-									}
+									type="radio"
+									name="settings-pbp"
+									value=""
+									checked={!rx.opts.playByPlayMode}
+									onChange={setPbpSetting}
 								/>
-								Hide mainchat
+								On
 							</label>
-							<label
-								style={{
-									position: 'absolute',
-									left: '8px',
-									top: '88px',
-								}}>
+							<label>
 								<input
-									type="checkbox"
-									checked={hideRightpane}
-									onChange={e =>
-										store.store.dispatch(
-											store.setOpt('hideRightpane', e.target.checked),
-										)
-									}
+									type="radio"
+									name="settings-pbp"
+									value="noline"
+									checked={rx.opts.playByPlayMode === 'noline'}
+									onChange={setPbpSetting}
 								/>
-								Hide rightpane
+								No line
 							</label>
-							<label
-								style={{
-									position: 'absolute',
-									left: '8px',
-									top: '123px',
-								}}>
+							<label>
 								<input
-									type="checkbox"
-									checked={disableTut}
-									onChange={e =>
-										store.store.dispatch(
-											store.setOpt('disableTut', e.target.checked),
-										)
-									}
+									type="radio"
+									name="settings-pbp"
+									value="disabled"
+									checked={rx.opts.playByPlayMode === 'disabled'}
+									onChange={setPbpSetting}
 								/>
-								Hide help
+								Off
 							</label>
-							<label
-								style={{
-									position: 'absolute',
-									left: '136px',
-									top: '123px',
-								}}>
-								<input
-									type="checkbox"
-									checked={lofiArt}
-									onChange={e =>
-										store.store.dispatch(
-											store.setOpt('lofiArt', e.target.checked),
-										)
-									}
-								/>
-								Lofi Art
-							</label>
-							<span
-								style={{
-									position: 'absolute',
-									left: '8px',
-									top: '158px',
-								}}>
-								Play by play
-								<label>
-									<input
-										type="radio"
-										name="settings-pbp"
-										value=""
-										checked={playByPlayMode === ''}
-										onChange={setPbpSetting}
-									/>
-									On
-								</label>
-								<label>
-									<input
-										type="radio"
-										name="settings-pbp"
-										value="noline"
-										checked={playByPlayMode === 'noline'}
-										onChange={setPbpSetting}
-									/>
-									No line
-								</label>
-								<label>
-									<input
-										type="radio"
-										name="settings-pbp"
-										value="disabled"
-										checked={playByPlayMode === 'disabled'}
-										onChange={setPbpSetting}
-									/>
-									Off
-								</label>
-							</span>
-							<label
-								style={{ position: 'absolute', left: '8px', top: '193px' }}>
-								Expected Damage Samples {expectedDamageSamples}
-								<input
-									type="range"
-									style={{ width: '272px' }}
-									min={1}
-									max={5}
-									value={expectedDamageSamples}
-									onChange={e =>
-										store.store.dispatch(
-											store.setOpt('expectedDamageSamples', e.target.value),
-										)
-									}
-								/>
-							</label>
-						</Components.Box>
-					)}
-				</>
+						</span>
+						<label style={{ position: 'absolute', left: '8px', top: '193px' }}>
+							Expected Damage Samples {expectedDamageSamples()}
+							<input
+								type="range"
+								style={{ width: '272px' }}
+								min={1}
+								max={5}
+								value={expectedDamageSamples()}
+								onChange={e =>
+									store.store.dispatch(
+										store.setOpt('expectedDamageSamples', e.target.value),
+									)
+								}
+							/>
+						</label>
+					</Components.Box>
+				)}
 			</div>
 		)
 	);

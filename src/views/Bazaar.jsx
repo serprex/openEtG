@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { createMemo, createSignal, onMount } from 'solid-js';
+import { For } from 'solid-js/web';
 
 import Cards from '../Cards.js';
 import * as etg from '../etg.js';
@@ -9,175 +9,163 @@ import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 import * as Components from '../Components/index.jsx';
 
-function Order({ order, onClick }) {
+function Order(p) {
 	return (
-		<div onClick={_e => onClick(Math.abs(order.p), order.q)}>
-			{order.q} @ {Math.abs(order.p)}
+		<div onClick={_e => p.onClick(Math.abs(p.order.p), p.order.q)}>
+			{p.order.q} @ {Math.abs(p.order.p)}
 		</div>
 	);
 }
-function CardOrders({ bc, onClickBuy, onClickSell, onClickCancel }) {
-	const uname = useSelector(({ user }) => user.name);
-	if (!bc) return null;
-	const hasMine = bc.some(({ u }) => u === uname);
+function CardOrders(p) {
 	return (
-		<>
-			<div
-				style={{
-					position: 'absolute',
-					left: '100px',
-					top: '72px',
-					width: '230px',
-					height: '192px',
-					color: '#4f8',
-				}}>
-				<div>Buys</div>
-				{bc
-					.filter(x => x.p > 0 && x.u !== uname)
-					.map((buy, i) => (
-						<Order key={i} order={buy} onClick={onClickBuy} />
-					))}
-			</div>
-			<div
-				style={{
-					position: 'absolute',
-					left: '330px',
-					top: '72px',
-					width: '230px',
-					height: '192px',
-					color: '#f84',
-				}}>
-				<div>Sells</div>
-				{bc
-					.filter(x => x.p < 0 && x.u !== uname)
-					.map((sell, i) => (
-						<Order key={i} order={sell} onClick={onClickSell} />
-					))}
-			</div>
-			{hasMine && (
+		p.bc && (
+			<>
 				<div
 					style={{
 						position: 'absolute',
-						left: '560px',
+						left: '100px',
 						top: '72px',
 						width: '230px',
 						height: '192px',
+						color: '#4f8',
 					}}>
-					{bc
-						.filter(x => x.u === uname)
-						.map((order, i) => (
-							<div
-								key={i}
-								style={{
-									color: order.p > 0 ? '#4f8' : '#f84',
-								}}>
-								{order.q} @ {Math.abs(order.p)}
-							</div>
-						))}
-					<input
-						type="button"
-						value="Cancel"
-						style={{ display: 'block' }}
-						onClick={onClickCancel}
-					/>
+					<div>Buys</div>
+					<For each={p.bc.filter(x => x.p > 0 && x.u !== p.username)}>
+						{buy => <Order order={buy} onClick={p.onClickBuy} />}
+					</For>
 				</div>
-			)}
-		</>
+				<div
+					style={{
+						position: 'absolute',
+						left: '330px',
+						top: '72px',
+						width: '230px',
+						height: '192px',
+						color: '#f84',
+					}}>
+					<div>Sells</div>
+					<For each={p.bc.filter(x => x.p < 0 && x.u !== p.username)}>
+						{sell => <Order order={sell} onClick={p.onClickSell} />}
+					</For>
+				</div>
+				{p.bc.some(({ u }) => u === p.username) && (
+					<div
+						style={{
+							position: 'absolute',
+							left: '560px',
+							top: '72px',
+							width: '230px',
+							height: '192px',
+						}}>
+						<For each={p.bc.filter(x => x.u === p.username)}>
+							{order => (
+								<div
+									style={{
+										color: order.p > 0 ? '#4f8' : '#f84',
+									}}>
+									{order.q} @ {Math.abs(order.p)}
+								</div>
+							)}
+						</For>
+						<input
+							type="button"
+							value="Cancel"
+							style={{ display: 'block' }}
+							onClick={p.onClickCancel}
+						/>
+					</div>
+				)}
+			</>
+		)
 	);
 }
 
 function OrderSummary(props) {
-	const uname = useSelector(({ user }) => user.name),
-		bz = useMemo(() => {
-			if (!props.bz) return null;
-			const bz = [];
-			for (const k in props.bz) {
-				const bzv = props.bz[k];
-				if (!bzv.length) continue;
-				const o0 = bzv[0],
-					o1 = bzv[bzv.length - 1],
-					card = Cards.Codes[k];
-				if (!((props.showSell && o0.p < 0) || (props.showBuy && o1.p > 0))) {
-					continue;
-				}
-				if (props.showDeal) {
-					const worth = userutil.cardValue(card);
-					if (
-						!(
-							(props.showSell && o0.p < 0 && -o0.p < worth) ||
-							(props.showBuy && o1.p > 0 && o1.p > worth)
-						)
-					) {
-						continue;
-					}
-				}
+	const bz = createMemo(() => {
+		const bz = [];
+		for (const k in props.bz) {
+			const bzv = props.bz[k];
+			if (!bzv.length) continue;
+			const o0 = bzv[0],
+				o1 = bzv[bzv.length - 1],
+				card = Cards.Codes[k];
+			if (!((props.showSell && o0.p < 0) || (props.showBuy && o1.p > 0))) {
+				continue;
+			}
+			if (props.showDeal) {
+				const worth = userutil.cardValue(card);
 				if (
-					props.showMine
-						? bzv.every(({ u }) => u !== uname)
-						: bzv.some(({ u }) => u === uname)
+					!(
+						(props.showSell && o0.p < 0 && -o0.p < worth) ||
+						(props.showBuy && o1.p > 0 && o1.p > worth)
+					)
 				) {
 					continue;
 				}
-				bz.push({
-					code: +k,
-					name: `${card.upped ? '^' : ''}${card.shiny ? '$' : ''}${card.name}`,
-					orders: bzv,
-				});
 			}
+			if (
+				props.showMine
+					? bzv.every(({ u }) => u !== props.username)
+					: bzv.some(({ u }) => u === props.username)
+			) {
+				continue;
+			}
+			bz.push({
+				code: +k,
+				name: `${card.upped ? '^' : ''}${card.shiny ? '$' : ''}${card.name}`,
+				orders: bzv,
+			});
+		}
 
-			return bz.sort((a, b) =>
-				Cards.Codes[a.code].name.localeCompare(Cards.Codes[b.code].name),
-			);
-		}, [props.bz, props.showDeal, props.showSell, props.showMine, uname]);
-
-	return bz.map(({ code, name, orders }) => {
-		const o0 = orders[0],
-			o1 = orders[orders.length - 1];
-		return (
-			(o0 || o1) && (
-				<div
-					key={code}
-					style={{ width: '288px' }}
-					onClick={() => props.onClick(code)}>
-					<div
-						style={{
-							display: 'inline-block',
-							width: '192px',
-							textOverflow: 'ellipsis',
-						}}>
-						{name}
-					</div>
-					<div
-						style={{
-							display: 'inline-block',
-							color: '#4f8',
-							width: '48px',
-						}}>
-						{o1.p > 0 ? o1.p : ' '}
-					</div>
-					<div
-						style={{
-							display: 'inline-block',
-							color: '#f84',
-							width: '48px',
-						}}>
-						{o0.p < 0 ? -o0.p : ' '}
-					</div>
-				</div>
-			)
+		return bz.sort((a, b) =>
+			Cards.Codes[a.code].name.localeCompare(Cards.Codes[b.code].name),
 		);
 	});
-}
-
-function OrderBook({ bz, onClick }) {
-	const deal = useSelector(({ opts }) => opts.orderFilter_Deal ?? false);
-	const buy = useSelector(({ opts }) => opts.orderFilter_Buy ?? true);
-	const sell = useSelector(({ opts }) => opts.orderFilter_Sell ?? true);
-	const mine = useSelector(({ opts }) => opts.orderFilter_Mine ?? false);
 
 	return (
+		<For each={bz()}>
+			{({ code, name, orders }) => {
+				const o0 = orders[0],
+					o1 = orders[orders.length - 1];
+				return (
+					(o0 || o1) && (
+						<div style={{ width: '288px' }} onClick={() => props.onClick(code)}>
+							<div
+								style={{
+									display: 'inline-block',
+									width: '192px',
+									'text-overflow': 'ellipsis',
+								}}>
+								{name}
+							</div>
+							<div
+								style={{
+									display: 'inline-block',
+									color: '#4f8',
+									width: '48px',
+								}}>
+								{o1.p > 0 ? o1.p : ' '}
+							</div>
+							<div
+								style={{
+									display: 'inline-block',
+									color: '#f84',
+									width: '48px',
+								}}>
+								{o0.p < 0 ? -o0.p : ' '}
+							</div>
+						</div>
+					)
+				);
+			}}
+		</For>
+	);
+}
+
+function OrderBook(p) {
+	return (
 		<div
-			className="bgbox"
+			class="bgbox"
 			style={{
 				position: 'absolute',
 				top: '270px',
@@ -188,7 +176,7 @@ function OrderBook({ bz, onClick }) {
 			<label style={{ display: 'inline-block', width: '200px' }}>
 				<input
 					type="checkbox"
-					checked={deal}
+					checked={p.deal}
 					onChange={e =>
 						store.store.dispatch(
 							store.setOptTemp('orderFilter_Deal', e.target.checked),
@@ -200,7 +188,7 @@ function OrderBook({ bz, onClick }) {
 			<label style={{ display: 'inline-block', width: '200px' }}>
 				<input
 					type="checkbox"
-					checked={buy}
+					checked={p.buy}
 					onChange={e =>
 						store.store.dispatch(
 							store.setOptTemp('orderFilter_Buy', e.target.checked),
@@ -212,7 +200,7 @@ function OrderBook({ bz, onClick }) {
 			<label style={{ display: 'inline-block', width: '200px' }}>
 				<input
 					type="checkbox"
-					checked={sell}
+					checked={p.sell}
 					onChange={e =>
 						store.store.dispatch(
 							store.setOptTemp('orderFilter_Sell', e.target.checked),
@@ -224,7 +212,7 @@ function OrderBook({ bz, onClick }) {
 			<label style={{ display: 'inline-block', width: '200px' }}>
 				<input
 					type="checkbox"
-					checked={mine}
+					checked={p.mine}
 					onChange={e =>
 						store.store.dispatch(
 							store.setOptTemp('orderFilter_Mine', e.target.checked),
@@ -233,15 +221,16 @@ function OrderBook({ bz, onClick }) {
 				/>{' '}
 				Mine
 			</label>
-			{bz && (
-				<div style={{ columnCount: '3', width: '890px' }}>
+			{p.bz && (
+				<div style="column-count:3;width:890px">
 					<OrderSummary
-						bz={bz}
-						showDeal={deal}
-						showBuy={buy}
-						showSell={sell}
-						showMine={mine}
-						onClick={onClick}
+						username={p.username}
+						bz={p.bz}
+						showDeal={p.deal}
+						showBuy={p.buy}
+						showSell={p.sell}
+						showMine={p.mine}
+						onClick={p.onClick}
 					/>
 				</div>
 			)}
@@ -250,18 +239,18 @@ function OrderBook({ bz, onClick }) {
 }
 
 export default function Bazaar() {
-	const user = useSelector(({ user }) => user),
-		cardpool = useMemo(() => etgutil.deck2pool(user.pool), [user.pool]);
+	const rx = store.useRedux();
+	const cardpool = createMemo(() => etgutil.deck2pool(rx.user.pool));
 
-	const [bz, setBz] = useState(null);
-	const [bcard, setBcard] = useState(null);
-	const [sell, setSell] = useState(0);
-	const [buy, setBuy] = useState(0);
-	const [sellq, setSellq] = useState(0);
-	const [buyq, setBuyq] = useState(0);
-	const [showOrders, setShowOrders] = useState(false);
+	const [bz, setBz] = createSignal(null);
+	const [bcard, setBcard] = createSignal(null);
+	const [sell, setSell] = createSignal(0);
+	const [buy, setBuy] = createSignal(0);
+	const [sellq, setSellq] = createSignal(0);
+	const [buyq, setBuyq] = createSignal(0);
+	const [showOrders, setShowOrders] = createSignal(false);
 
-	useEffect(() => {
+	onMount(() => {
 		store.store.dispatch(
 			store.setCmds({
 				bzread: data => {
@@ -304,7 +293,7 @@ export default function Bazaar() {
 			}),
 		);
 		sock.emit({ x: 'bzread' });
-	}, []);
+	});
 
 	return (
 		<>
@@ -312,100 +301,68 @@ export default function Bazaar() {
 			<input
 				type="button"
 				value="Orders"
-				onClick={() => setShowOrders(!showOrders)}
-				style={{
-					position: 'absolute',
-					top: '96px',
-					left: '8px',
-				}}
+				onClick={() => setShowOrders(showOrders => !showOrders)}
+				style="position:absolute;top:96px;left:8px;"
 			/>
-			{!!bcard && bz && (
+			{!!bcard() && bz() && (
 				<>
 					<input
 						type="button"
 						value="Sell"
 						onClick={() => {
 							sock.userEmit('bzbid', {
-								price: -sell,
+								price: -sell(),
 								cards:
-									etgutil.encodeCount(sellq || 1) +
-									etgutil.encodeCode(bcard.code),
+									etgutil.encodeCount(sellq() || 1) +
+									etgutil.encodeCode(bcard().code),
 							});
 						}}
-						style={{
-							position: 'absolute',
-							left: '100px',
-							top: '8px',
-						}}
+						style="position:absolute;left:100px;top:8px"
 					/>
 					<input
 						placeholder="Price"
-						value={sell || ''}
-						onChange={e => setSell(e.target.value | 0)}
-						style={{
-							position: 'absolute',
-							left: '200px',
-							top: '8px',
-						}}
+						value={sell() || ''}
+						onInput={e => setSell(e.target.value | 0)}
+						style="position:absolute;left:200px;top:8px"
 					/>
 					<input
 						placeholder="Quantity"
-						value={sellq || ''}
-						onChange={e => setSellq(e.target.value | 0)}
-						style={{
-							position: 'absolute',
-							left: '360px',
-							top: '8px',
-						}}
+						value={sellq() || ''}
+						onInput={e => setSellq(e.target.value | 0)}
+						style="position:absolute;left:360px;top:8px"
 					/>
-					{buy > userutil.sellValue(bcard) && (
+					{buy() > userutil.sellValue(bcard()) && (
 						<input
 							type="button"
 							value="Buy"
 							onClick={() => {
 								sock.userEmit('bzbid', {
-									price: buy,
+									price: buy(),
 									cards:
-										etgutil.encodeCount(buyq || 1) +
-										etgutil.encodeCode(bcard.code),
+										etgutil.encodeCount(buyq() || 1) +
+										etgutil.encodeCode(bcard().code),
 								});
 							}}
-							style={{
-								position: 'absolute',
-								left: '100px',
-								top: '40px',
-							}}
+							style="position:absolute;left:100px;top:40px"
 						/>
 					)}
 					<input
 						placeholder="Price"
-						value={buy || ''}
-						onChange={e => setBuy(e.target.value | 0)}
-						style={{
-							position: 'absolute',
-							left: '200px',
-							top: '40px',
-						}}
+						value={buy() || ''}
+						onInput={e => setBuy(e.target.value | 0)}
+						style="position:absolute;left:200px;top:40px"
 					/>
 					<input
 						placeholder="Quantity"
-						value={buyq || ''}
-						onChange={e => setBuyq(e.target.value | 0)}
-						style={{
-							position: 'absolute',
-							left: '360px',
-							top: '40px',
-						}}
+						value={buyq() || ''}
+						onInput={e => setBuyq(e.target.value | 0)}
+						style="position:absolute;left:360px;top:40px"
 					/>
 					<div
-						style={{
-							position: 'absolute',
-							right: '144px',
-							top: '8px',
-						}}
-						onClick={() => setSell(userutil.sellValue(bcard))}>
-						Autosell: {userutil.sellValue(bcard)}
-						<span className="ico g" />
+						style="position:absolute;right:144px;top:8px"
+						onClick={() => setSell(userutil.sellValue(bcard()))}>
+						Autosell: {userutil.sellValue(bcard())}
+						<span class="ico g" />
 					</div>
 					<div
 						style={{
@@ -413,11 +370,12 @@ export default function Bazaar() {
 							right: '144px',
 							top: '40px',
 						}}>
-						Wealth value: {userutil.cardValue(bcard)}
-						<span className="ico g" />
+						Wealth value: {userutil.cardValue(bcard())}
+						<span class="ico g" />
 					</div>
 					<CardOrders
-						bc={bz[bcard.code]}
+						username={rx.user.name}
+						bc={bz()[bcard().code]}
 						onClickBuy={(sell, sellq) => {
 							setSell(sell);
 							setSellq(sellq);
@@ -428,24 +386,20 @@ export default function Bazaar() {
 						}}
 						onClickCancel={() =>
 							sock.userEmit('bzcancel', {
-								c: bcard.code,
+								c: bcard().code,
 							})
 						}
 					/>
 				</>
 			)}
 			<Components.Text
-				text={user.gold + '$'}
-				style={{
-					position: 'absolute',
-					left: '5px',
-					top: '240px',
-				}}
+				text={rx.user.gold + '$'}
+				style="position:absolute;left:5px;top:240px"
 			/>
-			<Components.Card x={768} y={8} card={bcard} />
+			<Components.Card x={768} y={8} card={bcard()} />
 			<Components.CardSelector
 				cards={Cards}
-				cardpool={cardpool}
+				cardpool={cardpool()}
 				maxedIndicator
 				filter={card => !card.isFree()}
 				onClick={card => {
@@ -454,9 +408,14 @@ export default function Bazaar() {
 					}
 				}}
 			/>
-			{showOrders && (
+			{showOrders() && (
 				<OrderBook
-					bz={bz}
+					username={rx.user.name}
+					deal={rx.opts.orderFilter_Deal ?? false}
+					buy={rx.opts.orderFilter_Buy ?? true}
+					sell={rx.opts.orderFilter_Sell ?? true}
+					mine={rx.opts.orderFilter_Mine ?? false}
+					bz={bz()}
 					onClick={code => {
 						setBcard(Cards.Codes[code]);
 					}}

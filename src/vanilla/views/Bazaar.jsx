@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { createMemo, createSignal } from 'solid-js';
 
 import * as etgutil from '../../etgutil.js';
 import Cards from '../Cards.js';
@@ -7,32 +6,33 @@ import { userEmit } from '../../sock.jsx';
 import * as store from '../../store.jsx';
 import * as Components from '../../Components/index.jsx';
 
-export default function OriginalBazaar(props) {
-	const user = useSelector(({ user }) => user);
-	const orig = useSelector(({ orig }) => orig);
-	const [deck, setDeck] = useState([]);
-	const [card, setCard] = setState(null);
-
-	let cost = 0;
-	for (const code of deck) {
-		const card = Cards.Codes[code];
-		cost += 6 * card.rarity ** 2 + card.cost;
-	}
+export default function OriginalBazaar() {
+	const rx = store.useRedux();
+	const [deck, setDeck] = createSignal([]);
+	const [card, setCard] = createSignal(null);
+	const cost = () => {
+		let cost = 0;
+		for (const code of deck()) {
+			const card = Cards.Codes[code];
+			cost += 6 * card.rarity ** 2 + card.cost;
+		}
+		return cost;
+	};
 
 	return (
 		<>
 			<Components.DeckDisplay
 				cards={Cards}
-				deck={deck}
+				deck={deck()}
 				onMouseOver={(i, card) => setCard(card)}
 				onClick={i => {
-					const newdeck = deck.slice();
+					const newdeck = deck().slice();
 					newdeck.splice(i, 1);
 					setDeck(newdeck);
 				}}
 			/>
 			<Components.Text
-				text={`${orig.electrum}$`}
+				text={`${rx.orig.electrum}$`}
 				style={{
 					position: 'absolute',
 					left: '8px',
@@ -40,15 +40,15 @@ export default function OriginalBazaar(props) {
 				}}
 			/>
 			<Components.Text
-				text={`${cost}$`}
+				text={`${cost()}$`}
 				style={{
 					position: 'absolute',
 					left: '100px',
 					top: '235px',
 				}}
 			/>
-			{deck.length > 0 &&
-				(orig.electrum >= cost ? (
+			{deck().length > 0 &&
+				(rx.orig.electrum >= cost() ? (
 					<input
 						type="button"
 						value="Buy"
@@ -59,8 +59,8 @@ export default function OriginalBazaar(props) {
 						}}
 						onClick={() => {
 							const update = {
-								electrum: -cost,
-								pool: etgutil.encodedeck(deck),
+								electrum: -cost(),
+								pool: etgutil.encodedeck(deck()),
 							};
 							userEmit('origadd', update);
 							store.store.dispatch(store.addOrig(update));
@@ -74,8 +74,8 @@ export default function OriginalBazaar(props) {
 							left: '200px',
 							top: '235px',
 						}}>
-						{`You need ${cost - orig.electrum} more electrum to afford ${
-							deck.length === 1 ? 'this card' : 'these cards'
+						{`You need ${cost() - rx.orig.electrum} more electrum to afford ${
+							deck().length === 1 ? 'this card' : 'these cards'
 						}`}
 					</div>
 				))}
@@ -98,12 +98,12 @@ export default function OriginalBazaar(props) {
 				}
 				onMouseOver={setCard}
 				onClick={card => {
-					if (deck.length < 60 && !card.upped && !card.isFree()) {
-						setDeck(deck.concat([card.code]));
+					if (deck().length < 60 && !card.upped && !card.isFree()) {
+						setDeck(deck().concat([card.code]));
 					}
 				}}
 			/>
-			<Components.Card x={734} y={8} card={card} />
+			<Components.Card x={734} y={8} card={card()} />
 		</>
 	);
 }

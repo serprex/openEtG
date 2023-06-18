@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { createSignal, onCleanup, onMount } from 'solid-js';
 
 import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
@@ -197,44 +196,35 @@ function computeBonuses(game, player1, lefttext, streakrate, setTip, clearTip) {
 	const bonus = BonusList.reduce((bsum, bonus) => {
 		const b = bonus.func(game, player1, player1.foe, replayStats);
 		if (b > 0) {
-			lefttext.push(
-				<TooltipText
-					key={lefttext.length}
-					tip={bonus.desc}
-					setTip={setTip}
-					clearTip={clearTip}>
+			lefttext.push(() => (
+				<TooltipText tip={bonus.desc} setTip={setTip} clearTip={clearTip}>
 					{Math.round(b * 100)}% {bonus.name}
-				</TooltipText>,
-			);
+				</TooltipText>
+			));
 			return bsum + b;
 		} else return bsum;
 	}, 1);
-	lefttext.push(
-		<div key={lefttext.length}>
-			{((streakrate + 1) * bonus * 100 - 100).toFixed(1)}% total bonus
-		</div>,
-	);
+	lefttext.push(() => (
+		<div>{((streakrate + 1) * bonus * 100 - 100).toFixed(1)}% total bonus</div>
+	));
 	return bonus;
 }
 
 export default function Result(props) {
+	const rx = store.useRedux();
 	const { game } = props;
-	const user = useSelector(({ user }) => user);
-	const [tooltip, setTooltip] = useState(null);
-	const lefttextref = useRef([]),
-		goldrewardref = useRef(game.data.goldreward),
-		cardrewardref = useRef(game.data.cardreward);
+	const [tooltip, setTip] = createSignal(null);
+	const leftext = [];
+	let goldreward = game.data.goldreward,
+		cardreward = game.data.cardreward;
 
-	const player1 = game.byUser(user ? user.name : '');
+	const player1 = game.byUser(rx.user ? rx.user.name : '');
 
-	const canRematch = useMemo(
-		() =>
-			game.data.rematch &&
-			(!game.data.rematchFilter || game.data.rematchFilter(game, player1.id)),
-		[game.data.rematch, game.data.rematchFilter],
-	);
+	const canRematch = () =>
+		game.data.rematch &&
+		(!game.data.rematchFilter || game.data.rematchFilter(game, player1.id));
 
-	const exitFunc = useCallback(() => {
+	const exitFunc = () => {
 		if (game.data.quest) {
 			if (game.winner === player1.id && game.data.choicerewards) {
 				store.store.dispatch(
@@ -251,214 +241,173 @@ export default function Result(props) {
 		} else {
 			store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
 		}
-	}, [game, player1]);
+	};
 
-	const onkeydown = useCallback(
-		e => {
-			if (e.target.tagName === 'TEXTAREA') return;
-			const kc = e.which;
-			if (kc === 32 || kc === 13) exitFunc();
-			else if ((kc === 87 || e.key === 'w') && canRematch) {
-				game.data.rematch();
-			}
-		},
-		[canRematch, game.data.rematch, exitFunc],
-	);
+	const onkeydown = e => {
+		if (e.target.tagName === 'TEXTAREA') return;
+		const kc = e.which;
+		if (kc === 32 || kc === 13) exitFunc();
+		else if ((kc === 87 || e.key === 'w') && canRematch()) {
+			game.data.rematch();
+		}
+	};
 
-	const setTip = useCallback(text =>
-		setTooltip(
-			<div
-				style={{
-					position: 'absolute',
-					left: '8px',
-					top: '258px',
-				}}>
-				{text}
-			</div>,
-		),
-	);
+	const clearTip = () => setTip(null);
 
-	const clearTip = () => setTooltip(null);
-
-	useEffect(() => {
+	onMount(() => {
 		document.addEventListener('keydown', onkeydown);
-		return () => document.removeEventListener('keydown', onkeydown);
-	}, [onkeydown]);
+	});
+	onCleanup(() => {
+		document.removeEventListener('keydown', onkeydown);
+	});
 
-	useEffect(() => {
-		const level = game.data.level,
-			winner = game.winner === player1.id,
-			lefttext = [
-				<div key="0">{game.countPlies()} plies</div>,
-				<div key="1">{(game.duration / 1000).toFixed(1)} seconds</div>,
-			];
+	const level = game.data.level,
+		winner = game.winner === player1.id,
+		lefttext = [
+			() => <div>{game.countPlies()} plies</div>,
+			() => <div>{(game.duration / 1000).toFixed(1)} seconds</div>,
+		];
 
-		store.store.dispatch(store.clearChat('Replay'));
-		const { replay } = game;
-		if (
-			replay &&
-			game.data.endurance === undefined &&
-			game.data.quest === undefined
-		) {
-			store.store.dispatch(
-				store.chat(
-					JSON.stringify({
-						date: game.time,
-						seed: game.data.seed,
-						set: game.data.set,
-						players: game.data.players,
-						moves: replay,
+	store.store.dispatch(store.clearChat('Replay'));
+	const { replay } = game;
+	if (
+		replay &&
+		game.data.endurance === undefined &&
+		game.data.quest === undefined
+	) {
+		const replayJson = JSON.stringify({
+			date: game.time,
+			seed: game.data.seed,
+			set: game.data.set,
+			players: game.data.players,
+			moves: replay,
+		});
+		store.store.dispatch(store.chat(() => replayJson, 'Replay'));
+	}
+
+	let streakrate = 0;
+	if (winner) {
+		const wasPvP = game.data.players.every(pd => !pd.ai);
+		if (level !== undefined || wasPvP) sock.userExec('addwin', { pvp: wasPvP });
+		if (level !== undefined) {
+			const foedecks = game.data.players.filter(pd => !pd.user),
+				foedeck = choose(foedecks);
+			if (cardreward === undefined && foedeck) {
+				const foeDeck = etgutil.decodedeck(foedeck.deck);
+				let winnable = foeDeck.filter(code => {
+						const card = game.Cards.Codes[code];
+						return card && card.rarity > 0 && card.rarity < 4;
 					}),
-					'Replay',
-				),
-			);
-		}
-
-		let streakrate = 0,
-			cardreward = cardrewardref.current,
-			goldreward = goldrewardref.current;
-		if (winner) {
-			const wasPvP = game.data.players.every(pd => !pd.ai);
-			if (level !== undefined || wasPvP)
-				sock.userExec('addwin', { pvp: wasPvP });
-			if (level !== undefined) {
-				const foedecks = game.data.players.filter(pd => !pd.user),
-					foedeck = choose(foedecks);
-				if (cardreward === undefined && foedeck) {
-					const foeDeck = etgutil.decodedeck(foedeck.deck);
-					let winnable = foeDeck.filter(code => {
-							const card = game.Cards.Codes[code];
-							return card && card.rarity > 0 && card.rarity < 4;
-						}),
-						cardwon;
-					if (winnable.length) {
-						cardwon = choose(winnable);
-					} else {
-						cardwon = randomcard(
-							Cards,
-							false,
-							x => x.rarity > 0 && x.rarity < 4,
-						);
-					}
-					cardreward =
-						'01' + etgutil.encodeCode(etgutil.asShiny(cardwon, false));
-				}
-				if (goldreward === undefined) {
-					if (level !== undefined) {
-						if (game.data.daily === undefined) {
-							const streak = (props.streakback ?? 0) + 1;
-							if (streak !== user.streak[level]) {
-								sock.userExec('setstreak', {
-									l: level,
-									n: streak,
-								});
-							}
-							streakrate = Math.min((streak200[level] * (streak - 1)) / 200, 1);
-							lefttext.push(
-								<TooltipText
-									key={lefttext.length}
-									tip={streak + ' win streak'}
-									setTip={setTip}
-									clearTip={clearTip}>
-									{(streakrate * 100).toFixed(1)}% streak bonus
-								</TooltipText>,
-							);
-						}
-
-						goldreward = Math.round(
-							userutil.pveCostReward[level * 2 + 1] *
-								(1 + streakrate) *
-								computeBonuses(
-									game,
-									player1,
-									lefttext,
-									streakrate,
-									setTip,
-									clearTip,
-								),
-						);
-					}
-				}
-			}
-			if (goldreward) {
-				sock.userExec('addgold', { g: goldreward });
-			}
-			if (cardreward) {
-				sock.userExec(`add${game.data.quest ? 'bound' : ''}cards`, {
-					c: cardreward,
-				});
-			}
-		}
-		lefttextref.current = lefttext;
-		goldrewardref.current = goldreward;
-		cardrewardref.current = cardreward;
-		if (
-			level !== undefined &&
-			game.data.endurance === undefined &&
-			game.data.colobonus === undefined
-		) {
-			const stats = [
-				level,
-				(player1.foe.data.name || '?').replace(/,/g, ' '),
-				winner ? 'W' : 'L',
-				game.countPlies(),
-				game.duration,
-				player1.hp,
-				player1.maxhp,
-				(goldreward | 0) - (game.data.cost | 0),
-				cardreward || '-',
-				userutil.calcWealth(Cards, cardreward),
-				winner ? (props.streakback ?? 0) + 1 : 0,
-				streakrate,
-			];
-			sock.userEmit('stat', {
-				set: game.data.set,
-				stats: stats,
-				players: game.data.players,
-			});
-			stats[stats.length - 1] = +stats[stats.length - 1].toFixed(3);
-			store.store.dispatch(store.chatMsg(stats.join(), 'Stats'));
-			const { opts } = store.store.getState();
-			if (opts.runcount) {
-				if (opts.runcountcur === opts.runcount) {
-					store.store.dispatch(
-						store.chatMsg(`${opts.runcount} runs completed`, 'System'),
-					);
-					store.store.dispatch(store.setOptTemp('runcountcur', 1));
+					cardwon;
+				if (winnable.length) {
+					cardwon = choose(winnable);
 				} else {
-					store.store.dispatch(
-						store.setOptTemp('runcountcur', opts.runcountcur + 1),
+					cardwon = randomcard(Cards, false, x => x.rarity > 0 && x.rarity < 4);
+				}
+				cardreward = '01' + etgutil.encodeCode(etgutil.asShiny(cardwon, false));
+			}
+			if (goldreward === undefined) {
+				if (level !== undefined) {
+					if (game.data.daily === undefined) {
+						const streak = (props.streakback ?? 0) + 1;
+						if (streak !== rx.user.streak[level]) {
+							sock.userExec('setstreak', {
+								l: level,
+								n: streak,
+							});
+						}
+						streakrate = Math.min((streak200[level] * (streak - 1)) / 200, 1);
+						lefttext.push(() => (
+							<TooltipText
+								tip={streak + ' win streak'}
+								setTip={setTip}
+								clearTip={clearTip}>
+								{(streakrate * 100).toFixed(1)}% streak bonus
+							</TooltipText>
+						));
+					}
+
+					goldreward = Math.round(
+						userutil.pveCostReward[level * 2 + 1] *
+							(1 + streakrate) *
+							computeBonuses(
+								game,
+								player1,
+								lefttext,
+								streakrate,
+								setTip,
+								clearTip,
+							),
 					);
 				}
 			}
 		}
-	}, []);
+		if (goldreward) {
+			sock.userExec('addgold', { g: goldreward });
+		}
+		if (cardreward) {
+			sock.userExec(`add${game.data.quest ? 'bound' : ''}cards`, {
+				c: cardreward,
+			});
+		}
+	}
+	if (
+		level !== undefined &&
+		game.data.endurance === undefined &&
+		game.data.colobonus === undefined
+	) {
+		const stats = [
+			level,
+			(player1.foe.data.name || '?').replace(/,/g, ' '),
+			winner ? 'W' : 'L',
+			game.countPlies(),
+			game.duration,
+			player1.hp,
+			player1.maxhp,
+			(goldreward | 0) - (game.data.cost | 0),
+			cardreward || '-',
+			userutil.calcWealth(Cards, cardreward),
+			winner ? (props.streakback ?? 0) + 1 : 0,
+			streakrate,
+		];
+		sock.userEmit('stat', {
+			set: game.data.set,
+			stats: stats,
+			players: game.data.players,
+		});
+		stats[stats.length - 1] = +stats[stats.length - 1].toFixed(3);
+		store.store.dispatch(store.chatMsg(stats.join(), 'Stats'));
+		const { opts } = store.store.getState();
+		if (opts.runcount) {
+			if (opts.runcountcur === opts.runcount) {
+				store.store.dispatch(
+					store.chatMsg(`${opts.runcount} runs completed`, 'System'),
+				);
+				store.store.dispatch(store.setOptTemp('runcountcur', 1));
+			} else {
+				store.store.dispatch(
+					store.setOptTemp('runcountcur', opts.runcountcur + 1),
+				);
+			}
+		}
+	}
 
-	const cardreward = cardrewardref.current,
-		goldreward = goldrewardref.current;
-	const cards = useMemo(() => {
+	const cards = () => {
 		const cards = [];
 		if (cardreward) {
 			let x0 = 470 - etgutil.decklength(cardreward) * 20 - 80;
 			for (const code of etgutil.iterdeck(cardreward)) {
-				cards.push(
-					<Components.Card
-						key={cards.length}
-						x={x0}
-						y={170}
-						card={Cards.Codes[code]}
-					/>,
-				);
+				cards.push(<Components.Card x={x0} y={170} card={Cards.Codes[code]} />);
 				x0 += 40;
 			}
 		}
 		return cards;
-	}, [cardreward]);
+	};
 
 	return (
 		<>
 			<Components.ExitBtn x={412} y={440} onClick={exitFunc} />
-			{canRematch && (
+			{canRematch() && (
 				<input
 					type="button"
 					value="Rematch"
@@ -476,7 +425,7 @@ export default function Result(props) {
 						<Components.Text
 							text={`${goldreward - (game.data.cost | 0)}$`}
 							style={{
-								textAlign: 'center',
+								'text-align': 'center',
 								width: '900px',
 								position: 'absolute',
 								left: '0px',
@@ -484,11 +433,11 @@ export default function Result(props) {
 							}}
 						/>
 					)}
-					{cards.length > 0 && cards}
+					{cards}
 					<Components.Text
 						text={game.data.wintext || 'You won!'}
 						style={{
-							textAlign: 'center',
+							'text-align': 'center',
 							width: '700px',
 							position: 'absolute',
 							left: '100px',
@@ -503,9 +452,16 @@ export default function Result(props) {
 					left: '8px',
 					top: '290px',
 				}}>
-				{lefttextref.current}
+				{lefttext}
 			</span>
-			{tooltip}
+			<div
+				style={{
+					position: 'absolute',
+					left: '8px',
+					top: '258px',
+				}}>
+				{tooltip()}
+			</div>
 		</>
 	);
 }
