@@ -184,7 +184,7 @@ export function Card(p) {
 							bottom: '0',
 							'font-size': '10px',
 							'min-height': '102px',
-							'background-color': backColor,
+							'background-color': backColor(),
 							'border-radius': '0 0 4px 4px',
 						}}
 					/>
