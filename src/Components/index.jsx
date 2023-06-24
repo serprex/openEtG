@@ -164,13 +164,7 @@ export function Card(p) {
 						'border-width': '3px',
 						'border-style': 'double',
 					}}>
-					<span
-						style={{
-							position: 'absolute',
-							left: '2px',
-							top: '2px',
-							'font-size': '12px',
-						}}>
+					<span style="position:absolute;left:2px;top:2px;font-size:12px">
 						{p.card.name}
 					</span>
 					<img
@@ -179,16 +173,7 @@ export function Card(p) {
 							p.card.code +
 								(etgutil.asShiny(p.card.code, false) < 5000 ? 4000 : 0),
 						)}.webp`}
-						style={{
-							position: 'absolute',
-							top: '20px',
-							left: '8px',
-							width: '128px',
-							height: '128px',
-							'border-width': '1px',
-							'border-color': '#000',
-							'border-style': 'solid',
-						}}
+						style="position:absolute;top:20px;left:8px;width:128px;height:128px;border-width:1px;border-color:#000;border-style:solid"
 					/>
 					<Text
 						text={p.card.info()}
@@ -206,29 +191,18 @@ export function Card(p) {
 					{!!p.card.rarity && (
 						<span
 							class={`ico r${p.card.rarity}`}
-							style={{ position: 'absolute', right: '2px', top: '40px' }}
+							style="position:absolute;right:2px;top:40px"
 						/>
 					)}
 					{!!p.card.cost && (
-						<span
-							style={{
-								position: 'absolute',
-								right: '0',
-								'padding-right': '2px',
-								'padding-top': '2px',
-								'font-size': '12px',
-							}}>
+						<span style="position:absolute;right:0;padding-right:2px;padding-top:2px;font-size:12px">
 							{p.card.cost}
 							<span class={`ico te${p.card.costele}`} />
 						</span>
 					)}
 					<span
 						class={`ico t${p.card.type}`}
-						style={{
-							position: 'absolute',
-							right: '2px',
-							top: '22px',
-						}}
+						style="position:absolute;right:2px;top:22px"
 					/>
 				</div>
 			)}
@@ -489,11 +463,7 @@ export function CardSelector(props) {
 			<input
 				type="button"
 				value="Toggle Shiny"
-				style={{
-					position: 'absolute',
-					left: '4px',
-					top: '578px',
-				}}
+				style="position:absolute;left:4px;top:578px"
 				onClick={() => store.setOpt('toggleshiny', !rx.opts.toggleshiny)}
 			/>
 			<RaritySelector x={80} y={338} value={rarity()} onChange={setRarity} />

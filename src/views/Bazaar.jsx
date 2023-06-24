@@ -291,12 +291,12 @@ export default function Bazaar() {
 						style="position:absolute;left:360px;top:40px"
 					/>
 					<div
-						style="position:absolute;right:144px;top:8px"
+						style="position:absolute;right:176px;top:8px"
 						onClick={() => setSell(userutil.sellValue(bcard()))}>
 						Autosell: {userutil.sellValue(bcard())}
 						<span class="ico g" />
 					</div>
-					<div style="position:absolute;right:144px;top:40px">
+					<div style="position:absolute;right:176px;top:40px">
 						Wealth value: {userutil.cardValue(bcard())}
 						<span class="ico g" />
 					</div>
@@ -323,7 +323,7 @@ export default function Bazaar() {
 				text={rx.user.gold + '$'}
 				style="position:absolute;left:5px;top:240px"
 			/>
-			<Components.Card x={768} y={8} card={bcard()} />
+			<Components.Card x={732} y={8} card={bcard()} />
 			<Components.CardSelector
 				cards={Cards}
 				cardpool={cardpool()}
