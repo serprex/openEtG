@@ -5,11 +5,6 @@ import { Card, DeckDisplay } from '../Components/index.jsx';
 import { decodedeck } from '../etgutil.js';
 import { calcWealth } from '../userutil.js';
 
-const wealthStyle = {
-	position: 'absolute',
-	left: '204px',
-	top: '206px',
-};
 function App() {
 	const [deck, setDeck] = createSignal(decodedeck(location.hash.slice(1))),
 		[card, setCard] = createSignal(null);
@@ -31,7 +26,9 @@ function App() {
 				onMouseOver={(i, card) => setCard(card)}
 			/>
 			<Card x={36} y={206} card={card()} />
-			<span style={wealthStyle}>{calcWealth(Cards, deck(), true)}</span>
+			<span style="position:absolute;left:204px;top:206px">
+				{calcWealth(Cards, deck(), true)}
+			</span>
 		</>
 	);
 }

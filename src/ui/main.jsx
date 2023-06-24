@@ -11,7 +11,7 @@ window.onerror = function (...args) {
 };
 
 import { emit } from '../sock.jsx';
-import App from '../views/App.jsx';
+import App from '../views/App.js';
 import Rightpane from '../views/Rightpane.jsx';
 
 render(() => <App />, document.getElementById('leftpane'));

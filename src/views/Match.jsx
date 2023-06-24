@@ -1453,12 +1453,12 @@ export default function Match(props) {
 			!game.Cards.Names.Relic &&
 			(game.data.level !== undefined || isMultiplayer(game))
 		) {
+			streakback = rx.user.streak[game.data.level];
 			sock.userExec('addloss', {
 				pvp: isMultiplayer(game),
 				l: game.data.level,
 				g: -(game.data.cost | 0),
 			});
-			streakback = rx.user.streak[game.data.level];
 		}
 		sock.setCmds({
 			move: ({ cmd, hash }) => {

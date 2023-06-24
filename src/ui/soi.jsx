@@ -1,5 +1,5 @@
 import { render } from 'solid-js/web';
-import { createEffect, createSignal } from 'solid-js';
+import { createSignal } from 'solid-js';
 import Game from '../Game.js';
 import { toTrueMark, encodedeck } from '../etgutil.js';
 import { Earth, ShardList } from '../etg.js';
@@ -9,7 +9,6 @@ function App() {
 	const [cards, setCards] = createSignal(new Uint8Array(24));
 
 	const info = () => {
-		let info = 'Too many cards';
 		const deck = [toTrueMark(Earth), ShardList[Earth] + 2000];
 		cards().forEach((count, idx) => {
 			for (let i = 0; i < count; i++)
@@ -37,10 +36,9 @@ function App() {
 			if (id) {
 				game.next({ x: 'cast', c: id }, false);
 				const golemId = player.creatureIds[0];
-				info = golemId ? game.byId(golemId).info() : 'No Shard Golem spawned';
-			} else info = 'No Shard of Integrity to cast';
-		}
-		return info;
+				return golemId ? game.byId(golemId).info() : 'No Shard Golem spawned';
+			} else return 'No Shard of Integrity to cast';
+		} else return 'Too many cards';
 	};
 
 	const form = () => {
@@ -52,7 +50,7 @@ function App() {
 				<div>
 					<div class={`ico e${idx + 1}`} />
 					<input
-						style={{ display: 'block', width: '60px' }}
+						style="display:block;width:60px"
 						type="number"
 						value={cs[idx]}
 						onChange={e => {
@@ -62,7 +60,7 @@ function App() {
 						}}
 					/>
 					<input
-						style={{ display: 'block', width: '60px' }}
+						style="display:block;width:60px"
 						type="number"
 						value={cs[idx + 12]}
 						onChange={e => {
@@ -80,7 +78,7 @@ function App() {
 	return (
 		<>
 			<div style="display:flex;justify-content:space-between">{form}</div>
-			<Text text={info()} style={{ width: '900px' }} />
+			<Text text={info()} style="width:900px" />
 		</>
 	);
 }
