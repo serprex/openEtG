@@ -177,11 +177,7 @@ function OrderBook(p) {
 				<input
 					type="checkbox"
 					checked={p.deal}
-					onChange={e =>
-						store.store.dispatch(
-							store.setOptTemp('orderFilter_Deal', e.target.checked),
-						)
-					}
+					onChange={e => store.setOptTemp('orderFilter_Deal', e.target.checked)}
 				/>{' '}
 				Deals
 			</label>
@@ -189,11 +185,7 @@ function OrderBook(p) {
 				<input
 					type="checkbox"
 					checked={p.buy}
-					onChange={e =>
-						store.store.dispatch(
-							store.setOptTemp('orderFilter_Buy', e.target.checked),
-						)
-					}
+					onChange={e => store.setOptTemp('orderFilter_Buy', e.target.checked)}
 				/>{' '}
 				Buys
 			</label>
@@ -201,11 +193,7 @@ function OrderBook(p) {
 				<input
 					type="checkbox"
 					checked={p.sell}
-					onChange={e =>
-						store.store.dispatch(
-							store.setOptTemp('orderFilter_Sell', e.target.checked),
-						)
-					}
+					onChange={e => store.setOptTemp('orderFilter_Sell', e.target.checked)}
 				/>{' '}
 				Sells
 			</label>
@@ -213,11 +201,7 @@ function OrderBook(p) {
 				<input
 					type="checkbox"
 					checked={p.mine}
-					onChange={e =>
-						store.store.dispatch(
-							store.setOptTemp('orderFilter_Mine', e.target.checked),
-						)
-					}
+					onChange={e => store.setOptTemp('orderFilter_Mine', e.target.checked)}
 				/>{' '}
 				Mine
 			</label>
@@ -239,7 +223,7 @@ function OrderBook(p) {
 }
 
 export default function Bazaar() {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	const cardpool = createMemo(() => etgutil.deck2pool(rx.user.pool));
 
 	const [bz, setBz] = createSignal(null);
@@ -251,47 +235,42 @@ export default function Bazaar() {
 	const [showOrders, setShowOrders] = createSignal(false);
 
 	onMount(() => {
-		store.store.dispatch(
-			store.setCmds({
-				bzread: data => {
-					const bz = data.bz;
-					for (const k in bz) {
-						bz[k].sort(
-							(x, y) =>
-								Math.sign(x.p) - Math.sign(y.p) ||
-								Math.abs(x.p) - Math.abs(y.p),
-						);
-					}
-					setBz(data.bz);
-				},
-				bzbid: data => {
-					setBz(bz => {
-						const newbz = { ...bz };
-						for (const code in data.rm) {
-							if (newbz[code]) {
-								newbz[code] = newbz[code].filter(
-									bid =>
-										!data.rm[code].some(
-											rm => rm.u === bid.u && rm.q === bid.q && rm.p === bid.p,
-										),
-								);
-							}
-						}
-						for (const code in data.add) {
-							newbz[code] = newbz[code] ? newbz[code].slice() : [];
-							newbz[code].push(...data.add[code]);
-						}
-						return newbz;
-					});
-					store.store.dispatch(
-						store.updateUser({
-							gold: data.g,
-							pool: data.pool,
-						}),
+		store.setCmds({
+			bzread: data => {
+				const bz = data.bz;
+				for (const k in bz) {
+					bz[k].sort(
+						(x, y) =>
+							Math.sign(x.p) - Math.sign(y.p) || Math.abs(x.p) - Math.abs(y.p),
 					);
-				},
-			}),
-		);
+				}
+				setBz(data.bz);
+			},
+			bzbid: data => {
+				setBz(bz => {
+					const newbz = { ...bz };
+					for (const code in data.rm) {
+						if (newbz[code]) {
+							newbz[code] = newbz[code].filter(
+								bid =>
+									!data.rm[code].some(
+										rm => rm.u === bid.u && rm.q === bid.q && rm.p === bid.p,
+									),
+							);
+						}
+					}
+					for (const code in data.add) {
+						newbz[code] = newbz[code] ? newbz[code].slice() : [];
+						newbz[code].push(...data.add[code]);
+					}
+					return newbz;
+				});
+				store.updateUser({
+					gold: data.g,
+					pool: data.pool,
+				});
+			},
+		});
 		sock.emit({ x: 'bzread' });
 	});
 

@@ -23,34 +23,32 @@ const chatStyle = 'overflow:auto;color:#ddd';
 const defaultStyle = 'overflow:auto';
 const sockEvents = {
 	clear() {
-		store.store.dispatch(store.clearChat('Main'));
+		store.clearChat('Main');
 	},
 	passchange(data) {
-		store.store.dispatch(store.updateUser({ auth: data.auth }));
-		store.store.dispatch(store.chatMsg('Password updated', 'System'));
+		store.updateUser({ auth: data.auth });
+		store.chatMsg('Password updated', 'System');
 	},
 	mute(data) {
-		store.store.dispatch(store.mute(data.m));
-		store.store.dispatch(store.chatMsg(data.m + ' has been muted', 'System'));
+		store.mute(data.m);
+		store.chatMsg(data.m + ' has been muted', 'System');
 	},
 	roll(data) {
-		store.store.dispatch(
-			store.chat(
-				() => (
-					<div style={{ color: '#090' }}>
-						{data.u && <b>{data.u} </b>}
-						{data.A || 1}d{data.X}{' '}
-						<a href={`speed/${data.sum}`} target="_blank">
-							{data.sum}
-						</a>
-					</div>
-				),
-				'Main',
+		store.chat(
+			() => (
+				<div style={{ color: '#090' }}>
+					{data.u && <b>{data.u} </b>}
+					{data.A || 1}d{data.X}{' '}
+					<a href={`speed/${data.sum}`} target="_blank">
+						{data.sum}
+					</a>
+				</div>
 			),
+			'Main',
 		);
 	},
 	chat(data) {
-		const state = store.store.getState();
+		const state = store.store.state;
 		if (state.opts.muteall) {
 			if (!data.mode) return;
 		} else if (state.opts.muteguests && data.guest) {
@@ -102,30 +100,28 @@ const sockEvents = {
 			lastindex = reres.index + reres[0].length;
 		}
 		if (lastindex !== data.msg.length) text.push(data.msg.slice(lastindex));
-		store.store.dispatch(
-			store.chat(
-				() => (
-					<div
-						style={
-							data.guest
-								? guestStyle
-								: data.mode === 2
-								? mode2Style
-								: data.mode !== 1
-								? chatStyle
-								: defaultStyle
-						}>
-						{`${hs}${ms} `}
-						{data.u && <b>{data.u} </b>}
-						{text}
-					</div>
-				),
-				data.mode === 1 ? null : 'Main',
+		store.chat(
+			() => (
+				<div
+					style={
+						data.guest
+							? guestStyle
+							: data.mode === 2
+							? mode2Style
+							: data.mode !== 1
+							? chatStyle
+							: defaultStyle
+					}>
+					{`${hs}${ms} `}
+					{data.u && <b>{data.u} </b>}
+					{text}
+				</div>
 			),
+			data.mode === 1 ? null : 'Main',
 		);
 	},
 	foearena(data) {
-		const { user } = store.store.getState();
+		const { user } = store.store.state;
 		const game = new Game({
 			players: shuffle([
 				{
@@ -150,78 +146,70 @@ const sockEvents = {
 			level: 4 + data.lv,
 			cost: userutil.arenaCost(data.lv),
 			rematch: () => {
-				const { user } = store.store.getState();
+				const { user } = store.store.state;
 				if (!Cards.isDeckLegal(etgutil.decodedeck(getDeck()), user)) {
-					store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
+					store.chatMsg(`Invalid deck`, 'System');
 					return;
 				}
 				const cost = userutil.arenaCost(data.lv);
 				if (user.gold < cost) {
-					store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
+					store.chatMsg(`Requires ${cost}$`, 'System');
 					return;
 				}
 				userEmit('foearena', { lv: data.lv });
 			},
 		});
-		store.store.dispatch(store.doNav(import('./views/Match.jsx'), { game }));
+		store.doNav(import('./views/Match.jsx'), { game });
 	},
 	pvpgive(data) {
 		if (pvp) {
 			pvp = null;
 			const game = new Game(data.data);
-			store.store.dispatch(
-				store.doNav(import('./views/Match.jsx'), {
-					gameid: data.id,
-					game,
-				}),
-			);
+			store.doNav(import('./views/Match.jsx'), {
+				gameid: data.id,
+				game,
+			});
 		}
 	},
 	challenge(data) {
-		store.store.dispatch(
-			store.chat(() => (
-				<div
-					style={{ cursor: 'pointer', color: '#69f' }}
-					onClick={() => {
-						sendChallenge(data.f, data.set, data.deckcheck);
-					}}>
-					{`${data.f} offers to duel you!`}
-					{data.set && <i> (in Legacy mode)</i>}
-					{!data.deckcheck && <i> (without deck checks)</i>}
-				</div>
-			)),
-		);
+		store.chat(() => (
+			<div
+				style={{ cursor: 'pointer', color: '#69f' }}
+				onClick={() => {
+					sendChallenge(data.f, data.set, data.deckcheck);
+				}}>
+				{`${data.f} offers to duel you!`}
+				{data.set && <i> (in Legacy mode)</i>}
+				{!data.deckcheck && <i> (without deck checks)</i>}
+			</div>
+		));
 		userEmit('challrecv', { f: data.f });
 	},
 	offertrade(data) {
-		store.store.dispatch(
-			store.chat(() => (
-				<div
-					style={{ cursor: 'pointer', color: '#69f' }}
-					onClick={() =>
-						store.store.dispatch(
-							store.doNav(import('./views/Trade.jsx'), { foe: data.f }),
-						)
-					}>
-					{`${data.f} offers to trade with you!`}
-				</div>
-			)),
-		);
+		store.chat(() => (
+			<div
+				style={{ cursor: 'pointer', color: '#69f' }}
+				onClick={() =>
+					store.doNav(import('./views/Trade.jsx'), { foe: data.f })
+				}>
+				{`${data.f} offers to trade with you!`}
+			</div>
+		));
 		userEmit('challrecv', { f: data.f, trade: true });
 	},
 	bzgive(data) {
-		store.store.dispatch(store.userCmd(data.g ? 'addgold' : 'addcards', data));
-		store.store.dispatch(store.chatMsg(data.msg, 'System'));
+		store.userCmd(data.g ? 'addgold' : 'addcards', data);
+		store.chatMsg(data.msg, 'System');
 	},
 	addpools(data) {
-		store.store.dispatch(store.userCmd('addcards', { c: data.c }));
-		store.store.dispatch(store.userCmd('addboundcards', { c: data.b }));
-		store.store.dispatch(store.chatMsg(data.msg, 'System'));
+		store.userCmd('addcards', { c: data.c });
+		store.userCmd('addboundcards', { c: data.b });
+		store.chatMsg(data.msg, 'System');
 	},
 };
 socket.onmessage = function (msg) {
 	const data = JSON.parse(msg.data),
-		state = store.store.getState();
+		state = store.store.state;
 	if (data.u && state.muted.has(data.u)) return;
 	const func = state.cmds[data.x] ?? sockEvents[data.x];
 	if (func) func.call(this, data);
@@ -232,7 +220,7 @@ socket.onopen = function () {
 		clearTimeout(attemptTimeout);
 		attemptTimeout = 0;
 	}
-	const { opts } = store.store.getState();
+	const { opts } = store.store.state;
 	if (opts.offline || opts.afk) {
 		emit({
 			x: 'chatus',
@@ -242,7 +230,7 @@ socket.onopen = function () {
 	}
 	buffer.forEach(this.send, this);
 	buffer.length = 0;
-	store.store.dispatch(store.chatMsg('Connected', 'System'));
+	store.chatMsg('Connected', 'System');
 };
 socket.onclose = function () {
 	if (attemptTimeout) return;
@@ -256,7 +244,7 @@ socket.onclose = function () {
 		socket.onclose = oldsock.onclose;
 		socket.onmessage = oldsock.onmessage;
 	}, timeout);
-	store.store.dispatch(store.chatMsg(`Reconnecting in ${timeout}ms`, 'System'));
+	store.chatMsg(`Reconnecting in ${timeout}ms`, 'System');
 };
 export function emit(data) {
 	const msg = JSON.stringify(data);
@@ -267,7 +255,7 @@ export function emit(data) {
 	}
 }
 export function userEmit(x, data = {}) {
-	const { user } = store.store.getState();
+	const { user } = store.store.state;
 	data.x = 'a';
 	data.z = x;
 	data.u = user.name;
@@ -276,19 +264,19 @@ export function userEmit(x, data = {}) {
 }
 export function userExec(x, data = {}) {
 	userEmit(x, data);
-	store.store.dispatch(store.userCmd(x, data));
+	store.userCmd(x, data);
 }
 export function getDeck() {
-	const state = store.store.getState();
+	const state = store.store.state;
 	return state.user.decks[state.user.selectedDeck] ?? '';
 }
 export function getOrigDeck() {
-	const state = store.store.getState();
+	const state = store.store.state;
 	return state.orig.deck;
 }
 export function sendChallenge(foe, orig = false, deckcheck = true) {
 	const deck = orig ? getOrigDeck() : getDeck(),
-		state = store.store.getState();
+		state = store.store.state;
 	if (
 		deckcheck &&
 		!(orig ? OrigCards : Cards).isDeckLegal(
@@ -296,7 +284,7 @@ export function sendChallenge(foe, orig = false, deckcheck = true) {
 			orig ? state.orig : state.user,
 		)
 	) {
-		store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
+		store.chatMsg(`Invalid deck`, 'System');
 		return;
 	}
 	const msg = {

@@ -11,7 +11,7 @@ import * as util from '../../util.js';
 import { userEmit } from '../../sock.jsx';
 
 export default function OriginalEditor(props) {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	const pool = createMemo(() => {
 		const pool = [];
 		for (const [code, count] of etgutil.iterraw(rx.orig.pool)) {
@@ -53,24 +53,19 @@ export default function OriginalEditor(props) {
 				mark={data().mark}
 				pool={pool()}
 				cardMinus={data().cardMinus}
-				setDeck={deck => {
-					store.store.dispatch(
-						store.updateOrig({
-							deck:
-								etgutil.encodedeck(deck) +
-								etgutil.toTrueMarkSuffix(data().mark),
-						}),
-					);
-				}}
-				setMark={mark => {
-					store.store.dispatch(
-						store.updateOrig({
-							deck:
-								data().deckCode.slice(0, -5) +
-								etgutil.toTrueMarkSuffix(data().mark),
-						}),
-					);
-				}}
+				setDeck={deck =>
+					store.updateOrig({
+						deck:
+							etgutil.encodedeck(deck) + etgutil.toTrueMarkSuffix(data().mark),
+					})
+				}
+				setMark={mark =>
+					store.updateOrig({
+						deck:
+							data().deckCode.slice(0, -5) +
+							etgutil.toTrueMarkSuffix(data().mark),
+					})
+				}
 			/>
 			<input
 				type="button"
@@ -78,8 +73,8 @@ export default function OriginalEditor(props) {
 				onClick={() => {
 					const update = { deck: data().deckCode };
 					userEmit('updateorig', update);
-					store.store.dispatch(store.updateOrig(update));
-					store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
+					store.updateOrig(update);
+					store.doNav(import('./MainMenu.jsx'));
 				}}
 				style={{
 					position: 'absolute',
@@ -97,11 +92,7 @@ export default function OriginalEditor(props) {
 				<input
 					autoFocus
 					value={data().deckCode}
-					onChange={e => {
-						store.store.dispatch(
-							store.updateOrig({ deck: parseDeck(e.target.value) }),
-						);
-					}}
+					onChange={e => store.updateOrig({ deck: parseDeck(e.target.value) })}
 					ref={deckref}
 					onClick={e => {
 						e.target.setSelectionRange(0, 999);

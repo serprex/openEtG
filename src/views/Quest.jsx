@@ -22,7 +22,7 @@ function QuestButton(props) {
 }
 
 export default function QuestView(props) {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	const questInfo = createMemo(() => {
 		const questAreas = [],
 			quest = rx.opts.quest ?? [];
@@ -46,7 +46,7 @@ export default function QuestView(props) {
 						onClick={() => {
 							const newquest = quest.slice(0, qi);
 							newquest[qi] = i;
-							store.store.dispatch(store.setOptTemp('quest', newquest));
+							store.setOptTemp('quest', newquest);
 						}}
 						sel={quest[qi] === i}
 					/>,

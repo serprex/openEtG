@@ -1,26 +1,22 @@
-import { useRedux } from '../store.jsx';
-
 import Chat from '../Components/Chat.jsx';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 import parseChat from '../parseChat.js';
 
 function ChannelTab(props) {
-	const { opts } = useRedux();
+	const { opts } = store.useRx();
 
 	return (
 		<span
 			class={opts.channel === props.channel ? 'tabsel' : 'tab'}
-			onClick={e =>
-				store.store.dispatch(store.setOptTemp('channel', props.channel))
-			}>
+			onClick={e => store.setOptTemp('channel', props.channel)}>
 			{props.channel}
 		</span>
 	);
 }
 
 export default function Rightpane(props) {
-	const { opts } = useRedux();
+	const { opts } = store.useRx();
 
 	return (
 		!opts.hideRightpane && (
@@ -47,7 +43,7 @@ export default function Rightpane(props) {
 						checked={opts.offline}
 						onChange={e => {
 							sock.emit({ x: 'chatus', hide: e.target.checked });
-							store.store.dispatch(store.setOpt('offline', e.target.checked));
+							store.setOpt('offline', e.target.checked);
 						}}
 					/>
 					Appear Offline
@@ -58,7 +54,7 @@ export default function Rightpane(props) {
 						checked={opts.afk}
 						onChange={e => {
 							sock.emit({ x: 'chatus', afk: e.target.checked });
-							store.store.dispatch(store.setOptTemp('afk', e.target.checked));
+							store.setOptTemp('afk', e.target.checked);
 						}}
 					/>
 					Afk

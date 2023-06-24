@@ -11,7 +11,7 @@ export default function ArenaTop({ lv }) {
 	const [card, setCard] = createSignal(null);
 
 	onMount(() => {
-		store.store.dispatch(store.setCmds({ arenatop: ({ top }) => setTop(top) }));
+		store.setCmds({ arenatop: ({ top }) => setTop(top) });
 		sock.emit({ x: 'arenatop', lv });
 	});
 

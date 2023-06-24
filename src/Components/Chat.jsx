@@ -1,9 +1,9 @@
 import { createEffect, createRenderEffect } from 'solid-js';
 import { For } from 'solid-js/web';
-import { useRedux } from '../store.jsx';
+import { useRx } from '../store.jsx';
 
 export default function Chat(props) {
-	const rx = useRedux();
+	const rx = useRx();
 	let chat = null,
 		scrollTop = null;
 

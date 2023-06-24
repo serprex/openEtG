@@ -156,18 +156,18 @@ const chatStyle = {
 };
 
 function setPbpSetting(e) {
-	store.store.dispatch(store.setOpt('playByPlayMode', e.target.value));
+	store.setOpt('playByPlayMode', e.target.value);
 }
 
 function logout(cmd) {
 	sock.userEmit('logout');
-	store.store.dispatch(store.setUser(null));
-	store.store.dispatch(store.setOpt('remember', false));
-	store.store.dispatch(store.doNav(import('./Login.jsx')));
+	store.setUser(null);
+	store.setOpt('remember', false);
+	store.doNav(import('./Login.jsx'));
 }
 
 export default function MainMenu(props) {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	const foename = () => rx.opts.foename ?? '',
 		expectedDamageSamples = () => rx.opts.expectedDamageSamples || '4';
 	const showcard = () => props.nymph ?? (rx.user?.daily === 0 && rx.user.ocard);
@@ -189,45 +189,33 @@ export default function MainMenu(props) {
 
 	onMount(() => {
 		if (rx.user.daily === 0 && rx.user.ocard) {
-			store.store.dispatch(store.updateUser({ daily: 128 }));
+			store.updateUser({ daily: 128 });
 		}
 		document.addEventListener('mousemove', resetTip);
-		store.store.dispatch(
-			store.setCmds({
-				codecard: data => {
-					store.store.dispatch(
-						store.doNav(import('./Reward.jsx'), {
-							type: data.type,
-							amount: data.num,
-							code: foename(),
-						}),
-					);
-				},
-				codegold: data => {
-					store.store.dispatch(
-						store.updateUser({ gold: rx.user.gold + data.g }),
-					);
-					store.store.dispatch(
-						store.chat(
-							<div>
-								{data.g}
-								<span class="ico gold" /> added!
-							</div>,
-						),
-					);
-				},
-				codecode: data => {
-					store.store.dispatch(
-						store.updateUser({
-							pool: etgutil.addcard(rx.user.pool, data.card),
-						}),
-					);
-					store.store.dispatch(
-						store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System'),
-					);
-				},
-			}),
-		);
+		store.setCmds({
+			codecard: data => {
+				store.doNav(import('./Reward.jsx'), {
+					type: data.type,
+					amount: data.num,
+					code: foename(),
+				});
+			},
+			codegold: data => {
+				store.updateUser({ gold: rx.user.gold + data.g });
+				store.chat(
+					<div>
+						{data.g}
+						<span class="ico gold" /> added!
+					</div>,
+				);
+			},
+			codecode: data => {
+				store.updateUser({
+					pool: etgutil.addcard(rx.user.pool, data.card),
+				});
+				store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System');
+			},
+		});
 	});
 
 	onCleanup(() => document.removeEventListener('mousemove', resetTip));
@@ -238,9 +226,9 @@ export default function MainMenu(props) {
 		const cost = userutil.arenaCost(i);
 		return e => {
 			if (!Cards.isDeckLegal(etgutil.decodedeck(sock.getDeck()), rx.user)) {
-				store.store.dispatch(store.chatMsg('Invalid deck', 'System'));
+				store.chatMsg('Invalid deck', 'System');
 			} else if (rx.user.gold < cost) {
-				store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
+				store.chatMsg(`Requires ${cost}$`, 'System');
 			} else {
 				sock.userEmit('foearena', { lv: i });
 				e.target.style.display = 'none';
@@ -253,7 +241,7 @@ export default function MainMenu(props) {
 			sock.userEmit('passchange', { p: newpass() });
 			setChangepass(false);
 		} else {
-			store.store.dispatch(store.chatMsg('Passwords do not match', 'System'));
+			store.chatMsg('Passwords do not match', 'System');
 		}
 		newpass.value = '';
 		newpass2.value = '';
@@ -265,11 +253,7 @@ export default function MainMenu(props) {
 			<input
 				type="button"
 				value={`Arena${i + 1} T30`}
-				onClick={() => {
-					store.store.dispatch(
-						store.doNav(import('./ArenaTop.jsx'), { lv: i }),
-					);
-				}}
+				onClick={() => store.doNav(import('./ArenaTop.jsx'), { lv: i })}
 				onMouseOver={mkSetTip('See who the top players in arena are right now')}
 				style={{
 					position: 'absolute',
@@ -357,9 +341,7 @@ export default function MainMenu(props) {
 							<input
 								type="button"
 								value="Colosseum"
-								onClick={() => {
-									store.store.dispatch(store.doNav(import('./Colosseum.jsx')));
-								}}
+								onClick={() => store.doNav(import('./Colosseum.jsx'))}
 								onMouseOver={mkSetTip(
 									'Try some daily challenges in the Colosseum',
 								)}
@@ -374,9 +356,7 @@ export default function MainMenu(props) {
 							<input
 								type="button"
 								value="Quests"
-								onClick={() =>
-									store.store.dispatch(store.doNav(import('./Quest.jsx')))
-								}
+								onClick={() => store.doNav(import('./Quest.jsx'))}
 								onMouseOver={mkSetTip('Go on an adventure')}
 							/>
 						</div>
@@ -394,9 +374,7 @@ export default function MainMenu(props) {
 							<input
 								type="button"
 								value="Arena Deck"
-								onClick={() =>
-									store.store.dispatch(store.doNav(import('./ArenaInfo.jsx')))
-								}
+								onClick={() => store.doNav(import('./ArenaInfo.jsx'))}
 								onMouseOver={mkSetTip('Check how your arena decks are doing')}
 							/>
 						</div>
@@ -409,13 +387,9 @@ export default function MainMenu(props) {
 							<input
 								type="button"
 								value="Custom"
-								onClick={() => {
-									store.store.dispatch(
-										store.doNav(import('./Challenge.jsx'), {
-											pvp: false,
-										}),
-									);
-								}}
+								onClick={() =>
+									store.doNav(import('./Challenge.jsx'), { pvp: false })
+								}
 								onMouseOver={mkSetTip(
 									'Setup custom games vs AI or other players',
 								)}
@@ -435,11 +409,9 @@ export default function MainMenu(props) {
 							<input
 								type="button"
 								value="Legacy"
-								onClick={() => {
-									store.store.dispatch(
-										store.doNav(import('../vanilla/views/Login.jsx')),
-									);
-								}}
+								onClick={() =>
+									store.doNav(import('../vanilla/views/Login.jsx'))
+								}
 								onMouseOver={mkSetTip(
 									'A mode attempting to imitate the original EtG',
 								)}
@@ -470,9 +442,7 @@ export default function MainMenu(props) {
 					<input
 						type="button"
 						value="Wealth T60"
-						onClick={() => {
-							store.store.dispatch(store.doNav(import('./WealthTop.jsx')));
-						}}
+						onClick={() => store.doNav(import('./WealthTop.jsx'))}
 						onMouseOver={mkSetTip("See who's collected the most wealth")}
 						style={{ 'margin-left': '25%' }}
 					/>
@@ -538,9 +508,7 @@ export default function MainMenu(props) {
 					<input
 						type="button"
 						value="Editor"
-						onClick={() => {
-							store.store.dispatch(store.doNav(import('./DeckEditor.jsx')));
-						}}
+						onClick={() => store.doNav(import('./DeckEditor.jsx'))}
 						onMouseOver={mkSetTip('Edit & manage your decks')}
 						style={{
 							position: 'absolute',
@@ -562,9 +530,7 @@ export default function MainMenu(props) {
 					<input
 						type="button"
 						value="Shop"
-						onClick={() => {
-							store.store.dispatch(store.doNav(import('./Shop.jsx')));
-						}}
+						onClick={() => store.doNav(import('./Shop.jsx'))}
 						onMouseOver={mkSetTip(
 							'Buy booster packs which contain cards from the elements you choose',
 						)}
@@ -577,9 +543,7 @@ export default function MainMenu(props) {
 					<input
 						type="button"
 						value="Upgrade"
-						onClick={() => {
-							store.store.dispatch(store.doNav(import('./Upgrade.jsx')));
-						}}
+						onClick={() => store.doNav(import('./Upgrade.jsx'))}
 						onMouseOver={mkSetTip('Upgrade or sell cards')}
 						style={{
 							position: 'absolute',
@@ -590,9 +554,7 @@ export default function MainMenu(props) {
 					<input
 						type="button"
 						value="Bazaar"
-						onClick={() => {
-							store.store.dispatch(store.doNav(import('./Bazaar.jsx')));
-						}}
+						onClick={() => store.doNav(import('./Bazaar.jsx'))}
 						onMouseOver={mkSetTip(
 							"Put up cards for sale & review other players' offers",
 						)}
@@ -608,9 +570,7 @@ export default function MainMenu(props) {
 					<input
 						placeholder="Player's Name"
 						value={foename()}
-						onInput={e =>
-							store.store.dispatch(store.setOptTemp('foename', e.target.value))
-						}
+						onInput={e => store.setOptTemp('foename', e.target.value)}
 						style="margin-left:24px"
 					/>
 					<input
@@ -618,12 +578,7 @@ export default function MainMenu(props) {
 						value="Library"
 						onClick={() => {
 							const name = foename() || rx.user.name;
-							if (name)
-								store.store.dispatch(
-									store.doNav(import('./Library.jsx'), {
-										name,
-									}),
-								);
+							if (name) store.doNav(import('./Library.jsx'), { name });
 						}}
 						onMouseOver={mkSetTip('See exactly what cards you or others own')}
 						style={{
@@ -653,11 +608,7 @@ export default function MainMenu(props) {
 								forcards: null,
 								forg: null,
 							});
-							store.store.dispatch(
-								store.doNav(import('./Trade.jsx'), {
-									foe: foename(),
-								}),
-							);
+							store.doNav(import('./Trade.jsx'), { foe: foename() });
 						}}
 						onMouseOver={mkSetTip('Trade cards/$ with another player')}
 						style={{
@@ -776,9 +727,7 @@ export default function MainMenu(props) {
 								checked={!!rx.opts.enableSound}
 								onChange={e => {
 									audio.changeSound(e.target.checked);
-									store.store.dispatch(
-										store.setOpt('enableSound', e.target.checked),
-									);
+									store.setOpt('enableSound', e.target.checked);
 								}}
 							/>
 							Enable sound
@@ -794,9 +743,7 @@ export default function MainMenu(props) {
 								checked={!!rx.opts.enableMusic}
 								onChange={e => {
 									audio.changeMusic(e.target.checked);
-									store.store.dispatch(
-										store.setOpt('enableMusic', e.target.checked),
-									);
+									store.setOpt('enableMusic', e.target.checked);
 								}}
 							/>
 							Enable music
@@ -810,11 +757,7 @@ export default function MainMenu(props) {
 							<input
 								type="checkbox"
 								checked={!!rx.opts.hideMainchat}
-								onChange={e =>
-									store.store.dispatch(
-										store.setOpt('hideMainchat', e.target.checked),
-									)
-								}
+								onChange={e => store.setOpt('hideMainchat', e.target.checked)}
 							/>
 							Hide mainchat
 						</label>
@@ -827,11 +770,7 @@ export default function MainMenu(props) {
 							<input
 								type="checkbox"
 								checked={!!rx.opts.hideRightpane}
-								onChange={e =>
-									store.store.dispatch(
-										store.setOpt('hideRightpane', e.target.checked),
-									)
-								}
+								onChange={e => store.setOpt('hideRightpane', e.target.checked)}
 							/>
 							Hide rightpane
 						</label>
@@ -844,11 +783,7 @@ export default function MainMenu(props) {
 							<input
 								type="checkbox"
 								checked={!!rx.opts.disableTut}
-								onChange={e =>
-									store.store.dispatch(
-										store.setOpt('disableTut', e.target.checked),
-									)
-								}
+								onChange={e => store.setOpt('disableTut', e.target.checked)}
 							/>
 							Hide help
 						</label>
@@ -861,11 +796,7 @@ export default function MainMenu(props) {
 							<input
 								type="checkbox"
 								checked={!!rx.opts.lofiArt}
-								onChange={e =>
-									store.store.dispatch(
-										store.setOpt('lofiArt', e.target.checked),
-									)
-								}
+								onChange={e => store.setOpt('lofiArt', e.target.checked)}
 							/>
 							Lofi Art
 						</label>
@@ -916,9 +847,7 @@ export default function MainMenu(props) {
 								max={5}
 								value={expectedDamageSamples()}
 								onChange={e =>
-									store.store.dispatch(
-										store.setOpt('expectedDamageSamples', e.target.value),
-									)
+									store.setOpt('expectedDamageSamples', e.target.value)
 								}
 							/>
 						</label>

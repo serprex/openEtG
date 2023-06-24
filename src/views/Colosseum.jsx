@@ -25,7 +25,7 @@ function mkDaily(type) {
 			dataNext.cost = 0;
 			dataNext.cardreward = '';
 			dataNext.rematch = () => {
-				const { user } = store.store.getState();
+				const { user } = store.store.state;
 				return !(user.daily & (1 << type)) && mkDaily(type);
 			};
 			dataNext.rematchFilter = (game, p1id) => game.winner !== p1id;
@@ -46,7 +46,7 @@ function mkDaily(type) {
 	mkAi.run(game);
 }
 export default function Colosseum(props) {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	const [magename, magedeck] = Decks.mage[rx.user.dailymage],
 		[dgname, dgdeck] = Decks.demigod[rx.user.dailydg];
 	const events = [
@@ -125,9 +125,7 @@ export default function Colosseum(props) {
 						onClick={() => {
 							const nymph = etg.NymphList[(Math.random() * 12 + 1) | 0];
 							sock.userExec('donedaily', { daily: 6, c: nymph });
-							store.store.dispatch(
-								store.doNav(import('./MainMenu.jsx'), { nymph }),
-							);
+							store.doNav(import('./MainMenu.jsx'), { nymph });
 						}}
 					/>
 					<span

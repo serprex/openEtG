@@ -8,11 +8,11 @@ import * as store from '../../store.jsx';
 import { choose } from '../../util.js';
 
 function exitFunc() {
-	store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
+	store.doNav(import('./MainMenu.jsx'));
 }
 
 export default function OriginalResult({ game }) {
-	const rx = store.useRedux(),
+	const rx = store.useRx(),
 		player1 = game.byUser(rx.user ? rx.user.name : '');
 	let cardswonref = null,
 		electrumwonref = null;
@@ -84,7 +84,7 @@ export default function OriginalResult({ game }) {
 		};
 		if (update.electrum || update.pool) {
 			userEmit('origadd', update);
-			store.store.dispatch(store.addOrig(update));
+			store.addOrig(update);
 		}
 
 		cardswonref = cardswon;

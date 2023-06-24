@@ -73,7 +73,7 @@ function PackDisplay(props) {
 }
 
 export default function Shop() {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	const bulk = () => rx.opts.bulk ?? '1';
 	const [info1, setInfo1] = createSignal('Select from which element you want');
 	const [info2, setInfo2] = createSignal('Select which type of pack you want');
@@ -83,46 +83,42 @@ export default function Shop() {
 	const [cards, setCards] = createSignal('');
 
 	onMount(() => {
-		store.store.dispatch(
-			store.setCmds({
-				boostergive: data => {
-					const userdelta = {};
-					if (data.accountbound) {
-						userdelta.accountbound = etgutil.mergedecks(
-							rx.user.accountbound,
-							data.cards,
-						);
-						const freepacks = rx.user.freepacks && rx.user.freepacks.slice();
-						if (freepacks) {
-							freepacks[data.packtype]--;
-							userdelta.freepacks = freepacks;
-						}
-					} else {
-						const bdata = {};
-						parseInput(bdata, 'bulk', bulk(), 99);
-						userdelta.pool = etgutil.mergedecks(rx.user.pool, data.cards);
-						userdelta.gold =
-							rx.user.gold - packdata[data.packtype].cost * (bdata.bulk || 1);
-					}
-					store.store.dispatch(store.updateUser(userdelta));
-					setCards(data.cards);
-					setBuy(false);
-					store.store.dispatch(
-						store.chat(
-							() => (
-								<a
-									style={{ display: 'block' }}
-									href={`deck/${data.cards}`}
-									target="_blank">
-									{data.cards}
-								</a>
-							),
-							'Packs',
-						),
+		store.setCmds({
+			boostergive: data => {
+				const userdelta = {};
+				if (data.accountbound) {
+					userdelta.accountbound = etgutil.mergedecks(
+						rx.user.accountbound,
+						data.cards,
 					);
-				},
-			}),
-		);
+					const freepacks = rx.user.freepacks && rx.user.freepacks.slice();
+					if (freepacks) {
+						freepacks[data.packtype]--;
+						userdelta.freepacks = freepacks;
+					}
+				} else {
+					const bdata = {};
+					parseInput(bdata, 'bulk', bulk(), 99);
+					userdelta.pool = etgutil.mergedecks(rx.user.pool, data.cards);
+					userdelta.gold =
+						rx.user.gold - packdata[data.packtype].cost * (bdata.bulk || 1);
+				}
+				store.updateUser(userdelta);
+				setCards(data.cards);
+				setBuy(false);
+				store.chat(
+					() => (
+						<a
+							style={{ display: 'block' }}
+							href={`deck/${data.cards}`}
+							target="_blank">
+							{data.cards}
+						</a>
+					),
+					'Packs',
+				);
+			},
+		});
 	});
 
 	const buyPack = () => {
@@ -227,11 +223,9 @@ export default function Shop() {
 							value="Max Buy"
 							onClick={() => {
 								const pack = packdata[rarity()];
-								store.store.dispatch(
-									store.setOptTemp(
-										'bulk',
-										Math.min((rx.user.gold / pack.cost) | 0, 99).toString(),
-									),
+								store.setOptTemp(
+									'bulk',
+									Math.min((rx.user.gold / pack.cost) | 0, 99).toString(),
 								);
 							}}
 							style={{
@@ -289,9 +283,7 @@ export default function Shop() {
 					type="number"
 					placeholder="Bulk"
 					value={bulk()}
-					onChange={e =>
-						store.store.dispatch(store.setOptTemp('bulk', e.target.value))
-					}
+					onChange={e => store.setOptTemp('bulk', e.target.value)}
 					onKeyPress={e => {
 						if (e.which === 13) buyPack();
 					}}

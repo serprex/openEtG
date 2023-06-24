@@ -13,7 +13,7 @@ function RenderInfo(props) {
 	const testDeck = () => {
 		const deck = sock.getDeck();
 		if (decklength(deck) < 9 || decklength(adeck) < 9) {
-			store.store.dispatch(store.chatMsg('Deck too small'));
+			store.chatMsg('Deck too small');
 			return;
 		}
 		const game = new Game({
@@ -33,7 +33,7 @@ function RenderInfo(props) {
 				},
 			]),
 		});
-		store.store.dispatch(store.doNav(import('./Match.jsx'), { game }));
+		store.doNav(import('./Match.jsx'), { game });
 	};
 	const card =
 		props.info.card &&
@@ -119,13 +119,11 @@ function RenderInfo(props) {
 					top: `${224 + props.y}px`,
 				}}
 				onClick={() => {
-					store.store.dispatch(
-						store.doNav(import('./ArenaEditor.jsx'), {
-							adeck: props.info.deck,
-							acard: Cards.Codes[card],
-							ainfo: props.info,
-						}),
-					);
+					store.doNav(import('./ArenaEditor.jsx'), {
+						adeck: props.info.deck,
+						acard: Cards.Codes[card],
+						ainfo: props.info,
+					});
 				}}
 			/>
 			{adeck && (
@@ -155,14 +153,12 @@ function ArenaCard(props) {
 					top: `${260 + props.y}px`,
 				}}
 				onClick={() => {
-					store.store.dispatch(
-						store.doNav(import('./ArenaEditor.jsx'), {
-							adeck: '',
-							acard: props.card,
-							ainfo: { day: props.info?.day ?? 0 },
-							acreate: true,
-						}),
-					);
+					store.doNav(import('./ArenaEditor.jsx'), {
+						adeck: '',
+						acard: props.card,
+						ainfo: { day: props.info?.day ?? 0 },
+						acreate: true,
+					});
 				}}
 			/>
 			<Components.Card x={734} y={props.y} card={props.card} />
@@ -171,10 +167,10 @@ function ArenaCard(props) {
 }
 
 export default function ArenaInfo() {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	const [AB, setAB] = createSignal({});
 	onMount(() => {
-		store.store.dispatch(store.setCmds({ arenainfo: setAB }));
+		store.setCmds({ arenainfo: setAB });
 		sock.userEmit('arenainfo');
 	});
 

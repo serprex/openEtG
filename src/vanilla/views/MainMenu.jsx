@@ -55,7 +55,7 @@ function mkAi4() {
 }
 
 export default function OriginalMainMenu() {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	const origfoename = () => rx.opts.origfoename ?? '';
 
 	const vsAi = (level, cost, basereward, hpreward) => {
@@ -63,7 +63,7 @@ export default function OriginalMainMenu() {
 			hpreward > 0 &&
 			!Cards.isDeckLegal(etgutil.decodedeck(rx.orig.deck), rx.orig)
 		) {
-			store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
+			store.chatMsg(`Invalid deck`, 'System');
 			return;
 		}
 		const [ainame, aideck] =
@@ -75,7 +75,7 @@ export default function OriginalMainMenu() {
 		if (cost > 0) {
 			const update = { electrum: -cost };
 			userEmit('origadd', update);
-			store.store.dispatch(store.addOrig(update));
+			store.addOrig(update);
 		}
 		const game = new Game({
 			seed: randint(),
@@ -104,9 +104,7 @@ export default function OriginalMainMenu() {
 				},
 			]),
 		});
-		store.store.dispatch(
-			store.doNav(import('../../views/Match.jsx'), { game }),
-		);
+		store.doNav(import('../../views/Match.jsx'), { game });
 	};
 
 	return (
@@ -131,9 +129,7 @@ export default function OriginalMainMenu() {
 			<input
 				type="button"
 				value="Editor"
-				onClick={() =>
-					store.store.dispatch(store.doNav(import('./Editor.jsx')))
-				}
+				onClick={() => store.doNav(import('./Editor.jsx'))}
 			/>
 			<input
 				type="button"
@@ -177,9 +173,7 @@ export default function OriginalMainMenu() {
 			<input
 				placeholder="Name"
 				value={origfoename()}
-				onInput={e =>
-					store.store.dispatch(store.setOptTemp('origfoename', e.target.value))
-				}
+				onInput={e => store.setOptTemp('origfoename', e.target.value)}
 				style={{
 					position: 'absolute',
 					left: '300px',
@@ -189,9 +183,7 @@ export default function OriginalMainMenu() {
 			<input
 				type="button"
 				value="Upgrade"
-				onClick={() =>
-					store.store.dispatch(store.doNav(import('./Upgrade.jsx')))
-				}
+				onClick={() => store.doNav(import('./Upgrade.jsx'))}
 				style={{
 					position: 'absolute',
 					left: '500px',
@@ -201,9 +193,7 @@ export default function OriginalMainMenu() {
 			<input
 				type="button"
 				value="Bazaar"
-				onClick={() =>
-					store.store.dispatch(store.doNav(import('./Bazaar.jsx')))
-				}
+				onClick={() => store.doNav(import('./Bazaar.jsx'))}
 				style={{
 					position: 'absolute',
 					left: '500px',

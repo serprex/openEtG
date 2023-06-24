@@ -4,17 +4,15 @@ import * as store from './store.jsx';
 
 const guestname = `${(Math.random() * 89999 + 10000) | 0}`;
 function chatmute(state) {
-	store.store.dispatch(
-		store.chatMsg(
-			`${
-				state.opts.muteall
-					? 'You have chat muted. '
-					: state.opts.muteguest
-					? 'You have guests muted. '
-					: ''
-			}Muted: ${Array.from(state.muted).join(', ')}`,
-			'System',
-		),
+	store.chatMsg(
+		`${
+			state.opts.muteall
+				? 'You have chat muted. '
+				: state.opts.muteguest
+				? 'You have guests muted. '
+				: ''
+		}Muted: ${Array.from(state.muted).join(', ')}`,
+		'System',
 	);
 }
 export default function parseChat(e) {
@@ -25,7 +23,7 @@ export default function parseChat(e) {
 		let chatinput = e.target,
 			msg = chatinput.value.trim();
 		chatinput.value = '';
-		const storeState = store.store.getState(),
+		const storeState = store.store.state,
 			{ user } = storeState;
 		if (msg === '/help') {
 			const cmds = {
@@ -41,24 +39,22 @@ export default function parseChat(e) {
 				w: 'Whisper',
 			};
 			for (const cmd in cmds) {
-				store.store.dispatch(store.chatMsg(`${cmd} ${cmds[cmd]}`));
+				store.chatMsg(`${cmd} ${cmds[cmd]}`);
 			}
 		} else if (msg === '/clear') {
-			store.store.dispatch(store.clearChat(storeState.opts.channel));
+			store.clearChat(storeState.opts.channel);
 		} else if (msg === '/who') {
 			sock.emit({ x: 'who' });
 		} else if (msg === '/deleteme') {
 			if (storeState.opts.foename === user.name + 'yesdelete') {
 				sock.userEmit('delete');
-				store.store.dispatch(store.setUser(null));
-				store.store.dispatch(store.setOpt('remember', false));
-				store.store.dispatch(store.doNav(import('./views/Login.jsx')));
+				store.setUser(null);
+				store.setOpt('remember', false);
+				store.doNav(import('./views/Login.jsx'));
 			} else {
-				store.store.dispatch(
-					store.chatMsg(
-						`Input '${user.name}yesdelete' into Player's Name to delete your account`,
-						'System',
-					),
+				store.chatMsg(
+					`Input '${user.name}yesdelete' into Player's Name to delete your account`,
+					'System',
 				);
 			}
 		} else if (user && msg.match(/^\/roll( |$)\d*d?\d*$/)) {
@@ -73,22 +69,22 @@ export default function parseChat(e) {
 			}
 			sock.userEmit('roll', data);
 		} else if (msg === '/mute') {
-			store.store.dispatch(store.setOptTemp('muteall', true));
+			store.setOptTemp('muteall', true);
 			chatmute(storeState);
 		} else if (msg === '/unmute') {
-			store.store.dispatch(store.setOptTemp('muteall', false));
+			store.setOptTemp('muteall', false);
 			chatmute(storeState);
 		} else if (msg === '/muteguest') {
-			store.store.dispatch(store.setOptTemp('muteguest', true));
+			store.setOptTemp('muteguest', true);
 			chatmute(storeState);
 		} else if (msg === '/unmuteguest') {
-			store.store.dispatch(store.setOptTemp('muteguest', false));
+			store.setOptTemp('muteguest', false);
 			chatmute(storeState);
 		} else if (msg.match(/^\/mute /)) {
-			store.store.dispatch(store.mute(msg.slice(6)));
+			store.mute(msg.slice(6));
 			chatmute(storeState);
 		} else if (msg.match(/^\/unmute /)) {
-			store.store.dispatch(store.unmute(msg.slice(8)));
+			store.unmute(msg.slice(8));
 			chatmute(storeState);
 		} else if (msg.match(/^\/(motd|mod|codesmith)$/)) {
 			sock.emit({ x: msg.slice(1) });
@@ -112,9 +108,9 @@ export default function parseChat(e) {
 			const [t, pool] = msg.slice(9).split(' ');
 			sock.userEmit('addpool', { t, pool, bound: false });
 		} else if (msg.match(/^\/runcount /)) {
-			store.store.dispatch(store.setOptTemp('runcount', msg.slice(10) | 0));
-			store.store.dispatch(store.setOptTemp('runcountcur', 1));
-			store.store.dispatch(store.chatMsg(msg.slice(1), 'System'));
+			store.setOptTemp('runcount', msg.slice(10) | 0);
+			store.setOptTemp('runcountcur', 1);
+			store.chatMsg(msg.slice(1), 'System');
 		} else if (!msg.match(/^\/[^/]/) || (user && msg.match(/^\/w( |")/))) {
 			if (!msg.match(/^\s*$/)) {
 				msg = msg.replace(/^\/\//, '/');
@@ -137,6 +133,6 @@ export default function parseChat(e) {
 					});
 				}
 			}
-		} else store.store.dispatch(store.chatMsg('Not a command: ' + msg));
+		} else store.chatMsg('Not a command: ' + msg);
 	}
 }

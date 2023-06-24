@@ -143,40 +143,38 @@ const descriptions = [
 ];
 
 export default function ElementSelect() {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	let username, password, confirmpass;
 	const [eledesc, setEledesc] = createSignal(-1),
 		[skiptut, setSkiptut] = createSignal(false),
 		[err, setErr] = createSignal('');
 
 	onMount(() => {
-		store.store.dispatch(
-			store.setCmds({
-				login: data => {
-					if (data.err) {
-						setErr(
-							`Failed to register. Try a different username. Server response: ${data.err}`,
-						);
-					} else if (!data.accountbound && !data.pool) {
-						delete data.x;
-						store.store.dispatch(store.setUser(data));
-					} else if (rx.user) {
-						delete data.x;
-						store.store.dispatch(store.setUser(data));
-						if (skiptut()) {
-							store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
-						} else {
-							store.store.dispatch(store.setOptTemp('quest', [0]));
-							run(mkQuestAi(quarks.basic_damage));
-						}
+		store.setCmds({
+			login: data => {
+				if (data.err) {
+					setErr(
+						`Failed to register. Try a different username. Server response: ${data.err}`,
+					);
+				} else if (!data.accountbound && !data.pool) {
+					delete data.x;
+					store.setUser(data);
+				} else if (rx.user) {
+					delete data.x;
+					store.setUser(data);
+					if (skiptut()) {
+						store.doNav(import('./MainMenu.jsx'));
 					} else {
-						setErr(
-							`${data.name} already exists with that password. Click Exit to return to the login screen`,
-						);
+						store.setOptTemp('quest', [0]);
+						run(mkQuestAi(quarks.basic_damage));
 					}
-				},
-			}),
-		);
+				} else {
+					setErr(
+						`${data.name} already exists with that password. Click Exit to return to the login screen`,
+					);
+				}
+			},
+		});
 	});
 
 	return (
@@ -234,10 +232,10 @@ export default function ElementSelect() {
 				onClick={() => {
 					if (rx.user) {
 						sock.userEmit('delete');
-						store.store.dispatch(store.setUser(null));
+						store.setUser(null);
 					}
-					store.store.dispatch(store.setOpt('remember', false));
-					store.store.dispatch(store.doNav(import('./Login.jsx')));
+					store.setOpt('remember', false);
+					store.doNav(import('./Login.jsx'));
 				}}
 			/>
 			<label style="position:absolute;top:30px;left:500px;width:396px">

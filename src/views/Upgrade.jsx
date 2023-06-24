@@ -1,13 +1,13 @@
 import { createMemo, createSignal } from 'solid-js';
 
 import * as sock from '../sock.jsx';
-import { useRedux } from '../store.jsx';
+import { useRx } from '../store.jsx';
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
 import * as Components from '../Components/index.jsx';
 
 export default function Upgrade() {
-	const rx = useRedux();
+	const rx = useRx();
 	const cardpool = createMemo(() => etgutil.deck2pool(rx.user.pool));
 	const boundpool = createMemo(() => etgutil.deck2pool(rx.user.accountbound));
 	const [showBound, setShowBound] = createSignal(false);

@@ -912,7 +912,7 @@ function removeFx(fx) {
 }
 
 export default function Match(props) {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	const lofiArt = rx.opts.lofiArt ?? false,
 		playByPlayMode = rx.opts.playByPlayMode,
 		expectedDamageSamples = rx.opts.expectedDamageSamples | 0 || 4;
@@ -1262,13 +1262,9 @@ export default function Match(props) {
 			}
 		}
 		if (game.Cards.Names.Relic) {
-			store.store.dispatch(
-				store.doNav(import('../vanilla/views/Result.jsx'), { game }),
-			);
+			store.doNav(import('../vanilla/views/Result.jsx'), { game });
 		} else {
-			store.store.dispatch(
-				store.doNav(import('./Result.jsx'), { game, streakback }),
-			);
+			store.doNav(import('./Result.jsx'), { game, streakback });
 		}
 	};
 
@@ -1314,7 +1310,7 @@ export default function Match(props) {
 
 	const resignClick = () => {
 		if (props.replay) {
-			store.store.dispatch(store.doNav(import('./Challenge.jsx')));
+			store.doNav(import('./Challenge.jsx'));
 		} else if (pgame().winner || pgame().get(p1id(), 'resigned')) {
 			gotoResult();
 		} else if (!resigning()) {
@@ -1464,35 +1460,28 @@ export default function Match(props) {
 			});
 			streakback = rx.user.streak[game.data.level];
 		}
-		store.store.dispatch(
-			store.setCmds({
-				move: ({ cmd, hash }) => {
-					const { game } = props;
-					if (
-						(!cmd.c || game.has_id(cmd.c)) &&
-						(!cmd.t || game.has_id(cmd.t))
-					) {
-						applyNext(cmd, true);
-						if (game.hash() === hash) return;
-					}
-					sock.userEmit('reloadmoves', { id: props.gameid });
-				},
-				reloadmoves: ({ moves }) => {
-					store.store.dispatch(
-						store.doNav(Promise.resolve({ default: Match }), {
-							...rx.nav.props,
-							game: game.withMoves(moves),
-							noloss: true,
-						}),
-					);
-				},
-			}),
-		);
+		store.setCmds({
+			move: ({ cmd, hash }) => {
+				const { game } = props;
+				if ((!cmd.c || game.has_id(cmd.c)) && (!cmd.t || game.has_id(cmd.t))) {
+					applyNext(cmd, true);
+					if (game.hash() === hash) return;
+				}
+				sock.userEmit('reloadmoves', { id: props.gameid });
+			},
+			reloadmoves: ({ moves }) => {
+				store.doNav(Promise.resolve({ default: Match }), {
+					...rx.nav.props,
+					game: game.withMoves(moves),
+					noloss: true,
+				});
+			},
+		});
 		gameStep(game);
 	});
 
 	onCleanup(() => {
-		store.store.dispatch(store.setCmds({}));
+		store.setCmds({});
 		document.removeEventListener('keydown', onkeydown);
 		window.removeEventListener('beforeunload', onbeforeunload);
 	});

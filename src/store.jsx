@@ -1,6 +1,5 @@
-import { createStore, applyMiddleware } from 'redux';
 import { onCleanup } from 'solid-js';
-import { createStore as createSolidStore, reconcile } from 'solid-js/store';
+import { createStore, reconcile } from 'solid-js/store';
 
 import * as usercmd from './usercmd.js';
 import * as sfx from './audio.js';
@@ -18,75 +17,27 @@ try {
 sfx.changeSound(opts.enableSound);
 sfx.changeMusic(opts.enableMusic);
 
-export function doNav(view, props) {
-	return dispatch =>
-		view.then(view => dispatch({ type: 'NAV', view: view.default, props }));
-}
+class Store {
+	constructor(state) {
+		this.listeners = new Set();
+		this.state = {
+			nav: { view: Login, props: undefined, key: 0 },
+			opts,
+			cmds: {},
+			chat: new Map(),
+			muted: new Set(),
+		};
+	}
 
-export function setOptTemp(key, val) {
-	return dispatch => {
-		if (hasLocalStorage && !val) delete localStorage[key];
-		dispatch({
-			type: 'OPT',
-			key,
-			val,
-		});
-	};
-}
+	dispatch(action) {
+		this.state = this.reduce(action);
+		for (const listener of this.listeners) {
+			listener(this.state);
+		}
+	}
 
-export const setOpt = hasLocalStorage
-	? (key, val) => dispatch => {
-			if (hasLocalStorage) {
-				if (val) localStorage[key] = val;
-				else delete localStorage[key];
-			}
-			dispatch(setOptTemp(key, val));
-	  }
-	: setOptTemp;
-
-export function setCmds(cmds) {
-	return { type: 'CMD', cmds };
-}
-export function mute(name) {
-	return { type: 'MUTE', name };
-}
-export function unmute(name) {
-	return { type: 'UNMUTE', name };
-}
-export function clearChat(name) {
-	return { type: 'CHAT_CLEAR', name };
-}
-export function chat(span, name) {
-	return { type: 'CHAT', span, name };
-}
-export function chatMsg(msg, name) {
-	return {
-		type: 'CHAT',
-		span: () => <div>{msg}</div>,
-		name,
-	};
-}
-export function setUser(user) {
-	return { type: 'USER_SET', user };
-}
-export function userCmd(cmd, data) {
-	return { type: 'USER_CMD', cmd, data };
-}
-export function updateUser(data) {
-	return { type: 'USER_UPDATE', data };
-}
-export function setOrig(user) {
-	return { type: 'ORIG_SET', user };
-}
-export function updateOrig(data) {
-	return { type: 'ORIG_UPDATE', data };
-}
-export function addOrig(update) {
-	return { type: 'ORIG_ADD', ...update };
-}
-
-export const store = createStore(
-	(state, action) => {
+	reduce(action) {
+		const state = this.state;
 		switch (action.type) {
 			case 'NAV':
 				return {
@@ -171,29 +122,79 @@ export const store = createStore(
 			}
 		}
 		return state;
-	},
-	{
-		nav: { view: Login, props: undefined, key: 0 },
-		opts,
-		cmds: {},
-		chat: new Map(),
-		muted: new Set(),
-	},
-	applyMiddleware(
-		({ dispatch, getState }) =>
-			next =>
-			action =>
-				typeof action === 'function'
-					? action(dispatch, getState)
-					: next(action),
-	),
-);
+	}
 
-export function useRedux() {
-	const [state, setState] = createSolidStore(store.getState());
-	const unsubscribe = store.subscribe(() =>
-		setState(reconcile(store.getState())),
-	);
-	onCleanup(() => unsubscribe());
+	subscribe(cb) {
+		this.listeners.add(cb);
+		return () => this.listeners.delete(cb);
+	}
+}
+export const store = new Store();
+
+export function doNav(view, props) {
+	view.then(view => store.dispatch({ type: 'NAV', view: view.default, props }));
+}
+
+export function setOptTemp(key, val) {
+	if (hasLocalStorage && !val) delete localStorage[key];
+	store.dispatch({
+		type: 'OPT',
+		key,
+		val,
+	});
+}
+
+export function setOpt(key, val) {
+	if (hasLocalStorage) {
+		if (val) localStorage[key] = val;
+		else delete localStorage[key];
+	}
+	setOptTemp(key, val);
+}
+
+export function setCmds(cmds) {
+	store.dispatch({ type: 'CMD', cmds });
+}
+export function mute(name) {
+	store.dispatch({ type: 'MUTE', name });
+}
+export function unmute(name) {
+	store.dispatch({ type: 'UNMUTE', name });
+}
+export function clearChat(name) {
+	store.dispatch({ type: 'CHAT_CLEAR', name });
+}
+export function chat(span, name) {
+	store.dispatch({ type: 'CHAT', span, name });
+}
+export function chatMsg(msg, name) {
+	store.dispatch({
+		type: 'CHAT',
+		span: () => <div>{msg}</div>,
+		name,
+	});
+}
+export function setUser(user) {
+	store.dispatch({ type: 'USER_SET', user });
+}
+export function userCmd(cmd, data) {
+	store.dispatch({ type: 'USER_CMD', cmd, data });
+}
+export function updateUser(data) {
+	store.dispatch({ type: 'USER_UPDATE', data });
+}
+export function setOrig(user) {
+	store.dispatch({ type: 'ORIG_SET', user });
+}
+export function updateOrig(data) {
+	store.dispatch({ type: 'ORIG_UPDATE', data });
+}
+export function addOrig(update) {
+	store.dispatch({ type: 'ORIG_ADD', ...update });
+}
+
+export function useRx() {
+	const [state, setState] = createStore(store.state);
+	onCleanup(store.subscribe(state => setState(reconcile(state))));
 	return state;
 }

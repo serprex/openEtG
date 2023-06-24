@@ -207,7 +207,7 @@ function DeckSelector(props) {
 }
 
 export default function DeckEditor() {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	const pool = createMemo(() => {
 		const pool = [];
 		for (const [code, count] of chain(
@@ -343,7 +343,7 @@ export default function DeckEditor() {
 				value="Exit"
 				onClick={() => {
 					saveDeck(rx.user.selectedDeck, true);
-					store.store.dispatch(store.doNav(import('../views/MainMenu.jsx')));
+					store.doNav(import('../views/MainMenu.jsx'));
 				}}
 				style={{ position: 'absolute', left: '8px', top: '110px' }}
 			/>

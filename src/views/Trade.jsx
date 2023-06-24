@@ -8,7 +8,7 @@ import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 
 export default function Trade(props) {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	const [confirm, setConfirm] = createSignal(0);
 	const [canconfirm, setCanconfirm] = createSignal(false);
 	const [card, setCard] = createSignal(null);
@@ -18,32 +18,28 @@ export default function Trade(props) {
 	const [gopher, setGopher] = createSignal(0);
 
 	onMount(() => {
-		store.store.dispatch(
-			store.setCmds({
-				offertrade: data => {
-					setOffer(etgutil.decodedeck(data.c));
-					setGopher(data.g | 0);
-					setCanconfirm(true);
-				},
-				tradedone: data => {
-					store.store.dispatch(
-						store.updateUser({
-							pool: etgutil.mergedecks(
-								etgutil.removedecks(rx.user.pool, data.oldcards),
-								data.newcards,
-							),
-							gold: rx.user.gold + data.g,
-						}),
-					);
-					store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
-				},
-				tradecanceled: data => {
-					if (data.u === props.foe) {
-						store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
-					}
-				},
-			}),
-		);
+		store.setCmds({
+			offertrade: data => {
+				setOffer(etgutil.decodedeck(data.c));
+				setGopher(data.g | 0);
+				setCanconfirm(true);
+			},
+			tradedone: data => {
+				store.updateUser({
+					pool: etgutil.mergedecks(
+						etgutil.removedecks(rx.user.pool, data.oldcards),
+						data.newcards,
+					),
+					gold: rx.user.gold + data.g,
+				});
+				store.doNav(import('./MainMenu.jsx'));
+			},
+			tradecanceled: data => {
+				if (data.u === props.foe) {
+					store.doNav(import('./MainMenu.jsx'));
+				}
+			},
+		});
 	});
 
 	createEffect(() => sock.userEmit('reloadtrade', { f: props.foe }));
@@ -146,7 +142,7 @@ export default function Trade(props) {
 				value="Cancel"
 				onClick={() => {
 					sock.userEmit('canceltrade', { f: props.foe });
-					store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
+					store.doNav(import('./MainMenu.jsx'));
 				}}
 				style={{
 					position: 'absolute',

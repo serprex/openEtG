@@ -55,7 +55,7 @@ function AttrUi(p) {
 }
 
 export default function ArenaEditor(props) {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	const pool = createMemo(() => {
 		const baseacard = props.acard.asUpped(false).asShiny(false),
 			pool = [];
@@ -136,11 +136,9 @@ export default function ArenaEditor(props) {
 				value="Save & Exit"
 				onClick={() => {
 					if (!Cards.isDeckLegal(deck(), rx.user) || sumscore() > arpts) {
-						store.store.dispatch(
-							store.chatMsg(
-								'Invalid deck, 35 cards required before submission',
-								'System',
-							),
+						store.chatMsg(
+							'Invalid deck, 35 cards required before submission',
+							'System',
 						);
 						return;
 					}
@@ -154,14 +152,12 @@ export default function ArenaEditor(props) {
 					}
 					sock.userEmit('setarena', data);
 					if (props.acreate && props.ainfo.day > 0) {
-						store.store.dispatch(
-							store.updateUser({
-								gold: rx.user.gold + Math.min(props.ainfo.day * 25, 350),
-							}),
-						);
+						store.updateUser({
+							gold: rx.user.gold + Math.min(props.ainfo.day * 25, 350),
+						});
 					}
-					store.store.dispatch(store.chatMsg('Arena deck submitted', 'System'));
-					store.store.dispatch(store.doNav(import('../views/MainMenu.jsx')));
+					store.chatMsg('Arena deck submitted', 'System');
+					store.doNav(import('../views/MainMenu.jsx'));
 				}}
 				style={{
 					position: 'absolute',
@@ -172,9 +168,7 @@ export default function ArenaEditor(props) {
 			<input
 				type="button"
 				value="Exit"
-				onClick={() => {
-					store.store.dispatch(store.doNav(import('../views/ArenaInfo.jsx')));
-				}}
+				onClick={() => store.doNav(import('../views/ArenaInfo.jsx'))}
 				style={{
 					position: 'absolute',
 					left: '8px',

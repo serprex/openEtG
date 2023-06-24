@@ -8,7 +8,7 @@ const MainMenu = import('./MainMenu.jsx');
 let View;
 if (typeof kongregateAPI === 'undefined') {
 	View = function Login(props) {
-		const rx = store.useRedux();
+		const rx = store.useRx();
 		const [commit, setCommit] = createSignal(null);
 		let password;
 
@@ -26,29 +26,25 @@ if (typeof kongregateAPI === 'undefined') {
 		};
 
 		onMount(() => {
-			store.store.dispatch(
-				store.setCmds({
-					login: data => {
-						if (!data.err) {
-							delete data.x;
-							store.store.dispatch(store.setUser(data));
-							if (rx.opts.remember && typeof localStorage !== 'undefined') {
-								localStorage.auth = data.auth;
-							}
-							if (!data.accountbound && !data.pool) {
-								store.store.dispatch(
-									store.doNav(import('./ElementSelect.jsx')),
-								);
-							} else {
-								store.store.dispatch(store.setOptTemp('deck', sock.getDeck()));
-								store.store.dispatch(store.doNav(MainMenu));
-							}
-						} else {
-							store.store.dispatch(store.chatMsg(data.err));
+			store.setCmds({
+				login: data => {
+					if (!data.err) {
+						delete data.x;
+						store.setUser(data);
+						if (rx.opts.remember && typeof localStorage !== 'undefined') {
+							localStorage.auth = data.auth;
 						}
-					},
-				}),
-			);
+						if (!data.accountbound && !data.pool) {
+							store.doNav(import('./ElementSelect.jsx'));
+						} else {
+							store.setOptTemp('deck', sock.getDeck());
+							store.doNav(MainMenu);
+						}
+					} else {
+						store.chatMsg(data.err);
+					}
+				},
+			});
 
 			if (
 				rx.opts.remember &&
@@ -76,9 +72,7 @@ if (typeof kongregateAPI === 'undefined') {
 					tabIndex="1"
 					onKeyPress={maybeLogin}
 					value={rx.opts.username ?? ''}
-					onInput={e =>
-						store.store.dispatch(store.setOpt('username', e.target.value))
-					}
+					onInput={e => store.setOpt('username', e.target.value)}
 					style={{
 						position: 'absolute',
 						left: '270px',
@@ -110,7 +104,7 @@ if (typeof kongregateAPI === 'undefined') {
 							if (typeof localStorage !== 'undefined' && !e.target.checked) {
 								delete localStorage.auth;
 							}
-							store.store.dispatch(store.setOpt('remember', e.target.checked));
+							store.setOpt('remember', e.target.checked);
 						}}
 					/>
 					Remember me
@@ -129,9 +123,7 @@ if (typeof kongregateAPI === 'undefined') {
 				<input
 					type="button"
 					value="New Account"
-					onClick={e =>
-						store.store.dispatch(store.doNav(import('./ElementSelect.jsx')))
-					}
+					onClick={e => store.doNav(import('./ElementSelect.jsx'))}
 					style={{
 						position: 'absolute',
 						left: '430px',
@@ -170,26 +162,22 @@ if (typeof kongregateAPI === 'undefined') {
 				if (kong.services.isGuest()) {
 					setGuest(true);
 				} else {
-					store.store.dispatch(
-						store.setCmds({
-							login: data => {
-								if (!data.err) {
-									delete data.x;
-									store.store.dispatch(store.setUser(data));
-									if (!data.accountbound && !data.pool) {
-										store.store.dispatch(
-											store.doNav(import('./ElementSelect.jsx')),
-										);
-									} else {
-										store.store.dispatch(store.doNav(MainMenu));
-									}
+					store.setCmds({
+						login: data => {
+							if (!data.err) {
+								delete data.x;
+								store.setUser(data);
+								if (!data.accountbound && !data.pool) {
+									store.doNav(import('./ElementSelect.jsx'));
 								} else {
-									store.store.dispatch(store.chatMsg(data.err));
-									alert(data.err);
+									store.doNav(MainMenu);
 								}
-							},
-						}),
-					);
+							} else {
+								store.chatMsg(data.err);
+								alert(data.err);
+							}
+						},
+					});
 					sock.emit({
 						x: 'konglogin',
 						u: kong.services.getUserId(),

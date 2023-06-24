@@ -13,7 +13,7 @@ export default function Library(props) {
 	const [showBound, setShowBound] = createSignal(false);
 
 	onMount(() => {
-		store.store.dispatch(store.setCmds({ librarygive: setData }));
+		store.setCmds({ librarygive: setData });
 		sock.emit({ x: 'librarywant', f: props.name });
 	});
 

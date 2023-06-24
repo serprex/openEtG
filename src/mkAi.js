@@ -9,18 +9,16 @@ import deckgen from './deckgen.js';
 import Game from './Game.js';
 
 export function run(game) {
-	if (game) {
-		store.store.dispatch(store.doNav(import('./views/Match.jsx'), { game }));
-	}
+	if (game) store.doNav(import('./views/Match.jsx'), { game });
 }
 
 export function mkPremade(level, daily, datafn = null) {
 	const name = level === 1 ? 'mage' : 'demigod';
 	const urdeck = sock.getDeck(),
-		{ user } = store.store.getState(),
+		{ user } = store.store.state,
 		minsize = user ? 30 : 10;
 	if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user, minsize)) {
-		store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
+		store.chatMsg(`Invalid deck`, 'System');
 		return;
 	}
 	const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
@@ -28,7 +26,7 @@ export function mkPremade(level, daily, datafn = null) {
 	if (user) {
 		if (daily === undefined) {
 			if (user.gold < cost) {
-				store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
+				store.chatMsg(`Requires ${cost}$`, 'System');
 				return;
 			}
 		} else {
@@ -98,19 +96,19 @@ const randomNames = [
 ];
 export function mkAi(level, daily, datafn = null) {
 	const urdeck = sock.getDeck(),
-		{ user } = store.store.getState(),
+		{ user } = store.store.state,
 		minsize = user ? 30 : 10;
 	if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user, minsize)) {
-		store.store.dispatch(store.chatMsg('Invalid deck', 'System'));
+		store.chatMsg('Invalid deck', 'System');
 		return;
 	}
 	const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
 	if (cost && user.gold < cost) {
-		store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
+		store.chatMsg(`Requires ${cost}$`, 'System');
 		return;
 	}
 	const deck = level === 0 ? deckgen(0, 1, 2) : deckgen(0.4, 2, 3);
-	store.store.dispatch(store.setOptTemp('aideck', deck));
+	store.setOptTemp('aideck', deck);
 
 	const data = {
 		level: level,

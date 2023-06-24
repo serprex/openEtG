@@ -131,10 +131,7 @@ export function ExitBtn(props) {
 			type="button"
 			value="Exit"
 			onClick={
-				props.onClick ||
-				(() => {
-					store.store.dispatch(store.doNav(import('../views/MainMenu.jsx')));
-				})
+				props.onClick || (() => store.doNav(import('../views/MainMenu.jsx')))
 			}
 			style={{
 				position: 'absolute',
@@ -483,7 +480,7 @@ export function CardSelectorCore(props) {
 }
 
 export function CardSelector(props) {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	const [element, setElement] = createSignal(0);
 	const [rarity, setRarity] = createSignal(0);
 
@@ -497,11 +494,7 @@ export function CardSelector(props) {
 					left: '4px',
 					top: '578px',
 				}}
-				onClick={() =>
-					store.store.dispatch(
-						store.setOpt('toggleshiny', !rx.opts.toggleshiny),
-					)
-				}
+				onClick={() => store.setOpt('toggleshiny', !rx.opts.toggleshiny)}
 			/>
 			<RaritySelector x={80} y={338} value={rarity()} onChange={setRarity} />
 			<ElementSelector x={4} y={316} value={element()} onChange={setElement} />

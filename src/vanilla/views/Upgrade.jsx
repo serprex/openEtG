@@ -7,7 +7,7 @@ import * as store from '../../store.jsx';
 import * as Components from '../../Components/index.jsx';
 
 export default function OriginalUpgrade(props) {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	const [deck, setDeck] = createSignal([]);
 	const [card, setCard] = createSignal(null);
 
@@ -75,8 +75,8 @@ export default function OriginalUpgrade(props) {
 								),
 							};
 							userEmit('origadd', update);
-							store.store.dispatch(store.addOrig(update));
-							store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
+							store.addOrig(update);
+							store.doNav(import('./MainMenu.jsx'));
 						}}
 					/>
 				) : (
@@ -94,9 +94,7 @@ export default function OriginalUpgrade(props) {
 			<input
 				type="button"
 				value="Exit"
-				onClick={() => {
-					store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
-				}}
+				onClick={() => store.doNav(import('./MainMenu.jsx'))}
 				style={{
 					position: 'absolute',
 					left: '10px',

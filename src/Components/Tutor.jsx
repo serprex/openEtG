@@ -1,10 +1,10 @@
 import { createSignal } from 'solid-js';
 import { For } from 'solid-js/web';
-import { useRedux } from '../store.jsx';
+import { useRx } from '../store.jsx';
 import { Text } from './index.jsx';
 
 export function Tutor(props) {
-	const rx = useRedux();
+	const rx = useRx();
 	const [tut, setTut] = createSignal(false);
 	return (
 		<Show when={!rx.opts.disableTut}>

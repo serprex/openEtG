@@ -30,27 +30,19 @@ export default function Reward(props) {
 
 	onMount(() => {
 		if (rewardList) {
-			store.store.dispatch(
-				store.setCmds({
-					codedone: data => {
-						const { user } = store.store.getState();
-						store.store.dispatch(
-							store.updateUser({
-								pool: etgutil.addcard(user.pool, data.card),
-							}),
-						);
-						store.store.dispatch(
-							store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System'),
-						);
-						store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
-					},
-				}),
-			);
+			store.setCmds({
+				codedone: data => {
+					const { user } = store.store.state;
+					store.updateUser({
+						pool: etgutil.addcard(user.pool, data.card),
+					});
+					store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System');
+					store.doNav(import('./MainMenu.jsx'));
+				},
+			});
 		} else {
-			store.store.dispatch(
-				store.chatMsg('Unknown reward ${props.type}', 'System'),
-			);
-			store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
+			store.chatMsg('Unknown reward ${props.type}', 'System');
+			store.doNav(import('./MainMenu.jsx'));
 		}
 	});
 
@@ -69,7 +61,7 @@ export default function Reward(props) {
 										etgutil.encodeCount(numberofcopies) +
 										chosenReward().toString(32),
 								});
-								store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
+								store.doNav(import('./MainMenu.jsx'));
 							} else {
 								sock.userEmit('codesubmit2', {
 									code: props.code,
@@ -77,7 +69,7 @@ export default function Reward(props) {
 								});
 							}
 						} else {
-							store.store.dispatch(store.chatMsg('Choose a reward', 'System'));
+							store.chatMsg('Choose a reward', 'System');
 						}
 					}}
 					style={{

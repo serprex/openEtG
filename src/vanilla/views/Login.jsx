@@ -9,19 +9,17 @@ export default function OriginalLogin() {
 	const [select, setSelect] = createSignal(false);
 
 	onMount(() => {
-		store.store.dispatch(
-			store.setCmds({
-				originaldata: data => {
-					if (data.deck) {
-						delete data.x;
-						store.store.dispatch(store.setOrig(data));
-						store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
-					} else {
-						setSelect(true);
-					}
-				},
-			}),
-		);
+		store.setCmds({
+			originaldata: data => {
+				if (data.deck) {
+					delete data.x;
+					store.setOrig(data);
+					store.doNav(import('./MainMenu.jsx'));
+				} else {
+					setSelect(true);
+				}
+			},
+		});
 		sock.userEmit('loginoriginal');
 	});
 

@@ -7,9 +7,7 @@ export default function WealthTop(props) {
 	const [getTop, setTop] = createSignal(null);
 
 	onMount(() => {
-		store.store.dispatch(
-			store.setCmds({ wealthtop: ({ top }) => setTop(top) }),
-		);
+		store.setCmds({ wealthtop: ({ top }) => setTop(top) });
 		sock.emit({ x: 'wealthtop' });
 	});
 
@@ -23,11 +21,7 @@ export default function WealthTop(props) {
 				ol.push(
 					<li
 						onClick={() =>
-							store.store.dispatch(
-								store.doNav(import('./Library.jsx'), {
-									name: top[i],
-								}),
-							)
+							store.doNav(import('./Library.jsx'), { name: top[i] })
 						}>
 						{top[i]}
 						<span class="floatRight">{Math.round(top[i + 1])}</span>

@@ -211,7 +211,7 @@ function computeBonuses(game, player1, lefttext, streakrate, setTip, clearTip) {
 }
 
 export default function Result(props) {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 	const { game } = props;
 	const [tooltip, setTip] = createSignal(null);
 	const leftext = [];
@@ -227,19 +227,17 @@ export default function Result(props) {
 	const exitFunc = () => {
 		if (game.data.quest) {
 			if (game.winner === player1.id && game.data.choicerewards) {
-				store.store.dispatch(
-					store.doNav(import('./Reward.jsx'), {
-						type: game.data.choicerewards,
-						amount: game.data.rewardamount,
-					}),
-				);
+				store.doNav(import('./Reward.jsx'), {
+					type: game.data.choicerewards,
+					amount: game.data.rewardamount,
+				});
 			} else {
-				store.store.dispatch(store.doNav(import('./Quest.jsx')));
+				store.doNav(import('./Quest.jsx'));
 			}
 		} else if (game.data.daily !== undefined) {
-			store.store.dispatch(store.doNav(import('./Colosseum.jsx')));
+			store.doNav(import('./Colosseum.jsx'));
 		} else {
-			store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
+			store.doNav(import('./MainMenu.jsx'));
 		}
 	};
 
@@ -268,7 +266,7 @@ export default function Result(props) {
 			() => <div>{(game.duration / 1000).toFixed(1)} seconds</div>,
 		];
 
-	store.store.dispatch(store.clearChat('Replay'));
+	store.clearChat('Replay');
 	const { replay } = game;
 	if (
 		replay &&
@@ -282,7 +280,7 @@ export default function Result(props) {
 			players: game.data.players,
 			moves: replay,
 		});
-		store.store.dispatch(store.chat(() => replayJson, 'Replay'));
+		store.chat(() => replayJson, 'Replay');
 	}
 
 	let streakrate = 0;
@@ -376,18 +374,14 @@ export default function Result(props) {
 			players: game.data.players,
 		});
 		stats[stats.length - 1] = +stats[stats.length - 1].toFixed(3);
-		store.store.dispatch(store.chatMsg(stats.join(), 'Stats'));
-		const { opts } = store.store.getState();
+		store.chatMsg(stats.join(), 'Stats');
+		const { opts } = store.store.state;
 		if (opts.runcount) {
 			if (opts.runcountcur === opts.runcount) {
-				store.store.dispatch(
-					store.chatMsg(`${opts.runcount} runs completed`, 'System'),
-				);
-				store.store.dispatch(store.setOptTemp('runcountcur', 1));
+				store.chatMsg(`${opts.runcount} runs completed`, 'System');
+				store.setOptTemp('runcountcur', 1);
 			} else {
-				store.store.dispatch(
-					store.setOptTemp('runcountcur', opts.runcountcur + 1),
-				);
+				store.setOptTemp('runcountcur', opts.runcountcur + 1);
 			}
 		}
 	}

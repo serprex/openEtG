@@ -259,11 +259,11 @@ function Group(props) {
 }
 
 function toMainMenu() {
-	store.store.dispatch(store.doNav(import('./MainMenu.jsx')));
+	store.doNav(import('./MainMenu.jsx'));
 }
 
 export default function Challenge(props) {
-	const rx = store.useRedux();
+	const rx = store.useRx();
 
 	const [groups, setGroups] = createSignal(
 		props.groups ?? [[{ user: rx.user.name, idx: 1, pending: 1 }], []],
@@ -302,7 +302,7 @@ export default function Challenge(props) {
 	const aiClick = () => {
 		const deck = groups()[0][0].deck || mydeck();
 		if (etgutil.decklength(deck) < 9) {
-			store.store.dispatch(store.doNav(import('./DeckEditor.jsx')));
+			store.doNav(import('./DeckEditor.jsx'));
 			return;
 		}
 		const gameData = {
@@ -313,7 +313,7 @@ export default function Challenge(props) {
 		};
 		shuffle(gameData.players);
 		const game = new Game(gameData);
-		store.store.dispatch(store.doNav(import('./Match.jsx'), { game }));
+		store.doNav(import('./Match.jsx'), { game });
 	};
 
 	const replayClick = () => {
@@ -339,12 +339,10 @@ export default function Challenge(props) {
 			goldreward: 0,
 			players: play.players,
 		});
-		store.store.dispatch(
-			store.doNav(import('./Match.jsx'), {
-				replay: play,
-				game,
-			}),
-		);
+		store.doNav(import('./Match.jsx'), {
+			replay: play,
+			game,
+		});
 	};
 
 	const addGroup = () => {
