@@ -150,7 +150,7 @@ export default function ElementSelect() {
 		[err, setErr] = createSignal('');
 
 	onMount(() => {
-		store.setCmds({
+		sock.setCmds({
 			login: data => {
 				if (data.err) {
 					setErr(

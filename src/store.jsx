@@ -23,7 +23,6 @@ class Store {
 		this.state = {
 			nav: { view: Login, props: undefined, key: 0 },
 			opts,
-			cmds: {},
 			chat: new Map(),
 			muted: new Set(),
 		};
@@ -53,8 +52,6 @@ class Store {
 					...state,
 					opts: { ...state.opts, [action.key]: action.val },
 				};
-			case 'CMD':
-				return { ...state, cmds: action.cmds };
 			case 'USER_SET':
 				return { ...state, user: action.user };
 			case 'USER_CMD':
@@ -149,9 +146,6 @@ export function setOpt(key, val) {
 	setOptTemp(key, val);
 }
 
-export function setCmds(cmds) {
-	store.dispatch({ type: 'CMD', cmds });
-}
 export function mute(name) {
 	store.dispatch({ type: 'MUTE', name });
 }

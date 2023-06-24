@@ -2,7 +2,6 @@ import { createMemo, createSignal, onMount } from 'solid-js';
 
 import Cards from '../Cards.js';
 import * as sock from '../sock.jsx';
-import * as store from '../store.jsx';
 import * as etgutil from '../etgutil.js';
 import * as userutil from '../userutil.js';
 import * as Components from '../Components/index.jsx';
@@ -13,7 +12,7 @@ export default function Library(props) {
 	const [showBound, setShowBound] = createSignal(false);
 
 	onMount(() => {
-		store.setCmds({ librarygive: setData });
+		sock.setCmds({ librarygive: setData });
 		sock.emit({ x: 'librarywant', f: props.name });
 	});
 

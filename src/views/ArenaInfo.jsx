@@ -170,7 +170,7 @@ export default function ArenaInfo() {
 	const rx = store.useRx();
 	const [AB, setAB] = createSignal({});
 	onMount(() => {
-		store.setCmds({ arenainfo: setAB });
+		sock.setCmds({ arenainfo: setAB });
 		sock.userEmit('arenainfo');
 	});
 

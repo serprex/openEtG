@@ -18,7 +18,7 @@ export default function Trade(props) {
 	const [gopher, setGopher] = createSignal(0);
 
 	onMount(() => {
-		store.setCmds({
+		sock.setCmds({
 			offertrade: data => {
 				setOffer(etgutil.decodedeck(data.c));
 				setGopher(data.g | 0);

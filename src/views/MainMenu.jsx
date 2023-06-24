@@ -169,7 +169,7 @@ export default function MainMenu(props) {
 			store.updateUser({ daily: 128 });
 		}
 		document.addEventListener('mousemove', resetTip);
-		store.setCmds({
+		sock.setCmds({
 			codecard: data => {
 				store.doNav(import('./Reward.jsx'), {
 					type: data.type,

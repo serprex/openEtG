@@ -1460,7 +1460,7 @@ export default function Match(props) {
 			});
 			streakback = rx.user.streak[game.data.level];
 		}
-		store.setCmds({
+		sock.setCmds({
 			move: ({ cmd, hash }) => {
 				const { game } = props;
 				if ((!cmd.c || game.has_id(cmd.c)) && (!cmd.t || game.has_id(cmd.t))) {
@@ -1481,7 +1481,7 @@ export default function Match(props) {
 	});
 
 	onCleanup(() => {
-		store.setCmds({});
+		sock.setCmds({});
 		document.removeEventListener('keydown', onkeydown);
 		window.removeEventListener('beforeunload', onbeforeunload);
 	});

@@ -188,7 +188,7 @@ export default function Bazaar() {
 	const [showOrders, setShowOrders] = createSignal(false);
 
 	onMount(() => {
-		store.setCmds({
+		sock.setCmds({
 			bzread: data => {
 				const bz = data.bz;
 				for (const k in bz) {

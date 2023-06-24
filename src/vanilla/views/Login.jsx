@@ -9,7 +9,7 @@ export default function OriginalLogin() {
 	const [select, setSelect] = createSignal(false);
 
 	onMount(() => {
-		store.setCmds({
+		sock.setCmds({
 			originaldata: data => {
 				if (data.deck) {
 					delete data.x;

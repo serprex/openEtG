@@ -26,7 +26,7 @@ if (typeof kongregateAPI === 'undefined') {
 		};
 
 		onMount(() => {
-			store.setCmds({
+			sock.setCmds({
 				login: data => {
 					if (!data.err) {
 						delete data.x;
@@ -162,7 +162,7 @@ if (typeof kongregateAPI === 'undefined') {
 				if (kong.services.isGuest()) {
 					setGuest(true);
 				} else {
-					store.setCmds({
+					sock.setCmds({
 						login: data => {
 							if (!data.err) {
 								delete data.x;

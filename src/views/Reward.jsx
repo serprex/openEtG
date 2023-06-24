@@ -30,7 +30,7 @@ export default function Reward(props) {
 
 	onMount(() => {
 		if (rewardList) {
-			store.setCmds({
+			sock.setCmds({
 				codedone: data => {
 					const { user } = store.store.state;
 					store.updateUser({

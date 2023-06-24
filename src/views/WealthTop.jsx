@@ -7,7 +7,7 @@ export default function WealthTop(props) {
 	const [getTop, setTop] = createSignal(null);
 
 	onMount(() => {
-		store.setCmds({ wealthtop: ({ top }) => setTop(top) });
+		sock.setCmds({ wealthtop: ({ top }) => setTop(top) });
 		sock.emit({ x: 'wealthtop' });
 	});
 

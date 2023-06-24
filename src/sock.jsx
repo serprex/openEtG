@@ -16,7 +16,8 @@ const buffer = [];
 let socket = new WebSocket(endpoint),
 	attempts = 0,
 	attemptTimeout = 0,
-	pvp = null;
+	pvp = null,
+	cmds = {};
 const guestStyle = 'overflow:auto;font-style:italic;color:#ccc';
 const mode2Style = 'overflow:auto;color:#69f';
 const chatStyle = 'overflow:auto;color:#ddd';
@@ -214,7 +215,7 @@ socket.onmessage = function (msg) {
 	const data = JSON.parse(msg.data),
 		state = store.store.state;
 	if (data.u && state.muted.has(data.u)) return;
-	const func = state.cmds[data.x] ?? sockEvents[data.x];
+	const func = cmds[data.x] ?? sockEvents[data.x];
 	if (func) func.call(this, data);
 };
 socket.onopen = function () {
@@ -298,4 +299,7 @@ export function sendChallenge(foe, orig = false, deckcheck = true) {
 	};
 	userEmit(orig ? 'foewant' : 'foewant', msg);
 	pvp = foe;
+}
+export function setCmds(c) {
+	cmds = c;
 }

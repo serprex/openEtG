@@ -4,14 +4,13 @@ import { For } from 'solid-js/web';
 import Cards from '../Cards.js';
 import * as Components from '../Components/index.jsx';
 import * as sock from '../sock.jsx';
-import * as store from '../store.jsx';
 
 export default function ArenaTop({ lv }) {
 	const [top, setTop] = createSignal([]);
 	const [card, setCard] = createSignal(null);
 
 	onMount(() => {
-		store.setCmds({ arenatop: ({ top }) => setTop(top) });
+		sock.setCmds({ arenatop: ({ top }) => setTop(top) });
 		sock.emit({ x: 'arenatop', lv });
 	});
 

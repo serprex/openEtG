@@ -83,7 +83,7 @@ export default function Shop() {
 	const [cards, setCards] = createSignal('');
 
 	onMount(() => {
-		store.setCmds({
+		sock.setCmds({
 			boostergive: data => {
 				const userdelta = {};
 				if (data.accountbound) {
