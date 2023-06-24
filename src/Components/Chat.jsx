@@ -1,4 +1,4 @@
-import { createEffect, createRenderEffect } from 'solid-js';
+import { createComputed, createEffect } from 'solid-js';
 import { For } from 'solid-js/web';
 import { useRx } from '../store.jsx';
 
@@ -7,7 +7,7 @@ export default function Chat(props) {
 	let chat = null,
 		scrollTop = null;
 
-	createRenderEffect(channel => {
+	createComputed(channel => {
 		rx.chat;
 		scrollTop =
 			chat &&

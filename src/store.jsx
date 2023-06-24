@@ -145,10 +145,7 @@ export function setOptTemp(key, val) {
 }
 
 export function setOpt(key, val) {
-	if (hasLocalStorage) {
-		if (val) localStorage[key] = val;
-		else delete localStorage[key];
-	}
+	if (hasLocalStorage && val) localStorage[key] = val;
 	setOptTemp(key, val);
 }
 

@@ -20,49 +20,23 @@ function CardOrders(p) {
 	return (
 		p.bc && (
 			<>
-				<div
-					style={{
-						position: 'absolute',
-						left: '100px',
-						top: '72px',
-						width: '230px',
-						height: '192px',
-						color: '#4f8',
-					}}>
+				<div style="position:absolute;left:100px;top:72px;width:230px;height:192px;color:#4f8">
 					<div>Buys</div>
 					<For each={p.bc.filter(x => x.p > 0 && x.u !== p.username)}>
 						{buy => <Order order={buy} onClick={p.onClickBuy} />}
 					</For>
 				</div>
-				<div
-					style={{
-						position: 'absolute',
-						left: '330px',
-						top: '72px',
-						width: '230px',
-						height: '192px',
-						color: '#f84',
-					}}>
+				<div style="position:absolute;left:330px;top:72px;width:230px;height:192px;color:#f84">
 					<div>Sells</div>
 					<For each={p.bc.filter(x => x.p < 0 && x.u !== p.username)}>
 						{sell => <Order order={sell} onClick={p.onClickSell} />}
 					</For>
 				</div>
 				{p.bc.some(({ u }) => u === p.username) && (
-					<div
-						style={{
-							position: 'absolute',
-							left: '560px',
-							top: '72px',
-							width: '230px',
-							height: '192px',
-						}}>
+					<div style="position:absolute;left:560px;top:72px;width:230px;height:192px">
 						<For each={p.bc.filter(x => x.u === p.username)}>
 							{order => (
-								<div
-									style={{
-										color: order.p > 0 ? '#4f8' : '#f84',
-									}}>
+								<div style={order.p > 0 ? 'color:#4f8' : 'color:#f84'}>
 									{order.q} @ {Math.abs(order.p)}
 								</div>
 							)}
@@ -70,7 +44,7 @@ function CardOrders(p) {
 						<input
 							type="button"
 							value="Cancel"
-							style={{ display: 'block' }}
+							style="display:block"
 							onClick={p.onClickCancel}
 						/>
 					</div>
@@ -129,29 +103,14 @@ function OrderSummary(props) {
 					o1 = orders[orders.length - 1];
 				return (
 					(o0 || o1) && (
-						<div style={{ width: '288px' }} onClick={() => props.onClick(code)}>
-							<div
-								style={{
-									display: 'inline-block',
-									width: '192px',
-									'text-overflow': 'ellipsis',
-								}}>
+						<div style="width:288px" onClick={[props.onClick, code]}>
+							<div style="display:inline-block;width:192px;text-overflow:ellipsis;">
 								{name}
 							</div>
-							<div
-								style={{
-									display: 'inline-block',
-									color: '#4f8',
-									width: '48px',
-								}}>
+							<div style="display:inline-block;color:#4f8;width:48px">
 								{o1.p > 0 ? o1.p : ' '}
 							</div>
-							<div
-								style={{
-									display: 'inline-block',
-									color: '#f84',
-									width: '48px',
-								}}>
+							<div style="display:inline-block;color:#f84;width:48px">
 								{o0.p < 0 ? -o0.p : ' '}
 							</div>
 						</div>
@@ -166,14 +125,8 @@ function OrderBook(p) {
 	return (
 		<div
 			class="bgbox"
-			style={{
-				position: 'absolute',
-				top: '270px',
-				width: '900px',
-				height: '330px',
-				overflowY: 'auto',
-			}}>
-			<label style={{ display: 'inline-block', width: '200px' }}>
+			style="position:absolute;top:270px;width:900px;height:330px;overflow-y:auto">
+			<label style="display:inline-block;width:200px">
 				<input
 					type="checkbox"
 					checked={p.deal}
@@ -181,7 +134,7 @@ function OrderBook(p) {
 				/>{' '}
 				Deals
 			</label>
-			<label style={{ display: 'inline-block', width: '200px' }}>
+			<label style="display:inline-block;width:200px">
 				<input
 					type="checkbox"
 					checked={p.buy}
@@ -189,7 +142,7 @@ function OrderBook(p) {
 				/>{' '}
 				Buys
 			</label>
-			<label style={{ display: 'inline-block', width: '200px' }}>
+			<label style="display:inline-block;width:200px">
 				<input
 					type="checkbox"
 					checked={p.sell}
@@ -197,7 +150,7 @@ function OrderBook(p) {
 				/>{' '}
 				Sells
 			</label>
-			<label style={{ display: 'inline-block', width: '200px' }}>
+			<label style="display:inline-block;width:200px">
 				<input
 					type="checkbox"
 					checked={p.mine}
@@ -343,12 +296,7 @@ export default function Bazaar() {
 						Autosell: {userutil.sellValue(bcard())}
 						<span class="ico g" />
 					</div>
-					<div
-						style={{
-							position: 'absolute',
-							right: '144px',
-							top: '40px',
-						}}>
+					<div style="position:absolute;right:144px;top:40px">
 						Wealth value: {userutil.cardValue(bcard())}
 						<span class="ico g" />
 					</div>

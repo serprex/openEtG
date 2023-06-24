@@ -68,38 +68,41 @@ const sockEvents = {
 			h = now.getHours(),
 			m = now.getMinutes(),
 			hs = h < 10 ? '0' + h : h.toString(),
-			ms = m < 10 ? '0' + m : m.toString(),
-			text = [];
-		let decklink = /\b(([01][0-9a-v]{4})+)\b/g,
-			reres,
-			lastindex = 0;
-		while ((reres = decklink.exec(data.msg))) {
-			if (reres.index !== lastindex)
-				text.push(data.msg.slice(lastindex, reres.index));
-			let notlink = false;
-			for (let i = 2; i < reres[0].length; i += 5) {
-				const code = parseInt(reres[0].substr(i, 3), 32);
-				if (
-					!Cards.Codes[code] &&
-					!OrigCards.Codes[code] &&
-					etgutil.fromTrueMark(code) === -1
-				) {
-					notlink = true;
-					break;
+			ms = m < 10 ? '0' + m : m.toString();
+		const text = () => {
+			const text = [];
+			let decklink = /\b(([01][0-9a-v]{4})+)\b/g,
+				reres,
+				lastindex = 0;
+			while ((reres = decklink.exec(data.msg))) {
+				if (reres.index !== lastindex)
+					text.push(data.msg.slice(lastindex, reres.index));
+				let notlink = false;
+				for (let i = 2; i < reres[0].length; i += 5) {
+					const code = parseInt(reres[0].substr(i, 3), 32);
+					if (
+						!Cards.Codes[code] &&
+						!OrigCards.Codes[code] &&
+						etgutil.fromTrueMark(code) === -1
+					) {
+						notlink = true;
+						break;
+					}
 				}
+				if (notlink) {
+					lastindex = reres.index;
+					continue;
+				}
+				text.push(
+					<a href={`deck/${reres[0]}`} target="_blank">
+						{reres[0]}
+					</a>,
+				);
+				lastindex = reres.index + reres[0].length;
 			}
-			if (notlink) {
-				lastindex = reres.index;
-				continue;
-			}
-			text.push(
-				<a href={`deck/${reres[0]}`} target="_blank">
-					{reres[0]}
-				</a>,
-			);
-			lastindex = reres.index + reres[0].length;
-		}
-		if (lastindex !== data.msg.length) text.push(data.msg.slice(lastindex));
+			if (lastindex !== data.msg.length) text.push(data.msg.slice(lastindex));
+			return text;
+		};
 		store.chat(
 			() => (
 				<div

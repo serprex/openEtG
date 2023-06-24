@@ -53,31 +53,12 @@ function Rect(props) {
 	);
 }
 
-const CostRewardHeadersText = (
-	<>
-		<span
-			style={{
-				position: 'absolute',
-				top: '24px',
-				right: '114px',
-			}}>
-			Cost
-		</span>
-		<span
-			style={{
-				position: 'absolute',
-				top: '24px',
-				right: '4px',
-			}}>
-			Reward
-		</span>
-	</>
-);
 function CostRewardHeaders(props) {
 	return (
 		<Rect x={props.x} y={props.y} wid={props.wid} hei={props.hei}>
 			{props.children}
-			{CostRewardHeadersText}
+			<span style="position:absolute;top:24px;right:114px">Cost</span>
+			<span style="position:absolute;top:24px;right:4px">Reward</span>
 		</Rect>
 	);
 }
@@ -102,11 +83,7 @@ function CostText(props) {
 	);
 }
 function TitleText(props) {
-	return (
-		<div style={{ 'font-size': '20px', 'text-align': 'center' }}>
-			{props.text}
-		</div>
-	);
+	return <div style="font-size:20px;text-align:center">{props.text}</div>;
 }
 function AiButton({ name, onClick, onMouseOver, y, lv }) {
 	return (
@@ -238,7 +215,7 @@ export default function MainMenu(props) {
 
 	const changeFunc = () => {
 		if (newpass.value === newpass2.value) {
-			sock.userEmit('passchange', { p: newpass() });
+			sock.userEmit('passchange', { p: newpass.value });
 			setChangepass(false);
 		} else {
 			store.chatMsg('Passwords do not match', 'System');
@@ -298,26 +275,18 @@ export default function MainMenu(props) {
 							setTipNumber(newTipNumber);
 							setTip(tipjar[newTipNumber]);
 						}}
-						style={{
-							position: 'absolute',
-							right: '2px',
-							bottom: '2px',
-						}}
+						style="position:absolute;right:2px;bottom:2px"
 					/>
 				</Rect>
 				<input
 					type="button"
 					value="Settings"
-					style={{
-						position: 'absolute',
-						left: '620px',
-						top: '558px',
-					}}
+					style="position:absolute;left:620px;top:558px"
 					onClick={() => {
 						setSettings(settings => !settings);
 						setChangepass(false);
-						setNewpass('');
-						setNewpass2('');
+						if (newpass) newpass.value = '';
+						if (newpass2) newpass2.value = '';
 					}}
 				/>
 				<Rect x={86} y={92} wid={196} hei={120}>
@@ -332,12 +301,7 @@ export default function MainMenu(props) {
 				<Rect x={304} y={380} wid={292} hei={130}>
 					<TitleText text="Miscellaneous" />
 					<div>
-						<div
-							style={{
-								display: 'inline-block',
-								width: '49%',
-								'text-align': 'center',
-							}}>
+						<div style="display:inline-block;width:49%;text-align:center">
 							<input
 								type="button"
 								value="Colosseum"
@@ -347,12 +311,7 @@ export default function MainMenu(props) {
 								)}
 							/>
 						</div>
-						<div
-							style={{
-								display: 'inline-block',
-								width: '49%',
-								'text-align': 'center',
-							}}>
+						<div style="display:inline-block;width:49%;text-align:center">
 							<input
 								type="button"
 								value="Quests"
@@ -361,16 +320,8 @@ export default function MainMenu(props) {
 							/>
 						</div>
 					</div>
-					<div
-						style={{
-							'margin-top': '4px',
-						}}>
-						<div
-							style={{
-								display: 'inline-block',
-								width: '49%',
-								'text-align': 'center',
-							}}>
+					<div style="margin-top:4px">
+						<div style="display:inline-block;width:49%;text-align:center">
 							<input
 								type="button"
 								value="Arena Deck"
@@ -378,12 +329,7 @@ export default function MainMenu(props) {
 								onMouseOver={mkSetTip('Check how your arena decks are doing')}
 							/>
 						</div>
-						<div
-							style={{
-								display: 'inline-block',
-								width: '49%',
-								'text-align': 'center',
-							}}>
+						<div style="display:inline-block;width:49%;text-align:center">
 							<input
 								type="button"
 								value="Custom"
@@ -396,16 +342,8 @@ export default function MainMenu(props) {
 							/>
 						</div>
 					</div>
-					<div
-						style={{
-							'margin-top': '4px',
-						}}>
-						<div
-							style={{
-								display: 'inline-block',
-								width: '49%',
-								'text-align': 'center',
-							}}>
+					<div style="margin-top:4px">
+						<div style="display:inline-block;width:49%;text-align:center">
 							<input
 								type="button"
 								value="Legacy"
@@ -428,11 +366,7 @@ export default function MainMenu(props) {
 							<input
 								placeholder="Chat"
 								onKeyDown={parseChat}
-								style={{
-									position: 'absolute',
-									left: '99px',
-									top: '532px',
-								}}
+								style="position:absolute;left:99px;top:532px"
 							/>
 						</>
 					)
@@ -444,9 +378,9 @@ export default function MainMenu(props) {
 						value="Wealth T60"
 						onClick={() => store.doNav(import('./WealthTop.jsx'))}
 						onMouseOver={mkSetTip("See who's collected the most wealth")}
-						style={{ 'margin-left': '25%' }}
+						style="margin-left:25%"
 					/>
-					<div style={{ 'margin-top': '4px' }}>{leadc}</div>
+					<div style="margin-top:4px">{leadc}</div>
 				</Rect>
 				<CostRewardHeaders x={304} y={120} wid={292} hei={240}>
 					<TitleText text="Battle" />
@@ -510,11 +444,7 @@ export default function MainMenu(props) {
 						value="Editor"
 						onClick={() => store.doNav(import('./DeckEditor.jsx'))}
 						onMouseOver={mkSetTip('Edit & manage your decks')}
-						style={{
-							position: 'absolute',
-							left: '14px',
-							top: '108px',
-						}}
+						style="position:absolute;left:14px;top:108px"
 					/>
 					<LabelText
 						text={`Deck: ${rx.user?.selectedDeck}`}
@@ -526,7 +456,7 @@ export default function MainMenu(props) {
 							'margin-left': '16px',
 						}}
 					/>
-					<div style={{ 'text-align': 'center' }}>{quickslots}</div>
+					<div style="text-align:center">{quickslots}</div>
 					<input
 						type="button"
 						value="Shop"
@@ -534,22 +464,14 @@ export default function MainMenu(props) {
 						onMouseOver={mkSetTip(
 							'Buy booster packs which contain cards from the elements you choose',
 						)}
-						style={{
-							position: 'absolute',
-							left: '14px',
-							top: '132px',
-						}}
+						style="position:absolute;left:14px;top:132px"
 					/>
 					<input
 						type="button"
 						value="Upgrade"
 						onClick={() => store.doNav(import('./Upgrade.jsx'))}
 						onMouseOver={mkSetTip('Upgrade or sell cards')}
-						style={{
-							position: 'absolute',
-							left: '102px',
-							top: '108px',
-						}}
+						style="position:absolute;left:102px;top:108px"
 					/>
 					<input
 						type="button"
@@ -558,11 +480,7 @@ export default function MainMenu(props) {
 						onMouseOver={mkSetTip(
 							"Put up cards for sale & review other players' offers",
 						)}
-						style={{
-							position: 'absolute',
-							left: '102px',
-							top: '132px',
-						}}
+						style="position:absolute;left:102px;top:132px"
 					/>
 				</Rect>
 				<Rect x={616} y={300} wid={206} hei={130}>
@@ -581,21 +499,13 @@ export default function MainMenu(props) {
 							if (name) store.doNav(import('./Library.jsx'), { name });
 						}}
 						onMouseOver={mkSetTip('See exactly what cards you or others own')}
-						style={{
-							position: 'absolute',
-							left: '112px',
-							top: '64px',
-						}}
+						style="position:absolute;left:112px;top:64px"
 					/>
 					<input
 						type="button"
 						value="PvP"
 						onClick={() => sock.sendChallenge(foename())}
-						style={{
-							position: 'absolute',
-							left: '10px',
-							top: '88px',
-						}}
+						style="position:absolute;left:10px;top:88px"
 					/>
 					<input
 						type="button"
@@ -611,11 +521,7 @@ export default function MainMenu(props) {
 							store.doNav(import('./Trade.jsx'), { foe: foename() });
 						}}
 						onMouseOver={mkSetTip('Trade cards/$ with another player')}
-						style={{
-							position: 'absolute',
-							left: '10px',
-							top: '64px',
-						}}
+						style="position:absolute;left:10px;top:64px"
 					/>
 					<input
 						type="button"
@@ -626,11 +532,7 @@ export default function MainMenu(props) {
 							});
 						}}
 						onMouseOver={mkSetTip('Redeem a reward code')}
-						style={{
-							position: 'absolute',
-							left: '112px',
-							top: '88px',
-						}}
+						style="position:absolute;left:112px;top:88px"
 					/>
 				</Rect>
 				{typeof kongregateAPI === 'undefined' && (
@@ -639,11 +541,7 @@ export default function MainMenu(props) {
 						value="Logout"
 						onClick={logout}
 						onMouseOver={mkSetTip('Click here to log out')}
-						style={{
-							position: 'absolute',
-							left: '744px',
-							top: '558px',
-						}}
+						style="position:absolute;left:744px;top:558px"
 					/>
 				)}
 				{settings() && (
@@ -656,12 +554,7 @@ export default function MainMenu(props) {
 									onKeyPress={e => {
 										if (e.which === 13) changeFunc();
 									}}
-									style={{
-										position: 'absolute',
-										left: '136px',
-										top: '4px',
-										width: '128px',
-									}}
+									style="position:absolute;left:136px;top:4px;width:128px"
 								/>
 								<input
 									placeholder="Confirm New"
@@ -669,23 +562,13 @@ export default function MainMenu(props) {
 									onKeyPress={e => {
 										if (e.which === 13) changeFunc();
 									}}
-									style={{
-										position: 'absolute',
-										left: '136px',
-										top: '32px',
-										width: '128px',
-									}}
+									style="position:absolute;left:136px;top:32px;width:128px"
 								/>
 								<input
 									type="button"
 									value="Change Password"
 									onClick={changeFunc}
-									style={{
-										position: 'absolute',
-										left: '8px',
-										top: '8px',
-										width: '120px',
-									}}
+									style="position:absolute;left:8px;top:8px;width:120px"
 								/>
 								<input
 									type="button"
@@ -695,12 +578,7 @@ export default function MainMenu(props) {
 										newpass.value = '';
 										newpass2.value = '';
 									}}
-									style={{
-										position: 'absolute',
-										left: '8px',
-										top: '32px',
-										width: '120px',
-									}}
+									style="position:absolute;left:8px;top:32px;width:120px"
 								/>
 							</>
 						) : (
@@ -708,20 +586,10 @@ export default function MainMenu(props) {
 								type="button"
 								value="Change Password"
 								onClick={() => setChangepass(true)}
-								style={{
-									position: 'absolute',
-									left: '8px',
-									top: '8px',
-									width: '120px',
-								}}
+								style="position:absolute;left:8px;top:8px;width:120px"
 							/>
 						)}
-						<label
-							style={{
-								position: 'absolute',
-								left: '136px',
-								top: '88px',
-							}}>
+						<label style="position:absolute;left:136px;top:88px">
 							<input
 								type="checkbox"
 								checked={!!rx.opts.enableSound}
@@ -732,12 +600,7 @@ export default function MainMenu(props) {
 							/>
 							Enable sound
 						</label>
-						<label
-							style={{
-								position: 'absolute',
-								left: '136px',
-								top: '53px',
-							}}>
+						<label style="position:absolute;left:136px;top:53px">
 							<input
 								type="checkbox"
 								checked={!!rx.opts.enableMusic}
@@ -748,12 +611,7 @@ export default function MainMenu(props) {
 							/>
 							Enable music
 						</label>
-						<label
-							style={{
-								position: 'absolute',
-								left: '8px',
-								top: '53px',
-							}}>
+						<label style="position:absolute;left:8px;top:53px">
 							<input
 								type="checkbox"
 								checked={!!rx.opts.hideMainchat}
@@ -761,12 +619,7 @@ export default function MainMenu(props) {
 							/>
 							Hide mainchat
 						</label>
-						<label
-							style={{
-								position: 'absolute',
-								left: '8px',
-								top: '88px',
-							}}>
+						<label style="position:absolute;left:8px;top:88px">
 							<input
 								type="checkbox"
 								checked={!!rx.opts.hideRightpane}
@@ -774,12 +627,7 @@ export default function MainMenu(props) {
 							/>
 							Hide rightpane
 						</label>
-						<label
-							style={{
-								position: 'absolute',
-								left: '8px',
-								top: '123px',
-							}}>
+						<label style="position:absolute;left:8px;top:123px">
 							<input
 								type="checkbox"
 								checked={!!rx.opts.disableTut}
@@ -787,12 +635,7 @@ export default function MainMenu(props) {
 							/>
 							Hide help
 						</label>
-						<label
-							style={{
-								position: 'absolute',
-								left: '136px',
-								top: '123px',
-							}}>
+						<label style="position:absolute;left:136px;top:123px">
 							<input
 								type="checkbox"
 								checked={!!rx.opts.lofiArt}
@@ -800,12 +643,7 @@ export default function MainMenu(props) {
 							/>
 							Lofi Art
 						</label>
-						<span
-							style={{
-								position: 'absolute',
-								left: '8px',
-								top: '158px',
-							}}>
+						<span style="position:absolute;left:8px;top:158px">
 							Play by play
 							<label>
 								<input
@@ -838,11 +676,11 @@ export default function MainMenu(props) {
 								Off
 							</label>
 						</span>
-						<label style={{ position: 'absolute', left: '8px', top: '193px' }}>
+						<label style="position:absolute;left:8px;top:193px">
 							Expected Damage Samples {expectedDamageSamples()}
 							<input
 								type="range"
-								style={{ width: '272px' }}
+								style="width:272px"
 								min={1}
 								max={5}
 								value={expectedDamageSamples()}
