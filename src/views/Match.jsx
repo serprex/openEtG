@@ -221,15 +221,7 @@ function PagedModal(props) {
 	return (
 		<div
 			class="bgbox"
-			style={{
-				'white-space': 'pre-wrap',
-				'z-index': '9',
-				position: 'absolute',
-				left: '450px',
-				top: '300px',
-				'max-width': '900px',
-				transform: 'translate(-50%,-50%)',
-			}}>
+			style="white-space:pre-wrap;z-index:9;position:absolute;left:450px;top:300px;max-width:900px;transform:translate(-50%,-50%)">
 			<div>
 				<input
 					value="Prev"
@@ -1203,7 +1195,8 @@ export default function Match(props) {
 		});
 
 	const setReplayIndex = idx => {
-		const history = replayhistory();
+		let history = replayhistory();
+		idx = Math.min(idx, props.replay.moves.length);
 		if (idx >= history.length) {
 			history = history.slice();
 			while (idx >= history.length) {
@@ -1843,16 +1836,7 @@ export default function Match(props) {
 				things={things()}
 			/>
 			{game().game.has_flooding() && floodsvg}
-			<div
-				style={{
-					'white-space': 'pre-wrap',
-					'text-align': 'center',
-					position: 'absolute',
-					left: '780px',
-					top: '40px',
-					width: '120px',
-					'z-index': '3',
-				}}>
+			<div style="white-space:pre-wrap;text-align:center;position:absolute;left:780px;top:40px;width:120px;z-index:3">
 				{`${
 					[
 						'Commoner\n',
@@ -1870,16 +1854,7 @@ export default function Match(props) {
 						: '')
 				}${player2().data.name || '-'}`}
 			</div>
-			<span
-				style={{
-					position: 'absolute',
-					left: '780px',
-					top: '560px',
-					width: '120px',
-					'text-align': 'center',
-					'pointer-events': 'none',
-					'white-space': 'pre',
-				}}>
+			<span style="position:absolute;left:780px;top:560px;width:120px;text-align:center;pointer-events:none;white-space:pre">
 				{texts().turntell}
 			</span>
 			<For each={Array.from(effects().effects)}>{fx => untrack(fx)}</For>
@@ -1889,12 +1864,7 @@ export default function Match(props) {
 				<input
 					type="button"
 					value={`History ${foeplays().get(p2id()).length}`}
-					style={{
-						position: 'absolute',
-						left: '2px',
-						top: '270px',
-						'z-index': '2',
-					}}
+					style="position:absolute;left:2px;top:270px;z-index:2"
 					onClick={() => {
 						setTempgame(null);
 						setShowFoeplays(showFoeplays => !showFoeplays);
@@ -1905,12 +1875,7 @@ export default function Match(props) {
 				type="button"
 				value={props.replay ? 'Exit' : resigning() ? 'Confirm' : 'Resign'}
 				onClick={resignClick}
-				style={{
-					position: 'absolute',
-					left: '816px',
-					top: '15px',
-					'z-index': '4',
-				}}
+				style="position:absolute;left:816px;top:15px;z-index:4"
 			/>
 			{!props.replay &&
 				!game().data.spectate &&
@@ -1921,11 +1886,7 @@ export default function Match(props) {
 								type="button"
 								value={texts().endText}
 								onClick={() => endClick()}
-								style={{
-									position: 'absolute',
-									left: '10px',
-									top: '460px',
-								}}
+								style="position:absolute;left:10px;top:460px"
 							/>
 						)}
 						{texts().cancelText && (
@@ -1933,47 +1894,23 @@ export default function Match(props) {
 								type="button"
 								value={texts().cancelText}
 								onClick={cancelClick}
-								style={{
-									position: 'absolute',
-									left: '10px',
-									top: '490px',
-								}}
+								style="position:absolute;left:10px;top:490px"
 							/>
 						)}
 					</>
 				)}
 			{props.replay && (
 				<>
-					<span
-						style={{
-							position: 'absolute',
-							left: '760px',
-							top: '560px',
-						}}>
+					<span style="position:absolute;left:760px;top:560px">
 						{game().game.aieval().toFixed(2)}
 					</span>
-					<span
-						style={{
-							position: 'absolute',
-							left: '760px',
-							top: '520px',
-						}}>
+					<span style="position:absolute;left:760px;top:520px">
 						{replayindex()}
 					</span>
-					<span
-						style={{
-							position: 'absolute',
-							left: '860px',
-							top: '520px',
-						}}>
+					<span style="position:absolute;left:860px;top:520px">
 						{props.replay.moves.length}
 					</span>
-					<span
-						style={{
-							position: 'absolute',
-							left: '760px',
-							top: '540px',
-						}}>
+					<span style="position:absolute;left:760px;top:540px">
 						{game().countPlies()}
 					</span>
 					{!!replayindex() && (
@@ -1981,12 +1918,7 @@ export default function Match(props) {
 							type="button"
 							value="<"
 							onClick={() => setReplayIndex(replayindex() - 1)}
-							style={{
-								position: 'absolute',
-								left: '800px',
-								top: '520px',
-								width: '20px',
-							}}
+							style="position:absolute;left:800px;top:520px;width:20px"
 						/>
 					)}
 					{!game().winner && (
@@ -1994,12 +1926,7 @@ export default function Match(props) {
 							type="button"
 							value=">"
 							onClick={() => setReplayIndex(replayindex() + 1)}
-							style={{
-								position: 'absolute',
-								left: '830px',
-								top: '520px',
-								width: '20px',
-							}}
+							style="position:absolute;left:830px;top:520px;width:20px"
 						/>
 					)}
 					{!!replayindex() && (
@@ -2014,12 +1941,7 @@ export default function Match(props) {
 								}
 								setReplayIndex(Math.max(idx, 0));
 							}}
-							style={{
-								position: 'absolute',
-								left: '800px',
-								top: '540px',
-								width: '20px',
-							}}
+							style="position:absolute;left:800px;top:540px;width:20px"
 						/>
 					)}
 					{!game().winner && (
@@ -2035,12 +1957,7 @@ export default function Match(props) {
 								}
 								setReplayIndex(Math.min(idx, len));
 							}}
-							style={{
-								position: 'absolute',
-								left: '830px',
-								top: '540px',
-								width: '20px',
-							}}
+							style="position:absolute;left:830px;top:540px;width:20px"
 						/>
 					)}
 				</>
