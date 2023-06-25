@@ -63,7 +63,7 @@ export default function OriginalResult({ game }) {
 				c1 = choose(spins),
 				c2 = choose(spins);
 			cardswon.push(
-				<div style={{ opacity: c0 === c1 && c1 === c2 ? undefined : '.3' }}>
+				<div style={c0 === c1 && c1 === c2 ? '' : 'opacity:.3'}>
 					<Components.Card x={16 + i * 300} y={16} card={c0} />
 					<Components.Card x={48 + i * 300} y={48} card={c1} />
 					<Components.Card x={80 + i * 300} y={80} card={c2} />
@@ -96,11 +96,7 @@ export default function OriginalResult({ game }) {
 			<input
 				type="button"
 				value="Exit"
-				style={{
-					position: 'absolute',
-					left: '412px',
-					top: '440px',
-				}}
+				style="position:absolute;left:412px;top:440px"
 				onClick={exitFunc}
 			/>
 			{canRematch() && (
@@ -108,24 +104,14 @@ export default function OriginalResult({ game }) {
 					type="button"
 					value="Rematch"
 					onClick={() => game.data.rematch()}
-					style={{
-						position: 'absolute',
-						left: '412px',
-						top: '490px',
-					}}
+					style="position:absolute;left:412px;top:490px"
 				/>
 			)}
 			{cardswonref}
 			{electrumwonref && (
 				<Components.Text
 					text={`${electrumwonref}$`}
-					style={{
-						'text-align': 'center',
-						width: '900px',
-						position: 'absolute',
-						left: '0px',
-						top: '550px',
-					}}
+					style="text-align:center;width:900px;position:absolute;left:0px;top:550px"
 				/>
 			)}
 		</>

@@ -21,7 +21,7 @@ export default function Rightpane(props) {
 	return (
 		!opts.hideRightpane && (
 			<>
-				<div style={{ 'margin-bottom': '8px' }}>
+				<div style="margin-bottom:8px">
 					<a href="artcredit.htm" target="_blank">
 						Art credits
 					</a>

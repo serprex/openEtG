@@ -72,20 +72,9 @@ function Qecks(props) {
 				value="Bind to #"
 				class={setting() ? 'selectedbutton' : undefined}
 				onClick={() => setSetting(value => !value)}
-				style={{
-					position: 'absolute',
-					left: '200px',
-					top: '8px',
-				}}
+				style="position:absolute;left:200px;top:8px"
 			/>
-			<div
-				style={{
-					position: 'absolute',
-					left: '300px',
-					top: '8px',
-				}}>
-				{buttons}
-			</div>
+			<div style="position:absolute;left:300px;top:8px">{buttons}</div>
 		</>
 	);
 }
@@ -150,13 +139,7 @@ function DeckSelector(props) {
 	return (
 		<div
 			class="bgbox"
-			style={{
-				position: 'absolute',
-				top: '270px',
-				width: '900px',
-				height: '330px',
-				'overflow-y': 'auto',
-			}}>
+			style="position:absolute;top:270px;width:900px;height:330px;overflow-y:auto">
 			<input
 				ref={deckput}
 				autoFocus
@@ -286,7 +269,7 @@ export default function DeckEditor() {
 				setMark={mark => setDeckData({ deck: deckData().deck, mark })}
 			/>
 			<Tutor.Tutor x={4} y={220} panels={Tutor.Editor} />
-			<label style={{ position: 'absolute', left: '536px', top: '238px' }}>
+			<label style="position:absolute;left:536px;top:238px">
 				Deck &nbsp;
 				<input
 					autoFocus
@@ -319,24 +302,20 @@ export default function DeckEditor() {
 					}}
 				/>
 			</label>
-			<div style={{ position: 'absolute', top: '8px', left: '8px' }}>
+			<div style="position:absolute;top:8px;left:8px">
 				{rx.user.selectedDeck ?? ''}
 			</div>
 			<input
 				type="button"
 				value="Decks"
 				onClick={deckModeToggle}
-				style={{
-					position: 'absolute',
-					left: '8px',
-					top: '58px',
-				}}
+				style="position:absolute;left:8px;top:58px"
 			/>
 			<input
 				type="button"
 				value="Revert"
 				onClick={() => setDeckData(processDeck(sock.getDeck()))}
-				style={{ position: 'absolute', left: '8px', top: '162px' }}
+				style="position:absolute;left:8px;top:162px"
 			/>
 			<input
 				type="button"
@@ -345,7 +324,7 @@ export default function DeckEditor() {
 					saveDeck(rx.user.selectedDeck, true);
 					store.doNav(import('../views/MainMenu.jsx'));
 				}}
-				style={{ position: 'absolute', left: '8px', top: '110px' }}
+				style="position:absolute;left:8px;top:110px"
 			/>
 			<Qecks onClick={loadDeck} user={rx.user} />
 			{viewDecks() && (

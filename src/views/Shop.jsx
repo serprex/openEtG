@@ -47,15 +47,7 @@ function PackDisplay(props) {
 	return (
 		<div
 			class="bgbox"
-			style={{
-				position: 'absolute',
-				left: '0px',
-				top: '12px',
-				width: '756px',
-				height: '588px',
-				'z-index': '1',
-				'overflow-y': 'auto',
-			}}>
+			style="position:absolute;left:0px;top:12px;width:756px;height:588px;z-index:1;overflow-y:auto">
 			<Components.Card card={hoverCard()} x={8} y={8} />
 			<For each={children()}>
 				{p => (
@@ -109,7 +101,7 @@ export default function Shop() {
 				store.chat(
 					() => (
 						<a
-							style={{ display: 'block' }}
+							style="display:block"
 							href={`deck/${data.cards}`}
 							target="_blank">
 							{data.cards}
@@ -164,36 +156,16 @@ export default function Shop() {
 			<Components.Box x={768} y={90} width={94} height={184} />
 			<Components.Text
 				text={rx.user.gold + '$'}
-				style={{
-					position: 'absolute',
-					left: '775px',
-					top: '101px',
-				}}
+				style="position:absolute;left:775px;top:101px"
 			/>
 			<Components.Text
 				text={info1()}
-				style={{
-					position: 'absolute',
-					left: '50px',
-					top: '25px',
-				}}
+				style="position:absolute;left:50px;top:25px"
 			/>
-			<span
-				style={{
-					position: 'absolute',
-					left: '50px',
-					top: '50px',
-				}}>
-				{info2()}
-			</span>
+			<span style="position:absolute;left:50px;top:50px">{info2()}</span>
 			<Components.ExitBtn x={775} y={246} />
 			{hasFreePacks() && (
-				<span
-					style={{
-						position: 'absolute',
-						left: '350px',
-						top: '26px',
-					}}>
+				<span style="position:absolute;left:350px;top:26px">
 					{!!rx.user.freepacks[rarity()] &&
 						`Free ${packdata[rarity()].type} packs left: ${
 							rx.user.freepacks[rarity()]
@@ -208,11 +180,7 @@ export default function Shop() {
 						setBuy(true);
 						setCards('');
 					}}
-					style={{
-						position: 'absolute',
-						left: '775px',
-						top: '156px',
-					}}
+					style="position:absolute;left:775px;top:156px"
 				/>
 			)}
 			{buy() && !!~ele() && !!~rarity() && (
@@ -228,22 +196,14 @@ export default function Shop() {
 									Math.min((rx.user.gold / pack.cost) | 0, 99).toString(),
 								);
 							}}
-							style={{
-								position: 'absolute',
-								left: '775px',
-								top: '128px',
-							}}
+							style="position:absolute;left:775px;top:128px"
 						/>
 					)}
 					<input
 						type="button"
 						value="Buy Pack"
 						onClick={buyPack}
-						style={{
-							position: 'absolute',
-							left: '775px',
-							top: '156px',
-						}}
+						style="position:absolute;left:775px;top:156px"
 					/>
 				</>
 			)}

@@ -16,13 +16,7 @@ export default function ArenaTop({ lv }) {
 
 	return (
 		<>
-			<ol
-				class="atopol"
-				style={{
-					position: 'absolute',
-					left: '90px',
-					top: '16px',
-				}}>
+			<ol class="atopol" style="position:absolute;left:90px;top:16px">
 				<For each={top()}>
 					{data => {
 						const card = Cards.Codes[data[5]].asUpped(lv);

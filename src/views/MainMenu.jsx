@@ -66,11 +66,7 @@ function LabelText(props) {
 	return (
 		<Components.Text
 			text={props.text}
-			style={{
-				'font-size': '14px',
-				'pointer-events': 'none',
-				...props.style,
-			}}
+			style={`font-size:14px;pointer-events:none;${props.style ?? ''}`}
 		/>
 	);
 }
@@ -93,44 +89,21 @@ function AiButton({ name, onClick, onMouseOver, y, lv }) {
 				value={name}
 				onClick={onClick}
 				onMouseOver={onMouseOver}
-				style={{
-					position: 'absolute',
-					left: '4px',
-					top: `${y}px`,
-				}}
+				style={`position:absolute;left:4px;top:${y}px`}
 			/>
 			<CostText
 				n={0}
 				lv={lv}
-				style={{
-					position: 'absolute',
-					top: `${y}px`,
-					right: '114px',
-				}}
+				style={`position:absolute;top:${y}px;right:114px`}
 			/>
 			<CostText
 				n={1}
 				lv={lv}
-				style={{
-					position: 'absolute',
-					top: `${y}px`,
-					right: '4px',
-				}}
+				style={`position:absolute;top:${y}px;right:4px`}
 			/>
 		</>
 	);
 }
-
-const chatStyle = {
-	position: 'absolute',
-	left: '72px',
-	top: '228px',
-	width: '226px',
-	height: '300px',
-	background: 'transparent',
-	'font-size': '14px',
-	opacity: '0.6',
-};
 
 function setPbpSetting(e) {
 	store.setOpt('playByPlayMode', e.target.value);
@@ -362,7 +335,10 @@ export default function MainMenu(props) {
 				) : (
 					!rx.opts.hideMainchat && (
 						<>
-							<Chat channel="Main" style={chatStyle} />
+							<Chat
+								channel="Main"
+								style="position:absolute;left:72px;top:228px;width:226px;height:300px;background:transparent;font-size:14px;opacity:0.6"
+							/>
 							<input
 								placeholder="Chat"
 								onKeyDown={parseChat}
@@ -448,13 +424,7 @@ export default function MainMenu(props) {
 					/>
 					<LabelText
 						text={`Deck: ${rx.user?.selectedDeck}`}
-						style={{
-							width: '180px',
-							overflow: 'hidden',
-							'text-overflow': 'ellipsis',
-							'white-space': 'nowrap',
-							'margin-left': '16px',
-						}}
+						style="width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:16px;margin-top:12px"
 					/>
 					<div style="text-align:center">{quickslots}</div>
 					<input

@@ -40,13 +40,7 @@ export default function OriginalLogin() {
 							name: 'Original',
 						});
 					}}>
-					<span
-						style={{
-							position: 'absolute',
-							left: '48px',
-							top: '6px',
-							width: '144px',
-						}}>
+					<span style="position:absolute;left:48px;top:6px;width:144px">
 						{i === 13 ? 'Random' : eleNames[i]}
 					</span>
 				</span>,

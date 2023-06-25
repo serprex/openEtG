@@ -31,23 +31,13 @@ export default function WealthTop(props) {
 		}
 		return (
 			<>
-				<ol
-					class="width400"
-					style={{
-						position: 'absolute',
-						left: '80px',
-						top: '8px',
-					}}>
+				<ol class="width400" style="position:absolute;left:80px;top:8px">
 					{ol1c}
 				</ol>
 				<ol
 					class="width400"
 					start={ol1c.length + 1}
-					style={{
-						position: 'absolute',
-						left: '480px',
-						top: '8px',
-					}}>
+					style="position:absolute;left:480px;top:8px">
 					{ol2c}
 				</ol>
 			</>

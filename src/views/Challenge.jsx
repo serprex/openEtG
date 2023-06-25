@@ -248,7 +248,7 @@ function Group(props) {
 							type="button"
 							value="-"
 							class="editbtn"
-							style={{ float: 'right' }}
+							style="float:right"
 							onClick={props.removeGroup}
 						/>
 					)}

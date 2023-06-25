@@ -37,7 +37,7 @@ const sockEvents = {
 	roll(data) {
 		store.chat(
 			() => (
-				<div style={{ color: '#090' }}>
+				<div style="color:#090">
 					{data.u && <b>{data.u} </b>}
 					{data.A || 1}d{data.X}{' '}
 					<a href={`speed/${data.sum}`} target="_blank">
@@ -178,7 +178,7 @@ const sockEvents = {
 	challenge(data) {
 		store.chat(() => (
 			<div
-				style={{ cursor: 'pointer', color: '#69f' }}
+				style="cursor:pointer;color:#69f"
 				onClick={() => {
 					sendChallenge(data.f, data.set, data.deckcheck);
 				}}>
@@ -192,7 +192,7 @@ const sockEvents = {
 	offertrade(data) {
 		store.chat(() => (
 			<div
-				style={{ cursor: 'pointer', color: '#69f' }}
+				style="cursor:pointer;color:#69f"
 				onClick={() =>
 					store.doNav(import('./views/Trade.jsx'), { foe: data.f })
 				}>

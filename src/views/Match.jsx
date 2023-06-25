@@ -226,7 +226,7 @@ function PagedModal(props) {
 				<input
 					value="Prev"
 					type="button"
-					style={{ visibility: idx() > 0 ? 'visible' : 'hidden' }}
+					style={idx() > 0 ? 'visibility:visible' : 'visibility:hidden'}
 					onClick={() => setIdx(idx => idx - 1)}
 				/>
 				&emsp;
