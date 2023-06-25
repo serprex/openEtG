@@ -32,7 +32,7 @@ export default function Reward(props) {
 		if (rewardList) {
 			sock.setCmds({
 				codedone: data => {
-					const { user } = store.store.state;
+					const { user } = store.state;
 					store.updateUser({
 						pool: etgutil.addcard(user.pool, data.card),
 					});

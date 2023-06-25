@@ -15,7 +15,7 @@ export function run(game) {
 export function mkPremade(level, daily, datafn = null) {
 	const name = level === 1 ? 'mage' : 'demigod';
 	const urdeck = sock.getDeck(),
-		{ user } = store.store.state,
+		{ user } = store.state,
 		minsize = user ? 30 : 10;
 	if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user, minsize)) {
 		store.chatMsg(`Invalid deck`, 'System');
@@ -96,7 +96,7 @@ const randomNames = [
 ];
 export function mkAi(level, daily, datafn = null) {
 	const urdeck = sock.getDeck(),
-		{ user } = store.store.state,
+		{ user } = store.state,
 		minsize = user ? 30 : 10;
 	if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user, minsize)) {
 		store.chatMsg('Invalid deck', 'System');

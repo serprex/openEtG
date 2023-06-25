@@ -743,7 +743,7 @@ export function mkQuestAi(quest, datafn) {
 	const drawpower = quest.drawpower ?? 1;
 	const hp = quest.hp ?? 100;
 	const playerHPstart = quest.urhp ?? 100;
-	const { user } = store.store.state;
+	const { user } = store.state;
 	let urdeck = quest.urdeck;
 	if (!urdeck) {
 		urdeck = sock.getDeck();

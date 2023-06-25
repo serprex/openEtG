@@ -23,7 +23,7 @@ export default function parseChat(e) {
 		let chatinput = e.target,
 			msg = chatinput.value.trim();
 		chatinput.value = '';
-		const storeState = store.store.state,
+		const storeState = store.state,
 			{ user } = storeState;
 		if (msg === '/help') {
 			const cmds = {

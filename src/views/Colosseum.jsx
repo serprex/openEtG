@@ -25,7 +25,7 @@ function mkDaily(type) {
 			dataNext.cost = 0;
 			dataNext.cardreward = '';
 			dataNext.rematch = () => {
-				const { user } = store.store.state;
+				const { user } = store.state;
 				return !(user.daily & (1 << type)) && mkDaily(type);
 			};
 			dataNext.rematchFilter = (game, p1id) => game.winner !== p1id;

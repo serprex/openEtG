@@ -49,7 +49,7 @@ const sockEvents = {
 		);
 	},
 	chat(data) {
-		const state = store.store.state;
+		const state = store.state;
 		if (state.opts.muteall) {
 			if (!data.mode) return;
 		} else if (state.opts.muteguests && data.guest) {
@@ -125,7 +125,7 @@ const sockEvents = {
 		);
 	},
 	foearena(data) {
-		const { user } = store.store.state;
+		const { user } = store.state;
 		const game = new Game({
 			players: shuffle([
 				{
@@ -150,7 +150,7 @@ const sockEvents = {
 			level: 4 + data.lv,
 			cost: userutil.arenaCost(data.lv),
 			rematch: () => {
-				const { user } = store.store.state;
+				const { user } = store.state;
 				if (!Cards.isDeckLegal(etgutil.decodedeck(getDeck()), user)) {
 					store.chatMsg(`Invalid deck`, 'System');
 					return;
@@ -213,7 +213,7 @@ const sockEvents = {
 };
 socket.onmessage = function (msg) {
 	const data = JSON.parse(msg.data),
-		state = store.store.state;
+		state = store.state;
 	if (data.u && state.muted.has(data.u)) return;
 	const func = cmds[data.x] ?? sockEvents[data.x];
 	if (func) func.call(this, data);
@@ -224,7 +224,7 @@ socket.onopen = function () {
 		clearTimeout(attemptTimeout);
 		attemptTimeout = 0;
 	}
-	const { opts } = store.store.state;
+	const { opts } = store.state;
 	if (opts.offline || opts.afk) {
 		emit({
 			x: 'chatus',
@@ -259,7 +259,7 @@ export function emit(data) {
 	}
 }
 export function userEmit(x, data = {}) {
-	const { user } = store.store.state;
+	const { user } = store.state;
 	data.x = 'a';
 	data.z = x;
 	data.u = user.name;
@@ -271,16 +271,16 @@ export function userExec(x, data = {}) {
 	store.userCmd(x, data);
 }
 export function getDeck() {
-	const state = store.store.state;
+	const state = store.state;
 	return state.user.decks[state.user.selectedDeck] ?? '';
 }
 export function getOrigDeck() {
-	const state = store.store.state;
+	const state = store.state;
 	return state.orig.deck;
 }
 export function sendChallenge(foe, orig = false, deckcheck = true) {
 	const deck = orig ? getOrigDeck() : getDeck(),
-		state = store.store.state;
+		state = store.state;
 	if (
 		deckcheck &&
 		!(orig ? OrigCards : Cards).isDeckLegal(

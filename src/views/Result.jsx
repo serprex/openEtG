@@ -375,7 +375,7 @@ export default function Result(props) {
 		});
 		stats[stats.length - 1] = +stats[stats.length - 1].toFixed(3);
 		store.chatMsg(stats.join(), 'Stats');
-		const { opts } = store.store.state;
+		const { opts } = store.state;
 		if (opts.runcount) {
 			if (opts.runcountcur === opts.runcount) {
 				store.chatMsg(`${opts.runcount} runs completed`, 'System');

@@ -131,7 +131,7 @@ export function ExitBtn(props) {
 			type="button"
 			value="Exit"
 			onClick={
-				props.onClick || (() => store.doNav(import('../views/MainMenu.jsx')))
+				props.onClick ?? (() => store.doNav(import('../views/MainMenu.jsx')))
 			}
 			style={{
 				position: 'absolute',

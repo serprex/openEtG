@@ -17,128 +17,36 @@ try {
 sfx.changeSound(opts.enableSound);
 sfx.changeMusic(opts.enableMusic);
 
-class Store {
-	constructor(state) {
-		this.listeners = new Set();
-		this.state = {
-			nav: { view: Login, props: undefined, key: 0 },
-			opts,
-			chat: new Map(),
-			muted: new Set(),
-		};
-	}
+const listeners = new Set();
+export let state = {
+	nav: { view: Login, props: undefined, key: 0 },
+	opts,
+	chat: new Map(),
+	muted: new Set(),
+};
 
-	dispatch(action) {
-		this.state = this.reduce(action);
-		for (const listener of this.listeners) {
-			listener(this.state);
-		}
-	}
-
-	reduce(action) {
-		const state = this.state;
-		switch (action.type) {
-			case 'NAV':
-				return {
-					...state,
-					nav: {
-						view: action.view,
-						props: { ...action.props, key: state.nav.key + 1 },
-						key: state.nav.key + 1,
-					},
-				};
-			case 'OPT':
-				return {
-					...state,
-					opts: { ...state.opts, [action.key]: action.val },
-				};
-			case 'USER_SET':
-				return { ...state, user: action.user };
-			case 'USER_CMD':
-				return {
-					...state,
-					user: {
-						...state.user,
-						...usercmd[action.cmd](action.data, state.user),
-					},
-				};
-			case 'USER_UPDATE':
-				return {
-					...state,
-					user: {
-						...state.user,
-						...action.data,
-					},
-				};
-			case 'ORIG_SET':
-				return { ...state, orig: action.user };
-			case 'ORIG_UPDATE':
-				return {
-					...state,
-					orig: {
-						...state.orig,
-						...action.data,
-					},
-				};
-			case 'ORIG_ADD': {
-				let pool = state.orig.pool;
-				if (action.pool) pool = etgutil.mergedecks(pool, action.pool);
-				if (action.rmpool) pool = etgutil.removedecks(pool, action.rmpool);
-				return {
-					...state,
-					orig: {
-						...state.orig,
-						electrum: state.orig.electrum + (action.electrum | 0),
-						pool,
-					},
-				};
-			}
-			case 'MUTE': {
-				const muted = new Set(state.muted);
-				muted.add(action.name);
-				return { ...state, muted };
-			}
-			case 'UNMUTE': {
-				const muted = new Set(state.muted);
-				muted.delete(action.name);
-				return { ...state, muted };
-			}
-			case 'CHAT_CLEAR': {
-				const chat = new Map(state.chat);
-				chat.delete(action.name);
-				return { ...state, chat };
-			}
-			case 'CHAT': {
-				const chat = new Map(state.chat),
-					name = action.name ?? state.opts.channel,
-					span = action.span;
-				chat.set(name, (chat.get(name) ?? []).concat([span]));
-				if (action.name === 'System')
-					chat.set('Main', (chat.get('Main') ?? []).concat([span]));
-				return { ...state, chat };
-			}
-		}
-		return state;
-	}
-
-	subscribe(cb) {
-		this.listeners.add(cb);
-		return () => this.listeners.delete(cb);
-	}
+function dispatch(newstate) {
+	state = newstate;
+	for (const listener of listeners) listener(state);
 }
-export const store = new Store();
 
-export function doNav(view, props) {
-	view.then(view => store.dispatch({ type: 'NAV', view: view.default, props }));
+function subscribe(cb) {
+	listeners.add(cb);
+	return () => listeners.delete(cb);
+}
+
+export function doNav(view, props = {}) {
+	view.then(view =>
+		dispatch({
+			...state,
+			nav: { view: view.default, props, key: state.nav.key + 1 },
+		}),
+	);
 }
 
 export function setOptTemp(key, val) {
 	if (hasLocalStorage && !val) delete localStorage[key];
-	store.dispatch({
-		type: 'OPT',
-		key,
-		val,
-	});
+	dispatch({ ...state, opts: { ...state.opts, [key]: val } });
 }
 
 export function setOpt(key, val) {
@@ -147,45 +55,64 @@ export function setOpt(key, val) {
 }
 
 export function mute(name) {
-	store.dispatch({ type: 'MUTE', name });
+	const muted = new Set(state.muted);
+	muted.add(name);
+	dispatch({ ...state, muted });
 }
 export function unmute(name) {
-	store.dispatch({ type: 'UNMUTE', name });
+	const muted = new Set(state.muted);
+	muted.delete(name);
+	dispatch({ ...state, muted });
 }
 export function clearChat(name) {
-	store.dispatch({ type: 'CHAT_CLEAR', name });
+	const chat = new Map(state.chat);
+	chat.delete(name);
+	dispatch({ ...state, chat });
 }
-export function chat(span, name) {
-	store.dispatch({ type: 'CHAT', span, name });
+export function chat(span, name = state.opts.channel) {
+	const chat = new Map(state.chat);
+	chat.set(name, (chat.get(name) ?? []).concat([span]));
+	if (name === 'System')
+		chat.set('Main', (chat.get('Main') ?? []).concat([span]));
+	dispatch({ ...state, chat });
 }
 export function chatMsg(msg, name) {
-	store.dispatch({
-		type: 'CHAT',
-		span: () => <div>{msg}</div>,
-		name,
-	});
+	chat(() => <div>{msg}</div>, name);
 }
 export function setUser(user) {
-	store.dispatch({ type: 'USER_SET', user });
+	dispatch({ ...state, user });
 }
 export function userCmd(cmd, data) {
-	store.dispatch({ type: 'USER_CMD', cmd, data });
+	dispatch({
+		...state,
+		user: { ...state.user, ...usercmd[cmd](data, state.user) },
+	});
 }
 export function updateUser(data) {
-	store.dispatch({ type: 'USER_UPDATE', data });
+	dispatch({ ...state, user: { ...state.user, ...data } });
 }
-export function setOrig(user) {
-	store.dispatch({ type: 'ORIG_SET', user });
+export function setOrig(orig) {
+	dispatch({ ...state, orig });
 }
 export function updateOrig(data) {
-	store.dispatch({ type: 'ORIG_UPDATE', data });
+	dispatch({ ...state, orig: { ...state.orig, ...data } });
 }
 export function addOrig(update) {
-	store.dispatch({ type: 'ORIG_ADD', ...update });
+	let pool = state.orig.pool;
+	if (update.pool) pool = etgutil.mergedecks(pool, update.pool);
+	if (update.rmpool) pool = etgutil.removedecks(pool, update.rmpool);
+	return {
+		...state,
+		orig: {
+			...state.orig,
+			electrum: state.orig.electrum + (update.electrum | 0),
+			pool,
+		},
+	};
 }
 
 export function useRx() {
-	const [state, setState] = createStore(store.state);
-	onCleanup(store.subscribe(state => setState(reconcile(state))));
-	return state;
+	const [signal, setState] = createStore(state);
+	onCleanup(subscribe(state => setState(reconcile(state))));
+	return signal;
 }
