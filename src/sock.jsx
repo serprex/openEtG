@@ -18,10 +18,6 @@ let socket = new WebSocket(endpoint),
 	attemptTimeout = 0,
 	pvp = null,
 	cmds = {};
-const guestStyle = 'overflow:auto;font-style:italic;color:#ccc';
-const mode2Style = 'overflow:auto;color:#69f';
-const chatStyle = 'overflow:auto;color:#ddd';
-const defaultStyle = 'overflow:auto';
 const sockEvents = {
 	clear() {
 		store.clearChat('Main');
@@ -109,19 +105,19 @@ const sockEvents = {
 				<div
 					style={
 						data.guest
-							? guestStyle
+							? 'overflow:auto;font-style:italic;color:#ccc'
 							: data.mode === 2
-							? mode2Style
+							? 'overflow:auto;color:#69f'
 							: data.mode !== 1
-							? chatStyle
-							: defaultStyle
+							? 'overflow:auto;color:#ddd'
+							: 'overflow:auto'
 					}>
 					{`${hs}${ms} `}
 					{data.u && <b>{data.u} </b>}
 					{text}
 				</div>
 			),
-			data.mode === 1 ? null : 'Main',
+			data.mode === 1 ? store.state.opts.channel : 'Main',
 		);
 	},
 	foearena(data) {
