@@ -120,7 +120,7 @@ export default function MainMenu(props) {
 	const rx = store.useRx();
 	const foename = () => rx.opts.foename ?? '',
 		expectedDamageSamples = () => rx.opts.expectedDamageSamples || '4';
-	const showcard = () => props.nymph ?? (rx.user?.daily === 0 && rx.user.ocard);
+	const showcard = props.nymph ?? (rx.user?.daily === 0 && rx.user.ocard);
 
 	const [settings, setSettings] = createSignal(false);
 	const [changepass, setChangepass] = createSignal(false);
@@ -170,8 +170,6 @@ export default function MainMenu(props) {
 
 	onCleanup(() => document.removeEventListener('mousemove', resetTip));
 
-	const mkSetTip = tip => () => setTip(tip);
-
 	const arenaAi = i => {
 		const cost = userutil.arenaCost(i);
 		return e => {
@@ -204,7 +202,7 @@ export default function MainMenu(props) {
 				type="button"
 				value={`Arena${i + 1} T30`}
 				onClick={() => store.doNav(import('./ArenaTop.jsx'), { lv: i })}
-				onMouseOver={mkSetTip('See who the top players in arena are right now')}
+				onMouseOver={[setTip, 'See who the top players in arena are right now']}
 				style={{
 					position: 'absolute',
 					left: i ? '92px' : '10px',
@@ -279,9 +277,10 @@ export default function MainMenu(props) {
 								type="button"
 								value="Colosseum"
 								onClick={() => store.doNav(import('./Colosseum.jsx'))}
-								onMouseOver={mkSetTip(
+								onMouseOver={[
+									setTip,
 									'Try some daily challenges in the Colosseum',
-								)}
+								]}
 							/>
 						</div>
 						<div style="display:inline-block;width:49%;text-align:center">
@@ -289,7 +288,7 @@ export default function MainMenu(props) {
 								type="button"
 								value="Quests"
 								onClick={() => store.doNav(import('./Quest.jsx'))}
-								onMouseOver={mkSetTip('Go on an adventure')}
+								onMouseOver={[setTip, 'Go on an adventure']}
 							/>
 						</div>
 					</div>
@@ -299,7 +298,7 @@ export default function MainMenu(props) {
 								type="button"
 								value="Arena Deck"
 								onClick={() => store.doNav(import('./ArenaInfo.jsx'))}
-								onMouseOver={mkSetTip('Check how your arena decks are doing')}
+								onMouseOver={[setTip, 'Check how your arena decks are doing']}
 							/>
 						</div>
 						<div style="display:inline-block;width:49%;text-align:center">
@@ -309,9 +308,10 @@ export default function MainMenu(props) {
 								onClick={() =>
 									store.doNav(import('./Challenge.jsx'), { pvp: false })
 								}
-								onMouseOver={mkSetTip(
+								onMouseOver={[
+									setTip,
 									'Setup custom games vs AI or other players',
-								)}
+								]}
 							/>
 						</div>
 					</div>
@@ -323,15 +323,16 @@ export default function MainMenu(props) {
 								onClick={() =>
 									store.doNav(import('../vanilla/views/Login.jsx'))
 								}
-								onMouseOver={mkSetTip(
+								onMouseOver={[
+									setTip,
 									'A mode attempting to imitate the original EtG',
-								)}
+								]}
 							/>
 						</div>
 					</div>
 				</Rect>
-				{showcard() ? (
-					<Components.Card x={92} y={340} card={Cards.Codes[showcard()]} />
+				{showcard ? (
+					<Components.Card x={92} y={340} card={Cards.Codes[showcard]} />
 				) : (
 					!rx.opts.hideMainchat && (
 						<>
@@ -353,7 +354,7 @@ export default function MainMenu(props) {
 						type="button"
 						value="Wealth T60"
 						onClick={() => store.doNav(import('./WealthTop.jsx'))}
-						onMouseOver={mkSetTip("See who's collected the most wealth")}
+						onMouseOver={[setTip, "See who's collected the most wealth"]}
 						style="margin-left:25%"
 					/>
 					<div style="margin-top:4px">{leadc}</div>
@@ -365,50 +366,55 @@ export default function MainMenu(props) {
 						y={48}
 						lv={0}
 						onClick={() => mkAi.run(mkAi.mkAi(0))}
-						onMouseOver={mkSetTip(
+						onMouseOver={[
+							setTip,
 							'Commoners have no upgraded cards & mostly common cards',
-						)}
+						]}
 					/>
 					<AiButton
 						name="Mage"
 						y={72}
 						lv={1}
 						onClick={() => mkAi.run(mkAi.mkPremade(1))}
-						onMouseOver={mkSetTip(
+						onMouseOver={[
+							setTip,
 							'Mages have preconstructed decks with a couple rares',
-						)}
+						]}
 					/>
 					<AiButton
 						name="Champion"
 						y={96}
 						lv={2}
 						onClick={() => mkAi.run(mkAi.mkAi(2))}
-						onMouseOver={mkSetTip('Champions have some upgraded cards')}
+						onMouseOver={[setTip, 'Champions have some upgraded cards']}
 					/>
 					<AiButton
 						name="Demigod"
 						y={120}
 						lv={3}
 						onClick={() => mkAi.run(mkAi.mkPremade(3))}
-						onMouseOver={mkSetTip(
+						onMouseOver={[
+							setTip,
 							'Demigods are extremely powerful. Come prepared',
-						)}
+						]}
 					/>
 					<AiButton
 						name="Arena 1"
 						onClick={arenaAi(0)}
-						onMouseOver={mkSetTip(
+						onMouseOver={[
+							setTip,
 							'In the arena you will face decks from other players',
-						)}
+						]}
 						y={144}
 						lv={4}
 					/>
 					<AiButton
 						name="Arena 2"
 						onClick={arenaAi(1)}
-						onMouseOver={mkSetTip(
+						onMouseOver={[
+							setTip,
 							'In the arena you will face upgraded decks from other players',
-						)}
+						]}
 						y={168}
 						lv={5}
 					/>
@@ -419,7 +425,7 @@ export default function MainMenu(props) {
 						type="button"
 						value="Editor"
 						onClick={() => store.doNav(import('./DeckEditor.jsx'))}
-						onMouseOver={mkSetTip('Edit & manage your decks')}
+						onMouseOver={[setTip, 'Edit & manage your decks']}
 						style="position:absolute;left:14px;top:108px"
 					/>
 					<LabelText
@@ -431,25 +437,27 @@ export default function MainMenu(props) {
 						type="button"
 						value="Shop"
 						onClick={() => store.doNav(import('./Shop.jsx'))}
-						onMouseOver={mkSetTip(
+						onMouseOver={[
+							setTip,
 							'Buy booster packs which contain cards from the elements you choose',
-						)}
+						]}
 						style="position:absolute;left:14px;top:132px"
 					/>
 					<input
 						type="button"
 						value="Upgrade"
 						onClick={() => store.doNav(import('./Upgrade.jsx'))}
-						onMouseOver={mkSetTip('Upgrade or sell cards')}
+						onMouseOver={[setTip, 'Upgrade or sell cards']}
 						style="position:absolute;left:102px;top:108px"
 					/>
 					<input
 						type="button"
 						value="Bazaar"
 						onClick={() => store.doNav(import('./Bazaar.jsx'))}
-						onMouseOver={mkSetTip(
+						onMouseOver={[
+							setTip,
 							"Put up cards for sale & review other players' offers",
-						)}
+						]}
 						style="position:absolute;left:102px;top:132px"
 					/>
 				</Rect>
@@ -468,7 +476,7 @@ export default function MainMenu(props) {
 							const name = foename() || rx.user.name;
 							if (name) store.doNav(import('./Library.jsx'), { name });
 						}}
-						onMouseOver={mkSetTip('See exactly what cards you or others own')}
+						onMouseOver={[setTip, 'See exactly what cards you or others own']}
 						style="position:absolute;left:112px;top:64px"
 					/>
 					<input
@@ -490,7 +498,7 @@ export default function MainMenu(props) {
 							});
 							store.doNav(import('./Trade.jsx'), { foe: foename() });
 						}}
-						onMouseOver={mkSetTip('Trade cards/$ with another player')}
+						onMouseOver={[setTip, 'Trade cards/$ with another player']}
 						style="position:absolute;left:10px;top:64px"
 					/>
 					<input
@@ -501,7 +509,7 @@ export default function MainMenu(props) {
 								code: foename(),
 							});
 						}}
-						onMouseOver={mkSetTip('Redeem a reward code')}
+						onMouseOver={[setTip, 'Redeem a reward code']}
 						style="position:absolute;left:112px;top:88px"
 					/>
 				</Rect>
@@ -510,7 +518,7 @@ export default function MainMenu(props) {
 						type="button"
 						value="Logout"
 						onClick={logout}
-						onMouseOver={mkSetTip('Click here to log out')}
+						onMouseOver={[setTip, 'Click here to log out']}
 						style="position:absolute;left:744px;top:558px"
 					/>
 				)}
