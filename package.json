@@ -16,7 +16,7 @@
     "prettier": "^2.8.8",
     "solid-js": "^1.7.7",
     "spritesheet-js": "^1.2.8",
-    "webpack": "^5.88.0",
+    "webpack": "^5.88.1",
     "webpack-cli": "^5.1.4"
   },
   "scripts": {

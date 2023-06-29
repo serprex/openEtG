@@ -2399,8 +2399,7 @@ impl Game {
 		}
 		let shield = self.get_shield(id);
 		if shield != 0 {
-			self.set(shield, Stat::casts, 1);
-			self.trigger_data(Event::OwnAttack, shield, 0, &mut data);
+			self.attack(shield, &data);
 		}
 		let weapon = self.get_weapon(id);
 		if weapon != 0 {
@@ -2474,7 +2473,6 @@ impl Game {
 		}
 		let shield = self.get_shield(id);
 		if shield != 0 {
-			self.set(shield, Stat::casts, 1);
 			self.trigger_data(Event::OwnAttack, shield, 0, &mut data);
 		}
 		let weapon = self.get_weapon(id);

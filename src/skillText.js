@@ -777,7 +777,7 @@ for (const [k, v] of [
 	['v_hammer', '1:3 1:4.'],
 	['v_bow', '1:9.'],
 ]) {
-	data[k] = `Gains 1 strength if your mark is ${v}`;
+	data[k] = `Gains ${k === 'hammer' ? 2 : 1} strength if your mark is ${v}`;
 }
 for (const [k, v] of [
 	['pillmat', '1:4 1:6 1:7 1:9'],

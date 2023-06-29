@@ -5099,7 +5099,7 @@ impl Skill {
 			}
 			Self::hammer | Self::v_hammer => {
 				let mark = ctx.get_player(ctx.get_owner(c)).mark;
-				(mark == etg::Gravity || mark == etg::Earth) as i32
+				if mark != etg::Gravity && mark != etg::Earth { 0 } else if ctx.cardset() == card::CardSet::Open { 2 } else { 1 }
 			}
 			Self::hope => ctx
 				.get_player(ctx.get_owner(c))
