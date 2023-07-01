@@ -416,7 +416,7 @@ function SpellDisplayChild(props) {
 	return (
 		<>
 			<Components.CardImage
-				card={props.spell.card}
+				card={props.spell}
 				style={{
 					position: 'absolute',
 					left: '800px',

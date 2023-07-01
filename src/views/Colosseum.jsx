@@ -117,33 +117,20 @@ export default function Colosseum(props) {
 					<input
 						type="button"
 						value="Nymph!"
-						style={{
-							position: 'absolute',
-							left: '50px',
-							top: '280px',
-						}}
+						style="position:absolute;left:50px;top:280px"
 						onClick={() => {
 							const nymph = etg.NymphList[(Math.random() * 12 + 1) | 0];
 							sock.userExec('donedaily', { daily: 6, c: nymph });
 							store.doNav(import('./MainMenu.jsx'), { nymph });
 						}}
 					/>
-					<span
-						style={{
-							position: 'absolute',
-							left: '130px',
-							top: '280px',
-						}}>
+					<span style="position:absolute;left:130px;top:280px">
 						You successfully completed all tasks.
 					</span>
 				</>
 			) : (
 				<Components.Text
-					style={{
-						position: 'absolute',
-						left: '56px',
-						top: '300px',
-					}}
+					style="position:absolute;left:56px;top:300px"
 					text={
 						'Completing any colosseum event contributes to a 5 day reward cycle.\n' +
 						'At the end of the cycle, your streak is reset.\n\n' +

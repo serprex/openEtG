@@ -18,15 +18,7 @@ function PremadePicker({ onClick, onClose }) {
 	return (
 		<div
 			class="bgbox"
-			style={{
-				position: 'absolute',
-				'z-index': '10',
-				left: '75px',
-				top: '100px',
-				height: '400px',
-				width: '750px',
-				overflow: 'auto',
-			}}>
+			style="position:absolute;z-index:10;left:75px;top:100px;height:400px;width:750px;overflow:auto">
 			<input
 				style="display:block"
 				placeholder="Search"
@@ -266,7 +258,10 @@ export default function Challenge(props) {
 	const rx = store.useRx();
 
 	const [groups, setGroups] = createSignal(
-		props.groups ?? [[{ user: rx.user.name, idx: 1, pending: 1 }], []],
+		props.groups ?? [
+			[{ user: rx.user.name, name: rx.user.name, idx: 1, pending: 1 }],
+			[],
+		],
 	);
 	const [editing, setEditing] = createSignal([new Set(), new Set()]);
 	const [replay, setReplay] = createSignal('');

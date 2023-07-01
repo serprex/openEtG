@@ -33,7 +33,7 @@ export function mkPremade(level, daily, datafn = null) {
 			foedata = Decks[name][user[level === 1 ? 'dailymage' : 'dailydg']];
 		}
 	}
-	if (!foedata) foedata = choose(Decks[name]);
+	foedata ??= choose(Decks[name]);
 	const data = {
 		level: level,
 		seed: randint(),
@@ -111,7 +111,7 @@ export function mkAi(level, daily, datafn = null) {
 	store.setOptTemp('aideck', deck);
 
 	const data = {
-		level: level,
+		level,
 		seed: randint(),
 		cost,
 		rematch: () => run(mkAi(level)),
