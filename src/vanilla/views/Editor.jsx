@@ -49,6 +49,7 @@ export default function OriginalEditor(props) {
 		<>
 			<Editor
 				cards={Cards}
+				shiny={false}
 				deck={data().deck}
 				mark={data().mark}
 				pool={pool()}
@@ -61,9 +62,7 @@ export default function OriginalEditor(props) {
 				}
 				setMark={mark =>
 					store.updateOrig({
-						deck:
-							data().deckCode.slice(0, -5) +
-							etgutil.toTrueMarkSuffix(data().mark),
+						deck: data().deckCode.slice(0, -5) + etgutil.toTrueMarkSuffix(mark),
 					})
 				}
 			/>

@@ -101,14 +101,14 @@ export function addOrig(update) {
 	let pool = state.orig.pool;
 	if (update.pool) pool = etgutil.mergedecks(pool, update.pool);
 	if (update.rmpool) pool = etgutil.removedecks(pool, update.rmpool);
-	return {
+	dispatch({
 		...state,
 		orig: {
 			...state.orig,
 			electrum: state.orig.electrum + (update.electrum | 0),
 			pool,
 		},
-	};
+	});
 }
 
 export function useRx() {

@@ -18,7 +18,7 @@ export function Box(props) {
 				width: props.width + 'px',
 				height: props.height + 'px',
 			}}>
-			{props.children || null}
+			{props.children ?? null}
 		</div>
 	);
 }
@@ -295,7 +295,7 @@ export function ElementSelector(props) {
 		children.push(
 			<IconBtn
 				e={'e' + i}
-				x={!i || i & 1 ? props.x : props.x + 36}
+				x={props.x + (!i || i & 1) * 36}
 				y={286 + (((i + 1) / 2) | 0) * 32}
 				click={() => props.onChange(i)}
 			/>,
@@ -460,12 +460,14 @@ export function CardSelector(props) {
 
 	return (
 		<>
-			<input
-				type="button"
-				value="Toggle Shiny"
-				style="position:absolute;left:4px;top:578px"
-				onClick={() => store.setOpt('toggleshiny', !rx.opts.toggleshiny)}
-			/>
+			{props.shiny === undefined && (
+				<input
+					type="button"
+					value="Toggle Shiny"
+					style="position:absolute;left:4px;top:578px"
+					onClick={() => store.setOpt('toggleshiny', !rx.opts.toggleshiny)}
+				/>
+			)}
 			<RaritySelector x={80} y={338} value={rarity()} onChange={setRarity} />
 			<ElementSelector x={4} y={316} value={element()} onChange={setElement} />
 			<CardSelectorCore
@@ -474,7 +476,7 @@ export function CardSelector(props) {
 				y={272}
 				rarity={rarity()}
 				element={element()}
-				shiny={rx.opts.toggleshiny}
+				shiny={props.shiny ?? rx.opts.toggleshiny}
 			/>
 		</>
 	);

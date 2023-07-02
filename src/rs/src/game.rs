@@ -1412,7 +1412,7 @@ impl Game {
 				Skill::growth(2, 2),
 				Skill::growth(2, 0),
 				Skill::poisonfoe(1),
-				Skill::v_deja,
+				Skill::deja,
 				Skill::v_endow,
 				Skill::v_guard,
 				Skill::v_mitosis,

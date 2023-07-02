@@ -50,6 +50,7 @@ export default function Editor(props) {
 				cardpool={props.pool}
 				cardminus={props.cardMinus}
 				noupped={props.noupped}
+				shiny={props.shiny}
 			/>
 			<input
 				type="button"

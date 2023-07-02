@@ -556,12 +556,10 @@ pub enum Skill {
 	v_bravery,
 	v_burrow,
 	v_butterfly,
-	v_chimera,
 	v_cold,
 	v_cpower,
 	v_cseed,
 	v_dagger,
-	v_deja,
 	v_dessication,
 	v_destroy,
 	v_disfield,
@@ -615,25 +613,21 @@ pub enum Skill {
 	v_nymph,
 	v_obsession,
 	v_pandemonium,
-	v_parallel,
 	v_phoenix,
 	v_plague,
 	v_platearmor(i16),
-	v_queen,
 	v_readiness,
 	v_rebirth,
 	v_regenerate,
 	v_relic,
 	v_rewind,
 	v_salvage,
-	v_scarab,
 	v_scramble,
 	v_serendipity,
 	v_silence,
 	v_singularity,
 	v_siphon,
 	v_skull,
-	v_skyblitz,
 	v_slow,
 	v_solar,
 	v_sosa,
@@ -642,8 +636,7 @@ pub enum Skill {
 	v_steal,
 	v_steam,
 	v_stoneform,
-	v_storm2,
-	v_storm3,
+	v_storm(i16),
 	v_swarm,
 	v_swarmhp,
 	v_thorn,
@@ -1073,7 +1066,6 @@ impl Skill {
 			Self::v_mutation => Tgt::crea,
 			Self::v_nightmare => Tgt::crea,
 			Self::v_nymph => Tgt::pill,
-			Self::v_parallel => Tgt::crea,
 			Self::v_platearmor(_) => Tgt::crea,
 			Self::v_readiness => Tgt::crea,
 			Self::v_rewind => Tgt::crea,
@@ -1097,7 +1089,8 @@ impl Skill {
 			| Skill::storm(x)
 			| Skill::tempering(x)
 			| Skill::thorn(x)
-			| Skill::v_platearmor(x) => x as i32,
+			| Skill::v_platearmor(x)
+			| Skill::v_storm(x) => x as i32,
 			Skill::summon(x) => x as i32,
 			Skill::quanta(x) => x as i32,
 			Skill::v_drainlife(x) | Skill::v_firebolt(x) | Skill::v_icebolt(x) => x as i32,
@@ -1446,7 +1439,8 @@ impl Skill {
 					}
 				}
 			}
-			Self::chimera | Self::v_chimera => {
+			Self::chimera => {
+				let is_open = ctx.cardset() == card::CardSet::Open;
 				let mut hp = 0;
 				let mut atk = 0;
 				let owner = ctx.get_owner(c);
@@ -1459,11 +1453,7 @@ impl Skill {
 				let chim = ctx.new_thing(
 					card::As(
 						ctx.get(c, Stat::card),
-						if self == Skill::chimera {
-							card::Chimera
-						} else {
-							card::v_Chimera
-						},
+						if is_open { card::Chimera } else { card::v_Chimera },
 					),
 					owner,
 				);
@@ -1471,8 +1461,10 @@ impl Skill {
 				ctx.set(chim, Stat::hp, hp);
 				ctx.set(chim, Stat::atk, atk);
 				ctx.set(chim, Flag::momentum, true);
-				if self == Self::chimera {
+				if is_open {
 					ctx.set(chim, Flag::airborne, true);
+				} else {
+					ctx.rmskill(chim, Event::Cast, Skill::chimera);
 				}
 				ctx.set_kind(chim, Kind::Creature);
 				let crs = Rc::make_mut(&mut ctx.get_player_mut(owner).creatures);
@@ -3101,14 +3093,11 @@ impl Skill {
 				ctx.fx(t, Fx::Paradox);
 				ctx.die(t);
 			}
-			Self::parallel | Self::v_parallel => {
+			Self::parallel => {
 				ctx.fx(t, Fx::Parallel);
-				if self == Self::parallel {
-					if card::IsOf(ctx.get(t, Stat::card), card::Chimera) {
-						return Skill::chimera.proc(ctx, c, t, data);
-					}
-				} else if card::IsOf(ctx.get(t, Stat::card), card::v_Chimera) {
-					return Skill::v_chimera.proc(ctx, c, t, data);
+				let is_open = ctx.cardset() == card::CardSet::Open;
+				if card::IsOf(ctx.get(t, Stat::card), if is_open { card::Chimera } else { card::v_Chimera }) {
+					return Skill::chimera.proc(ctx, c, t, data);
 				}
 				let clone = ctx.cloneinst(t);
 				let owner = ctx.get_owner(c);
@@ -3118,19 +3107,19 @@ impl Skill {
 					let buff = ctx.rng_range(0..25);
 					ctx.buffhp(clone, buff / 5);
 					ctx.incrAtk(clone, buff % 5);
-					if self == Self::parallel {
+					if is_open {
 						ctx.o_mutantactive(clone);
 					} else {
 						ctx.v_mutantactive(clone);
 					}
 				}
-				if self == Self::v_parallel {
+				if !is_open {
 					ctx.set(clone, Stat::casts, 0);
 				}
 				if ctx.get(clone, Flag::voodoo) {
 					let foe = ctx.get_foe(owner);
 					ctx.dmg(foe, ctx.get(clone, Stat::maxhp) - ctx.get(clone, Stat::hp));
-					if self == Self::parallel {
+					if is_open {
 						ctx.poison(foe, ctx.get(clone, Stat::poison));
 						let foeweapon = ctx.get_player(foe).weapon;
 						if foeweapon != 0 {
@@ -3726,7 +3715,7 @@ impl Skill {
 					}
 				}
 			}
-			Self::skyblitz | Self::v_skyblitz => {
+			Self::skyblitz => {
 				let owner = ctx.get_owner(c);
 				ctx.set_quanta(owner, etg::Air, 0);
 				for &cr in ctx.get_player(owner).creatures.clone().iter() {
@@ -4235,17 +4224,13 @@ impl Skill {
 					Skill::v_infect,
 					Skill::lightning,
 					Skill::v_lobotomize,
-					Skill::v_parallel,
+					Skill::parallel,
 					Skill::v_rewind,
 					Skill::snipe,
 					Skill::swave,
 				]) {
 					return sk.proc(ctx, c, t, data);
 				}
-			}
-			Self::v_deja => {
-				ctx.rmskill(c, Event::Cast, Skill::v_deja);
-				Skill::v_parallel.proc(ctx, c, c, data);
 			}
 			Self::v_dessication => {
 				let owner = ctx.get_owner(c);
@@ -4403,7 +4388,7 @@ impl Skill {
 				}
 				if ctx.get(c, Stat::ready) != 0 {
 					ctx.set(c, Stat::casts, 0);
-					Skill::v_parallel.proc(ctx, c, c, data);
+					Skill::parallel.proc(ctx, c, c, data);
 				}
 			}
 			Self::v_heal => {
@@ -4515,18 +4500,18 @@ impl Skill {
 						Skill::v_luciferin,
 					],
 					[
-						Skill::v_queen,
-						Skill::v_queen,
+						Skill::summon(1908),
+						Skill::summon(1908),
 						Skill::snipe,
 						Skill::v_dive,
 						Skill::v_gas,
 						Skill::v_gas,
 					],
 					[
-						Skill::v_scarab,
-						Skill::v_scarab,
-						Skill::v_deja,
-						Skill::v_deja,
+						Skill::summon(2010),
+						Skill::summon(2010),
+						Skill::deja,
+						Skill::deja,
 						Skill::precognition,
 						Skill::precognition,
 					],
@@ -4622,12 +4607,11 @@ impl Skill {
 					Skill::v_heal => 1,
 					Skill::v_endow => 2,
 					Skill::v_luciferin => 4,
-					Skill::v_queen => 2,
+					Skill::summon(_) => 2,
 					Skill::snipe => 2,
 					Skill::v_dive => 2,
 					Skill::v_gas => 2,
-					Skill::v_scarab => 2,
-					Skill::v_deja => 4,
+					Skill::deja => 4,
 					Skill::v_neuro => -2,
 					Skill::precognition => 2,
 					Skill::v_siphon => -1,
@@ -4817,11 +4801,6 @@ impl Skill {
 					ctx.poison(cr, 1);
 				});
 			}
-			Self::v_queen => {
-				let owner = ctx.get_owner(c);
-				let inst = ctx.new_thing(card::As(ctx.get(c, Stat::card), card::v_Firefly), owner);
-				ctx.addCrea(owner, inst);
-			}
 			Self::v_readiness => {
 				ctx.fx(t, Fx::Ready);
 				ctx.set(t, Stat::cast, 0);
@@ -4869,11 +4848,6 @@ impl Skill {
 					let inst = ctx.new_thing(ctx.get(t, Stat::card), owner);
 					ctx.addCard(owner, inst);
 				}
-			}
-			Self::v_scarab => {
-				let owner = ctx.get_owner(c);
-				let inst = ctx.new_thing(card::As(ctx.get(c, Stat::card), card::v_Scarab), owner);
-				ctx.addCrea(owner, inst);
 			}
 			Self::v_scramble => {
 				if ctx.get_kind(t) == Kind::Player && !ctx.sanctified(t) {
@@ -4979,11 +4953,8 @@ impl Skill {
 					}
 				}
 			}
-			Self::v_storm2 => {
-				return Skill::storm(2).proc(ctx, c, ctx.get_foe(ctx.get_owner(c)), data)
-			}
-			Self::v_storm3 => {
-				return Skill::storm(3).proc(ctx, c, ctx.get_foe(ctx.get_owner(c)), data)
+			Self::v_storm(dmg) => {
+				return Skill::storm(dmg).proc(ctx, c, ctx.get_foe(ctx.get_owner(c)), data)
 			}
 			Self::v_swarm => {
 				let hp: i32 = ctx
@@ -5003,7 +4974,7 @@ impl Skill {
 			}
 			Self::v_unburrow => {
 				ctx.set(c, Flag::burrowed, false);
-				ctx.setSkill(c, Event::Cast, &[Skill::burrow]);
+				ctx.setSkill(c, Event::Cast, &[Skill::v_burrow]);
 				ctx.set(c, Stat::cast, 1);
 				*ctx.get_mut(c, Stat::atk) *= 2;
 			}

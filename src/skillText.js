@@ -635,13 +635,10 @@ const data = {
 	v_burrow: 'Burrow this creature. Strength is halved while burrowed.',
 	v_butterfly:
 		'Target something smaller than, or weaker than, 3. Replace target\'s skills with "3:1 Destroy target permanent"',
-	v_chimera:
-		'Combine all your creatures to form a Chimera with momentum & gravity pull.',
 	v_cold: '30% chance to freeze attackers for 3.',
 	v_cpower: 'Target gains 1 to 5 strength. Target gains 1 to 5 hp.',
 	v_cseed: 'A random effect is inflicted to target creature.',
 	v_decrsteam: 'Decrement strength from steam after attack.',
-	v_deja: 'Remove active & summon copy.',
 	v_dessication:
 		"Deal 2 damage to opponent's creatures. Gain 1:7 per damage dealt. Removes cloak",
 	v_destroy: 'Destroy target permanent.',
@@ -708,19 +705,17 @@ const data = {
 	v_nova2:
 		'Gain 2 quanta of each element. If you play two or more of this card in one turn, summon a Singularity on your side.',
 	v_nymph: 'Turn target pillar into a Nymph of same element.',
-	v_obsession: c => `Damage owner ${c.upped ? 13 : 10} on discard`,
+	v_obsession: c => `Damage owner ${c.upped ? 13 : 10} on discard.`,
 	v_pandemonium: c =>
 		`Random effects are inflicted to ${
 			c.upped ? "oppenent's" : 'all'
-		} creatures. Removes cloak`,
-	v_parallel: 'Duplicate target creature.',
+		} creatures. Removes cloak.`,
 	v_phoenix: ['Become an Ash on death.', 'Become a Minor Ash on death.'],
-	v_plague: "Poison foe's creatures. Removes cloak",
+	v_plague: "Poison foe's creatures. Removes cloak.",
 	v_platearmor: x => `Target creature gains 0|${x}.`,
 	v_purify: 'Replace poison statuses with 2 purify. Removes sacrifice.',
-	v_queen: 'Summon a Firefly.',
 	v_readiness:
-		"Target creature's active becomes costless. Skill can be reactivated",
+		"Target creature's active becomes costless. Skill can be reactivated.",
 	v_rebirth: c => `Become a ${c.upped ? 'Minor ' : ''}Phoenix`,
 	v_regenerate: 'Heal owner 5.',
 	v_relic: 'Worthless.',
@@ -728,37 +723,34 @@ const data = {
 		"Remove target creature to top of owner's deck. If target is a Skeleton, transform it into a random creature. If target is a Mummy, transform it into a Pharaoh.",
 	v_salvage: 'Restore permanents destroyed by foe to hand once per turn.',
 	v_salvageoff: 'Become ready to salvage when your next turn starts.',
-	v_scarab: 'Summon a Scarab.',
-	v_scramble: "Randomly scramble foe's quanta on hit",
+	v_scramble: "Randomly scramble foe's quanta on hit.",
 	v_serendipity: c =>
 		`Generate 3 random${
 			c.upped ? ' upgraded' : ''
-		} cards in hand. One will be 1:1`,
+		} cards in hand. One will be 1:1.`,
 	v_silence:
 		'Foe cannot play cards during their next turn, or target creature gains summoning sickness.',
 	v_singularity: 'Not well behaved.',
 	v_siphon: 'Siphon 1:0 from foe as 1:11. Throttled.',
 	v_skull:
 		'Attacking creatures may die & become skeletons. Smaller creatures are more likely to die.',
-	v_skyblitz: 'Dive all own airborne creatures. Consumes remaining 1:9.',
 	v_slow: 'Delay attackers.',
 	v_solar: 'Gain 1:8 per attacker.',
 	v_sosa: c =>
 		`Sacrifice ${
 			c.upped ? 40 : 48
 		}HP. Consume all non 1:2. Invert damage for 2 turns`,
-	v_soulcatch: c => `When a creature dies, gain ${c.upped ? 3 : 2}:2`,
+	v_soulcatch: c => `When a creature dies, gain ${c.upped ? 3 : 2}:2.`,
 	v_sskin: 'Increment maximum HP per 1:4 owned. Heal same.',
 	v_steal: 'Steal target permanent.',
 	v_steam: 'Gain 5|0.',
 	v_stoneform: 'Remove this ability & gain 0|20.',
-	v_storm2: "Deals 2 damage to foe's creatures. Removes cloak",
-	v_storm3: "Deals 3 damage to foe's creatures. Removes cloak",
+	v_storm: x => `Deals ${x} damage to foe's creatures. Removes cloak.`,
 	v_swarm: 'Increment hp per scarab.',
 	v_thorn: '75% chance to poison attackers.',
 	v_upkeep: c => 'Consumes 1:' + c.element,
 	v_virusinfect: 'Sacrifice self & poison target creature.',
-	v_virusplague: "Sacrifice self & poison foe's creatures",
+	v_virusplague: "Sacrifice self & poison foe's creatures.",
 	v_void: "Reduce foe's maximum HP by 2, 3 if mark is 1:11",
 	v_web: 'Target creature loses airborne.',
 	v_wisdom: 'Target gains 4|0. May target immaterial, granting psionic.',

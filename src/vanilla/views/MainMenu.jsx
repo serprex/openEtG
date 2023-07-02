@@ -108,108 +108,66 @@ export default function OriginalMainMenu() {
 	};
 
 	return (
-		<div
-			style={{
-				position: 'absolute',
-				width: '900px',
-				height: '600px',
-			}}>
-			<input type="button" value="AI2" onClick={() => vsAi('ai2', 5, 5, 5)} />
-			<input
-				type="button"
-				value="AI3"
-				onClick={() => vsAi('ai3', 10, 10, 10)}
-			/>
-			<input
-				type="button"
-				value="AI4"
-				onClick={() => vsAi('ai4', 20, 15, 25)}
-			/>
-			<input type="button" value="FG" onClick={() => vsAi('fg', 30, 30, 30)} />
-			<input
-				type="button"
-				value="Editor"
-				onClick={() => store.doNav(import('./Editor.jsx'))}
-			/>
+		<div style="position:absolute;width:900px;height:600px">
+			<div style="display:flex;height:120px;justify-content:space-evenly;align-items:center">
+				<input type="button" value="AI2" onClick={() => vsAi('ai2', 5, 5, 5)} />
+				<input
+					type="button"
+					value="AI3"
+					onClick={() => vsAi('ai3', 10, 10, 10)}
+				/>
+				<input
+					type="button"
+					value="AI4"
+					onClick={() => vsAi('ai4', 20, 15, 25)}
+				/>
+				<input
+					type="button"
+					value="FG"
+					onClick={() => vsAi('fg', 30, 30, 30)}
+				/>
+				<input
+					type="button"
+					value="Editor"
+					onClick={() => store.doNav(import('./Editor.jsx'))}
+				/>
+				<input
+					type="button"
+					value="Bazaar"
+					onClick={() => store.doNav(import('./Bazaar.jsx'))}
+				/>
+			</div>
 			<input
 				type="button"
 				value="PvP"
 				onClick={() => sendChallenge(origfoename(), true)}
-				style={{
-					position: 'absolute',
-					left: '200px',
-					top: '140px',
-				}}
+				style="position:absolute;left:200px;top:140px"
 			/>
 			<input
 				type="button"
 				value="Sandbox PvP"
 				onClick={() => sendChallenge(origfoename(), true, false)}
-				style={{
-					position: 'absolute',
-					left: '200px',
-					top: '170px',
-					width: '96px',
-				}}
+				style="position:absolute;left:200px;top:170px;width:96px"
 			/>
 			<input
 				type="button"
 				value="vs AI"
 				onClick={() => vsAi('custom', 0, 0, 0)}
-				style={{
-					position: 'absolute',
-					left: '200px',
-					top: '200px',
-				}}
+				style="position:absolute;left:200px;top:200px"
 			/>
-			<span
-				style={{
-					position: 'absolute',
-					left: '300px',
-					top: '200px',
-				}}>
+			<span style="position:absolute;left:300px;top:200px">
 				Enter deck as Name to play against it
 			</span>
 			<input
 				placeholder="Name"
 				value={origfoename()}
 				onInput={e => store.setOptTemp('origfoename', e.target.value)}
-				style={{
-					position: 'absolute',
-					left: '300px',
-					top: '140px',
-				}}
-			/>
-			<input
-				type="button"
-				value="Upgrade"
-				onClick={() => store.doNav(import('./Upgrade.jsx'))}
-				style={{
-					position: 'absolute',
-					left: '500px',
-					top: '140px',
-				}}
-			/>
-			<input
-				type="button"
-				value="Bazaar"
-				onClick={() => store.doNav(import('./Bazaar.jsx'))}
-				style={{
-					position: 'absolute',
-					left: '500px',
-					top: '170px',
-				}}
+				style="position:absolute;left:300px;top:140px"
 			/>
 			<Components.ExitBtn x={9} y={140} />
 			<Components.Text
 				text={`${rx.orig.electrum}$`}
-				style={{
-					'font-size': '14px',
-					'pointer-events': 'none',
-					position: 'absolute',
-					left: '8px',
-					top: '160px',
-				}}
+				style="font-size:14px;pointer-events:none;position:absolute;left:8px;top:160px"
 			/>
 		</div>
 	);
