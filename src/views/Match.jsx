@@ -24,6 +24,7 @@ import * as wasm from '../rs/pkg/etg.js';
 import AiWorker from '../AiWorker.js';
 
 const aiWorker = new AiWorker();
+const novaCodes = new Set([1107, 3107, 5107, 7107]);
 
 function updateMap(map, k, f) {
 	return new Map(map).set(k, f(map.get(k)));
@@ -1254,10 +1255,10 @@ export default function Match(props) {
 				}
 			}
 		}
-		if (game.Cards.Names.Relic) {
-			store.doNav(import('../vanilla/views/Result.jsx'), { game });
-		} else {
+		if (game.Cards.cardSet === 'Open') {
 			store.doNav(import('./Result.jsx'), { game, streakback });
+		} else {
+			store.doNav(import('../vanilla/views/Result.jsx'), { game });
 		}
 	};
 
@@ -1443,7 +1444,7 @@ export default function Match(props) {
 		if (
 			!props.noloss &&
 			!game.data.endurance &&
-			!game.Cards.Names.Relic &&
+			game.Cards.cardSet === 'Open' &&
 			(game.data.level !== undefined || isMultiplayer(game))
 		) {
 			streakback = rx.user.streak[game.data.level];
@@ -1598,10 +1599,9 @@ export default function Match(props) {
 								: (pl().getStatus('nova') >= 2 ||
 										pl().getStatus('nova2') >= 1) &&
 								  (pl().id !== p1id() ||
-										pl().handIds.some(id => {
-											const card = game().Cards.Codes[game().get(id, 'card')];
-											return card && card.isOf(game().Cards.Names.Nova);
-										}))
+										pl().handIds.some(id =>
+											novaCodes.has(game().get(id, 'card')),
+										))
 								? 1
 								: null;
 					const expectedDamage = () =>

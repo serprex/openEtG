@@ -28,7 +28,7 @@ function App() {
 
 			let id = 0;
 			for (const handId of player.handIds) {
-				if (game.byId(handId).card.code == ShardList[Earth] + 2000) {
+				if (game.byId(handId).card.code === ShardList[Earth] + 2000) {
 					id = handId;
 					break;
 				}

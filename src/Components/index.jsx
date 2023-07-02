@@ -347,7 +347,7 @@ function CardSelectorColumn(props) {
 					shinyAmount === 0 &&
 					!(
 						card.upped &&
-						!card.Cards.Names.Relic &&
+						card.Cards.cardSet === 'Open' &&
 						(poolCount(props, etgutil.asUpped(code, false)) >=
 							(card.rarity === -1 ? 1 : 6) *
 								(card.upped && card.shiny ? 6 : 1) ||

@@ -5,10 +5,10 @@ import enums from './enum.json' assert { type: 'json' };
 
 export default class Cards {
 	constructor(set) {
+		this.cardSet = set;
 		this.set = wasm.CardSet[set];
 		this.filtercache = [[], [], [], []];
 		this.Codes = [];
-		this.Names = Object.create(null);
 
 		for (const code of wasm.card_codes(this.set)) {
 			for (let shiny = 0; shiny < 2; shiny++) {
@@ -24,8 +24,6 @@ export default class Cards {
 					}
 				}
 			}
-			const name = enums.Card[code];
-			this.Names[name.replace(/\W/g, '')] = this.Codes[code];
 		}
 		for (const fc of this.filtercache) {
 			fc.sort(this.cardCmp, this);
@@ -69,7 +67,7 @@ export default class Cards {
 			return true;
 		}
 
-		if ((!card.upped && !card.shiny) || this.Names.Relic) {
+		if ((!card.upped && !card.shiny) || this.cardSet === 'Original') {
 			return false;
 		}
 

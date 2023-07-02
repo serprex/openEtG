@@ -1,8 +1,8 @@
 import Cards from './Cards.js';
 import OriginalCards from './vanilla/Cards.js';
 
-const AllCards = { Codes: [] };
-Cards.Codes.forEach((card, code) => (AllCards.Codes[code] = card));
-OriginalCards.Codes.forEach((card, code) => (AllCards.Codes[code] = card));
+const Codes = [];
+Cards.Codes.forEach((card, code) => (Codes[code] = card));
+OriginalCards.Codes.forEach((card, code) => (Codes[code] = card));
 
-export default AllCards;
+export default { Codes };

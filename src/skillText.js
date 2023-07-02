@@ -450,7 +450,7 @@ const data = {
 	rage: c => {
 		const n = c.upped ? 6 : 5;
 		let msg = `Target creature gains +${n}|-${n}.`;
-		if (!c.Cards.Names.Relic)
+		if (c.Cards.cardSet === 'Open')
 			msg += ' If target creature is frozen, it loses frozen status.';
 		return msg;
 	},
@@ -805,7 +805,7 @@ const statusText = {
 	poison: (c, inst) =>
 		c === inst
 			? `Enters play with ${c.getStatus('poison')} poison counter${
-					c.getStatus('poison') == 1 ? '' : 's'
+					c.getStatus('poison') === 1 ? '' : 's'
 			  }.`
 			: inst.getStatus('poison') + ' poison',
 	stackable: '',

@@ -82,7 +82,7 @@ export function addcard(deck, card, x = 1) {
 		if (code === card) {
 			const oldcount = parseInt(deck.substr(i, 2), 32);
 			let count = oldcount + x;
-			if (oldcount == 1023 && count >= 1023) continue;
+			if (oldcount === 1023 && count >= 1023) continue;
 			while (count >= 1023) {
 				deck += `vv${encodeCode(card)}`;
 				count -= 1023;
