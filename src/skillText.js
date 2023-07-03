@@ -189,8 +189,11 @@ const data = {
 		'Replaces target creature\'s skills with "When this creature damages a player, that player draws a card. When this creature dies, destroy top two cards of opponent\'s deck."',
 	embezzledeath:
 		"When this creature dies, destroy top two cards of opponent's deck.",
-	empathy:
-		'At the end of your turn, heal 1 for each creature you own. For every 8 creatures you own (rounded down), pay 1:5 at the end of your turn.',
+	empathy: c =>
+		'At the end of your turn, heal 1 for each creature you own.' +
+		(c.Cards.cardSet === 'Open'
+			? ' For every 8 creatures you own (rounded down), pay 1:5 at the end of your turn.'
+			: ''),
 	enchant: 'Target permanent becomes immaterial.',
 	endow:
 		'Gain the strength, skills, & statuses of target weapon. Gain 0|2.\nCannot gain Endow skill.',
@@ -335,7 +338,7 @@ const data = {
 		'Your creatures without skills gain "Gain 1:8 when it attacks."\nHeal yourself 10.\nRemoves cloak.',
 	lycanthropy: 'Remove this ability and gain 5|5 and become nocturnal.',
 	martyr: 'Gains 1|0 for every point of damage this card receives.',
-	mend: 'Heal target creature 10.',
+	mend: c => `Heal target creature ${c.Cards.cardSet === 'Open' ? 10 : 5}.`,
 	metamorph:
 		"Change your mark to target's element.\nIncrease your mark power by 1.",
 	midas:
@@ -539,7 +542,10 @@ const data = {
 		`Sacrifice ${
 			c.upped ? 40 : 48
 		} HP. Consume all non-1:2 quanta. For two turns, damage heals you and healing damages you.`,
-	soulcatch: 'Whenever a creature dies, gain 3:2.',
+	soulcatch: c =>
+		`Whenever a creature dies, gain ${
+			c.cardSet === 'Original' && !c.upped ? 2 : 3
+		}:2.`,
 	spores: c =>
 		`When this creature dies, summon 2 ${c.upped ? 'Toxic ' : ''}Spores.`,
 	sskin:
@@ -626,10 +632,6 @@ const data = {
 		'Absorb 3 quanta per element from target player. Heal 1 per absorbed quantum.',
 	v_bless: 'Target gains 3|3.',
 	v_blockwithcharge: 'Block attack per stack.',
-	v_boneyard: c =>
-		`When a non-Skeleton creature dies, summon a ${
-			c.upped ? '2|2' : '1|1'
-		} Skeleton`,
 	v_bravery:
 		'Foe draws 2, 3 if own mark is 1:6, cards, you draw an equal amount of cards.',
 	v_burrow: 'Burrow this creature. Strength is halved while burrowed.',
@@ -641,7 +643,6 @@ const data = {
 	v_decrsteam: 'Decrement strength from steam after attack.',
 	v_dessication:
 		"Deal 2 damage to opponent's creatures. Gain 1:7 per damage dealt. Removes cloak",
-	v_destroy: 'Destroy target permanent.',
 	v_disfield: 'Absorb damage. Consume 1:0 per damage absorbed.',
 	v_disshield: 'Absorb damage. Consume 1:1 per 3 damage absorbed.',
 	v_divinity: 'Add 24 to maximum health if mark 1:8, otherwise 16 & heal same.',
@@ -654,7 +655,6 @@ const data = {
 	],
 	v_dshield: 'Become immaterial until next turn.',
 	v_earthquake: 'Destroy up to 3 stacks from target permanent.',
-	v_empathy: 'Heal owner per creature owned per turn. Upkeep per 8 creatures.',
 	v_endow: 'Replicate attributes of target weapon.',
 	v_evolve: 'Become an unburrowed Shrieker.',
 	v_fiery: 'Increment damage per 5:6 owned.',
@@ -680,8 +680,6 @@ const data = {
 	v_icebolt: _ =>
 		'Deal 2 damage to target, plus an additional 2 per 10:7 remaining. 25% plus 5% per point of damage chance to freeze target.',
 	v_improve: 'Mutate target creature.',
-	v_infect: 'Poison target creature.',
-	v_ink: 'Summon a Cloak which lasts 1 turn.',
 	v_integrity: 'Combine all shards in hand to form a Shard Golem.',
 	v_liquid:
 		'Target creature is poisoned & skills replaced with "Heal owner per damage dealt"',
@@ -689,7 +687,6 @@ const data = {
 	v_luciferin:
 		'All your creatures without skills gain 1:8 when attacking. Heal self 10.',
 	v_lycanthropy: 'Gain 5|5.',
-	v_mend: 'Heal target creature 5.',
 	v_mitosis: 'Summon a daughter creature.',
 	v_mitosisspell:
 		'Non-weapon creature gains active "Mitosis: Summon a daughter creature" costing target\'s card\'s cost.',
@@ -700,10 +697,6 @@ const data = {
 		'Apply poison on hit, also inflicting neurotoxin. Neurotoxin applies poison per card played by victim. Throttled.',
 	v_nightmare:
 		"Fill foe's hand with copies of target creature's card. Drain 2HP per added card",
-	v_nova:
-		'Gain 1 quanta of each element. If you play three or more of this card in one turn, summon a Singularity on your side.',
-	v_nova2:
-		'Gain 2 quanta of each element. If you play two or more of this card in one turn, summon a Singularity on your side.',
 	v_nymph: 'Turn target pillar into a Nymph of same element.',
 	v_obsession: c => `Damage owner ${c.upped ? 13 : 10} on discard.`,
 	v_pandemonium: c =>
@@ -740,7 +733,6 @@ const data = {
 		`Sacrifice ${
 			c.upped ? 40 : 48
 		}HP. Consume all non 1:2. Invert damage for 2 turns`,
-	v_soulcatch: c => `When a creature dies, gain ${c.upped ? 3 : 2}:2.`,
 	v_sskin: 'Increment maximum HP per 1:4 owned. Heal same.',
 	v_steal: 'Steal target permanent.',
 	v_steam: 'Gain 5|0.',

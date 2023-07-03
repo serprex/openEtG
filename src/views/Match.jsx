@@ -83,18 +83,7 @@ function floodsvg() {
 
 function cloaksvg() {
 	return (
-		<div
-			style={{
-				position: 'absolute',
-				left: '0',
-				top: '0',
-				width: '900px',
-				height: '299px',
-				'background-color': '#000',
-				'z-index': '1',
-				'pointer-events': 'none',
-			}}
-		/>
+		<div style="position:absolute;left:0;top:0;width:900px;height:299px;background-color:#000;z-index:1;pointer-events:none" />
 	);
 }
 

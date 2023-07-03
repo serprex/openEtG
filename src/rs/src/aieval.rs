@@ -182,9 +182,9 @@ fn eval_skill(
 		.iter()
 		.map(|&sk| match sk {
 			Skill::acceleration => 5.0,
-			Skill::accretion => 8.0,
+			Skill::accretion | Skill::v_accretion => 8.0,
 			Skill::adrenaline => 8.0,
-			Skill::aflatoxin => 5.0,
+			Skill::aflatoxin | Skill::v_aflatoxin => 5.0,
 			Skill::aggroskele => 2.0,
 			Skill::alphawolf => {
 				if ctx.get_kind(c) == Kind::Spell {
@@ -203,7 +203,7 @@ fn eval_skill(
 					ctx.trueatk(c) as f32 * -1.5
 				}
 			}
-			Skill::bblood => 7.0,
+			Skill::bblood | Skill::v_bblood => 7.0,
 			Skill::beguilestop => -damage[c],
 			Skill::bellweb => 1.0,
 			Skill::blackhole => ctx
@@ -212,11 +212,11 @@ fn eval_skill(
 				.iter()
 				.map(|&q| cmp::min(q, 3) as f32 / 12.0)
 				.sum(),
-			Skill::bless => 4.0,
+			Skill::bless | Skill::v_bless => 4.0,
 			Skill::bloodmoon => 4.5,
 			Skill::boneyard => 3.0,
 			Skill::bounce => 1.0,
-			Skill::bravery => {
+			Skill::bravery | Skill::v_bravery => {
 				let owner = ctx.get_owner(c);
 				cmp::min(
 					2,
@@ -237,8 +237,8 @@ fn eval_skill(
 				}
 			}
 			Skill::bubbleclear => 3.0,
-			Skill::burrow => 1.0,
-			Skill::butterfly => 12.0,
+			Skill::burrow | Skill::v_burrow => 1.0,
+			Skill::butterfly | Skill::v_butterfly => 12.0,
 			Skill::catapult => 6.0,
 			Skill::chimera => 4.0,
 			Skill::chromastat => (3 + ctx.trueatk(c) + ctx.truehp(c)) as f32 / 3.0,
@@ -246,7 +246,7 @@ fn eval_skill(
 			Skill::corpseexplosion => 1.0,
 			Skill::counter => 3.0,
 			Skill::countimmbur => 1.0,
-			Skill::cpower => 4.0,
+			Skill::cpower | Skill::v_cpower => 4.0,
 			Skill::cseed => 4.0,
 			Skill::cseed2 => 4.0,
 			Skill::creatureupkeep => {
@@ -342,29 +342,29 @@ fn eval_skill(
 					ttatk - ctx.get(c, Stat::dive) as f32 / 1.5
 				}
 			}
-			Skill::divinity => 3.0,
-			Skill::drainlife => 10.0,
+			Skill::divinity | Skill::v_divinity => 3.0,
+			Skill::drainlife | Skill::v_drainlife(_) => 10.0,
 			Skill::draft => 1.0,
 			Skill::drawcopy => 1.0,
 			Skill::drawequip => 2.0,
 			Skill::drawpillar => 1.0,
-			Skill::dryspell => 5.0,
-			Skill::dshield => 4.0,
+			Skill::dryspell | Skill::v_dryspell => 5.0,
+			Skill::dshield | Skill::v_dshield => 4.0,
 			Skill::duality => 4.0,
-			Skill::earthquake => 4.0,
+			Skill::earthquake | Skill::v_earthquake => 4.0,
 			Skill::eatspell => 3.0,
 			Skill::embezzle => 7.0,
-			Skill::empathy | Skill::v_empathy => ctx.count_creatures(ctx.get_owner(c)) as f32,
+			Skill::empathy => ctx.count_creatures(ctx.get_owner(c)) as f32,
 			Skill::enchant => 6.0,
-			Skill::endow => 4.0,
+			Skill::endow | Skill::v_endow => 4.0,
 			Skill::envenom => 3.0,
 			Skill::epidemic => 4.0,
 			Skill::epoch => 2.0,
 			Skill::evolve | Skill::v_evolve => 3.0,
 			Skill::feed => 6.0,
 			Skill::fickle => 3.0,
-			Skill::firebolt => 10.0,
-			Skill::flyingweapon => 7.0,
+			Skill::firebolt | Skill::v_firebolt(_) => 10.0,
+			Skill::flyingweapon | Skill::v_flyingweapon => 7.0,
 			Skill::foedraw => 8.0,
 			Skill::forcedraw => -10.0,
 			Skill::forceplay => 2.0,
@@ -378,7 +378,7 @@ fn eval_skill(
 				}
 			}
 			Skill::fungusrebirth => 1.0,
-			Skill::gas => 5.0,
+			Skill::gas | Skill::v_gas => 5.0,
 			Skill::give => 1.0,
 			Skill::golemhit => {
 				let mut dmg = 0.0;
@@ -417,7 +417,7 @@ fn eval_skill(
 				}
 			}
 			Skill::hasten => (ctx.get_player(ctx.get_owner(c)).deck.len() as f32 / 4.0).min(6.0),
-			Skill::hatch => 4.0,
+			Skill::hatch | Skill::v_hatch => 4.0,
 			Skill::heal => {
 				if ctx.get(ctx.get_foe(ctx.get_owner(c)), Stat::sosa) != 0 {
 					16.0
@@ -433,26 +433,26 @@ fn eval_skill(
 					ctx.trueatk(c)
 				} * -32) as f32
 			}
-			Skill::holylight => 3.0,
-			Skill::hope => 2.0,
-			Skill::icebolt => 10.0,
+			Skill::holylight | Skill::v_holylight => 3.0,
+			Skill::hope | Skill::v_hope => 2.0,
+			Skill::icebolt | Skill::v_icebolt(_) => 10.0,
 			Skill::ignite => 10.0,
 			Skill::immolate(_) => 5.0,
-			Skill::improve => 6.0,
+			Skill::improve | Skill::v_improve => 6.0,
 			Skill::inertia => 2.0,
 			Skill::ink => 3.0,
 			Skill::innovation => 3.0,
-			Skill::integrity => 4.0,
+			Skill::integrity | Skill::v_integrity => 4.0,
 			Skill::jelly => 5.0,
 			Skill::jetstream => 2.5,
 			Skill::lightning => 6.0,
-			Skill::liquid => 5.0,
+			Skill::liquid | Skill::v_liquid => 5.0,
 			Skill::livingweapon => 2.0,
-			Skill::lobotomize => 6.0,
+			Skill::lobotomize | Skill::v_lobotomize => 6.0,
 			Skill::locket => 1.0,
 			Skill::loot => 2.0,
-			Skill::luciferin => 3.0,
-			Skill::lycanthropy => 4.0,
+			Skill::luciferin | Skill::v_luciferin => 3.0,
+			Skill::lycanthropy | Skill::v_lycanthropy => 4.0,
 			Skill::mend => 3.0,
 			Skill::metamorph => 2.0,
 			Skill::midas => 6.0,
@@ -464,8 +464,8 @@ fn eval_skill(
 				(4 + ctx.get_card(ctx.get(c, Stat::card)).cost) as f32
 			}
 			Skill::mitosisspell | Skill::v_mitosisspell => 6.0,
-			Skill::momentum => 2.0,
-			Skill::mutation => 4.0,
+			Skill::momentum | Skill::v_momentum => 2.0,
+			Skill::mutation | Skill::v_mutation => 4.0,
 			Skill::neuro | Skill::v_neuro => {
 				if ctx.get(ctx.get_foe(ctx.get_owner(c)), Flag::neuro) {
 					4.0
@@ -480,7 +480,7 @@ fn eval_skill(
 					2.0
 				}
 			}
-			Skill::nightmare => {
+			Skill::nightmare | Skill::v_nightmare => {
 				let owner = ctx.get_owner(c);
 				let n = ctx
 					.get_player(owner)
@@ -494,7 +494,7 @@ fn eval_skill(
 			Skill::nova => 4.0,
 			Skill::nova2 => 6.0,
 			Skill::nullspell => 4.0,
-			Skill::nymph => 7.0,
+			Skill::nymph | Skill::v_nymph => 7.0,
 			Skill::ouija => 3.0,
 			Skill::pacify => 5.0,
 			Skill::pairproduce => 2.0,
@@ -509,15 +509,15 @@ fn eval_skill(
 						+ quantamap.get(owner, ctx.get_player(ctx.get_foe(owner)).mark)) as f32)
 					.ln()
 			}
-			Skill::pandemonium => 3.0,
+			Skill::pandemonium | Skill::v_pandemonium => 3.0,
 			Skill::pandemonium2 => 4.0,
 			Skill::pandemonium3 => 5.0,
 			Skill::paradox => 5.0,
 			Skill::parallel => 8.0,
 			Skill::patience => 2.0,
-			Skill::phoenix => 3.0,
+			Skill::phoenix | Skill::v_phoenix => 3.0,
 			Skill::photosynthesis => 2.0,
-			Skill::plague => 5.0,
+			Skill::plague | Skill::v_plague => 5.0,
 			Skill::platearmor(x) | Skill::v_platearmor(x) => x as f32,
 			Skill::poison(x) => x as f32,
 			Skill::poisonfoe(x) => x as f32,
@@ -544,7 +544,7 @@ fn eval_skill(
 					6.0
 				}
 			}
-			Skill::readiness => 3.0,
+			Skill::readiness | Skill::v_readiness => 3.0,
 			Skill::reap => 7.0,
 			Skill::rebirth | Skill::v_rebirth => {
 				if card::Upped(ctx.get(c, Stat::card)) {
@@ -565,11 +565,11 @@ fn eval_skill(
 			Skill::regrade => 3.0,
 			Skill::reinforce => 0.5,
 			Skill::ren => 5.0,
-			Skill::rewind => 6.0,
+			Skill::rewind | Skill::v_rewind => 6.0,
 			Skill::ricochet => 2.0,
 			Skill::sabbath => 1.0,
 			Skill::sadism => 5.0,
-			Skill::salvage => 2.0,
+			Skill::salvage | Skill::v_salvage => 2.0,
 			Skill::sanctify => 2.0,
 			Skill::scramble | Skill::v_scramble => {
 				(13 - ctx
@@ -583,22 +583,22 @@ fn eval_skill(
 			Skill::serendipity | Skill::v_serendipity => 4.0,
 			Skill::shtriga => 6.0,
 			Skill::shuffle3 => 7.0,
-			Skill::silence => 1.0,
+			Skill::silence | Skill::v_silence => 1.0,
 			Skill::singularity | Skill::v_singularity => -64.0,
 			Skill::sinkhole => 3.0,
-			Skill::siphon => 4.0,
+			Skill::siphon | Skill::v_siphon => 4.0,
 			Skill::siphonactive => 3.0,
 			Skill::siphonstrength => 4.0,
 			Skill::skyblitz => 10.0,
 			Skill::snipe => 7.0,
-			Skill::sosa => 6.0,
+			Skill::sosa | Skill::v_sosa => 6.0,
 			Skill::soulcatch => 2.0,
 			Skill::spores => 4.0,
-			Skill::sskin => 15.0,
+			Skill::sskin | Skill::v_sskin => 15.0,
 			Skill::stasisdraw => 1.0,
-			Skill::steal => 6.0,
-			Skill::steam => 6.0,
-			Skill::stoneform => 1.0,
+			Skill::steal | Skill::v_steal => 6.0,
+			Skill::steam | Skill::v_steam => 6.0,
+			Skill::stoneform | Skill::v_stoneform => 1.0,
 			Skill::storm(x) | Skill::v_storm(x) | Skill::firestorm(x) => (x * 4) as f32,
 			Skill::summon(FateEgg) => 3.0,
 			Skill::summon(FateEggUp) => 4.0,
@@ -629,7 +629,7 @@ fn eval_skill(
 			Skill::turngolem => (ctx.get(c, Stat::storedpower) / 2) as f32,
 			Skill::unsummon => 1.0,
 			Skill::unsummonquanta => 3.0,
-			Skill::upkeep => -0.5,
+			Skill::upkeep | Skill::v_upkeep => -0.5,
 			Skill::upload => 3.0,
 			Skill::vampire => {
 				(if ctx.get_kind(c) == Kind::Spell {
@@ -653,11 +653,11 @@ fn eval_skill(
 					(ctx.trueatk(c) as f32 - damage[c]) / 1.5
 				}
 			}
-			Skill::virusplague => 1.0,
+			Skill::virusplague | Skill::v_virusplague => 1.0,
 			Skill::void => 5.0,
 			Skill::web | Skill::v_web => 1.0,
 			Skill::wind => ctx.get(c, Stat::storedpower) as f32 / 2.0,
-			Skill::wisdom => 4.0,
+			Skill::wisdom | Skill::v_wisdom => 4.0,
 			Skill::yoink => 4.0,
 			Skill::vengeance => 2.0,
 			Skill::vindicate => 3.0,
@@ -673,7 +673,7 @@ fn eval_skill(
 				ctx.get(c, Stat::charges) as f32
 					/ (1 + ctx.count_creatures(ctx.get_foe(ctx.get_owner(c))) * 2) as f32
 			}
-			Skill::cold => 7.0,
+			Skill::cold | Skill::v_cold => 7.0,
 			Skill::despair => 5.0,
 			Skill::evade100 => {
 				if ctx.get(c, Stat::charges) == 0 && ctx.get_owner(c) == ctx.turn {
@@ -683,7 +683,7 @@ fn eval_skill(
 				}
 			}
 			Skill::evade(_) => 1.0,
-			Skill::firewall => {
+			Skill::firewall | Skill::v_firewall => {
 				4.0 + ctx
 					.get_player(ctx.get_foe(ctx.get_owner(c)))
 					.creatures
@@ -699,88 +699,22 @@ fn eval_skill(
 					9.0
 				}
 			}
-			Skill::skull => 5.0,
-			Skill::slow => 6.0,
+			Skill::skull | Skill::v_skull => 5.0,
+			Skill::slow | Skill::v_slow => 6.0,
 			Skill::solar | Skill::v_solar => {
 				let coq = ctx.get_player(ctx.get_owner(c)).quanta(etg::Light) as f32;
 				5.0 - (4.0 * coq) / (4.0 + coq)
 			}
 			Skill::thorn(chance) => chance as f32 / 15.0,
 			Skill::vend => 1.0,
-			Skill::v_accretion => 8.0,
-			Skill::v_aflatoxin => 5.0,
-			Skill::v_bblood => 7.0,
-			Skill::v_bless => 4.0,
-			Skill::v_boneyard => 3.0,
-			Skill::v_bravery => 3.0,
-			Skill::v_burrow => 1.0,
-			Skill::v_butterfly => 12.0,
-			Skill::v_cpower => 4.0,
-			Skill::v_destroy => 8.0,
-			Skill::v_divinity => 3.0,
-			Skill::v_drainlife(_) => 10.0,
-			Skill::v_dryspell => 5.0,
-			Skill::v_dshield => 4.0,
-			Skill::v_earthquake => 4.0,
-			Skill::v_endow => 4.0,
-			Skill::v_firebolt(_) => 10.0,
-			Skill::v_flyingweapon => 7.0,
+			Skill::v_dessication => 8.0,
 			Skill::v_freedom => (ctx.get(c, Stat::charges) * 5) as f32,
-			Skill::v_gas => 5.0,
 			Skill::v_gratitude => (ctx.get(c, Stat::charges) * 4) as f32,
 			Skill::v_guard => 4.0,
-			Skill::v_hatch => 4.5,
 			Skill::v_heal => 8.0,
-			Skill::v_holylight => 3.0,
-			Skill::v_hope => 2.0,
-			Skill::v_icebolt(_) => 10.0,
-			Skill::v_improve => 6.0,
-			Skill::v_infect => 4.0,
-			Skill::v_integrity => 4.0,
-			Skill::v_liquid => 5.0,
-			Skill::v_lobotomize => 6.0,
-			Skill::v_luciferin => 3.0,
-			Skill::v_lycanthropy => 4.0,
-			Skill::v_mend => 3.0,
-			Skill::v_momentum => 2.0,
-			Skill::v_mutation => 4.0,
-			Skill::v_nightmare => {
-				let owner = ctx.get_owner(c);
-				let n = ctx
-					.get_player(owner)
-					.hand
-					.iter()
-					.map(|&inst| card::IsOf(ctx.get(inst, Stat::card), card::v_Nightmare) as usize)
-					.sum::<usize>();
-				((24 - ctx.get_player(ctx.get_foe(owner)).hand_len()) >> n) as f32
-			}
-			Skill::v_cold => 7.0,
-			Skill::v_firewall => 7.0,
-			Skill::v_nova => 4.0,
-			Skill::v_nova2 => 6.0,
-			Skill::v_nymph => 7.0,
-			Skill::v_pandemonium => 3.0,
-			Skill::v_phoenix => 3.0,
-			Skill::v_plague => 5.0,
-			Skill::v_readiness => 3.0,
 			Skill::v_regenerate => 5.0,
-			Skill::v_rewind => 6.0,
-			Skill::v_salvage => 2.0,
-			Skill::v_silence => 1.0,
-			Skill::v_siphon => 4.0,
-			Skill::v_skull => 5.0,
-			Skill::v_slow => 6.0,
-			Skill::v_sosa => 6.0,
-			Skill::v_soulcatch => 2.0,
-			Skill::v_sskin => 15.0,
-			Skill::v_steal => 6.0,
-			Skill::v_steam => 6.0,
-			Skill::v_stoneform => 1.0,
 			Skill::v_thorn => 5.0,
-			Skill::v_upkeep => -0.5,
-			Skill::v_virusplague => 1.0,
 			Skill::v_void => (ctx.get(c, Stat::charges) * 5) as f32,
-			Skill::v_wisdom => 4.0,
 			_ => 0.0,
 		})
 		.sum()

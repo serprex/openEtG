@@ -76,7 +76,7 @@ export function deck2pool(deck, pool = []) {
 	return pool;
 }
 export function addcard(deck, card, x = 1) {
-	if (!deck) deck = '';
+	deck ||= '';
 	for (let i = 0; i < deck.length; i += 5) {
 		const code = parseInt(deck.substr(i + 2, 3), 32);
 		if (code === card) {

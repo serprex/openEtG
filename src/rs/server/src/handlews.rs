@@ -546,6 +546,8 @@ pub async fn handle_ws(
 									pool: Cardpool::from(sid.0),
 									deck: String::from(sid.1),
 									electrum: 0,
+									oracle: 0,
+									fg: None,
 								};
 								if client.query("insert into user_data (user_id, type_id, name, data) values ($1, 2, $2, $3)", &[&userid, &name, &Json(&userdata)]).await.is_ok() {
 									sendmsg(&tx, &WsResponse::originaldata(&userdata));
@@ -1225,6 +1227,8 @@ pub async fn handle_ws(
 							pool,
 							rmpool,
 							electrum,
+							oracle,
+							fg,
 						} => {
 							if let Ok(trx) = client.transaction().await {
 								if let Ok(row) = trx.query_one("select id, data from user_data where user_id = $1 and type_id = 2 for update", &[&userid]).await {
@@ -1244,6 +1248,16 @@ pub async fn handle_ws(
 											let c = data.pool.0.entry(code as u16).or_default();
 											*c = c.saturating_sub(count as u16);
 										}
+									}
+									if let Some(fg) = fg {
+										if fg == -1 {
+											data.fg = None;
+										} else {
+											data.fg = Some(fg as u16);
+										}
+									}
+									if let Some(oracle) = oracle {
+										data.oracle = oracle;
 									}
 									if trx.execute("update user_data set data = $2 where id = $1", &[&rowid, &Json(data)]).await.is_ok() {
 										trx.commit().await.ok();

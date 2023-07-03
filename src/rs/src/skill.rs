@@ -551,7 +551,6 @@ pub enum Skill {
 	v_blackhole,
 	v_bless,
 	v_blockwithcharge,
-	v_boneyard,
 	v_bow,
 	v_bravery,
 	v_burrow,
@@ -561,7 +560,6 @@ pub enum Skill {
 	v_cseed,
 	v_dagger,
 	v_dessication,
-	v_destroy,
 	v_disfield,
 	v_disshield,
 	v_dive,
@@ -571,7 +569,6 @@ pub enum Skill {
 	v_dshield,
 	v_dshieldoff,
 	v_earthquake,
-	v_empathy,
 	v_endow,
 	v_evolve,
 	v_fiery,
@@ -594,13 +591,11 @@ pub enum Skill {
 	v_hopedr,
 	v_icebolt(u8),
 	v_improve,
-	v_infect,
 	v_integrity,
 	v_liquid,
 	v_lobotomize,
 	v_luciferin,
 	v_lycanthropy,
-	v_mend,
 	v_mitosis,
 	v_mitosisspell,
 	v_momentum,
@@ -608,8 +603,6 @@ pub enum Skill {
 	v_neuro,
 	v_nightmare,
 	v_noluci,
-	v_nova,
-	v_nova2,
 	v_nymph,
 	v_obsession,
 	v_pandemonium,
@@ -631,7 +624,6 @@ pub enum Skill {
 	v_slow,
 	v_solar,
 	v_sosa,
-	v_soulcatch,
 	v_sskin,
 	v_steal,
 	v_steam,
@@ -1046,7 +1038,6 @@ impl Skill {
 			Self::v_butterfly => Tgt::v_butterfly,
 			Self::v_cpower => Tgt::crea,
 			Self::v_cseed => Tgt::crea,
-			Self::v_destroy => Tgt::perm,
 			Self::v_drainlife(_) => Tgt::crea.mix(Tgt::play).or(),
 			Self::v_earthquake => Tgt::pill,
 			Self::v_endow => Tgt::weap,
@@ -1057,10 +1048,8 @@ impl Skill {
 			Self::v_holylight => Tgt::crea.mix(Tgt::play).or(),
 			Self::v_icebolt(_) => Tgt::crea.mix(Tgt::play).or(),
 			Self::v_improve => Tgt::crea,
-			Self::v_infect => Tgt::crea,
 			Self::v_liquid => Tgt::crea,
 			Self::v_lobotomize => Tgt::crea,
-			Self::v_mend => Tgt::crea,
 			Self::v_mitosisspell => Tgt::creacrea,
 			Self::v_momentum => Tgt::crea,
 			Self::v_mutation => Tgt::crea,
@@ -1305,10 +1294,11 @@ impl Skill {
 				ctx.get_player_mut(owner).deck_mut().extend(cards);
 			}
 			Self::boneyard => {
-				if !card::IsOf(ctx.get(t, Stat::card), card::Skeleton) {
+				let skele = if ctx.cardset() == card::CardSet::Open { card::Skeleton } else { card::v_Skeleton };
+				if !card::IsOf(ctx.get(t, Stat::card), skele) {
 					let owner = ctx.get_owner(c);
 					let skele =
-						ctx.new_thing(card::As(ctx.get(c, Stat::card), card::Skeleton), owner);
+						ctx.new_thing(card::As(ctx.get(c, Stat::card), skele), owner);
 					ctx.addCrea(owner, skele);
 				}
 			}
@@ -1688,7 +1678,7 @@ impl Skill {
 					}
 				}
 			}
-			Self::destroy | Self::v_destroy => {
+			Self::destroy => {
 				ctx.fx(t, Fx::Destroy);
 				ctx.destroy(t, Some(data));
 			}
@@ -1883,7 +1873,7 @@ impl Skill {
 				let heal = ctx.count_creatures(owner);
 				ctx.fx(c, Fx::Heal(heal));
 				ctx.dmg(owner, -heal);
-				if !ctx.spend(owner, etg::Life, heal / 8) {
+				if ctx.cardset() == card::CardSet::Open && !ctx.spend(owner, etg::Life, heal / 8) {
 					ctx.set_quanta(owner, etg::Life, 0);
 					ctx.die(c);
 				}
@@ -2803,7 +2793,7 @@ impl Skill {
 				}
 			}
 			Self::mend => {
-				ctx.dmg(t, -10);
+				ctx.dmg(t, if ctx.cardset() == card::CardSet::Open { -10 } else { -5 });
 			}
 			Self::metamorph => {
 				let owner = ctx.get_owner(c);
@@ -2958,7 +2948,8 @@ impl Skill {
 				ctx.incrStatus(owner, Stat::nova, 1);
 				if ctx.get(owner, Stat::nova) >= 3 {
 					let shiny = card::Shiny(ctx.get(c, Stat::card));
-					ctx.transform(c, card::AsShiny(card::Singularity, shiny));
+					let singu = if ctx.cardset() == card::CardSet::Open { card::Singularity } else { card::v_Singularity };
+					ctx.transform(c, card::AsShiny(singu, shiny));
 					ctx.addCrea(owner, c);
 				}
 			}
@@ -2970,9 +2961,10 @@ impl Skill {
 				ctx.incrStatus(owner, Stat::nova2, 1);
 				if ctx.get(owner, Stat::nova2) >= 2 {
 					let shiny = card::Shiny(ctx.get(c, Stat::card));
+					let singu = if ctx.cardset() == card::CardSet::Open { card::Singularity } else { card::v_Singularity };
 					ctx.transform(
 						c,
-						card::AsShiny(card::AsUpped(card::Singularity, true), shiny),
+						card::AsShiny(card::AsUpped(singu, true), shiny),
 					);
 					ctx.addCrea(owner, c);
 				}
@@ -3759,8 +3751,9 @@ impl Skill {
 				}
 			}
 			Self::soulcatch => {
-				ctx.fx(c, Fx::Quanta(3, etg::Death as u8));
-				ctx.spend(ctx.get_owner(c), etg::Death, -3);
+				let amt: i32 = if ctx.cardset() == card::CardSet::Original && !card::Upped(ctx.get(c, Stat::card)) { 2 } else { 3 };
+				ctx.fx(c, Fx::Quanta(amt as u16, etg::Death as u8));
+				ctx.spend(ctx.get_owner(c), etg::Death, -amt);
 			}
 			Self::spores => {
 				let ccard = ctx.get(c, Stat::card);
@@ -4150,7 +4143,7 @@ impl Skill {
 			}
 			Self::v_accretion => {
 				if ctx.get_kind(t) != Kind::Player {
-					Skill::v_destroy.proc(ctx, c, t, data);
+					Skill::destroy.proc(ctx, c, t, data);
 				}
 				ctx.buffhp(c, 15);
 				if ctx.truehp(c) > 45 {
@@ -4176,14 +4169,6 @@ impl Skill {
 					ctx.remove(c);
 				}
 				data.dmg = 0;
-			}
-			Self::v_boneyard => {
-				if !card::IsOf(ctx.get(t, Stat::card), card::v_Skeleton) {
-					let owner = ctx.get_owner(c);
-					let skele =
-						ctx.new_thing(card::As(ctx.get(c, Stat::card), card::v_Skeleton), owner);
-					ctx.addCrea(owner, skele);
-				}
 			}
 			Self::v_bravery => {
 				let owner = ctx.get_owner(c);
@@ -4221,7 +4206,7 @@ impl Skill {
 					Skill::v_freeze,
 					Skill::v_gpullspell,
 					Skill::v_icebolt(0),
-					Skill::v_infect,
+					Skill::poison(1),
 					Skill::lightning,
 					Skill::v_lobotomize,
 					Skill::parallel,
@@ -4282,12 +4267,6 @@ impl Skill {
 					ctx.set(c, Flag::psionic, false);
 					ctx.rmskill(c, Event::Turnstart, Skill::v_dshieldoff);
 				}
-			}
-			Self::v_empathy => {
-				let owner = ctx.get_owner(c);
-				let heal = ctx.count_creatures(owner);
-				ctx.fx(c, Fx::Heal(heal));
-				ctx.dmg(owner, -heal);
 			}
 			Self::v_endow => {
 				ctx.fx(t, Fx::Endow);
@@ -4432,7 +4411,6 @@ impl Skill {
 					ctx.transform(t, card.code as i32);
 				}
 			}
-			Self::v_infect => return Skill::poison(1).proc(ctx, c, t, data),
 			Self::v_integrity => {
 				const shardSkills: [[Skill; 6]; 12] = [
 					[
@@ -4444,7 +4422,7 @@ impl Skill {
 						Skill::v_antimatter,
 					],
 					[
-						Skill::v_infect,
+						Skill::poison(1),
 						Skill::growth(1, 1),
 						Skill::growth(1, 1),
 						Skill::poison(1),
@@ -4479,8 +4457,8 @@ impl Skill {
 						Skill::growth(2, 0),
 						Skill::growth(2, 0),
 						Skill::v_fiery,
-						Skill::v_destroy,
-						Skill::v_destroy,
+						Skill::destroy,
+						Skill::destroy,
 						Skill::rage,
 					],
 					[
@@ -4492,7 +4470,7 @@ impl Skill {
 						Skill::v_nymph,
 					],
 					[
-						Skill::v_mend,
+						Skill::mend,
 						Skill::v_endow,
 						Skill::v_endow,
 						Skill::v_luciferin,
@@ -4588,9 +4566,8 @@ impl Skill {
 					Skill::v_improve => 2,
 					Skill::v_scramble => -2,
 					Skill::v_antimatter => 4,
-					Skill::v_infect => 1,
 					Skill::growth(1, 1) => -4,
-					Skill::poison(_) => -2,
+					Skill::poison(_) => if shmax == 0 { 1 } else { -2 },
 					Skill::v_aflatoxin => 2,
 					Skill::devour => 3,
 					Skill::v_blackhole => 4,
@@ -4599,7 +4576,7 @@ impl Skill {
 					Skill::v_mitosis => 4,
 					Skill::growth(2, 0) => 1,
 					Skill::v_fiery => -3,
-					Skill::v_destroy => 3,
+					Skill::destroy => 3,
 					Skill::rage => 2,
 					Skill::v_steam => 2,
 					Skill::v_freeze => 2,
@@ -4697,9 +4674,6 @@ impl Skill {
 				ctx.incrAtk(c, 5);
 				ctx.get_thing_mut(c).skill.remove(Event::Cast);
 			}
-			Self::v_mend => {
-				ctx.dmg(t, -5);
-			}
 			Self::v_mitosisspell => {
 				ctx.lobo(t);
 				let card = ctx.get_card(ctx.get(t, Stat::card));
@@ -4720,33 +4694,6 @@ impl Skill {
 				}
 			}
 			Self::v_noluci => (),
-			Self::v_nova => {
-				let owner = ctx.get_owner(c);
-				for i in 1..13 {
-					ctx.spend(owner, i, -1);
-				}
-				ctx.incrStatus(owner, Stat::nova, 1);
-				if ctx.get(owner, Stat::nova) >= 3 {
-					let shiny = card::Shiny(ctx.get(c, Stat::card));
-					ctx.transform(c, card::AsShiny(card::v_Singularity, shiny));
-					ctx.addCrea(owner, c);
-				}
-			}
-			Self::v_nova2 => {
-				let owner = ctx.get_owner(c);
-				for i in 1..13 {
-					ctx.spend(owner, i, -2);
-				}
-				ctx.incrStatus(owner, Stat::nova2, 1);
-				if ctx.get(owner, Stat::nova2) >= 2 {
-					let shiny = card::Shiny(ctx.get(c, Stat::card));
-					ctx.transform(
-						c,
-						card::AsShiny(card::AsUpped(card::v_Singularity, true), shiny),
-					);
-					ctx.addCrea(owner, c);
-				}
-			}
 			Self::v_nymph => {
 				ctx.fx(t, Fx::Nymph);
 				let code = ctx.get(t, Stat::card);
@@ -4816,6 +4763,7 @@ impl Skill {
 			}
 			Self::v_regenerate => {
 				if ctx.get(c, Stat::delayed) == 0 {
+					ctx.fx(t, Fx::Heal(5));
 					ctx.dmg(ctx.get_owner(c), -5);
 				}
 			}
@@ -4900,17 +4848,6 @@ impl Skill {
 					ctx.spend(owner, etg::Light, -1);
 				}
 			}
-			Self::v_soulcatch => {
-				ctx.spend(
-					ctx.get_owner(c),
-					etg::Death,
-					if card::Upped(ctx.get(c, Stat::card)) {
-						-3
-					} else {
-						-2
-					},
-				);
-			}
 			Self::v_sskin => {
 				let owner = ctx.get_owner(c);
 				let earth = ctx.get_player(owner).quanta(etg::Earth) as i32;
@@ -4968,7 +4905,7 @@ impl Skill {
 				ctx.set(c, Stat::swarmhp, hp - 1);
 			}
 			Self::v_thorn => {
-				if ctx.get_kind(c) == Kind::Creature && data.dmg > 0 && ctx.rng_ratio(3, 4) {
+				if ctx.get_kind(t) == Kind::Creature && data.dmg > 0 && ctx.rng_ratio(3, 4) {
 					ctx.poison(t, 1);
 				}
 			}

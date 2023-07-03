@@ -153,6 +153,8 @@ pub enum AuthMessage {
 		pool: Option<String>,
 		rmpool: Option<String>,
 		electrum: Option<i16>,
+		fg: Option<i16>,
+		oracle: Option<u32>
 	},
 	roll {
 		#[serde(rename = "A")]
@@ -428,6 +430,10 @@ pub struct LegacyUser {
 	pub pool: Cardpool,
 	pub deck: String,
 	pub electrum: i32,
+	#[serde(default)]
+	pub oracle: u32,
+	#[serde(default)]
+	pub fg: Option<u16>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

@@ -107,6 +107,13 @@ export function addOrig(update) {
 			...state.orig,
 			electrum: state.orig.electrum + (update.electrum | 0),
 			pool,
+			oracle: update.oracle ?? state.orig.oracle,
+			fg:
+				typeof update.fg !== 'number'
+					? state.orig.fg
+					: update.fg === -1
+					? null
+					: update.fg,
 		},
 	});
 }

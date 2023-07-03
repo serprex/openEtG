@@ -148,7 +148,7 @@ const sockEvents = {
 			rematch: () => {
 				const { user } = store.state;
 				if (!Cards.isDeckLegal(etgutil.decodedeck(getDeck()), user)) {
-					store.chatMsg(`Invalid deck`, 'System');
+					store.chatMsg('Invalid deck', 'System');
 					return;
 				}
 				const cost = userutil.arenaCost(data.lv);
@@ -284,7 +284,7 @@ export function sendChallenge(foe, orig = false, deckcheck = true) {
 			orig ? state.orig : state.user,
 		)
 	) {
-		store.chatMsg(`Invalid deck`, 'System');
+		store.chatMsg('Invalid deck', 'System');
 		return;
 	}
 	const msg = {

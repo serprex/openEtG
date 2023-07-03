@@ -41,45 +41,46 @@ export default function OriginalResult({ game }) {
 
 	if (game.winner === player1.id) {
 		const foedecks = game.data.players.filter(pd => !pd.user);
-		if (foedecks.length === 0) return;
-		const foedeck = choose(foedecks),
-			foeDeck = etgutil
+		if (foedecks.length !== 0) {
+			const foedeck = choose(foedecks);
+			const foeDeck = etgutil
 				.decodedeck(foedeck.deck)
 				.map(code => game.Cards.Codes[code])
 				.filter(
 					card => card && !card.isFree() && !card.name.startsWith('Mark of '),
 				);
-		let newpool = '';
-		for (let i = 0; i < game.data.spins; i++) {
-			const spins = [];
-			while (spins.length < 4) {
-				let card = choose(foeDeck);
-				if (card.getStatus('pillar')) card = choose(foeDeck);
-				if (card.rarity === 15 || card.rarity === 20) {
-					card = game.Cards.Codes[1033];
+			let newpool = '';
+			for (let i = 0; i < game.data.spins; i++) {
+				const spins = [];
+				while (spins.length < 4) {
+					let card = choose(foeDeck);
+					if (card.getStatus('pillar')) card = choose(foeDeck);
+					if (card.rarity === 15 || card.rarity === 20) {
+						card = game.Cards.Codes[1033];
+					}
+					spins.push(card);
 				}
-				spins.push(card);
+				const c0 = choose(spins),
+					c1 = choose(spins),
+					c2 = choose(spins);
+				cardswon.push([c0, c1, c2]);
+				if (c0 === c1 && c1 === c2) {
+					newpool = etgutil.addcard(newpool, c0.code);
+				}
 			}
-			const c0 = choose(spins),
-				c1 = choose(spins),
-				c2 = choose(spins);
-			cardswon.push([c0, c1, c2]);
-			if (c0 === c1 && c1 === c2) {
-				newpool = etgutil.addcard(newpool, c0.code);
-			}
-		}
-		electrumwon =
-			((game.data.basereward + game.data.hpreward * (player1.hp / 100)) *
-				(player1.hp === player1.maxhp ? 2 : 1)) |
-			0;
+			electrumwon =
+				((game.data.basereward + game.data.hpreward * (player1.hp / 100)) *
+					(player1.hp === player1.maxhp ? 2 : 1)) |
+				0;
 
-		const update = {
-			electrum: game.data.cost + electrumwon,
-			pool: newpool || undefined,
-		};
-		if (update.electrum || update.pool) {
-			userEmit('origadd', update);
-			store.addOrig(update);
+			const update = {
+				electrum: game.data.cost + electrumwon,
+				pool: newpool || undefined,
+			};
+			if (update.electrum || update.pool) {
+				userEmit('origadd', update);
+				store.addOrig(update);
+			}
 		}
 	}
 

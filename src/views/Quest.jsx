@@ -68,24 +68,15 @@ export default function QuestView(props) {
 			<Components.Text
 				text={
 					questInfo().selectedQuest?.info ??
-					"Click the list items to see the quest lines, & the FIGHT button to challenge them!\nNames in red are the ones you haven't yet completed."
+					"Click list items to see quest lines, & FIGHT button to challenge them!\nNames in red are quests you haven't completed."
 				}
-				style={{
-					position: 'absolute',
-					left: '26px',
-					top: '26px',
-					'max-width': '850px',
-				}}
+				style="position:absolute;left:26px;top:26px;max-width:850px"
 			/>
 			{questInfo().selectedQuest?.key && (
 				<input
 					type="button"
 					value="Fight!"
-					style={{
-						position: 'absolute',
-						left: '8px',
-						top: '120px',
-					}}
+					style="position:absolute;left:8px;top:120px"
 					onClick={() => mkAi.run(Quest.mkQuestAi(questInfo().selectedQuest))}
 				/>
 			)}

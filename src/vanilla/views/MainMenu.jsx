@@ -58,24 +58,52 @@ export default function OriginalMainMenu() {
 	const rx = store.useRx();
 	const origfoename = () => rx.opts.origfoename ?? '';
 
+	let ocard = null;
+	if (rx.orig.oracle !== rx.user.oracle) {
+		const nymph = Math.random() < 0.03;
+		const fg = upto(aiDecks.fg.length);
+		ocard = randomcard(
+			Cards,
+			false,
+			card =>
+				card.name !== 'Relic' &&
+				!card.name.startsWith('Mark of ') &&
+				!card.isFree() &&
+				nymph === etg.NymphList.includes(card.code + 4000),
+		);
+		const update = {
+			pool: etgutil.addcard(rx.orig.pool, ocard.code),
+			oracle: rx.user.oracle,
+			fg,
+		};
+		userEmit('origadd', update);
+		store.addOrig(update);
+	}
+
 	const vsAi = (level, cost, basereward, hpreward) => {
 		if (
 			hpreward > 0 &&
 			!Cards.isDeckLegal(etgutil.decodedeck(rx.orig.deck), rx.orig)
 		) {
-			store.chatMsg(`Invalid deck`, 'System');
+			store.chatMsg('Invalid deck', 'System');
 			return;
+		}
+		if (cost > 0) {
+			const update = { electrum: -cost };
+			userEmit('origadd', update);
+			store.addOrig(update);
 		}
 		const [ainame, aideck] =
 			level === 'custom'
 				? ['Custom', parseDeck(origfoename())]
 				: level === 'ai4'
 				? mkAi4()
+				: level === 'fg' && typeof rx.orig.fg === 'number'
+				? aiDecks.fg[rx.orig.fg]
 				: choose(aiDecks[level]);
-		if (cost > 0) {
-			const update = { electrum: -cost };
-			userEmit('origadd', update);
-			store.addOrig(update);
+		if (rx.orig.fg) {
+			userEmit('origadd', { fg: -1 });
+			store.addOrig({ fg: -1 });
 		}
 		const game = new Game({
 			seed: randint(),
@@ -123,7 +151,9 @@ export default function OriginalMainMenu() {
 				/>
 				<input
 					type="button"
-					value="FG"
+					value={
+						typeof rx.orig.fg === 'number' ? aiDecks.fg[rx.orig.fg][0] : 'FG'
+					}
 					onClick={() => vsAi('fg', 30, 30, 30)}
 				/>
 				<input
@@ -169,6 +199,7 @@ export default function OriginalMainMenu() {
 				text={`${rx.orig.electrum}$`}
 				style="font-size:14px;pointer-events:none;position:absolute;left:8px;top:160px"
 			/>
+			{ocard && <Components.Card y={300} card={ocard} />}
 		</div>
 	);
 }

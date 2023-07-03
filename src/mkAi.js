@@ -18,7 +18,7 @@ export function mkPremade(level, daily, datafn = null) {
 		{ user } = store.state,
 		minsize = user ? 30 : 10;
 	if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user, minsize)) {
-		store.chatMsg(`Invalid deck`, 'System');
+		store.chatMsg('Invalid deck', 'System');
 		return;
 	}
 	const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
