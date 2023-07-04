@@ -152,7 +152,7 @@ pub enum AuthMessage {
 	origadd {
 		pool: Option<String>,
 		rmpool: Option<String>,
-		electrum: Option<i16>,
+		electrum: Option<i32>,
 		fg: Option<i16>,
 		oracle: Option<u32>
 	},

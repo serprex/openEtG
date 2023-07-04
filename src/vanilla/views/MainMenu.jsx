@@ -72,7 +72,7 @@ export default function OriginalMainMenu() {
 				nymph === etg.NymphList.includes(card.code + 4000),
 		);
 		const update = {
-			pool: etgutil.addcard(rx.orig.pool, ocard.code),
+			pool: '01' + etgutil.encodeCode(ocard.code),
 			oracle: rx.user.oracle,
 			fg,
 		};

@@ -1235,7 +1235,7 @@ pub async fn handle_ws(
 									let rowid: i64 = row.get(0);
 									let Json(mut data) = row.get::<usize, Json<LegacyUser>>(1);
 									if let Some(electrum) = electrum {
-										data.electrum = data.electrum.saturating_add(electrum as i32);
+										data.electrum = data.electrum.saturating_add(electrum);
 									}
 									if let Some(pool) = pool {
 										for (code, count) in iterraw(pool.as_bytes()) {

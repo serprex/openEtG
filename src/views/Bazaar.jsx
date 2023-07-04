@@ -1,5 +1,5 @@
 import { createMemo, createSignal, onMount } from 'solid-js';
-import { For } from 'solid-js/web';
+import { For, Show } from 'solid-js/web';
 
 import Cards from '../Cards.js';
 import * as etg from '../etg.js';
@@ -18,39 +18,37 @@ function Order(p) {
 }
 function CardOrders(p) {
 	return (
-		p.bc && (
-			<>
-				<div style="position:absolute;left:100px;top:72px;width:230px;height:192px;color:#4f8">
-					<div>Buys</div>
-					<For each={p.bc.filter(x => x.p > 0 && x.u !== p.username)}>
-						{buy => <Order order={buy} onClick={p.onClickBuy} />}
+		<Show when={p.bc}>
+			<div style="position:absolute;left:100px;top:72px;width:230px;height:192px;color:#4f8">
+				<div>Buys</div>
+				<For each={p.bc?.filter(x => x.p > 0 && x.u !== p.username)}>
+					{buy => <Order order={buy} onClick={p.onClickBuy} />}
+				</For>
+			</div>
+			<div style="position:absolute;left:330px;top:72px;width:230px;height:192px;color:#f84">
+				<div>Sells</div>
+				<For each={p.bc?.filter(x => x.p < 0 && x.u !== p.username)}>
+					{sell => <Order order={sell} onClick={p.onClickSell} />}
+				</For>
+			</div>
+			{p.bc?.some(({ u }) => u === p.username) && (
+				<div style="position:absolute;left:560px;top:72px;width:230px;height:192px">
+					<For each={p.bc?.filter(x => x.u === p.username)}>
+						{order => (
+							<div style={order.p > 0 ? 'color:#4f8' : 'color:#f84'}>
+								{order.q} @ {Math.abs(order.p)}
+							</div>
+						)}
 					</For>
+					<input
+						type="button"
+						value="Cancel"
+						style="display:block"
+						onClick={p.onClickCancel}
+					/>
 				</div>
-				<div style="position:absolute;left:330px;top:72px;width:230px;height:192px;color:#f84">
-					<div>Sells</div>
-					<For each={p.bc.filter(x => x.p < 0 && x.u !== p.username)}>
-						{sell => <Order order={sell} onClick={p.onClickSell} />}
-					</For>
-				</div>
-				{p.bc.some(({ u }) => u === p.username) && (
-					<div style="position:absolute;left:560px;top:72px;width:230px;height:192px">
-						<For each={p.bc.filter(x => x.u === p.username)}>
-							{order => (
-								<div style={order.p > 0 ? 'color:#4f8' : 'color:#f84'}>
-									{order.q} @ {Math.abs(order.p)}
-								</div>
-							)}
-						</For>
-						<input
-							type="button"
-							value="Cancel"
-							style="display:block"
-							onClick={p.onClickCancel}
-						/>
-					</div>
-				)}
-			</>
-		)
+			)}
+		</Show>
 	);
 }
 
@@ -189,15 +187,14 @@ export default function Bazaar() {
 
 	onMount(() => {
 		sock.setCmds({
-			bzread: data => {
-				const bz = data.bz;
+			bzread: ({ bz }) => {
 				for (const k in bz) {
 					bz[k].sort(
 						(x, y) =>
 							Math.sign(x.p) - Math.sign(y.p) || Math.abs(x.p) - Math.abs(y.p),
 					);
 				}
-				setBz(data.bz);
+				setBz(bz);
 			},
 			bzbid: data => {
 				setBz(bz => {

@@ -770,7 +770,6 @@ function Things(props) {
 					{...props}
 					unregister={unregister}
 					id={id}
-					obj={props.game.byId(id)}
 					pos0={birth(id)}
 					pos={
 						getDeath().get(id) ?? {
@@ -913,8 +912,8 @@ export default function Match(props) {
 
 	const [p1id, setPlayer1] = createSignal(
 			props.replay
-				? pgame().turn
-				: pgame().byUser(rx.user ? rx.user.name : '').id,
+				? game().turn
+				: game().byUser(rx.user ? rx.user.name : '').id,
 		),
 		player1 = () => game().byId(p1id());
 	const [p2id, setPlayer2] = createSignal(player1().foeId),
@@ -1184,25 +1183,24 @@ export default function Match(props) {
 			}
 		});
 
-	const setReplayIndex = idx => {
-		let history = replayhistory();
-		idx = Math.min(idx, props.replay.moves.length);
-		if (idx >= history.length) {
-			history = history.slice();
-			while (idx >= history.length) {
-				const gclone = history[history.length - 1].clone();
-				gclone.next(props.replay.moves[history.length - 1], false);
-				history.push(gclone);
-			}
-			setReplayHistory(history);
-		}
-		const game = history[idx];
+	const setReplayIndex = idx =>
 		batch(() => {
+			let history = replayhistory();
+			idx = Math.min(idx, props.replay.moves.length);
+			if (idx >= history.length) {
+				history = history.slice();
+				while (idx >= history.length) {
+					const gclone = history[history.length - 1].clone();
+					gclone.next(props.replay.moves[history.length - 1], false);
+					history.push(gclone);
+				}
+				setReplayHistory(history);
+			}
+			const game = history[idx];
 			setreplayindex(idx);
 			setPlayer1(game.turn);
 			setPlayer2(game.get_foe(game.turn));
 		});
-	};
 
 	const gotoResult = () => {
 		const { game } = props;

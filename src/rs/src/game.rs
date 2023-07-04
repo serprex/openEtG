@@ -1540,9 +1540,7 @@ impl Game {
 			let frozen = self.get(id, Stat::frozen);
 			if frozen == 0 {
 				self.proc_data(Event::Attack, id, &mut data);
-				let stasis = data.stasis;
-				let freedom = data.freedom;
-				if !stasis && self.get(id, Stat::delayed) == 0 {
+				if kind != Kind::Shield && !data.stasis && self.get(id, Stat::delayed) == 0 {
 					let mut trueatk = self.trueatk(id);
 					if trueatk != 0 {
 						let psionic = self.get(id, Flag::psionic);
@@ -1556,7 +1554,7 @@ impl Game {
 						}
 						let gpull = self.get(data.tgt, Stat::gpull);
 						let shield = self.get_shield(data.tgt);
-						if freedom {
+						if data.freedom {
 							if bypass || (shield == 0 && gpull == 0) {
 								trueatk = (trueatk * 3 + 1) / 2;
 							} else {
@@ -1641,15 +1639,13 @@ impl Game {
 					.any(|&s| matches!(s, Skill::growth(_, _) | Skill::v_siphon))
 			{
 				self.proc_data(Event::Attack, id, &mut data);
-				let freedom = data.freedom;
-				let stasis = data.stasis;
-				if !stasis && frozen == 0 && self.get(id, Stat::delayed) == 0 {
+				if !data.stasis && frozen == 0 && self.get(id, Stat::delayed) == 0 {
 					let mut trueatk = self.trueatk(id);
 					if trueatk != 0 {
 						let owner = self.get_owner(id);
 						let target = self.get_foe(owner);
 						let mut bypass = self.get(id, Flag::momentum);
-						if freedom {
+						if data.freedom {
 							bypass = true;
 							trueatk = (trueatk * 3 + 1) / 2
 						}
