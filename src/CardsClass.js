@@ -7,7 +7,7 @@ export default class Cards {
 	constructor(set) {
 		this.cardSet = set;
 		this.set = wasm.CardSet[set];
-		this.filtercache = [[], [], [], []];
+		this.filtercache = [[], []];
 		this.Codes = [];
 
 		for (const code of wasm.card_codes(this.set)) {
@@ -17,10 +17,8 @@ export default class Cards {
 						realcode = etgutil.asShiny(upcode, shiny),
 						card = new Card(this, upcode, realcode);
 					this.Codes[realcode] = card;
-					if (!card.getStatus('token')) {
-						this.filtercache[(card.upped ? 1 : 0) | (card.shiny ? 2 : 0)].push(
-							card,
-						);
+					if (shiny === 0 && !card.getStatus('token')) {
+						this.filtercache[card.upped ? 1 : 0].push(card);
 					}
 				}
 			}
@@ -46,9 +44,8 @@ export default class Cards {
 
 	cardCmp = (x, y) => this.codeCmp(x.code, y.code);
 
-	filter(upped, filter, cmp, shiny) {
-		const keys =
-			this.filtercache[(upped ? 1 : 0) | (shiny ? 2 : 0)].filter(filter);
+	filter(upped, filter, cmp) {
+		const keys = this.filtercache[upped ? 1 : 0].filter(filter);
 		return cmp ? keys.sort(cmp) : keys;
 	}
 
