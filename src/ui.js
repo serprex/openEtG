@@ -60,16 +60,10 @@ function creaturePos(j, i) {
 	});
 }
 function permanentPos(j, i) {
-	return reflectPos(j, {
-		x: 280 + (i % 9) * 70,
-		y: 492 + ((i / 9) | 0) * 70,
-	});
+	return reflectPos(j, { x: 280 + (i % 9) * 70, y: 492 + ((i / 9) | 0) * 70 });
 }
 function cardPos(j, i) {
-	return {
-		x: 132,
-		y: (j ? 36 : 336) + 28 * i,
-	};
+	return { x: 132, y: (j ? 36 : 336) + 28 * i };
 }
 export function tgtToPos(t, p1id) {
 	const { type } = t;

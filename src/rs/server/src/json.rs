@@ -154,7 +154,7 @@ pub enum AuthMessage {
 		rmpool: Option<String>,
 		electrum: Option<i32>,
 		fg: Option<i16>,
-		oracle: Option<u32>
+		oracle: Option<u32>,
 	},
 	roll {
 		#[serde(rename = "A")]

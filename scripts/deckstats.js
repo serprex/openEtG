@@ -1,4 +1,4 @@
-#!/bin/node --experimental-json-modules
+#!/usr/bin/env -Snode --experimental-wasm-modules --experimental-json-modules
 import Cards from '../src/Cards.js';
 import * as etgutil from '../src/etgutil.js';
 import decks from '../src/Decks.json' assert { type: 'json' };

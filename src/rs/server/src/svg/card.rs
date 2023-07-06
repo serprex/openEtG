@@ -80,10 +80,20 @@ pub fn card(code: i32) -> Option<String> {
 	result.push_str(".webp' style='position:absolute;top:-130px;left:0px'/>");
 	result.push_str(card_info(card));
 	if card.rarity != 0 {
-		write!(result, "<span class='ico r{}' style='position:absolute;right:2px;top:-112px'></span>", card.rarity).ok();
+		write!(
+			result,
+			"<span class='ico r{}' style='position:absolute;right:2px;top:-112px'></span>",
+			card.rarity
+		)
+		.ok();
 	}
 	if card.cost != 0 {
-		write!(result, "<span style='position:absolute;right:2px;top:-150px'>{}</span>", card.cost).ok();
+		write!(
+			result,
+			"<span style='position:absolute;right:2px;top:-150px'>{}</span>",
+			card.cost
+		)
+		.ok();
 		if card.element != card.costele {
 			write!(result, "<span class='ico ce{}'></span>", card.costele).ok();
 		}

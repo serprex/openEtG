@@ -1294,11 +1294,14 @@ impl Skill {
 				ctx.get_player_mut(owner).deck_mut().extend(cards);
 			}
 			Self::boneyard => {
-				let skele = if ctx.cardset() == card::CardSet::Open { card::Skeleton } else { card::v_Skeleton };
+				let skele = if ctx.cardset() == card::CardSet::Open {
+					card::Skeleton
+				} else {
+					card::v_Skeleton
+				};
 				if !card::IsOf(ctx.get(t, Stat::card), skele) {
 					let owner = ctx.get_owner(c);
-					let skele =
-						ctx.new_thing(card::As(ctx.get(c, Stat::card), skele), owner);
+					let skele = ctx.new_thing(card::As(ctx.get(c, Stat::card), skele), owner);
 					ctx.addCrea(owner, skele);
 				}
 			}
@@ -1443,7 +1446,11 @@ impl Skill {
 				let chim = ctx.new_thing(
 					card::As(
 						ctx.get(c, Stat::card),
-						if is_open { card::Chimera } else { card::v_Chimera },
+						if is_open {
+							card::Chimera
+						} else {
+							card::v_Chimera
+						},
 					),
 					owner,
 				);
@@ -2793,7 +2800,14 @@ impl Skill {
 				}
 			}
 			Self::mend => {
-				ctx.dmg(t, if ctx.cardset() == card::CardSet::Open { -10 } else { -5 });
+				ctx.dmg(
+					t,
+					if ctx.cardset() == card::CardSet::Open {
+						-10
+					} else {
+						-5
+					},
+				);
 			}
 			Self::metamorph => {
 				let owner = ctx.get_owner(c);
@@ -2948,7 +2962,11 @@ impl Skill {
 				ctx.incrStatus(owner, Stat::nova, 1);
 				if ctx.get(owner, Stat::nova) >= 3 {
 					let shiny = card::Shiny(ctx.get(c, Stat::card));
-					let singu = if ctx.cardset() == card::CardSet::Open { card::Singularity } else { card::v_Singularity };
+					let singu = if ctx.cardset() == card::CardSet::Open {
+						card::Singularity
+					} else {
+						card::v_Singularity
+					};
 					ctx.transform(c, card::AsShiny(singu, shiny));
 					ctx.addCrea(owner, c);
 				}
@@ -2961,11 +2979,12 @@ impl Skill {
 				ctx.incrStatus(owner, Stat::nova2, 1);
 				if ctx.get(owner, Stat::nova2) >= 2 {
 					let shiny = card::Shiny(ctx.get(c, Stat::card));
-					let singu = if ctx.cardset() == card::CardSet::Open { card::Singularity } else { card::v_Singularity };
-					ctx.transform(
-						c,
-						card::AsShiny(card::AsUpped(singu, true), shiny),
-					);
+					let singu = if ctx.cardset() == card::CardSet::Open {
+						card::Singularity
+					} else {
+						card::v_Singularity
+					};
+					ctx.transform(c, card::AsShiny(card::AsUpped(singu, true), shiny));
 					ctx.addCrea(owner, c);
 				}
 			}
@@ -3088,7 +3107,14 @@ impl Skill {
 			Self::parallel => {
 				ctx.fx(t, Fx::Parallel);
 				let is_open = ctx.cardset() == card::CardSet::Open;
-				if card::IsOf(ctx.get(t, Stat::card), if is_open { card::Chimera } else { card::v_Chimera }) {
+				if card::IsOf(
+					ctx.get(t, Stat::card),
+					if is_open {
+						card::Chimera
+					} else {
+						card::v_Chimera
+					},
+				) {
 					return Skill::chimera.proc(ctx, c, t, data);
 				}
 				let clone = ctx.cloneinst(t);
@@ -3751,7 +3777,13 @@ impl Skill {
 				}
 			}
 			Self::soulcatch => {
-				let amt: i32 = if ctx.cardset() == card::CardSet::Original && !card::Upped(ctx.get(c, Stat::card)) { 2 } else { 3 };
+				let amt: i32 = if ctx.cardset() == card::CardSet::Original
+					&& !card::Upped(ctx.get(c, Stat::card))
+				{
+					2
+				} else {
+					3
+				};
 				ctx.fx(c, Fx::Quanta(amt as u16, etg::Death as u8));
 				ctx.spend(ctx.get_owner(c), etg::Death, -amt);
 			}
@@ -4567,7 +4599,13 @@ impl Skill {
 					Skill::v_scramble => -2,
 					Skill::v_antimatter => 4,
 					Skill::growth(1, 1) => -4,
-					Skill::poison(_) => if shmax == 0 { 1 } else { -2 },
+					Skill::poison(_) => {
+						if shmax == 0 {
+							1
+						} else {
+							-2
+						}
+					}
 					Skill::v_aflatoxin => 2,
 					Skill::devour => 3,
 					Skill::v_blackhole => 4,
@@ -5007,7 +5045,13 @@ impl Skill {
 			}
 			Self::hammer | Self::v_hammer => {
 				let mark = ctx.get_player(ctx.get_owner(c)).mark;
-				if mark != etg::Gravity && mark != etg::Earth { 0 } else if ctx.cardset() == card::CardSet::Open { 2 } else { 1 }
+				if mark != etg::Gravity && mark != etg::Earth {
+					0
+				} else if ctx.cardset() == card::CardSet::Open {
+					2
+				} else {
+					1
+				}
 			}
 			Self::hope => ctx
 				.get_player(ctx.get_owner(c))

@@ -158,10 +158,11 @@ function Tween(props) {
 	const [state, setState] = createSignal(prevState);
 	const step = ts => {
 		start ??= ts;
-		setState(props.proc(ts - start, prevState, nextState));
-		if (state() !== nextState) {
-			raf &&= requestAnimationFrame(step);
-		}
+		const newState = untrack(() =>
+			props.proc(ts - start, prevState, nextState),
+		);
+		setState(newState);
+		if (newState !== nextState) raf &&= requestAnimationFrame(step);
 	};
 	createEffect(() => {
 		if (!props.compare(nextState, props.state)) {
@@ -448,14 +449,7 @@ function ArrowLine(props) {
 		<svg
 			width="900"
 			height="600"
-			style={{
-				position: 'absolute',
-				left: '0',
-				top: '0',
-				'z-index': '4',
-				'pointer-events': 'none',
-				opacity: props.opacity,
-			}}>
+			style={`position:absolute;left:0;top:0;z-index:4;pointer-events:none;opacity:${props.opacity}`}>
 			<defs>
 				<marker
 					id="h"
@@ -478,196 +472,174 @@ function ArrowLine(props) {
 	);
 }
 
-function ThingInst(props) {
-	const obj = () => props.game.byId(props.id),
-		isSpell = () => obj()?.type === etg.Spell,
-		card = () => obj().card,
-		bgcolor = () => ui.maybeLightenStr(card()),
+function Thing(props) {
+	const isSpell = () => props.obj.type === etg.Spell,
+		bgcolor = () => ui.maybeLightenStr(props.obj.card),
 		faceDown = () =>
 			isSpell() &&
-			obj().ownerId !== props.p1id &&
+			props.obj.ownerId !== props.p1id &&
 			!props.game.get(props.p1id, 'precognition'),
 		setInfo = e => {
-			if (!faceDown() && props.setInfo)
-				props.setInfo(e, props.game.byId(props.id));
+			if (!faceDown() && props.setInfo) props.setInfo(e, props.obj);
 		};
 
 	const visible = [
-		() => obj().getStatus('psionic'),
-		() => obj().getStatus('aflatoxin'),
-		() => !obj().getStatus('aflatoxin') && obj().getStatus('poison') > 0,
-		() => obj().getStatus('airborne') || obj().getStatus('ranged'),
-		() => obj().getStatus('momentum'),
-		() => obj().getStatus('adrenaline'),
-		() => obj().getStatus('poison') < 0,
+		() => props.obj.getStatus('psionic'),
+		() => props.obj.getStatus('aflatoxin'),
+		() =>
+			!props.obj.getStatus('aflatoxin') && props.obj.getStatus('poison') > 0,
+		() => props.obj.getStatus('airborne') || props.obj.getStatus('ranged'),
+		() => props.obj.getStatus('momentum'),
+		() => props.obj.getStatus('adrenaline'),
+		() => props.obj.getStatus('poison') < 0,
 	];
 	const bordervisible = [
-		() => obj().getStatus('delayed'),
-		() => props.id === obj().owner.gpull,
-		() => obj().getStatus('frozen'),
+		() => props.obj.getStatus('delayed'),
+		() => props.obj.id === props.obj.owner.gpull,
+		() => props.obj.getStatus('frozen'),
 	];
 
 	const memo = createMemo(() => {
 		if (faceDown()) return {};
 		let statText, topText;
 		if (!isSpell()) {
-			const charges = obj().getStatus('charges');
-			topText = activeText(obj());
-			if (obj().type === etg.Creature) {
-				statText = `${obj().trueatk()} | ${obj().truehp()}${
+			const charges = props.obj.getStatus('charges');
+			topText = activeText(props.obj);
+			if (props.obj.type === etg.Creature) {
+				statText = `${props.obj.trueatk()} | ${props.obj.truehp()}${
 					charges ? ` \u00d7${charges}` : ''
 				}`;
-			} else if (obj().type === etg.Permanent) {
-				if (card().getStatus('pillar')) {
+			} else if (props.obj.type === etg.Permanent) {
+				if (props.obj.card.getStatus('pillar')) {
 					statText = `1:${
-						obj().getStatus('pendstate') ? obj().owner.mark : card().element
+						props.obj.getStatus('pendstate')
+							? props.obj.owner.mark
+							: props.obj.card.element
 					}\u00d7${charges}`;
 					topText = '';
 				} else {
-					const ownattack = obj().getSkill('ownattack');
+					const ownattack = props.obj.getSkill('ownattack');
 					if (ownattack?.length === 1 && ownattack[0] === 'locket') {
-						const mode = obj().getStatus('mode');
-						statText = `1:${~mode ? mode : obj().owner.mark}`;
+						const mode = props.obj.getStatus('mode');
+						statText = `1:${~mode ? mode : props.obj.owner.mark}`;
 					} else {
 						statText = `${charges || ''}`;
 					}
 				}
-			} else if (obj().type === etg.Weapon) {
-				statText = `${obj().trueatk()}${charges ? ` \u00d7${charges}` : ''}`;
-			} else if (obj().type === etg.Shield) {
-				statText = charges ? '\u00d7' + charges : obj().truedr().toString();
+			} else if (props.obj.type === etg.Weapon) {
+				statText = `${props.obj.trueatk()}${
+					charges ? ` \u00d7${charges}` : ''
+				}`;
+			} else if (props.obj.type === etg.Shield) {
+				statText = charges ? '\u00d7' + charges : props.obj.truedr().toString();
 			}
 		} else {
-			topText = card().name;
-			statText = `${obj().cost}:${obj().costele}`;
+			topText = props.obj.card.name;
+			statText = `${props.obj.cost}:${props.obj.costele}`;
 		}
-		return {
-			topText,
-			statText,
-		};
+		return { topText, statText };
 	});
 
 	return (
-		<Show when={props.game.has_id(props.id)}>
-			<div
-				class={`${
-					obj().type === etg.Spell ? 'inst handinst ' : 'inst '
-				}${tgtclass(props.p1id, obj(), props.targeting)}`}
-				style={{
-					position: 'absolute',
-					left: `${props.pos.x - 32}px`,
-					top: `${props.pos.y - 32}px`,
-					opacity: faceDown()
-						? props.pos.opacity
-						: (obj().isMaterial() ? 1 : 0.7) * props.pos.opacity,
-					color: faceDown() ? undefined : card().upped ? '#000' : '#fff',
-					'z-index': '2',
-					'pointer-events': ~obj().getIndex() ? undefined : 'none',
-				}}
-				onMouseMove={setInfo}
-				onMouseOver={setInfo}
-				onMouseLeave={props.onMouseOut}
-				onClick={[props.onClick, props.id]}>
-				<Show
-					when={!faceDown()}
-					fallback={<div class="ico cback" style="left:2px;top:2px" />}>
-					<div
-						style={{
-							width: '64px',
-							height: '64px',
-							'background-color': bgcolor(),
-							'pointer-events': 'none',
-						}}>
-						<Show when={!props.lofiArt}>
-							<img
-								class={card.shiny ? 'shiny' : ''}
-								src={`/Cards/${encodeCode(
-									card().code + (asShiny(card().code, false) < 5000 ? 4000 : 0),
-								)}.webp`}
-								style={instimgstyle}
-							/>
-						</Show>
+		<div
+			class={`${
+				props.obj.type === etg.Spell ? 'inst handinst ' : 'inst '
+			}${tgtclass(props.p1id, props.obj, props.targeting)}`}
+			style={{
+				position: 'absolute',
+				left: `${props.pos.x - 32}px`,
+				top: `${props.pos.y - 32}px`,
+				opacity: faceDown()
+					? props.pos.opacity
+					: (props.obj.isMaterial() ? 1 : 0.7) * props.pos.opacity,
+				color: faceDown() ? undefined : props.obj.card.upped ? '#000' : '#fff',
+				'z-index': '2',
+				'pointer-events': ~props.obj.getIndex() ? undefined : 'none',
+			}}
+			onMouseMove={setInfo}
+			onMouseOver={setInfo}
+			onMouseLeave={props.onMouseOut}
+			onClick={[props.onClick, props.obj.id]}>
+			<Show
+				when={!faceDown()}
+				fallback={<div class="ico cback" style="left:2px;top:2px" />}>
+				<div
+					style={`width:64px;height:64px;pointer-events:none;background-color:${bgcolor()}`}>
+					<Show when={!props.lofiArt}>
+						<img
+							class={props.obj.card.shiny ? 'shiny' : ''}
+							src={`/Cards/${encodeCode(
+								props.obj.card.code +
+									(asShiny(props.obj.card.code, false) < 5000 ? 4000 : 0),
+							)}.webp`}
+							style={instimgstyle}
+						/>
+					</Show>
+					<Show when={!isSpell()}>
+						<Index each={visible}>
+							{(v, k) => (
+								<Show when={v()()}>
+									<div
+										class={`ico s${k}`}
+										style={`position:absolute;bottom:-8px;left:${
+											['32', '8', '8', '0', '24', '16', '8'][k]
+										}px;opacity:.6;z-index:1`}
+									/>
+								</Show>
+							)}
+						</Index>
+						<Index each={bordervisible}>
+							{(v, k) => (
+								<Show when={v()()}>
+									<div
+										class={`ico sborder${k}`}
+										style="position:absolute;left:0;top:0;width:64px;height:64px"
+									/>
+								</Show>
+							)}
+						</Index>
+					</Show>
+					<Show when={props.game.game.has_protectonce(props.obj.id)}>
+						<div
+							class="ico protection"
+							style="position:absolute;width:64px;height:64px"
+						/>
+					</Show>
+					<div style="position:absolute;width:64px">
+						<Components.Text
+							text={memo().topText}
+							icoprefix="se"
+							style={{
+								width: '64px',
+								'white-space': 'nowrap',
+								overflow: 'hidden',
+								'background-color': bgcolor(),
+							}}
+						/>
+						<Components.Text
+							text={memo().statText}
+							icoprefix="se"
+							style={`float:right;background-color:${bgcolor()}`}
+						/>
 						<Show when={!isSpell()}>
-							<Index each={visible}>
-								{(v, k) => (
-									<Show when={v()()}>
-										<div
-											class={`ico s${k}`}
-											style={{
-												position: 'absolute',
-												bottom: '-8px',
-												left: [
-													'32px',
-													'8px',
-													'8px',
-													'0px',
-													'24px',
-													'16px',
-													'8px',
-												][k],
-												opacity: '.6',
-												'z-index': '1',
-											}}
-										/>
-									</Show>
-								)}
-							</Index>
-							<Index each={bordervisible}>
-								{(v, k) => (
-									<Show when={v()()}>
-										<div
-											class={`ico sborder${k}`}
-											style="position:absolute;left:0;top:0;width:64px;height:64px"
-										/>
-									</Show>
-								)}
-							</Index>
-						</Show>
-						<Show when={props.game.game.has_protectonce(props.id)}>
-							<div
-								class="ico protection"
-								style="position:absolute;width:64px;height:64px"
-							/>
-						</Show>
-						<div style="position:absolute;width:64px">
 							<Components.Text
-								text={memo().topText}
+								text={props.obj.card.name}
 								icoprefix="se"
 								style={{
+									position: 'absolute',
+									top: '54px',
+									height: '10px',
 									width: '64px',
-									'white-space': 'nowrap',
 									overflow: 'hidden',
+									'white-space': 'nowrap',
 									'background-color': bgcolor(),
 								}}
 							/>
-							<Components.Text
-								text={memo().statText}
-								icoprefix="se"
-								style={{
-									float: 'right',
-									'background-color': bgcolor(),
-								}}
-							/>
-							<Show when={!isSpell()}>
-								<Components.Text
-									text={card().name}
-									icoprefix="se"
-									style={{
-										position: 'absolute',
-										top: '54px',
-										height: '10px',
-										width: '64px',
-										overflow: 'hidden',
-										'white-space': 'nowrap',
-										'background-color': bgcolor(),
-									}}
-								/>
-							</Show>
-						</div>
+						</Show>
 					</div>
-				</Show>
-			</div>
-		</Show>
+				</div>
+			</Show>
+		</div>
 	);
 }
 
@@ -677,55 +649,15 @@ function thingTweenCompare(prev, next) {
 	);
 }
 
-function Thing(props) {
-	return (
-		<Tween
-			initial={props.pos0}
-			state={props.pos}
-			compare={thingTweenCompare}
-			unregister={() => props.unregister(props.id)}
-			proc={(ms, prev, next) => {
-				if (ms > 96 * Math.PI) {
-					if (next.opacity === 0) props.unregister(props.id);
-					return next;
-				}
-				const pos = {
-					x: prev.x + (next.x - prev.x) * Math.sin(ms / 192),
-					y: prev.y + (next.y - prev.y) * Math.sin(ms / 192),
-				};
-				props.setIdTrack(props.id, pos);
-				return {
-					opacity:
-						prev.opacity + (next.opacity - prev.opacity) * Math.sin(ms / 192),
-					...pos,
-				};
-			}}>
-			{pos => (
-				<ThingInst
-					lofiArt={props.lofiArt}
-					game={props.game}
-					id={props.id}
-					p1id={props.p1id}
-					setInfo={props.setInfo}
-					onMouseOut={props.onMouseOut}
-					onClick={props.onClick}
-					targeting={props.targeting}
-					pos={pos()}
-				/>
-			)}
-		</Tween>
-	);
-}
-
 function Things(props) {
-	const birth = id =>
+	const birth = (id, obj) =>
 		untrack(() => {
 			const start = props.startPos.get(id);
 			return start < 0
 				? { opacity: 0, x: 103, y: -start === props.p1id ? 551 : 258 }
 				: start
 				? { opacity: 0, x: -99, y: -99, ...props.getIdTrack(start) }
-				: { opacity: 0, ...ui.tgtToPos(props.game.byId(id), props.p1id) };
+				: { opacity: 0, ...ui.tgtToPos(obj(id), props.p1id) };
 		});
 	const death = new Map(),
 		[getDeath, updateDeath] = createSignal(death, { equals: false }),
@@ -763,21 +695,53 @@ function Things(props) {
 			death.delete(id);
 		}
 	};
+	const obj = id => props.game.byId(id);
 	return (
 		<For each={allthings()}>
 			{id => (
-				<Thing
-					{...props}
-					unregister={unregister}
-					id={id}
-					pos0={birth(id)}
-					pos={
-						getDeath().get(id) ?? {
-							opacity: 1,
-							...ui.tgtToPos(props.game.byId(id), props.p1id),
+				<Show when={props.game && props.game.has_id(id)}>
+					<Tween
+						initial={birth(id, obj)}
+						state={
+							getDeath().get(id) ?? {
+								opacity: 1,
+								...ui.tgtToPos(obj(id), props.p1id),
+							}
 						}
-					}
-				/>
+						compare={thingTweenCompare}
+						unregister={() => unregister(id)}
+						proc={(ms, prev, next) => {
+							if (ms > 96 * Math.PI) {
+								if (next.opacity === 0) unregister(id);
+								return next;
+							}
+							const pos = {
+								x: prev.x + (next.x - prev.x) * Math.sin(ms / 192),
+								y: prev.y + (next.y - prev.y) * Math.sin(ms / 192),
+							};
+							props.setIdTrack(id, pos);
+							return {
+								opacity:
+									prev.opacity +
+									(next.opacity - prev.opacity) * Math.sin(ms / 192),
+								...pos,
+							};
+						}}>
+						{pos => (
+							<Thing
+								lofiArt={props.lofiArt}
+								game={props.game}
+								p1id={props.p1id}
+								setInfo={props.setInfo}
+								onMouseOut={props.onMouseOut}
+								onClick={props.onClick}
+								targeting={props.targeting}
+								obj={obj(id)}
+								pos={pos()}
+							/>
+						)}
+					</Tween>
+				</Show>
 			)}
 		</For>
 	);
@@ -856,9 +820,7 @@ function FoePlays(props) {
 					)}
 				</For>
 			</div>
-			<Show when={line()}>
-				<ArrowLine {...line()} />
-			</Show>
+			<Show when={line()}>{line => <ArrowLine {...line()} />}</Show>
 		</Show>
 	);
 }
@@ -1486,9 +1448,7 @@ export default function Match(props) {
 				'z-index': '5',
 			},
 		});
-		if (obj.type !== etg.Player) {
-			setCard(e, obj.card);
-		}
+		if (obj.type !== etg.Player) setCard(e, obj.card);
 	};
 
 	const clearCard = () => {
@@ -1649,23 +1609,16 @@ export default function Match(props) {
 							</span>
 							<Show when={pl().getStatus('sosa')}>
 								<div
-									class={'ico sacrifice'}
-									style={{
-										position: 'absolute',
-										left: '0',
-										top: j ? '7px' : '502px',
-										'pointer-events': 'none',
-									}}
+									class="ico sacrifice"
+									style={`position:absolute;left:0;top:${
+										j ? '7' : '502'
+									}px;pointer-events:none`}
 								/>
 							</Show>
 							<Show when={pl().getStatus('sabbath')}>
 								<span
 									class="ico sabbath"
-									style={{
-										position: 'absolute',
-										left: '0',
-										top: j ? '96px' : '300px',
-									}}
+									style={`position:absolute;left:0;top:${j ? '96' : '300'}px`}
 								/>
 							</Show>
 							<Show

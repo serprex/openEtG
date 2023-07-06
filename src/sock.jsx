@@ -10,8 +10,8 @@ import OrigCards from './vanilla/Cards.js';
 
 const endpoint = `${location.protocol === 'http:' ? 'ws://' : 'wss://'}
 	${location.hostname}:${
-	location.protocol === 'http:' ? config.wsport : config.wssport
-}/ws`;
+		location.protocol === 'http:' ? config.wsport : config.wssport
+	}/ws`;
 const buffer = [];
 let socket = new WebSocket(endpoint),
 	attempts = 0,
