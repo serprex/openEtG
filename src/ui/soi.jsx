@@ -2,17 +2,21 @@ import { render } from 'solid-js/web';
 import { createSignal } from 'solid-js';
 import Game from '../Game.js';
 import { toTrueMark, encodedeck } from '../etgutil.js';
-import { Earth, ShardList } from '../etg.js';
+import { Earth } from '../etg.js';
 import { Text } from '../Components/index.jsx';
+
+function Shard(element) {
+	return 5030 + element * 100;
+}
 
 function App() {
 	const [cards, setCards] = createSignal(new Uint8Array(24));
 
 	const info = () => {
-		const deck = [toTrueMark(Earth), ShardList[Earth] + 2000];
+		const deck = [toTrueMark(Earth), Shard(Earth) + 2000];
 		cards().forEach((count, idx) => {
 			for (let i = 0; i < count; i++)
-				deck.push(ShardList[(idx % 12) + 1] + (idx >= 12 ? 2000 : 0));
+				deck.push(Shard((idx % 12) + 1) + (idx >= 12 ? 2000 : 0));
 		});
 		if (deck.length < 10) {
 			const data = {
@@ -28,7 +32,7 @@ function App() {
 
 			let id = 0;
 			for (const handId of player.handIds) {
-				if (game.byId(handId).card.code === ShardList[Earth] + 2000) {
+				if (game.byId(handId).card.code === Shard(Earth) + 2000) {
 					id = handId;
 					break;
 				}

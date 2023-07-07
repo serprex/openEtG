@@ -72,19 +72,10 @@ export default function Reward(props) {
 							store.chatMsg('Choose a reward', 'System');
 						}
 					}}
-					style={{
-						position: 'absolute',
-						left: '10px',
-						top: '40px',
-					}}
+					style="position:absolute;left:10px;top:40px"
 				/>
 				{numberofcopies > 1 && (
-					<div
-						style={{
-							position: 'absolute',
-							left: '20px',
-							top: '100px',
-						}}>
+					<div style="position:absolute;left:20px;top:100px">
 						You will get {numberofcopies} copies of the card you choose
 					</div>
 				)}
@@ -98,7 +89,7 @@ export default function Reward(props) {
 								top: `${272 + (i() % 12) * 20}px`,
 							}}
 							card={Cards.Codes[reward]}
-							onClick={() => setChosenReward(reward)}
+							onClick={[setChosenReward, reward]}
 						/>
 					)}
 				</For>

@@ -177,11 +177,7 @@ export default function ArenaInfo() {
 	return (
 		<>
 			<Components.Text
-				style={{
-					position: 'absolute',
-					left: '96px',
-					top: '560px',
-				}}
+				style="position:absolute;left:96px;top:560px"
 				text={
 					'Earn 5$ when your deck is faced, & 10$ more when it wins\nEarn 25$ per age of old deck when creating new deck, up to 350$'
 				}

@@ -2,7 +2,9 @@ export default class AiWorker {
 	constructor() {
 		this.id = 0;
 		this.worker = new Promise(resolve => {
-			const worker = new Worker(new URL('./ai.worker.js', import.meta.url));
+			const worker = new Worker(new URL('./ai.worker.js', import.meta.url), {
+				type: 'module',
+			});
 			worker.addEventListener('message', e => {
 				if (e.data === null) {
 					resolve(worker);

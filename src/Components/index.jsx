@@ -454,7 +454,7 @@ export function CardSelectorCore(props) {
 }
 
 export function CardSelector(props) {
-	const rx = store.useRx();
+	const opts = store.useRx(state => state.opts);
 	const [element, setElement] = createSignal(0);
 	const [rarity, setRarity] = createSignal(0);
 
@@ -465,7 +465,7 @@ export function CardSelector(props) {
 					type="button"
 					value="Toggle Shiny"
 					style="position:absolute;left:4px;top:578px"
-					onClick={() => store.setOpt('toggleshiny', !rx.opts.toggleshiny)}
+					onClick={() => store.setOpt('toggleshiny', !opts.toggleshiny)}
 				/>
 			)}
 			<RaritySelector x={80} y={338} value={rarity()} onChange={setRarity} />
@@ -476,7 +476,7 @@ export function CardSelector(props) {
 				y={272}
 				rarity={rarity()}
 				element={element()}
-				shiny={props.shiny ?? rx.opts.toggleshiny}
+				shiny={props.shiny ?? opts.toggleshiny}
 			/>
 		</>
 	);

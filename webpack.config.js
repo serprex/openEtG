@@ -1,8 +1,8 @@
-const path = require('path'),
-	HtmlPlugin = require('html-webpack-plugin'),
-	CopyPlugin = require('copy-webpack-plugin');
+import { URL } from 'url';
+import HtmlPlugin from 'html-webpack-plugin';
+import CopyPlugin from 'copy-webpack-plugin';
 
-module.exports = {
+export default {
 	experiments: {
 		asyncWebAssembly: true,
 		topLevelAwait: true,
@@ -24,7 +24,7 @@ module.exports = {
 	},
 	output: {
 		clean: true,
-		path: path.resolve(__dirname, 'bundle'),
+		path: new URL('./bundle', import.meta.url).pathname,
 		filename: 'hash/[contenthash].js',
 		chunkFilename: 'hash/[contenthash].js',
 		webassemblyModuleFilename: 'hash/[hash].wasm',

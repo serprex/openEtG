@@ -7,9 +7,9 @@ import * as etgutil from '../etgutil.js';
 import * as Components from '../Components/index.jsx';
 
 export default function Upgrade() {
-	const rx = useRx();
-	const cardpool = createMemo(() => etgutil.deck2pool(rx.user.pool));
-	const boundpool = createMemo(() => etgutil.deck2pool(rx.user.accountbound));
+	const user = useRx(state => state.user);
+	const cardpool = createMemo(() => etgutil.deck2pool(user.pool));
+	const boundpool = createMemo(() => etgutil.deck2pool(user.accountbound));
 	const [showBound, setShowBound] = createSignal(false);
 	const [error, setError] = createSignal('');
 	const [state, setState] = createSignal({
@@ -31,7 +31,7 @@ export default function Upgrade() {
 				sock.userExec('upgrade', { card: card.code });
 			} else
 				return `You need at least ${use} copies to be able to upgrade this card!`;
-		} else if (rx.user.gold >= 50) {
+		} else if (user.gold >= 50) {
 			sock.userExec('uppillar', { c: card.code });
 		} else return 'You need 50$ to afford an upgraded pillar!';
 	}
@@ -50,7 +50,7 @@ export default function Upgrade() {
 				sock.userExec('polish', { card: card.code });
 			} else
 				return `You need at least ${use} copies to be able to polish this card!`;
-		} else if (rx.user.gold >= 50) {
+		} else if (user.gold >= 50) {
 			sock.userExec('shpillar', { c: card.code });
 		} else return 'You need 50$ to afford a shiny pillar!';
 	}
@@ -110,7 +110,7 @@ export default function Upgrade() {
 				}}
 			/>
 			<Components.Text
-				text={rx.user.gold + '$'}
+				text={user.gold + '$'}
 				style={{
 					position: 'absolute',
 					left: '5px',
