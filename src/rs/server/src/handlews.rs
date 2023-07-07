@@ -2495,7 +2495,7 @@ pub async fn handle_ws(
 				UserMessage::wealthtop => {
 					if let Ok(rows) = client
 						.query(
-							"select name, wealth from users order by wealth desc limit 60",
+							"select name, wealth from users order by wealth desc limit 99",
 							&[],
 						)
 						.await

@@ -12,13 +12,11 @@ export default function WealthTop(props) {
 	});
 
 	const list = () => {
-		const ol1c = [],
-			ol2c = [],
+		const olc = [],
 			top = getTop();
 		if (top) {
 			for (let i = 0; i < top.length; i += 2) {
-				const ol = i < top.length / 2 ? ol1c : ol2c;
-				ol.push(
+				olc.push(
 					<li
 						onClick={() =>
 							store.doNav(import('./Library.jsx'), { name: top[i] })
@@ -30,24 +28,16 @@ export default function WealthTop(props) {
 			}
 		}
 		return (
-			<>
-				<ol class="width400" style="position:absolute;left:80px;top:8px">
-					{ol1c}
-				</ol>
-				<ol
-					class="width400"
-					start={ol1c.length + 1}
-					style="position:absolute;left:480px;top:8px">
-					{ol2c}
-				</ol>
-			</>
+			<ol style="position:absolute;left:80px;width:800px;columns:3;column-gap:40px;line-height:17px">
+				{olc}
+			</ol>
 		);
 	};
 
 	return (
 		<>
 			{list}
-			<Components.ExitBtn x={8} y={300} />
+			<Components.ExitBtn x={4} y={300} />
 		</>
 	);
 }

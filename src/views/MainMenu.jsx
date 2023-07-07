@@ -35,7 +35,7 @@ const tipjar = [
 	'A ply is half a turn',
 	'Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm',
 	"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
-	'Wealth T60 is a leaderboard for player wealth. Wealth is a combination of current gold & cardpool',
+	'Wealth T99 is a leaderboard for player wealth. Wealth is a combination of current gold & cardpool',
 ];
 
 function Rect(props) {
@@ -352,7 +352,7 @@ export default function MainMenu(props) {
 					<TitleText text="Leaderboards" />
 					<input
 						type="button"
-						value="Wealth T60"
+						value="Wealth T99"
 						onClick={() => store.doNav(import('./WealthTop.jsx'))}
 						onMouseOver={[setTip, "See who's collected the most wealth"]}
 						style="margin-left:25%"

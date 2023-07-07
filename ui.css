@@ -1,8 +1,6 @@
 *{box-sizing:border-box}
 body{
 	background-color:#000;
-	background-image:url(assets/bg_default.webp);
-	background-repeat:no-repeat;
 	color:#fff;
 	margin:0;
 	font:16px sans-serif;
@@ -25,8 +23,6 @@ input[type="button"]:hover{background:linear-gradient(to bottom,#ccdde0,#586776)
 input[type="button"]:hover:active{background:linear-gradient(to bottom,#aabbc0,#485766)}
 select,input[type="text"],input[type="password"],input[type="number"],input:not([type]){width:150px;border:2px solid rgba(0,0,0,.7777777);border-radius:4px;background-color:rgba(8,8,8,.5);color:#eee}
 select{
-	-webkit-appearance:none;
-	-moz-appearance:none;
 	appearance:none;
 	color:#111;
 	background-color:#ddeef0;
@@ -40,7 +36,6 @@ select{
 select:hover{background-color:#bbcccf}
 select:hover:active{background-color:#99aaaf}
 .bg_main{background-image:url(assets/bg_main.webp);width:900px;height:600px}
-.width400{width:400px;margin:0}
 .floatRight{float:right}
 .atopol{width:900px;margin:0}
 .atoptext{display:inline-block;width:200px}
@@ -98,21 +93,20 @@ select:hover:active{background-color:#99aaaf}
 }
 .numput{width:32px!important}
 .imgb:hover{
-	-webkit-filter:brightness(0.6);
 	filter:brightness(0.6);
 	cursor:pointer;
 }
 .imgb:active{
-	-webkit-filter:brightness(0.4);
 	filter:brightness(0.4);
 	cursor:pointer;
 }
 #leftpane{
+	background-image:url(assets/bg_default.webp);
+	background-repeat:no-repeat;
 	width:900px;
 	height:600px;
 	position:absolute;
-	-moz-user-select:none;
-	-webkit-user-select:none;
+	user-select:none;
 	z-index:-9;
 }
 #rightpane{
