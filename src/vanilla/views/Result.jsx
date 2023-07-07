@@ -14,8 +14,7 @@ function exitFunc() {
 }
 
 export default function OriginalResult({ game }) {
-	const rx = store.useRx(),
-		player1 = game.byUser(rx.user ? rx.user.name : '');
+	const player1 = game.byUser(store.state.user.name);
 	const cardswon = [];
 	let electrumwon = null;
 
@@ -96,7 +95,7 @@ export default function OriginalResult({ game }) {
 				<input
 					type="button"
 					value="Rematch"
-					onClick={() => game.data.rematch()}
+					onClick={game.data.rematch}
 					style="position:absolute;left:412px;top:490px"
 				/>
 			)}

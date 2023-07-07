@@ -14,9 +14,7 @@ const streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
 
 function TooltipText(props) {
 	return (
-		<div
-			onMouseOver={() => props.setTip(props.tip)}
-			onMouseOut={props.clearTip}>
+		<div onMouseOver={[props.setTip, props.tip]} onMouseOut={props.clearTip}>
 			{props.children}
 		</div>
 	);
@@ -405,12 +403,8 @@ export default function Result(props) {
 				<input
 					type="button"
 					value="Rematch"
-					onClick={() => game.data.rematch()}
-					style={{
-						position: 'absolute',
-						left: '412px',
-						top: '490px',
-					}}
+					onClick={game.data.rematch}
+					style="position:absolute;left:412px;top:490px"
 				/>
 			)}
 			{game.winner === player1.id && (
@@ -418,13 +412,7 @@ export default function Result(props) {
 					{goldreward > 0 && (
 						<Components.Text
 							text={`${goldreward - (game.data.cost | 0)}$`}
-							style={{
-								'text-align': 'center',
-								width: '900px',
-								position: 'absolute',
-								left: '0px',
-								top: '550px',
-							}}
+							style="text-align:center;width:900px;position:absolute;left:0px;top:550px"
 						/>
 					)}
 					{cards}
@@ -440,22 +428,8 @@ export default function Result(props) {
 					/>
 				</>
 			)}
-			<span
-				style={{
-					position: 'absolute',
-					left: '8px',
-					top: '290px',
-				}}>
-				{lefttext}
-			</span>
-			<div
-				style={{
-					position: 'absolute',
-					left: '8px',
-					top: '258px',
-				}}>
-				{tooltip()}
-			</div>
+			<span style="position:absolute;left:8px;top:290px">{lefttext}</span>
+			<div style="position:absolute;left:8px;top:258px">{tooltip()}</div>
 		</>
 	);
 }

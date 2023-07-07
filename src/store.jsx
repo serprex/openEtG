@@ -118,8 +118,8 @@ export function addOrig(update) {
 	});
 }
 
-export function useRx() {
-	const [signal, setState] = createStore(state);
-	onCleanup(subscribe(state => setState(reconcile(state))));
+export function useRx(cb = x => x) {
+	const [signal, setState] = createStore(cb(state));
+	onCleanup(subscribe(state => setState(cb(state))));
 	return signal;
 }

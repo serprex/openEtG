@@ -8,7 +8,7 @@ import {
 	onCleanup,
 	onMount,
 } from 'solid-js';
-import { For, Index, Show } from 'solid-js/web';
+import { For, Show } from 'solid-js/web';
 
 import { playSound } from '../audio.js';
 import * as ui from '../ui.js';
@@ -30,39 +30,31 @@ function updateMap(map, k, f) {
 	return new Map(map).set(k, f(map.get(k)));
 }
 
-function svgbg() {
-	// prettier-ignore
-	const redhor = new Uint16Array([
-			140, 172, 900,
-			300, 172, 900,
-			460, 172, 900,
-		]),
-		redver = new Uint16Array([
-			170, 0, 600,
-			246, 0, 139,
-			246, 459, 600,
-		]),
-		redren = [];
-	for (let j = 0; j < 2; j++) {
-		let path = '';
-		for (let i = 0; i < redhor.length; i += 3) {
-			path += `M${redhor[i + 1]} ${redhor[i] - j}L${redhor[i + 2]} ${
-				redhor[i] - j
-			}`;
-		}
-		for (let i = 0; i < redver.length; i += 3) {
-			path += `M${redver[i] + j} ${redver[i + 1]}L${redver[i] + j} ${
-				redver[i + 2]
-			}`;
-		}
-		redren.push(<path d={path} stroke={['#421', '#842'][j]} strokeWidth="1" />);
+const redhor = new Uint16Array([140, 172, 900, 300, 172, 900, 460, 172, 900]),
+	redver = new Uint16Array([170, 0, 600, 246, 0, 139, 246, 459, 600]),
+	redren = [];
+for (let j = 0; j < 2; j++) {
+	let path = '';
+	for (let i = 0; i < redhor.length; i += 3) {
+		path += `M${redhor[i + 1]} ${redhor[i] - j}L${redhor[i + 2]} ${
+			redhor[i] - j
+		}`;
 	}
+	for (let i = 0; i < redver.length; i += 3) {
+		path += `M${redver[i] + j} ${redver[i + 1]}L${redver[i] + j} ${
+			redver[i + 2]
+		}`;
+	}
+	redren.push([path, ['#421', '#842'][j]]);
+}
+function svgbg() {
 	return (
 		<svg
 			width="900"
 			height="600"
 			style="position:absolute;left:0;top:0;z-index:-8;pointer-events:none">
-			{redren}
+			<path d={redren[0][0]} stroke={redren[0][1]} strokeWidth="1" />
+			<path d={redren[1][0]} stroke={redren[1][1]} strokeWidth="1" />
 		</svg>
 	);
 }
@@ -86,13 +78,6 @@ function cloaksvg() {
 		<div style="position:absolute;left:0;top:0;width:900px;height:299px;background-color:#000;z-index:1;pointer-events:none" />
 	);
 }
-
-const instimgstyle = {
-	position: 'absolute',
-	width: '64px',
-	height: '64px',
-	'pointer-events': 'none',
-};
 
 const activeInfo = {
 	firebolt: (c, t) => 3 + (((c.owner.quanta[etg.Fire] - c.card.cost) / 4) | 0),
@@ -572,32 +557,28 @@ function Thing(props) {
 								props.obj.card.code +
 									(asShiny(props.obj.card.code, false) < 5000 ? 4000 : 0),
 							)}.webp`}
-							style={instimgstyle}
+							style="position:absolute;width:64px;height:64px;pointer-events:none"
 						/>
 					</Show>
 					<Show when={!isSpell()}>
-						<Index each={visible}>
-							{(v, k) => (
-								<Show when={v()()}>
-									<div
-										class={`ico s${k}`}
-										style={`position:absolute;bottom:-8px;left:${
-											['32', '8', '8', '0', '24', '16', '8'][k]
-										}px;opacity:.6;z-index:1`}
-									/>
-								</Show>
-							)}
-						</Index>
-						<Index each={bordervisible}>
-							{(v, k) => (
-								<Show when={v()()}>
-									<div
-										class={`ico sborder${k}`}
-										style="position:absolute;left:0;top:0;width:64px;height:64px"
-									/>
-								</Show>
-							)}
-						</Index>
+						{visible.map((v, k) => (
+							<Show when={v()}>
+								<div
+									class={`ico s${k}`}
+									style={`position:absolute;bottom:-8px;left:${
+										['32', '8', '8', '0', '24', '16', '8'][k]
+									}px;opacity:.6;z-index:1`}
+								/>
+							</Show>
+						))}
+						{bordervisible.map((v, k) => (
+							<Show when={v()}>
+								<div
+									class={`ico sborder${k}`}
+									style="position:absolute;left:0;top:0;width:64px;height:64px"
+								/>
+							</Show>
+						))}
 					</Show>
 					<Show when={props.game.game.has_protectonce(props.obj.id)}>
 						<div

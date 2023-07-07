@@ -167,7 +167,7 @@ function ArenaCard(props) {
 }
 
 export default function ArenaInfo() {
-	const rx = store.useRx();
+	const user = store.useRx(state => state.user);
 	const [AB, setAB] = createSignal({});
 	onMount(() => {
 		sock.setCmds({ arenainfo: setAB });
@@ -188,22 +188,22 @@ export default function ArenaInfo() {
 			/>
 			<Components.ExitBtn x={8} y={300} />
 			<Show when={AB().A}>
-				<RenderInfo info={AB().A} y={0} name={rx.user.name} />
+				<RenderInfo info={AB().A} y={0} name={user.name} />
 			</Show>
 			<Show when={AB().B}>
-				<RenderInfo info={AB().B} y={300} name={rx.user.name} />
+				<RenderInfo info={AB().B} y={300} name={user.name} />
 			</Show>
-			{!!rx.user.ocard && (
+			{!!user.ocard && (
 				<>
 					<ArenaCard
 						info={AB().A}
 						y={8}
-						card={Cards.Codes[asUpped(rx.user.ocard, false)]}
+						card={Cards.Codes[asUpped(user.ocard, false)]}
 					/>
 					<ArenaCard
 						info={AB().B}
 						y={300}
-						card={Cards.Codes[asUpped(rx.user.ocard, true)]}
+						card={Cards.Codes[asUpped(user.ocard, true)]}
 					/>
 				</>
 			)}

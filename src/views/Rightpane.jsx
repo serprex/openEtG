@@ -4,7 +4,7 @@ import * as store from '../store.jsx';
 import parseChat from '../parseChat.js';
 
 function ChannelTab(props) {
-	const { opts } = store.useRx();
+	const opts = store.useRx(state => state.opts);
 
 	return (
 		<span
@@ -16,7 +16,7 @@ function ChannelTab(props) {
 }
 
 export default function Rightpane(props) {
-	const { opts } = store.useRx();
+	const opts = store.useRx(state => state.opts);
 
 	return (
 		!opts.hideRightpane && (

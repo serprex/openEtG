@@ -115,12 +115,7 @@ export default function OriginalMainMenu() {
 			spins: level === 'custom' ? 0 : level === 'ai2' ? 2 : 3,
 			rematch: () => vsAi(level, cost, basereward, hpreward),
 			players: shuffle([
-				{
-					idx: 1,
-					name: rx.user.name,
-					user: rx.user.name,
-					deck: rx.orig.deck,
-				},
+				{ idx: 1, name: rx.user.name, user: rx.user.name, deck: rx.orig.deck },
 				{
 					idx: 2,
 					ai: 1,

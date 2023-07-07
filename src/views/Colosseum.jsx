@@ -46,9 +46,9 @@ function mkDaily(type) {
 	mkAi.run(game);
 }
 export default function Colosseum(props) {
-	const rx = store.useRx();
-	const [magename, magedeck] = Decks.mage[rx.user.dailymage],
-		[dgname, dgdeck] = Decks.demigod[rx.user.dailydg];
+	const user = store.useRx(state => state.user);
+	const [magename, magedeck] = Decks.mage[user.dailymage],
+		[dgname, dgdeck] = Decks.demigod[user.dailydg];
 	const events = [
 		() =>
 			'Novice Endurance Fight 3 Commoners in a row without healing in between. May try until you win.',
@@ -76,7 +76,7 @@ export default function Colosseum(props) {
 	const eventui = () => {
 		const eventui = [];
 		for (let i = 1; i < 5; i++) {
-			const active = !(rx.user.daily & (1 << i));
+			const active = !(user.daily & (1 << i));
 			eventui.push(
 				active && (
 					<input
@@ -99,7 +99,7 @@ export default function Colosseum(props) {
 					{active
 						? events[i - 1]
 						: i > 2
-						? rx.user.daily & (i === 3 ? 1 : 32)
+						? user.daily & (i === 3 ? 1 : 32)
 							? 'You defeated this already today.'
 							: 'You failed this today. Better luck tomorrow!'
 						: 'Completed.'}
@@ -112,7 +112,7 @@ export default function Colosseum(props) {
 		<>
 			<Components.ExitBtn x={50} y={50} />
 			{eventui}
-			{rx.user.daily === 191 ? (
+			{user.daily === 191 ? (
 				<>
 					<input
 						type="button"
@@ -135,13 +135,13 @@ export default function Colosseum(props) {
 						'Completing any colosseum event contributes to a 5 day reward cycle.\n' +
 						'At the end of the cycle, your streak is reset.\n\n' +
 						`Reward Cycle: 15$, 25$, 77$, 100$, 250$\n\n${
-							rx.user.ostreak
-								? `You currently have a ${rx.user.ostreak} day colosseum streak.`
+							user.ostreak
+								? `You currently have a ${user.ostreak} day colosseum streak.`
 								: "You'ven't begun a streak."
 						}\n${
-							rx.user.ostreak && rx.user.ostreakday
+							user.ostreak && user.ostreakday
 								? `You've redeemed ${
-										[250, 15, 25, 77, 100][rx.user.ostreak % 5]
+										[250, 15, 25, 77, 100][user.ostreak % 5]
 								  }$ today.`
 								: "You'ven't redeemed a colosseum streak today."
 						}`

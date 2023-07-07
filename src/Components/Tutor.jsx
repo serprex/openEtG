@@ -4,10 +4,10 @@ import { useRx } from '../store.jsx';
 import { Text } from './index.jsx';
 
 export function Tutor(props) {
-	const rx = useRx();
+	const opts = useRx(state => state.opts);
 	const [tut, setTut] = createSignal(false);
 	return (
-		<Show when={!rx.opts.disableTut}>
+		<Show when={!opts.disableTut}>
 			<span
 				class="imgb ico e13"
 				onMouseEnter={[setTut, true]}
