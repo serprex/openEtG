@@ -108,7 +108,7 @@ export default function OriginalResult({ game }) {
 					</div>
 				)}
 			</For>
-			{electrumwon && (
+			{electrumwon > 0 && (
 				<Components.Text
 					text={`${electrumwon}$`}
 					style="text-align:center;width:900px;position:absolute;left:0px;top:550px"

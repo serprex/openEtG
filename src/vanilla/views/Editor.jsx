@@ -91,7 +91,7 @@ export default function OriginalEditor(props) {
 				<input
 					autoFocus
 					value={data().deckCode}
-					onChange={e => store.updateOrig({ deck: parseDeck(e.target.value) })}
+					onInput={e => store.updateOrig({ deck: parseDeck(e.target.value) })}
 					ref={deckref}
 					onClick={e => {
 						e.target.setSelectionRange(0, 999);
