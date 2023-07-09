@@ -107,35 +107,19 @@ export default function Trade(props) {
 			/>
 			<Components.Text
 				text={`${gold() + userutil.calcWealth(Cards, deck(), true)}$`}
-				style={{
-					position: 'absolute',
-					left: '100px',
-					top: '235px',
-				}}
+				style="position:absolute;left:100px;top:235px"
 			/>
 			<Components.Text
 				text={`(${gold()}$)`}
-				style={{
-					position: 'absolute',
-					left: '250px',
-					top: '235px',
-				}}
+				style="position:absolute;left:250px;top:235px"
 			/>
 			<Components.Text
 				text={`${gopher() + userutil.calcWealth(Cards, offer(), true)}$`}
-				style={{
-					position: 'absolute',
-					left: '350px',
-					top: '235px',
-				}}
+				style="position:absolute;left:350px;top:235px"
 			/>
 			<Components.Text
 				text={`(${gopher()}$)`}
-				style={{
-					position: 'absolute',
-					left: '500px',
-					top: '235px',
-				}}
+				style="position:absolute;left:500px;top:235px"
 			/>
 			<input
 				type="button"
@@ -144,11 +128,7 @@ export default function Trade(props) {
 					sock.userEmit('canceltrade', { f: props.foe });
 					store.doNav(import('./MainMenu.jsx'));
 				}}
-				style={{
-					position: 'absolute',
-					left: '10px',
-					top: '10px',
-				}}
+				style="position:absolute;left:10px;top:10px"
 			/>
 			<input
 				type="number"

@@ -13,15 +13,14 @@ const a = Cards.filter(
 	card =>
 		card.rarity > 0 &&
 		card.rarity < 4 &&
-		etgutil.count(pool, card.asUpped(false).code) +
-			etgutil.count(pool, card.asUpped(true).code) ==
-			0,
+		etgutil.count(pool, card.asUpped(false).code) === 0 &&
+		etgutil.count(pool, card.asUpped(true).code) === 0,
 );
 a.forEach(x => console.log(x.name));
 const pool2 = etgutil.deck2pool(pool),
 	poolrank = [];
 pool2.forEach((code, count) => {
-	if (etgutil.asUpped(code, true) == code)
+	if (etgutil.asUpped(code, true) === code)
 		pool2[etgutil.asUpped(code, false)] =
 			(pool2[etgutil.asUpped(code, false)] ?? 0) + count;
 });

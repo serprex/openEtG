@@ -46,12 +46,32 @@ export function parseDeck(dcode) {
 	return dcode;
 }
 
+function parseAiDeck(dcode) {
+	dcode = dcode.trim();
+	for (const level in aiDecks) {
+		const aiDeck = aiDecks[level].find(x => x[0] === dcode);
+		if (aiDeck) return { level, name: dcode, deck: aiDeck[1] };
+	}
+	for (let e1 = 1; e1 < 13; e1++)
+		if (dcode.startsWith(ai4names[e1][0]))
+			for (let e2 = 1; e2 < 13; e2++)
+				if (dcode.endsWith(ai4names[e2][0]))
+					return {
+						level: 'ai4',
+						name: ai4names[e1][0] + ai4names[e2][1],
+						deck: etgutil.encodedeck(wasm.deckgen_ai4(e1, e2)),
+					};
+	return { level: 'custom', name: 'Custom', deck: parseDeck(dcode) };
+}
+
 function mkAi4() {
 	const es = upto(144),
 		e1 = ((es / 12) | 0) + 1,
-		e2 = (es % 12) + 1,
-		deck = wasm.deckgen_ai4(e1, e2);
-	return [ai4names[e1][0] + ai4names[e2][1], etgutil.encodedeck(deck)];
+		e2 = (es % 12) + 1;
+	return [
+		ai4names[e1][0] + ai4names[e2][1],
+		etgutil.encodedeck(wasm.deckgen_ai4(e1, e2)),
+	];
 }
 
 export default function OriginalMainMenu() {
@@ -93,14 +113,16 @@ export default function OriginalMainMenu() {
 			userEmit('origadd', update);
 			store.addOrig(update);
 		}
-		const [ainame, aideck] =
-			level === 'custom'
-				? ['Custom', parseDeck(origfoename())]
-				: level === 'ai4'
-				? mkAi4()
-				: level === 'fg' && typeof rx.orig.fg === 'number'
-				? aiDecks.fg[rx.orig.fg]
-				: choose(aiDecks[level]);
+
+		const aiinfo = level === 'custom' && parseAiDeck(origfoename());
+		const ailevel = aiinfo ? aiinfo.level : level;
+		const [ainame, aideck] = aiinfo
+			? [aiinfo.name, aiinfo.deck]
+			: level === 'ai4'
+			? mkAi4()
+			: level === 'fg' && typeof rx.orig.fg === 'number'
+			? aiDecks.fg[rx.orig.fg]
+			: choose(aiDecks[level]);
 		if (rx.orig.fg) {
 			userEmit('origadd', { fg: -1 });
 			store.addOrig({ fg: -1 });
@@ -121,9 +143,9 @@ export default function OriginalMainMenu() {
 					ai: 1,
 					name: ainame,
 					deck: aideck,
-					hp: level === 'fg' ? 200 : level === 'ai4' ? 150 : 100,
-					drawpower: level === 'ai4' || level === 'fg' ? 2 : 1,
-					markpower: level === 'ai4' || level === 'fg' ? 3 : 1,
+					hp: ailevel === 'fg' ? 200 : ailevel === 'ai4' ? 150 : 100,
+					drawpower: ailevel === 'ai4' || ailevel === 'fg' ? 2 : 1,
+					markpower: ailevel === 'ai4' || ailevel === 'fg' ? 3 : 1,
 				},
 			]),
 		});
