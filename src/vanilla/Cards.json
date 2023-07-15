@@ -1,5 +1,5 @@
 [[["Name","Code","Cost","Skill","Attack","Health","Status","R"],
-	[["Dagger",1027,0,"buff=v_dagger",3,1,"",2],["Dirk",3027,0,"buff=v_dagger",4,1,"",17],["Short Sword",1028,1,"v_noluci",3,2,"",3],["Long Sword",3028,1,"v_noluci",6,2,"",17],["Hammer",1029,2,"buff=v_hammer",3,4,"",3],["Gavel",3029,2,"buff=v_hammer",6,6,"",17],["Short Bow",1035,2,"buff=v_bow",3,3,"ranged",3],["Long Bow",3035,2,"buff=v_bow",6,4,"ranged",17]],
+	[["Dagger",1027,0,"buff=v_dagger",2,1,"",2],["Dirk",3027,0,"buff=v_dagger",4,1,"",17],["Short Sword",1028,1,"v_noluci",3,2,"",3],["Long Sword",3028,1,"v_noluci",6,2,"",17],["Hammer",1029,2,"buff=v_hammer",3,4,"",3],["Gavel",3029,2,"buff=v_hammer",6,6,"",17],["Short Bow",1035,2,"buff=v_bow",3,3,"ranged",3],["Long Bow",3035,2,"buff=v_bow",6,4,"ranged",17]],
 	[["Discord",1109,3,"hit=v_scramble",4,3,"",6],["Discord",3109,3,"hit=v_scramble",6,3,"",18]],
 	[["Arsenic",1210,2,"hit=poison 1",2,7,"poisonous+nocturnal",6],["Arsenic",3210,2,"hit=poison 1",4,7,"poisonous+nocturnal",18]],
 	[["Titan",1308,5,"v_noluci",7,50,"momentum",6],["Titan",3308,5,"v_noluci",8,50,"momentum",18]],
