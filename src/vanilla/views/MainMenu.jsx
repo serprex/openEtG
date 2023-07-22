@@ -123,7 +123,7 @@ export default function OriginalMainMenu() {
 			: level === 'fg' && typeof rx.orig.fg === 'number'
 			? aiDecks.fg[rx.orig.fg]
 			: choose(aiDecks[level]);
-		if (rx.orig.fg) {
+		if (level === 'fg' && typeof rx.orig.fg === 'number') {
 			userEmit('origadd', { fg: -1 });
 			store.addOrig({ fg: -1 });
 		}
