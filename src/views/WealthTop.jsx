@@ -17,20 +17,23 @@ export default function WealthTop(props) {
 		if (top) {
 			for (let i = 0; i < top.length; i += 2) {
 				olc.push(
-					<li
+					<div
+						style="display:flex;justify-content:space-between"
 						onClick={() =>
 							store.doNav(import('./Library.jsx'), { name: top[i] })
 						}>
-						{top[i]}
-						<span class="floatRight">{Math.round(top[i + 1])}</span>
-					</li>,
+						<div style="text-overflow:ellipsis;overflow:hidden">
+							{`${(i >> 1) + 1}. ${top[i]}`}
+						</div>
+						{Math.round(top[i + 1])}
+					</div>,
 				);
 			}
 		}
 		return (
-			<ol style="position:absolute;left:80px;width:800px;columns:3;column-gap:40px;line-height:17px">
+			<div style="position:absolute;left:90px;width:810px;line-height:18px;display:grid;grid-template-rows:repeat(33,18px);column-gap:18px;grid-auto-flow:column;grid-auto-columns:257px;white-space:nowrap">
 				{olc}
-			</ol>
+			</div>
 		);
 	};
 
