@@ -80,11 +80,7 @@ export default function Upgrade() {
 					type="button"
 					value={state().downgrade ? 'Downgrade' : 'Upgrade'}
 					onClick={eventWrap(state().downgrade ? downgradeCard : upgradeCard)}
-					style={{
-						position: 'absolute',
-						left: '150px',
-						top: '50px',
-					}}
+					style="position:absolute;left:150px;top:50px"
 				/>
 			)}
 			{state().canLish && (
@@ -92,74 +88,46 @@ export default function Upgrade() {
 					type="button"
 					value={state().downlish ? 'Unpolish' : 'Polish'}
 					onClick={eventWrap(state().downlish ? unpolishCard : polishCard)}
-					style={{
-						position: 'absolute',
-						left: '150px',
-						top: '95px',
-					}}
+					style="position:absolute;left:150px;top:95px"
 				/>
 			)}
 			<input
 				type="button"
 				value="Autoconvert"
 				onClick={autoCards}
-				style={{
-					position: 'absolute',
-					left: '5px',
-					top: '138px',
-				}}
+				style="position:absolute;left:5px;top:138px"
 			/>
 			<Components.Text
 				text={user.gold + '$'}
-				style={{
-					position: 'absolute',
-					left: '5px',
-					top: '240px',
-				}}
+				style="position:absolute;left:5px;top:240px"
 			/>
 			<Components.Text
 				text={state().info1}
-				style={{
-					position: 'absolute',
-					left: '250px',
-					top: '50px',
-				}}
+				style="position:absolute;left:250px;top:50px"
 			/>
 			<Components.Text
 				text={state().info3}
-				style={{
-					position: 'absolute',
-					left: '250px',
-					top: '95px',
-				}}
+				style="position:absolute;left:250px;top:95px"
 			/>
 			<Components.Text
 				text={error()}
-				style={{
-					position: 'absolute',
-					left: '100px',
-					top: '170px',
-				}}
+				style="position:absolute;left:100px;top:170px"
 			/>
 			<Components.Card x={534} y={8} card={state().card1} />
 			<Components.Card x={734} y={8} card={state().card2} />
 			<input
 				type="button"
 				value="Toggle Bound"
-				style={{
-					position: 'absolute',
-					left: '5px',
-					top: '554px',
-				}}
+				style="position:absolute;left:5px;top:554px"
 				onClick={() => setShowBound(showBound => !showBound)}
 			/>
 			<Components.CardSelector
 				cards={Cards}
 				cardpool={showBound() ? boundpool() : cardpool()}
 				maxedIndicator
+				filterboth
 				onClick={card => {
 					const newstate = {
-						...state(),
 						card1: card,
 						card2: card.asUpped(true),
 						canGrade: true,
@@ -203,7 +171,7 @@ export default function Upgrade() {
 						newstate.downlish = false;
 					}
 					setError('');
-					setState(newstate);
+					setState(state => ({...state, ...newstate}));
 				}}
 			/>
 		</>
