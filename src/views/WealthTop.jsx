@@ -31,7 +31,7 @@ export default function WealthTop(props) {
 			}
 		}
 		return (
-			<div style="position:absolute;left:90px;width:810px;line-height:18px;display:grid;grid-template-rows:repeat(33,18px);column-gap:18px;grid-auto-flow:column;grid-auto-columns:257px;white-space:nowrap">
+			<div style="position:absolute;left:90px;width:810px;display:grid;grid-template-rows:repeat(33,18px);column-gap:18px;grid-auto-flow:column;grid-auto-columns:257px;white-space:nowrap">
 				{olc}
 			</div>
 		);
