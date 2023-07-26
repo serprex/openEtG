@@ -9,7 +9,7 @@ import * as etgutil from '../etgutil.js';
 import * as Components from '../Components/index.jsx';
 import * as store from '../store.jsx';
 import aiDecks from '../Decks.json' assert { type: 'json' };
-import deckgen from '../deckgen.js';
+import { deckgen } from '../deckgen.js';
 
 const { mage, demigod } = aiDecks;
 function PremadePicker({ onClick, onClose }) {
@@ -101,7 +101,7 @@ function PlayerEditor(props) {
 								newdeck = Promise.resolve(newdeck);
 								break;
 							case 'rng':
-								newdeck = deckgen(
+								[data.name, newdeck] = deckgen(
 									rnguprate() * 100,
 									data.markpower,
 									rngmaxrare() | 0,

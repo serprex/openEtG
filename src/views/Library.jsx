@@ -99,35 +99,17 @@ export default function Library(props) {
 	}
 	return (
 		<>
-			<span
-				style={{
-					position: 'absolute',
-					left: '100px',
-					top: '8px',
-					'white-space': 'pre',
-				}}>
+			<span style="position:absolute;left:100px;top:8px;white-space:pre">
 				{`Wealth ${
 					data().gold + Math.round(userutil.calcWealth(Cards, memo().cardpool))
 				}\nGold ${data().gold}`}
 			</span>
-			<span
-				style={{
-					position: 'absolute',
-					left: '320px',
-					top: '8px',
-					'white-space': 'pre',
-				}}>
+			<span style="position:absolute;left:320px;top:8px;white-space:pre">
 				ZE Progress {memo().progress} / {memo().progressmax}
 				{'\nSZE Progress '}
 				{memo().shinyprogress} / {memo().progressmax}
 			</span>
-			<span
-				style={{
-					position: 'absolute',
-					left: '540px',
-					top: '8px',
-					'white-space': 'pre',
-				}}>
+			<span style="position:absolute;left:540px;top:8px;white-space:pre">
 				{`PvE ${data().aiwins} - ${data().ailosses}\nPvP ${data().pvpwins} - ${
 					data().pvplosses
 				}`}
@@ -136,22 +118,14 @@ export default function Library(props) {
 			<input
 				type="button"
 				value="Toggle Bound"
-				style={{
-					position: 'absolute',
-					left: '5px',
-					top: '554px',
-				}}
+				style="position:absolute;left:5px;top:554px"
 				onClick={() => setShowBound(showBound => !showBound)}
 			/>
 			<Components.ExitBtn x={5} y={8} />
 			<input
 				type="button"
 				value="Export"
-				style={{
-					position: 'absolute',
-					left: '5px',
-					top: '28px',
-				}}
+				style="position:absolute;left:5px;top:28px"
 				onClick={() => open('/collection/' + props.name, '_blank')}
 			/>
 			<Components.CardSelector

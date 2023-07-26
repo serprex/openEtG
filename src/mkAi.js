@@ -5,7 +5,7 @@ import * as sock from './sock.jsx';
 import * as store from './store.jsx';
 import * as userutil from './userutil.js';
 import { choose, randint, shuffle } from './util.js';
-import deckgen from './deckgen.js';
+import { deckgen } from './deckgen.js';
 import Game from './Game.js';
 
 export function run(game) {
@@ -64,36 +64,6 @@ export function mkPremade(level, daily, datafn = null) {
 	shuffle(data.players);
 	return new Game(datafn ? datafn(data) : data);
 }
-const randomNames = [
-	'Adrienne',
-	'Audrie',
-	'Billie',
-	'Brendon',
-	'Charles',
-	'Caddy',
-	'Dane',
-	'Digna',
-	'Emory',
-	'Evan',
-	'Fern',
-	'Garland',
-	'Gord',
-	'Margie',
-	'Mariah',
-	'Martina',
-	'Monroe',
-	'Murray',
-	'Page',
-	'Pariah',
-	'Rocky',
-	'Ronald',
-	'Ren',
-	'Seth',
-	'Sherman',
-	'Stormy',
-	'Tammi',
-	'Yuriko',
-];
 export function mkAi(level, daily, datafn = null) {
 	const urdeck = sock.getDeck(),
 		{ user } = store.state,
@@ -107,7 +77,7 @@ export function mkAi(level, daily, datafn = null) {
 		store.chatMsg(`Requires ${cost}$`, 'System');
 		return;
 	}
-	const deck = level === 0 ? deckgen(0, 1, 2) : deckgen(0.4, 2, 3);
+	const [aiName, deck] = level === 0 ? deckgen(0, 1, 2) : deckgen(0.4, 2, 3);
 	store.setOptTemp('aideck', deck);
 
 	const data = {
@@ -125,7 +95,7 @@ export function mkAi(level, daily, datafn = null) {
 			{
 				idx: 2,
 				ai: 1,
-				name: choose(randomNames),
+				name: aiName,
 				deck: deck,
 				hp: level === 0 ? 100 : level === 1 ? 125 : 150,
 				drawpower: level > 1 ? 2 : 1,

@@ -60,12 +60,7 @@ if (typeof kongregateAPI === 'undefined') {
 		});
 
 		return (
-			<div
-				style={{
-					'background-image': 'url(assets/bg_login.webp)',
-					width: '900px',
-					height: '600px',
-				}}>
+			<div style="background-image:url(assets/bg_login.webp);width:900px;height:600px">
 				<input
 					placeholder="Username"
 					autoFocus
@@ -73,11 +68,7 @@ if (typeof kongregateAPI === 'undefined') {
 					onKeyPress={maybeLogin}
 					value={rx.opts.username ?? ''}
 					onInput={e => store.setOpt('username', e.target.value)}
-					style={{
-						position: 'absolute',
-						left: '270px',
-						top: '350px',
-					}}
+					style="position:absolute;left:270px;top:350px"
 				/>
 				<input
 					ref={password}
@@ -85,18 +76,9 @@ if (typeof kongregateAPI === 'undefined') {
 					placeholder="Password"
 					tabIndex="2"
 					onKeyPress={maybeLogin}
-					style={{
-						position: 'absolute',
-						left: '270px',
-						top: '380px',
-					}}
+					style="position:absolute;left:270px;top:380px"
 				/>
-				<label
-					style={{
-						position: 'absolute',
-						left: '270px',
-						top: '410px',
-					}}>
+				<label style="position:absolute;left:270px;top:410px">
 					<input
 						type="checkbox"
 						checked={!!rx.opts.remember}
@@ -113,23 +95,13 @@ if (typeof kongregateAPI === 'undefined') {
 					type="button"
 					value="Login"
 					onClick={() => loginClick()}
-					style={{
-						position: 'absolute',
-						left: '430px',
-						top: '350px',
-						width: '100px',
-					}}
+					style="position:absolute;left:430px;top:350px;width:100px"
 				/>
 				<input
 					type="button"
 					value="New Account"
 					onClick={e => store.doNav(import('./ElementSelect.jsx'))}
-					style={{
-						position: 'absolute',
-						left: '430px',
-						top: '380px',
-						width: '100px',
-					}}
+					style="position:absolute;left:430px;top:380px;width:100px"
 				/>
 				<Show when={commit()}>
 					{data => (
@@ -137,12 +109,7 @@ if (typeof kongregateAPI === 'undefined') {
 							target="_blank"
 							rel="noopener"
 							href={data().html_url}
-							style={{
-								'max-width': '670px',
-								position: 'absolute',
-								left: '220px',
-								top: '460px',
-							}}>
+							style="max-width:670px;position:absolute;left:220px;top:460px">
 							<For each={data().commit.message.split('\n')}>
 								{text => <div style="margin-bottom:6px">{text}</div>}
 							</For>

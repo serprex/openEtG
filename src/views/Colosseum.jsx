@@ -82,20 +82,12 @@ export default function Colosseum(props) {
 					<input
 						type="button"
 						value="Fight!"
-						style={{
-							position: 'absolute',
-							left: '50px',
-							top: `${100 + 30 * i}px`,
-						}}
+						style={`position:absolute;left:50px;top:${100 + 30 * i}px`}
 						onClick={[mkDaily, i]}
 					/>
 				),
 				<span
-					style={{
-						position: 'absolute',
-						left: '130px',
-						top: `${100 + 30 * i}px`,
-					}}>
+					style={`position:absolute;left:130px;top:${100 + 30 * i}px`}>
 					{active
 						? events[i - 1]
 						: i > 2

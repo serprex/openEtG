@@ -8,21 +8,7 @@ import * as Components from '../../Components/index.jsx';
 import Cards from '../Cards.js';
 import { userEmit, sendChallenge } from '../../sock.jsx';
 import * as wasm from '../../rs/pkg/etg.js';
-
-const ai4names = {
-	[etg.Air]: ['Ari', 'es'],
-	[etg.Aether]: ['Aeth', 'eric'],
-	[etg.Darkness]: ['Shad', 'ow'],
-	[etg.Death]: ['Mor', 'tis'],
-	[etg.Earth]: ['Ter', 'ra'],
-	[etg.Entropy]: ['Dis', 'cord'],
-	[etg.Fire]: ['Pyr', 'ofuze'],
-	[etg.Gravity]: ['Mas', 'sa'],
-	[etg.Life]: ['Vit', 'al'],
-	[etg.Light]: ['Lum', 'iel'],
-	[etg.Time]: ['Chr', 'onos'],
-	[etg.Water]: ['Aqua', 'rius'],
-};
+import { deckgenAi4 } from '../../deckgen.js';
 
 export function parseDeck(dcode) {
 	dcode = dcode.trim();
@@ -64,15 +50,6 @@ function parseAiDeck(dcode) {
 	return { level: 'custom', name: 'Custom', deck: parseDeck(dcode) };
 }
 
-function mkAi4() {
-	const es = upto(144),
-		e1 = ((es / 12) | 0) + 1,
-		e2 = (es % 12) + 1;
-	return [
-		ai4names[e1][0] + ai4names[e2][1],
-		etgutil.encodedeck(wasm.deckgen_ai4(e1, e2)),
-	];
-}
 
 export default function OriginalMainMenu() {
 	const rx = store.useRx();
@@ -119,7 +96,7 @@ export default function OriginalMainMenu() {
 		const [ainame, aideck] = aiinfo
 			? [aiinfo.name, aiinfo.deck]
 			: level === 'ai4'
-			? mkAi4()
+			? deckgenAi4()
 			: level === 'fg' && typeof rx.orig.fg === 'number'
 			? aiDecks.fg[rx.orig.fg]
 			: choose(aiDecks[level]);

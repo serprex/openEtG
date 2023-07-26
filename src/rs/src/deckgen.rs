@@ -13,12 +13,11 @@ use crate::skill::{Event, Skill};
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn deckgen_duo(uprate: f64, markpower: i32, maxrarity: i32, seed: i32) -> Vec<u16> {
+pub fn deckgen_duo(e1: i8, e2: i8, uprate: f64, markpower: i32, maxrarity: i32, seed: i32) -> Vec<u16> {
 	let mut rng = Pcg32::seed_from_u64(seed as u64);
-	let eles = [rng.gen_range(1..=12i8), rng.gen_range(1..=12i8)];
-	let mut build = Builder::new(eles[1] as i32, uprate, markpower, &mut rng);
+	let mut build = Builder::new(e2 as i32, uprate, markpower, &mut rng);
 	for j in 0..=1 {
-		let ele = eles[j];
+		let ele = if j == 0 { e1 } else { e2 };
 		for i in 0..(20 - j * 10) {
 			let upped = rng.gen_bool(uprate);
 			if let Some(card) = card::OpenSet.random_card(&mut rng, upped, |card| {
@@ -53,43 +52,44 @@ pub fn deckgen_bow(uprate: f64, markpower: i32, maxrarity: i32, seed: i32) -> Ve
 		}
 	} else {
 		build = Builder::new(etg::Chroma, uprate, markpower, &mut rng);
-		for _ in 0..rng.gen_range(0..=6) {
+		for _ in 0..rng.gen_range(2..=6) {
 			build.add_card(card::Nova as u16);
 		}
+		for _ in 0..rng.gen_range(0..=2) {
+			build.add_card(card::ChromaticButterfly as u16);
+		}
 	}
-	for ele in 1..=12 {
-		for i in 0..=rng.gen_range(1..=4) {
-			let upped = rng.gen_bool(uprate);
-			if let Some(card) = card::OpenSet.random_card(&mut rng, upped, |card| {
-				card.element == ele
-					&& (card.flag & Flag::pillar) == 0
-					&& card.cost < 7 && card.rarity as i32 <= maxrarity
-					&& build.card_count(card.code) != 6
-					&& !(card.kind == Kind::Shield && build.anyshield >= 3)
-					&& !(card.kind == Kind::Weapon && build.anyweapon >= 3)
-					&& !card.isOf(card::Give)
-					&& !card.isOf(card::GiftofOceanus)
-					&& !card.isOf(card::Precognition)
-			}) {
-				if (build.ecost[ele as usize] + (card.cost as f32) < 10.0) {
-					build.add_card(card.code);
+	while build.deck.len() < 30 {
+		for ele in 1..=12 {
+			for i in 0..=rng.gen_range(1..=4) {
+				let upped = rng.gen_bool(uprate);
+				if let Some(card) = card::OpenSet.random_card(&mut rng, upped, |card| {
+					card.element == ele
+						&& (card.flag & Flag::pillar) == 0
+						&& card.cost < 7 && card.rarity as i32 <= maxrarity
+						&& build.card_count(card.code) != 6
+						&& !(card.kind == Kind::Shield && build.anyshield >= 3)
+						&& !(card.kind == Kind::Weapon && build.anyweapon >= 3)
+						&& !card.isOf(card::Give)
+						&& !card.isOf(card::GiftofOceanus)
+						&& !card.isOf(card::Precognition)
+				}) {
+					if (build.ecost[ele as usize] + (card.cost as f32) < 10.0) {
+						build.add_card(card.code);
+					}
 				}
 			}
 		}
+		build.filter_cards();
+		let mut cost = build.ecost[0] / 4.0;
+		for i in 1..=12 {
+			cost += build.ecost[i];
+		}
+		for i in (0..cost as i32).step_by(12) {
+			build.deck.push(build.up_code(card::QuantumPillar as u16));
+		}
 	}
-	build.filter_cards();
-	let mut cost = build.ecost[0] / 4.0;
-	for i in 1..=12 {
-		cost += build.ecost[i];
-	}
-	for i in (0..cost as i32).step_by(12) {
-		build.deck.push(build.up_code(card::QuantumPillar as u16));
-	}
-	if build.deck.len() < 30 {
-		deckgen_duo(uprate, markpower, maxrarity, seed)
-	} else {
-		build.finish()
-	}
+	build.finish()
 }
 
 #[cfg(target_arch = "wasm32")]
