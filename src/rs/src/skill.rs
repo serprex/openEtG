@@ -4856,7 +4856,7 @@ impl Skill {
 							&& !card::IsOf(card.code as i32, card::v_Miracle)
 							&& !etg::ShardList[1..]
 								.iter()
-								.any(|&shard| !card::IsOf(card.code as i32, shard as i32))
+								.any(|&shard| card::IsOf(card.code as i32 + 2000, shard as i32))
 							&& (i > 0 || anyentro || card.element as i32 == etg::Entropy)
 					}) {
 						if card.element as i32 == etg::Entropy {
@@ -4871,9 +4871,7 @@ impl Skill {
 			}
 			Self::v_silence => {
 				let foe = ctx.get_foe(ctx.get_owner(c));
-				if !ctx.get(foe, Flag::sanctuary) {
-					ctx.set(foe, Stat::casts, 0);
-				}
+				return Skill::silence.proc(ctx, c, foe, data);
 			}
 			Self::v_slow => {
 				if ctx.get_kind(t) == Kind::Creature {
