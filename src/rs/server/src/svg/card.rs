@@ -58,11 +58,9 @@ pub fn card(code: i32) -> Option<String> {
 	result.push('>');
 	result.push_str(card_name(card));
 	result.push_str(
-			"</text><foreignObject width='160' height='256'><p xmlns='http://www.w3.org/1999/xhtml' style='font:10px sans-serif;white-space:pre-wrap"
+			"</text><foreignObject width='160' height='256'><p xmlns='http://www.w3.org/1999/xhtml' style='font:10px sans-serif;white-space:pre-wrap;color:#"
 			);
-	if upped {
-		result.push_str(";color:#000");
-	}
+	result.push_str(if upped { "000" } else { "fff" });
 	result.push_str(";position:absolute;left:2px;top:150px;right:2px;height:106px;margin:0'><img ");
 	if shiny {
 		result.push_str("class='shiny' ");
@@ -90,13 +88,11 @@ pub fn card(code: i32) -> Option<String> {
 	if card.cost != 0 {
 		write!(
 			result,
-			"<span style='position:absolute;right:2px;top:-150px'>{}</span>",
-			card.cost
+			"<span style='position:absolute;right:2px;top:-150px'>{}<span class='ico ce{}'></span></span>",
+			card.cost,
+			card.costele,
 		)
 		.ok();
-		if card.element != card.costele {
-			write!(result, "<span class='ico ce{}'></span>", card.costele).ok();
-		}
 	}
 	write!(result, "<span class='ico t{}' style='position:absolute;right:2px;top:-130px'></span></p></foreignObject></svg>", card.kind as i32).ok();
 	Some(result)
