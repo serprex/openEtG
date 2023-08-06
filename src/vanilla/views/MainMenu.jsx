@@ -8,7 +8,7 @@ import * as Components from '../../Components/index.jsx';
 import Cards from '../Cards.js';
 import { userEmit, sendChallenge } from '../../sock.jsx';
 import * as wasm from '../../rs/pkg/etg.js';
-import { deckgenAi4 } from '../../deckgen.js';
+import { deckgenAi4, aiNames } from '../../deckgen.js';
 
 export function parseDeck(dcode) {
 	dcode = dcode.trim();
@@ -39,12 +39,12 @@ function parseAiDeck(dcode) {
 		if (aiDeck) return { level, name: dcode, deck: aiDeck[1] };
 	}
 	for (let e1 = 1; e1 < 13; e1++)
-		if (dcode.startsWith(ai4names[e1][0]))
+		if (dcode.startsWith(aiNames[e1][0]))
 			for (let e2 = 1; e2 < 13; e2++)
-				if (dcode.endsWith(ai4names[e2][0]))
+				if (dcode.endsWith(aiNames[e2][0]))
 					return {
 						level: 'ai4',
-						name: ai4names[e1][0] + ai4names[e2][1],
+						name: aiNames[e1][0] + aiNames[e2][1],
 						deck: etgutil.encodedeck(wasm.deckgen_ai4(e1, e2)),
 					};
 	return { level: 'custom', name: 'Custom', deck: parseDeck(dcode) };

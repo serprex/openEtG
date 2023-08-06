@@ -3,7 +3,7 @@ import * as wasm from './rs/pkg/etg.js';
 import { randint, upto } from './util.js';
 import { encodedeck } from './etgutil.js';
 
-const aiNames = {
+export const aiNames = {
 	[etg.Air]: ['Ari', 'es'],
 	[etg.Aether]: ['Aeth', 'eric'],
 	[etg.Darkness]: ['Shad', 'ow'],

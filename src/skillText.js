@@ -636,7 +636,7 @@ const data = {
 		'Foe draws 2, 3 if own mark is 1:6, cards, you draw an equal amount of cards.',
 	v_burrow: 'Burrow this creature. Strength is halved while burrowed.',
 	v_butterfly:
-		'Target something smaller than, or weaker than, 3. Replace target\'s skills with "3:1 Destroy target permanent"',
+		'Target creature with less attack than 3. Replace target\'s skills with "3:1 Destroy target permanent"',
 	v_cold: '30% chance to freeze attackers for 3.',
 	v_cpower: 'Target gains 1 to 5 strength. Target gains 1 to 5 hp.',
 	v_cseed: 'A random effect is inflicted to target creature.',
