@@ -113,9 +113,9 @@ export default function parseChat(e) {
 			store.chatMsg(msg.slice(1), 'System');
 		} else if (!msg.match(/^\/[^/]/) || (user && msg.match(/^\/w( |")/))) {
 			if (!msg.match(/^\s*$/)) {
-				msg = msg.replace(/^\/\//, '/');
+				const escapedmsg = msg.replace(/^\/\//, '/');
 				if (user) {
-					const data = { msg };
+					const data = { msg: escapedmsg };
 					if (msg.match(/^\/w( |")/)) {
 						const match = msg.match(/^\/w"([^"]*)"/);
 						const to = (match && match[1]) || msg.slice(3, msg.indexOf(' ', 4));
@@ -128,7 +128,7 @@ export default function parseChat(e) {
 				} else {
 					sock.emit({
 						x: 'guestchat',
-						msg: msg,
+						msg: escapedmsg,
 						u: storeState.opts.username || guestname,
 					});
 				}
