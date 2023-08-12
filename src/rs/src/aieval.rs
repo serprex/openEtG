@@ -1324,6 +1324,8 @@ pub fn eval(ctx: &Game) -> f32 {
 		if patience {
 			pscore += (ctx.count_creatures(pl) * 3) as f32;
 		}
+		pscore += (quantamap.get(pl, etg::Chroma) as f32) / 1188.0;
+		pscore += (player.quanta.iter().map(|q| *q as u32).sum::<u32>() as f32) / 1188.0;
 		pscore += evalthing(
 			ctx,
 			&damage,
