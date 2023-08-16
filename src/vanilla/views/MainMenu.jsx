@@ -50,7 +50,6 @@ function parseAiDeck(dcode) {
 	return { level: 'custom', name: 'Custom', deck: parseDeck(dcode) };
 }
 
-
 export default function OriginalMainMenu() {
 	const rx = store.useRx();
 	const origfoename = () => rx.opts.origfoename ?? '';

@@ -25,11 +25,13 @@ export function deckgen(uprate, markpower, maxRarity) {
 			e2 = (es % 12) + 1;
 		return [
 			aiNames[e1][0] + aiNames[e2][1],
-			encodedeck(wasm.deckgen_duo(e1, e2, uprate, markpower, maxRarity, randint())),
-		]
+			encodedeck(
+				wasm.deckgen_duo(e1, e2, uprate, markpower, maxRarity, randint()),
+			),
+		];
 	} else {
 		return [
-			"Celeste",
+			'Celeste',
 			encodedeck(wasm.deckgen_bow(uprate, markpower, maxRarity, randint())),
 		];
 	}

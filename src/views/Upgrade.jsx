@@ -171,7 +171,7 @@ export default function Upgrade() {
 						newstate.downlish = false;
 					}
 					setError('');
-					setState(state => ({...state, ...newstate}));
+					setState(state => ({ ...state, ...newstate }));
 				}}
 			/>
 		</>
