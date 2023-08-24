@@ -329,13 +329,9 @@ fn eval_skill(
 					ctx.get(weapon, Stat::cost) as f32
 				}
 			}
-			Skill::disfield | Skill::v_disfield => {
-				(3 + quantamap.get(ctx.get_owner(c), etg::Chroma) as i32) as f32
-			}
-			Skill::disshield | Skill::v_disshield => {
-				(2 + quantamap.get(ctx.get_owner(c), etg::Entropy) as i32) as f32
-			}
-			Skill::dive | Skill::v_dive => {
+			Skill::disfield => (3 + quantamap.get(ctx.get_owner(c), etg::Chroma) as i32) as f32,
+			Skill::disshield => (2 + quantamap.get(ctx.get_owner(c), etg::Entropy) as i32) as f32,
+			Skill::dive => {
 				if ctx.get_kind(c) == Kind::Spell {
 					ctx.get_card(ctx.get(c, Stat::card)).attack as f32
 				} else {
@@ -370,13 +366,8 @@ fn eval_skill(
 			Skill::forceplay => 2.0,
 			Skill::fractal => (20 - ctx.get_player(ctx.get_owner(c)).hand_len()) as f32 / 4.0,
 			Skill::freedom => 4.0,
-			Skill::freeze | Skill::v_freeze | Skill::freezeperm => {
-				if card::Upped(ctx.get(c, Stat::card)) {
-					3.0
-				} else {
-					3.5
-				}
-			}
+			Skill::freeze(x) | Skill::v_freeze(x) => x as f32,
+			Skill::freezeperm => 4.0,
 			Skill::fungusrebirth => 1.0,
 			Skill::gas | Skill::v_gas => 5.0,
 			Skill::give => 1.0,
@@ -452,7 +443,7 @@ fn eval_skill(
 			Skill::locket => 1.0,
 			Skill::loot => 2.0,
 			Skill::luciferin | Skill::v_luciferin => 3.0,
-			Skill::lycanthropy | Skill::v_lycanthropy => 4.0,
+			Skill::lycanthropy => 4.0,
 			Skill::mend => 3.0,
 			Skill::metamorph => 2.0,
 			Skill::midas => 6.0,
@@ -669,7 +660,7 @@ fn eval_skill(
 				}
 			}
 			Skill::absorber => 5.0,
-			Skill::blockwithcharge | Skill::v_blockwithcharge => {
+			Skill::blockwithcharge => {
 				ctx.get(c, Stat::charges) as f32
 					/ (1 + ctx.count_creatures(ctx.get_foe(ctx.get_owner(c))) * 2) as f32
 			}
@@ -1180,17 +1171,17 @@ pub fn eval(ctx: &Game) -> f32 {
 		if shield != 0 {
 			for &fsh in ctx.getSkill(shield, Event::Shield) {
 				match fsh {
-					Skill::blockwithcharge | Skill::v_blockwithcharge => {
+					Skill::blockwithcharge => {
 						wall.shield = Some(WallShield::Chargeblock(ctx.get(shield, Stat::charges)));
 					}
-					Skill::disshield | Skill::v_disshield => {
-						if fsh == Skill::disshield || !ctx.get(pl, Flag::sanctuary) {
+					Skill::disshield => {
+						if ctx.cardset() == CardSet::Open || !ctx.get(pl, Flag::sanctuary) {
 							wall.shield =
 								Some(WallShield::Disentro(player.quanta(etg::Entropy) as i32));
 						}
 					}
-					Skill::disfield | Skill::v_disfield => {
-						if fsh == Skill::disfield || !ctx.get(pl, Flag::sanctuary) {
+					Skill::disfield => {
+						if ctx.cardset() == CardSet::Open || !ctx.get(pl, Flag::sanctuary) {
 							wall.shield = Some(WallShield::Dischroma(
 								player.quanta.iter().map(|&q| q as i32).sum::<i32>(),
 							));

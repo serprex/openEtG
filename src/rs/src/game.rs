@@ -1369,7 +1369,7 @@ impl Game {
 			id,
 			&[
 				Skill::hatch,
-				Skill::freeze,
+				Skill::freeze(4),
 				Skill::burrow,
 				Skill::destroy,
 				Skill::steal,
@@ -1383,7 +1383,7 @@ impl Game {
 				Skill::mutation,
 				Skill::growth(2, 2),
 				Skill::growth(2, 0),
-				Skill::poison(1),
+				Skill::poisonfoe(1),
 				Skill::deja,
 				Skill::endow,
 				Skill::guard,
@@ -1397,14 +1397,14 @@ impl Game {
 			id,
 			&[
 				Skill::v_hatch,
-				Skill::v_freeze,
+				Skill::v_freeze(3),
 				Skill::v_burrow,
 				Skill::destroy,
 				Skill::v_steal,
-				Skill::v_dive,
+				Skill::dive,
 				Skill::mend,
 				Skill::paradox,
-				Skill::v_lycanthropy,
+				Skill::lycanthropy,
 				Skill::poison(1),
 				Skill::gpull,
 				Skill::devour,
@@ -1904,7 +1904,6 @@ impl Game {
 	}
 
 	pub fn addCreaCore(&mut self, id: i32, crea: i32, fromhand: bool) {
-		debug_assert!(id < crea);
 		let pl = self.get_player_mut(id);
 		for cr in Rc::make_mut(&mut pl.creatures).iter_mut() {
 			if *cr == 0 {
@@ -1920,7 +1919,6 @@ impl Game {
 	}
 
 	fn addPermCore(&mut self, id: i32, perm: i32, fromhand: bool) {
-		debug_assert!(id < perm);
 		if self.get(perm, Flag::additive) {
 			let code = card::AsShiny(self.get(perm, Stat::card), false);
 			for &pr in self.get_player(id).permanents.clone().iter() {

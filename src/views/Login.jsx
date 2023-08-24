@@ -109,10 +109,8 @@ if (typeof kongregateAPI === 'undefined') {
 							target="_blank"
 							rel="noopener"
 							href={data().html_url}
-							style="max-width:670px;position:absolute;left:220px;top:460px">
-							<For each={data().commit.message.split('\n')}>
-								{text => <div style="margin-bottom:6px">{text}</div>}
-							</For>
+							style="max-width:670px;min-width:470px;position:absolute;left:220px;top:460px;height:140px;white-space:pre-wrap;overflow-y:auto">
+							{data().commit.message.replace('\n', '\n\n')}
 						</a>
 					)}
 				</Show>

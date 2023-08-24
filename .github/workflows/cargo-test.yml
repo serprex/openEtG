@@ -4,10 +4,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 17
+      - uses: dtolnay/rust-toolchain@stable
       - run: cargo test --manifest-path=./src/rs/Cargo.toml

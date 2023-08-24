@@ -13,7 +13,14 @@ use crate::skill::{Event, Skill};
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn deckgen_duo(e1: i8, e2: i8, uprate: f64, markpower: i32, maxrarity: i32, seed: i32) -> Vec<u16> {
+pub fn deckgen_duo(
+	e1: i8,
+	e2: i8,
+	uprate: f64,
+	markpower: i32,
+	maxrarity: i32,
+	seed: i32,
+) -> Vec<u16> {
 	let mut rng = Pcg32::seed_from_u64(seed as u64);
 	let mut build = Builder::new(e2 as i32, uprate, markpower, &mut rng);
 	for j in 0..=1 {
@@ -99,7 +106,9 @@ pub fn deckgen_ai4(e1: i8, e2: i8, seed: i32) -> Vec<u16> {
 	let mut deck = Vec::with_capacity(65);
 	for i in 0..24 {
 		let upped = rng.gen_bool(0.3);
-		deck.push(etg::PillarList[if i < 4 { 0 } else { e1 as usize }] - if upped { 2000 } else { 4000 });
+		deck.push(
+			etg::PillarList[if i < 4 { 0 } else { e1 as usize }] - if upped { 2000 } else { 4000 },
+		);
 	}
 	for i in 0..40 {
 		let upped = rng.gen_bool(0.3);

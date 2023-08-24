@@ -53,9 +53,7 @@ mod test {
 				let un = set.get(card::AsUpped(card.code as i32, false));
 				let up = set.get(card::AsUpped(card.code as i32, true));
 				if card.kind == Kind::Spell {
-					assert_eq!(card.skill.len(), 1);
-					assert!(card.skill[0].0 == Event::Cast);
-					assert_eq!(card.skill[0].1.len(), 1);
+					assert!(card.skill.iter().any(|&(k, v)| k == Event::Cast));
 				}
 			}
 		}
