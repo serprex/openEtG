@@ -264,21 +264,14 @@ export default function Result(props) {
 			() => <div>{(game.duration / 1000).toFixed(1)} seconds</div>,
 		];
 
-	store.clearChat('Replay');
-	const { replay } = game;
+	const replay = game.replayJson();
 	if (
 		replay &&
 		game.data.endurance === undefined &&
 		game.data.quest === undefined
 	) {
-		const replayJson = JSON.stringify({
-			date: game.time,
-			seed: game.data.seed,
-			set: game.data.set,
-			players: game.data.players,
-			moves: replay,
-		});
-		store.chat(() => replayJson, 'Replay');
+		store.clearChat('Replay');
+		store.chat(() => replay, 'Replay');
 	}
 
 	let streakrate = 0;

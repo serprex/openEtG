@@ -184,6 +184,18 @@ export default class Game {
 	canTarget(c, t) {
 		return this.game.can_target(c, t);
 	}
+	replayJson() {
+		return (
+			this.replay &&
+			JSON.stringify({
+				date: this.time,
+				seed: this.data.seed,
+				set: this.data.set,
+				players: this.data.players,
+				moves: this.replay,
+			})
+		);
+	}
 }
 
 function defineProp(key) {

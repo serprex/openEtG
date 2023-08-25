@@ -178,6 +178,10 @@ fn eval_skill(
 	const SparkUp: u16 = card::Upped(card::Spark) as u16;
 	const Phantom: u16 = card::Phantom as u16;
 	const PhantomUp: u16 = card::Upped(card::Phantom) as u16;
+	const FireflyV: u16 = card::v_Firefly as u16;
+	const FireflyUpV: u16 = card::Upped(card::v_Firefly) as u16;
+	const ScarabV: u16 = card::v_Scarab as u16;
+	const ScarabUpV: u16 = card::Upped(card::v_Scarab) as u16;
 	skills
 		.iter()
 		.map(|&sk| match sk {
@@ -369,7 +373,7 @@ fn eval_skill(
 			Skill::freeze(x) | Skill::v_freeze(x) => x as f32,
 			Skill::freezeperm => 4.0,
 			Skill::fungusrebirth => 1.0,
-			Skill::gas | Skill::v_gas => 5.0,
+			Skill::gas => 5.0,
 			Skill::give => 1.0,
 			Skill::golemhit => {
 				let mut dmg = 0.0;
@@ -581,7 +585,7 @@ fn eval_skill(
 			Skill::siphonactive => 3.0,
 			Skill::siphonstrength => 4.0,
 			Skill::skyblitz => 10.0,
-			Skill::snipe => 7.0,
+			Skill::snipe => 3.0,
 			Skill::sosa | Skill::v_sosa => 6.0,
 			Skill::soulcatch => 2.0,
 			Skill::spores => 4.0,
@@ -593,10 +597,10 @@ fn eval_skill(
 			Skill::storm(x) | Skill::v_storm(x) | Skill::firestorm(x) => (x * 4) as f32,
 			Skill::summon(FateEgg) => 3.0,
 			Skill::summon(FateEggUp) => 4.0,
-			Skill::summon(Firefly) => 4.0,
-			Skill::summon(FireflyUp) => 5.0,
-			Skill::summon(Scarab) => 4.0,
-			Skill::summon(ScarabUp) => 4.5,
+			Skill::summon(Firefly) | Skill::summon(FireflyV) => 4.0,
+			Skill::summon(FireflyUp) | Skill::summon(FireflyUpV) => 5.0,
+			Skill::summon(Scarab) | Skill::summon(ScarabV) => 4.0,
+			Skill::summon(ScarabUp) | Skill::summon(ScarabUpV) => 4.5,
 			Skill::summon(Shadow) => 3.0,
 			Skill::summon(ShadowUp) => 4.0,
 			Skill::summon(Spark) => 2.0,
@@ -967,7 +971,7 @@ fn evalthing(
 			let mut poison = ctx.get(id, Stat::poison);
 			for &sk in ctx.getSkill(id, Event::OwnAttack).iter() {
 				match sk {
-					Skill::growth(gatk, ghp) => poison = poison.saturating_sub(ghp as i32),
+					Skill::growth(_, ghp) => poison = poison.saturating_sub(ghp as i32),
 					_ => (),
 				}
 			}
@@ -1080,7 +1084,7 @@ fn evalthing(
 		}
 	}
 	let flag = ctx.get_thing(id).flag;
-	if flag.get(Flag::airborne | Flag::ranged) {
+	if flag.get(Flag::airborne | Flag::ranged | Flag::whetstone) {
 		score += 0.2;
 	} else if flag.get(Flag::nightfall) {
 		score += 0.5;
@@ -1090,12 +1094,12 @@ fn evalthing(
 		score += 1.0;
 	}
 	if iscrea {
+		let hpf32 = hp as f32;
 		let voodoo = ctx.get(id, Flag::voodoo);
 		if voodoo && ctx.material(id, None) {
-			score += hp as f32 / 10.0;
+			score += hpf32 / 10.0;
 		}
 		if hp != 0 && ctx.get(owner, Stat::gpull) == id {
-			let hpf32 = hp as f32;
 			if voodoo {
 				score += hpf32;
 			}
@@ -1113,9 +1117,9 @@ fn evalthing(
 		} else {
 			score *= if hp != 0 {
 				if ctx.material(id, None) {
-					1.0 + (cmp::min(hp, 33) as f32).ln() / 7.0
+					1.0 + hpf32.sqrt() / (hpf32.sqrt() * 2.0 + 4.0)
 				} else {
-					1.3
+					1.5
 				}
 			} else if inhand {
 				0.9
@@ -1124,11 +1128,7 @@ fn evalthing(
 			}
 		}
 	} else {
-		score *= if ctx.get(id, Flag::immaterial) {
-			1.4
-		} else {
-			1.25
-		};
+		score *= if ctx.material(id, None) { 1.25 } else { 1.4 };
 	}
 	if inhand {
 		score * 0.9
@@ -1315,8 +1315,7 @@ pub fn eval(ctx: &Game) -> f32 {
 		if patience {
 			pscore += (ctx.count_creatures(pl) * 3) as f32;
 		}
-		pscore += (quantamap.get(pl, etg::Chroma) as f32) / 1188.0;
-		pscore += (player.quanta.iter().map(|q| *q as u32).sum::<u32>() as f32) / 1188.0;
+		pscore += (quantamap.get(pl, etg::Chroma) as u32 + player.quanta.iter().map(|q| *q as u32).sum::<u32>()) as f32 / 14256.0;
 		pscore += evalthing(
 			ctx,
 			&damage,

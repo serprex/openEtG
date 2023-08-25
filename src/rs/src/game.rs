@@ -1761,6 +1761,7 @@ impl Game {
 		}
 		let mut dmgdata = ProcData::default();
 		dmgdata.dmg = dmg;
+		dmgdata.amt = capdmg;
 		self.proc_data(Event::Dmg, id, &mut dmgdata);
 		if realdmg > 0 {
 			if (!dontdie || kind == Kind::Player) && self.truehp(id) <= 0 {

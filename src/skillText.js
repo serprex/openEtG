@@ -125,7 +125,7 @@ const data = {
 		'Remove statuses (positive & negative) from target creature or permanent, & heal target creature 1.',
 	cold: '30% chance to freeze non-ranged attackers for 3 turns.',
 	corpseexplosion: [
-		'Sacrifice one of your creatures to deal 1 spell damage to all creatures. Increase damage by 1 for every 8 HP of the sacrifice. Poisonous sacrifices poison. Also affect opponent.',
+		'Sacrifice one of your creatures to deal 1 spell damage to all other creatures. Increase damage by 1 for every 8 HP of the sacrifice. Poisonous sacrifices poison. Also affect opponent.',
 		'Sacrifice one of your creatures to deal 1 spell damage to all enemy creatures. Increase damage by 1 for every 8 HP of the sacrifice. Poisonous sacrifices poison. Also affect opponent.',
 	],
 	counter:
@@ -389,6 +389,7 @@ const data = {
 	obsession: c =>
 		`When discarded, its owner receives ${c.upped ? 13 : 10} spell damage.`,
 	ouija: "Whenever a creature dies, add an Ouija Essence to opponent's hand.",
+	ouijadestroy: "When destroyed, add 1 to opponent's maximum health.",
 	ouijagrowth: "Summon an Ouija Essence on opponent's side of the field.",
 	pacify: "Set target creature or weapon's strength to 0.",
 	pairproduce: 'Your pillars, pendulums, and towers trigger as if end of turn.',
@@ -618,7 +619,7 @@ const data = {
 		"When this creature attacks, if any damage is blocked by opponent's shield, your maximum HP is increased by the amount of this creature's damage that was blocked.",
 	virusdeath: 'When this creature dies, give opponent 1 poison counter.',
 	virusinfect:
-		'Sacrifice this creature. Give target creature or player 1 poison counter.',
+		'Sacrifice this creature. Give target creature 1 poison counter. Give opponent 1 poison counter.',
 	virusplague:
 		"Sacrifice this creature. Give target player's creatures 1 poison counter.",
 	void: "Reduce opponent's maximum HP by 3.",
@@ -626,7 +627,7 @@ const data = {
 		'Block all damage from attackers. Reduce your maximum HP equal to the damage blocked by this card.',
 	web: 'Target creature loses airborne status.',
 	weight: 'Evade all attackers that have more than 5 HP.',
-	wind: 'Restore any strentgh lost by halving after attacking.',
+	wind: 'Restore any strength lost by halving after attacking. Increase HP by amount restored.',
 	wings: 'Evade all non-airborne, non-ranged attackers.',
 	wisdom:
 		'Target creature or weapon gains 3|0. May target immaterial cards. If it targets an immaterial card, that card gains psionic. Psionic cards deal spell damage and typically bypass shields.',
@@ -672,7 +673,6 @@ const data = {
 	v_freeze: x => c =>
 		`Freeze target for ${x} turns. Being frozen disables attacking & per turn skills`,
 	v_gaincharge2: 'Gain 2 stacks per death.',
-	v_gas: 'Summon an Unstable Gas.',
 	v_gpullspell: 'Target creature intercepts attacks directed to its owner.',
 	v_gratitude: 'Heal owner 3, 5 if 1:5.',
 	v_guard: 'Delay target creature & attack target if grounded. Delay self.',

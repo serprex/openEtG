@@ -27,30 +27,21 @@ struct Candidate {
 	pub score: f32,
 }
 
-fn get_worst_card(ctx: &Game) -> Candidate {
+fn get_worst_card(ctx: &Game) -> (i32, f32) {
 	if ctx.full_hand(ctx.turn) {
 		ctx.get_player(ctx.turn)
 			.hand
 			.iter()
+			.filter(|&&card| card != 0)
 			.map(|&card| {
-				let card = ctx.get_player(ctx.turn).hand[0];
 				let mut clone = ctx.clonegame();
 				clone.die(card);
-				let score = eval(&clone);
-				Candidate {
-					cmd: GameMove::End(card),
-					depth: 0,
-					score,
-				}
+				(card, eval(&clone))
 			})
-			.max_by(|a, b| a.score.partial_cmp(&b.score).unwrap_or(Ordering::Equal))
+			.max_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal))
 			.unwrap()
 	} else {
-		Candidate {
-			cmd: GameMove::End(0),
-			depth: 0,
-			score: eval(ctx),
-		}
+		(0, eval(ctx))
 	}
 }
 
@@ -226,6 +217,7 @@ fn scancore(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32, cmd:
 				| &[Skill::cseed2]
 				| &[Skill::mutation]
 				| &[Skill::improve]
+				| &[Skill::hatch]
 		) || ctx.hasskill(id, Event::Shield, Skill::randomdr)
 			|| ctx.hasskill(id, Event::OwnPlay, Skill::mutant)
 		{
@@ -242,7 +234,7 @@ fn scancore(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32, cmd:
 	}) {
 		gclone.r#move(cmd);
 	}
-	let score = eval(&gclone);
+	let score = get_worst_card(&gclone).1;
 	if score > candy.score || (score == candy.score && depth < candy.depth) {
 		if depth == 0 {
 			*candy = Candidate { cmd, depth, score };
@@ -320,9 +312,13 @@ pub fn search(ctx: &Game) -> GameMove {
 		};
 	}
 	lethal(ctx).unwrap_or_else(|| {
-		let mut candy = get_worst_card(ctx);
-		let mut limit = 864;
-		scan(ctx, 0, &mut candy, &mut limit);
+		let (discard, score) = get_worst_card(ctx);
+		let mut candy = Candidate {
+			cmd: GameMove::End(discard),
+			depth: 0,
+			score,
+		};
+		scan(ctx, 0, &mut candy, &mut 1260);
 		candy.cmd
 	})
 }

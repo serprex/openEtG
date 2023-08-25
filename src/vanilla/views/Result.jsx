@@ -38,6 +38,12 @@ export default function OriginalResult({ game }) {
 		document.removeEventListener('keydown', onkeydown);
 	});
 
+	const replay = game.replayJson();
+	if (replay) {
+		store.clearChat('Replay');
+		store.chat(() => replay, 'Replay');
+	}
+
 	if (game.winner === player1.id) {
 		const foedecks = game.data.players.filter(pd => !pd.user);
 		if (foedecks.length !== 0) {

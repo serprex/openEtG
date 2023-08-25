@@ -41,7 +41,7 @@ export default function Reward(props) {
 				},
 			});
 		} else {
-			store.chatMsg('Unknown reward ${props.type}', 'System');
+			store.chatMsg(`Unknown reward ${props.type}`, 'System');
 			store.doNav(import('./MainMenu.jsx'));
 		}
 	});

@@ -423,6 +423,7 @@ pub enum Skill {
 	nymph,
 	obsession,
 	ouija,
+	ouijadestroy,
 	ouijagrowth,
 	pacify,
 	pairproduce,
@@ -578,7 +579,6 @@ pub enum Skill {
 	v_freeevade,
 	v_freeze(u8),
 	v_gaincharge2,
-	v_gas,
 	v_gpullspell,
 	v_gratitude,
 	v_guard,
@@ -1079,7 +1079,11 @@ impl Skill {
 			| Skill::v_storm(x) => x as i32,
 			Skill::summon(x) => x as i32,
 			Skill::quanta(x) => x as i32,
-			Skill::freeze(x) | Skill::v_drainlife(x) | Skill::v_firebolt(x) | Skill::v_freeze(x) | Skill::v_icebolt(x) => x as i32,
+			Skill::freeze(x)
+			| Skill::v_drainlife(x)
+			| Skill::v_firebolt(x)
+			| Skill::v_freeze(x)
+			| Skill::v_icebolt(x) => x as i32,
 			Skill::growth(x, _) | Skill::icegrowth(x, _) => x as i32,
 			_ => 0,
 		}
@@ -1512,8 +1516,10 @@ impl Skill {
 						owner
 					},
 					|ctx, cr| {
-						ctx.spelldmg(cr, dmg);
-						ctx.poison(cr, poison);
+						if cr != t {
+							ctx.spelldmg(cr, dmg);
+							ctx.poison(cr, poison);
+						}
 					},
 				);
 				ctx.spelldmg(foe, dmg);
@@ -2191,7 +2197,12 @@ impl Skill {
 			}
 			Self::gas => {
 				let owner = ctx.get_owner(c);
-				let gas = ctx.new_thing(card::As(ctx.get(c, Stat::card), card::UnstableGas), owner);
+				let gas = if ctx.cardset() == CardSet::Open {
+					card::UnstableGas
+				} else {
+					card::v_UnstableGas
+				};
+				let gas = ctx.new_thing(card::As(ctx.get(c, Stat::card), gas), owner);
 				ctx.addPerm(owner, gas);
 			}
 			Self::give => {
@@ -2698,7 +2709,7 @@ impl Skill {
 			Self::jetstream => {
 				if ctx.get(t, Flag::airborne) {
 					ctx.dmg(t, 1);
-					ctx.incrAtk(t, 4);
+					ctx.incrAtk(t, 3);
 				} else {
 					ctx.set(t, Flag::airborne, true);
 				}
@@ -2809,12 +2820,11 @@ impl Skill {
 				}
 			}
 			Self::martyr => {
-				let dmg = data.dmg;
-				if dmg > 0 {
-					ctx.incrAtk(c, dmg);
+				if data.dmg > 0 {
+					ctx.incrAtk(c, data.dmg);
 				} else {
 					let owner = ctx.get_owner(c);
-					ctx.dmg(owner, dmg);
+					ctx.dmg(owner, data.amt);
 				}
 			}
 			Self::mend => {
@@ -3056,6 +3066,11 @@ impl Skill {
 					ctx.fx(inst, Fx::StartPos(c));
 					ctx.addCard(foe, inst);
 				}
+			}
+			Self::ouijadestroy => {
+				let foe = ctx.get_foe(ctx.get_owner(c));
+				let maxhp = ctx.get_mut(foe, Stat::maxhp);
+				*maxhp = cmp::min(*maxhp + 1, 500);
 			}
 			Self::ouijagrowth => {
 				let foe = ctx.get_foe(ctx.get_owner(c));
@@ -4374,12 +4389,6 @@ impl Skill {
 					data.evade = true;
 				}
 			}
-			Self::v_gas => {
-				let owner = ctx.get_owner(c);
-				let gas =
-					ctx.new_thing(card::As(ctx.get(c, Stat::card), card::v_UnstableGas), owner);
-				ctx.addPerm(owner, gas);
-			}
 			Self::v_gratitude => {
 				let owner = ctx.get_owner(c);
 				ctx.dmg(
@@ -4524,8 +4533,8 @@ impl Skill {
 						Skill::summon(1908),
 						Skill::snipe,
 						Skill::dive,
-						Skill::v_gas,
-						Skill::v_gas,
+						Skill::gas,
+						Skill::gas,
 					],
 					[
 						Skill::summon(2010),
@@ -4635,7 +4644,7 @@ impl Skill {
 					Skill::summon(_) => 2,
 					Skill::snipe => 2,
 					Skill::dive => 2,
-					Skill::v_gas => 2,
+					Skill::gas => 2,
 					Skill::deja => 4,
 					Skill::v_neuro => -2,
 					Skill::precognition => 2,
