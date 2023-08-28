@@ -713,7 +713,6 @@ const data = {
 	v_readiness:
 		"Target creature's active becomes costless. Skill can be reactivated.",
 	v_rebirth: c => `Become a ${c.upped ? 'Minor ' : ''}Phoenix`,
-	v_regenerate: 'Heal owner 5.',
 	v_relic: 'Worthless.',
 	v_rewind:
 		"Remove target creature to top of owner's deck. If target is a Skeleton, transform it into a random creature. If target is a Mummy, transform it into a Pharaoh.",

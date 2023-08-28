@@ -210,12 +210,15 @@ fn eval_skill(
 			Skill::bblood | Skill::v_bblood => 7.0,
 			Skill::beguilestop => -damage[c],
 			Skill::bellweb => 1.0,
-			Skill::blackhole => ctx
-				.get_player(ctx.get_foe(ctx.get_owner(c)))
-				.quanta
-				.iter()
-				.map(|&q| cmp::min(q, 3) as f32 / 12.0)
-				.sum(),
+			Skill::blackhole | Skill::v_blackhole => {
+				let foe = ctx.get_foe(ctx.get_owner(c));
+				(ctx.get_player(foe)
+					.quanta
+					.iter()
+					.map(|&q| cmp::min(q, 3) as u16)
+					.sum::<u16>() + quantamap.get(foe, 0)) as f32
+					/ 12.0
+			}
 			Skill::bless | Skill::v_bless => 4.0,
 			Skill::bloodmoon => 4.5,
 			Skill::boneyard => 3.0,
@@ -241,7 +244,7 @@ fn eval_skill(
 				}
 			}
 			Skill::bubbleclear => 3.0,
-			Skill::burrow | Skill::v_burrow => 1.0,
+			Skill::burrow | Skill::v_burrow | Skill::v_unburrow => 1.0,
 			Skill::butterfly | Skill::v_butterfly => 12.0,
 			Skill::catapult => 6.0,
 			Skill::chimera => 4.0,
@@ -401,7 +404,7 @@ fn eval_skill(
 			Skill::gpullspell | Skill::v_gpullspell => 3.0,
 			Skill::grave => 1.0,
 			Skill::growth(atk, hp) => (atk + hp) as f32,
-			Skill::guard => ttatk + (4 + ctx.get(c, Flag::airborne) as i32) as f32,
+			Skill::guard | Skill::v_guard => ttatk + (4 + ctx.get(c, Flag::airborne) as i32) as f32,
 			Skill::halveatk => {
 				if ctx.get_kind(c) == Kind::Spell {
 					-ctx.get_card(ctx.get(c, Stat::card)).attack as f32 / 4.0
@@ -707,7 +710,6 @@ fn eval_skill(
 			Skill::v_gratitude => (ctx.get(c, Stat::charges) * 4) as f32,
 			Skill::v_guard => 4.0,
 			Skill::v_heal => 8.0,
-			Skill::v_regenerate => 5.0,
 			Skill::v_thorn => 5.0,
 			Skill::v_void => (ctx.get(c, Stat::charges) * 5) as f32,
 			_ => 0.0,
@@ -1315,7 +1317,9 @@ pub fn eval(ctx: &Game) -> f32 {
 		if patience {
 			pscore += (ctx.count_creatures(pl) * 3) as f32;
 		}
-		pscore += (quantamap.get(pl, etg::Chroma) as u32 + player.quanta.iter().map(|q| *q as u32).sum::<u32>()) as f32 / 14256.0;
+		pscore += (quantamap.get(pl, etg::Chroma) as u32
+			+ player.quanta.iter().map(|q| *q as u32).sum::<u32>()) as f32
+			/ 14256.0;
 		pscore += evalthing(
 			ctx,
 			&damage,

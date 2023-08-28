@@ -609,7 +609,6 @@ pub enum Skill {
 	v_platearmor(i16),
 	v_readiness,
 	v_rebirth,
-	v_regenerate,
 	v_relic,
 	v_rewind,
 	v_salvage,
@@ -3454,8 +3453,10 @@ impl Skill {
 				}
 			}
 			Self::regenerate(amt) => {
-				ctx.fx(t, Fx::Heal(amt as i32));
-				ctx.dmg(ctx.get_owner(c), -(amt as i32));
+				if ctx.cardset() == CardSet::Open || ctx.get(c, Stat::delayed) == 0 {
+					ctx.fx(t, Fx::Heal(amt as i32));
+					ctx.dmg(ctx.get_owner(c), -(amt as i32));
+				}
 			}
 			Self::regeneratespell => {
 				ctx.lobo(t);
@@ -4812,12 +4813,6 @@ impl Skill {
 			}
 			Self::v_rebirth => {
 				ctx.transform(c, card::As(ctx.get(c, Stat::card), card::v_Phoenix));
-			}
-			Self::v_regenerate => {
-				if ctx.get(c, Stat::delayed) == 0 {
-					ctx.fx(t, Fx::Heal(5));
-					ctx.dmg(ctx.get_owner(c), -5);
-				}
 			}
 			Self::v_relic => {
 				ctx.addCard(ctx.get_owner(c), c);
