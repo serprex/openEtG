@@ -152,12 +152,12 @@ export default function MainMenu(props) {
 			},
 			codegold: data => {
 				store.updateUser({ gold: rx.user.gold + data.g });
-				store.chat(
+				store.chat(() => (
 					<div>
 						{data.g}
 						<span class="ico gold" /> added!
-					</div>,
-				);
+					</div>
+				));
 			},
 			codecode: data => {
 				store.updateUser({
