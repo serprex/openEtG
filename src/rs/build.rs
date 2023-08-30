@@ -286,9 +286,7 @@ fn main() {
 	let skillrs = fs::read_to_string("src/skill.rs").expect("failed to read skill.rs");
 
 	let mut enums = Enums::default();
-	let mut source = String::new();
-	source.push_str("#![allow(non_upper_case_globals)]\n");
-	source.push_str("use crate::card::{Card,CardSet,Cards};use crate::game::{Flag,Fx,Kind,Stat};use crate::skill::{Event,Skill};");
+	let mut source = String::from("#![no_std]\n#![allow(non_upper_case_globals)]\nuse crate::card::{Card,CardSet,Cards};use crate::game::{Flag,Fx,Kind,Stat};use crate::skill::{Event,Skill};\n");
 
 	let skillevent = subsource(&skillrs, "impl Event {\n");
 	let mut eventid = 1;

@@ -1,4 +1,8 @@
+#![cfg_attr(target_arch = "wasm32", no_std)]
 #![allow(unused)]
+
+extern crate alloc;
+extern crate core;
 
 pub mod aieval;
 pub mod aisearch;
@@ -74,7 +78,7 @@ mod test {
 				1,
 				1,
 				1,
-				std::iter::repeat(if set == CardSet::Open {
+				core::iter::repeat(if set == CardSet::Open {
 					card::AmethystPillar
 				} else {
 					card::v_AmethystPillar

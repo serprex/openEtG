@@ -1,13 +1,16 @@
+#![no_std]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 
-use std::borrow::Cow;
-use std::cmp;
-use std::default::Default;
-use std::hash::{Hash, Hasher};
-use std::iter::once;
-use std::rc::Rc;
+use alloc::borrow::Cow;
+use alloc::rc::Rc;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::cmp;
+use core::default::Default;
+use core::hash::{Hash, Hasher};
+use core::iter::once;
 
 use fxhash::FxHasher64;
 use rand::distributions::{uniform::SampleRange, uniform::SampleUniform, Distribution, Uniform};

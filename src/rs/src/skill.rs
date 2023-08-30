@@ -1,11 +1,14 @@
+#![no_std]
 #![allow(non_camel_case_types)]
 #![allow(non_upper_case_globals)]
 
-use std::borrow::Cow;
-use std::cmp;
-use std::iter::once;
-use std::num::{NonZeroU32, NonZeroU8};
-use std::rc::Rc;
+use alloc::borrow::Cow;
+use alloc::rc::Rc;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::cmp;
+use core::iter::once;
+use core::num::{NonZeroU32, NonZeroU8};
 
 use crate::card::{self, CardSet};
 use crate::etg;
@@ -4051,7 +4054,7 @@ impl Skill {
 				ctx.remove(c);
 				let thing = ctx.get_thing_mut(c);
 				let stored =
-					std::mem::replace(thing.status.entry(Stat::storedpower).or_insert(0), 0);
+					core::mem::replace(thing.status.entry(Stat::storedpower).or_insert(0), 0);
 				thing.skill.remove(Event::Cast);
 				thing.status.insert(Stat::atk, stored / 2);
 				thing.status.insert(Stat::maxhp, stored);
@@ -4182,7 +4185,7 @@ impl Skill {
 				}
 			}
 			Self::wind => {
-				let stored = std::mem::replace(ctx.get_mut(c, Stat::storedpower), 0);
+				let stored = core::mem::replace(ctx.get_mut(c, Stat::storedpower), 0);
 				ctx.incrAtk(c, stored);
 				ctx.buffhp(c, stored);
 			}

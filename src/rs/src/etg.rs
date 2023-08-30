@@ -1,6 +1,9 @@
+#![no_std]
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
-use std::default::Default;
+
+use alloc::vec::Vec;
+use core::default::Default;
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
@@ -65,7 +68,7 @@ pub fn getAdrenalRow(x: i32) -> Vec<i8> {
 		let len = AdrenalineTable[xabs * 5] as usize;
 		unsafe {
 			v.set_len(len);
-			std::ptr::copy_nonoverlapping(
+			core::ptr::copy_nonoverlapping(
 				AdrenalineTable.as_ptr().offset(xabs as isize * 5 + 1),
 				vp,
 				4,

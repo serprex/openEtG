@@ -1,5 +1,8 @@
-use std::cmp::Ordering;
-use std::iter::once;
+#![no_std]
+
+use alloc::vec::Vec;
+use core::cmp::Ordering;
+use core::iter::once;
 
 use crate::aieval::eval;
 use crate::card;

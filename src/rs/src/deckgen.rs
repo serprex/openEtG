@@ -1,4 +1,7 @@
-use std::cell::RefCell;
+#![no_std]
+
+use alloc::vec::Vec;
+use core::cell::RefCell;
 
 use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;

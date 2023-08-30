@@ -1,9 +1,11 @@
+#![no_std]
 #![allow(non_upper_case_globals)]
 
-use std::cmp;
-use std::default::Default;
-use std::iter::once;
-use std::ops::{Index, IndexMut};
+use alloc::vec::Vec;
+use core::cmp;
+use core::default::Default;
+use core::iter::once;
+use core::ops::{Index, IndexMut};
 
 use crate::card::{self, CardSet};
 use crate::etg;

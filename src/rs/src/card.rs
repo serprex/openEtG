@@ -1,4 +1,7 @@
+#![no_std]
 #![allow(non_snake_case)]
+
+use alloc::vec::Vec;
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
@@ -261,7 +264,7 @@ pub fn card_skills(set: CardSet, index: usize) -> Option<Vec<i32>> {
 		card.skill
 			.iter()
 			.flat_map(|&(k, v)| {
-				std::iter::once(u8::from(k) as i32 | (v.len() as i32) << 8).chain(
+				core::iter::once(u8::from(k) as i32 | (v.len() as i32) << 8).chain(
 					v.iter()
 						.map(|&sk| id_skill(sk) | sk.param1() << 16 | sk.param2() << 24),
 				)
