@@ -139,8 +139,8 @@ pub enum AuthMessage {
 	},
 	r#move {
 		id: i64,
-		prehash: i32,
-		hash: i32,
+		prehash: u32,
+		hash: u32,
 		cmd: GamesMoveCmd,
 	},
 	reloadmoves {
@@ -374,7 +374,7 @@ pub enum WsResponse<'a> {
 	},
 	r#move {
 		cmd: GamesMoveCmd,
-		hash: i32,
+		hash: u32,
 	},
 	mute {
 		m: &'a str,
@@ -454,7 +454,7 @@ pub struct GamesDataPlayer {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GamesMove {
 	pub cmd: GamesMoveCmd,
-	pub hash: i32,
+	pub hash: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]

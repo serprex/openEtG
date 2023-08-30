@@ -778,7 +778,7 @@ impl Game {
 			.sum()
 	}
 
-	pub fn hash(&self) -> i32 {
+	pub fn hash(&self) -> u32 {
 		let mut hasher: FxHasher64 = Default::default();
 		self.phase.hash(&mut hasher);
 		self.turn.hash(&mut hasher);
@@ -797,6 +797,7 @@ impl Game {
 				}
 				Entity::Thing(t) => t,
 			};
+			thing.flag.0.hash(&mut hasher);
 			for &(k, v) in thing.status.iter() {
 				if v != 0 {
 					k.hash(&mut hasher);
@@ -811,7 +812,7 @@ impl Game {
 			}
 		}
 		let h64 = hasher.finish();
-		((h64 >> 32) as u32 ^ h64 as u32) as i32
+		(h64 >> 32) as u32 ^ h64 as u32
 	}
 
 	pub fn new_player(&mut self) -> i32 {

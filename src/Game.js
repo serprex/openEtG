@@ -58,10 +58,6 @@ export default class Game {
 		}
 	}
 
-	get phase() {
-		return this.game.phase;
-	}
-
 	get players() {
 		return this.game.get_players();
 	}
@@ -205,6 +201,7 @@ function defineProp(key) {
 		},
 	});
 }
+defineProp('phase');
 defineProp('turn');
 defineProp('winner');
 defineProp('time');
