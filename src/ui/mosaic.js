@@ -7,14 +7,12 @@ const a2n = {
 	r: 'Timpa',
 	t: 'Ravi',
 	s: 'Kae',
+	s4: 'Niharia',
 	cback: 'Kae',
 	sborder: 'Kae',
-	silence: 'Kae',
 	sabbath: 'Kae',
-	sanctuary: 'Kae',
 	sacrifice: 'Kae',
 	protection: 'Kae',
-	singularity: 'Kae',
 	gold: 'Kae',
 };
 let oldkey;
@@ -28,7 +26,7 @@ document.getElementById('codeimg').addEventListener('mousemove', function (e) {
 			oldkey = key;
 			while (aname.firstChild) aname.firstChild.remove();
 			aname.appendChild(
-				document.createTextNode(a2n[key] || a2n[key.replace(/\d+$/, '')]),
+				document.createTextNode(a2n[key] ?? a2n[key.replace(/\d+$/, '')]),
 			);
 			return;
 		}

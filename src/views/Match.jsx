@@ -473,7 +473,8 @@ function Thing(props) {
 		() => props.obj.getStatus('aflatoxin'),
 		() =>
 			!props.obj.getStatus('aflatoxin') && props.obj.getStatus('poison') > 0,
-		() => props.obj.getStatus('airborne') || props.obj.getStatus('ranged'),
+		() => props.obj.getStatus('airborne'),
+		() => !props.obj.getStatus('airborne') && props.obj.getStatus('ranged'),
 		() => props.obj.getStatus('momentum'),
 		() => props.obj.getStatus('adrenaline'),
 		() => props.obj.getStatus('poison') < 0,
@@ -566,7 +567,7 @@ function Thing(props) {
 								<div
 									class={`ico s${k}`}
 									style={`position:absolute;bottom:-8px;left:${
-										['32', '8', '8', '0', '24', '16', '8'][k]
+										['32', '8', '8', '0', '0', '24', '16', '8'][k]
 									}px;opacity:.6;z-index:1`}
 								/>
 							</Show>
