@@ -598,8 +598,6 @@ pub enum Skill {
 	v_mitosisspell,
 	v_momentum,
 	v_mutation,
-	v_neuro,
-	v_nightmare,
 	v_noluci,
 	v_nymph,
 	v_obsession,
@@ -617,10 +615,7 @@ pub enum Skill {
 	v_silence,
 	v_singularity,
 	v_siphon,
-	v_skull,
 	v_slow,
-	v_solar,
-	v_sosa,
 	v_sskin,
 	v_steal,
 	v_steam,
@@ -830,6 +825,15 @@ impl Tgt {
 	}
 }
 
+fn pillarcore(ctx: &mut Game, c: i32, n: i32) {
+	let card = ctx.get_card(ctx.get(c, Stat::card));
+	ctx.spend(
+		ctx.get_owner(c),
+		card.element as i32,
+		n * if card.element > 0 { -1 } else { -3 },
+	);
+}
+
 fn quadpillarcore(ctx: &mut Game, ele: [u8; 4], c: i32, n: i32) {
 	let owner = ctx.get_owner(c);
 	for _ in 0..n {
@@ -840,6 +844,7 @@ fn quadpillarcore(ctx: &mut Game, ele: [u8; 4], c: i32, n: i32) {
 		}
 	}
 }
+
 const QUAD_PILLAR_MAT: [u8; 4] = [
 	etg::Earth as u8,
 	etg::Fire as u8,
@@ -1050,7 +1055,6 @@ impl Skill {
 			Self::v_mitosisspell => Tgt::creacrea,
 			Self::v_momentum => Tgt::crea,
 			Self::v_mutation => Tgt::crea,
-			Self::v_nightmare => Tgt::crea,
 			Self::v_nymph => Tgt::pill,
 			Self::v_platearmor(_) => Tgt::crea,
 			Self::v_readiness => Tgt::crea,
@@ -2937,10 +2941,10 @@ impl Skill {
 					ctx.transform(t, card::Abomination);
 				}
 			}
-			Self::neuro | Self::v_neuro => {
+			Self::neuro => {
 				if throttle(ctx, c) {
 					ctx.poison(t, 1);
-					if self == Self::neuro || ctx.get_kind(t) == Kind::Player {
+					if ctx.cardset() == CardSet::Open || ctx.get_kind(t) == Kind::Player {
 						ctx.set(t, Flag::neuro, true);
 					}
 				}
@@ -2953,14 +2957,14 @@ impl Skill {
 					ctx.set(t, Stat::poison, 0);
 				}
 			}
-			Self::nightmare | Self::v_nightmare => {
+			Self::nightmare => {
 				let owner = ctx.get_owner(c);
 				let foe = ctx.get_foe(owner);
 				if !ctx.sanctified(foe) {
 					ctx.fx(t, Fx::Nightmare);
 					let card = ctx.get(t, Stat::card);
 					let copies = 8 - ctx.get_player(foe).hand_len() as i32;
-					let dmg = if self == Self::nightmare {
+					let dmg = if ctx.cardset() == CardSet::Open {
 						ctx.spelldmg(foe, copies * if card::Upped(card) { 2 } else { 1 })
 					} else {
 						ctx.dmg(foe, copies * 2)
@@ -3237,23 +3241,8 @@ impl Skill {
 					ctx.set(c, Stat::casts, 1);
 				}
 			}
-			Self::pillar => {
-				let card = ctx.get_card(ctx.get(c, Stat::card));
-				let charges = ctx.get(c, Stat::charges);
-				ctx.spend(
-					ctx.get_owner(c),
-					card.element as i32,
-					charges * if card.element > 0 { -1 } else { -3 },
-				);
-			}
-			Self::pillar1 => {
-				let card = ctx.get_card(ctx.get(c, Stat::card));
-				ctx.spend(
-					ctx.get_owner(c),
-					card.element as i32,
-					if card.element > 0 { -1 } else { -3 },
-				);
-			}
+			Self::pillar => pillarcore(ctx, c, ctx.get(c, Stat::charges)),
+			Self::pillar1 => pillarcore(ctx, c, 1),
 			Self::pillcar => quadpillarcore(ctx, QUAD_PILLAR_CAR, c, ctx.get(c, Stat::charges)),
 			Self::pillcar1 => quadpillarcore(ctx, QUAD_PILLAR_CAR, c, 1),
 			Self::pillmat => quadpillarcore(ctx, QUAD_PILLAR_MAT, c, ctx.get(c, Stat::charges)),
@@ -3754,8 +3743,8 @@ impl Skill {
 					data.evade = true;
 				}
 			}
-			Self::skull | Self::v_skull => {
-				let (cardskele, cardmalig) = if self == Self::skull {
+			Self::skull => {
+				let (cardskele, cardmalig) = if ctx.cardset() == CardSet::Open {
 					(card::Skeleton, card::MalignantCell)
 				} else {
 					(card::v_Skeleton, card::v_MalignantCell)
@@ -3801,9 +3790,11 @@ impl Skill {
 			}
 			Self::solar => {
 				let owner = ctx.get_owner(c);
-				ctx.spend(owner, etg::Light, -1);
+				if ctx.cardset() == CardSet::Open || !ctx.get(owner, Flag::sanctuary) {
+					ctx.spend(owner, etg::Light, -1);
+				}
 			}
-			Self::sosa | Self::v_sosa => {
+			Self::sosa => {
 				ctx.fx(t, Fx::Sfx(Sfx::mulligan));
 				let upped = card::Upped(ctx.get(c, Stat::card));
 				let owner = ctx.get_owner(c);
@@ -3813,7 +3804,7 @@ impl Skill {
 						*q = 0;
 					}
 				}
-				if self == Self::sosa {
+				if ctx.cardset() == CardSet::Open {
 					ctx.set(owner, Stat::sosa, 0);
 					ctx.dmg(owner, if upped { 40 } else { 48 });
 					ctx.set(owner, Stat::sosa, 2);
@@ -4647,7 +4638,7 @@ impl Skill {
 					Skill::dive => 2,
 					Skill::gas => 2,
 					Skill::deja => 4,
-					Skill::v_neuro => -2,
+					Skill::neuro => -2,
 					Skill::precognition => 2,
 					Skill::v_siphon => -1,
 					Skill::vampire => -2,
@@ -4885,12 +4876,6 @@ impl Skill {
 			Self::v_slow => {
 				if ctx.get_kind(t) == Kind::Creature {
 					ctx.delay(t, 2);
-				}
-			}
-			Self::v_solar => {
-				let owner = ctx.get_owner(c);
-				if !ctx.get(owner, Flag::sanctuary) {
-					ctx.spend(owner, etg::Light, -1);
 				}
 			}
 			Self::v_sskin => {

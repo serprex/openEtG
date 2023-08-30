@@ -375,7 +375,7 @@ const data = {
 		"If target creature or player is poisoned, target gains neurotoxin. Neurotoxin gives 1 poison counter for every card played by the affected player or active ability used by the affected creature. Remove target's purify counters.",
 	nightmare: c =>
 		`Fill opponent\'s hand with fresh copies of target creature. Deal ${
-			c.upped ? '2' : '1'
+			c.Cards.cardSet === 'Open' && c.upped ? '2' : '1'
 		} damage per card added in this way. Heal yourself an equal amount.`,
 	nightshade:
 		'Target creature becomes nocturnal, gains 5|5, and loses active skills.',
@@ -414,7 +414,7 @@ const data = {
 	photosynthesis:
 		'Gain 2:5. This ability may be used multiple times per turn unless activation cost is free.',
 	pillar: c => `Gain ${c.element ? 1 : 3}:${c.element} every turn.`,
-	pillar1: c => `Gain ${c.element ? 1 : 3}:${c.element} when played`,
+	pillar1: c => `Gain ${c.element ? 1 : 3}:${c.element} when played.`,
 	pend: c =>
 		`Each turn, switch between gaining ${c.element ? 1 : 3}:${
 			c.element
@@ -696,10 +696,6 @@ const data = {
 	v_momentum: 'Target ignores shield effects & gains 1|1.',
 	v_mutation:
 		'Mutate target creature into an abomination, or maybe something more. Slight chance of death.',
-	v_neuro:
-		'Apply poison on hit, also inflicting neurotoxin. Neurotoxin applies poison per card played by victim. Throttled.',
-	v_nightmare:
-		"Fill foe's hand with copies of target creature's card. Drain 2HP per added card",
 	v_nymph: 'Turn target pillar into a Nymph of same element.',
 	v_obsession: c => `Damage owner ${c.upped ? 13 : 10} on discard.`,
 	v_pandemonium: c =>
@@ -727,14 +723,7 @@ const data = {
 		'Foe cannot play cards during their next turn, or target creature gains summoning sickness.',
 	v_singularity: 'Not well behaved.',
 	v_siphon: 'Siphon 1:0 from foe as 1:11. Throttled.',
-	v_skull:
-		'Attacking creatures may die & become skeletons. Smaller creatures are more likely to die.',
 	v_slow: 'Delay attackers.',
-	v_solar: 'Gain 1:8 per attacker.',
-	v_sosa: c =>
-		`Sacrifice ${
-			c.upped ? 40 : 48
-		}HP. Consume all non 1:2. Invert damage for 2 turns`,
 	v_sskin: 'Increment maximum HP per 1:4 owned. Heal same.',
 	v_steal: 'Steal target permanent.',
 	v_steam: 'Gain 5|0.',
@@ -751,28 +740,28 @@ const data = {
 for (const [k, v] of [
 	[
 		'dagger',
-		'1:2 1:11. Gains 1 strength per Darkness or Death non-pillar permanent you control.',
+		'1:2 1:11. Gains 1 strength per Darkness or Death non-pillar permanent you control',
 	],
-	['hammer', '1:3 1:4.'],
-	['bow', '1:8 1:9.'],
-	['staff', '1:5 1:7.'],
-	['disc', '1:1 1:12.'],
-	['axe', '1:6 1:10.'],
-	['v_dagger', '1:2 1:11.'],
-	['v_hammer', '1:3 1:4.'],
-	['v_bow', '1:9.'],
+	['hammer', '1:3 1:4'],
+	['bow', '1:8 1:9'],
+	['staff', '1:5 1:7'],
+	['disc', '1:1 1:12'],
+	['axe', '1:6 1:10'],
+	['v_dagger', '1:2 1:11'],
+	['v_hammer', '1:3 1:4'],
+	['v_bow', '1:9'],
 ]) {
-	data[k] = `Gains ${k === 'hammer' ? 2 : 1} strength if your mark is ${v}`;
+	data[k] = `Gains ${k === 'hammer' ? 2 : 1} strength if your mark is ${v}.`;
 }
 for (const [k, v] of [
 	['pillmat', '1:4 1:6 1:7 1:9'],
 	['pillspi', '1:2 1:5 1:8 1:11'],
 	['pillcar', '1:1 1:3 1:10 1:12'],
 ]) {
-	data[k] = {
-		ownattack: `Randomly gain 1-2 ${v} each turn. \u2154 chance to gain 2.`,
-		ownplay: `Randomly gain 1-2 ${v} when played. \u2154 chance to gain 2.`,
-	};
+	data[k] = `Randomly gain 1-2 ${v} each turn. \u2154 chance to gain 2.`;
+	data[
+		k + '1'
+	] = `Randomly gain 1-2 ${v} when played. \u2154 chance to gain 2.`;
 }
 function auraText(tgts, bufftext, upbufftext) {
 	return c =>

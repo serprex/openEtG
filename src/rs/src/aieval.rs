@@ -215,9 +215,8 @@ fn eval_skill(
 				(ctx.get_player(foe)
 					.quanta
 					.iter()
-					.map(|&q| cmp::min(q, 3) as u16)
-					.sum::<u16>() + quantamap.get(foe, 0)) as f32
-					/ 12.0
+					.map(|&q| cmp::min(q, 3))
+					.sum::<u8>()) as f32 / 12.0
 			}
 			Skill::bless | Skill::v_bless => 4.0,
 			Skill::bloodmoon => 4.5,
@@ -464,7 +463,7 @@ fn eval_skill(
 			Skill::mitosisspell | Skill::v_mitosisspell => 6.0,
 			Skill::momentum | Skill::v_momentum => 2.0,
 			Skill::mutation | Skill::v_mutation => 4.0,
-			Skill::neuro | Skill::v_neuro => {
+			Skill::neuro => {
 				if ctx.get(ctx.get_foe(ctx.get_owner(c)), Flag::neuro) {
 					4.0
 				} else {
@@ -478,7 +477,7 @@ fn eval_skill(
 					2.0
 				}
 			}
-			Skill::nightmare | Skill::v_nightmare => {
+			Skill::nightmare => {
 				let owner = ctx.get_owner(c);
 				let n = ctx
 					.get_player(owner)
@@ -589,7 +588,7 @@ fn eval_skill(
 			Skill::siphonstrength => 4.0,
 			Skill::skyblitz => 10.0,
 			Skill::snipe => 3.0,
-			Skill::sosa | Skill::v_sosa => 6.0,
+			Skill::sosa => 6.0,
 			Skill::soulcatch => 2.0,
 			Skill::spores => 4.0,
 			Skill::sskin | Skill::v_sskin => 15.0,
@@ -697,9 +696,9 @@ fn eval_skill(
 					9.0
 				}
 			}
-			Skill::skull | Skill::v_skull => 5.0,
+			Skill::skull => 5.0,
 			Skill::slow | Skill::v_slow => 6.0,
-			Skill::solar | Skill::v_solar => {
+			Skill::solar => {
 				let coq = ctx.get_player(ctx.get_owner(c)).quanta(etg::Light) as f32;
 				5.0 - (4.0 * coq) / (4.0 + coq)
 			}

@@ -13,7 +13,7 @@
     "babel-preset-solid": "^1.7.7",
     "copy-webpack-plugin": "^11.0.0",
     "html-webpack-plugin": "^5.5.3",
-    "prettier": "^3.0.2",
+    "prettier": "^3.0.3",
     "solid-js": "^1.7.11",
     "spritesheet-js": "^1.2.8",
     "webpack": "^5.88.2",
