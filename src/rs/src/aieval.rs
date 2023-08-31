@@ -91,45 +91,20 @@ impl QuantaMap {
 								charges * if element == 0 { 3 } else { 1 },
 							);
 						}
-						Skill::pillcar => {
+						Skill::quadpillar(eles) => {
 							let amount = (ctx.get(id, Stat::charges) * 107) as u16;
-							let q = &mut quanta[(etg::Entropy - 1) as usize];
-							*q = q.saturating_add(amount);
-							let q = &mut quanta[(etg::Gravity - 1) as usize];
-							*q = q.saturating_add(amount);
-							let q = &mut quanta[(etg::Time - 1) as usize];
-							*q = q.saturating_add(amount);
-							let q = &mut quanta[(etg::Aether - 1) as usize];
-							*q = q.saturating_add(amount);
-						}
-						Skill::pillmat => {
-							let amount = (ctx.get(id, Stat::charges) * 107) as u16;
-							let q = &mut quanta[(etg::Earth - 1) as usize];
-							*q = q.saturating_add(amount);
-							let q = &mut quanta[(etg::Fire - 1) as usize];
-							*q = q.saturating_add(amount);
-							let q = &mut quanta[(etg::Water - 1) as usize];
-							*q = q.saturating_add(amount);
-							let q = &mut quanta[(etg::Air - 1) as usize];
-							*q = q.saturating_add(amount);
-						}
-						Skill::pillspi => {
-							let amount = (ctx.get(id, Stat::charges) * 107) as u16;
-							let q = &mut quanta[(etg::Death - 1) as usize];
-							*q = q.saturating_add(amount);
-							let q = &mut quanta[(etg::Life - 1) as usize];
-							*q = q.saturating_add(amount);
-							let q = &mut quanta[(etg::Light - 1) as usize];
-							*q = q.saturating_add(amount);
-							let q = &mut quanta[(etg::Darkness - 1) as usize];
-							*q = q.saturating_add(amount);
+							for i in (0..16).step_by(4) {
+								let q = &mut quanta[(((eles >> i) & 15) - 1) as usize];
+								*q = q.saturating_add(amount);
+							}
 						}
 						Skill::locket => {
-							let mut element = ctx.get(id, Stat::mode);
-							if element == -1 {
-								element = player.mark;
-							}
-							QuantaMap::add(&mut quanta, element, 1);
+							let element = ctx.get(id, Stat::mode);
+							QuantaMap::add(
+								&mut quanta,
+								if element == -1 { player.mark } else { element },
+								1,
+							);
 						}
 						_ => {}
 					}
@@ -658,7 +633,7 @@ fn eval_skill(
 			Skill::yoink => 4.0,
 			Skill::vengeance => 2.0,
 			Skill::vindicate => 3.0,
-			Skill::pillar | Skill::pend | Skill::pillmat | Skill::pillspi | Skill::pillcar => {
+			Skill::pillar | Skill::pend | Skill::quadpillar(_) => {
 				if ctx.get_kind(c) == Kind::Spell {
 					0.1
 				} else {

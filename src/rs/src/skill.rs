@@ -442,12 +442,8 @@ pub enum Skill {
 	photosynthesis,
 	pillar,
 	pillar1,
-	pillcar,
-	pillcar1,
-	pillmat,
-	pillmat1,
-	pillspi,
-	pillspi1,
+	quadpillar(u16),
+	quadpillar1(u16),
 	plague,
 	platearmor(i16),
 	poison(i16),
@@ -836,35 +832,16 @@ fn pillarcore(ctx: &mut Game, c: i32, n: i32) {
 	);
 }
 
-fn quadpillarcore(ctx: &mut Game, ele: [u8; 4], c: i32, n: i32) {
+fn quadpillarcore(ctx: &mut Game, eles: u16, c: i32, n: i32) {
 	let owner = ctx.get_owner(c);
 	for _ in 0..n {
 		let r = ctx.rng_range(0..16);
-		ctx.spend(owner, ele[r & 3] as i32, -1);
+		ctx.spend(owner, ((eles >> ((r << 2) & 12)) & 15) as i32, -1);
 		if ctx.rng_ratio(2, 3) {
-			ctx.spend(owner, ele[(r >> 2) & 3] as i32, -1);
+			ctx.spend(owner, ((eles >> (r & 12)) & 15) as i32, -1);
 		}
 	}
 }
-
-const QUAD_PILLAR_MAT: [u8; 4] = [
-	etg::Earth as u8,
-	etg::Fire as u8,
-	etg::Water as u8,
-	etg::Air as u8,
-];
-const QUAD_PILLAR_SPI: [u8; 4] = [
-	etg::Death as u8,
-	etg::Life as u8,
-	etg::Light as u8,
-	etg::Darkness as u8,
-];
-const QUAD_PILLAR_CAR: [u8; 4] = [
-	etg::Entropy as u8,
-	etg::Gravity as u8,
-	etg::Time as u8,
-	etg::Aether as u8,
-];
 
 const fn legacy_banned(code: i32) -> bool {
 	matches!(
@@ -1082,7 +1059,7 @@ impl Skill {
 			| Skill::thorn(x)
 			| Skill::v_platearmor(x)
 			| Skill::v_storm(x) => x as i32,
-			Skill::summon(x) => x as i32,
+			Skill::summon(x) | Skill::quadpillar(x) | Skill::quadpillar1(x) => x as i32,
 			Skill::quanta(x) => x as i32,
 			Skill::freeze(x)
 			| Skill::v_drainlife(x)
@@ -3036,15 +3013,9 @@ impl Skill {
 				let card = ctx.get_card(code);
 				let nymphcode = etg::NymphList[if card.element as i32 == etg::Chroma {
 					match ctx.getSkill(t, Event::OwnAttack) {
-						&[Skill::pillmat] => *ctx
-							.choose(&[etg::Earth, etg::Fire, etg::Water, etg::Air])
-							.unwrap() as usize,
-						&[Skill::pillspi] => *ctx
-							.choose(&[etg::Death, etg::Life, etg::Light, etg::Darkness])
-							.unwrap() as usize,
-						&[Skill::pillcar] => *ctx
-							.choose(&[etg::Entropy, etg::Gravity, etg::Time, etg::Aether])
-							.unwrap() as usize,
+						&[Skill::quadpillar(eles)] => {
+							((eles >> (ctx.rng_range(0..4) << 2)) & 15) as usize
+						}
 						_ => ctx.rng_range(1..=12),
 					}
 				} else {
@@ -3247,12 +3218,6 @@ impl Skill {
 			}
 			Self::pillar => pillarcore(ctx, c, ctx.get(c, Stat::charges)),
 			Self::pillar1 => pillarcore(ctx, c, 1),
-			Self::pillcar => quadpillarcore(ctx, QUAD_PILLAR_CAR, c, ctx.get(c, Stat::charges)),
-			Self::pillcar1 => quadpillarcore(ctx, QUAD_PILLAR_CAR, c, 1),
-			Self::pillmat => quadpillarcore(ctx, QUAD_PILLAR_MAT, c, ctx.get(c, Stat::charges)),
-			Self::pillmat1 => quadpillarcore(ctx, QUAD_PILLAR_MAT, c, 1),
-			Self::pillspi => quadpillarcore(ctx, QUAD_PILLAR_SPI, c, ctx.get(c, Stat::charges)),
-			Self::pillspi1 => quadpillarcore(ctx, QUAD_PILLAR_SPI, c, 1),
 			Self::plague => {
 				ctx.masscc(t, 0, |ctx, cr| {
 					ctx.poison(cr, 1);
@@ -3350,6 +3315,8 @@ impl Skill {
 					*val = 0;
 				}
 			}
+			Self::quadpillar(eles) => quadpillarcore(ctx, eles, c, ctx.get(c, Stat::charges)),
+			Self::quadpillar1(eles) => quadpillarcore(ctx, eles, c, 1),
 			Self::quanta(e) => {
 				ctx.fx(c, Fx::Quanta(1, e as u8));
 				ctx.spend(ctx.get_owner(c), e as i32, -1);

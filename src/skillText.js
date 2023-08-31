@@ -38,6 +38,12 @@ export default function skillText(c) {
 	}
 }
 
+function decodeQuad(eles) {
+	const result = [];
+	for (let i = 0; i < 16; i += 4) result.push(`1:${(eles >> i) & 15}`);
+	return result.join(' ');
+}
+
 const data = {
 	abomination:
 		'If targeted with mutation, this will always become an improved mutant.',
@@ -735,6 +741,10 @@ const data = {
 	v_void: "Reduce foe's maximum HP by 2, 3 if mark is 1:11",
 	v_web: 'Target creature loses airborne.',
 	v_wisdom: 'Target gains 4|0. May target immaterial, granting psionic.',
+	quadpillar: x =>
+		`Randomly gain 1-2 ${decodeQuad(x)} each turn. \u2154 chance to gain 2.`,
+	quadpillar1: x =>
+		`Randomly gain 1-2 ${decodeQuad(x)} when played. \u2154 chance to gain 2.`,
 };
 for (const [k, v] of [
 	[
@@ -751,16 +761,6 @@ for (const [k, v] of [
 	['v_bow', '1:9'],
 ]) {
 	data[k] = `Gains ${k === 'hammer' ? 2 : 1} strength if your mark is ${v}.`;
-}
-for (const [k, v] of [
-	['pillmat', '1:4 1:6 1:7 1:9'],
-	['pillspi', '1:2 1:5 1:8 1:11'],
-	['pillcar', '1:1 1:3 1:10 1:12'],
-]) {
-	data[k] = `Randomly gain 1-2 ${v} each turn. \u2154 chance to gain 2.`;
-	data[
-		k + '1'
-	] = `Randomly gain 1-2 ${v} when played. \u2154 chance to gain 2.`;
 }
 function auraText(tgts, bufftext, upbufftext) {
 	return c =>
