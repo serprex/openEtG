@@ -337,8 +337,8 @@ fn eval_skill(
 					ctx.get(weapon, Stat::cost) as f32
 				}
 			}
-			Skill::disfield => (3 + quantamap.get(ctx.get_owner(c), etg::Chroma) as i32) as f32,
-			Skill::disshield => (2 + quantamap.get(ctx.get_owner(c), etg::Entropy) as i32) as f32,
+			Skill::disfield => (3 + quantamap.get(ctx.get_owner(c), etg::Chroma)) as f32,
+			Skill::disshield => (2 + quantamap.get(ctx.get_owner(c), etg::Entropy)) as f32,
 			Skill::dive => {
 				if ctx.get_kind(c) == Kind::Spell {
 					ctx.get_card(ctx.get(c, Stat::card)).attack as f32
@@ -459,9 +459,7 @@ fn eval_skill(
 			Skill::millpillar => 1.0,
 			Skill::mimic => 3.0,
 			Skill::miracle => ctx.get(ctx.get_owner(c), Stat::maxhp) as f32 / 8.0,
-			Skill::mitosis | Skill::v_mitosis => {
-				(4 + ctx.get_card(ctx.get(c, Stat::card)).cost) as f32
-			}
+			Skill::mitosis => (4 + ctx.get_card(ctx.get(c, Stat::card)).cost) as f32,
 			Skill::mitosisspell | Skill::v_mitosisspell => 6.0,
 			Skill::momentum | Skill::v_momentum => 2.0,
 			Skill::mutation | Skill::v_mutation => 4.0,

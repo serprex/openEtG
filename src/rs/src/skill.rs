@@ -597,7 +597,6 @@ pub enum Skill {
 	v_liquid,
 	v_lobotomize,
 	v_luciferin,
-	v_mitosis,
 	v_mitosisspell,
 	v_momentum,
 	v_mutation,
@@ -2895,20 +2894,22 @@ impl Skill {
 					ctx.set(owner, Stat::hp, 1);
 				}
 			}
-			Self::mitosis | Self::v_mitosis => {
+			Self::mitosis => {
 				let owner = ctx.get_owner(c);
 				let child = ctx.new_thing(ctx.get(c, Stat::card), owner);
 				ctx.fx(child, Fx::StartPos(c));
 				ctx.play(child, c, false);
 			}
-			Self::mitosisspell => {
+			Self::mitosisspell | Self::v_mitosisspell => {
 				ctx.lobo(t);
 				let costele = ctx.get(t, Stat::costele);
 				let cost = ctx.get(t, Stat::cost);
 				ctx.setSkill(t, Event::Cast, &[Skill::mitosis]);
 				ctx.set(t, Stat::castele, costele);
 				ctx.set(t, Stat::cast, cost);
-				ctx.buffhp(t, 1);
+				if ctx.cardset() == CardSet::Open {
+					ctx.buffhp(t, 1);
+				}
 			}
 			Self::momentum | Self::v_momentum => {
 				ctx.fx(t, Fx::Momentum);
@@ -4497,7 +4498,7 @@ impl Skill {
 						Skill::adrenaline,
 						Skill::adrenaline,
 						Skill::adrenaline,
-						Skill::v_mitosis,
+						Skill::mitosis,
 					],
 					[
 						Skill::growth(2, 0),
@@ -4625,7 +4626,7 @@ impl Skill {
 					Skill::v_blackhole => 4,
 					Skill::growth(2, 2) => 2,
 					Skill::adrenaline => 2,
-					Skill::v_mitosis => 4,
+					Skill::mitosis => 4,
 					Skill::growth(2, 0) => 1,
 					Skill::v_fiery => -3,
 					Skill::destroy => 3,
@@ -4720,13 +4721,6 @@ impl Skill {
 				ctx.lobo(t);
 				ctx.get_thing_mut(t).flag.0 &= !(Flag::momentum | Flag::psionic | Flag::mutant);
 				ctx.set(t, Stat::casts, 0);
-			}
-			Self::v_mitosisspell => {
-				ctx.lobo(t);
-				let card = ctx.get_card(ctx.get(t, Stat::card));
-				ctx.setSkill(t, Event::Cast, &[Skill::mitosis]);
-				ctx.set(t, Stat::castele, card.costele as i32);
-				ctx.set(t, Stat::cast, card.cost as i32);
 			}
 			Self::v_mutation => {
 				let r = ctx.rng();

@@ -690,9 +690,8 @@ const data = {
 	v_lobotomize: 'Remove skills from target creature.',
 	v_luciferin:
 		'All your creatures without skills gain 1:8 when attacking. Heal self 10.',
-	v_mitosis: 'Summon a daughter creature.',
 	v_mitosisspell:
-		'Non-weapon creature gains active "Mitosis: Summon a daughter creature" costing target\'s card\'s cost.',
+		'Target\'s active ability becomes "Summon a fresh copy of this creature." That ability costs target\'s cost.',
 	v_momentum: 'Target ignores shield effects & gains 1|1.',
 	v_mutation:
 		'Mutate target creature into an abomination, or maybe something more. Slight chance of death.',

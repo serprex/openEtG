@@ -1419,7 +1419,7 @@ impl Game {
 				Skill::deja,
 				Skill::v_endow,
 				Skill::v_guard,
-				Skill::v_mitosis,
+				Skill::mitosis,
 			],
 		)
 	}
