@@ -3500,8 +3500,12 @@ impl Skill {
 				if !ctx.sanctified(t) {
 					ctx.set(t, Flag::sabbath, true);
 				}
-				ctx.masscc(t, 0, |ctx, cr| {
+				let owner = ctx.get_owner(c);
+				ctx.masscc(ctx.get_foe(owner), 0, |ctx, cr| {
 					ctx.set(cr, Stat::casts, 0);
+				});
+				ctx.masscc(owner, 0, |ctx, cr| {
+					ctx.dmg(t, -10);
 				});
 				ctx.set(t, Flag::protectdeck, true);
 			}

@@ -503,7 +503,7 @@ const data = {
 	ricochet:
 		'Any targeted spells cast by either player are copied when played. The copy has a random caster and a random non-player target.',
 	sabbath:
-		'Target cannot gain quanta through the end of their next turn. Their deck is protected until start of their next turn.',
+		"Target cannot gain quanta through the end of their next turn. Their deck is protected until start of their next turn.\nSilence all your opponent's creatures & heal all your creatures by 8",
 	sadism: 'Whenever any creatures are damaged, heal yourself an equal amount.',
 	salvage:
 		'Whenever a permanent is destroyed, gain 1|1. Once per turn, when opponent destroys a permanent, add a copy of that permanent to your hand.',
