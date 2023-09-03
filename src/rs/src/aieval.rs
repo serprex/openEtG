@@ -163,9 +163,9 @@ fn eval_skill(
 		.iter()
 		.map(|&sk| match sk {
 			Skill::acceleration => 5.0,
-			Skill::accretion | Skill::v_accretion => 8.0,
+			Skill::accretion => 8.0,
 			Skill::adrenaline => 8.0,
-			Skill::aflatoxin | Skill::v_aflatoxin => 5.0,
+			Skill::aflatoxin => 5.0,
 			Skill::aggroskele => 2.0,
 			Skill::alphawolf => {
 				if ctx.get_kind(c) == Kind::Spell {
@@ -174,7 +174,7 @@ fn eval_skill(
 					0.0
 				}
 			}
-			Skill::antimatter | Skill::v_antimatter => 12.0,
+			Skill::antimatter => 12.0,
 			Skill::appease => {
 				if ctx.get_kind(c) == Kind::Spell {
 					-6.0
@@ -185,7 +185,13 @@ fn eval_skill(
 				}
 			}
 			Skill::bblood | Skill::v_bblood => 7.0,
-			Skill::beguilestop => -damage[c],
+			Skill::beguilestop => {
+				(if ctx.hasskill(c, Event::OwnAttack, Skill::singularity) {
+					60.0
+				} else {
+					0.0
+				}) - damage[c]
+			}
 			Skill::bellweb => 1.0,
 			Skill::blackhole | Skill::v_blackhole => {
 				let foe = ctx.get_foe(ctx.get_owner(c));
@@ -193,13 +199,13 @@ fn eval_skill(
 					.quanta
 					.iter()
 					.map(|&q| cmp::min(q, 3))
-					.sum::<u8>()) as f32 / 12.0
+					.sum::<u8>()) as f32 / 24.0
 			}
-			Skill::bless | Skill::v_bless => 4.0,
+			Skill::bless => 4.0,
 			Skill::bloodmoon => 4.5,
 			Skill::boneyard => 3.0,
 			Skill::bounce => 1.0,
-			Skill::bravery | Skill::v_bravery => {
+			Skill::bravery => {
 				let owner = ctx.get_owner(c);
 				cmp::min(
 					2,
@@ -221,7 +227,7 @@ fn eval_skill(
 			}
 			Skill::bubbleclear => 3.0,
 			Skill::burrow | Skill::v_burrow | Skill::v_unburrow => 1.0,
-			Skill::butterfly | Skill::v_butterfly => 12.0,
+			Skill::butterfly => 12.0,
 			Skill::catapult => 6.0,
 			Skill::chimera => 4.0,
 			Skill::chromastat => (3 + ctx.trueatk(c) + ctx.truehp(c)) as f32 / 3.0,
@@ -229,7 +235,7 @@ fn eval_skill(
 			Skill::corpseexplosion => 1.0,
 			Skill::counter => 3.0,
 			Skill::countimmbur => 1.0,
-			Skill::cpower | Skill::v_cpower => 4.0,
+			Skill::cpower => 4.0,
 			Skill::cseed => 4.0,
 			Skill::cseed2 => 4.0,
 			Skill::creatureupkeep => {
@@ -330,7 +336,7 @@ fn eval_skill(
 			Skill::dryspell | Skill::v_dryspell => 5.0,
 			Skill::dshield | Skill::v_dshield => 4.0,
 			Skill::duality => 4.0,
-			Skill::earthquake | Skill::v_earthquake => 4.0,
+			Skill::earthquake => 4.0,
 			Skill::eatspell => 3.0,
 			Skill::embezzle => 7.0,
 			Skill::empathy => ctx.count_creatures(ctx.get_owner(c)) as f32,
@@ -339,7 +345,7 @@ fn eval_skill(
 			Skill::envenom => 3.0,
 			Skill::epidemic => 4.0,
 			Skill::epoch => 2.0,
-			Skill::evolve | Skill::v_evolve => 3.0,
+			Skill::evolve => 3.0,
 			Skill::feed => 6.0,
 			Skill::fickle => 3.0,
 			Skill::firebolt | Skill::v_firebolt(_) => 10.0,
@@ -349,7 +355,7 @@ fn eval_skill(
 			Skill::forceplay => 2.0,
 			Skill::fractal => (20 - ctx.get_player(ctx.get_owner(c)).hand_len()) as f32 / 4.0,
 			Skill::freedom => 4.0,
-			Skill::freeze(x) | Skill::v_freeze(x) => x as f32,
+			Skill::freeze(x) => x as f32,
 			Skill::freezeperm => 4.0,
 			Skill::fungusrebirth => 1.0,
 			Skill::gas => 5.0,
@@ -377,10 +383,10 @@ fn eval_skill(
 					0.0
 				}
 			}
-			Skill::gpullspell | Skill::v_gpullspell => 3.0,
+			Skill::gpullspell => 3.0,
 			Skill::grave => 1.0,
 			Skill::growth(atk, hp) => (atk + hp) as f32,
-			Skill::guard | Skill::v_guard => ttatk + (4 + ctx.get(c, Flag::airborne) as i32) as f32,
+			Skill::guard => ttatk + (4 + ctx.get(c, Flag::airborne) as i32) as f32,
 			Skill::halveatk => {
 				if ctx.get_kind(c) == Kind::Spell {
 					-ctx.get_card(ctx.get(c, Stat::card)).attack as f32 / 4.0
@@ -420,12 +426,12 @@ fn eval_skill(
 			Skill::jelly => 5.0,
 			Skill::jetstream => 2.5,
 			Skill::lightning => 6.0,
-			Skill::liquid | Skill::v_liquid => 5.0,
+			Skill::liquid => 5.0,
 			Skill::livingweapon => 2.0,
-			Skill::lobotomize | Skill::v_lobotomize => 6.0,
+			Skill::lobotomize => 6.0,
 			Skill::locket => 1.0,
 			Skill::loot => 2.0,
-			Skill::luciferin | Skill::v_luciferin => 3.0,
+			Skill::luciferin => 3.0,
 			Skill::lycanthropy => 4.0,
 			Skill::mend => 3.0,
 			Skill::metamorph => 2.0,
@@ -435,8 +441,8 @@ fn eval_skill(
 			Skill::mimic => 3.0,
 			Skill::miracle => ctx.get(ctx.get_owner(c), Stat::maxhp) as f32 / 8.0,
 			Skill::mitosis => (4 + ctx.get_card(ctx.get(c, Stat::card)).cost) as f32,
-			Skill::mitosisspell | Skill::v_mitosisspell => 6.0,
-			Skill::momentum | Skill::v_momentum => 2.0,
+			Skill::mitosisspell => 6.0,
+			Skill::momentum => 2.0,
 			Skill::mutation | Skill::v_mutation => 4.0,
 			Skill::neuro => {
 				if ctx.get(ctx.get_foe(ctx.get_owner(c)), Flag::neuro) {
@@ -487,10 +493,10 @@ fn eval_skill(
 			Skill::paradox => 5.0,
 			Skill::parallel => 8.0,
 			Skill::patience => 2.0,
-			Skill::phoenix | Skill::v_phoenix => 3.0,
+			Skill::phoenix => 3.0,
 			Skill::photosynthesis => 2.0,
 			Skill::plague | Skill::v_plague => 5.0,
-			Skill::platearmor(x) | Skill::v_platearmor(x) => x as f32,
+			Skill::platearmor(x) => x as f32,
 			Skill::poison(x) => x as f32,
 			Skill::poisonfoe(x) => x as f32,
 			Skill::powerdrain => 6.0,
@@ -518,7 +524,7 @@ fn eval_skill(
 			}
 			Skill::readiness | Skill::v_readiness => 3.0,
 			Skill::reap => 7.0,
-			Skill::rebirth | Skill::v_rebirth => {
+			Skill::rebirth => {
 				if card::Upped(ctx.get(c, Stat::card)) {
 					5.0
 				} else {
@@ -558,7 +564,7 @@ fn eval_skill(
 			Skill::silence | Skill::v_silence => 1.0,
 			Skill::singularity | Skill::v_singularity => -64.0,
 			Skill::sinkhole => 3.0,
-			Skill::siphon | Skill::v_siphon => 4.0,
+			Skill::siphon => 4.0,
 			Skill::siphonactive => 3.0,
 			Skill::siphonstrength => 4.0,
 			Skill::skyblitz => 10.0,
@@ -566,16 +572,16 @@ fn eval_skill(
 			Skill::sosa => 6.0,
 			Skill::soulcatch => 2.0,
 			Skill::spores => 4.0,
-			Skill::sskin | Skill::v_sskin => 15.0,
+			Skill::sskin => 15.0,
 			Skill::stasisdraw => 1.0,
 			Skill::steal | Skill::v_steal => 6.0,
-			Skill::steam | Skill::v_steam => 6.0,
+			Skill::steam => 6.0,
 			Skill::stoneform | Skill::v_stoneform => 1.0,
 			Skill::storm(x) | Skill::v_storm(x) | Skill::firestorm(x) => (x * 4) as f32,
 			Skill::summon(FateEgg) => 3.0,
 			Skill::summon(FateEggUp) => 4.0,
 			Skill::summon(Firefly) | Skill::summon(FireflyV) => 4.0,
-			Skill::summon(FireflyUp) | Skill::summon(FireflyUpV) => 5.0,
+			Skill::summon(FireflyUp) | Skill::summon(FireflyUpV) => 4.5,
 			Skill::summon(Scarab) | Skill::summon(ScarabV) => 4.0,
 			Skill::summon(ScarabUp) | Skill::summon(ScarabUpV) => 4.5,
 			Skill::summon(Shadow) => 3.0,
@@ -601,7 +607,7 @@ fn eval_skill(
 			Skill::turngolem => (ctx.get(c, Stat::storedpower) / 2) as f32,
 			Skill::unsummon => 1.0,
 			Skill::unsummonquanta => 3.0,
-			Skill::upkeep | Skill::v_upkeep => -0.5,
+			Skill::upkeep => -0.5,
 			Skill::upload => 3.0,
 			Skill::vampire => {
 				(if ctx.get_kind(c) == Kind::Spell {
@@ -627,9 +633,9 @@ fn eval_skill(
 			}
 			Skill::virusplague | Skill::v_virusplague => 1.0,
 			Skill::void => 5.0,
-			Skill::web | Skill::v_web => 1.0,
+			Skill::web => 1.0,
 			Skill::wind => ctx.get(c, Stat::storedpower) as f32 / 2.0,
-			Skill::wisdom | Skill::v_wisdom => 4.0,
+			Skill::wisdom => 4.0,
 			Skill::yoink => 4.0,
 			Skill::vengeance => 2.0,
 			Skill::vindicate => 3.0,
@@ -682,7 +688,6 @@ fn eval_skill(
 			Skill::v_dessication => 8.0,
 			Skill::v_freedom => (ctx.get(c, Stat::charges) * 5) as f32,
 			Skill::v_gratitude => (ctx.get(c, Stat::charges) * 4) as f32,
-			Skill::v_guard => 4.0,
 			Skill::v_heal => 8.0,
 			Skill::v_thorn => 5.0,
 			Skill::v_void => (ctx.get(c, Stat::charges) * 5) as f32,
@@ -876,6 +881,7 @@ fn evalthing(
 	id: i32,
 	inhand: bool,
 	flooded: bool,
+	nothrottle: bool,
 	patience: bool,
 ) -> f32 {
 	if id == 0 {
@@ -993,11 +999,7 @@ fn evalthing(
 			}
 		}
 	}
-	let throttle = if adrenaline < 3.0
-		|| (iscrea && {
-			let weapon = ctx.get_weapon(owner);
-			weapon != 0 && ctx.get(weapon, Flag::nothrottle)
-		}) {
+	let throttle = if adrenaline < 3.0 || nothrottle {
 		adrenaline
 	} else {
 		2.0
@@ -1030,7 +1032,7 @@ fn evalthing(
 					&& sk
 						.iter()
 						.cloned()
-						.any(|sk| matches!(sk, Skill::growth(_, _) | Skill::v_siphon))
+						.any(|sk| matches!(sk, Skill::growth(_, _) | Skill::siphon))
 				{
 					autoscore *= delayfactor
 				}
@@ -1294,6 +1296,8 @@ pub fn eval(ctx: &Game) -> f32 {
 		pscore += (quantamap.get(pl, etg::Chroma) as u32
 			+ player.quanta.iter().map(|q| *q as u32).sum::<u32>()) as f32
 			/ 14256.0;
+		let nothrottle = once(player.weapon)
+			.chain(player.creatures.iter().cloned()).any(|id| ctx.hasskill(id, Event::Beginattack, Skill::nothrottle));
 		pscore += evalthing(
 			ctx,
 			&damage,
@@ -1301,6 +1305,7 @@ pub fn eval(ctx: &Game) -> f32 {
 			ctx.get_weapon(pl),
 			false,
 			false,
+			nothrottle,
 			false,
 		);
 		pscore += evalthing(
@@ -1310,22 +1315,23 @@ pub fn eval(ctx: &Game) -> f32 {
 			ctx.get_shield(pl),
 			false,
 			false,
+			nothrottle,
 			false,
 		);
 		pscore += player
 			.creatures
 			.iter()
-			.map(|&cr| evalthing(ctx, &damage, &quantamap, cr, false, flooded, patience))
+			.map(|&cr| evalthing(ctx, &damage, &quantamap, cr, false, flooded, nothrottle, patience))
 			.sum::<f32>();
 		pscore += player
 			.permanents
 			.iter()
-			.map(|&pr| evalthing(ctx, &damage, &quantamap, pr, false, false, false))
+			.map(|&pr| evalthing(ctx, &damage, &quantamap, pr, false, false, nothrottle, false))
 			.sum::<f32>();
 		pscore += player
 			.hand
 			.iter()
-			.map(|&hr| evalthing(ctx, &damage, &quantamap, hr, true, false, false))
+			.map(|&hr| evalthing(ctx, &damage, &quantamap, hr, true, false, nothrottle, false))
 			.sum::<f32>();
 		if !ctx.get(pl, Flag::drawlock) {
 			if pl != turn {
@@ -1339,6 +1345,7 @@ pub fn eval(ctx: &Game) -> f32 {
 							player.deck[player.deck.len() - draw],
 							true,
 							false,
+							nothrottle,
 							false,
 						);
 					}

@@ -497,28 +497,27 @@ impl Flag {
 	pub const neuro: u64 = 1 << 12;
 	pub const nightfall: u64 = 1 << 13;
 	pub const nocturnal: u64 = 1 << 14;
-	pub const nothrottle: u64 = 1 << 15;
-	pub const out: u64 = 1 << 16;
-	pub const patience: u64 = 1 << 17;
-	pub const pendstate: u64 = 1 << 18;
-	pub const pillar: u64 = 1 << 19;
-	pub const poisonous: u64 = 1 << 20;
-	pub const precognition: u64 = 1 << 21;
-	pub const protectdeck: u64 = 1 << 22;
-	pub const psionic: u64 = 1 << 23;
-	pub const ranged: u64 = 1 << 24;
-	pub const ready: u64 = 1 << 25;
-	pub const reflective: u64 = 1 << 26;
-	pub const resigned: u64 = 1 << 27;
-	pub const sabbath: u64 = 1 << 28;
-	pub const salvaged: u64 = 1 << 29;
-	pub const sanctuary: u64 = 1 << 30;
-	pub const stackable: u64 = 1 << 31;
-	pub const token: u64 = 1 << 32;
-	pub const tunnel: u64 = 1 << 33;
-	pub const vindicated: u64 = 1 << 34;
-	pub const voodoo: u64 = 1 << 35;
-	pub const whetstone: u64 = 1 << 36;
+	pub const out: u64 = 1 << 15;
+	pub const patience: u64 = 1 << 16;
+	pub const pendstate: u64 = 1 << 17;
+	pub const pillar: u64 = 1 << 18;
+	pub const poisonous: u64 = 1 << 19;
+	pub const precognition: u64 = 1 << 20;
+	pub const protectdeck: u64 = 1 << 21;
+	pub const psionic: u64 = 1 << 22;
+	pub const ranged: u64 = 1 << 23;
+	pub const ready: u64 = 1 << 24;
+	pub const reflective: u64 = 1 << 25;
+	pub const resigned: u64 = 1 << 26;
+	pub const sabbath: u64 = 1 << 27;
+	pub const salvaged: u64 = 1 << 28;
+	pub const sanctuary: u64 = 1 << 29;
+	pub const stackable: u64 = 1 << 30;
+	pub const token: u64 = 1 << 31;
+	pub const tunnel: u64 = 1 << 32;
+	pub const vindicated: u64 = 1 << 33;
+	pub const voodoo: u64 = 1 << 34;
+	pub const whetstone: u64 = 1 << 35;
 
 	pub fn get(self, key: u64) -> bool {
 		self.0 & key != 0
@@ -1149,13 +1148,13 @@ impl Game {
 
 	pub fn requires_target(&self, id: i32) -> bool {
 		let skill = self.getSkill(id, Event::Cast);
-		!skill.is_empty() && skill[0].targeting().is_some()
+		!skill.is_empty() && skill[0].targeting(self.cardset()).is_some()
 	}
 
 	pub fn can_target(&self, c: i32, t: i32) -> bool {
 		self.getSkill(c, Event::Cast)
 			.first()
-			.and_then(|sk| sk.targeting())
+			.and_then(|sk| sk.targeting(self.cardset()))
 			.map(|tgt| tgt.full_check(self, c, t))
 			.unwrap_or(false)
 	}
@@ -1401,7 +1400,7 @@ impl Game {
 			id,
 			&[
 				Skill::v_hatch,
-				Skill::v_freeze(3),
+				Skill::freeze(3),
 				Skill::v_burrow,
 				Skill::destroy,
 				Skill::v_steal,
@@ -1418,7 +1417,7 @@ impl Game {
 				Skill::poisonfoe(1),
 				Skill::deja,
 				Skill::v_endow,
-				Skill::v_guard,
+				Skill::guard,
 				Skill::mitosis,
 			],
 		)
@@ -1544,7 +1543,7 @@ impl Game {
 			let frozen = self.get(id, Stat::frozen);
 			if frozen == 0 {
 				self.proc_data(Event::Attack, id, &mut data);
-				if kind != Kind::Shield && !data.stasis && self.get(id, Stat::delayed) == 0 {
+				if kind != Kind::Shield && !data.get(ProcData::stasis) && self.get(id, Stat::delayed) == 0 {
 					let mut trueatk = self.trueatk(id);
 					if trueatk != 0 {
 						let psionic = self.get(id, Flag::psionic);
@@ -1558,7 +1557,7 @@ impl Game {
 						}
 						let gpull = self.get(data.tgt, Stat::gpull);
 						let shield = self.get_shield(data.tgt);
-						if data.freedom {
+						if data.get(ProcData::freedom) {
 							if bypass || (shield == 0 && gpull == 0) {
 								trueatk = (trueatk * 3 + 1) / 2;
 							} else {
@@ -1568,7 +1567,7 @@ impl Game {
 						if psionic {
 							self.spelldmg(data.tgt, trueatk);
 						} else if bypass || trueatk < 0 {
-							let mut hitdata = ProcData::default();
+							let mut hitdata = data.clone();
 							hitdata.dmg = self.dmg(data.tgt, trueatk);
 							self.trigger_data(Event::Hit, id, data.tgt, &mut hitdata);
 						} else if gpull != 0 {
@@ -1579,7 +1578,7 @@ impl Game {
 							} else {
 								0
 							};
-							let mut hitdata = ProcData::default();
+							let mut hitdata = data.clone();
 							hitdata.dmg = trueatk - truedr;
 							hitdata.blocked = truedr;
 							if shield != 0 {
@@ -1640,16 +1639,16 @@ impl Game {
 				|| self
 					.getSkill(id, Event::OwnAttack)
 					.iter()
-					.any(|&s| matches!(s, Skill::growth(_, _) | Skill::v_siphon))
+					.any(|&s| matches!(s, Skill::growth(_, _) | Skill::siphon))
 			{
 				self.proc_data(Event::Attack, id, &mut data);
-				if !data.stasis && frozen == 0 && self.get(id, Stat::delayed) == 0 {
+				if !data.get(ProcData::stasis) && frozen == 0 && self.get(id, Stat::delayed) == 0 {
 					let mut trueatk = self.trueatk(id);
 					if trueatk != 0 {
 						let owner = self.get_owner(id);
 						let target = self.get_foe(owner);
 						let mut bypass = self.get(id, Flag::momentum);
-						if data.freedom {
+						if data.get(ProcData::freedom) {
 							bypass = true;
 							trueatk = (trueatk * 3 + 1) / 2
 						}
@@ -1657,7 +1656,7 @@ impl Game {
 							self.spelldmg(target, trueatk);
 						} else if bypass || trueatk < 0 {
 							self.dmg(target, trueatk);
-							let mut hitdata = ProcData::default();
+							let mut hitdata = data.clone();
 							hitdata.dmg = trueatk;
 							self.trigger_data(Event::Hit, id, target, &mut hitdata);
 						} else if kind == Kind::Creature && self.get(target, Stat::gpull) != 0 {
@@ -1676,7 +1675,7 @@ impl Game {
 							} else {
 								0
 							};
-							let mut hitdata = ProcData::default();
+							let mut hitdata = data.clone();
 							let reducedmg = trueatk - truedr;
 							hitdata.dmg = reducedmg;
 							hitdata.blocked = truedr;
@@ -1730,7 +1729,7 @@ impl Game {
 		let mut dmgdata = ProcData::default();
 		dmgdata.dmg = dmg;
 		self.trigger_data(Event::Spelldmg, id, 0, &mut dmgdata);
-		if dmgdata.evade {
+		if dmgdata.get(ProcData::evade) {
 			0
 		} else {
 			self.dmg(id, dmgdata.dmg)
@@ -1863,7 +1862,7 @@ impl Game {
 			Event::Play,
 			thingid,
 			&mut ProcData {
-				fromhand: fromhand,
+				flags: if fromhand { ProcData::fromhand } else { 0 },
 				..Default::default()
 			},
 		);
@@ -2180,7 +2179,7 @@ impl Game {
 		} else if kind == Kind::Creature {
 			let mut data = ProcData::default();
 			self.trigger_data(Event::Predeath, id, 0, &mut data);
-			if !data.evade {
+			if !data.get(ProcData::evade) {
 				if self.get(id, Flag::aflatoxin) {
 					let card = self.get(id, Stat::card);
 					let cellcode = if self.cards.set == CardSet::Open {
@@ -2267,7 +2266,7 @@ impl Game {
 					Event::Draw,
 					cardid,
 					&mut ProcData {
-						drawstep: isstep,
+						flags: if isstep { ProcData::drawstep } else { 0 },
 						..Default::default()
 					},
 				);
@@ -2324,7 +2323,6 @@ impl Game {
 		thing.flag.0 &=
 			!(Flag::additive
 				| Flag::cloak | Flag::nightfall
-				| Flag::nothrottle
 				| Flag::stackable
 				| Flag::tunnel | Flag::whetstone);
 		for status in [Stat::charges, Stat::flooding] {
@@ -2380,7 +2378,7 @@ impl Game {
 		self.proc_mark(id);
 		let mut data = ProcData {
 			tgt: self.get_foe(id),
-			attackphase: true,
+			flags: ProcData::attackphase,
 			..Default::default()
 		};
 		self.proc_data(Event::Beginattack, id, &mut data);
@@ -2413,8 +2411,10 @@ impl Game {
 		self.proc_mark(id);
 		let foe = self.get_foe(id);
 		self.dmg(foe, self.get(foe, Stat::poison));
-		let mut data = ProcData::default();
-		data.attackphase = true;
+		let mut data = ProcData {
+			flags: ProcData::attackphase,
+			..ProcData::default()
+		};
 		let mut patienceFlag = false;
 		let mut floodingIndex = 23;
 		self.proc_data(Event::Beginattack, id, &mut data);
@@ -2555,7 +2555,7 @@ impl Game {
 		};
 		self.proc_data(Event::Prespell, c, &mut data);
 		let t = data.tgt;
-		let evade = data.evade;
+		let evade = data.get(ProcData::evade);
 		if evade {
 			if t != 0 {
 				self.fx(t, Fx::Evade);

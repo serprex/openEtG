@@ -52,8 +52,10 @@ const data = {
 		`Replaces target creature\'s skills with "Gains +${
 			c.upped ? 3 : 2
 		}|-1 when it attacks."`,
-	accretion:
-		'Destroy target permanent & gain 0|10. If using this ability leaves this creature at more than 30 HP, destroy this creature & add a black hole to your hand.',
+	accretion: c =>
+		c.Cards.cardSet === 'Open'
+			? 'Destroy target permanent & gain 0|10. If using this ability leaves this creature at more than 30 HP, transform into a black hole in your hand.'
+			: 'Destroy target permanent & gain 0|15. If using this ability leaves this creature at more than 45 HP, destroy this creature & add a black hole to your hand.',
 	accumulation: 'Playing additional repulsors adds to damage reduction.',
 	adrenaline:
 		'Target creature attacks multiple times per turn. Creatures with lower strength attack more times per turn.',
@@ -93,8 +95,10 @@ const data = {
 		} Skeleton.`,
 	bounce:
 		"When dying instead return to owner's hand. Modified state besides this effect remains when played again.",
-	bravery:
-		'Opponent draws up to two cards. Draw cards equal to what opponent drew.',
+	bravery: c =>
+		`Opponent draws up to two${
+			c.Cards.cardSet === 'Open' ? '' : ', three if your mark is 1:6,'
+		} cards. Draw cards equal to what opponent drew.`,
 	brawl:
 		'Your creatures attack. If a creature exists in opposing creature slot, the two creatures deal their damage to one another instead of opponent. Consumes all remaining 1:3.',
 	brew: "Add a random Alchemy card to your hand. Possible cards include: Antimatter, Black Hole, Adrenaline, Nymph's Tears, Unstable Gas, Liquid Shadow, Aflatoxin, Basilisk Blood, Rage Potion, Luciferin, Precognition, Quintessence.",
@@ -104,8 +108,10 @@ const data = {
 		} Phantom.`,
 	bubbleclear:
 		'Remove statuses (positive & negative) from target creature or permanent, & heal target creature 1.\nTarget gains a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages the affected card.',
-	butterfly:
-		'Target creature or weapon with either strength or HP less than 3 has its skills replaced with "3:1 Destroy target permanent."',
+	butterfly: c =>
+		c.Cards.cardSet === 'Open'
+			? 'Target creature or weapon with either strength or HP less than 3 has its skills replaced with "3:1 Destroy target permanent."'
+			: 'Target creature with less attack than 3. Replace target\'s skills with "3:1 Destroy target permanent"',
 	burrow: c =>
 		c.getStatus('burrowed')
 			? 'Unburrow.'
@@ -385,6 +391,7 @@ const data = {
 		} damage per card added in this way. Heal yourself an equal amount.`,
 	nightshade:
 		'Target creature becomes nocturnal, gains 5|5, and loses active skills.',
+	nothrottle: 'Your creatures whose skills have Throttled lose Throttled.',
 	nova: 'Gain 1 quanta of each element. If you play three or more of this card in one turn, summon a Singularity on your side.',
 	nova2:
 		'Gain 2 quanta of each element. If you play two or more of this card in one turn, summon a Singularity on your side.',
@@ -455,6 +462,10 @@ const data = {
 		'Nullify the next spell, ability, or spell damage used by opponent that targets or damages this card.',
 	purify:
 		'Remove all poison counters and sacrifice status from target creature or player. Target creature or player gains two purify counters.',
+	quadpillar: x =>
+		`Randomly gain 1-2 ${decodeQuad(x)} each turn. \u2154 chance to gain 2.`,
+	quadpillar1: x =>
+		`Randomly gain 1-2 ${decodeQuad(x)} when played. \u2154 chance to gain 2.`,
 	quantagift:
 		'Gain 2:7 and 2 quanta matching your mark. If your mark is 1:7, instead gain only 3:7 total. If your mark is 1:0, gain an additional 4:0.',
 	quanta: x => ({
@@ -635,28 +646,18 @@ const data = {
 	weight: 'Evade all attackers that have more than 5 HP.',
 	wind: 'Restore any strength lost by halving after attacking. Increase HP by amount restored.',
 	wings: 'Evade all non-airborne, non-ranged attackers.',
-	wisdom:
-		'Target creature or weapon gains 3|0. May target immaterial cards. If it targets an immaterial card, that card gains psionic. Psionic cards deal spell damage and typically bypass shields.',
+	wisdom: c =>
+		`Target creature ${
+			c.Cards.cardSet === 'Open' ? 'or weapon gains 3' : 'gains 4'
+		}|0. May target immaterial cards. If it targets an immaterial card, that card gains psionic. Psionic cards deal spell damage and typically bypass shields.`,
 	yoink:
 		"Remove target card from opponent's hand and add it to your hand, or draw from target opponent's deck.",
-	v_accretion:
-		'Destroy target permanent & gain 0|10. If using this ability leaves this creature at more than 45 HP, destroy this creature & add a black hole to your hand.',
-	v_aflatoxin:
-		'Apply 2 poison to target. When target dies, it turns into a malignant cell.',
-	v_antimatter: 'Invert strength of target.',
 	v_bblood: 'Target creature gains 0|20 & is delayed 6 turns.',
 	v_blackhole:
 		'Absorb 3 quanta per element from target player. Heal 1 per absorbed quantum.',
-	v_bless: 'Target gains 3|3.',
-	v_bravery:
-		'Foe draws 2, 3 if own mark is 1:6, cards, you draw an equal amount of cards.',
 	v_burrow: 'Burrow this creature. Strength is halved while burrowed.',
-	v_butterfly:
-		'Target creature with less attack than 3. Replace target\'s skills with "3:1 Destroy target permanent"',
 	v_cold: '30% chance to freeze attackers for 3.',
-	v_cpower: 'Target gains 1 to 5 strength. Target gains 1 to 5 hp.',
 	v_cseed: 'A random effect is inflicted to target creature.',
-	v_decrsteam: 'Decrement strength from steam after attack.',
 	v_dessication:
 		"Deal 2 damage to opponent's creatures. Gain 1:7 per damage dealt. Removes cloak",
 	v_divinity: 'Add 24 to maximum health if mark 1:8, otherwise 16 & heal same.',
@@ -667,21 +668,15 @@ const data = {
 		"Deal 2 damage to all opponent's creatures. Gain 1:7 per damage dealt. Removes cloak",
 	],
 	v_dshield: 'Become immaterial until next turn.',
-	v_earthquake: 'Destroy up to 3 stacks from target permanent.',
 	v_endow: 'Replicate attributes of target weapon.',
-	v_evolve: 'Become an unburrowed Shrieker.',
 	v_fiery: 'Increment damage per 5:6 owned.',
 	v_firebolt: _ => 'Deals 3 damage to target. Deal 3 more per 10:6 remaining.',
 	v_firewall: 'Damage attackers.',
 	v_flyingweapon: 'Own weapon becomes a flying creature.',
 	v_freedom:
 		'Your airborne creatures have a 25% chance to deal 50% more damage, bypass shields and evade targeting if 1:9.',
-	v_freeze: x => c =>
-		`Freeze target for ${x} turns. Being frozen disables attacking & per turn skills`,
 	v_gaincharge2: 'Gain 2 stacks per death.',
-	v_gpullspell: 'Target creature intercepts attacks directed to its owner.',
 	v_gratitude: 'Heal owner 3, 5 if 1:5.',
-	v_guard: 'Delay target creature & attack target if grounded. Delay self.',
 	v_hatch: 'Become a random creature.',
 	v_heal: 'Heal self 20.',
 	v_holylight: 'Heal target 10. Nocturnal targets are damaged instead.',
@@ -691,14 +686,6 @@ const data = {
 		'Deal 2 damage to target, plus an additional 2 per 10:7 remaining. 25% plus 5% per point of damage chance to freeze target.',
 	v_improve: 'Mutate target creature.',
 	v_integrity: 'Combine all shards in hand to form a Shard Golem.',
-	v_liquid:
-		'Target creature is poisoned & skills replaced with "Heal owner per damage dealt"',
-	v_lobotomize: 'Remove skills from target creature.',
-	v_luciferin:
-		'All your creatures without skills gain 1:8 when attacking. Heal self 10.',
-	v_mitosisspell:
-		'Target\'s active ability becomes "Summon a fresh copy of this creature." That ability costs target\'s cost.',
-	v_momentum: 'Target ignores shield effects & gains 1|1.',
 	v_mutation:
 		'Mutate target creature into an abomination, or maybe something more. Slight chance of death.',
 	v_nymph: 'Turn target pillar into a Nymph of same element.',
@@ -707,13 +694,10 @@ const data = {
 		`Random effects are inflicted to ${
 			c.upped ? "oppenent's" : 'all'
 		} creatures. Removes cloak.`,
-	v_phoenix: ['Become an Ash on death.', 'Become a Minor Ash on death.'],
 	v_plague: "Poison foe's creatures. Removes cloak.",
-	v_platearmor: x => `Target creature gains 0|${x}.`,
 	v_purify: 'Replace poison statuses with 2 purify. Removes sacrifice.',
 	v_readiness:
 		"Target creature's active becomes costless. Skill can be reactivated.",
-	v_rebirth: c => `Become a ${c.upped ? 'Minor ' : ''}Phoenix`,
 	v_relic: 'Worthless.',
 	v_rewind:
 		"Remove target creature to top of owner's deck. If target is a Skeleton, transform it into a random creature. If target is a Mummy, transform it into a Pharaoh.",
@@ -727,24 +711,14 @@ const data = {
 	v_silence:
 		'Foe cannot play cards during their next turn, or target creature gains summoning sickness.',
 	v_singularity: 'Not well behaved.',
-	v_siphon: 'Siphon 1:0 from foe as 1:11. Throttled.',
 	v_slow: 'Delay attackers.',
-	v_sskin: 'Increment maximum HP per 1:4 owned. Heal same.',
 	v_steal: 'Steal target permanent.',
-	v_steam: 'Gain 5|0.',
 	v_stoneform: 'Remove this ability & gain 0|20.',
 	v_storm: x => `Deals ${x} damage to foe's creatures. Removes cloak.`,
 	v_swarm: 'Increment hp per scarab.',
 	v_thorn: '75% chance to poison attackers.',
-	v_upkeep: c => 'Consumes 1:' + c.element,
 	v_virusplague: "Sacrifice self & poison foe's creatures.",
 	v_void: "Reduce foe's maximum HP by 2, 3 if mark is 1:11",
-	v_web: 'Target creature loses airborne.',
-	v_wisdom: 'Target gains 4|0. May target immaterial, granting psionic.',
-	quadpillar: x =>
-		`Randomly gain 1-2 ${decodeQuad(x)} each turn. \u2154 chance to gain 2.`,
-	quadpillar1: x =>
-		`Randomly gain 1-2 ${decodeQuad(x)} when played. \u2154 chance to gain 2.`,
 };
 for (const [k, v] of [
 	[
@@ -781,8 +755,6 @@ const statusText = {
 			  }`,
 	mode: '',
 	nightfall: auraText('Nocturnal creatures', '1|1', '2|1'),
-	nothrottle:
-		'While this is equipped, any of your creatures whose active skills have Throttled lose Throttled.',
 	poison: (c, inst) =>
 		c === inst
 			? `Enters play with ${c.getStatus('poison')} poison counter${
