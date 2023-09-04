@@ -3,6 +3,12 @@ import enums from './enum.json' assert { type: 'json' };
 import { decodeSkillName, read_skill, read_status } from './util.js';
 import * as wasm from './rs/pkg/etg.js';
 
+const infoskipkeys = new Set(['casts', 'gpull', 'hp', 'maxhp']);
+function plinfocore(info, key, val) {
+	if (val === true) info.push(key);
+	else if (val) info.push(val + key);
+}
+
 export default class Thing {
 	constructor(game, id) {
 		if (!id || typeof id !== 'number') {
@@ -10,9 +16,6 @@ export default class Thing {
 		}
 		this.game = game;
 		this.id = id;
-	}
-	toString() {
-		return this.card.name;
 	}
 	get active() {
 		return read_skill(this.game.game.get_skills(this.id));
@@ -29,9 +32,6 @@ export default class Thing {
 	}
 	get ownerId() {
 		return this.game.get_owner(this.id);
-	}
-	get owner() {
-		return this.game.byId(this.game.get_owner(this.id));
 	}
 	get card() {
 		return this.game.Cards.Codes[this.game.get(this.id, 'card')];
@@ -71,14 +71,28 @@ export default class Thing {
 	}
 	info() {
 		const type = this.type === wasm.Kind.Spell ? this.card.type : this.type;
-		const info =
-			type === wasm.Kind.Creature || type === wasm.Kind.Weapon
-				? `${this.trueatk()}|${this.truehp()}/${this.maxhp}`
-				: type === wasm.Kind.Shield
-				? this.truedr().toString()
-				: '';
-		const stext = skillText(this);
-		return !info ? stext : stext ? info + '\n' + stext : info;
+		if (type == wasm.Kind.Player) {
+			const info = [
+				`${this.hp}/${this.maxhp} ${this.game.game.deck_length(this.id)}cards`,
+			];
+			for (const [k, v] of this.status) {
+				if (!infoskipkeys.has(k) || !v)
+					plinfocore(info, k, this.game.get(this.id, k));
+			}
+			info.push(this.game.game.get_drawpower(this.id) + 'drawpower');
+			if (this.casts === 0) info.push('silenced');
+			if (this.getStatus('gpull')) info.push('gpull');
+			return info.join('\n');
+		} else {
+			const info =
+				type === wasm.Kind.Creature || type === wasm.Kind.Weapon
+					? `${this.trueatk()}|${this.truehp()}/${this.maxhp}`
+					: type === wasm.Kind.Shield
+					? this.truedr().toString()
+					: '';
+			const stext = skillText(this);
+			return !info ? stext : stext ? info + '\n' + stext : info;
+		}
 	}
 	isMaterial(type) {
 		return this.game.game.material(this.id, type);

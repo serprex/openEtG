@@ -19,7 +19,7 @@ async function bench(name) {
 			const cmd = game.aiSearch();
 			const end = performance.now();
 			timing.push(end - start);
-			if (game.byId(game.turn).data.ai) {
+			if (game.data.players[game.getIndex(game.turn)].ai) {
 				for (const k in moves[m]) {
 					if (moves[m][k] !== cmd[k]) {
 						console.log(m, moves[m], cmd);

@@ -65,23 +65,25 @@ function permanentPos(j, i) {
 function cardPos(j, i) {
 	return { x: 132, y: (j ? 36 : 336) + 28 * i };
 }
-export function tgtToPos(t, p1id) {
-	const { type } = t;
+export function tgtToPos(game, id, p1id) {
+	const type = game.get_kind(id);
 	if (type === etg.Player) {
-		return reflectPos(t.id !== p1id, { x: 50, y: 560 });
+		return reflectPos(id !== p1id, { x: 50, y: 560 });
 	}
-	if (~t.getIndex()) {
+	const index = game.getIndex(id);
+	if (~index) {
+		const ownerId = game.get_owner(id);
 		switch (type) {
 			case etg.Creature:
-				return creaturePos(t.ownerId !== p1id, t.getIndex());
+				return creaturePos(ownerId !== p1id, index);
 			case etg.Weapon:
-				return reflectPos(t.ownerId !== p1id, { x: 207, y: 492 });
+				return reflectPos(ownerId !== p1id, { x: 207, y: 492 });
 			case etg.Shield:
-				return reflectPos(t.ownerId !== p1id, { x: 207, y: 562 });
+				return reflectPos(ownerId !== p1id, { x: 207, y: 562 });
 			case etg.Permanent:
-				return permanentPos(t.ownerId !== p1id, t.getIndex());
+				return permanentPos(ownerId !== p1id, index);
 			case etg.Spell:
-				return cardPos(t.ownerId !== p1id, t.getIndex());
+				return cardPos(ownerId !== p1id, index);
 		}
 	}
 	return null;

@@ -3,7 +3,6 @@ import * as etgutil from './etgutil.js';
 import OriginalCards from './vanilla/Cards.js';
 import OpenCards from './Cards.js';
 import Thing from './Thing.js';
-import Player from './Player.js';
 import enums from './enum.json' assert { type: 'json' };
 import { randint } from './util.js';
 import * as wasm from './rs/pkg/etg.js';
@@ -24,7 +23,6 @@ export default class Game {
 				pdata = data.players[i];
 			players.push(id);
 			playersByIdx.set(pdata.idx, id);
-			this.cache.set(id, new Player(this, id));
 		}
 		for (let i = 0; i < players.length; i++) {
 			const pdata = data.players[i];
@@ -76,9 +74,6 @@ export default class Game {
 		obj.game = this.game.clonegame();
 		obj.cache = new Map([[this.id, obj]]);
 		obj.replay = this.replay.slice();
-		for (const id of this.players) {
-			obj.cache.set(id, new Player(obj, id));
-		}
 		return obj;
 	}
 	byId(id) {
@@ -138,8 +133,8 @@ export default class Game {
 	get_hand(id) {
 		return this.game.get_hand(id);
 	}
-	get_quanta(id) {
-		return new Uint8Array([0, ...this.game.get_quanta(id)]);
+	get_quanta(id, ele) {
+		return this.game.get_quanta(id, ele);
 	}
 	get_foe(id) {
 		return this.game.get_foe(id);

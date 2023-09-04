@@ -760,8 +760,8 @@ impl Game {
 		self.get_player(id).deck.len()
 	}
 
-	pub fn get_quanta(&self, id: i32) -> Vec<u8> {
-		self.get_player(id).quanta.iter().cloned().collect()
+	pub fn get_quanta(&self, id: i32, ele: i32) -> u8 {
+		self.get_player(id).quanta(ele)
 	}
 
 	pub fn count_creatures(&self, id: i32) -> i32 {

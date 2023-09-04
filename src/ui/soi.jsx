@@ -26,20 +26,19 @@ function App() {
 					{ idx: 1, deck: '' },
 				],
 			};
-			const game = new Game(data),
-				player = game.byId(1);
+			const game = new Game(data);
 			game.next({ x: 'end' }, false);
 
 			let id = 0;
-			for (const handId of player.handIds) {
-				if (game.byId(handId).card.code === Shard(Earth) + 2000) {
+			for (const handId of game.get_hand(1)) {
+				if (game.get(handId, 'card') === Shard(Earth) + 2000) {
 					id = handId;
 					break;
 				}
 			}
 			if (id) {
 				game.next({ x: 'cast', c: id }, false);
-				const golemId = player.creatureIds[0];
+				const golemId = game.get_creatures(1)[0];
 				return golemId ? game.byId(golemId).info() : 'No Shard Golem spawned';
 			} else return 'No Shard of Integrity to cast';
 		} else return 'Too many cards';

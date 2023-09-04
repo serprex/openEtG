@@ -36,7 +36,9 @@ const BonusList = [
 		name: 'Creature Domination',
 		desc: 'More than twice as many creatures than foe',
 		func: (game, p1, p2, stats) =>
-			p1.countcreatures() > 2 * p2.countcreatures() ? 0.05 : 0,
+			game.game.count_creatures(p1.id) > 2 * game.game.count_creatures(p2.id)
+				? 0.05
+				: 0,
 	},
 	{
 		name: 'Creatureless',
@@ -52,7 +54,7 @@ const BonusList = [
 		name: 'Deckout',
 		desc: 'Win through deckout',
 		func: (game, p1, p2, stats) =>
-			p2.deck_length === 0 && p2.hp > 0 ? 0.5 : 0,
+			game.game.deck_length(p2.id) === 0 && p2.hp > 0 ? 0.5 : 0,
 	},
 	{
 		name: 'Double Kill',
@@ -62,13 +64,14 @@ const BonusList = [
 	{
 		name: 'Equipped',
 		desc: 'End match wielding a weapon & shield',
-		func: (game, p1, p2, stats) => (p1.weaponId && p1.shieldId ? 0.05 : 0),
+		func: (game, p1, p2, stats) =>
+			game.game.get_weapon(p1.id) && game.game.get_shield(p1.id) ? 0.05 : 0,
 	},
 	{
 		name: 'First past the post',
 		desc: 'Win with non-positive hp, or foe loses from damage with positive hp',
 		func: (game, p1, p2, stats) =>
-			p2.deck_length && (p1.hp <= 0 || p2.hp > 0) ? 0.1 : 0,
+			game.game.deck_length(p2.id) && (p1.hp <= 0 || p2.hp > 0) ? 0.1 : 0,
 	},
 	{
 		name: 'Full Health',
@@ -78,7 +81,7 @@ const BonusList = [
 	{
 		name: 'Grounds Keeper',
 		desc: '2% per permanent over 8',
-		func: (game, p1, p2, stats) => (p1.countpermanents() - 8) / 50,
+		func: (game, p1, p2, stats) => (game.game.count_permanents(p1.id) - 8) / 50,
 	},
 	{
 		name: 'Head Hunter',
@@ -133,7 +136,8 @@ const BonusList = [
 		name: 'Size matters',
 		desc: '0.666..% per card in deck over 36',
 		func: (game, p1, p2, stats) =>
-			(etgutil.decklength(p1.data.deck) - 36) / 150,
+			(etgutil.decklength(game.data.players[game.getIndex(p1.id)].deck) - 36) /
+			150,
 	},
 	{
 		name: 'Toxic',
@@ -145,7 +149,9 @@ const BonusList = [
 		desc: '4% per unupped card in deck',
 		func: (game, p1, p2, stats) => {
 			let unupnu = 0;
-			for (const [code, count] of etgutil.iterraw(p1.data.deck)) {
+			for (const [code, count] of etgutil.iterraw(
+				game.data.players[game.getIndex(p1.id)].deck,
+			)) {
 				const card = game.Cards.Codes[code];
 				if (card && !card.upped) unupnu += count;
 			}
@@ -155,7 +161,8 @@ const BonusList = [
 	{
 		name: 'Waiter',
 		desc: 'Won with 0 cards in deck',
-		func: (game, p1, p2, stats) => (p1.deck_length === 0 ? 0.2 : 0),
+		func: (game, p1, p2, stats) =>
+			game.game.deck_length(p1.id) === 0 ? 0.2 : 0,
 	},
 	{
 		name: 'Weapon Master',
@@ -180,11 +187,12 @@ function computeBonuses(game, player1, lefttext, streakrate, setTip, clearTip) {
 	replayGame.game.tracedeath();
 	for (const move of game.replay) {
 		if (replayGame.turn === player1.id && move.x === 'cast') {
-			const c = replayGame.byId(move.c);
-			if (c.type === etg.Spell) {
-				if (c.card.type === etg.Creature) replayStats.creaturesPlayed++;
-				if (c.card.type === etg.Weapon) replayStats.weaponsPlayed++;
-				if (c.getStatus('pillar')) replayStats.pillarsPlayed++;
+			const type = replayGame.get_kind(move.c);
+			if (type === etg.Spell) {
+				const card = replayGame.Cards.Codes[replayGame.get(move.c, 'card')];
+				if (card.type === etg.Creature) replayStats.creaturesPlayed++;
+				if (card.type === etg.Weapon) replayStats.weaponsPlayed++;
+				if (replayGame.get(move.c, 'pillar')) replayStats.pillarsPlayed++;
 			}
 		}
 		replayGame.next(move);
@@ -192,7 +200,12 @@ function computeBonuses(game, player1, lefttext, streakrate, setTip, clearTip) {
 	replayStats.creaturesDied = replayGame.get(player1.id, 'creaturesDied');
 
 	const bonus = BonusList.reduce((bsum, bonus) => {
-		const b = bonus.func(game, player1, player1.foe, replayStats);
+		const b = bonus.func(
+			game,
+			player1,
+			game.byId(game.get_foe(player1.id)),
+			replayStats,
+		);
 		if (b > 0) {
 			lefttext.push(() => (
 				<TooltipText tip={bonus.desc} setTip={setTip} clearTip={clearTip}>
@@ -347,7 +360,9 @@ export default function Result(props) {
 	) {
 		const stats = [
 			level,
-			(player1.foe.data.name || '?').replace(/,/g, ' '),
+			(
+				game.data.players[game.getIndex(game.get_foe(player1.id))].name || '?'
+			).replace(/,/g, ' '),
 			winner ? 'W' : 'L',
 			game.countPlies(),
 			game.duration,
