@@ -80,21 +80,32 @@ function cloaksvg() {
 }
 
 const activeInfo = {
-	firebolt: (c, t) =>
-		3 + (((c.game.get_quanta(c.ownerId, etg.Fire) - c.card.cost) / 4) | 0),
-	drainlife: (c, t) =>
-		2 + (((c.game.get_quanta(c.ownerId, etg.Darkness) - c.card.cost) / 5) | 0),
-	icebolt: (c, t) => {
+	firebolt: (game, c, t) =>
+		3 +
+		(((game.get_quanta(game.get_owner(c), etg.Fire) - game.getCard(c).cost) /
+			4) |
+			0),
+	drainlife: (game, c, t) =>
+		2 +
+		(((game.get_quanta(game.get_owner(c), etg.Darkness) -
+			game.getCard(c).cost) /
+			5) |
+			0),
+	icebolt: (game, c, t) => {
 		const bolts =
-			((c.game.get_quanta(c.ownerId, etg.Water) - c.card.cost) / 5) | 0;
+			((game.get_quanta(game.get_owner(c), etg.Water) - game.getCard(c).cost) /
+				5) |
+			0;
 		return `${2 + bolts} ${35 + bolts * 5}%`;
 	},
-	catapult: (c, t) =>
+	catapult: (game, c, t) =>
 		Math.ceil(
-			(t.truehp() * (t.getStatus('frozen') ? 150 : 100)) / (t.truehp() + 100),
+			(game.truehp(t) * (game.get(t, 'frozen') ? 150 : 100)) /
+				(game.truehp(t) + 100),
 		),
-	corpseexplosion: (c, t) => 1 + ((c.truehp() / 8) | 0),
-	adrenaline: (c, t) => `Extra: ${wasm.getAdrenalRow(t.trueatk()).join(',')}`,
+	corpseexplosion: (game, c, t) => 1 + ((game.truehp(c) / 8) | 0),
+	adrenaline: (game, c, t) =>
+		`Extra: ${wasm.getAdrenalRow(game.trueatk(t)).join(',')}`,
 };
 
 const activetexts = [
@@ -111,30 +122,35 @@ const activetexts = [
 	'postauto',
 ];
 const activetextsRename = {
-	burrow: (c, x) => (c.getStatus('burrowed') ? 'unburrow' : 'burrow'),
-	quanta: (c, x) => ui.eleNames[x[1]].toLowerCase(),
-	summon: (c, x) => c.game.Cards.Codes[x[1] & 0xffff].name.toLowerCase(),
+	burrow: (game, id, x) => (game.get(id, 'burrowed') ? 'unburrow' : 'burrow'),
+	quanta: (game, id, x) => ui.eleNames[x[1]].toLowerCase(),
+	summon: (game, id, x) => game.Cards.Codes[x[1] & 0xffff].name.toLowerCase(),
 };
-function skillName(c, sk) {
+function skillName(game, id, sk) {
 	const namelist = [];
 	for (const name of sk) {
 		const nsplit = name.split(' ');
 		const rename = activetextsRename[nsplit[0]];
 		if (rename === null) continue;
-		namelist.push(rename ? rename(c, nsplit) : name);
+		namelist.push(rename ? rename(game, id, nsplit) : name);
 	}
 	return namelist.join(' ');
 }
-function activeText(c) {
-	const skills = c.active;
+function activeText(game, id) {
+	const skills = game.skillsOf(id);
 	const acast = skills.get('cast');
-	if (acast) return `${c.cast}:${c.castele}${skillName(c, acast)}`;
+	if (acast)
+		return `${game.get(id, 'cast')}:${game.get(id, 'castele')}${skillName(
+			game,
+			id,
+			acast,
+		)}`;
 	for (const akey of activetexts) {
 		const a = skills.get(akey);
-		if (a) return `${akey} ${skillName(c, a)}`;
+		if (a) return `${akey} ${skillName(game, id, a)}`;
 	}
 	const aauto = skills.get('ownattack');
-	return aauto ? skillName(c, aauto) : '';
+	return aauto ? skillName(game, id, aauto) : '';
 }
 
 function Tween(props) {
@@ -460,96 +476,111 @@ function ArrowLine(props) {
 }
 
 function Thing(props) {
-	const isSpell = () => props.obj.type === etg.Spell,
-		bgcolor = () => ui.maybeLightenStr(props.obj.card),
+	const isSpell = () => props.game.get_kind(props.id) === etg.Spell,
+		bgcolor = () => ui.maybeLightenStr(props.game.getCard(props.id)),
 		faceDown = () =>
 			isSpell() &&
-			props.obj.ownerId !== props.p1id &&
+			props.game.get_owner(props.id) !== props.p1id &&
 			!props.game.get(props.p1id, 'precognition'),
 		setInfo = e => {
-			if (!faceDown() && props.setInfo) props.setInfo(e, props.obj);
+			if (!faceDown() && props.setInfo) props.setInfo(e, props.id);
 		};
 
 	const visible = [
-		() => props.obj.getStatus('psionic'),
-		() => props.obj.getStatus('aflatoxin'),
+		() => props.game.get(props.id, 'psionic'),
+		() => props.game.get(props.id, 'aflatoxin'),
 		() =>
-			!props.obj.getStatus('aflatoxin') && props.obj.getStatus('poison') > 0,
-		() => props.obj.getStatus('airborne'),
-		() => !props.obj.getStatus('airborne') && props.obj.getStatus('ranged'),
-		() => props.obj.getStatus('momentum'),
-		() => props.obj.getStatus('adrenaline'),
-		() => props.obj.getStatus('poison') < 0,
+			!props.game.get(props.id, 'aflatoxin') &&
+			props.game.get(props.id, 'poison') > 0,
+		() => props.game.get(props.id, 'airborne'),
+		() =>
+			!props.game.get(props.id, 'airborne') &&
+			props.game.get(props.id, 'ranged'),
+		() => props.game.get(props.id, 'momentum'),
+		() => props.game.get(props.id, 'adrenaline'),
+		() => props.game.get(props.id, 'poison') < 0,
 	];
 	const bordervisible = [
-		() => props.obj.getStatus('delayed'),
-		() => props.obj.id === props.game.get(props.obj.ownerId, 'gpull'),
-		() => props.obj.getStatus('frozen'),
+		() => props.game.get(props.id, 'delayed'),
+		() => props.id === props.game.get(props.game.get_owner(props.id), 'gpull'),
+		() => props.game.get(props.id, 'frozen'),
 	];
 
 	const memo = createMemo(() => {
 		if (faceDown()) return {};
 		let statText, topText;
 		if (!isSpell()) {
-			const charges = props.obj.getStatus('charges');
-			topText = activeText(props.obj);
-			if (props.obj.type === etg.Creature) {
-				statText = `${props.obj.trueatk()} | ${props.obj.truehp()}${
-					charges ? ` \u00d7${charges}` : ''
-				}`;
-			} else if (props.obj.type === etg.Permanent) {
-				if (props.obj.card.getStatus('pillar')) {
+			const charges = props.game.get(props.id, 'charges');
+			topText = activeText(props.game, props.id);
+			if (props.game.get_kind(props.id) === etg.Creature) {
+				statText = `${props.game.trueatk(props.id)} | ${props.game.truehp(
+					props.id,
+				)}${charges ? ` \u00d7${charges}` : ''}`;
+			} else if (props.game.get_kind(props.id) === etg.Permanent) {
+				if (props.game.get(props.id, 'pillar')) {
 					statText = `1:${
-						props.obj.getStatus('pendstate')
-							? props.game.game.get_mark(props.obj.ownerId)
-							: props.obj.card.element
+						props.game.get(props.id, 'pendstate')
+							? props.game.get_mark(props.game.get_owner(props.id))
+							: props.game.getCard(props.id).element
 					}\u00d7${charges}`;
 					topText = '';
 				} else {
-					const ownattack = props.obj.getSkill('ownattack');
+					const ownattack = props.game.getSkill(props.id, 'ownattack');
 					if (ownattack?.length === 1 && ownattack[0] === 'locket') {
-						const mode = props.obj.getStatus('mode');
+						const mode = props.game.get(props.id, 'mode');
 						statText = `1:${
-							~mode ? mode : props.game.game.get_mark(obj.ownerId)
+							~mode ? mode : props.game.get_mark(props.game.get_owner(props.id))
 						}`;
 					} else {
 						statText = `${charges || ''}`;
 					}
 				}
-			} else if (props.obj.type === etg.Weapon) {
-				statText = `${props.obj.trueatk()}${
+			} else if (props.game.get_kind(props.id) === etg.Weapon) {
+				statText = `${props.game.trueatk(props.id)}${
 					charges ? ` \u00d7${charges}` : ''
 				}`;
-			} else if (props.obj.type === etg.Shield) {
-				statText = charges ? '\u00d7' + charges : props.obj.truedr().toString();
+			} else if (props.game.get_kind(props.id) === etg.Shield) {
+				statText = charges
+					? '\u00d7' + charges
+					: props.game.truedr(props.id).toString();
 			}
 		} else {
-			topText = props.obj.card.name;
-			statText = `${props.obj.cost}:${props.obj.costele}`;
+			topText = props.game.getCard(props.id).name;
+			statText = `${props.game.get(props.id, 'cost')}:${props.game.get(
+				props.id,
+				'costele',
+			)}`;
 		}
 		return { topText, statText };
 	});
 
 	return (
 		<div
-			class={`${
-				props.obj.type === etg.Spell ? 'inst handinst ' : 'inst '
-			}${tgtclass(props.p1id, props.obj, props.targeting)}`}
+			class={`${isSpell() ? 'inst handinst ' : 'inst '}${tgtclass(
+				props.game,
+				props.p1id,
+				props.id,
+				props.targeting,
+			)}`}
 			style={{
 				position: 'absolute',
 				left: `${props.pos.x - 32}px`,
 				top: `${props.pos.y - 32}px`,
 				opacity: faceDown()
 					? props.pos.opacity
-					: (props.obj.isMaterial() ? 1 : 0.7) * props.pos.opacity,
-				color: faceDown() ? undefined : props.obj.card.upped ? '#000' : '#fff',
+					: (props.game.material(props.id) ? 1 : 0.7) * props.pos.opacity,
+				color: faceDown()
+					? undefined
+					: props.game.getCard(props.id).upped
+					? '#000'
+					: '#fff',
 				'z-index': '2',
-				'pointer-events': ~props.obj.getIndex() ? undefined : 'none',
+				'pointer-events': ~props.game.getIndex(props.id) ? undefined : 'none',
 			}}
 			onMouseMove={setInfo}
 			onMouseOver={setInfo}
 			onMouseLeave={props.onMouseOut}
-			onClick={[props.onClick, props.obj.id]}>
+			onClick={[props.onClick, props.id]}>
 			<Show
 				when={!faceDown()}
 				fallback={<div class="ico cback" style="left:2px;top:2px" />}>
@@ -557,10 +588,12 @@ function Thing(props) {
 					style={`width:64px;height:64px;pointer-events:none;background-color:${bgcolor()}`}>
 					<Show when={!props.lofiArt}>
 						<img
-							class={props.obj.card.shiny ? 'shiny' : ''}
+							class={props.game.getCard(props.id).shiny ? 'shiny' : ''}
 							src={`/Cards/${encodeCode(
-								props.obj.card.code +
-									(asShiny(props.obj.card.code, false) < 5000 ? 4000 : 0),
+								props.game.get(props.id, 'card') +
+									(asShiny(props.game.get(props.id, 'card'), false) < 5000
+										? 4000
+										: 0),
 							)}.webp`}
 							style="position:absolute;width:64px;height:64px;pointer-events:none"
 						/>
@@ -585,7 +618,7 @@ function Thing(props) {
 							</Show>
 						))}
 					</Show>
-					<Show when={props.game.game.has_protectonce(props.obj.id)}>
+					<Show when={props.game.has_protectonce(props.id)}>
 						<div
 							class="ico protection"
 							style="position:absolute;width:64px;height:64px"
@@ -609,7 +642,7 @@ function Thing(props) {
 						/>
 						<Show when={!isSpell()}>
 							<Components.Text
-								text={props.obj.card.name}
+								text={props.game.getCard(props.id).name}
 								icoprefix="se"
 								style={{
 									position: 'absolute',
@@ -681,7 +714,6 @@ function Things(props) {
 			death.delete(id);
 		}
 	};
-	const obj = id => props.game.byId(id);
 	return (
 		<For each={allthings()}>
 			{id => (
@@ -722,7 +754,7 @@ function Things(props) {
 								onMouseOut={props.onMouseOut}
 								onClick={props.onClick}
 								targeting={props.targeting}
-								obj={obj(id)}
+								id={id}
 								pos={pos()}
 							/>
 						)}
@@ -745,9 +777,9 @@ function addNoHealData(game, newdata) {
 				for (let i = 0; i < newdata.players.length; i++) {
 					const pldata = newdata.players[i];
 					if (pldata.user === user) {
-						const pl = game.byId(game.players[gi]);
-						pldata.hp = Math.max(pl.hp, 1);
-						pldata.maxhp = pl.maxhp;
+						const pl = game.player_idx(gi);
+						pldata.hp = Math.max(game.get(pl, 'hp'), 1);
+						pldata.maxhp = game.get(pl, 'maxhp');
 					}
 				}
 			}
@@ -757,10 +789,11 @@ function addNoHealData(game, newdata) {
 	return Object.assign(newdata, dataNext);
 }
 
-function tgtclass(p1id, obj, targeting) {
+function tgtclass(game, p1id, id, targeting) {
 	if (targeting) {
-		if (targeting.filter(obj)) return 'cantarget';
-	} else if (obj.ownerId === p1id && obj.canactive()) return 'canactive';
+		if (targeting.filter(id)) return 'cantarget';
+	} else if (game.get_owner(id) === p1id && game.canactive(id))
+		return 'canactive';
 	return '';
 }
 
@@ -859,11 +892,9 @@ export default function Match(props) {
 		props.replay ? replayhistory()[replayindex()] : tempgame() ?? pgame();
 
 	const [p1id, setPlayer1] = createSignal(
-		props.replay ? game().turn : game().byUser(rx.user ? rx.user.name : '').id,
+		props.replay ? game().turn : game().userId(rx.user ? rx.user.name : ''),
 	);
 	const [p2id, setPlayer2] = createSignal(game().get_foe(p1id()));
-	const player1 = () => game().byId(p1id());
-	const player2 = () => game().byId(p2id());
 
 	const idtrack = new Map(),
 		setIdTrack = (id, pos) => idtrack.set(id, pos),
@@ -945,17 +976,20 @@ export default function Match(props) {
 			if (cmd.x === 'cast' || cmd.x === 'end') {
 				let play;
 				if (cmd.x === 'cast') {
-					const c = game.byId(cmd.c),
-						isSpell = c.type === etg.Spell;
+					const id = cmd.c,
+						isSpell = game.get_kind(id) === etg.Spell,
+						card = game.getCard(id);
 					play = {
-						card: c.card,
-						element: c.card.element,
-						costele: isSpell ? c.costele : c.castele,
-						cost: isSpell ? c.cost : c.cast,
-						name: isSpell ? c.card.name : skillName(c, c.getSkill('cast')),
-						upped: c.card.upped,
-						shiny: c.card.shiny,
-						c: cmd.c,
+						card: card,
+						element: card.element,
+						costele: game.get(id, isSpell ? 'costele' : 'castele'),
+						cost: game.get(id, isSpell ? 'cost' : 'cast'),
+						name: isSpell
+							? card.name
+							: skillName(game, id, game.getSkill(id, 'cast')),
+						upped: card.upped,
+						shiny: card.shiny,
+						c: id,
 						t: cmd.t,
 						game: game.clone(),
 					};
@@ -973,8 +1007,12 @@ export default function Match(props) {
 						game: game.clone(),
 					};
 				}
-				const c = cmd.x === 'cast' && cmd.c && game.byId(cmd.c);
-				if (!c || c.ownerId === p1id() || !game.game.is_cloaked(c.ownerId)) {
+				const c = cmd.x === 'cast' && cmd.c;
+				if (
+					!c ||
+					game.get_owner(c) === p1id() ||
+					!game.is_cloaked(game.get_owner(c))
+				) {
 					setFoeplays(foeplays =>
 						new Map(foeplays).set(
 							turn,
@@ -986,7 +1024,7 @@ export default function Match(props) {
 					}
 				}
 			}
-			const effects = game.next(cmd);
+			const effects = game.nextCmd(cmd);
 			forceUpdate();
 			if (
 				!iscmd &&
@@ -1068,8 +1106,7 @@ export default function Match(props) {
 							break;
 						case 'LastCard':
 							newstate.effects ??= new Set(state.effects);
-							const playerName =
-								game.data.players[game.byId(id).getIndex()].name;
+							const playerName = game.data.players[game.getIndex(id)].name;
 							const LastCardEffect = () => (
 								<LastCardFx
 									self={LastCardEffect}
@@ -1119,7 +1156,6 @@ export default function Match(props) {
 			});
 			const newTurn = game.turn;
 			if (newTurn !== turn) {
-				const pl = game.byId(newTurn);
 				if (game.data.players[game.getIndex(newTurn)].user === rx.user.name) {
 					setPlayer1(newTurn);
 				}
@@ -1135,7 +1171,7 @@ export default function Match(props) {
 				history = history.slice();
 				while (idx >= history.length) {
 					const gclone = history[history.length - 1].clone();
-					gclone.next(props.replay.moves[history.length - 1], false);
+					gclone.nextCmd(props.replay.moves[history.length - 1], false);
 					history.push(gclone);
 				}
 				setReplayHistory(history);
@@ -1202,9 +1238,10 @@ export default function Match(props) {
 		} else if (game.turn === p1id()) {
 			if (discard === 0 && game.full_hand(p1id())) {
 				setTargeting({
-					filter: obj => obj.type === etg.Spell && obj.ownerId === p1id(),
+					filter: id =>
+						game.get_kind(id) === etg.Spell && game.get_owner(id) === p1id(),
 					cb: tgt => {
-						endClick(tgt.id);
+						endClick(tgt);
 						setTargeting(null);
 					},
 					text: 'Discard',
@@ -1250,28 +1287,29 @@ export default function Match(props) {
 		const { game } = props;
 		clearCard();
 		if (props.replay || game.phase !== wasm.Phase.Play) return;
-		const obj = game.byId(id);
 		if (targeting()) {
-			if (targeting().filter(obj)) {
-				targeting().cb(obj);
+			if (targeting().filter(id)) {
+				targeting().cb(id);
 			}
-		} else if (obj.ownerId === p1id() && obj.canactive()) {
-			const cb = tgt => applyNext({ x: 'cast', c: obj.id, t: tgt?.id });
-			if (obj.type === etg.Spell && obj.card.type !== etg.Spell) {
+		} else if (game.get_owner(id) === p1id() && game.canactive(id)) {
+			const cb = tgt => applyNext({ x: 'cast', c: id, t: tgt });
+			if (
+				game.get_kind(id) === etg.Spell &&
+				game.getCard(id).type !== etg.Spell
+			) {
 				cb();
 			} else {
-				const requiresTarget = game.requiresTarget(obj.id);
-				if (!requiresTarget) {
+				if (!game.requires_target(id)) {
 					cb();
 				} else {
 					setTargeting({
-						filter: tgt => game.canTarget(obj.id, tgt.id),
+						filter: tgt => game.can_target(id, tgt),
 						cb: tgt => {
 							cb(tgt);
 							setTargeting(null);
 						},
-						text: skillName(obj, obj.getSkill('cast')),
-						src: obj,
+						text: skillName(game, id, game.getSkill(id, 'cast')),
+						src: id,
 					});
 				}
 			}
@@ -1325,10 +1363,10 @@ export default function Match(props) {
 		} else if (~(chi = 'sw'.indexOf(ch))) {
 			thingClick(chi ? p2id() : p1id());
 		} else if (~(chi = 'qa'.indexOf(ch))) {
-			const shieldId = pgame().game.get_shield(chi ? p2id() : p1id());
+			const shieldId = pgame().get_shield(chi ? p2id() : p1id());
 			if (shieldId !== 0) thingClick(shieldId);
 		} else if (~(chi = 'ed'.indexOf(ch))) {
-			const weaponId = pgame().game.get_weapon(chi ? p2id() : p1id());
+			const weaponId = pgame().get_weapon(chi ? p2id() : p1id());
 			if (weaponId !== 0) thingClick(weaponId);
 		} else if (~(chi = '12345678'.indexOf(ch))) {
 			const card = pgame().get_hand(p1id())[chi];
@@ -1415,12 +1453,12 @@ export default function Match(props) {
 		setHovery(e.pageY > 300 ? 44 : 300);
 	};
 
-	const setInfo = (e, obj) => {
+	const setInfo = (e, id) => {
 		const actinfo =
-			targeting() && targeting().filter(obj) && activeInfo[targeting().text];
+			targeting() && targeting().filter(id) && activeInfo[targeting().text];
 		setTooltip({
-			text: `${obj.info()}${
-				actinfo ? '\n' + actinfo(targeting().src, obj) : ''
+			text: `${game().info(id)}${
+				actinfo ? '\n' + actinfo(game(), targeting().src, id) : ''
 			}`,
 			style: {
 				position: 'absolute',
@@ -1429,7 +1467,7 @@ export default function Match(props) {
 				'z-index': '5',
 			},
 		});
-		if (obj.type !== etg.Player) setCard(e, obj.card);
+		if (game().get_kind(id) !== etg.Player) setCard(e, game().getCard(id));
 	};
 
 	const clearCard = () => {
@@ -1445,7 +1483,7 @@ export default function Match(props) {
 					replaylength: pgame().replay.length,
 			  },
 	);
-	const cloaked = () => game().game.is_cloaked(p2id());
+	const cloaked = () => game().is_cloaked(p2id());
 
 	const texts = createMemo(() => {
 		const g = game();
@@ -1456,7 +1494,7 @@ export default function Match(props) {
 				: `${g.turn === p1id() ? 'Your' : 'Their'} turn${
 						g.phase > wasm.Phase.Mulligan
 							? ''
-							: g.players[0] === p1id()
+							: g.player_idx(0) === p1id()
 							? "\nYou're first"
 							: "\nYou're second"
 				  }`;
@@ -1485,8 +1523,8 @@ export default function Match(props) {
 	});
 
 	const things = createMemo(() => [
-		...game().game.visible_instances(p1id(), true, cloaked()),
-		...game().game.visible_instances(p2id(), false, cloaked()),
+		...game().visible_instances(p1id(), true, cloaked()),
+		...game().visible_instances(p2id(), false, cloaked()),
 	]);
 
 	return (
@@ -1517,30 +1555,39 @@ export default function Match(props) {
 			)}
 			<For each={[0, 1]}>
 				{j => {
-					const pl = j ? player2 : player1,
-						plpos = () => ui.tgtToPos(game(), pl().id, p1id()),
+					const pl = j ? p2id : p1id,
+						plpos = () => ui.tgtToPos(game(), pl(), p1id()),
 						handOverlay = () =>
-							pl().casts === 0
+							game().get(pl(), 'casts') === 0
 								? 12
-								: pl().getStatus('sanctuary')
+								: game().get(pl(), 'sanctuary')
 								? 8
-								: (pl().getStatus('nova') >= 2 ||
-										pl().getStatus('nova2') >= 1) &&
-								  (pl().id !== p1id() ||
+								: (game().get(pl(), 'nova') >= 2 ||
+										game().get(pl(), 'nova2') >= 1) &&
+								  (pl() !== p1id() ||
 										game()
-											.get_hand(pl().id)
+											.get_hand(pl())
 											.some(id => novaCodes.has(game().get(id, 'card'))))
 								? 1
 								: null;
 					const expectedDamage = () =>
-						expectedDamages().expectedDamage[pl().getIndex()];
-					const x1 = () => Math.max(Math.round(96 * (pl().hp / pl().maxhp)), 0),
+						expectedDamages().expectedDamage[game().getIndex(pl())];
+					const x1 = () =>
+							Math.max(
+								Math.round(
+									96 * (game().get(pl(), 'hp') / game().get(pl(), 'maxhp')),
+								),
+								0,
+							),
 						x2 = () =>
 							Math.max(
-								x1() - Math.round(96 * (expectedDamage() / pl().maxhp)),
+								x1() -
+									Math.round(
+										96 * (expectedDamage() / game().get(pl(), 'maxhp')),
+									),
 								0,
 							);
-					const poison = () => pl().getStatus('poison'),
+					const poison = () => game().get(pl(), 'poison'),
 						poisoninfo = () =>
 							`${
 								poison() > 0
@@ -1548,19 +1595,19 @@ export default function Match(props) {
 									: poison() < 0
 									? -poison() + ' 1:7'
 									: ''
-							} ${pl().getStatus('neuro') ? ' 1:10' : ''}`;
+							} ${game().get(pl(), 'neuro') ? ' 1:10' : ''}`;
 					const hptext = () =>
-						`${pl().hp}/${pl().maxhp} ${
+						`${game().get(pl(), 'hp')}/${game().get(pl(), 'maxhp')} ${
 							!cloaked() && expectedDamage() ? `(${expectedDamage()})` : ''
 						}\n${poisoninfo() ? `\n${poisoninfo()}` : ''}${
-							pl().id !== p1id() && pl().id !== game().get_foe(p1id())
+							pl() !== p1id() && pl() !== game().get_foe(p1id())
 								? '\n(Not targeted)'
 								: ''
 						}`;
 					return (
 						<>
 							<div
-								class={tgtclass(p1id(), pl(), targeting())}
+								class={tgtclass(game(), p1id(), pl(), targeting())}
 								style={{
 									position: 'absolute',
 									left: `${plpos().x - 48}px`,
@@ -1570,12 +1617,12 @@ export default function Match(props) {
 									border: 'transparent 2px solid',
 									'z-index': '4',
 								}}
-								onClick={[thingClick, pl().id]}
+								onClick={[thingClick, pl()]}
 								onMouseOver={e => setInfo(e, pl())}
 								onMouseMove={e => setInfo(e, pl())}
 							/>
 							<span
-								class={'ico e' + game().game.get_mark(pl().id)}
+								class={'ico e' + game().get_mark(pl())}
 								style={{
 									position: 'absolute',
 									left: '32px',
@@ -1586,10 +1633,9 @@ export default function Match(props) {
 									'font-size': '18px',
 									'text-shadow': '2px 2px 1px #000,2px 2px 2px #000',
 								}}>
-								{game().game.get_markpower(pl().id) !== 1 &&
-									game().game.get_markpower(pl().id)}
+								{game().get_markpower(pl()) !== 1 && game().get_markpower(pl())}
 							</span>
-							<Show when={pl().getStatus('sosa')}>
+							<Show when={game().get(pl(), 'sosa')}>
 								<div
 									class="ico sacrifice"
 									style={`position:absolute;left:0;top:${
@@ -1597,7 +1643,7 @@ export default function Match(props) {
 									}px;pointer-events:none`}
 								/>
 							</Show>
-							<Show when={pl().getStatus('sabbath')}>
+							<Show when={game().get(pl(), 'sabbath')}>
 								<span
 									class="ico sabbath"
 									style={`position:absolute;left:0;top:${j ? '96' : '300'}px`}
@@ -1605,7 +1651,8 @@ export default function Match(props) {
 							</Show>
 							<Show
 								when={
-									pl().getStatus('drawlock') || pl().getStatus('protectdeck')
+									game().get(pl(), 'drawlock') ||
+									game().get(pl(), 'protectdeck')
 								}>
 								<span
 									style={{
@@ -1614,7 +1661,7 @@ export default function Match(props) {
 										top: j ? '250px' : '543px',
 										width: '48px',
 										height: '48px',
-										'background-color': pl().getStatus('drawlock')
+										'background-color': game().get(pl(), 'drawlock')
 											? '#931'
 											: '#ede',
 									}}
@@ -1649,7 +1696,7 @@ export default function Match(props) {
 											'padding-left': '16px',
 										}}>
 										&nbsp;
-										{game().get_quanta(pl().id, k) || ''}
+										{game().get_quanta(pl(), k) || ''}
 									</span>
 								)}
 							</For>
@@ -1687,7 +1734,7 @@ export default function Match(props) {
 												style={{
 													'background-color':
 														ui.strcols[
-															expectedDamage() >= pl().hp
+															expectedDamage() >= game().get(pl(), 'hp')
 																? etg.Fire
 																: expectedDamage() > 0
 																? etg.Time
@@ -1725,7 +1772,7 @@ export default function Match(props) {
 								}}
 							/>
 							<div
-								class={game().game.deck_length(pl().id) ? 'ico ccback' : ''}
+								class={game().deck_length(pl()) ? 'ico ccback' : ''}
 								style={{
 									position: 'absolute',
 									left: '103px',
@@ -1737,7 +1784,7 @@ export default function Match(props) {
 									'text-shadow': '2px 2px 1px #000,2px 2px 2px #000',
 									'z-index': '3',
 								}}>
-								{game().game.deck_length(pl().id) || '0!!'}
+								{game().deck_length(pl()) || '0!!'}
 							</div>
 						</>
 					);
@@ -1757,7 +1804,7 @@ export default function Match(props) {
 				targeting={targeting()}
 				things={things()}
 			/>
-			{game().game.has_flooding() && floodsvg}
+			{game().has_flooding() && floodsvg}
 			<div style="white-space:pre-wrap;text-align:center;position:absolute;left:780px;top:40px;width:120px;z-index:3">
 				{`${
 					[
@@ -1808,7 +1855,7 @@ export default function Match(props) {
 							<input
 								type="button"
 								value={texts().endText}
-								onClick={() => endClick()}
+								onClick={[endClick]}
 								style="position:absolute;left:10px;top:460px"
 							/>
 						)}
@@ -1825,7 +1872,7 @@ export default function Match(props) {
 			{props.replay && (
 				<>
 					<span style="position:absolute;left:760px;top:560px">
-						{game().game.aieval().toFixed(2)}
+						{game().aieval().toFixed(2)}
 					</span>
 					<span style="position:absolute;left:760px;top:520px">
 						{replayindex()}

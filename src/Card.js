@@ -96,7 +96,7 @@ export default class Card {
 	}
 
 	toString() {
-		return this.code;
+		return this.code.toString();
 	}
 
 	asUpped(upped) {

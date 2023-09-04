@@ -76,13 +76,16 @@ function fightItOut() {
 		},
 		end(game, player, data) {
 			return `${player}\tEND TURN ${game.countPlies()}${
-				data.t ? '\tDISCARD ' + game.byId(data.t).card.name : ''
+				data.t ? '\tDISCARD ' + game.getCard(data.t).name : ''
 			}\n`;
 		},
 		cast(game, player, data) {
-			const t = game.byId(data.t);
-			return `${player}\t${game.byId(data.c).card.name}${
-				t ? ` targets ${t.card ? t.card.name : t.id}` : ''
+			return `${player}\t${game.getCard(data.c).name}${
+				data.t
+					? ` targets ${
+							game.getCard(data.t) ? game.getCard(data.t).name : data.t
+					  }`
+					: ''
 			}\n`;
 		},
 	};
@@ -97,7 +100,7 @@ function fightItOut() {
 			}));
 			if (seed & 1) players.reverse();
 			const game = new Game({ seed, set, players });
-			const realp1 = game.byUser(0).id;
+			const realp1 = game.userId(0);
 
 			while (game.phase < wasm.Phase.End) {
 				const msg = await worker.send({
@@ -115,7 +118,7 @@ function fightItOut() {
 						cmd,
 					);
 				}
-				game.next(cmd);
+				game.nextCmd(cmd);
 			}
 
 			if (mode === fight) {

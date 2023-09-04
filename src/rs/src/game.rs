@@ -728,8 +728,8 @@ impl Game {
 		self.new_id(self.props[id as usize].clone())
 	}
 
-	pub fn get_players(&self) -> Vec<i32> {
-		(*self.players).clone()
+	pub fn player_idx(&self, idx: usize) -> i32 {
+		self.players[idx]
 	}
 
 	pub fn full_hand(&self, id: i32) -> bool {

@@ -292,34 +292,6 @@ quarks.spirit4 = {
 		You decide that NOW would be a good time to run!... But a flock of giant angry birds is in your way",
 	questdependencies: ['spirit3'],
 };
-quarks.spirit5 = {
-	deck: '0b606015ur025us035up025uu025v2035vb015uo025uv015v8025ul018pi',
-	name: 'Spirit of the Dark Maiden',
-	morph: (ctx, card) =>
-		randomcard(
-			Cards,
-			card.upped,
-			x => x.element === etg.Darkness && x.type === card.type,
-		).code,
-	wintext:
-		"As the maiden falls, your powers return to normal, and your allies settle back into their original forms.\
-		the shadows that gripped and drained your energies recede. Your strength returns to its former glory.\
-		You are still feeling tired from the fight, but the storm has passed, leaving an oddly purple sky.\
-		In light of recent events, you decide it is probably best to get out while you can, tired or not.\
-		Afterall whatever lies down the road has to be less painful than risking encountering another spirit.\
-		...right? ... You open the creaky door and head back out down the gravel path.\
-		as you take your first step you hear the maiden's silvery voice echoing from the house behind you.\
-		'It appears you may be as stong as my sister claims. Your soul shall make a most delectable morsel.\
-		'We shall meet again... Don't die before then. I'd hate to lose my favorite toy.' She fades into the darkness.\
-		Off in the distance the storm has settled above the castle, the echos of ominous thunder growing fainter.\
-		You hope it will be gone by the time you get there... but given your luck so far, you don't think it will.\
-		Storm or not, you didn't come this far just to turn back, so you continue your treck down the path.",
-	info: "You turn to face your attacker, but as you call on your powers, only darkness answers.\
-		Your allies come to your aid but their forms have all been twisted. The dark lady laughs mischeviously.\
-		'You must think yourself dreaming... Well this is the nightmare realm, and I am the one in control.\
-		I think I will toy with you first... before I swallow your soul.' The shadows lunge toward you in a vicious attack.",
-	questdependencies: ['spirit5'],
-};
 quarks.bombmaker = {
 	deck: '046220f5t2065s50680d018pu',
 	name: 'Bomb Maker',
@@ -733,7 +705,6 @@ export const root = {
 				{ key: 'spirit2' },
 				{ key: 'spirit3' },
 				{ key: 'spirit4' },
-				{ key: 'spirit5' },
 			],
 		},
 	],
@@ -783,11 +754,5 @@ export function mkQuestAi(quest, datafn) {
 		data.rewardamount = quest.rewardamount;
 	}
 	shuffle(data.players);
-	const game = new Game(datafn ? datafn(data) : data);
-	if (quest.morph) {
-		for (const card of game.byUser(user.name).deck) {
-			game.game.transform(card.id, quest.morph(card.card));
-		}
-	}
-	return game;
+	return new Game(datafn ? datafn(data) : data);
 }

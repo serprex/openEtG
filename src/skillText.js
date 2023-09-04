@@ -3,6 +3,50 @@ import * as etg from './etg.js';
 
 const skipstat = new Set(['hp', 'maxhp', 'atk', 'card', 'cast', 'castele']);
 
+class Thing {
+	constructor(game, id) {
+		if (!id || typeof id !== 'number') {
+			throw new Error(`Invalid id ${id}`);
+		}
+		this.game = game;
+		this.id = id;
+	}
+	get active() {
+		return this.game.skillsOf(this.id);
+	}
+	get status() {
+		return this.game.statusesOf(this.id);
+	}
+	getStatus(k) {
+		return this.game.get(this.id, k);
+	}
+	getSkill(k) {
+		return this.game.getSkill(this.id, k);
+	}
+	get type() {
+		return this.game.get_kind(this.id);
+	}
+	get cast() {
+		return this.game.get(this.id, 'cast');
+	}
+	get castele() {
+		return this.game.get(this.id, 'castele');
+	}
+	get cost() {
+		return this.game.get(this.id, 'cost');
+	}
+	get costele() {
+		return this.game.get(this.id, 'costele');
+	}
+	get card() {
+		return this.game.getCard(this.id);
+	}
+}
+
+export function entitySkillText(game, id) {
+	return skillText(new Thing(game, id));
+}
+
 export default function skillText(c) {
 	if (c instanceof Card && c.type === etg.Spell) {
 		const entry = getDataFromName(c.getSkill('cast')[0]);
@@ -14,8 +58,8 @@ export default function skillText(c) {
 			if (
 				val === 0 ||
 				skipstat.has(key) ||
-				(key === 'cost' && val === c.card.cost) ||
-				(key === 'costele' && val === c.card.costele)
+				(key === 'cost' && val === asCard(c).cost) ||
+				(key === 'costele' && val === asCard(c).costele)
 			)
 				continue;
 			const entry = statusText[key];
@@ -26,6 +70,8 @@ export default function skillText(c) {
 		}
 		if (stext.length) ret.unshift(stext.join(', ') + '.');
 		for (const [k, v] of c.active) {
+			if (k === 'cast' && c.type === etg.Spell && c.card.type === etg.Spell)
+				continue;
 			for (const name of v) {
 				const entry = getDataFromName(name);
 				if (entry === undefined) continue;
@@ -61,8 +107,10 @@ const data = {
 		'Target creature attacks multiple times per turn. Creatures with lower strength attack more times per turn.',
 	aflatoxin:
 		'Give target 2 poison counters. When the target dies, it becomes a Malignant Cell.',
-	aggroskele:
-		'Summon a Skeleton. All of your skeletons deal damage equal to their strength to target creature.',
+	aggroskele: c =>
+		`Summon a ${
+			c.upped ? '2|2' : '1|1'
+		} Skeleton. All of your skeletons deal damage equal to their strength to target creature.`,
 	alphawolf: 'Summon two 2|1 Pack Wolves when this enters play.',
 	antimatter:
 		"If target creature or weapon's attack is positive, it becomes negative. Otherwise, it becomes positive.",

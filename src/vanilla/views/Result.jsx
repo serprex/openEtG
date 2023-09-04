@@ -14,13 +14,13 @@ function exitFunc() {
 }
 
 export default function OriginalResult({ game }) {
-	const player1 = game.byUser(store.state.user.name);
+	const p1id = game.userId(store.state.user.name);
 	const cardswon = [];
 	let electrumwon = null;
 
 	const canRematch = () =>
 		game.data.rematch &&
-		(!game.data.rematchFilter || game.data.rematchFilter(game, player1.id));
+		(!game.data.rematchFilter || game.data.rematchFilter(game, p1id));
 
 	const onkeydown = e => {
 		if (e.target.tagName === 'TEXTAREA') return;
@@ -44,7 +44,7 @@ export default function OriginalResult({ game }) {
 		store.chat(() => replay, 'Replay');
 	}
 
-	if (game.winner === player1.id) {
+	if (game.winner === p1id) {
 		const foedecks = game.data.players.filter(pd => !pd.user);
 		if (foedecks.length !== 0) {
 			const foedeck = choose(foedecks);
@@ -74,8 +74,9 @@ export default function OriginalResult({ game }) {
 				}
 			}
 			electrumwon =
-				((game.data.basereward + game.data.hpreward * (player1.hp / 100)) *
-					(player1.hp === player1.maxhp ? 2 : 1)) |
+				((game.data.basereward +
+					game.data.hpreward * (game.get(p1id, 'hp') / 100)) *
+					(game.get(p1id, 'hp') === game.get(p1id, 'maxhp') ? 2 : 1)) |
 				0;
 
 			const update = {

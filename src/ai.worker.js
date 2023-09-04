@@ -19,7 +19,7 @@ onmessage = function (e) {
 		premoves = null;
 	}
 	for (let i = premoves !== null ? premoves.length : 0; i < moves.length; i++) {
-		game.next(moves[i], false);
+		game.nextCmd(moves[i], false);
 	}
 	premoves = moves;
 	postMessage({ id, cmd: game.aiSearch() });

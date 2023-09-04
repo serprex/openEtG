@@ -36,6 +36,7 @@ export default {
 		chunkIds: 'deterministic',
 		splitChunks: {
 			chunks: 'all',
+			minSize: 0,
 		},
 	},
 	performance: {

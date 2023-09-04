@@ -36,9 +36,7 @@ const BonusList = [
 		name: 'Creature Domination',
 		desc: 'More than twice as many creatures than foe',
 		func: (game, p1, p2, stats) =>
-			game.game.count_creatures(p1.id) > 2 * game.game.count_creatures(p2.id)
-				? 0.05
-				: 0,
+			game.count_creatures(p1) > 2 * game.count_creatures(p2) ? 0.05 : 0,
 	},
 	{
 		name: 'Creatureless',
@@ -48,40 +46,45 @@ const BonusList = [
 	{
 		name: 'Current Health',
 		desc: '1% per 3hp',
-		func: (game, p1, p2, stats) => p1.hp / 300,
+		func: (game, p1, p2, stats) => game.get(p1, 'hp') / 300,
 	},
 	{
 		name: 'Deckout',
 		desc: 'Win through deckout',
 		func: (game, p1, p2, stats) =>
-			game.game.deck_length(p2.id) === 0 && p2.hp > 0 ? 0.5 : 0,
+			game.deck_length(p2) === 0 && game.get(p2, 'hp') > 0 ? 0.5 : 0,
 	},
 	{
 		name: 'Double Kill',
 		desc: 'Foe lost with as much negative hp as maxhp',
-		func: (game, p1, p2, stats) => (p2.hp <= -p2.maxhp ? 0.1 : 0),
+		func: (game, p1, p2, stats) =>
+			game.get(p2, 'hp') <= -game.get(p2, 'maxhp') ? 0.1 : 0,
 	},
 	{
 		name: 'Equipped',
 		desc: 'End match wielding a weapon & shield',
 		func: (game, p1, p2, stats) =>
-			game.game.get_weapon(p1.id) && game.game.get_shield(p1.id) ? 0.05 : 0,
+			game.get_weapon(p1) && game.get_shield(p1) ? 0.05 : 0,
 	},
 	{
 		name: 'First past the post',
 		desc: 'Win with non-positive hp, or foe loses from damage with positive hp',
 		func: (game, p1, p2, stats) =>
-			game.game.deck_length(p2.id) && (p1.hp <= 0 || p2.hp > 0) ? 0.1 : 0,
+			game.deck_length(p2) &&
+			(game.get(p1, 'hp') <= 0 || game.get(p2, 'hp') > 0)
+				? 0.1
+				: 0,
 	},
 	{
 		name: 'Full Health',
 		desc: 'Hp equal to maxhp',
-		func: (game, p1, p2, stats) => (p1.hp === p1.maxhp ? 0.2 : 0),
+		func: (game, p1, p2, stats) =>
+			game.get(p1, 'hp') === game.get(p1, 'maxhp') ? 0.2 : 0,
 	},
 	{
 		name: 'Grounds Keeper',
 		desc: '2% per permanent over 8',
-		func: (game, p1, p2, stats) => (game.game.count_permanents(p1.id) - 8) / 50,
+		func: (game, p1, p2, stats) => (game.count_permanents(p1) - 8) / 50,
 	},
 	{
 		name: 'Head Hunter',
@@ -92,21 +95,21 @@ const BonusList = [
 	{
 		name: 'Last Leg',
 		desc: 'Foe lost with 1 maxhp',
-		func: (game, p1, p2, stats) => (p2.maxhp === 1 ? 0.1 : 0),
+		func: (game, p1, p2, stats) => (game.get(p2, 'maxhp') === 1 ? 0.1 : 0),
 	},
 	{
 		name: 'Last Point',
 		desc: 'End with 1hp',
-		func: (game, p1, p2, stats) => (p1.hp === 1 ? 0.3 : 0),
+		func: (game, p1, p2, stats) => (game.get(p1, 'hp') === 1 ? 0.3 : 0),
 	},
 	{
 		name: 'Max Health',
 		desc: '1% per 6 maxhp over 100',
-		func: (game, p1, p2, stats) => (p1.maxhp - 100) / 600,
+		func: (game, p1, p2, stats) => (game.get(p1, 'maxhp') - 100) / 600,
 	},
 	{
 		name: 'Mid Turn',
-		desc: 'Defeat foe with game ended still on own turn',
+		desc: 'Game ended with an action other than End Turn',
 		func: (game, p1, p2, stats) => {
 			const { replay } = game;
 			return replay.length && replay[replay.length - 1].x === 'end' ? 0 : 0.1;
@@ -120,7 +123,7 @@ const BonusList = [
 	{
 		name: 'Perfect Damage',
 		desc: 'Foe lost with 0hp',
-		func: (game, p1, p2, stats) => (p2.hp === 0 ? 0.1 : 0),
+		func: (game, p1, p2, stats) => (game.get(p2, 'hp') === 0 ? 0.1 : 0),
 	},
 	{
 		name: 'Pillarless',
@@ -130,19 +133,19 @@ const BonusList = [
 	{
 		name: 'Purity',
 		desc: 'Won match with more than 2 purify counters',
-		func: (game, p1, p2, stats) => (p1.getStatus('poison') < -2 ? 0.05 : 0),
+		func: (game, p1, p2, stats) => (game.get(p1, 'poison') < -2 ? 0.05 : 0),
 	},
 	{
 		name: 'Size matters',
 		desc: '0.666..% per card in deck over 36',
 		func: (game, p1, p2, stats) =>
-			(etgutil.decklength(game.data.players[game.getIndex(p1.id)].deck) - 36) /
+			(etgutil.decklength(game.data.players[game.getIndex(p1)].deck) - 36) /
 			150,
 	},
 	{
 		name: 'Toxic',
 		desc: 'Foe lost with more than 18 poison counters',
-		func: (game, p1, p2, stats) => (p2.getStatus('poison') > 18 ? 0.1 : 0),
+		func: (game, p1, p2, stats) => (game.get(p2, 'poison') > 18 ? 0.1 : 0),
 	},
 	{
 		name: 'Unupped',
@@ -150,7 +153,7 @@ const BonusList = [
 		func: (game, p1, p2, stats) => {
 			let unupnu = 0;
 			for (const [code, count] of etgutil.iterraw(
-				game.data.players[game.getIndex(p1.id)].deck,
+				game.data.players[game.getIndex(p1)].deck,
 			)) {
 				const card = game.Cards.Codes[code];
 				if (card && !card.upped) unupnu += count;
@@ -161,8 +164,7 @@ const BonusList = [
 	{
 		name: 'Waiter',
 		desc: 'Won with 0 cards in deck',
-		func: (game, p1, p2, stats) =>
-			game.game.deck_length(p1.id) === 0 ? 0.2 : 0,
+		func: (game, p1, p2, stats) => (game.deck_length(p1) === 0 ? 0.2 : 0),
 	},
 	{
 		name: 'Weapon Master',
@@ -170,7 +172,7 @@ const BonusList = [
 		func: (game, p1, p2, stats) => (stats.weaponsPlayed > 2 ? 0.1 : 0),
 	},
 ];
-function computeBonuses(game, player1, lefttext, streakrate, setTip, clearTip) {
+function computeBonuses(game, p1id, lefttext, streakrate, setTip, clearTip) {
 	if (game.data.endurance !== undefined) return 1;
 	const replayGame = new Game({
 			seed: game.data.seed,
@@ -184,9 +186,9 @@ function computeBonuses(game, player1, lefttext, streakrate, setTip, clearTip) {
 			creaturesDied: 0,
 		};
 
-	replayGame.game.tracedeath();
+	replayGame.tracedeath();
 	for (const move of game.replay) {
-		if (replayGame.turn === player1.id && move.x === 'cast') {
+		if (replayGame.turn === p1id && move.x === 'cast') {
 			const type = replayGame.get_kind(move.c);
 			if (type === etg.Spell) {
 				const card = replayGame.Cards.Codes[replayGame.get(move.c, 'card')];
@@ -195,17 +197,13 @@ function computeBonuses(game, player1, lefttext, streakrate, setTip, clearTip) {
 				if (replayGame.get(move.c, 'pillar')) replayStats.pillarsPlayed++;
 			}
 		}
-		replayGame.next(move);
+		replayGame.nextCmd(move);
 	}
-	replayStats.creaturesDied = replayGame.get(player1.id, 'creaturesDied');
+	replayStats.creaturesDied = replayGame.get(p1id, 'creaturesDied');
 
+	const p1foe = game.get_foe(p1id);
 	const bonus = BonusList.reduce((bsum, bonus) => {
-		const b = bonus.func(
-			game,
-			player1,
-			game.byId(game.get_foe(player1.id)),
-			replayStats,
-		);
+		const b = bonus.func(game, p1id, p1foe, replayStats);
 		if (b > 0) {
 			lefttext.push(() => (
 				<TooltipText tip={bonus.desc} setTip={setTip} clearTip={clearTip}>
@@ -229,15 +227,15 @@ export default function Result(props) {
 	let goldreward = game.data.goldreward,
 		cardreward = game.data.cardreward;
 
-	const player1 = game.byUser(rx.user ? rx.user.name : '');
+	const p1id = game.userId(rx.user ? rx.user.name : '');
 
 	const canRematch = () =>
 		game.data.rematch &&
-		(!game.data.rematchFilter || game.data.rematchFilter(game, player1.id));
+		(!game.data.rematchFilter || game.data.rematchFilter(game, p1id));
 
 	const exitFunc = () => {
 		if (game.data.quest) {
-			if (game.winner === player1.id && game.data.choicerewards) {
+			if (game.winner === p1id && game.data.choicerewards) {
 				store.doNav(import('./Reward.jsx'), {
 					type: game.data.choicerewards,
 					amount: game.data.rewardamount,
@@ -271,7 +269,7 @@ export default function Result(props) {
 	});
 
 	const level = game.data.level,
-		winner = game.winner === player1.id,
+		winner = game.winner === p1id,
 		lefttext = [
 			() => <div>{game.countPlies()} plies</div>,
 			() => <div>{(game.duration / 1000).toFixed(1)} seconds</div>,
@@ -334,7 +332,7 @@ export default function Result(props) {
 							(1 + streakrate) *
 							computeBonuses(
 								game,
-								player1,
+								p1id,
 								lefttext,
 								streakrate,
 								setTip,
@@ -361,13 +359,13 @@ export default function Result(props) {
 		const stats = [
 			level,
 			(
-				game.data.players[game.getIndex(game.get_foe(player1.id))].name || '?'
+				game.data.players[game.getIndex(game.get_foe(p1id))].name || '?'
 			).replace(/,/g, ' '),
 			winner ? 'W' : 'L',
 			game.countPlies(),
 			game.duration,
-			player1.hp,
-			player1.maxhp,
+			game.get(p1id, 'hp'),
+			game.get(p1id, 'maxhp'),
 			(goldreward | 0) - (game.data.cost | 0),
 			cardreward || '-',
 			userutil.calcWealth(Cards, cardreward),
@@ -415,7 +413,7 @@ export default function Result(props) {
 					style="position:absolute;left:412px;top:490px"
 				/>
 			)}
-			{game.winner === player1.id && (
+			{game.winner === p1id && (
 				<>
 					{goldreward > 0 && (
 						<Components.Text

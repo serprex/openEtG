@@ -2,34 +2,34 @@ import * as etg from './etg.js';
 import * as etgutil from './etgutil.js';
 import OriginalCards from './vanilla/Cards.js';
 import OpenCards from './Cards.js';
-import Thing from './Thing.js';
+import { entitySkillText } from './skillText.js';
 import enums from './enum.json' assert { type: 'json' };
-import { randint } from './util.js';
+import { randint, decodeSkillName, read_skill, read_status } from './util.js';
 import * as wasm from './rs/pkg/etg.js';
 
-export default class Game {
+const infoskipkeys = new Set(['casts', 'gpull', 'hp', 'maxhp']);
+function plinfocore(info, key, val) {
+	if (val === true) info.push(key);
+	else if (val) info.push(val + key);
+}
+
+export default class Game extends wasm.Game {
 	constructor(data) {
+		super(data.seed, wasm.CardSet[data.set] ?? wasm.CardSet.Open);
+		this.__proto__ = Game.prototype;
 		this.data = data;
-		this.game = new wasm.Game(
-			data.seed,
-			wasm.CardSet[data.set] ?? wasm.CardSet.Open,
-		);
-		this.cache = new Map([[this.id, this]]);
 		this.replay = [];
 		const players = [];
 		const playersByIdx = new Map();
 		for (let i = 0; i < data.players.length; i++) {
-			const id = this.game.new_player(),
+			const id = this.new_player(),
 				pdata = data.players[i];
 			players.push(id);
 			playersByIdx.set(pdata.idx, id);
 		}
 		for (let i = 0; i < players.length; i++) {
 			const pdata = data.players[i];
-			this.game.set_leader(
-				players[i],
-				playersByIdx.get(pdata.leader ?? pdata.idx),
-			);
+			this.set_leader(players[i], playersByIdx.get(pdata.leader ?? pdata.idx));
 		}
 		for (let i = 0; i < players.length; i++) {
 			let mark = 0;
@@ -43,7 +43,7 @@ export default class Game {
 					mark = idx;
 				}
 			}
-			this.game.init_player(
+			this.init_player(
 				players[i],
 				dp.hp ?? 100,
 				dp.maxhp ?? dp.hp ?? 100,
@@ -56,40 +56,26 @@ export default class Game {
 		}
 	}
 
-	get players() {
-		return this.game.get_players();
-	}
-
 	get Cards() {
 		return this.data?.set === 'Original' ? OriginalCards : OpenCards;
 	}
 
-	hash() {
-		return this.game.hash();
+	getCard(id) {
+		return this.Cards.Codes[this.get(id, 'card')];
 	}
 
 	clone() {
-		const obj = Object.create(Game.prototype);
+		const obj = this.clonegame();
+		obj.__proto__ = Game.prototype;
 		obj.data = this.data;
-		obj.game = this.game.clonegame();
-		obj.cache = new Map([[this.id, obj]]);
 		obj.replay = this.replay.slice();
 		return obj;
 	}
-	byId(id) {
-		if (!id) return null;
-		let inst = this.cache.get(id);
-		if (!inst) {
-			inst = new Thing(this, id);
-			this.cache.set(id, inst);
-		}
-		return inst;
-	}
-	byUser(name) {
+	userId(name) {
 		const pldata = this.data.players;
 		for (let i = 0; i < pldata.length; i++) {
 			if (pldata[i].user === name) {
-				return this.byId(this.players[i]);
+				return this.player_idx(i);
 			}
 		}
 		return null;
@@ -104,43 +90,10 @@ export default class Game {
 		return null;
 	}
 	get(id, key) {
-		return this.game.get_stat(id, enums.StatId[key] ?? enums.FlagId[key]);
-	}
-	get_owner(id) {
-		return this.game.get_owner(id);
-	}
-	get_kind(id) {
-		return this.game.get_kind(id);
-	}
-	getIndex(id) {
-		return this.game.getIndex(id);
-	}
-	full_hand(id) {
-		return this.game.full_hand(id);
-	}
-	empty_hand(id) {
-		return this.game.empty_hand(id);
-	}
-	has_id(id) {
-		return this.game.has_id(id | 0);
-	}
-	get_creatures(id) {
-		return this.game.get_creatures(id);
-	}
-	get_permanents(id) {
-		return this.game.get_permanents(id);
-	}
-	get_hand(id) {
-		return this.game.get_hand(id);
-	}
-	get_quanta(id, ele) {
-		return this.game.get_quanta(id, ele);
-	}
-	get_foe(id) {
-		return this.game.get_foe(id);
+		return this.get_stat(id, enums.StatId[key] ?? enums.FlagId[key]);
 	}
 	aiSearch() {
-		const cmd = this.game.aisearch();
+		const cmd = this.aisearch();
 		return {
 			x: wasm.GameMoveType[cmd.x],
 			c: cmd.c,
@@ -155,9 +108,9 @@ export default class Game {
 		}
 		return plies;
 	}
-	next(cmd, fx = true) {
+	nextCmd(cmd, fx = true) {
 		if (this.replay) this.replay.push(cmd);
-		return this.game.next(wasm.GameMoveType[cmd.x], cmd.c | 0, cmd.t | 0, fx);
+		return this.next(wasm.GameMoveType[cmd.x], cmd.c | 0, cmd.t | 0, fx);
 	}
 	withMoves(moves) {
 		const newgame = new Game(this.data);
@@ -167,13 +120,7 @@ export default class Game {
 		return newgame;
 	}
 	expectedDamage(samples) {
-		return this.game.expected_damage(samples);
-	}
-	requiresTarget(c) {
-		return this.game.requires_target(c);
-	}
-	canTarget(c, t) {
-		return this.game.can_target(c, t);
+		return this.expected_damage(samples);
 	}
 	replayJson() {
 		return (
@@ -187,19 +134,44 @@ export default class Game {
 			})
 		);
 	}
+	statusesOf(id) {
+		return read_status(this.get_stats(id));
+	}
+	skillsOf(id) {
+		return read_skill(this.get_skills(id));
+	}
+	getSkill(id, k) {
+		const name = Array.from(
+			this.get_one_skill(id, enums.EventId[k]),
+			decodeSkillName,
+		);
+		if (name.length) return name;
+	}
+	info(id) {
+		const kind = this.get_kind(id);
+		const type = kind === wasm.Kind.Spell ? this.getCard(id).type : kind;
+		if (type == wasm.Kind.Player) {
+			const info = [
+				`${this.get(id, 'hp')}/${this.get(id, 'maxhp')} ${this.deck_length(
+					id,
+				)}cards`,
+			];
+			for (const [k, v] of this.statusesOf(id)) {
+				if (!infoskipkeys.has(k) || !v) plinfocore(info, k, v);
+			}
+			info.push(this.get_drawpower(id) + 'drawpower');
+			if (this.get(id, 'casts') === 0) info.push('silenced');
+			if (this.get(id, 'gpull')) info.push('gpull');
+			return info.join('\n');
+		} else {
+			const info =
+				type === wasm.Kind.Creature || type === wasm.Kind.Weapon
+					? `${this.trueatk(id)}|${this.truehp(id)}/${this.get(id, 'maxhp')}`
+					: type === wasm.Kind.Shield
+					? this.truedr(id).toString()
+					: '';
+			const stext = entitySkillText(this, id);
+			return !info ? stext : stext ? info + '\n' + stext : info;
+		}
+	}
 }
-
-function defineProp(key) {
-	Object.defineProperty(Game.prototype, key, {
-		get() {
-			return this.game[key];
-		},
-	});
-}
-defineProp('phase');
-defineProp('turn');
-defineProp('winner');
-defineProp('time');
-defineProp('duration');
-
-Game.prototype.id = 0;

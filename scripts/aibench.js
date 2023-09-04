@@ -28,7 +28,7 @@ async function bench(name) {
 				}
 			}
 		}
-		game.next(moves[m]);
+		game.nextCmd(moves[m]);
 	}
 	let totalTime = 0;
 	for (const t of timing) {

@@ -27,7 +27,7 @@ function App() {
 				],
 			};
 			const game = new Game(data);
-			game.next({ x: 'end' }, false);
+			game.nextCmd({ x: 'end' }, false);
 
 			let id = 0;
 			for (const handId of game.get_hand(1)) {
@@ -37,9 +37,9 @@ function App() {
 				}
 			}
 			if (id) {
-				game.next({ x: 'cast', c: id }, false);
+				game.nextCmd({ x: 'cast', c: id }, false);
 				const golemId = game.get_creatures(1)[0];
-				return golemId ? game.byId(golemId).info() : 'No Shard Golem spawned';
+				return golemId ? game.info(golemId) : 'No Shard Golem spawned';
 			} else return 'No Shard of Integrity to cast';
 		} else return 'Too many cards';
 	};
