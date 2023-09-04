@@ -67,7 +67,7 @@ if (typeof kongregateAPI === 'undefined') {
 					tabIndex="1"
 					onKeyPress={maybeLogin}
 					value={rx.opts.username ?? ''}
-					onInput={e => store.setOpt('username', e.target.value)}
+					onInput={e => store.setOpt('username', e.target.value.trim())}
 					style="position:absolute;left:270px;top:350px"
 				/>
 				<input

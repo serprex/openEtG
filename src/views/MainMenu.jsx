@@ -466,7 +466,7 @@ export default function MainMenu(props) {
 					<input
 						placeholder="Player's Name"
 						value={foename()}
-						onInput={e => store.setOptTemp('foename', e.target.value)}
+						onInput={e => store.setOptTemp('foename', e.target.value.trim())}
 						style="margin-left:24px"
 					/>
 					<input
