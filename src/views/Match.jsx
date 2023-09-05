@@ -1328,17 +1328,11 @@ export default function Match(props) {
 						},
 						moves: game.replay,
 					})
-					.then(e => {
+					.then(async e => {
 						const now = Date.now();
 						if (game.phase === wasm.Phase.Play && now < aiDelay) {
-							return new Promise(resolve =>
-								setTimeout(() => resolve(e), aiDelay - now),
-							);
-						} else {
-							return Promise.resolve(e);
+							await new Promise(resolve => setTimeout(resolve, aiDelay - now));
 						}
-					})
-					.then(e => {
 						aiDelay = Date.now() + (game.turn === p1id() ? 2000 : 200);
 						applyNext(e.data.cmd, true);
 					});
