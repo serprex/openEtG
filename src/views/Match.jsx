@@ -1849,7 +1849,7 @@ export default function Match(props) {
 							<input
 								type="button"
 								value={texts().endText}
-								onClick={[endClick]}
+								onClick={() => endClick()}
 								style="position:absolute;left:10px;top:460px"
 							/>
 						)}
