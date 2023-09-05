@@ -13,10 +13,12 @@ function plinfocore(info, key, val) {
 	else if (val) info.push(val + key);
 }
 
-export default class Game extends wasm.Game {
+export default class Game {
 	constructor(data) {
-		super(data.seed, wasm.CardSet[data.set] ?? wasm.CardSet.Open);
-		this.__proto__ = Game.prototype;
+		this.game = new wasm.Game(
+			data.seed,
+			wasm.CardSet[data.set] ?? wasm.CardSet.Open,
+		);
 		this.data = data;
 		this.replay = [];
 		const players = [];
@@ -65,12 +67,13 @@ export default class Game extends wasm.Game {
 	}
 
 	clone() {
-		const obj = this.clonegame();
-		obj.__proto__ = Game.prototype;
+		const obj = Object.create(Game);
+		obj.game = this.clonegame();
 		obj.data = this.data;
 		obj.replay = this.replay.slice();
 		return obj;
 	}
+
 	userId(name) {
 		const pldata = this.data.players;
 		for (let i = 0; i < pldata.length; i++) {
@@ -173,5 +176,20 @@ export default class Game extends wasm.Game {
 			const stext = entitySkillText(this, id);
 			return !info ? stext : stext ? info + '\n' + stext : info;
 		}
+	}
+}
+
+for (const k of Object.getOwnPropertyNames(wasm.Game.prototype)) {
+	const descriptor = Object.getOwnPropertyDescriptor(wasm.Game.prototype, k);
+	if (typeof descriptor.value === 'function' && k !== 'constructor') {
+		Game.prototype[k] = function (...args) {
+			return this.game[k](...args);
+		};
+	} else if (descriptor.get) {
+		Object.defineProperty(Game.prototype, k, {
+			get: function () {
+				return this.game[k];
+			},
+		});
 	}
 }
