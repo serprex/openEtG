@@ -3617,7 +3617,7 @@ impl Skill {
 					ctx.set(cr, Stat::casts, 0);
 				});
 				ctx.masscc(owner, 0, |ctx, cr| {
-					ctx.dmg(t, -10);
+					ctx.dmg(cr, -10);
 				});
 				ctx.set(t, Flag::protectdeck, true);
 			}
