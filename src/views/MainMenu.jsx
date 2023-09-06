@@ -118,7 +118,7 @@ function logout(cmd) {
 
 export default function MainMenu(props) {
 	const rx = store.useRx();
-	const foename = () => rx.opts.foename ?? '',
+	const foename = () => (rx.opts.foename ?? '').trim(),
 		expectedDamageSamples = () => rx.opts.expectedDamageSamples || '4';
 	const showcard = props.nymph ?? (rx.user?.daily === 0 && rx.user.ocard);
 
@@ -465,8 +465,8 @@ export default function MainMenu(props) {
 					<TitleText text="Players" />
 					<input
 						placeholder="Player's Name"
-						value={foename()}
-						onInput={e => store.setOptTemp('foename', e.target.value.trim())}
+						value={rx.opts.foename ?? ''}
+						onInput={e => store.setOptTemp('foename', e.target.value)}
 						style="margin-left:24px"
 					/>
 					<input

@@ -67,7 +67,7 @@ export default class Game {
 	}
 
 	clone() {
-		const obj = Object.create(Game);
+		const obj = Object.create(Game.prototype);
 		obj.game = this.clonegame();
 		obj.data = this.data;
 		obj.replay = this.replay.slice();

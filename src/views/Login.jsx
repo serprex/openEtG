@@ -14,6 +14,7 @@ if (typeof kongregateAPI === 'undefined') {
 
 		const loginClick = auth => {
 			if (rx.opts.username) {
+				store.setOpt('username', rx.opts.username.trim());
 				const data = { x: 'login', u: rx.opts.username };
 				if (auth) data.a = auth;
 				else data.p = password.value;
@@ -67,7 +68,7 @@ if (typeof kongregateAPI === 'undefined') {
 					tabIndex="1"
 					onKeyPress={maybeLogin}
 					value={rx.opts.username ?? ''}
-					onInput={e => store.setOpt('username', e.target.value.trim())}
+					onInput={e => store.setOpt('username', e.target.value)}
 					style="position:absolute;left:270px;top:350px"
 				/>
 				<input
