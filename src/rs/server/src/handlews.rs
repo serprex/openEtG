@@ -558,7 +558,6 @@ pub async fn handle_ws(
 							let mut wusers = users.write().await;
 							let mut wusersocks = usersocks.write().await;
 							wusersocks.remove(&u);
-							wusersocks.remove(&u);
 							drop(wusersocks);
 							wusers.evict(&client, &u).await;
 						}
@@ -2104,7 +2103,7 @@ pub async fn handle_ws(
 						}
 						AuthMessage::upshall => {
 							let mut user = user.lock().await;
-							let base = user
+							let mut base = user
 								.data
 								.pool
 								.0
@@ -2115,7 +2114,9 @@ pub async fn handle_ws(
 										false,
 									) as u16
 								})
-								.collect::<std::collections::HashSet<u16>>();
+								.collect::<Vec<u16>>();
+							base.sort_unstable();
+							base.dedup();
 							let convert =
 								|pool: &mut Cardpool, oldcode: u16, oldamt: u16, newcode: u16| {
 									if pool.0.get(&newcode).cloned() == Some(u16::max_value())

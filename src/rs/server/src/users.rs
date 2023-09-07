@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -127,18 +127,15 @@ impl UserObject {
 pub type User = Arc<Mutex<UserObject>>;
 
 #[derive(Default)]
-pub struct Users {
-	gc: HashSet<String>,
-	data: HashMap<String, User>,
-}
+pub struct Users(HashMap<String, (bool, User)>);
 
 impl Users {
 	pub async fn load<GC>(&mut self, client: &GC, name: &str) -> Option<User>
 	where
 		GC: GenericClient,
 	{
-		if let Some(user) = self.data.get(name) {
-			self.gc.remove(name);
+		if let Some(&mut (ref mut gc, ref user)) = self.0.get_mut(name) {
+			*gc = false;
 			Some(user.clone())
 		} else {
 			if let Some(row) = client.query_opt("select u.id, u.auth, u.salt, u.iter, u.algo, ud.data from user_data ud join users u on u.id = ud.user_id where u.name = $1 and ud.type_id = 1", &[&name]).await.expect("Connection failed while loading user") {
@@ -153,7 +150,7 @@ impl Users {
 					algo: HashAlgo::from_str(&row.get::<usize, String>(4)).unwrap(),
 					data: userdata,
 				}));
-				self.data.insert(namestr, userarc.clone());
+				self.insert(namestr, userarc.clone());
 				Some(userarc)
 			} else {
 				None
@@ -162,16 +159,15 @@ impl Users {
 	}
 
 	pub fn insert(&mut self, name: String, user: User) {
-		self.data.insert(name, user);
+		self.0.insert(name, (false, user));
 	}
 
 	pub fn remove(&mut self, name: &str) {
-		self.gc.remove(name);
-		self.data.remove(name);
+		self.0.remove(name);
 	}
 
 	pub async fn evict(&mut self, client: &Client, name: &str) {
-		if let Some(user) = self.data.remove(name) {
+		if let Some((_, user)) = self.0.remove(name) {
 			let user = user.lock().await;
 			client
 				.query(
@@ -185,7 +181,7 @@ impl Users {
 
 	pub async fn saveall(&mut self, client: &Client) -> bool {
 		let mut queries = Vec::new();
-		for user in self.data.values() {
+		for &(_, ref user) in self.0.values() {
 			queries.push(async move {
 				let user = user.lock().await;
 				client
@@ -207,15 +203,11 @@ impl Users {
 			let mut usersocks = usersocks.write().await;
 			let socks = socks.read().await;
 			usersocks.retain(|_, v| socks.contains_key(v));
-			let Users {
-				ref mut data,
-				ref mut gc,
-			} = self;
-			data.retain(|k, _| {
-				if gc.remove(k) {
+			self.0.retain(|_, &mut (ref mut gc, _)| {
+				if *gc {
 					false
 				} else {
-					gc.insert(String::from(k));
+					*gc = true;
 					true
 				}
 			});
