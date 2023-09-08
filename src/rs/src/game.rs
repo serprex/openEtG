@@ -724,10 +724,6 @@ impl Game {
 		self.clone()
 	}
 
-	pub fn cloneinst(&mut self, id: i32) -> i32 {
-		self.new_id(self.props[id as usize].clone())
-	}
-
 	pub fn player_idx(&self, idx: usize) -> i32 {
 		self.players[idx]
 	}
@@ -742,14 +738,6 @@ impl Game {
 
 	pub fn has_id(&self, id: i32) -> bool {
 		id >= 0 && (id as usize) < self.props.len()
-	}
-
-	pub fn get_permanents(&self, id: i32) -> Vec<i32> {
-		self.get_player(id).permanents.iter().cloned().collect()
-	}
-
-	pub fn get_creatures(&self, id: i32) -> Vec<i32> {
-		self.get_player(id).creatures.iter().cloned().collect()
 	}
 
 	pub fn get_hand(&self, id: i32) -> Vec<i32> {
@@ -901,86 +889,6 @@ impl Game {
 		}
 	}
 
-	pub fn new_thing(&mut self, code: i32, owner: i32) -> i32 {
-		let mut thing = ThingData::default();
-		thing.owner = owner;
-		thing.status.insert(Stat::card, code);
-		let card = self.cards.get(code);
-		thing.status.insert(Stat::cast, card.cast as i32);
-		thing.status.insert(Stat::castele, card.castele as i32);
-		thing.status.insert(Stat::cost, card.cost as i32);
-		thing.status.insert(Stat::costele, card.costele as i32);
-		thing.status.insert(Stat::hp, card.health as i32);
-		thing.status.insert(Stat::maxhp, card.health as i32);
-		thing.status.insert(Stat::atk, card.attack as i32);
-		thing.status.insert(Stat::casts, 0);
-		thing.flag.0 |= card.flag;
-		for &(k, v) in card.status.iter() {
-			thing.status.insert(k, v);
-		}
-		thing.skill = Skills::from(
-			card.skill
-				.iter()
-				.map(|&(k, v)| (k, Cow::Borrowed(v)))
-				.collect::<Vec<_>>(),
-		);
-		self.new_id(Entity::Thing(Rc::new(thing)))
-	}
-
-	pub fn transform(&mut self, c: i32, code: i32) {
-		let card = self.get_card(code);
-		let thing = self.get_thing_mut(c);
-		thing.status.insert(Stat::card, code);
-		thing.status.insert(Stat::hp, card.health as i32);
-		thing.status.insert(Stat::maxhp, card.health as i32);
-		thing.status.insert(Stat::atk, card.attack as i32);
-		thing.status.insert(Stat::cost, card.cost as i32);
-		thing.status.insert(Stat::costele, card.costele as i32);
-		thing.flag.0 &=
-			!(Flag::additive
-				| Flag::airborne | Flag::aquatic
-				| Flag::golem | Flag::nightfall
-				| Flag::nocturnal
-				| Flag::pillar | Flag::poisonous
-				| Flag::ranged | Flag::stackable
-				| Flag::token | Flag::tunnel
-				| Flag::voodoo | Flag::whetstone);
-		thing.flag.0 |= card.flag;
-		for &(k, v) in card.status {
-			thing.status.insert(k, v);
-		}
-		thing.skill = Skills::from(
-			card.skill
-				.iter()
-				.map(|&(k, v)| (k, Cow::Borrowed(v)))
-				.collect::<Vec<_>>(),
-		);
-		if thing.flag.get(Flag::mutant) {
-			let buff = self.rng.gen_range(0..25);
-			if card.code < 5000 {
-				self.buffhp(c, buff / 5);
-				self.incrAtk(c, buff % 5);
-				self.v_mutantactive(c);
-			} else {
-				self.buffhp(c, 1 + buff / 5);
-				self.incrAtk(c, 1 + buff % 5);
-				self.o_mutantactive(c);
-			}
-		} else {
-			thing.status.insert(Stat::cast, card.cast as i32);
-			thing.status.insert(Stat::castele, card.castele as i32);
-		}
-	}
-
-	pub fn nextPlayer(&self, id: i32) -> i32 {
-		for i in 0..self.players.len() - 1 {
-			if self.players[i] == id {
-				return self.players[i + 1];
-			}
-		}
-		return self.players[0];
-	}
-
 	pub fn get_stats(&self, id: i32) -> Vec<i32> {
 		let thing = self.get_thing(id);
 		thing
@@ -1010,14 +918,18 @@ impl Game {
 	}
 
 	pub fn get_one_skill(&self, id: i32, k: u8) -> Vec<i32> {
-		self.get_thing(id)
-			.skill
-			.get(Event::try_from(k).unwrap())
-			.map(|sk| sk.as_ref())
-			.unwrap_or(&[])
-			.iter()
-			.map(|&sk| generated::id_skill(sk) | sk.param1() << 16 | sk.param2() << 24)
-			.collect()
+		if let Ok(event) = Event::try_from(k) {
+			self.get_thing(id)
+				.skill
+				.get(event)
+				.map(|sk| sk.as_ref())
+				.unwrap_or(&[])
+				.iter()
+				.map(|&sk| generated::id_skill(sk) | sk.param1() << 16 | sk.param2() << 24)
+				.collect()
+		} else {
+			Vec::new()
+		}
 	}
 
 	pub fn next(&mut self, x: GameMoveType, c: i32, t: i32, fx: bool) -> Option<Vec<i32>> {
@@ -1293,6 +1205,10 @@ impl Game {
 
 	pub fn choose<'a, 'b, T>(&'a mut self, slice: &'b [T]) -> Option<&'b T> {
 		slice.choose(&mut self.rng)
+	}
+
+	pub fn cloneinst(&mut self, id: i32) -> i32 {
+		self.new_id(self.props[id as usize].clone())
 	}
 
 	pub fn players_ref(&self) -> &[i32] {
@@ -1849,6 +1765,77 @@ impl Game {
 			.map(|(&k, v)| (k, v.as_ref()))
 	}
 
+	pub fn new_thing(&mut self, code: i32, owner: i32) -> i32 {
+		let mut thing = ThingData::default();
+		thing.owner = owner;
+		thing.status.insert(Stat::card, code);
+		let card = self.cards.get(code);
+		thing.status.insert(Stat::cast, card.cast as i32);
+		thing.status.insert(Stat::castele, card.castele as i32);
+		thing.status.insert(Stat::cost, card.cost as i32);
+		thing.status.insert(Stat::costele, card.costele as i32);
+		thing.status.insert(Stat::hp, card.health as i32);
+		thing.status.insert(Stat::maxhp, card.health as i32);
+		thing.status.insert(Stat::atk, card.attack as i32);
+		thing.status.insert(Stat::casts, 0);
+		thing.flag.0 |= card.flag;
+		for &(k, v) in card.status.iter() {
+			thing.status.insert(k, v);
+		}
+		thing.skill = Skills::from(
+			card.skill
+				.iter()
+				.map(|&(k, v)| (k, Cow::Borrowed(v)))
+				.collect::<Vec<_>>(),
+		);
+		self.new_id(Entity::Thing(Rc::new(thing)))
+	}
+
+	pub fn transform(&mut self, c: i32, code: i32) {
+		let card = self.get_card(code);
+		let thing = self.get_thing_mut(c);
+		thing.status.insert(Stat::card, code);
+		thing.status.insert(Stat::hp, card.health as i32);
+		thing.status.insert(Stat::maxhp, card.health as i32);
+		thing.status.insert(Stat::atk, card.attack as i32);
+		thing.status.insert(Stat::cost, card.cost as i32);
+		thing.status.insert(Stat::costele, card.costele as i32);
+		thing.flag.0 &=
+			!(Flag::additive
+				| Flag::airborne | Flag::aquatic
+				| Flag::golem | Flag::nightfall
+				| Flag::nocturnal
+				| Flag::pillar | Flag::poisonous
+				| Flag::ranged | Flag::stackable
+				| Flag::token | Flag::tunnel
+				| Flag::voodoo | Flag::whetstone);
+		thing.flag.0 |= card.flag;
+		for &(k, v) in card.status {
+			thing.status.insert(k, v);
+		}
+		thing.skill = Skills::from(
+			card.skill
+				.iter()
+				.map(|&(k, v)| (k, Cow::Borrowed(v)))
+				.collect::<Vec<_>>(),
+		);
+		if thing.flag.get(Flag::mutant) {
+			let buff = self.rng.gen_range(0..25);
+			if card.code < 5000 {
+				self.buffhp(c, buff / 5);
+				self.incrAtk(c, buff % 5);
+				self.v_mutantactive(c);
+			} else {
+				self.buffhp(c, 1 + buff / 5);
+				self.incrAtk(c, 1 + buff % 5);
+				self.o_mutantactive(c);
+			}
+		} else {
+			thing.status.insert(Stat::cast, card.cast as i32);
+			thing.status.insert(Stat::castele, card.castele as i32);
+		}
+	}
+
 	pub fn new_id(&mut self, ent: Entity) -> i32 {
 		let id = self.props.len() as i32;
 		self.props.push(ent);
@@ -2372,6 +2359,15 @@ impl Game {
 			(pl.mark, pl.markpower as i32)
 		};
 		self.spend(id, mark, markpower * if mark > 0 { -1 } else { -3 })
+	}
+
+	pub fn nextPlayer(&self, id: i32) -> i32 {
+		for i in 0..self.players.len() - 1 {
+			if self.players[i] == id {
+				return self.players[i + 1];
+			}
+		}
+		return self.players[0];
 	}
 
 	pub fn o_endturn(&mut self, id: i32) {

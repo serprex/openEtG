@@ -5,6 +5,7 @@ mod generated;
 mod handleget;
 mod handlews;
 mod json;
+mod starters;
 mod svg;
 mod users;
 

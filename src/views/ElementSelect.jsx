@@ -9,127 +9,32 @@ import * as store from '../store.jsx';
 import { mkQuestAi, quarks } from '../Quest.js';
 import Cards from '../Cards.js';
 
+function Preview(props) {
+	return (
+		<>
+			<Card x={168} y={48} card={props.codes[0]} />
+			<Card x={332} y={48} card={props.codes[1]} />
+			<Card x={168} y={324} card={props.codes[2]} />
+			<Card x={332} y={324} card={props.codes[3]} />
+			<Card x={496} y={324} card={props.codes[4]} />
+			<Card x={660} y={324} card={props.codes[5]} />
+		</>
+	);
+}
+
 const descriptions = [
-	() => (
-		<>
-			<Card x={168} y={48} card={Cards.Codes[5116]} />
-			<Card x={332} y={48} card={Cards.Codes[5106]} />
-			<Card x={168} y={324} card={Cards.Codes[5123]} />
-			<Card x={332} y={324} card={Cards.Codes[5122]} />
-			<Card x={496} y={324} card={Cards.Codes[5109]} />
-			<Card x={660} y={324} card={Cards.Codes[5111]} />
-		</>
-	),
-	() => (
-		<>
-			<Card x={168} y={48} card={Cards.Codes[5208]} />
-			<Card x={332} y={48} card={Cards.Codes[5209]} />
-			<Card x={168} y={324} card={Cards.Codes[5217]} />
-			<Card x={332} y={324} card={Cards.Codes[5211]} />
-			<Card x={496} y={324} card={Cards.Codes[5204]} />
-			<Card x={660} y={324} card={Cards.Codes[5210]} />
-		</>
-	),
-	() => (
-		<>
-			<Card x={168} y={48} card={Cards.Codes[5302]} />
-			<Card x={332} y={48} card={Cards.Codes[5313]} />
-			<Card x={168} y={324} card={Cards.Codes[5306]} />
-			<Card x={332} y={324} card={Cards.Codes[5314]} />
-			<Card x={496} y={324} card={Cards.Codes[5327]} />
-			<Card x={660} y={324} card={Cards.Codes[5307]} />
-		</>
-	),
-	() => (
-		<>
-			<Card x={168} y={48} card={Cards.Codes[5428]} />
-			<Card x={332} y={48} card={Cards.Codes[5410]} />
-			<Card x={168} y={324} card={Cards.Codes[5404]} />
-			<Card x={332} y={324} card={Cards.Codes[5407]} />
-			<Card x={496} y={324} card={Cards.Codes[5412]} />
-			<Card x={660} y={324} card={Cards.Codes[5413]} />
-		</>
-	),
-	() => (
-		<>
-			<Card x={168} y={48} card={Cards.Codes[5531]} />
-			<Card x={332} y={48} card={Cards.Codes[5510]} />
-			<Card x={168} y={324} card={Cards.Codes[5513]} />
-			<Card x={332} y={324} card={Cards.Codes[5507]} />
-			<Card x={496} y={324} card={Cards.Codes[5511]} />
-			<Card x={660} y={324} card={Cards.Codes[5512]} />
-		</>
-	),
-	() => (
-		<>
-			<Card x={168} y={48} card={Cards.Codes[5612]} />
-			<Card x={332} y={48} card={Cards.Codes[5604]} />
-			<Card x={168} y={324} card={Cards.Codes[5606]} />
-			<Card x={332} y={324} card={Cards.Codes[5607]} />
-			<Card x={496} y={324} card={Cards.Codes[5608]} />
-			<Card x={660} y={324} card={Cards.Codes[5601]} />
-		</>
-	),
-	() => (
-		<>
-			<Card x={168} y={48} card={Cards.Codes[5707]} />
-			<Card x={332} y={48} card={Cards.Codes[5705]} />
-			<Card x={168} y={324} card={Cards.Codes[5706]} />
-			<Card x={332} y={324} card={Cards.Codes[5710]} />
-			<Card x={496} y={324} card={Cards.Codes[5708]} />
-			<Card x={660} y={324} card={Cards.Codes[5701]} />
-		</>
-	),
-	() => (
-		<>
-			<Card x={168} y={48} card={Cards.Codes[5810]} />
-			<Card x={332} y={48} card={Cards.Codes[5827]} />
-			<Card x={168} y={324} card={Cards.Codes[5811]} />
-			<Card x={332} y={324} card={Cards.Codes[5812]} />
-			<Card x={496} y={324} card={Cards.Codes[5803]} />
-			<Card x={660} y={324} card={Cards.Codes[5807]} />
-		</>
-	),
-	() => (
-		<>
-			<Card x={168} y={48} card={Cards.Codes[5907]} />
-			<Card x={332} y={48} card={Cards.Codes[5908]} />
-			<Card x={168} y={324} card={Cards.Codes[5912]} />
-			<Card x={332} y={324} card={Cards.Codes[5913]} />
-			<Card x={496} y={324} card={Cards.Codes[5916]} />
-			<Card x={660} y={324} card={Cards.Codes[5906]} />
-		</>
-	),
-	() => (
-		<>
-			<Card x={168} y={48} card={Cards.Codes[6012]} />
-			<Card x={332} y={48} card={Cards.Codes[6010]} />
-			<Card x={168} y={324} card={Cards.Codes[6005]} />
-			<Card x={332} y={324} card={Cards.Codes[6017]} />
-			<Card x={496} y={324} card={Cards.Codes[6008]} />
-			<Card x={660} y={324} card={Cards.Codes[6023]} />
-		</>
-	),
-	() => (
-		<>
-			<Card x={168} y={48} card={Cards.Codes[6109]} />
-			<Card x={332} y={48} card={Cards.Codes[6102]} />
-			<Card x={168} y={324} card={Cards.Codes[6106]} />
-			<Card x={332} y={324} card={Cards.Codes[6105]} />
-			<Card x={496} y={324} card={Cards.Codes[6108]} />
-			<Card x={660} y={324} card={Cards.Codes[6126]} />
-		</>
-	),
-	() => (
-		<>
-			<Card x={168} y={48} card={Cards.Codes[6213]} />
-			<Card x={332} y={48} card={Cards.Codes[6210]} />
-			<Card x={168} y={324} card={Cards.Codes[6205]} />
-			<Card x={332} y={324} card={Cards.Codes[6202]} />
-			<Card x={496} y={324} card={Cards.Codes[6211]} />
-			<Card x={660} y={324} card={Cards.Codes[6206]} />
-		</>
-	),
+	() => <Preview codes={[5116, 5106, 5123, 5122, 5109, 5111]} />,
+	() => <Preview codes={[5208, 5209, 5217, 5211, 5204, 5210]} />,
+	() => <Preview codes={[5302, 5313, 5306, 5314, 5327, 5307]} />,
+	() => <Preview codes={[5428, 5410, 5404, 5407, 5412, 5413]} />,
+	() => <Preview codes={[5531, 5510, 5513, 5507, 5511, 5512]} />,
+	() => <Preview codes={[5612, 5604, 5606, 5607, 5608, 5601]} />,
+	() => <Preview codes={[5707, 5705, 6706, 5710, 5708, 5701]} />,
+	() => <Preview codes={[5810, 5827, 5811, 5812, 5803, 5807]} />,
+	() => <Preview codes={[5907, 5908, 5912, 5913, 5916, 5906]} />,
+	() => <Preview codes={[6012, 6010, 6005, 6017, 6008, 6023]} />,
+	() => <Preview codes={[6109, 6102, 6106, 6105, 6108, 6126]} />,
+	() => <Preview codes={[6213, 6210, 6205, 6202, 6211, 6206]} />,
 	() => (
 		<span style="position:absolute;left:200px;top:508px">
 			Start without any cards, but gain several extra boosters instead!
@@ -208,6 +113,7 @@ export default function ElementSelect() {
 						style="display:block"
 						onClick={e => {
 							let errmsg = '';
+							username.value = username.value.trim();
 							if (!username.value) {
 								errmsg = 'Please enter a username';
 							} else if (password.value !== confirmpass.value) {
@@ -256,11 +162,7 @@ export default function ElementSelect() {
 					{i => (
 						<span
 							class={`imgb ico e${i === 14 ? 13 : i === 13 ? 14 : i}`}
-							style={{
-								position: 'absolute',
-								left: '12px',
-								top: `${24 + (i - 1) * 40}px`,
-							}}
+							style={`position:absolute;left:12px;top:${24 + (i - 1) * 40}px`}
 							onClick={() => {
 								sock.userEmit('inituser', {
 									e: i === 14 ? (Math.random() * 12 + 1) | 0 : i,

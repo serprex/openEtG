@@ -3187,7 +3187,7 @@ impl Skill {
 			}
 			Self::pandemonium3 => {
 				let mut ids = Vec::new();
-				for &pid in ctx.players().iter() {
+				for &pid in ctx.players_ref() {
 					let pl = ctx.get_player(pid);
 					ids.extend(
 						once(pid)
@@ -3586,7 +3586,7 @@ impl Skill {
 							let mut tgts = Vec::with_capacity(50 * ctx.players_ref().len());
 							for &caster in ctx.players().iter() {
 								ctx.set_owner(t, caster);
-								for &pid in ctx.players().iter() {
+								for &pid in ctx.players_ref() {
 									let pl = ctx.get_player(pid);
 									tgts.extend(
 										once(pl.weapon)

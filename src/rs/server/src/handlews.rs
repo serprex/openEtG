@@ -22,11 +22,12 @@ use warp::ws::{Message, WebSocket};
 
 use crate::cardpool::Cardpool;
 use crate::etgutil::{decode_code, encode_code, encode_count, iterraw};
-use crate::generated::{DG_COUNT, MAGE_COUNT, ORIGINAL_STARTERS, STARTERS};
+use crate::generated::{DG_COUNT, MAGE_COUNT};
 use crate::json::{
 	ArenaInfo, AuthMessage, BzBid, GamesData, GamesDataPlayer, GamesMove, LegacyUser, UserMessage,
 	WsResponse,
 };
+use crate::starters::{ORIGINAL_STARTERS, STARTERS};
 use crate::users::{self, HashAlgo, UserData, UserObject, Users};
 use crate::{get_day, svg, PgPool};
 
