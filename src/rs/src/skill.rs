@@ -1729,14 +1729,13 @@ impl Skill {
 			Self::despair => {
 				if !ctx.get(t, Flag::ranged) {
 					let owner = ctx.get_owner(c);
-					let devs = ctx
+					let nocturnal: u32 = ctx
 						.get_player(owner)
 						.creatures
-						.clone()
 						.iter()
-						.filter(|&&cr| ctx.hasskill(cr, Event::OwnAttack, Skill::siphon))
-						.count();
-					if ctx.rng() < 1.4 - (0.95f64).powf(devs as f64) {
+						.map(|&cr| ctx.get(cr, Flag::nocturnal) as u32)
+						.sum();
+					if ctx.rng_ratio(40 + nocturnal, 100) {
 						ctx.incrAtk(t, -1);
 						ctx.dmg(t, 1);
 					}

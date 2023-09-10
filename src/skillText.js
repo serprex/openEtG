@@ -211,7 +211,7 @@ const data = {
 	deja: 'Remove this ability & summon a copy of this creature.',
 	deployblobs: 'Summon 3 Blobs. Gain -2|-2.',
 	despair:
-		'Non-ranged attackers have a 40% chance plus 5% per 1:11 producing creature you control to gain -1|-1.',
+		'Non-ranged attackers have a 50% chance plus 1% per nocturnal creature you control to gain -1|-1.',
 	destroy: 'Destroy target permanent.',
 	destroycard:
 		"Discard target card, or destroy top card of target player's deck.",

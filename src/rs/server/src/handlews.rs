@@ -717,13 +717,10 @@ pub async fn handle_ws(
 										let mut p = 0.05;
 										let p0 = 1.0 - p;
 										let mut idx = 0;
-										while idx < len && r > p {
+										while idx + 1 < len && r > p {
 											r -= p;
 											p *= p0;
 											idx += 1;
-										}
-										if idx == len {
-											idx = rng.gen_range(0..len);
 										}
 										(rng.gen::<u32>(), idx)
 									};
