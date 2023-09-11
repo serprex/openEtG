@@ -2,7 +2,7 @@ create table users (
 	id bigserial not null primary key,
 	name text not null unique,
 	auth text not null,
-	salt text not null,
+	salt bytea not null,
 	iter int not null,
 	algo text not null,
 	wealth int not null default(0)

@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use base64::engine::{general_purpose::STANDARD_NO_PAD, Engine};
 use bb8_postgres::tokio_postgres::{types::Json, Client, GenericClient};
 use openssl::hash::MessageDigest;
 use serde::{Deserialize, Serialize};
@@ -100,7 +99,7 @@ pub struct UserObject {
 	pub id: i64,
 	pub auth: String,
 	#[serde(skip)]
-	pub salt: String,
+	pub salt: Vec<u8>,
 	#[serde(skip)]
 	pub iter: i32,
 	#[serde(skip)]
@@ -114,11 +113,9 @@ pub const HASH_ALGO: HashAlgo = HashAlgo::Sha512;
 
 impl UserObject {
 	pub fn initsalt(&mut self) {
-		let mut saltstr = [0u8; 20];
-		let mut saltbin = [0u8; 15];
+		let mut saltbin = [0u8; 16];
 		getrandom::getrandom(&mut saltbin).expect("Where, O entropy, is your sting?");
-		STANDARD_NO_PAD.encode_slice(&saltbin, &mut saltstr).ok();
-		self.salt = String::from(unsafe { std::str::from_utf8_unchecked(&saltstr) });
+		self.salt = Vec::from(&saltbin[..]);
 		self.iter = HASH_ITER;
 		self.algo = HASH_ALGO;
 	}
@@ -145,9 +142,9 @@ impl Users {
 					name: namestr.clone(),
 					id: row.get::<usize, i64>(0),
 					auth: row.get::<usize, String>(1),
-					salt: row.get::<usize, String>(2),
+					salt: row.get::<usize, Vec<u8>>(2),
 					iter: row.get::<usize, i32>(3),
-					algo: HashAlgo::from_str(&row.get::<usize, String>(4)).unwrap(),
+					algo: HashAlgo::from_str(&row.get::<usize, &str>(4)).unwrap(),
 					data: userdata,
 				}));
 				self.insert(namestr, userarc.clone());

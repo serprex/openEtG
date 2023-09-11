@@ -1452,7 +1452,7 @@ pub async fn handle_ws(
 								let mut keybuf = [0u8; 64];
 								pbkdf2_hmac(
 									p.as_bytes(),
-									user.salt.as_bytes(),
+									&user.salt,
 									user.iter as usize,
 									MessageDigest::sha512(),
 									&mut keybuf,
@@ -2230,7 +2230,7 @@ pub async fn handle_ws(
 								name: username.clone(),
 								id: -1,
 								auth: String::new(),
-								salt: String::new(),
+								salt: Vec::new(),
 								iter: 0,
 								algo: users::HASH_ALGO,
 								data: UserData {
@@ -2254,7 +2254,7 @@ pub async fn handle_ws(
 							}
 							pbkdf2_hmac(
 								psw.as_bytes(),
-								user.salt.as_bytes(),
+								&user.salt,
 								user.iter as usize,
 								MessageDigest::from(user.algo),
 								&mut keybuf,
@@ -2344,7 +2344,7 @@ pub async fn handle_ws(
 												name: name.clone(),
 												id: -1,
 												auth: g.clone(),
-												salt: String::new(),
+												salt: Vec::new(),
 												iter: 0,
 												algo: HashAlgo::Sha512,
 												data: Default::default(),

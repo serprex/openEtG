@@ -12,12 +12,12 @@ import Cards from '../Cards.js';
 function Preview(props) {
 	return (
 		<>
-			<Card x={168} y={48} card={props.codes[0]} />
-			<Card x={332} y={48} card={props.codes[1]} />
-			<Card x={168} y={324} card={props.codes[2]} />
-			<Card x={332} y={324} card={props.codes[3]} />
-			<Card x={496} y={324} card={props.codes[4]} />
-			<Card x={660} y={324} card={props.codes[5]} />
+			<Card x={168} y={48} card={Cards.Codes[props.codes[0]]} />
+			<Card x={332} y={48} card={Cards.Codes[props.codes[1]]} />
+			<Card x={168} y={324} card={Cards.Codes[props.codes[2]]} />
+			<Card x={332} y={324} card={Cards.Codes[props.codes[3]]} />
+			<Card x={496} y={324} card={Cards.Codes[props.codes[4]]} />
+			<Card x={660} y={324} card={Cards.Codes[props.codes[5]]} />
 		</>
 	);
 }
