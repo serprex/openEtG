@@ -14,18 +14,17 @@ opt-level = 1
 lto = "thin"
 
 [dependencies]
-base64 = "0.21"
+base64 = { version = "0.21", default-features = false }
 bb8-postgres = { version = "0.8", features = ["with-serde_json-1"] }
-brotli = "3"
+brotli = { version = "3", default-features = false, features = ["std"] }
 etg = { version = "0.1", path = "../" }
-form_urlencoded = "1"
 futures = { version = "0.3", default-features = false, features = ["alloc"] }
 fxhash = "0.2"
 getrandom = "0.2"
-hyper-tls = "0.5"
-openssl = "0.10"
+hyper-rustls = { version = "0.24", default-features = false, features = ["native-tokio", "http2", "tls12"] }
+ring = { version = "0.16", default-features = false }
 rand = "0.8"
-rand_pcg = "0.3"
+rand_pcg = { version = "0.3", default-features = false }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 httpdate = "1"

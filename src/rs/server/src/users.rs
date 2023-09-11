@@ -3,7 +3,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use bb8_postgres::tokio_postgres::{types::Json, Client, GenericClient};
-use openssl::hash::MessageDigest;
+use ring::pbkdf2;
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
 
@@ -36,11 +36,11 @@ impl HashAlgo {
 	}
 }
 
-impl From<HashAlgo> for MessageDigest {
-	fn from(algo: HashAlgo) -> MessageDigest {
+impl From<HashAlgo> for pbkdf2::Algorithm {
+	fn from(algo: HashAlgo) -> pbkdf2::Algorithm {
 		match algo {
-			HashAlgo::Sha1 => MessageDigest::sha1(),
-			HashAlgo::Sha512 => MessageDigest::sha512(),
+			HashAlgo::Sha1 => pbkdf2::PBKDF2_HMAC_SHA1,
+			HashAlgo::Sha512 => pbkdf2::PBKDF2_HMAC_SHA512,
 		}
 	}
 }
@@ -101,14 +101,14 @@ pub struct UserObject {
 	#[serde(skip)]
 	pub salt: Vec<u8>,
 	#[serde(skip)]
-	pub iter: i32,
+	pub iter: u32,
 	#[serde(skip)]
 	pub algo: HashAlgo,
 	#[serde(flatten)]
 	pub data: UserData,
 }
 
-pub const HASH_ITER: i32 = 99999;
+pub const HASH_ITER: u32 = 99999;
 pub const HASH_ALGO: HashAlgo = HashAlgo::Sha512;
 
 impl UserObject {
@@ -143,7 +143,7 @@ impl Users {
 					id: row.get::<usize, i64>(0),
 					auth: row.get::<usize, String>(1),
 					salt: row.get::<usize, Vec<u8>>(2),
-					iter: row.get::<usize, i32>(3),
+					iter: row.get::<usize, i32>(3) as u32,
 					algo: HashAlgo::from_str(&row.get::<usize, &str>(4)).unwrap(),
 					data: userdata,
 				}));

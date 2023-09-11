@@ -10,8 +10,7 @@ use bb8_postgres::tokio_postgres::{
 };
 use futures::{SinkExt, StreamExt, TryFutureExt};
 use fxhash::FxHashMap;
-use openssl::hash::MessageDigest;
-use openssl::pkcs5::pbkdf2_hmac;
+use ring::pbkdf2;
 use rand::distributions::{Distribution, Uniform};
 use rand::Rng;
 use serde_json::{Map, Value};
@@ -240,7 +239,7 @@ async fn login_success(
 						&(user.data.gold.saturating_add(wealth + (wealth24 / 24) as i32)),
 						&user.auth,
 						&user.salt,
-						&user.iter,
+						&(user.iter as i32),
 						&user.algo.as_str(),
 					]).await.ok();
 				trx.commit().await.ok();
@@ -1450,14 +1449,13 @@ pub async fn handle_ws(
 							} else {
 								user.initsalt();
 								let mut keybuf = [0u8; 64];
-								pbkdf2_hmac(
-									p.as_bytes(),
+								pbkdf2::derive(
+									pbkdf2::PBKDF2_HMAC_SHA512,
+									unsafe { core::num::NonZeroU32::new_unchecked(user.iter) },
 									&user.salt,
-									user.iter as usize,
-									MessageDigest::sha512(),
+									p.as_bytes(),
 									&mut keybuf,
-								)
-								.ok();
+								);
 								user.auth = STANDARD_NO_PAD.encode(&mut keybuf[..]);
 							}
 							sendmsg(&tx, &WsResponse::passchange { auth: &user.auth });
@@ -2218,16 +2216,17 @@ pub async fn handle_ws(
 					}
 				}
 				UserMessage::login { u, a, p } => {
-					let username = u;
-					if username.is_empty() {
+					if u.is_empty() {
 						sendmsg(&tx, &WsResponse::loginfail { err: "No name" });
+					} else if u.starts_with("Kong:") {
+						sendmsg(&tx, &WsResponse::loginfail { err: "'Kong:' prefix reserved for Kongregate accounts" });
 					} else {
 						let mut wusers = users.write().await;
-						let user = if let Some(user) = wusers.load(&*client, &username).await {
+						let user = if let Some(user) = wusers.load(&*client, &u).await {
 							user
 						} else {
 							let user = Arc::new(Mutex::new(UserObject {
-								name: username.clone(),
+								name: u.clone(),
 								id: -1,
 								auth: String::new(),
 								salt: Vec::new(),
@@ -2238,7 +2237,7 @@ pub async fn handle_ws(
 									..Default::default()
 								},
 							}));
-							wusers.insert(username.clone(), user.clone());
+							wusers.insert(u.clone(), user.clone());
 							user
 						};
 						let mut user = user.lock().await;
@@ -2252,14 +2251,13 @@ pub async fn handle_ws(
 							if user.salt.is_empty() {
 								user.initsalt();
 							}
-							pbkdf2_hmac(
-								psw.as_bytes(),
+							pbkdf2::derive(
+								pbkdf2::Algorithm::from(user.algo),
+								unsafe { core::num::NonZeroU32::new_unchecked(user.iter) },
 								&user.salt,
-								user.iter as usize,
-								MessageDigest::from(user.algo),
+								psw.as_bytes(),
 								&mut keybuf,
-							)
-							.ok();
+							);
 							let realkey = user.auth.as_bytes();
 							if realkey.is_empty() {
 								user.auth = STANDARD_NO_PAD.encode(&mut keybuf[..]);
@@ -2279,7 +2277,7 @@ pub async fn handle_ws(
 								&tx,
 								sockid,
 								&mut *user,
-								&username,
+								&u,
 								&mut client,
 							)
 							.await;
@@ -2300,10 +2298,9 @@ pub async fn handle_ws(
 					{
 						let key: String = row.get(0);
 
-						use hyper_tls::HttpsConnector;
 						use warp::hyper;
 						let https =
-							hyper::Client::builder().build::<_, hyper::Body>(HttpsConnector::new());
+							hyper::Client::builder().build::<_, hyper::Body>(hyper_rustls::HttpsConnectorBuilder::new().with_native_roots().https_only().enable_http2().build());
 						let konguri: Result<hyper::Uri, _> = format!("https://api.kongregate.com/api/authenticate.json?user_id={}&game_auth_token={}&api_key={}", u, g, key).parse();
 						if let Ok(konguri) = konguri {
 							if let Ok(mut res) = https.get(konguri).await {
