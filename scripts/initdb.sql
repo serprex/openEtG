@@ -1,10 +1,11 @@
+create type pbkdf2algo as enum('SHA1', 'SHA512');
 create table users (
 	id bigserial not null primary key,
 	name text not null unique,
 	auth text not null,
 	salt bytea not null,
 	iter int not null,
-	algo text not null,
+	algo pbkdf2algo not null,
 	wealth int not null default(0)
 );
 create table user_data_types (

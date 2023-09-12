@@ -240,7 +240,7 @@ async fn login_success(
 						&user.auth,
 						&user.salt,
 						&(user.iter as i32),
-						&user.algo.as_str(),
+						&user.algo,
 					]).await.ok();
 				trx.commit().await.ok();
 			}
@@ -251,8 +251,8 @@ async fn login_success(
 				&username,
 				&user.auth,
 				&user.salt,
-				&user.iter,
-				&user.algo.as_str()
+				&(user.iter as i32),
+				&user.algo
 				]).await
 			{
 				let userid: i64 = new_row.get(0);

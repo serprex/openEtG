@@ -22,6 +22,7 @@ futures = { version = "0.3", default-features = false, features = ["alloc"] }
 fxhash = "0.2"
 getrandom = "0.2"
 hyper-rustls = { version = "0.24", default-features = false, features = ["native-tokio", "http2", "tls12"] }
+postgres-types = { version = "0.2", features = ["derive"] }
 ring = { version = "0.16", default-features = false }
 rand = "0.8"
 rand_pcg = { version = "0.3", default-features = false }

@@ -1,39 +1,22 @@
 use std::collections::HashMap;
-use std::str::FromStr;
 use std::sync::Arc;
 
 use bb8_postgres::tokio_postgres::{types::Json, Client, GenericClient};
 use ring::pbkdf2;
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
+use bb8_postgres::tokio_postgres::types::{ToSql, FromSql};
 
 use crate::cardpool::Cardpool;
 use crate::handlews::{AsyncSocks, AsyncUserSocks};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, ToSql, FromSql)]
+#[postgres(name = "pbkdf2algo")]
 pub enum HashAlgo {
+	#[postgres(name = "SHA1")]
 	Sha1,
+	#[postgres(name = "SHA512")]
 	Sha512,
-}
-
-impl FromStr for HashAlgo {
-	type Err = std::convert::Infallible;
-
-	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		Ok(match s {
-			"SHA512" => HashAlgo::Sha512,
-			_ => HashAlgo::Sha1,
-		})
-	}
-}
-
-impl HashAlgo {
-	pub fn as_str(self) -> &'static str {
-		match self {
-			HashAlgo::Sha1 => "SHA1",
-			HashAlgo::Sha512 => "SHA512",
-		}
-	}
 }
 
 impl From<HashAlgo> for pbkdf2::Algorithm {
@@ -144,7 +127,7 @@ impl Users {
 					auth: row.get::<usize, String>(1),
 					salt: row.get::<usize, Vec<u8>>(2),
 					iter: row.get::<usize, i32>(3) as u32,
-					algo: HashAlgo::from_str(&row.get::<usize, &str>(4)).unwrap(),
+					algo: row.get::<usize, HashAlgo>(4),
 					data: userdata,
 				}));
 				self.insert(namestr, userarc.clone());
