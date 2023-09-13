@@ -1459,7 +1459,10 @@ impl Game {
 			let frozen = self.get(id, Stat::frozen);
 			if frozen == 0 {
 				self.proc_data(Event::Attack, id, &mut data);
-				if kind != Kind::Shield && !data.get(ProcData::stasis) && self.get(id, Stat::delayed) == 0 {
+				if kind != Kind::Shield
+					&& !data.get(ProcData::stasis)
+					&& self.get(id, Stat::delayed) == 0
+				{
 					let mut trueatk = self.trueatk(id);
 					if trueatk != 0 {
 						let psionic = self.get(id, Flag::psionic);

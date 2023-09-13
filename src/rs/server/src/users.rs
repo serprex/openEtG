@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use bb8_postgres::tokio_postgres::types::{FromSql, ToSql};
 use bb8_postgres::tokio_postgres::{types::Json, Client, GenericClient};
 use ring::pbkdf2;
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
-use bb8_postgres::tokio_postgres::types::{ToSql, FromSql};
 
 use crate::cardpool::Cardpool;
 use crate::handlews::{AsyncSocks, AsyncUserSocks};

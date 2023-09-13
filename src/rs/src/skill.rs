@@ -1404,7 +1404,10 @@ impl Skill {
 			}
 			Self::brokenmirror => {
 				let owner = ctx.get_owner(c);
-				if data.get(ProcData::fromhand) && ctx.get_kind(t) == Kind::Creature && owner != ctx.get_owner(t) {
+				if data.get(ProcData::fromhand)
+					&& ctx.get_kind(t) == Kind::Creature
+					&& owner != ctx.get_owner(t)
+				{
 					let phantom =
 						ctx.new_thing(card::As(ctx.get(c, Stat::card), card::Phantom), owner);
 					ctx.fx(phantom, Fx::StartPos(c));
@@ -2217,7 +2220,8 @@ impl Skill {
 				if ctx.get_owner(c) == ctx.get_owner(t)
 					&& ctx.get_kind(t) == Kind::Creature
 					&& ctx.get(t, Flag::airborne)
-					&& !data.get(ProcData::freedom) && ctx.rng_ratio(1, 4)
+					&& !data.get(ProcData::freedom)
+					&& ctx.rng_ratio(1, 4)
 				{
 					ctx.fx(t, Fx::Free);
 					data.flags |= ProcData::freedom;
@@ -2349,7 +2353,10 @@ impl Skill {
 			}
 			Self::heatmirror => {
 				let owner = ctx.get_owner(c);
-				if data.get(ProcData::fromhand) && ctx.get_kind(t) == Kind::Creature && owner != ctx.get_owner(t) {
+				if data.get(ProcData::fromhand)
+					&& ctx.get_kind(t) == Kind::Creature
+					&& owner != ctx.get_owner(t)
+				{
 					let spark = ctx.new_thing(card::As(ctx.get(c, Stat::card), card::Spark), owner);
 					ctx.fx(spark, Fx::StartPos(c));
 					ctx.addCrea(owner, spark);
@@ -3259,7 +3266,8 @@ impl Skill {
 			Self::patience => {
 				if !data.get(ProcData::patience)
 					&& ctx.get_kind(t) == Kind::Creature
-					&& data.get(ProcData::attackphase) && ctx.get_owner(c) == ctx.get_owner(t)
+					&& data.get(ProcData::attackphase)
+					&& ctx.get_owner(c) == ctx.get_owner(t)
 					&& ctx.get(c, Stat::frozen) == 0
 				{
 					let floodbuff = data.get(ProcData::flood) && ctx.getIndex(t) > 4;
@@ -3629,7 +3637,8 @@ impl Skill {
 				Skill::growth(1, 1).proc(ctx, c, t, data);
 				let owner = ctx.get_owner(c);
 				if ctx.turn != owner
-					&& !data.get(ProcData::salvaged) && !ctx.hasskill(c, Event::Turnstart, Skill::salvageoff)
+					&& !data.get(ProcData::salvaged)
+					&& !ctx.hasskill(c, Event::Turnstart, Skill::salvageoff)
 				{
 					ctx.fx(c, Fx::Salvage);
 					data.flags |= ProcData::salvaged;
@@ -3929,7 +3938,10 @@ impl Skill {
 				ctx.buffhp(owner, amount);
 			}
 			Self::stasis => {
-				if ctx.get_kind(t) == Kind::Creature && (data.flags & (ProcData::attackphase | ProcData::stasis)) == ProcData::attackphase {
+				if ctx.get_kind(t) == Kind::Creature
+					&& (data.flags & (ProcData::attackphase | ProcData::stasis))
+						== ProcData::attackphase
+				{
 					ctx.fx(t, Fx::Sfx(Sfx::stasis));
 					data.flags |= ProcData::stasis;
 				}
@@ -4408,7 +4420,8 @@ impl Skill {
 				if ctx.get_owner(c) == ctx.get_owner(t)
 					&& ctx.get_kind(t) == Kind::Creature
 					&& ctx.get(t, Flag::airborne)
-					&& !data.get(ProcData::freedom) && ctx.rng_range(0..4) < ctx.get(c, Stat::charges)
+					&& !data.get(ProcData::freedom)
+					&& ctx.rng_range(0..4) < ctx.get(c, Stat::charges)
 				{
 					ctx.fx(t, Fx::Free);
 					data.flags |= ProcData::freedom;

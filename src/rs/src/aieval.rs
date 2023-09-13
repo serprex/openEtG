@@ -1297,7 +1297,8 @@ pub fn eval(ctx: &Game) -> f32 {
 			+ player.quanta.iter().map(|q| *q as u32).sum::<u32>()) as f32
 			/ 14256.0;
 		let nothrottle = once(player.weapon)
-			.chain(player.creatures.iter().cloned()).any(|id| ctx.hasskill(id, Event::Beginattack, Skill::nothrottle));
+			.chain(player.creatures.iter().cloned())
+			.any(|id| ctx.hasskill(id, Event::Beginattack, Skill::nothrottle));
 		pscore += evalthing(
 			ctx,
 			&damage,
@@ -1321,12 +1322,20 @@ pub fn eval(ctx: &Game) -> f32 {
 		pscore += player
 			.creatures
 			.iter()
-			.map(|&cr| evalthing(ctx, &damage, &quantamap, cr, false, flooded, nothrottle, patience))
+			.map(|&cr| {
+				evalthing(
+					ctx, &damage, &quantamap, cr, false, flooded, nothrottle, patience,
+				)
+			})
 			.sum::<f32>();
 		pscore += player
 			.permanents
 			.iter()
-			.map(|&pr| evalthing(ctx, &damage, &quantamap, pr, false, false, nothrottle, false))
+			.map(|&pr| {
+				evalthing(
+					ctx, &damage, &quantamap, pr, false, false, nothrottle, false,
+				)
+			})
 			.sum::<f32>();
 		pscore += player
 			.hand

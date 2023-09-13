@@ -10,9 +10,9 @@ use bb8_postgres::tokio_postgres::{
 };
 use futures::{SinkExt, StreamExt, TryFutureExt};
 use fxhash::FxHashMap;
-use ring::pbkdf2;
 use rand::distributions::{Distribution, Uniform};
 use rand::Rng;
+use ring::pbkdf2;
 use serde_json::{Map, Value};
 use tokio::join;
 use tokio::sync::{mpsc, Mutex, MutexGuard, RwLock};
@@ -2219,7 +2219,12 @@ pub async fn handle_ws(
 					if u.is_empty() {
 						sendmsg(&tx, &WsResponse::loginfail { err: "No name" });
 					} else if u.starts_with("Kong:") {
-						sendmsg(&tx, &WsResponse::loginfail { err: "'Kong:' prefix reserved for Kongregate accounts" });
+						sendmsg(
+							&tx,
+							&WsResponse::loginfail {
+								err: "'Kong:' prefix reserved for Kongregate accounts",
+							},
+						);
 					} else {
 						let mut wusers = users.write().await;
 						let user = if let Some(user) = wusers.load(&*client, &u).await {
@@ -2272,15 +2277,8 @@ pub async fn handle_ws(
 						} else {
 							user.auth.is_empty()
 						} {
-							login_success(
-								&usersocks,
-								&tx,
-								sockid,
-								&mut *user,
-								&u,
-								&mut client,
-							)
-							.await;
+							login_success(&usersocks, &tx, sockid, &mut *user, &u, &mut client)
+								.await;
 						} else {
 							sendmsg(
 								&tx,
@@ -2299,8 +2297,13 @@ pub async fn handle_ws(
 						let key: String = row.get(0);
 
 						use warp::hyper;
-						let https =
-							hyper::Client::builder().build::<_, hyper::Body>(hyper_rustls::HttpsConnectorBuilder::new().with_native_roots().https_only().enable_http2().build());
+						let https = hyper::Client::builder().build::<_, hyper::Body>(
+							hyper_rustls::HttpsConnectorBuilder::new()
+								.with_native_roots()
+								.https_only()
+								.enable_http2()
+								.build(),
+						);
 						let konguri: Result<hyper::Uri, _> = format!("https://api.kongregate.com/api/authenticate.json?user_id={}&game_auth_token={}&api_key={}", u, g, key).parse();
 						if let Ok(konguri) = konguri {
 							if let Ok(mut res) = https.get(konguri).await {
