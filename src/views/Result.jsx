@@ -137,10 +137,10 @@ const BonusList = [
 	},
 	{
 		name: 'Size matters',
-		desc: '0.666..% per card in deck over 36',
+		desc: '0.5% per card in deck over 30',
 		func: (game, p1, p2, stats) =>
-			(etgutil.decklength(game.data.players[game.getIndex(p1)].deck) - 36) /
-			150,
+			(etgutil.decklength(game.data.players[game.getIndex(p1)].deck) - 31) /
+			200,
 	},
 	{
 		name: 'Toxic',

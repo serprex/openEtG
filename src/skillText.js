@@ -279,7 +279,10 @@ const data = {
 	evadecrea:
 		"Cannot be directly targeted by opponent's creature's active skills.",
 	evadespell: "Cannot be directly targeted by opponent's spells.",
-	evolve: 'Transform this card into an unburrowed Shrieker.',
+	evolve: c =>
+		`Transform this card into an unburrowed ${
+			c.upped ? '8|3' : '10|4'
+		} Shrieker.`,
 	feed: 'Give target creature 1 poison counter, gain 3|3, & lose immaterial.',
 	fickle:
 		"Swap target card in either player's hand with a random card from their deck that they have enough quanta to play.",

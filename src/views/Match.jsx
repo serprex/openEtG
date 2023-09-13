@@ -1317,26 +1317,31 @@ export default function Match(props) {
 	};
 
 	const gameStep = game => {
-		if (game.data.players[game.getIndex(game.turn)].ai === 1) {
-			if (game.phase <= wasm.Phase.Play) {
-				aiWorker
-					.send({
-						data: {
-							seed: game.data.seed,
-							set: game.data.set,
-							players: game.data.players,
-						},
-						moves: game.replay,
-					})
-					.then(async e => {
-						const now = Date.now();
-						if (game.phase === wasm.Phase.Play && now < aiDelay) {
-							await new Promise(resolve => setTimeout(resolve, aiDelay - now));
-						}
-						aiDelay = Date.now() + (game.turn === p1id() ? 2000 : 200);
-						applyNext(e.data.cmd, true);
-					});
-			}
+		if (
+			game.data.players[game.getIndex(game.turn)].ai === 1 &&
+			game.phase <= wasm.Phase.Play
+		) {
+			aiWorker
+				.send({
+					data: {
+						seed: game.data.seed,
+						set: game.data.set,
+						players: game.data.players,
+					},
+					moves: game.replay,
+				})
+				.then(async e => {
+					const now = Date.now();
+					if (
+						now < aiDelay &&
+						game.phase === wasm.Phase.Play &&
+						e.data.cmd.x !== 'end'
+					) {
+						await new Promise(resolve => setTimeout(resolve, aiDelay - now));
+					}
+					aiDelay = Date.now() + (e.data.cmd.x === 'end' ? 2000 : 200);
+					applyNext(e.data.cmd, true);
+				});
 		}
 	};
 
