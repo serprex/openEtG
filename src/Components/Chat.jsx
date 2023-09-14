@@ -19,6 +19,7 @@ export default function Chat(props) {
 	}, props.channel);
 	createEffect(() => {
 		rx.chat;
+		props.channel;
 		chat.scrollTop = ~scrollTop ? scrollTop : chat.scrollHeight;
 	});
 
