@@ -321,7 +321,7 @@ pub fn search(ctx: &Game) -> GameMove {
 			depth: 0,
 			score,
 		};
-		scan(ctx, 0, &mut candy, &mut 1260);
+		scan(ctx, 0, &mut candy, &mut 5040);
 		candy.cmd
 	})
 }

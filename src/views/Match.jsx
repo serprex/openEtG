@@ -1339,7 +1339,7 @@ export default function Match(props) {
 					) {
 						await new Promise(resolve => setTimeout(resolve, aiDelay - now));
 					}
-					aiDelay = Date.now() + (e.data.cmd.x === 'end' ? 2000 : 200);
+					aiDelay = Date.now() + (e.data.cmd.x === 'end' ? 1728 : 216);
 					applyNext(e.data.cmd, true);
 				});
 		}
