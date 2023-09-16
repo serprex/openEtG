@@ -1656,7 +1656,7 @@ pub async fn handle_ws(
 									.is_ok()
 								{
 									let mut user = user.lock().await;
-									let mut sells: Vec<BzBidSell> = Default::default();
+									let mut sells: Vec<BzBidSell> = Vec::new();
 									for (code, mut count) in iterraw(cards.as_bytes()) {
 										if let Some(card) = etg::card::OpenSet.try_get(code) {
 											let code16 = code as u16;
@@ -1679,20 +1679,18 @@ pub async fn handle_ws(
 												if price as i32 <= sellval {
 													continue;
 												}
-											} else {
-												if -(price as i32) <= sellval {
-													if codecount as u32 >= count {
-														user.data.gold += sellval * count as i32;
-														let c = user
-															.data
-															.pool
-															.0
-															.entry(code16)
-															.or_default();
-														*c = c.saturating_sub(count as u16);
-													}
-													continue;
-												}
+											} else if (codecount as u32) < count {
+												continue;
+											} else if -(price as i32) <= sellval {
+												user.data.gold += sellval * count as i32;
+												let c = user
+													.data
+													.pool
+													.0
+													.entry(code16)
+														.or_default();
+													*c = c.saturating_sub(count as u16);
+												continue;
 											}
 											if let Ok(bids) = trx.query("select b.id, u.name u, b.p, b.q from bazaar b join users u on b.user_id = u.id where b.code = $1 order by b.p desc", &[&code]).await {
 														let mut ops: Vec<BzBidOp> = Vec::new();
