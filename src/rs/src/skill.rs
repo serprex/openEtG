@@ -930,7 +930,7 @@ impl Skill {
 			Self::destroy => Tgt::perm,
 			Self::destroycard => Tgt::card.mix(Tgt::play).or(),
 			Self::detain | Skill::devour => Tgt::devour,
-			Self::discping => Tgt::crea,
+			Self::discping => Tgt::crea.mix(Tgt::play).or(),
 			Self::drainlife => Tgt::crea.mix(Tgt::play).or(),
 			Self::draft => Tgt::crea,
 			Self::dshield => Tgt::crea,
@@ -2458,9 +2458,9 @@ impl Skill {
 							.filter(|&id| id != 0 && ctx.material(id, None)),
 					);
 				}
-				for &id in tgts.iter() {
+				for id in tgts {
 					let cast = ctx.get_mut(id, Stat::cast);
-					*cast += 1;
+					*cast = cast.saturating_add(1);
 					if *cast == 1 {
 						ctx.set(id, Stat::castele, etg::Chroma);
 					}
@@ -3321,7 +3321,7 @@ impl Skill {
 			Self::photosynthesis => {
 				ctx.fx(c, Fx::Quanta(2, etg::Life as u8));
 				ctx.spend(ctx.get_owner(c), etg::Life, -2);
-				if ctx.get(c, Stat::cast) > 0 {
+				if ctx.get(c, Stat::castele) != etg::Chroma || ctx.get(c, Stat::cast) > 1 {
 					ctx.set(c, Stat::casts, 1);
 				}
 			}
@@ -3344,24 +3344,33 @@ impl Skill {
 				ctx.poison(ctx.get_foe(ctx.get_owner(c)), amt as i32);
 			}
 			Self::powerdrain => {
-				let mut candidates = Vec::with_capacity(23);
-				candidates.extend(
-					ctx.get_player(ctx.get_owner(c))
+				let halfhp = (ctx.truehp(t) + 1) / 2;
+				let halfatk = (ctx.trueatk(t) + 1) / 2;
+				ctx.dmg(t, halfhp);
+				ctx.incrAtk(t, -halfatk);
+				let owner = ctx.get_owner(c);
+				let candidates =
+					ctx.get_player(owner)
 						.creatures
 						.iter()
-						.cloned()
-						.filter(|&cr| cr != 0),
-				);
-				if candidates.len() > 1 {
-					candidates.retain(|&id| id != t);
-				}
-				if let Some(&id) = ctx.choose(&candidates) {
-					let halfhp = (ctx.truehp(t) + 1) / 2;
-					let halfatk = (ctx.trueatk(t) + 1) / 2;
-					ctx.dmg(t, halfhp);
-					ctx.incrAtk(t, -halfatk);
-					ctx.buffhp(id, halfhp);
-					ctx.incrAtk(id, halfatk);
+						.map(|&cr| (cr != 0) as u32)
+						.sum();
+				if candidates > 0 {
+					let mut candidate = ctx.rng_range(0..candidates);
+					for &cr in ctx.get_player(owner).creatures.iter() {
+						if cr != 0 {
+							if candidate == 0 {
+								ctx.buffhp(cr, halfhp);
+								ctx.incrAtk(cr, halfatk);
+								break;
+							} else {
+								candidate -= 1;
+							}
+						}
+					}
+				} else if owner == ctx.get_owner(t) {
+					ctx.buffhp(t, halfhp);
+					ctx.incrAtk(t, halfatk);
 				}
 			}
 			Self::precognition => {

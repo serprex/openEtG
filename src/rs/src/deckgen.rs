@@ -231,7 +231,6 @@ fn filters(code: u16, deck: &[u16], ecost: &[f32; 13]) -> bool {
 			false
 		}
 		card::DuneScorpion => {
-			// neuro
 			for &dcode in deck.iter() {
 				if (HAS_POISON.contains(&dcode)) {
 					return true;

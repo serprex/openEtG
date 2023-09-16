@@ -46,8 +46,8 @@ impl Cards {
 	pub fn try_get(&self, code: i32) -> Option<&'static Card> {
 		self.data
 			.binary_search_by_key(&AsShiny(code, false), |card| card.code as i32)
-			.map(|idx| &self.data[idx])
 			.ok()
+			.and_then(|idx| self.data.get(idx))
 	}
 
 	pub fn try_get_index(&self, index: usize) -> Option<&'static Card> {

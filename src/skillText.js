@@ -223,7 +223,7 @@ const data = {
 	disarm:
 		'When this creature damages opponent, return their weapon to their hand. Modified stats & statuses remain on the card when it is played again.',
 	discping:
-		'Deal 1 damage to target creature & return this card to your hand. Modified stats & statuses remain on the card when it is played again.',
+		'Deal 1 damage to target & return this card to your hand. Modified stats & statuses remain on the card when it is played again.',
 	disfield: 'Block all damage from attackers. Consumes 1:0 per damage blocked.',
 	disshield:
 		'Block all damage from attackers. Consume 1:1 per 3 damage blocked.',
@@ -476,7 +476,7 @@ const data = {
 		'When this creature dies, transform it into a Minor Ash.',
 	],
 	photosynthesis:
-		'Gain 2:5. This ability may be used multiple times per turn unless activation cost is free.',
+		'Gain 2:5. Unless cost was 0 or 1:0, caster can be reactivated.',
 	pillar: c => `Gain ${c.element ? 1 : 3}:${c.element} every turn.`,
 	pillar1: c => `Gain ${c.element ? 1 : 3}:${c.element} when played.`,
 	pend: c =>
@@ -502,7 +502,7 @@ const data = {
 		owndeath: `When this creature dies, give poison counter to opponent.`,
 	}),
 	powerdrain:
-		"Remove half of target creature's strength and HP, rounded up. Add an equal amount of strength and HP to a random creature you control.",
+		"Remove half of target creature's strength and HP, rounded up. Add an equal amount of strength and HP to a random creature you control. Prefer not to buff target.",
 	precognition:
 		"Reveal opponent's hand until the end of their turn. Draw a card.",
 	predator:
