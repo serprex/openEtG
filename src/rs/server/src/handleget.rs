@@ -445,7 +445,7 @@ async fn handle_get_core(
 							userdata,
 							"{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
 							code,
-							svg::card_name(card),
+							card.name,
 							row[0],
 							row[1],
 							row[2],

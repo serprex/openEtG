@@ -4,7 +4,6 @@ use fxhash::FxHashMap;
 
 use etg::card;
 
-use super::card_name;
 use crate::etgutil::{decode_code, parse_digit32};
 
 pub fn css_class(byte: u8) -> &'static str {
@@ -71,9 +70,7 @@ pub fn deck(deck: &str) -> String {
 				if !upped {
 					textml.push_str(" fill='#fff'");
 				}
-				textml.push('>');
-				textml.push_str(card_name(card));
-				textml.push_str("</text>");
+				write!(textml, ">{}</text>", card.name).ok();
 				y += 16;
 				if y == 160 {
 					y = 0;

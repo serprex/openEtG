@@ -1,4 +1,5 @@
-import enums from '../enum.json' assert { type: 'json' };
+import * as wasm from '../rs/pkg/etg.js';
+
 function hookRowMouseover(tr) {
 	tr.addEventListener('mouseover', function (e) {
 		let i = 1;
@@ -513,7 +514,11 @@ for (const credit of [
 		incx(credit[i][0], credit[i][1]);
 	}
 	for (const code of credit[credit.length - 1]) {
-		const name = enums.Card[parseInt(code, 32) & 0x3fff];
+		const index = wasm.card_index(
+			wasm.CardSet.Open,
+			parseInt(code, 32) & 0x3fff,
+		);
+		const name = wasm.card_name(wasm.CardSet.Open, index);
 		incx(name, `Cards/${code}.webp`);
 	}
 	table.appendChild(tr);

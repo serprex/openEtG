@@ -51,7 +51,7 @@ export default class Card {
 	}
 
 	get name() {
-		return enums.Card[etgutil.asShiny(this.code, false)];
+		return wasm.card_name(this.Cards.set, this.index);
 	}
 
 	get shiny() {

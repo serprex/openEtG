@@ -28,7 +28,7 @@ use crate::json::{
 };
 use crate::starters::{ORIGINAL_STARTERS, STARTERS};
 use crate::users::{self, HashAlgo, UserData, UserObject, Users};
-use crate::{get_day, svg, PgPool};
+use crate::{get_day, PgPool};
 
 static NEXT_SOCK_ID: AtomicUsize = AtomicUsize::new(0);
 
@@ -1864,7 +1864,6 @@ pub async fn handle_ws(
 											if let Some(card) =
 												etg::card::OpenSet.try_get(sell.code as i32)
 											{
-												let cardname = svg::card_name(card);
 												if sell.p > 0 {
 													let ecount = encode_count(sell.amt as u32);
 													let ecode = encode_code(sell.code as i32);
@@ -1877,7 +1876,7 @@ pub async fn handle_ws(
 														&WsResponse::bzgivec {
 															msg: &format!(
 																"{} sold you {} of {} @ {}",
-																u, sell.amt, cardname, sell.p
+																u, sell.amt, card.name, sell.p
 															),
 															c: unsafe {
 																std::str::from_utf8_unchecked(
@@ -1892,7 +1891,7 @@ pub async fn handle_ws(
 														&WsResponse::bzgiveg {
 															msg: &format!(
 																"{} bought {} of {} @ {} from you.",
-																u, sell.amt, cardname, -sell.p
+																u, sell.amt, card.name, -sell.p
 															),
 															g: sell.amt as i32 * -sell.p,
 														},

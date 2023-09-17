@@ -9,7 +9,6 @@ use serde_json::Value;
 
 #[derive(Default, Serialize)]
 struct Enums {
-	Card: BTreeMap<u16, String>,
 	Event: BTreeMap<u16, String>,
 	EventId: BTreeMap<String, u16>,
 	Flag: BTreeMap<u16, String>,
@@ -31,6 +30,7 @@ fn subsource<'a, 'b>(source: &'a str, prefix: &'b str) -> &'a str {
 
 struct Card {
 	code: u16,
+	name: String,
 	kind: u8,
 	ele: u8,
 	rarity: i8,
@@ -222,9 +222,9 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 				}
 				skillstr.push(']');
 
-				enums.Card.insert(code, String::from(name));
 				let card = Card {
 					code,
+					name: String::from(name),
 					kind,
 					ele,
 					rarity,
@@ -264,8 +264,8 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 	)
 	.ok();
 	for card in cards.iter() {
-		write!(source, "Card{{code:{},kind:Kind::{},element:{},rarity:{},attack:{},health:{},cost:{},costele:{},cast:{},castele:{},flag:{},status:{},skill:{}}},\n",
-			   card.code, ["Weapon","Shield","Permanent","Spell","Creature"][card.kind as usize],
+		write!(source, "Card{{code:{},name:r#\"{}\"#,kind:Kind::{},element:{},rarity:{},attack:{},health:{},cost:{},costele:{},cast:{},castele:{},flag:{},status:{},skill:{}}},\n",
+			   card.code, card.name, ["Weapon","Shield","Permanent","Spell","Creature"][card.kind as usize],
 			   card.ele, card.rarity, card.attack, card.health, card.cost, card.costele, card.cast, card.castele,
 			   card.flag, card.status, card.skill
 		).ok();

@@ -1,7 +1,7 @@
 #![no_std]
 #![allow(non_snake_case)]
 
-use alloc::vec::Vec;
+use alloc::{string::String, vec::Vec};
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
@@ -20,6 +20,7 @@ pub struct Cards {
 #[derive(Clone, Copy)]
 pub struct Card {
 	pub code: u16,
+	pub name: &'static str,
 	pub kind: Kind,
 	pub element: i8,
 	pub rarity: i8,
@@ -167,6 +168,14 @@ pub fn card_index(set: CardSet, code: u16) -> Option<usize> {
 		.data
 		.binary_search_by_key(&code, |card| card.code)
 		.ok()
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn card_name(set: CardSet, index: usize) -> Option<String> {
+	cardSetCards(set)
+		.try_get_index(index)
+		.map(|&card| String::from(card.name))
 }
 
 #[cfg(target_arch = "wasm32")]

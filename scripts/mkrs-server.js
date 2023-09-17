@@ -2,11 +2,11 @@ import fs from 'fs/promises';
 import AllCards from '../src/AllCards.js';
 import Decks from '../src/Decks.json' assert { type: 'json' };
 
-const source = ["pub const CARD_STRINGS:&[(u16,&'static str,&'static str)]=&["];
+const source = ["pub const CARD_STRINGS:&[(u16,&'static str)]=&["];
 AllCards.Codes.forEach((card, code) => {
 	if (card.shiny) return;
 	source.push(
-		`(${card.code},r#"${card.name}"#,r#"${card
+		`(${card.code},r#"${card
 			.info()
 			.replaceAll('&', '&amp;')
 			.replace(/(\d\d?):(\d\d?) ?/g, (m, n, e) => {

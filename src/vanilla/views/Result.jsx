@@ -7,7 +7,6 @@ import * as etgutil from '../../etgutil.js';
 import * as Components from '../../Components/index.jsx';
 import * as store from '../../store.jsx';
 import { choose } from '../../util.js';
-import enums from '../../enum.json' assert { type: 'json' };
 
 function exitFunc() {
 	store.doNav(import('./MainMenu.jsx'));

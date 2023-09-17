@@ -2,7 +2,7 @@ use std::fmt::Write;
 
 use etg::card;
 
-use super::{card_info, card_name};
+use super::card_info;
 use crate::etgutil::encode_code;
 
 pub fn eleup_str(element: i8, upped: bool) -> &'static str {
@@ -56,7 +56,7 @@ pub fn card(code: i32) -> Option<String> {
 		result.push_str(" fill='#fff'");
 	}
 	result.push('>');
-	result.push_str(card_name(card));
+	result.push_str(card.name);
 	result.push_str(
 			"</text><foreignObject width='160' height='256'><p xmlns='http://www.w3.org/1999/xhtml' style='font:10px sans-serif;white-space:pre-wrap;color:#"
 			);

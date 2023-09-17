@@ -769,7 +769,7 @@ const data = {
 	v_swarm: 'Increment hp per scarab.',
 	v_thorn: '75% chance to poison attackers.',
 	v_virusplague: "Sacrifice self & poison foe's creatures.",
-	v_void: "Reduce foe's maximum HP by 2, 3 if mark is 1:11",
+	v_void: "Reduce foe's maximum HP by 2, 3 if mark is 1:11.",
 };
 for (const [k, v] of [
 	[
