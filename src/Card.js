@@ -1,7 +1,6 @@
 import enums from './enum.json' assert { type: 'json' };
 import * as etg from './etg.js';
 import * as etgutil from './etgutil.js';
-import skillText from './skillText.js';
 import { read_skill, read_status } from './util.js';
 import * as wasm from './rs/pkg/etg.js';
 
@@ -78,18 +77,18 @@ export default class Card {
 
 	info() {
 		if (this.type === etg.Spell) {
-			return skillText(this);
+			return wasm.skillTextCard(this.Cards.set, this.index);
 		} else {
 			const text = [];
 			if (this.type === etg.Shield && this.health)
 				text.push(
 					this.health > 0
-						? `Reduce damage by ${this.health}`
-						: `Increase damage by ${-this.health}`,
+						? `Reduce damage by ${this.health}.`
+						: `Increase damage by ${-this.health}.`,
 				);
 			else if (this.type === etg.Creature || this.type === etg.Weapon)
 				text.push(`${this.attack}|${this.health}`);
-			const skills = skillText(this);
+			const skills = wasm.skillTextCard(this.Cards, this.index);
 			if (skills) text.push(skills);
 			return text.join('\n');
 		}

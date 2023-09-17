@@ -205,12 +205,12 @@ impl Skills {
 		}
 	}
 
-	pub fn iter(&self) -> impl Iterator<Item = (&Event, &Cow<'static, [Skill]>)> {
-		self.0.iter().map(|&(ref k, ref v)| (k, v))
+	pub fn iter(&self) -> impl Iterator<Item = (Event, &Cow<'static, [Skill]>)> {
+		self.0.iter().map(|&(k, ref v)| (k, v))
 	}
 
-	pub fn iter_mut(&mut self) -> impl Iterator<Item = (&Event, &mut Cow<'static, [Skill]>)> {
-		self.0.iter_mut().map(|&mut (ref k, ref mut v)| (k, v))
+	pub fn iter_mut(&mut self) -> impl Iterator<Item = (Event, &mut Cow<'static, [Skill]>)> {
+		self.0.iter_mut().map(|&mut (k, ref mut v)| (k, v))
 	}
 
 	pub fn clear(&mut self) {
@@ -563,7 +563,6 @@ pub enum Skill {
 	v_dessication,
 	v_divinity,
 	v_drainlife(u8),
-	v_dryspell,
 	v_dshield,
 	v_endow,
 	v_fiery,
@@ -574,7 +573,6 @@ pub enum Skill {
 	v_freeevade,
 	v_gaincharge2,
 	v_gratitude,
-	v_hammer,
 	v_hatch,
 	v_heal,
 	v_holylight,
@@ -1880,7 +1878,7 @@ impl Skill {
 					}
 				}
 			}
-			Self::dryspell | Self::v_dryspell => {
+			Self::dryspell => {
 				let owner = ctx.get_owner(c);
 				ctx.masscc(owner, ctx.get_foe(owner), |ctx, cr| {
 					let q = -ctx.spelldmg(cr, 1);
@@ -2878,7 +2876,7 @@ impl Skill {
 				for &cr in ctx.get_player(owner).creatures.clone().iter() {
 					if cr != 0 {
 						let thing = ctx.get_thing(cr);
-						if thing.skill.iter().all(|(&k, v)| {
+						if thing.skill.iter().all(|(k, v)| {
 							k == Event::OwnPlay
 								|| k == Event::OwnDiscard || v.iter().all(|&sk| sk.passive())
 						}) {
@@ -3349,12 +3347,12 @@ impl Skill {
 				ctx.dmg(t, halfhp);
 				ctx.incrAtk(t, -halfatk);
 				let owner = ctx.get_owner(c);
-				let candidates =
-					ctx.get_player(owner)
-						.creatures
-						.iter()
-						.map(|&cr| (cr != 0) as u32)
-						.sum();
+				let candidates = ctx
+					.get_player(owner)
+					.creatures
+					.iter()
+					.map(|&cr| (cr != 0) as u32)
+					.sum();
 				if candidates > 0 {
 					let mut candidate = ctx.rng_range(0..candidates);
 					for &cr in ctx.get_player(owner).creatures.iter() {
@@ -4470,7 +4468,7 @@ impl Skill {
 					}) {
 					ctx.transform(c, card.code as i32);
 				}
-				if ctx.get(c, Stat::ready) != 0 {
+				if ctx.get(c, Flag::ready) {
 					ctx.set(c, Stat::casts, 0);
 					Skill::parallel.proc(ctx, c, c, data);
 				}
@@ -4830,9 +4828,9 @@ impl Skill {
 				ctx.fx(t, Fx::Ready);
 				ctx.set(t, Stat::cast, 0);
 				if ctx.get_card(ctx.get(t, Stat::card)).element as i32 == etg::Time
-					&& ctx.get(t, Stat::ready) == 0
+					&& !ctx.get(t, Flag::ready)
 				{
-					ctx.set(t, Stat::ready, 1);
+					ctx.set(t, Flag::ready, true);
 					ctx.set(t, Stat::casts, 2);
 				}
 			}
@@ -5003,7 +5001,6 @@ impl Skill {
 			| Self::v_bow
 			| Self::v_dagger
 			| Self::v_fiery
-			| Self::v_hammer
 			| Self::v_hopedr
 			| Self::v_swarmhp => panic!("Pure skill triggered with impurity"),
 		}
@@ -5054,15 +5051,9 @@ impl Skill {
 				let mark = ctx.get_player(ctx.get_owner(c)).mark;
 				(mark == etg::Entropy || mark == etg::Aether) as i32
 			}
-			Self::hammer | Self::v_hammer => {
+			Self::hammer => {
 				let mark = ctx.get_player(ctx.get_owner(c)).mark;
-				if mark != etg::Gravity && mark != etg::Earth {
-					0
-				} else if ctx.cardset() == CardSet::Open {
-					2
-				} else {
-					1
-				}
+				(mark == etg::Gravity || mark == etg::Earth) as i32
 			}
 			Self::hope => ctx
 				.get_player(ctx.get_owner(c))

@@ -55,7 +55,9 @@ fn parseCost(s: &str, ele: u8) -> Option<(i8, u8)> {
 			.expect("invalid ele in cost:ele");
 		Some((cost, costele))
 	} else {
-		s.parse::<i8>().ok().map(|val| (val, if val == 0 { 0 } else { ele }))
+		s.parse::<i8>()
+			.ok()
+			.map(|val| (val, if val == 0 { 0 } else { ele }))
 	}
 }
 

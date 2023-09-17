@@ -2,7 +2,6 @@ import * as etg from './etg.js';
 import * as etgutil from './etgutil.js';
 import OriginalCards from './vanilla/Cards.js';
 import OpenCards from './Cards.js';
-import { entitySkillText } from './skillText.js';
 import enums from './enum.json' assert { type: 'json' };
 import { randint, decodeSkillName, read_skill, read_status } from './util.js';
 import * as wasm from './rs/pkg/etg.js';
@@ -173,7 +172,7 @@ export default class Game {
 					: type === wasm.Kind.Shield
 					? this.truedr(id).toString()
 					: '';
-			const stext = entitySkillText(this, id);
+			const stext = wasm.skillTextThing(this.game, id);
 			return !info ? stext : stext ? info + '\n' + stext : info;
 		}
 	}

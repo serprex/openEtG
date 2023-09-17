@@ -1,6 +1,7 @@
 #![cfg_attr(target_arch = "wasm32", no_std)]
 #![allow(unused)]
 
+#[macro_use]
 extern crate alloc;
 extern crate core;
 
@@ -13,6 +14,7 @@ pub mod game;
 #[rustfmt::skip]
 pub mod generated;
 pub mod skill;
+pub mod text;
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;

@@ -333,7 +333,7 @@ fn eval_skill(
 			Skill::drawcopy => 1.0,
 			Skill::drawequip => 2.0,
 			Skill::drawpillar => 1.0,
-			Skill::dryspell | Skill::v_dryspell => 5.0,
+			Skill::dryspell => 5.0,
 			Skill::dshield | Skill::v_dshield => 4.0,
 			Skill::duality => 4.0,
 			Skill::earthquake => 4.0,

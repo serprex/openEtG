@@ -388,7 +388,6 @@ pub enum Stat {
 	nova,
 	nova2,
 	poison,
-	ready,
 	shardgolem,
 	sosa,
 	steam,
@@ -397,7 +396,7 @@ pub enum Stat {
 }
 
 #[derive(Clone, Default)]
-pub struct Status(Vec<(Stat, i32)>);
+pub struct Status(pub Vec<(Stat, i32)>);
 
 pub struct StatusVacant<'a> {
 	pub status: &'a mut Status,
@@ -794,7 +793,7 @@ impl Game {
 					v.hash(&mut hasher);
 				}
 			}
-			for (&k, v) in thing.skill.iter() {
+			for (k, v) in thing.skill.iter() {
 				if !v.is_empty() {
 					k.hash(&mut hasher);
 					v.hash(&mut hasher);
@@ -908,7 +907,7 @@ impl Game {
 		self.get_thing(id)
 			.skill
 			.iter()
-			.flat_map(|(&k, v)| {
+			.flat_map(|(k, v)| {
 				once(u8::from(k) as i32 | (v.len() as i32) << 8).chain(
 					v.iter()
 						.map(|&sk| generated::id_skill(sk) | sk.param1() << 16 | sk.param2() << 24),
@@ -1245,6 +1244,10 @@ impl Game {
 		self.get_thing_mut(id).status.entry(k).or_insert(0)
 	}
 
+	pub fn get_cards(&self) -> Cards {
+		*self.cards
+	}
+
 	pub fn get_card(&self, code: i32) -> &'static Card {
 		self.cards.get(code)
 	}
@@ -1553,7 +1556,7 @@ impl Game {
 			}
 			let frozen = self.get(id, Stat::frozen);
 			self.set(id, Stat::casts, 1);
-			self.set(id, Stat::ready, 0);
+			self.set(id, Flag::ready, false);
 			if frozen == 0
 				|| self
 					.getSkill(id, Event::OwnAttack)
@@ -1765,7 +1768,7 @@ impl Game {
 		self.get_thing(id)
 			.skill
 			.iter()
-			.map(|(&k, v)| (k, v.as_ref()))
+			.map(|(k, v)| (k, v.as_ref()))
 	}
 
 	pub fn new_thing(&mut self, code: i32, owner: i32) -> i32 {
@@ -2013,7 +2016,7 @@ impl Game {
 
 	pub fn lobo(&mut self, id: i32) {
 		let mut thing = self.get_thing_mut(id);
-		for (&k, v) in thing.skill.iter_mut() {
+		for (k, v) in thing.skill.iter_mut() {
 			v.to_mut().retain(|s| s.passive());
 		}
 	}
