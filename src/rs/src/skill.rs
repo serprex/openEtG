@@ -1459,7 +1459,7 @@ impl Skill {
 				let index = data.index;
 				if pl.creatures[index as usize] == 0 {
 					let lives = ctx.maybeDecrStatus(c, Stat::lives);
-					if lives != 0 {
+					if lives > 1 {
 						ctx.fx(c, Fx::Lives(lives));
 						let card = ctx.get_card(ctx.get(c, Stat::card));
 						ctx.set(c, Stat::maxhp, card.health as i32);

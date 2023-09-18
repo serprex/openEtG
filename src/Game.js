@@ -7,10 +7,6 @@ import { randint, decodeSkillName, read_skill, read_status } from './util.js';
 import * as wasm from './rs/pkg/etg.js';
 
 const infoskipkeys = new Set(['casts', 'gpull', 'hp', 'maxhp']);
-function plinfocore(info, key, val) {
-	if (val === true) info.push(key);
-	else if (val) info.push(val + key);
-}
 
 export default class Game {
 	constructor(data) {
@@ -150,30 +146,21 @@ export default class Game {
 		if (name.length) return name;
 	}
 	info(id) {
-		const kind = this.get_kind(id);
-		const type = kind === wasm.Kind.Spell ? this.getCard(id).type : kind;
-		if (type == wasm.Kind.Player) {
+		if (this.get_kind(id) == wasm.Kind.Player) {
 			const info = [
 				`${this.get(id, 'hp')}/${this.get(id, 'maxhp')} ${this.deck_length(
 					id,
 				)}cards`,
 			];
 			for (const [k, v] of this.statusesOf(id)) {
-				if (!infoskipkeys.has(k) || !v) plinfocore(info, k, v);
+				if (v && !infoskipkeys.has(k)) info.push(v === true ? k : v + k);
 			}
 			info.push(this.get_drawpower(id) + 'drawpower');
 			if (this.get(id, 'casts') === 0) info.push('silenced');
 			if (this.get(id, 'gpull')) info.push('gpull');
 			return info.join('\n');
 		} else {
-			const info =
-				type === wasm.Kind.Creature || type === wasm.Kind.Weapon
-					? `${this.trueatk(id)}|${this.truehp(id)}/${this.get(id, 'maxhp')}`
-					: type === wasm.Kind.Shield
-					? this.truedr(id).toString()
-					: '';
-			const stext = wasm.skillTextThing(this.game, id);
-			return !info ? stext : stext ? info + '\n' + stext : info;
+			return wasm.thingText(this.game, id);
 		}
 	}
 }
@@ -186,7 +173,7 @@ for (const k of Object.getOwnPropertyNames(wasm.Game.prototype)) {
 		};
 	} else if (descriptor.get) {
 		Object.defineProperty(Game.prototype, k, {
-			get: function () {
+			get() {
 				return this.game[k];
 			},
 		});

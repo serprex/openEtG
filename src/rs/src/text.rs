@@ -877,7 +877,15 @@ impl<'a> SkillThing<'a> {
 							write!(ret, "{v}:{}, ", costele).ok();
 						}
 					}
-					Stat::adrenaline => ret.push_str("adrenaline, "),
+					Stat::adrenaline => {
+						if v != 1 {
+							write!(ret, "{v} ").ok();
+						}
+						ret.push_str("adrenaline, ");
+					}
+					Stat::casts => {
+						write!(ret, "{v} casts, ").ok();
+					}
 					Stat::charges if v != 1 => {
 						match *self {
 							Self::Card(cards, c) => {
@@ -909,7 +917,11 @@ impl<'a> SkillThing<'a> {
 						}.ok();
 					}
 					Stat::lives => {
-						write!(ret, "{v} lives, ").ok();
+						if v == 1 {
+							write!(ret, "last life, ").ok();
+						} else {
+							write!(ret, "{v} lives, ").ok();
+						}
 					}
 					Stat::steam => {
 						write!(ret, "{v} steam, ").ok();
@@ -992,8 +1004,30 @@ impl<'a> SkillThing<'a> {
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn skillTextThing(game: &Game, id: i32) -> String {
-	SkillThing::Thing(game, id).info()
+pub fn thingText(game: &Game, id: i32) -> String {
+	let thing = game.get_thing(id);
+	let mut ret = String::new();
+	if thing.kind != Kind::Player {
+		let instkind = if thing.kind == Kind::Spell {
+			game.get_card(game.get(id, Stat::card)).kind
+		} else {
+			thing.kind
+		};
+		if instkind == Kind::Creature || instkind == Kind::Weapon {
+			write!(ret, "{}|{}/{}", game.trueatk(id), game.truehp(id), game.get(id, Stat::maxhp)).ok();
+		} else if instkind == Kind::Shield {
+			write!(ret, "{}", game.truedr(id)).ok();
+		}
+		let skills = SkillThing::Thing(game, id).info();
+		if ret.is_empty() {
+			return skills;
+		}
+		if (!skills.is_empty()) {
+			ret.push('\n');
+			ret.push_str(&skills);
+		}
+	}
+	ret
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
