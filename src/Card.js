@@ -9,7 +9,6 @@ export default class Card {
 		this.Cards = Cards;
 		this.index = wasm.card_index(Cards.set, code);
 		this.code = realcode;
-		this.active = read_skill(wasm.card_skills(Cards.set, this.index));
 		this.status = read_status(wasm.card_stats(Cards.set, this.index));
 	}
 
@@ -25,28 +24,12 @@ export default class Card {
 		return wasm.card_rarity(this.Cards.set, this.index);
 	}
 
-	get attack() {
-		return wasm.card_attack(this.Cards.set, this.index);
-	}
-
-	get health() {
-		return wasm.card_health(this.Cards.set, this.index);
-	}
-
 	get cost() {
 		return wasm.card_cost(this.Cards.set, this.index);
 	}
 
 	get costele() {
 		return wasm.card_costele(this.Cards.set, this.index);
-	}
-
-	get cast() {
-		return wasm.card_cast(this.Cards.set, this.index);
-	}
-
-	get castele() {
-		return wasm.card_castele(this.Cards.set, this.index);
 	}
 
 	get name() {
@@ -76,22 +59,7 @@ export default class Card {
 	}
 
 	info() {
-		if (this.type === etg.Spell) {
-			return wasm.skillTextCard(this.Cards.set, this.index);
-		} else {
-			const text = [];
-			if (this.type === etg.Shield && this.health)
-				text.push(
-					this.health > 0
-						? `Reduce damage by ${this.health}.`
-						: `Increase damage by ${-this.health}.`,
-				);
-			else if (this.type === etg.Creature || this.type === etg.Weapon)
-				text.push(`${this.attack}|${this.health}`);
-			const skills = wasm.skillTextCard(this.Cards, this.index);
-			if (skills) text.push(skills);
-			return text.join('\n');
-		}
+		return wasm.cardText(this.Cards.set, this.index);
 	}
 
 	toString() {
@@ -118,14 +86,5 @@ export default class Card {
 
 	getStatus(key) {
 		return this.status.get(key) | 0;
-	}
-
-	getSkill(key) {
-		return this.active.get(key);
-	}
-
-	hasactive(key, name) {
-		const a = this.getSkill(key);
-		return !!(a && ~a.indexOf(name));
 	}
 }

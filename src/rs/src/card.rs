@@ -204,22 +204,6 @@ pub fn card_rarity(set: CardSet, index: usize) -> Option<i8> {
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_attack(set: CardSet, index: usize) -> Option<i8> {
-	cardSetCards(set)
-		.try_get_index(index)
-		.map(|&card| card.attack)
-}
-
-#[cfg(target_arch = "wasm32")]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_health(set: CardSet, index: usize) -> Option<i8> {
-	cardSetCards(set)
-		.try_get_index(index)
-		.map(|&card| card.health)
-}
-
-#[cfg(target_arch = "wasm32")]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn card_cost(set: CardSet, index: usize) -> Option<i8> {
 	cardSetCards(set)
 		.try_get_index(index)
@@ -236,22 +220,6 @@ pub fn card_costele(set: CardSet, index: usize) -> Option<i8> {
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_cast(set: CardSet, index: usize) -> Option<i8> {
-	cardSetCards(set)
-		.try_get_index(index)
-		.map(|&card| card.cast)
-}
-
-#[cfg(target_arch = "wasm32")]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_castele(set: CardSet, index: usize) -> Option<i8> {
-	cardSetCards(set)
-		.try_get_index(index)
-		.map(|&card| card.castele)
-}
-
-#[cfg(target_arch = "wasm32")]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn card_stats(set: CardSet, index: usize) -> Option<Vec<i32>> {
 	cardSetCards(set).try_get_index(index).map(|&card| {
 		card.status
@@ -263,21 +231,5 @@ pub fn card_stats(set: CardSet, index: usize) -> Option<Vec<i32>> {
 					.flat_map(|k| [id_flag(k), 1].into_iter()),
 			)
 			.collect()
-	})
-}
-
-#[cfg(target_arch = "wasm32")]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_skills(set: CardSet, index: usize) -> Option<Vec<i32>> {
-	cardSetCards(set).try_get_index(index).map(|&card| {
-		card.skill
-			.iter()
-			.flat_map(|&(k, v)| {
-				core::iter::once(u8::from(k) as i32 | (v.len() as i32) << 8).chain(
-					v.iter()
-						.map(|&sk| id_skill(sk) | sk.param1() << 16 | sk.param2() << 24),
-				)
-			})
-			.collect::<Vec<_>>()
 	})
 }

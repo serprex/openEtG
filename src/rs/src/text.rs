@@ -997,10 +997,29 @@ pub fn skillTextThing(game: &Game, id: i32) -> String {
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn skillTextCard(set: CardSet, idx: u16) -> String {
+pub fn cardText(set: CardSet, idx: u16) -> String {
 	let cards = if set == CardSet::Original { card::OrigSet } else { card::OpenSet };
 	if let Some(card) = cards.try_get_index(idx as usize) {
-		SkillThing::Card(cards, card).info()
+		if card.kind == Kind::Spell {
+			SkillThing::Card(cards, card).info()
+		} else {
+			let mut s = String::new();
+			if card.kind == Kind::Shield {
+				if card.health > 0 {
+					write!(s, "Reduce damage by {}", card.health).ok();
+				} else if card.health < 0 {
+					write!(s, "Increase damage by {}", -card.health).ok();
+				}
+			} else if card.kind == Kind::Creature || card.kind == Kind::Weapon {
+				write!(s, "{}|{}", card.attack, card.health);
+			}
+			let skills = SkillThing::Card(cards, card).info();
+			if (!skills.is_empty()) {
+				s.push('\n');
+				s.push_str(&skills);
+			}
+			s
+		}
 	} else {
 		String::new()
 	}
