@@ -2,7 +2,6 @@ use std::fmt::Write;
 
 use etg::card;
 
-use super::card_info;
 use crate::etgutil::encode_code;
 
 pub fn eleup_str(element: i8, upped: bool) -> &'static str {
@@ -38,12 +37,12 @@ pub fn eleup_str(element: i8, upped: bool) -> &'static str {
 }
 
 pub fn card(code: i32) -> Option<String> {
-	let card = if code < 5000 {
+	let cards = if code < 5000 {
 		card::OrigSet
 	} else {
 		card::OpenSet
-	}
-	.try_get(code)?;
+	};
+	let card = cards.try_get(code)?;
 	let upped = card::Upped(code);
 	let shiny = card::Shiny(code);
 	let mut result = String::new();
@@ -76,7 +75,7 @@ pub fn card(code: i32) -> Option<String> {
 		))
 	});
 	result.push_str(".webp' style='position:absolute;top:-130px;left:0px'/>");
-	result.push_str(card_info(card));
+	result.push_str(&etg::text::rawCardText(cards, card));
 	if card.rarity != 0 {
 		write!(
 			result,

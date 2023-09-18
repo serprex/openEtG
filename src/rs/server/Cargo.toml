@@ -32,3 +32,7 @@ httpdate = "1"
 tokio = { version = "1", features = ["full"] }
 tokio-stream = "0.1"
 warp = { version = "0.3", default-features = false, features = ["websocket"] }
+
+[build-dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

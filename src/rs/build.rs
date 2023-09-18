@@ -276,9 +276,6 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 }
 
 fn main() {
-	if std::env::var("SKIPMKRS").map(|s| s == "1").unwrap_or(false) {
-		return;
-	}
 	println!("cargo:rerun-if-changed=../Cards.json");
 	println!("cargo:rerun-if-changed=../vanilla/Cards.json");
 	println!("cargo:rerun-if-changed=./src/game.rs");
