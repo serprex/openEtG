@@ -12,12 +12,16 @@ function QuestButton(props) {
 				position: 'absolute',
 				left: `${props.x}px`,
 				top: `${props.y}px`,
-				color: `${
-					props.area.key && !props.user.quests[props.area.key] ? '#f' : '#a'
+				color: `#${
+					typeof props.area === 'string' && !props.user.quests[props.area]
+						? 'f'
+						: 'a'
 				}${props.sel ? 'ff' : 'aa'}`,
 			}}
 			onClick={props.onClick}>
-			{(props.area.key && Quest.quarks[props.area.key].name) ?? props.area.name}
+			{typeof props.area === 'string'
+				? Quest.quarks[props.area].name
+				: props.area.name}
 		</span>
 	);
 }
@@ -32,8 +36,8 @@ export default function QuestView(props) {
 			let y = 162;
 			for (let i = 0; i < qbag.children.length; i++) {
 				const area = qbag.children[i];
-				if (area.key) {
-					const quark = Quest.quarks[area.key];
+				if (typeof area === 'string') {
+					const quark = Quest.quarks[area];
 					if (quark.questdependencies && !Quest.requireQuest(quark, rx.user)) {
 						continue;
 					}
@@ -59,7 +63,7 @@ export default function QuestView(props) {
 				if (!qbag.children) break;
 			}
 		}
-		const selectedQuest = qbag.key && Quest.quarks[qbag.key];
+		const selectedQuest = typeof qbag === 'string' ? Quest.quarks[qbag] : null;
 		return { questAreas, selectedQuest };
 	});
 	return (
