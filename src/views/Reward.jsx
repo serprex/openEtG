@@ -4,7 +4,8 @@ import { For } from 'solid-js/web';
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
 import * as userutil from '../userutil.js';
-import * as Components from '../Components/index.jsx';
+import { Card, CardImage } from '../Components/index.jsx';
+import ExitBtn from '../Components/ExitBtn.jsx';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 
@@ -79,10 +80,10 @@ export default function Reward(props) {
 						You will get {numberofcopies} copies of the card you choose
 					</div>
 				)}
-				{!!props.code && <Components.ExitBtn x={10} y={10} />}
+				{!!props.code && <ExitBtn x={10} y={10} />}
 				<For each={rewardList}>
 					{(reward, i) => (
-						<Components.CardImage
+						<CardImage
 							style={{
 								position: 'absolute',
 								left: `${100 + ((i() / 12) | 0) * 108}px`,
@@ -93,7 +94,7 @@ export default function Reward(props) {
 						/>
 					)}
 				</For>
-				<Components.Card x={233} y={10} card={Cards.Codes[chosenReward()]} />
+				<Card x={233} y={10} card={Cards.Codes[chosenReward()]} />
 			</>
 		)
 	);

@@ -7,7 +7,9 @@ import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 import { decklength, decodedeck, encodeCode, asUpped } from '../etgutil.js';
 import { randint, shuffle } from '../util.js';
-import * as Components from '../Components/index.jsx';
+import { Card, DeckDisplay } from '../Components/index.jsx';
+import ExitBtn from '../Components/ExitBtn.jsx';
+import Text from '../Components/Text.jsx';
 
 function RenderInfo(props) {
 	const testDeck = () => {
@@ -42,14 +44,14 @@ function RenderInfo(props) {
 	return (
 		<>
 			{adeck && (
-				<Components.DeckDisplay
+				<DeckDisplay
 					cards={Cards}
 					deck={decodedeck(adeck)}
 					renderMark
 					y={props.y}
 				/>
 			)}
-			<Components.Text
+			<Text
 				style={{
 					position: 'absolute',
 					left: '100px',
@@ -161,7 +163,7 @@ function ArenaCard(props) {
 					});
 				}}
 			/>
-			<Components.Card x={734} y={props.y} card={props.card} />
+			<Card x={734} y={props.y} card={props.card} />
 		</>
 	);
 }
@@ -176,13 +178,11 @@ export default function ArenaInfo() {
 
 	return (
 		<>
-			<Components.Text
+			<Text
 				style="position:absolute;left:96px;top:560px"
-				text={
-					'Earn 5$ when your deck is faced, & 10$ more when it wins\nEarn 25$ per age of old deck when creating new deck, up to 350$'
-				}
+				text="Earn 5$ when your deck is faced, & 10$ more when it wins\nEarn 25$ per age of old deck when creating new deck, up to 350$"
 			/>
-			<Components.ExitBtn x={8} y={300} />
+			<ExitBtn x={8} y={300} />
 			<Show when={AB().A}>
 				<RenderInfo info={AB().A} y={0} name={user.name} />
 			</Show>

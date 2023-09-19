@@ -1,6 +1,7 @@
 import { createSignal } from 'solid-js';
 
-import * as Components from '../Components/index.jsx';
+import { Card, CardSelector, DeckDisplay } from './index.jsx';
+import IconBtn from './IconBtn.jsx';
 import * as etgutil from '../etgutil.js';
 
 export default function Editor(props) {
@@ -29,7 +30,7 @@ export default function Editor(props) {
 
 	return (
 		<>
-			<Components.DeckDisplay
+			<DeckDisplay
 				cards={props.cards}
 				onMouseOver={(_, card) => setCard(card)}
 				onClick={(i, card) => {
@@ -40,7 +41,7 @@ export default function Editor(props) {
 				deck={props.deck}
 				pool={props.pool}
 			/>
-			<Components.CardSelector
+			<CardSelector
 				cards={props.cards}
 				onMouseOver={setCard}
 				onClick={addCard}
@@ -56,23 +57,15 @@ export default function Editor(props) {
 				type="button"
 				value="Clear"
 				onClick={() => props.setDeck([])}
-				style={{
-					position: 'absolute',
-					left: '8px',
-					top: '32px',
-				}}
+				style="position:absolute;left:8px;top:32px"
 			/>
 			<span
 				class={'ico e' + props.mark}
-				style={{
-					position: 'absolute',
-					left: '66px',
-					top: '200px',
-				}}
+				style="position:absolute;left:66px;top:200px"
 			/>
 			<For each={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}>
 				{i => (
-					<Components.IconBtn
+					<IconBtn
 						e={'e' + i}
 						x={100 + i * 32}
 						y={234}
@@ -80,7 +73,7 @@ export default function Editor(props) {
 					/>
 				)}
 			</For>
-			<Components.Card x={734} y={8} card={card()} />
+			<Card x={734} y={8} card={card()} />
 		</>
 	);
 }

@@ -1,7 +1,7 @@
 import { createSignal } from 'solid-js';
 import { For } from 'solid-js/web';
 import { useRx } from '../store.jsx';
-import { Text } from './index.jsx';
+import Text from './Text.jsx';
 
 export function Tutor(props) {
 	const opts = useRx(state => state.opts);

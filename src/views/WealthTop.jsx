@@ -1,6 +1,6 @@
 import { createSignal, onMount } from 'solid-js';
 import * as sock from '../sock.jsx';
-import * as Components from '../Components/index.jsx';
+import ExitBtn from '../Components/ExitBtn.jsx';
 import * as store from '../store.jsx';
 
 export default function WealthTop(props) {
@@ -40,7 +40,7 @@ export default function WealthTop(props) {
 	return (
 		<>
 			{list}
-			<Components.ExitBtn x={4} y={300} />
+			<ExitBtn x={4} y={300} />
 		</>
 	);
 }

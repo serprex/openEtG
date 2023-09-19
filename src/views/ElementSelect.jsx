@@ -4,7 +4,7 @@ import { For } from 'solid-js/web';
 import * as ui from '../ui.js';
 import { run } from '../mkAi.js';
 import * as sock from '../sock.jsx';
-import { Card, ExitBtn } from '../Components/index.jsx';
+import { Card } from '../Components/index.jsx';
 import * as store from '../store.jsx';
 import { mkQuestAi, quarks } from '../Quest.js';
 import Cards from '../Cards.js';
@@ -132,9 +132,9 @@ export default function ElementSelect() {
 					{err}
 				</div>
 			)}
-			<ExitBtn
-				x={800}
-				y={200}
+			<input
+				type="button"
+				value="Exit"
 				onClick={() => {
 					if (rx.user) {
 						sock.userEmit('delete');
@@ -143,6 +143,7 @@ export default function ElementSelect() {
 					store.setOpt('remember', false);
 					store.doNav(import('./Login.jsx'));
 				}}
+				style="position:absolute;left:800px;top:200px"
 			/>
 			<label style="position:absolute;top:30px;left:500px;width:396px">
 				<i style="display:block;margin-bottom:24px;white-space:pre-line">

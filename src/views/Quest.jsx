@@ -1,6 +1,7 @@
 import { createMemo } from 'solid-js';
 import * as Quest from '../Quest.js';
-import * as Components from '../Components/index.jsx';
+import ExitBtn from '../Components/ExitBtn.jsx';
+import Text from '../Components/Text.jsx';
 import * as mkAi from '../mkAi.js';
 import * as store from '../store.jsx';
 
@@ -63,9 +64,12 @@ export default function QuestView(props) {
 	});
 	return (
 		<>
-			<Components.Box x={8} y={8} width={880} height={108} />
-			<Components.ExitBtn x={750} y={120} />
-			<Components.Text
+			<div
+				class="bgbox"
+				style="position:absolute;left:8px;top:8px;width:880px;height:108px"
+			/>
+			<ExitBtn x={750} y={120} />
+			<Text
 				text={
 					questInfo().selectedQuest?.info ??
 					"Click list items to see quest lines, & FIGHT button to challenge them!\nNames in red are quests you haven't completed."

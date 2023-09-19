@@ -4,7 +4,8 @@ import { For } from 'solid-js/web';
 import { userEmit } from '../../sock.jsx';
 import * as etg from '../../etg.js';
 import * as etgutil from '../../etgutil.js';
-import * as Components from '../../Components/index.jsx';
+import { Card } from '../../Components/index.jsx';
+import Text from '../../Components/Text.jsx';
 import * as store from '../../store.jsx';
 import { choose } from '../../util.js';
 
@@ -108,14 +109,14 @@ export default function OriginalResult({ game }) {
 			<For each={cardswon}>
 				{(c, i) => (
 					<div style={c[0] === c[1] && c[1] === c[2] ? '' : 'opacity:.3'}>
-						<Components.Card x={16 + i() * 300} y={16} card={c[0]} />
-						<Components.Card x={48 + i() * 300} y={48} card={c[1]} />
-						<Components.Card x={80 + i() * 300} y={80} card={c[2]} />
+						<Card x={16 + i() * 300} y={16} card={c[0]} />
+						<Card x={48 + i() * 300} y={48} card={c[1]} />
+						<Card x={80 + i() * 300} y={80} card={c[2]} />
 					</div>
 				)}
 			</For>
 			{electrumwon > 0 && (
-				<Components.Text
+				<Text
 					text={`${electrumwon}$`}
 					style="text-align:center;width:900px;position:absolute;left:0px;top:550px"
 				/>

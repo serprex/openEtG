@@ -4,7 +4,8 @@ import Cards from '../Cards.js';
 import * as sock from '../sock.jsx';
 import * as etgutil from '../etgutil.js';
 import * as userutil from '../userutil.js';
-import * as Components from '../Components/index.jsx';
+import { Card, CardSelector } from '../Components/index.jsx';
+import ExitBtn from '../Components/ExitBtn.jsx';
 
 export default function Library(props) {
 	const [data, setData] = createSignal({});
@@ -114,21 +115,21 @@ export default function Library(props) {
 					data().pvplosses
 				}`}
 			</span>
-			<Components.Card x={734} y={8} card={card()} />
+			<Card x={734} y={8} card={card()} />
 			<input
 				type="button"
 				value="Toggle Bound"
 				style="position:absolute;left:5px;top:554px"
 				onClick={() => setShowBound(showBound => !showBound)}
 			/>
-			<Components.ExitBtn x={5} y={8} />
+			<ExitBtn x={5} y={8} />
 			<input
 				type="button"
 				value="Export"
 				style="position:absolute;left:5px;top:28px"
 				onClick={() => open('/collection/' + props.name, '_blank')}
 			/>
-			<Components.CardSelector
+			<CardSelector
 				cards={Cards}
 				cardpool={showBound() ? memo().boundpool : memo().cardpool}
 				filterboth

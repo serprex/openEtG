@@ -2,7 +2,8 @@ import { createSignal, onMount } from 'solid-js';
 import { For } from 'solid-js/web';
 
 import Cards from '../Cards.js';
-import * as Components from '../Components/index.jsx';
+import { Card } from '../Components/index.jsx';
+import ExitBtn from '../Components/ExitBtn.jsx';
 import * as sock from '../sock.jsx';
 
 export default function ArenaTop({ lv }) {
@@ -41,8 +42,8 @@ export default function ArenaTop({ lv }) {
 					}}
 				</For>
 			</ol>
-			<Components.ExitBtn x={8} y={300} />
-			<Components.Card {...card()} />
+			<ExitBtn x={8} y={300} />
+			<Card {...card()} />
 		</>
 	);
 }

@@ -5,7 +5,8 @@ import * as etgutil from '../etgutil.js';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 import * as userutil from '../userutil.js';
-import * as Components from '../Components/index.jsx';
+import { Card } from '../Components/index.jsx';
+import Text from '../Components/Text.jsx';
 import Game from '../Game.js';
 import Cards from '../Cards.js';
 import { choose, randomcard } from '../util.js';
@@ -395,7 +396,7 @@ export default function Result(props) {
 		if (cardreward) {
 			let x0 = 470 - etgutil.decklength(cardreward) * 20 - 80;
 			for (const code of etgutil.iterdeck(cardreward)) {
-				cards.push(<Components.Card x={x0} y={170} card={Cards.Codes[code]} />);
+				cards.push(<Card x={x0} y={170} card={Cards.Codes[code]} />);
 				x0 += 40;
 			}
 		}
@@ -404,7 +405,12 @@ export default function Result(props) {
 
 	return (
 		<>
-			<Components.ExitBtn x={412} y={440} onClick={exitFunc} />
+			<input
+				type="button"
+				value="Exit"
+				onClick={exitFunc}
+				style="position:absolute;left:412px;top:440px"
+			/>
 			{canRematch() && (
 				<input
 					type="button"
@@ -416,13 +422,13 @@ export default function Result(props) {
 			{game.winner === p1id && (
 				<>
 					{goldreward > 0 && (
-						<Components.Text
+						<Text
 							text={`${goldreward - (game.data.cost | 0)}$`}
 							style="text-align:center;width:900px;position:absolute;left:0px;top:550px"
 						/>
 					)}
 					{cards}
-					<Components.Text
+					<Text
 						text={game.data.wintext || 'You won!'}
 						style={{
 							'text-align': 'center',

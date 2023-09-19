@@ -4,7 +4,9 @@ import * as sock from '../sock.jsx';
 import { useRx } from '../store.jsx';
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
-import * as Components from '../Components/index.jsx';
+import { Card, CardSelector } from '../Components/index.jsx';
+import ExitBtn from '../Components/ExitBtn.jsx';
+import Text from '../Components/Text.jsx';
 
 export default function Upgrade() {
 	const user = useRx(state => state.user);
@@ -74,7 +76,7 @@ export default function Upgrade() {
 	}
 	return (
 		<>
-			<Components.ExitBtn x={5} y={50} />
+			<ExitBtn x={5} y={50} />
 			{state().canGrade && (
 				<input
 					type="button"
@@ -97,31 +99,28 @@ export default function Upgrade() {
 				onClick={autoCards}
 				style="position:absolute;left:5px;top:138px"
 			/>
-			<Components.Text
+			<Text
 				text={user.gold + '$'}
 				style="position:absolute;left:5px;top:240px"
 			/>
-			<Components.Text
+			<Text
 				text={state().info1}
 				style="position:absolute;left:250px;top:50px"
 			/>
-			<Components.Text
+			<Text
 				text={state().info3}
 				style="position:absolute;left:250px;top:95px"
 			/>
-			<Components.Text
-				text={error()}
-				style="position:absolute;left:100px;top:170px"
-			/>
-			<Components.Card x={534} y={8} card={state().card1} />
-			<Components.Card x={734} y={8} card={state().card2} />
+			<Text text={error()} style="position:absolute;left:100px;top:170px" />
+			<Card x={534} y={8} card={state().card1} />
+			<Card x={734} y={8} card={state().card2} />
 			<input
 				type="button"
 				value="Toggle Bound"
 				style="position:absolute;left:5px;top:554px"
 				onClick={() => setShowBound(showBound => !showBound)}
 			/>
-			<Components.CardSelector
+			<CardSelector
 				cards={Cards}
 				cardpool={showBound() ? boundpool() : cardpool()}
 				maxedIndicator

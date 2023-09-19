@@ -3,7 +3,8 @@ import { createEffect, createMemo, createSignal, onMount } from 'solid-js';
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
 import * as userutil from '../userutil.js';
-import * as Components from '../Components/index.jsx';
+import { Card, CardSelector, DeckDisplay } from '../Components/index.jsx';
+import Text from '../Components/Text.jsx';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 
@@ -89,7 +90,7 @@ export default function Trade(props) {
 					}}
 				/>
 			)}
-			<Components.DeckDisplay
+			<DeckDisplay
 				cards={Cards}
 				deck={deck()}
 				onMouseOver={(i, card) => setCard(card)}
@@ -99,25 +100,25 @@ export default function Trade(props) {
 					setDeck(newdeck);
 				}}
 			/>
-			<Components.DeckDisplay
+			<DeckDisplay
 				cards={Cards}
 				deck={offer()}
 				x={450}
 				onMouseOver={(i, card) => setCard(card)}
 			/>
-			<Components.Text
+			<Text
 				text={`${gold() + userutil.calcWealth(Cards, deck(), true)}$`}
 				style="position:absolute;left:100px;top:235px"
 			/>
-			<Components.Text
+			<Text
 				text={`(${gold()}$)`}
 				style="position:absolute;left:250px;top:235px"
 			/>
-			<Components.Text
+			<Text
 				text={`${gopher() + userutil.calcWealth(Cards, offer(), true)}$`}
 				style="position:absolute;left:350px;top:235px"
 			/>
-			<Components.Text
+			<Text
 				text={`(${gopher()}$)`}
 				style="position:absolute;left:500px;top:235px"
 			/>
@@ -145,7 +146,7 @@ export default function Trade(props) {
 				style="position:absolute;left:8px;top:235px;width:84px"
 			/>
 			{confirm() === 0 && (
-				<Components.CardSelector
+				<CardSelector
 					cards={Cards}
 					cardpool={cardpool()}
 					cardminus={cardminus()}
@@ -163,7 +164,7 @@ export default function Trade(props) {
 					}}
 				/>
 			)}
-			<Components.Card x={734} y={8} card={card()} />
+			<Card x={734} y={8} card={card()} />
 		</>
 	);
 }

@@ -5,7 +5,8 @@ import * as etgutil from '../../etgutil.js';
 import Cards from '../Cards.js';
 import { userEmit } from '../../sock.jsx';
 import * as store from '../../store.jsx';
-import * as Components from '../../Components/index.jsx';
+import { Card, CardSelector, DeckDisplay } from '../../Components/index.jsx';
+import Text from '../../Components/Text.jsx';
 
 export default function OriginalUpgrade(props) {
 	const rx = store.useRx();
@@ -65,7 +66,7 @@ export default function OriginalUpgrade(props) {
 
 	return (
 		<>
-			<Components.DeckDisplay
+			<DeckDisplay
 				cards={Cards}
 				deck={deck()}
 				onMouseOver={(i, card) => setCard(card)}
@@ -75,7 +76,7 @@ export default function OriginalUpgrade(props) {
 					setDeck(newdeck);
 				}}
 			/>
-			<Components.Text
+			<Text
 				text={`${rx.orig.electrum}$`}
 				style="position:absolute;left:4px;top:235px"
 			/>
@@ -91,10 +92,7 @@ export default function OriginalUpgrade(props) {
 					: ''}
 			</div>
 			<div style="position:absolute;left:100px;top:235px">
-				<Components.Text
-					text={`${buyCost()}$`}
-					style="display:inline;margin-right:4px"
-				/>
+				<Text text={`${buyCost()}$`} style="display:inline;margin-right:4px" />
 				<Show when={canBuy() && rx.orig.electrum >= buyCost()}>
 					<input
 						type="button"
@@ -112,10 +110,7 @@ export default function OriginalUpgrade(props) {
 				</Show>
 			</div>
 			<div style="position:absolute;left:300px;top:235px">
-				<Components.Text
-					text={`${sellCost()}$`}
-					style="display:inline;margin-right:4px"
-				/>
+				<Text text={`${sellCost()}$`} style="display:inline;margin-right:4px" />
 				<Show when={canSell()}>
 					<input
 						type="button"
@@ -133,7 +128,7 @@ export default function OriginalUpgrade(props) {
 				</Show>
 			</div>
 			<div style="position:absolute;left:500px;top:235px">
-				<Components.Text
+				<Text
 					text={`${upgradeCost()}$`}
 					style="display:inline;margin-right:4px"
 				/>
@@ -162,7 +157,7 @@ export default function OriginalUpgrade(props) {
 				onClick={() => store.doNav(import('./MainMenu.jsx'))}
 				style="position:absolute;left:4px;top:4px"
 			/>
-			<Components.CardSelector
+			<CardSelector
 				cards={Cards}
 				shiny={false}
 				cardpool={cardpool()}
@@ -180,7 +175,7 @@ export default function OriginalUpgrade(props) {
 					}
 				}}
 			/>
-			<Components.Card x={734} y={8} card={card()} />
+			<Card x={734} y={8} card={card()} />
 		</>
 	);
 }

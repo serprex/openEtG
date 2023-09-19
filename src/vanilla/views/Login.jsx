@@ -1,6 +1,6 @@
 import { createSignal, onMount } from 'solid-js';
 
-import { ExitBtn } from '../../Components/index.jsx';
+import ExitBtn from '../../Components/ExitBtn.jsx';
 import * as sock from '../../sock.jsx';
 import * as store from '../../store.jsx';
 import { eleNames } from '../../ui.js';

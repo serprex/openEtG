@@ -6,7 +6,10 @@ import Cards from '../Cards.js';
 import * as Tutor from '../Components/Tutor.jsx';
 import * as etgutil from '../etgutil.js';
 import { parseInput } from '../util.js';
-import * as Components from '../Components/index.jsx';
+import { Card, DeckDisplay } from '../Components/index.jsx';
+import ExitBtn from '../Components/ExitBtn.jsx';
+import IconBtn from '../Components/IconBtn.jsx';
+import Text from '../Components/Text.jsx';
 import * as store from '../store.jsx';
 
 const packdata = [
@@ -48,10 +51,10 @@ function PackDisplay(props) {
 		<div
 			class="bgbox"
 			style="position:absolute;left:0px;top:12px;width:756px;height:588px;z-index:1;overflow-y:auto">
-			<Components.Card card={hoverCard()} x={8} y={8} />
+			<Card card={hoverCard()} x={8} y={8} />
 			<For each={children()}>
 				{p => (
-					<Components.DeckDisplay
+					<DeckDisplay
 						cards={Cards}
 						x={p.x}
 						y={p.y}
@@ -137,7 +140,7 @@ export default function Shop() {
 	const elebuttons = [];
 	for (let i = 0; i < 14; i++) {
 		elebuttons.push(
-			<Components.IconBtn
+			<IconBtn
 				e={'e' + i}
 				x={75 + (i >> 1) * 64}
 				y={117 + (i & 1) * 75}
@@ -150,20 +153,29 @@ export default function Shop() {
 	}
 	return (
 		<>
-			<Components.Box x={40} y={16} width={820} height={60} />
-			<Components.Box x={40} y={89} width={494} height={168} />
-			<Components.Box x={40} y={270} width={712} height={300} />
-			<Components.Box x={768} y={90} width={94} height={184} />
-			<Components.Text
+			<div
+				class="bgbox"
+				style="position:absolute;left:40px;top:16;width:820px;height:60px"
+			/>
+			<div
+				class="bgbox"
+				style="position:absolute;left:40px;top:89;width:494px;height:168px"
+			/>
+			<div
+				class="bgbox"
+				style="position:absolute;left:40px;top:270;width:712px;height:300px"
+			/>
+			<div
+				class="bgbox"
+				style="position:absolute;left:768px;top:90px;width:94px;height:184px"
+			/>
+			<Text
 				text={rx.user.gold + '$'}
 				style="position:absolute;left:775px;top:101px"
 			/>
-			<Components.Text
-				text={info1()}
-				style="position:absolute;left:50px;top:25px"
-			/>
+			<Text text={info1()} style="position:absolute;left:50px;top:25px" />
 			<span style="position:absolute;left:50px;top:50px">{info2()}</span>
-			<Components.ExitBtn x={775} y={246} />
+			<ExitBtn x={775} y={246} />
 			{hasFreePacks() && (
 				<span style="position:absolute;left:350px;top:26px">
 					{!!rx.user.freepacks[rarity()] &&
@@ -223,7 +235,7 @@ export default function Shop() {
 								top: '278px',
 							}}
 						/>
-						<Components.Text
+						<Text
 							text={pack.cost + '$'}
 							style={{
 								position: 'absolute',

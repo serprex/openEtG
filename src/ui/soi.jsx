@@ -3,7 +3,7 @@ import { createSignal } from 'solid-js';
 import Game from '../Game.js';
 import { toTrueMark, encodedeck } from '../etgutil.js';
 import { Creature, Earth } from '../etg.js';
-import { Text } from '../Components/index.jsx';
+import Text from '../Components/Text.jsx';
 
 function Shard(element) {
 	return 5030 + element * 100;

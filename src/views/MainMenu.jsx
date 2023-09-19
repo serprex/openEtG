@@ -7,7 +7,8 @@ import * as mkAi from '../mkAi.js';
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
 import * as store from '../store.jsx';
-import * as Components from '../Components/index.jsx';
+import { Card } from '../Components/index.jsx';
+import Text from '../Components/Text.jsx';
 import * as userutil from '../userutil.js';
 import parseChat from '../parseChat.js';
 
@@ -64,7 +65,7 @@ function CostRewardHeaders(props) {
 }
 function LabelText(props) {
 	return (
-		<Components.Text
+		<Text
 			text={props.text}
 			style={`font-size:14px;pointer-events:none;${props.style ?? ''}`}
 		/>
@@ -237,7 +238,7 @@ export default function MainMenu(props) {
 		rx.user && (
 			<div class="bg_main">
 				<Rect x={196} y={4} wid={504} hei={48}>
-					<Components.Text text={tip()} />
+					<Text text={tip()} />
 					<input
 						type="button"
 						value="Next Tip"
@@ -262,7 +263,7 @@ export default function MainMenu(props) {
 				/>
 				<Rect x={86} y={92} wid={196} hei={120}>
 					<TitleText text="Stats" />
-					<Components.Text
+					<Text
 						text={
 							rx.user &&
 							`${rx.user.name}\n${rx.user.gold}$\nPvE ${rx.user.aiwins} - ${rx.user.ailosses}\nPvP ${rx.user.pvpwins} - ${rx.user.pvplosses}`
@@ -332,7 +333,7 @@ export default function MainMenu(props) {
 					</div>
 				</Rect>
 				{showcard ? (
-					<Components.Card x={92} y={340} card={Cards.Codes[showcard]} />
+					<Card x={92} y={340} card={Cards.Codes[showcard]} />
 				) : (
 					!rx.opts.hideMainchat && (
 						<>
@@ -523,7 +524,9 @@ export default function MainMenu(props) {
 					/>
 				)}
 				{settings() && (
-					<Components.Box x={580} y={300} width={300} height={240}>
+					<div
+						class="bgbox"
+						style="position:absolute;left:580px;top:300px;width:300px;height:240px">
 						{changepass() ? (
 							<>
 								<input
@@ -667,7 +670,7 @@ export default function MainMenu(props) {
 								}
 							/>
 						</label>
-					</Components.Box>
+					</div>
 				)}
 			</div>
 		)

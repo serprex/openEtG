@@ -1,31 +1,15 @@
 import { createMemo, createSignal } from 'solid-js';
 import { Index } from 'solid-js/web';
 
-import { playSound } from '../audio.js';
 import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
 import * as store from '../store.jsx';
 import { maybeLightenStr } from '../ui.js';
-
-export function Box(props) {
-	return (
-		<div
-			class="bgbox"
-			style={{
-				position: 'absolute',
-				left: props.x + 'px',
-				top: props.y + 'px',
-				width: props.width + 'px',
-				height: props.height + 'px',
-			}}>
-			{props.children ?? null}
-		</div>
-	);
-}
+import IconBtn from './IconBtn.jsx';
+import Text from './Text.jsx';
 
 export function CardImage(props) {
-	const { card } = props,
-		bgcol = maybeLightenStr(card);
+	const bgcol = maybeLightenStr(props.card);
 	return (
 		<div
 			class="cardslot"
@@ -37,108 +21,21 @@ export function CardImage(props) {
 				'background-color': bgcol,
 				'border-color': props.opacity
 					? '#f00'
-					: card.shiny
+					: props.card.shiny
 					? '#daa520'
 					: '#222',
-				color: card.upped ? '#000' : '#fff',
+				color: props.card.upped ? '#000' : '#fff',
 				...props.style,
 			}}>
-			{card.name}
-			{!!card.cost && (
+			{props.card.name}
+			{!!props.card.cost && (
 				<span
-					style={{
-						position: 'absolute',
-						right: '0',
-						'padding-right': '2px',
-						'padding-top': '2px',
-						'background-color': bgcol,
-					}}>
-					{card.cost}
-					<span class={'ico te' + card.costele} />
+					style={`position:absolute;right:0;padding-right:2px;padding-top:2px;background-color:${bgcol}`}>
+					{props.card.cost}
+					<span class={'ico te' + props.card.costele} />
 				</span>
 			)}
 		</div>
-	);
-}
-
-export function Text(props) {
-	const elec = () => {
-		const str = props.text ? props.text.toString() : '';
-		const sep = /\d\d?:\d\d?|\$|\n/g;
-		const ico = `ico ${props.icoprefix ?? 'ce'}`;
-		let reres,
-			lastindex = 0;
-		const elec = [];
-		while ((reres = sep.exec(str))) {
-			const piece = reres[0];
-			if (reres.index !== lastindex) {
-				elec.push(str.slice(lastindex, reres.index));
-			}
-			if (piece === '\n') {
-				elec.push(<br />);
-			} else if (piece === '$') {
-				elec.push(<span class="ico gold" />);
-			} else if (/^\d\d?:\d\d?$/.test(piece)) {
-				const parse = piece.split(':');
-				const num = +parse[0];
-				const className = ico + parse[1];
-				if (num === 0) {
-					elec.push('0');
-				} else if (num < 4) {
-					for (let j = 0; j < num; j++) {
-						elec.push(<span class={className} />);
-					}
-				} else {
-					elec.push(parse[0], <span class={className} />);
-				}
-			}
-			lastindex = reres.index + piece.length;
-		}
-		if (lastindex !== str.length) {
-			elec.push(str.slice(lastindex));
-		}
-		return elec;
-	};
-
-	return (
-		<div class={props.class} style={props.style}>
-			{elec}
-		</div>
-	);
-}
-
-export function IconBtn(props) {
-	return (
-		<span
-			class={'imgb ico ' + props.e}
-			style={{
-				position: 'absolute',
-				left: props.x + 'px',
-				top: props.y + 'px',
-			}}
-			onClick={e => {
-				playSound('click');
-				if (props.click) props.click.call(e.target, e);
-			}}
-			onMouseOver={props.onMouseOver}
-		/>
-	);
-}
-
-export function ExitBtn(props) {
-	return (
-		<input
-			type="button"
-			value="Exit"
-			onClick={
-				props.onClick ?? (() => store.doNav(import('../views/MainMenu.jsx')))
-			}
-			style={{
-				position: 'absolute',
-				left: props.x + 'px',
-				top: props.y + 'px',
-			}}
-		/>
 	);
 }
 
@@ -274,7 +171,7 @@ export function DeckDisplay(props) {
 	return <>{children}</>;
 }
 
-export function RaritySelector(props) {
+function RaritySelector(props) {
 	const children = [];
 	for (let i = 0; i < 5; i++) {
 		children.push(
@@ -289,7 +186,7 @@ export function RaritySelector(props) {
 	return children;
 }
 
-export function ElementSelector(props) {
+function ElementSelector(props) {
 	const children = [];
 	for (let i = 0; i < 13; i++) {
 		children.push(

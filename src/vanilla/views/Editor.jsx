@@ -3,7 +3,6 @@ import { createMemo, onMount } from 'solid-js';
 import { parseDeck } from './MainMenu.jsx';
 import * as etg from '../../etg.js';
 import Cards from '../Cards.js';
-import * as Components from '../../Components/index.jsx';
 import Editor from '../../Components/Editor.jsx';
 import * as etgutil from '../../etgutil.js';
 import * as store from '../../store.jsx';

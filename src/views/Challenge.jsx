@@ -6,7 +6,7 @@ import Cards from '../Cards.js';
 import { choose, parseInput, randint, shuffle } from '../util.js';
 import Game from '../Game.js';
 import * as etgutil from '../etgutil.js';
-import * as Components from '../Components/index.jsx';
+import { DeckDisplay } from '../Components/index.jsx';
 import * as store from '../store.jsx';
 import aiDecks from '../Decks.json' assert { type: 'json' };
 import { deckgen } from '../deckgen.js';
@@ -394,7 +394,7 @@ export default function Challenge(props) {
 				onChange={e => setMyDeck(e.target.value)}
 				style="position:absolute;left:306px;top:380px"
 			/>
-			<Components.DeckDisplay
+			<DeckDisplay
 				cards={Cards}
 				x={206}
 				y={377}

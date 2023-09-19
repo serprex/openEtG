@@ -7,7 +7,9 @@ import * as etgutil from '../etgutil.js';
 import * as userutil from '../userutil.js';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
-import * as Components from '../Components/index.jsx';
+import { Card, CardSelector } from '../Components/index.jsx';
+import ExitBtn from '../Components/ExitBtn.jsx';
+import Text from '../Components/Text.jsx';
 
 function Order(p) {
 	return (
@@ -226,7 +228,7 @@ export default function Bazaar() {
 
 	return (
 		<>
-			<Components.ExitBtn x={8} y={56} />
+			<ExitBtn x={8} y={56} />
 			<input
 				type="button"
 				value="Orders"
@@ -316,12 +318,12 @@ export default function Bazaar() {
 					/>
 				</>
 			)}
-			<Components.Text
+			<Text
 				text={rx.user.gold + '$'}
 				style="position:absolute;left:5px;top:240px"
 			/>
-			<Components.Card x={732} y={8} card={bcard()} />
-			<Components.CardSelector
+			<Card x={732} y={8} card={bcard()} />
+			<CardSelector
 				cards={Cards}
 				cardpool={cardpool()}
 				maxedIndicator

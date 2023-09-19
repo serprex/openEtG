@@ -16,7 +16,8 @@ import * as etg from '../etg.js';
 import { encodeCode, asShiny } from '../etgutil.js';
 import * as mkAi from '../mkAi.js';
 import * as sock from '../sock.jsx';
-import * as Components from '../Components/index.jsx';
+import { Card, CardImage } from '../Components/index.jsx';
+import Text from '../Components/Text.jsx';
 import * as store from '../store.jsx';
 import { mkQuestAi } from '../Quest.js';
 import enums from '../enum.json' assert { type: 'json' };
@@ -293,7 +294,7 @@ function TextFx(props) {
 	const y = () => props.y0 + yy();
 	const fade = () => 1 - Math.tan(yy() / 91);
 	return (
-		<Components.Text
+		<Text
 			text={props.text}
 			style={{
 				position: 'absolute',
@@ -409,7 +410,7 @@ function SpellDisplayChild(props) {
 	});
 	return (
 		<>
-			<Components.CardImage
+			<CardImage
 				card={props.spell}
 				style={{
 					position: 'absolute',
@@ -625,7 +626,7 @@ function Thing(props) {
 						/>
 					</Show>
 					<div style="position:absolute;width:64px">
-						<Components.Text
+						<Text
 							text={memo().topText}
 							icoprefix="se"
 							style={{
@@ -635,13 +636,13 @@ function Thing(props) {
 								'background-color': bgcolor(),
 							}}
 						/>
-						<Components.Text
+						<Text
 							text={memo().statText}
 							icoprefix="se"
 							style={`float:right;background-color:${bgcolor()}`}
 						/>
 						<Show when={!isSpell()}>
-							<Components.Text
+							<Text
 								text={props.game.getCard(props.id).name}
 								icoprefix="se"
 								style={{
@@ -810,7 +811,7 @@ function FoePlays(props) {
 				}}>
 				<For each={props.foeplays}>
 					{play => (
-						<Components.CardImage
+						<CardImage
 							card={play}
 							onMouseOver={e => {
 								if (play.card) props.setCard(e, play.card);
@@ -913,7 +914,7 @@ export default function Match(props) {
 	const [effects, setEffects] = createSignal(initialEffects);
 	const [popup, setPopup] = createSignal(props.game.data.quest?.opentext);
 
-	const Text = (state, newstate, id, text, onRest) => {
+	const mkText = (state, newstate, id, text, onRest) => {
 		let offset;
 		newstate.fxTextPos = updateMap(
 			newstate.fxTextPos ?? state.fxTextPos,
@@ -945,7 +946,7 @@ export default function Match(props) {
 			newentry = e ? { ...e } : { atk: 0, hp: 0, dom: null };
 			newentry.hp += hp;
 			newentry.atk += atk;
-			newentry.dom = Text(
+			newentry.dom = mkText(
 				state,
 				newstate,
 				id,
@@ -1079,23 +1080,25 @@ export default function Match(props) {
 						case 'Card':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
-								Text(state, newstate, id, game.Cards.Codes[param].name),
+								mkText(state, newstate, id, game.Cards.Codes[param].name),
 							);
 							break;
 						case 'Poison':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
-								Text(state, newstate, id, `Poison ${param}`),
+								mkText(state, newstate, id, `Poison ${param}`),
 							);
 							break;
 						case 'Delay':
 							newstate.effects ??= new Set(state.effects);
-							newstate.effects.add(Text(state, newstate, id, `Delay ${param}`));
+							newstate.effects.add(
+								mkmkText(state, newstate, id, `Delay ${param}`),
+							);
 							break;
 						case 'Freeze':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
-								Text(state, newstate, id, `Freeze ${param}`),
+								mkText(state, newstate, id, `Freeze ${param}`),
 							);
 							break;
 						case 'Dmg':
@@ -1118,7 +1121,7 @@ export default function Match(props) {
 							break;
 						case 'Heal':
 							newstate.effects ??= new Set(state.effects);
-							newstate.effects.add(Text(state, newstate, id, `+${param}`));
+							newstate.effects.add(mkText(state, newstate, id, `+${param}`));
 							break;
 						case 'Lightning': {
 							newstate.effects ??= new Set(state.effects);
@@ -1135,12 +1138,14 @@ export default function Match(props) {
 						}
 						case 'Lives':
 							newstate.effects ??= new Set(state.effects);
-							newstate.effects.add(Text(state, newstate, id, `${param} lives`));
+							newstate.effects.add(
+								mkText(state, newstate, id, `${param} lives`),
+							);
 							break;
 						case 'Quanta':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
-								Text(state, newstate, id, `${param >> 8}:${param & 255}`),
+								mkText(state, newstate, id, `${param >> 8}:${param & 255}`),
 							);
 							break;
 						case 'Sfx':
@@ -1148,7 +1153,7 @@ export default function Match(props) {
 							break;
 						default:
 							newstate.effects ??= new Set(state.effects);
-							newstate.effects.add(Text(state, newstate, id, kind));
+							newstate.effects.add(mkText(state, newstate, id, kind));
 							break;
 					}
 				}
@@ -1755,7 +1760,7 @@ export default function Match(props) {
 									</>
 								)}
 							</Tween>
-							<Components.Text
+							<Text
 								text={hptext()}
 								style={{
 									'text-align': 'center',
@@ -1827,8 +1832,8 @@ export default function Match(props) {
 				{texts().turntell}
 			</span>
 			<For each={Array.from(effects().effects)}>{fx => untrack(fx)}</For>
-			<Components.Card x={734} y={hovery()} card={hovercard()} />
-			<Components.Text class="infobox" icoprefix="te" {...tooltip()} />
+			<Card x={734} y={hovery()} card={hovercard()} />
+			<Text class="infobox" icoprefix="te" {...tooltip()} />
 			{!!foeplays().get(p2id())?.length && (
 				<input
 					type="button"

@@ -2,7 +2,8 @@ import * as etg from '../etg.js';
 import * as mkAi from '../mkAi.js';
 import * as sock from '../sock.jsx';
 import Decks from '../Decks.json' assert { type: 'json' };
-import * as Components from '../Components/index.jsx';
+import ExitBtn from '../Components/ExitBtn.jsx';
+import Text from '../Components/Text.jsx';
 import * as store from '../store.jsx';
 
 function mkDaily(type) {
@@ -101,7 +102,7 @@ export default function Colosseum(props) {
 	};
 	return (
 		<>
-			<Components.ExitBtn x={50} y={50} />
+			<ExitBtn x={50} y={50} />
 			{eventui}
 			{user.daily === 191 ? (
 				<>
@@ -120,7 +121,7 @@ export default function Colosseum(props) {
 					</span>
 				</>
 			) : (
-				<Components.Text
+				<Text
 					style="position:absolute;left:56px;top:300px"
 					text={
 						'Completing any colosseum event contributes to a 5 day reward cycle.\n' +

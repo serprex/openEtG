@@ -4,7 +4,9 @@ import * as etgutil from '../../etgutil.js';
 import Game from '../../Game.js';
 import { choose, randint, randomcard, shuffle, upto } from '../../util.js';
 import * as store from '../../store.jsx';
-import * as Components from '../../Components/index.jsx';
+import { Card } from '../../Components/index.jsx';
+import ExitBtn from '../../Components/ExitBtn.jsx';
+import Text from '../../Components/Text.jsx';
 import Cards from '../Cards.js';
 import { userEmit, sendChallenge } from '../../sock.jsx';
 import * as wasm from '../../rs/pkg/etg.js';
@@ -187,12 +189,12 @@ export default function OriginalMainMenu() {
 				onInput={e => store.setOptTemp('origfoename', e.target.value)}
 				style="position:absolute;left:300px;top:140px"
 			/>
-			<Components.ExitBtn x={9} y={140} />
-			<Components.Text
+			<ExitBtn x={9} y={140} />
+			<Text
 				text={`${rx.orig.electrum}$`}
 				style="font-size:14px;pointer-events:none;position:absolute;left:8px;top:160px"
 			/>
-			{ocard && <Components.Card y={300} card={ocard} />}
+			{ocard && <Card y={300} card={ocard} />}
 		</div>
 	);
 }
