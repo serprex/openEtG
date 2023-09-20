@@ -4,7 +4,8 @@ import * as sock from '../sock.jsx';
 import { useRx } from '../store.jsx';
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
-import { Card, CardSelector } from '../Components/index.jsx';
+import Card from '../Components/Card.jsx';
+import CardSelector from '../Components/CardSelector.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
 import Text from '../Components/Text.jsx';
 

@@ -4,7 +4,7 @@ import { For } from 'solid-js/web';
 import { userEmit } from '../../sock.jsx';
 import * as etg from '../../etg.js';
 import * as etgutil from '../../etgutil.js';
-import { Card } from '../../Components/index.jsx';
+import Card from '../../Components/Card.jsx';
 import Text from '../../Components/Text.jsx';
 import * as store from '../../store.jsx';
 import { choose } from '../../util.js';

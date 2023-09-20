@@ -5,7 +5,7 @@ import * as etgutil from '../etgutil.js';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 import * as userutil from '../userutil.js';
-import { Card } from '../Components/index.jsx';
+import Card from '../Components/Card.jsx';
 import Text from '../Components/Text.jsx';
 import Game from '../Game.js';
 import Cards from '../Cards.js';

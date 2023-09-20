@@ -1,6 +1,8 @@
 import { createSignal } from 'solid-js';
 
-import { Card, CardSelector, DeckDisplay } from './index.jsx';
+import Card from './Card.jsx';
+import CardSelector from './CardSelector.jsx';
+import DeckDisplay from './DeckDisplay.jsx';
 import IconBtn from './IconBtn.jsx';
 import * as etgutil from '../etgutil.js';
 

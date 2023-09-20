@@ -1,7 +1,8 @@
 import { onMount, createSignal } from 'solid-js';
 import { render } from 'solid-js/web';
 import Cards from '../AllCards.js';
-import { Card, DeckDisplay } from '../Components/index.jsx';
+import Card from '../Components/Card.jsx';
+import DeckDisplay from '../Components/DeckDisplay.jsx';
 import { decodedeck } from '../etgutil.js';
 import { calcWealth } from '../userutil.js';
 

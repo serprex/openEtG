@@ -5,7 +5,9 @@ import * as etgutil from '../../etgutil.js';
 import Cards from '../Cards.js';
 import { userEmit } from '../../sock.jsx';
 import * as store from '../../store.jsx';
-import { Card, CardSelector, DeckDisplay } from '../../Components/index.jsx';
+import Card from '../../Components/Card.jsx';
+import CardSelector from '../../Components/CardSelector.jsx';
+import DeckDisplay from '../../Components/DeckDisplay.jsx';
 import Text from '../../Components/Text.jsx';
 
 export default function OriginalUpgrade(props) {

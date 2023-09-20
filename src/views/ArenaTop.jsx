@@ -2,7 +2,7 @@ import { createSignal, onMount } from 'solid-js';
 import { For } from 'solid-js/web';
 
 import Cards from '../Cards.js';
-import { Card } from '../Components/index.jsx';
+import Card from '../Components/Card.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
 import * as sock from '../sock.jsx';
 

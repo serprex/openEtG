@@ -4,7 +4,7 @@ import { For } from 'solid-js/web';
 import * as ui from '../ui.js';
 import { run } from '../mkAi.js';
 import * as sock from '../sock.jsx';
-import { Card } from '../Components/index.jsx';
+import Card from '../Components/Card.jsx';
 import * as store from '../store.jsx';
 import { mkQuestAi, quarks } from '../Quest.js';
 import Cards from '../Cards.js';

@@ -7,7 +7,7 @@ import * as mkAi from '../mkAi.js';
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
 import * as store from '../store.jsx';
-import { Card } from '../Components/index.jsx';
+import Card from '../Components/Card.jsx';
 import Text from '../Components/Text.jsx';
 import * as userutil from '../userutil.js';
 import parseChat from '../parseChat.js';

@@ -2,174 +2,12 @@ import { createMemo, createSignal } from 'solid-js';
 import { Index } from 'solid-js/web';
 
 import * as etg from '../etg.js';
-import * as etgutil from '../etgutil.js';
+import { asShiny, asUpped } from '../etgutil.js';
 import * as store from '../store.jsx';
-import { maybeLightenStr } from '../ui.js';
+import Card from './Card.jsx';
+import CardImage from './CardImage.jsx';
 import IconBtn from './IconBtn.jsx';
 import Text from './Text.jsx';
-
-export function CardImage(props) {
-	const bgcol = maybeLightenStr(props.card);
-	return (
-		<div
-			class="cardslot"
-			onMouseOver={props.onMouseOver}
-			onMouseLeave={props.onMouseOut}
-			onClick={props.onClick}
-			onContextMenu={props.onContextMenu}
-			style={{
-				'background-color': bgcol,
-				'border-color': props.opacity
-					? '#f00'
-					: props.card.shiny
-					? '#daa520'
-					: '#222',
-				color: props.card.upped ? '#000' : '#fff',
-				...props.style,
-			}}>
-			{props.card.name}
-			{!!props.card.cost && (
-				<span
-					style={`position:absolute;right:0;padding-right:2px;padding-top:2px;background-color:${bgcol}`}>
-					{props.card.cost}
-					<span class={'ico te' + props.card.costele} />
-				</span>
-			)}
-		</div>
-	);
-}
-
-export function Card(p) {
-	const textColor = () => p.card && (p.card.upped ? '#000' : ''),
-		backColor = () => p.card && maybeLightenStr(p.card);
-	return (
-		<>
-			{p.card && (
-				<div
-					style={{
-						position: 'absolute',
-						left: p.x + 'px',
-						top: p.y + 'px',
-						width: '160px',
-						height: '256px',
-						'pointer-events': 'none',
-						'z-index': '5',
-						color: textColor(),
-						overflow: 'hidden',
-						'background-color': backColor(),
-						'border-radius': '4px',
-						'border-width': '3px',
-						'border-style': 'double',
-					}}>
-					<span style="position:absolute;left:2px;top:2px;font-size:12px">
-						{p.card.name}
-					</span>
-					<img
-						class={p.card.shiny ? 'shiny' : ''}
-						src={`/Cards/${etgutil.encodeCode(
-							p.card.code +
-								(etgutil.asShiny(p.card.code, false) < 5000 ? 4000 : 0),
-						)}.webp`}
-						style="position:absolute;top:20px;left:8px;width:128px;height:128px;border-width:1px;border-color:#000;border-style:solid"
-					/>
-					<Text
-						text={p.card.info()}
-						icoprefix="te"
-						style={{
-							position: 'absolute',
-							padding: '2px',
-							bottom: '0',
-							'font-size': '10px',
-							'min-height': '102px',
-							'background-color': backColor(),
-							'border-radius': '0 0 4px 4px',
-						}}
-					/>
-					{!!p.card.rarity && (
-						<span
-							class={`ico r${p.card.rarity}`}
-							style="position:absolute;right:2px;top:40px"
-						/>
-					)}
-					{!!p.card.cost && (
-						<span style="position:absolute;right:0;padding-right:2px;padding-top:2px;font-size:12px">
-							{p.card.cost}
-							<span class={`ico te${p.card.costele}`} />
-						</span>
-					)}
-					<span
-						class={`ico t${p.card.type}`}
-						style="position:absolute;right:2px;top:22px"
-					/>
-				</div>
-			)}
-		</>
-	);
-}
-
-export function DeckDisplay(props) {
-	const children = () => {
-		let mark = -1,
-			j = -1;
-		const children = [],
-			cardMinus = [],
-			cardCount = [];
-		for (let i = 0; i < props.deck.length; i++) {
-			const code = props.deck[i],
-				card = props.cards.Codes[code];
-			if (card) {
-				j++;
-				let opacity;
-				if (props.pool && !card.isFree()) {
-					const tooMany =
-						!card.getStatus('pillar') &&
-						props.cards.cardCount(cardCount, card) >= 6;
-					const notEnough = !props.cards.checkPool(
-						props.pool,
-						cardCount,
-						cardMinus,
-						card,
-					);
-					if (tooMany || notEnough) {
-						opacity = '.5';
-					}
-				}
-				children.push(
-					<CardImage
-						card={card}
-						onMouseOver={
-							props.onMouseOver && (() => props.onMouseOver(i, card))
-						}
-						onClick={props.onClick && (() => props.onClick(i, card))}
-						style={{
-							position: 'absolute',
-							left: `${(props.x ?? 0) + 100 + ((j / 10) | 0) * 99}px`,
-							top: `${(props.y ?? 0) + 32 + (j % 10) * 19}px`,
-							opacity,
-						}}
-					/>,
-				);
-			} else {
-				const ismark = etgutil.fromTrueMark(code);
-				if (~ismark) mark = ismark;
-			}
-		}
-		if (mark !== -1 && props.renderMark) {
-			children.push(
-				<span
-					class={'ico e' + mark}
-					style={{
-						position: 'absolute',
-						left: `${(props.x ?? 0) + 66}px`,
-						top: `${(props.y ?? 0) + 188}px`,
-					}}
-				/>,
-			);
-		}
-		return children;
-	};
-	return <>{children}</>;
-}
 
 function RaritySelector(props) {
 	const children = [];
@@ -203,7 +41,7 @@ function ElementSelector(props) {
 
 function maybeShiny(props, card) {
 	if (props.filterboth && props.shiny) {
-		const shinycode = etgutil.asShiny(card.code);
+		const shinycode = asShiny(card.code);
 		if (
 			shinycode in props.cardpool &&
 			props.cardpool[shinycode] >
@@ -229,7 +67,7 @@ function CardSelectorColumn(props) {
 				code = card.code;
 			let opacity = undefined;
 			if (props.cardpool) {
-				const scode = etgutil.asShiny(code, true);
+				const scode = asShiny(code, true);
 				const cardAmount = card.isFree()
 						? '-'
 						: code in props.cardpool
@@ -245,11 +83,11 @@ function CardSelectorColumn(props) {
 					!(
 						card.upped &&
 						card.Cards.cardSet === 'Open' &&
-						(poolCount(props, etgutil.asUpped(code, false)) >=
+						(poolCount(props, asUpped(code, false)) >=
 							(card.rarity === -1 ? 1 : 6) *
 								(card.upped && card.shiny ? 6 : 1) ||
 							(card.rarity === 4 &&
-								poolCount(props, etgutil.asUpped(scode, false)) >= 1))
+								poolCount(props, asUpped(scode, false)) >= 1))
 					)
 				) {
 					opacity = '.5';
@@ -313,7 +151,7 @@ function CardSelectorColumn(props) {
 	);
 }
 
-export function CardSelectorCore(props) {
+function CardSelectorCore(props) {
 	const columns = () => {
 		const columns = [];
 		const count = props.noupped ? 3 : 6;
@@ -350,7 +188,7 @@ export function CardSelectorCore(props) {
 	);
 }
 
-export function CardSelector(props) {
+export default function CardSelector(props) {
 	const opts = store.useRx(state => state.opts);
 	const [element, setElement] = createSignal(0);
 	const [rarity, setRarity] = createSignal(0);

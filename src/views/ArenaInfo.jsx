@@ -7,7 +7,8 @@ import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 import { decklength, decodedeck, encodeCode, asUpped } from '../etgutil.js';
 import { randint, shuffle } from '../util.js';
-import { Card, DeckDisplay } from '../Components/index.jsx';
+import Card from '../Components/Card.jsx';
+import DeckDisplay from '../Components/DeckDisplay.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
 import Text from '../Components/Text.jsx';
 

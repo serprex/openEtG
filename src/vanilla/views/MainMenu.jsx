@@ -4,7 +4,7 @@ import * as etgutil from '../../etgutil.js';
 import Game from '../../Game.js';
 import { choose, randint, randomcard, shuffle, upto } from '../../util.js';
 import * as store from '../../store.jsx';
-import { Card } from '../../Components/index.jsx';
+import Card from '../../Components/Card.jsx';
 import ExitBtn from '../../Components/ExitBtn.jsx';
 import Text from '../../Components/Text.jsx';
 import Cards from '../Cards.js';

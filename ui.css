@@ -9,7 +9,7 @@ a{
 	color:#69f;
 	text-decoration:none;
 }
-a:hover{text-decoration:underline;}
+a:hover{text-decoration:underline}
 tr,td{padding:0}
 input[type="button"]{
 	background:linear-gradient(to bottom,#def,#89a);
@@ -124,7 +124,7 @@ select:hover:active{background-color:#9ab}
 	word-wrap:break-word;
 	font:14px sans-serif;
 }
-.chatBox div:not(:first-child) { margin-top:4px }
+.chatBox div:not(:first-child){margin-top:4px}
 .chatinput{
 	width:350px;
 	height:40px;
@@ -134,39 +134,24 @@ select:hover:active{background-color:#9ab}
 	background-color:#222;
 	font:14px sans-serif;
 }
-.tab {
-	padding-left: 12px;
+.tab{padding-left:12px}
+.tabsel{padding-left:12px;font-weight:bold}
+@keyframes animatedShiny{
+	0%{filter:hue-rotate(90deg)}
+	100%{filter:hue-rotate(270deg)}
 }
-.tabsel {
-	padding-left: 12px;
-	font-weight: bold;
+.inst{
+	width:68px;
+	height:68px;
+	font-size:8px;
+	border:transparent 2px solid;
 }
-@keyframes animatedShiny {
-	0% { filter:hue-rotate(90deg) }
-	100% { filter:hue-rotate(270deg) }
-}
-.inst {
-	width: 68px;
-	height: 68px;
-	font-size: 8px;
-	border: transparent 2px solid;
-}
-.handinst {
-	transition: transform .5s;
-}
-.handinst.canactive {
-	transform: translate(-4px);
-}
-.handinst.cantarget {
-	transform: translate(-4px);
-}
-.handinst:hover {
-	transform: translate(-8px);
-}
-.cantarget { border:2px #f00 solid!important;box-shadow:0 0 5px #f00 }
-.cantarget:hover { border:2px #ff0 solid!important;box-shadow:0 0 5px #ff0 }
-.canactive { border:2px #000 solid!important;box-shadow:0 0 5px #fff }
-.canactive:hover { border:2px #00f solid!important;box-shadow:0 0 5px #fff }
-.shiny {
-	animation:animatedShiny 8s linear infinite alternate-reverse;
-}
+.handinst{transition:transform .5s}
+.handinst.canactive{transform:translate(-4px)}
+.handinst.cantarget{transform:translate(-4px)}
+.handinst:hover{transform:translate(-8px)}
+.cantarget{border:2px #f00 solid!important;box-shadow:0 0 5px #f00}
+.cantarget:hover{border:2px #ff0 solid!important;box-shadow:0 0 5px #ff0}
+.canactive{border:2px #000 solid!important;box-shadow:0 0 5px #fff}
+.canactive:hover{border:2px #00f solid!important;box-shadow:0 0 5px #fff}
+.shiny{animation:animatedShiny 8s linear infinite alternate-reverse}

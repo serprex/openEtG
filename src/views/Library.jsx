@@ -4,7 +4,8 @@ import Cards from '../Cards.js';
 import * as sock from '../sock.jsx';
 import * as etgutil from '../etgutil.js';
 import * as userutil from '../userutil.js';
-import { Card, CardSelector } from '../Components/index.jsx';
+import Card from '../Components/Card.jsx';
+import CardSelector from '../Components/CardSelector.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
 
 export default function Library(props) {
