@@ -4,7 +4,7 @@ import { For, Show } from 'solid-js/web';
 import Cards from '../Cards.js';
 import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
-import * as userutil from '../userutil.js';
+import { cardValue, sellValue } from '../userutil.js';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 import Card from '../Components/Card.jsx';
@@ -68,7 +68,7 @@ function OrderSummary(props) {
 				continue;
 			}
 			if (props.showDeal) {
-				const worth = userutil.cardValue(card);
+				const worth = cardValue(card);
 				if (
 					!(
 						(props.showSell && o0.p < 0 && -o0.p < worth) ||
@@ -263,7 +263,7 @@ export default function Bazaar() {
 						onInput={e => setSellq(e.target.value | 0)}
 						style="position:absolute;left:360px;top:8px"
 					/>
-					{buy() > userutil.sellValue(bcard()) && (
+					{buy() > sellValue(bcard()) && (
 						<input
 							type="button"
 							value="Buy"
@@ -292,12 +292,12 @@ export default function Bazaar() {
 					/>
 					<div
 						style="position:absolute;right:176px;top:8px"
-						onClick={() => setSell(userutil.sellValue(bcard()))}>
-						Autosell: {userutil.sellValue(bcard())}
+						onClick={() => setSell(sellValue(bcard()))}>
+						Autosell: {sellValue(bcard())}
 						<span class="ico g" />
 					</div>
 					<div style="position:absolute;right:176px;top:40px">
-						Wealth value: {userutil.cardValue(bcard())}
+						Wealth value: {cardValue(bcard())}
 						<span class="ico g" />
 					</div>
 					<CardOrders

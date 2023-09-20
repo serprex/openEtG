@@ -3,7 +3,7 @@ import Cards from './Cards.js';
 import Decks from './Decks.json' assert { type: 'json' };
 import * as sock from './sock.jsx';
 import * as store from './store.jsx';
-import * as userutil from './userutil.js';
+import { pveCostReward } from './userutil.js';
 import { choose, randint, shuffle } from './util.js';
 import { deckgen } from './deckgen.js';
 import Game from './Game.js';
@@ -21,7 +21,7 @@ export function mkPremade(level, daily, datafn = null) {
 		store.chatMsg('Invalid deck', 'System');
 		return;
 	}
-	const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
+	const cost = daily !== undefined ? 0 : pveCostReward[level * 2];
 	let foedata;
 	if (user) {
 		if (daily === undefined) {
@@ -72,7 +72,7 @@ export function mkAi(level, daily, datafn = null) {
 		store.chatMsg('Invalid deck', 'System');
 		return;
 	}
-	const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
+	const cost = daily !== undefined ? 0 : pveCostReward[level * 2];
 	if (cost && user.gold < cost) {
 		store.chatMsg(`Requires ${cost}$`, 'System');
 		return;

@@ -4,7 +4,7 @@ import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
-import * as userutil from '../userutil.js';
+import { calcWealth, pveCostReward } from '../userutil.js';
 import Card from '../Components/Card.jsx';
 import Text from '../Components/Text.jsx';
 import Game from '../Game.js';
@@ -329,7 +329,7 @@ export default function Result(props) {
 					}
 
 					goldreward = Math.round(
-						userutil.pveCostReward[level * 2 + 1] *
+						pveCostReward[level * 2 + 1] *
 							(1 + streakrate) *
 							computeBonuses(
 								game,
@@ -369,7 +369,7 @@ export default function Result(props) {
 			game.get(p1id, 'maxhp'),
 			(goldreward | 0) - (game.data.cost | 0),
 			cardreward || '-',
-			userutil.calcWealth(Cards, cardreward),
+			calcWealth(Cards, cardreward),
 			winner ? (props.streakback ?? 0) + 1 : 0,
 			streakrate,
 		];

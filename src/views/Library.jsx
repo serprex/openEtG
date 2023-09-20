@@ -3,7 +3,7 @@ import { createMemo, createSignal, onMount } from 'solid-js';
 import Cards from '../Cards.js';
 import * as sock from '../sock.jsx';
 import * as etgutil from '../etgutil.js';
-import * as userutil from '../userutil.js';
+import { calcWealth } from '../userutil.js';
 import Card from '../Components/Card.jsx';
 import CardSelector from '../Components/CardSelector.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
@@ -103,7 +103,7 @@ export default function Library(props) {
 		<>
 			<span style="position:absolute;left:100px;top:8px;white-space:pre">
 				{`Wealth ${
-					data().gold + Math.round(userutil.calcWealth(Cards, memo().cardpool))
+					data().gold + Math.round(calcWealth(Cards, memo().cardpool))
 				}\nGold ${data().gold}`}
 			</span>
 			<span style="position:absolute;left:320px;top:8px;white-space:pre">

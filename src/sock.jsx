@@ -4,7 +4,7 @@ import Cards from './Cards.js';
 import * as etgutil from './etgutil.js';
 import Game from './Game.js';
 import * as store from './store.jsx';
-import * as userutil from './userutil.js';
+import { arenaCost } from './userutil.js';
 import { shuffle } from './util.js';
 import OrigCards from './vanilla/Cards.js';
 
@@ -144,14 +144,14 @@ const sockEvents = {
 			rank: data.rank,
 			arena: data.name,
 			level: 4 + data.lv,
-			cost: userutil.arenaCost(data.lv),
+			cost: arenaCost(data.lv),
 			rematch: () => {
 				const { user } = store.state;
 				if (!Cards.isDeckLegal(etgutil.decodedeck(getDeck()), user)) {
 					store.chatMsg('Invalid deck', 'System');
 					return;
 				}
-				const cost = userutil.arenaCost(data.lv);
+				const cost = arenaCost(data.lv);
 				if (user.gold < cost) {
 					store.chatMsg(`Requires ${cost}$`, 'System');
 					return;

@@ -2,7 +2,7 @@ import { createEffect, createMemo, createSignal, onMount } from 'solid-js';
 
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
-import * as userutil from '../userutil.js';
+import { calcWealth } from '../userutil.js';
 import Card from '../Components/Card.jsx';
 import CardSelector from '../Components/CardSelector.jsx';
 import DeckDisplay from '../Components/DeckDisplay.jsx';
@@ -109,7 +109,7 @@ export default function Trade(props) {
 				onMouseOver={(i, card) => setCard(card)}
 			/>
 			<Text
-				text={`${gold() + userutil.calcWealth(Cards, deck(), true)}$`}
+				text={`${gold() + calcWealth(Cards, deck(), true)}$`}
 				style="position:absolute;left:100px;top:235px"
 			/>
 			<Text
@@ -117,7 +117,7 @@ export default function Trade(props) {
 				style="position:absolute;left:250px;top:235px"
 			/>
 			<Text
-				text={`${gopher() + userutil.calcWealth(Cards, offer(), true)}$`}
+				text={`${gopher() + calcWealth(Cards, offer(), true)}$`}
 				style="position:absolute;left:350px;top:235px"
 			/>
 			<Text

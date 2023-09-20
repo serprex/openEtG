@@ -9,7 +9,7 @@ import * as etgutil from '../etgutil.js';
 import * as store from '../store.jsx';
 import Card from '../Components/Card.jsx';
 import Text from '../Components/Text.jsx';
-import * as userutil from '../userutil.js';
+import { arenaCost, pveCostReward } from '../userutil.js';
 import parseChat from '../parseChat.js';
 
 const tipjar = [
@@ -74,7 +74,7 @@ function LabelText(props) {
 function CostText(props) {
 	return (
 		<LabelText
-			text={userutil.pveCostReward[props.lv * 2 + props.n] + '$'}
+			text={pveCostReward[props.lv * 2 + props.n] + '$'}
 			style={props.style}
 		/>
 	);
@@ -172,7 +172,7 @@ export default function MainMenu(props) {
 	onCleanup(() => document.removeEventListener('mousemove', resetTip));
 
 	const arenaAi = i => {
-		const cost = userutil.arenaCost(i);
+		const cost = arenaCost(i);
 		return e => {
 			if (!Cards.isDeckLegal(etgutil.decodedeck(sock.getDeck()), rx.user)) {
 				store.chatMsg('Invalid deck', 'System');

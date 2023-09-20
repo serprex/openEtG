@@ -3,19 +3,26 @@ import { For } from 'solid-js/web';
 
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
-import * as userutil from '../userutil.js';
 import Card from '../Components/Card.jsx';
 import CardImage from '../Components/CardImage.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 
+const rewardwords = {
+	mark: -1,
+	pillar: 0,
+	rare: 3,
+	shard: 3,
+	nymph: 4,
+};
+
 function getRewardList(reward) {
 	if (typeof reward === 'string') {
 		const shiny = reward.charAt(0) === '!';
 		if (shiny) reward = reward.slice(1);
 		const upped = reward.slice(0, 5) === 'upped';
-		const rarity = userutil.rewardwords[upped ? reward.slice(5) : reward];
+		const rarity = rewardwords[upped ? reward.slice(5) : reward];
 		return Cards.filter(upped, x => x.rarity === rarity).map(
 			card => card.asShiny(shiny).code,
 		);
