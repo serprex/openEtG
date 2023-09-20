@@ -649,11 +649,7 @@ impl Game {
 			duration: 0.0,
 			props: vec![Entity::Thing(Default::default())],
 			attacks: Vec::new(),
-			cards: if set == CardSet::Original {
-				&card::OrigSet
-			} else {
-				&card::OpenSet
-			},
+			cards: card::cardSetCards(set),
 			fx: None,
 		}
 	}

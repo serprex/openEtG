@@ -27,31 +27,18 @@ export default class Cards {
 		}
 	}
 
-	codeCmp = (x, y) => {
-		const cx = this.Codes[etgutil.asShiny(x, false)],
-			cy = this.Codes[etgutil.asShiny(y, false)];
-		return (
-			cx.upped - cy.upped ||
-			cx.element - cy.element ||
-			cy.getStatus('pillar') - cx.getStatus('pillar') ||
-			cx.cost - cy.cost ||
-			cx.type - cy.type ||
-			(cx.code > cy.code) - (cx.code < cy.code) ||
-			(x > y) - (x < y)
-		);
-	};
+	codeCmp = (x, y) =>
+		wasm.code_cmp(
+			this.set,
+			etgutil.asShiny(x, false),
+			etgutil.asShiny(y, false),
+		) || (x > y) - (x < y);
 
 	cardCmp = (x, y) => this.codeCmp(x.code, y.code);
 
 	filter(upped, filter, cmp) {
 		const keys = this.filtercache[upped ? 1 : 0].filter(filter);
 		return cmp ? keys.sort(cmp) : keys;
-	}
-
-	cardCount(counts, card) {
-		return (
-			counts[etgutil.asShiny(etgutil.asUpped(card.code, false), false)] ?? 0
-		);
 	}
 
 	checkPool(pool, cardCount, cardMinus, card) {
@@ -94,7 +81,7 @@ export default class Cards {
 			let code = deck[i],
 				card = this.Codes[code];
 			if (!card.getStatus('pillar')) {
-				if (this.cardCount(cardCount, code) >= 6) {
+				if (etgutil.cardCount(cardCount, code) >= 6) {
 					deck.splice(i, 1);
 					continue;
 				}
@@ -133,7 +120,7 @@ export default class Cards {
 			const card = this.Codes[code];
 			if (
 				!card ||
-				(!card.getStatus('pillar') && this.cardCount(cardCount, card) >= 6)
+				(!card.getStatus('pillar') && etgutil.cardCount(cardCount, card) >= 6)
 			) {
 				return false;
 			}

@@ -1,4 +1,4 @@
-import { fromTrueMark } from '../etgutil.js';
+import { cardCount, fromTrueMark } from '../etgutil.js';
 import CardImage from './CardImage.jsx';
 
 export default function DeckDisplay(props) {
@@ -7,7 +7,7 @@ export default function DeckDisplay(props) {
 			j = -1;
 		const children = [],
 			cardMinus = [],
-			cardCount = [];
+			cardCounts = [];
 		for (let i = 0; i < props.deck.length; i++) {
 			const code = props.deck[i],
 				card = props.cards.Codes[code];
@@ -16,11 +16,10 @@ export default function DeckDisplay(props) {
 				let opacity;
 				if (props.pool && !card.isFree()) {
 					const tooMany =
-						!card.getStatus('pillar') &&
-						props.cards.cardCount(cardCount, card) >= 6;
+						!card.getStatus('pillar') && cardCount(cardCounts, card) >= 6;
 					const notEnough = !props.cards.checkPool(
 						props.pool,
-						cardCount,
+						cardCounts,
 						cardMinus,
 						card,
 					);

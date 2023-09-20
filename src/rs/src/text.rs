@@ -1032,9 +1032,9 @@ pub fn thingText(game: &Game, id: i32) -> String {
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn cardText(set: CardSet, idx: u16) -> String {
-	let cards = if set == CardSet::Original { card::OrigSet } else { card::OpenSet };
+	let cards = card::cardSetCards(set);
 	if let Some(card) = cards.try_get_index(idx as usize) {
-		rawCardText(cards, card)
+		rawCardText(*cards, card)
 	} else {
 		String::new()
 	}

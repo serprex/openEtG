@@ -2,6 +2,7 @@
 #![allow(non_snake_case)]
 
 use alloc::{string::String, vec::Vec};
+use core::cmp::Ordering;
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
@@ -143,7 +144,7 @@ pub const fn AsShiny(code: i32, shiny: bool) -> i32 {
 	}
 }
 
-const fn cardSetCards(set: CardSet) -> &'static Cards {
+pub const fn cardSetCards(set: CardSet) -> &'static Cards {
 	match set {
 		CardSet::Original => &OrigSet,
 		_ => &OpenSet,
@@ -232,4 +233,25 @@ pub fn card_stats(set: CardSet, index: usize) -> Option<Vec<i32>> {
 			)
 			.collect()
 	})
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn code_cmp(set: CardSet, x: i32, y: i32) -> i32 {
+	let cards = cardSetCards(set);
+	if let (Some(cx), Some(cy)) = (cards.try_get(x), cards.try_get(y)) {
+		match cx.upped().cmp(&cy.upped())
+			.then(cx.element.cmp(&cy.element))
+			.then((cy.flag & Flag::pillar).cmp(&(cx.flag & Flag::pillar)))
+			.then(cx.cost.cmp(&cy.cost))
+			.then(cx.kind.cmp(&cy.kind))
+			.then(x.cmp(&y))
+		{
+			Ordering::Less => -1,
+			Ordering::Equal => 0,
+			Ordering::Greater => 1,
+		}
+	} else {
+		0
+	}
 }

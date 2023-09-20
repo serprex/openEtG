@@ -38,6 +38,9 @@ export function* iterdeck(deck) {
 		for (let j = 0; j < count; j++) yield code;
 	}
 }
+export function cardCount(counts, card) {
+	return counts[asShiny(asUpped(card.code, false), false)] ?? 0;
+}
 export function count(deck, code) {
 	let total = 0;
 	for (const [dcode, count] of iterraw(deck)) {
