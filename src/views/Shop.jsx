@@ -156,15 +156,11 @@ export default function Shop() {
 		<>
 			<div
 				class="bgbox"
-				style="position:absolute;left:40px;top:16;width:820px;height:60px"
+				style="position:absolute;left:40px;top:16px;width:820px;height:60px"
 			/>
 			<div
 				class="bgbox"
-				style="position:absolute;left:40px;top:89;width:494px;height:168px"
-			/>
-			<div
-				class="bgbox"
-				style="position:absolute;left:40px;top:270;width:712px;height:300px"
+				style="position:absolute;left:40px;top:89px;width:494px;height:168px"
 			/>
 			<div
 				class="bgbox"
