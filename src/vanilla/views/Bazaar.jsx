@@ -1,6 +1,7 @@
 import { createMemo, createSignal } from 'solid-js';
 import { Show } from 'solid-js/web';
 
+import * as wasm from '../../rs/pkg/etg.js';
 import * as etgutil from '../../etgutil.js';
 import Cards from '../Cards.js';
 import { userEmit } from '../../sock.jsx';

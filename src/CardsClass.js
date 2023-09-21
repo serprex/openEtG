@@ -16,7 +16,7 @@ export default class Cards {
 						realcode = etgutil.asShiny(upcode, shiny),
 						card = new Card(this, upcode, realcode);
 					this.Codes[realcode] = card;
-					if (shiny === 0 && !card.getStatus('token')) {
+					if (shiny === 0 && !card.token) {
 						this.filtercache[card.upped ? 1 : 0].push(card);
 					}
 				}
@@ -36,9 +36,8 @@ export default class Cards {
 
 	cardCmp = (x, y) => this.codeCmp(x.code, y.code);
 
-	filter(upped, filter, cmp) {
-		const keys = this.filtercache[upped ? 1 : 0].filter(filter);
-		return cmp ? keys.sort(cmp) : keys;
+	filter(upped, filter) {
+		return this.filtercache[upped ? 1 : 0].filter(filter);
 	}
 
 	checkPool(pool, cardCount, cardMinus, card) {
@@ -80,7 +79,7 @@ export default class Cards {
 		for (let i = deck.length - 1; i >= 0; i--) {
 			let code = deck[i],
 				card = this.Codes[code];
-			if (!card.getStatus('pillar')) {
+			if (!card.pillar) {
 				if (etgutil.cardCount(cardCount, code) >= 6) {
 					deck.splice(i, 1);
 					continue;
@@ -118,10 +117,7 @@ export default class Cards {
 			if (~etgutil.fromTrueMark(code)) continue;
 			dlen++;
 			const card = this.Codes[code];
-			if (
-				!card ||
-				(!card.getStatus('pillar') && etgutil.cardCount(cardCount, card) >= 6)
-			) {
+			if (!card || (!card.pillar && etgutil.cardCount(cardCount, card) >= 6)) {
 				return false;
 			}
 			if (

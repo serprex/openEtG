@@ -10,33 +10,33 @@ import IconBtn from './IconBtn.jsx';
 import Text from './Text.jsx';
 
 function RaritySelector(props) {
-	const children = [];
-	for (let i = 0; i < 5; i++) {
-		children.push(
-			<IconBtn
-				e={(i ? 'r' : 't') + i}
-				x={props.x}
-				y={props.y + i * 24}
-				click={() => props.onChange(i)}
-			/>,
-		);
-	}
-	return children;
+	return (
+		<For each={[0, 1, 2, 3, 4]}>
+			{i => (
+				<IconBtn
+					e={(i ? 'r' : 't') + i}
+					x={props.x}
+					y={props.y + i * 24}
+					click={() => props.onChange(i)}
+				/>
+			)}
+		</For>
+	);
 }
 
 function ElementSelector(props) {
-	const children = [];
-	for (let i = 0; i < 13; i++) {
-		children.push(
-			<IconBtn
-				e={'e' + i}
-				x={props.x + (!i || i & 1) * 36}
-				y={286 + (((i + 1) / 2) | 0) * 32}
-				click={() => props.onChange(i)}
-			/>,
-		);
-	}
-	return children;
+	return (
+		<For each={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}>
+			{i => (
+				<IconBtn
+					e={'e' + i}
+					x={props.x + (!i || i & 1) * 36}
+					y={286 + (((i + 1) / 2) | 0) * 32}
+					click={() => props.onChange(i)}
+				/>
+			)}
+		</For>
+	);
 }
 
 function maybeShiny(props, card) {
@@ -94,10 +94,8 @@ function CardSelectorColumn(props) {
 				}
 				countTexts.push(
 					<div
-						class={`selectortext ${
-							props.maxedIndicator &&
-							!card.getStatus('pillar') &&
-							cardAmount >= 6
+						class={`selectortext${
+							props.maxedIndicator && !card.pillar && cardAmount >= 6
 								? cardAmount >= 12
 									? ' beigeback'
 									: ' lightback'
@@ -116,9 +114,7 @@ function CardSelectorColumn(props) {
 						opacity,
 					}}
 					card={card}
-					onClick={
-						props.onClick && (() => props.onClick(maybeShiny(props, card)))
-					}
+					onClick={props.onClick && [props.onClick, maybeShiny(props, card)]}
 					onContextMenu={
 						props.onContextMenu &&
 						(e => {
@@ -127,8 +123,7 @@ function CardSelectorColumn(props) {
 						})
 					}
 					onMouseOver={
-						props.onMouseOver &&
-						(() => props.onMouseOver(maybeShiny(props, card)))
+						props.onMouseOver && [props.onMouseOver, maybeShiny(props, card)]
 					}
 				/>,
 			);
@@ -138,12 +133,9 @@ function CardSelectorColumn(props) {
 	return (
 		<>
 			<div
-				style={{
-					position: 'absolute',
-					left: `${props.x + 100}px`,
-					top: `${props.y}px`,
-					'text-height': '0',
-				}}>
+				style={`position:absolute;left:${props.x + 100}px;top:${
+					props.y
+				}px;text-height:0`}>
 				{memo().countTexts}
 			</div>
 			{memo().children}
@@ -157,19 +149,26 @@ function CardSelectorCore(props) {
 		const count = props.noupped ? 3 : 6;
 		for (let i = 0; i < count; i++) {
 			columns.push(
-				props.cards.filter(
-					i > 2,
-					x =>
-						(!props.filter || props.filter(x)) &&
-						(x.element === props.element || props.rarity === 4) &&
-						((i % 3 === 0 && x.type === etg.Creature) ||
-							(i % 3 === 1 && x.type <= etg.Permanent) ||
-							(i % 3 === 2 && x.type === etg.Spell)) &&
-						(!props.rarity || props.rarity === x.rarity),
-					props.cards.cardCmp,
-					props.shiny && !props.filterboth,
-				),
+				props.cards
+					.filter(
+						i > 2,
+						x =>
+							(!props.filter || props.filter(x)) &&
+							(x.element === props.element || props.rarity === 4) &&
+							((i % 3 === 0 && x.type === etg.Creature) ||
+								(i % 3 === 1 && x.type <= etg.Permanent) ||
+								(i % 3 === 2 && x.type === etg.Spell)) &&
+							(!props.rarity || props.rarity === x.rarity),
+					)
+					.sort(props.cards.cardCmp),
 			);
+		}
+		if (props.shiny && !props.filterboth) {
+			for (const column of columns) {
+				for (let i = 0; i < column.length; i++) {
+					column[i] = column[i].asShiny(true);
+				}
+			}
 		}
 		return columns;
 	};

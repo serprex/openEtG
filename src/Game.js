@@ -3,10 +3,44 @@ import * as etgutil from './etgutil.js';
 import OriginalCards from './vanilla/Cards.js';
 import OpenCards from './Cards.js';
 import enums from './enum.json' assert { type: 'json' };
-import { randint, decodeSkillName, read_skill, read_status } from './util.js';
+import { randint } from './util.js';
 import * as wasm from './rs/pkg/etg.js';
 
 const infoskipkeys = new Set(['casts', 'gpull', 'hp', 'maxhp']);
+
+function decodeSkillName(cell) {
+	const skid = cell & 0xffff,
+		n = enums.Skill[skid],
+		c = enums.SkillParams[skid] ?? 0;
+	return c === 0
+		? n
+		: c === 1
+		? `${n} ${cell >> 16}`
+		: `${n} ${(((cell >> 16) & 0xff) << 24) >> 24} ${cell >> 24}`;
+}
+
+function read_skill(raw) {
+	const skills = new Map();
+	let idx = 0;
+	while (idx < raw.length) {
+		const ev = enums.Event[raw[idx] & 255],
+			lastidx = idx + (raw[idx] >>> 8),
+			name = [];
+		while (idx++ < lastidx) {
+			name.push(decodeSkillName(raw[idx]));
+		}
+		if (name.length) skills.set(ev, name);
+	}
+	return skills;
+}
+
+function read_status(raw) {
+	const status = new Map();
+	for (let i = 0; i < raw.length; i += 2) {
+		status.set(enums.Stat[raw[i]] ?? enums.Flag[raw[i]], raw[i + 1]);
+	}
+	return status;
+}
 
 export default class Game {
 	constructor(data) {

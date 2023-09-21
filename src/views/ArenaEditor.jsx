@@ -63,11 +63,11 @@ export default function ArenaEditor(props) {
 			etgutil.iterraw(rx.user.pool),
 			etgutil.iterraw(rx.user.accountbound),
 		)) {
+			const card = Cards.Codes[code];
 			if (
-				Cards.Codes[code] &&
-				(!props.acard ||
-					(!Cards.Codes[code].isOf(baseacard) &&
-						(props.acard.upped || !Cards.Codes[code].upped)))
+				card &&
+				card.asUpped(false).asShiny(false) !== baseacard &&
+				(!card.upped || props.acard.upped)
 			) {
 				pool[code] = (pool[code] ?? 0) + count;
 			}

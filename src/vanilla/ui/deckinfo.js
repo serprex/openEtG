@@ -27,7 +27,7 @@ function printstat() {
 			buy += buycost;
 			sell += 4 * card.rarity ** 2 + card.cost;
 			if (card.upped) ups++;
-			if (card.getStatus('pillar')) pillars++;
+			if (card.pillar) pillars++;
 			if ([6, 8, 15, 18, 20].indexOf(card.rarity) === -1) norarebuy += buycost;
 			else if (card.rarity === 6 || card.rarity === 8 || card.rarity === 18)
 				rares++;

@@ -1,7 +1,6 @@
 import enums from './enum.json' assert { type: 'json' };
 import * as etg from './etg.js';
 import * as etgutil from './etgutil.js';
-import { read_skill, read_status } from './util.js';
 import * as wasm from './rs/pkg/etg.js';
 
 export default class Card {
@@ -9,7 +8,6 @@ export default class Card {
 		this.Cards = Cards;
 		this.index = wasm.card_index(Cards.set, code);
 		this.code = realcode;
-		this.status = read_status(wasm.card_stats(Cards.set, this.index));
 	}
 
 	get type() {
@@ -44,18 +42,20 @@ export default class Card {
 		return ((this.code & 0x3fff) - 1000) % 4000 > 1999;
 	}
 
+	get token() {
+		return wasm.card_token(this.Cards.set, this.index);
+	}
+
+	get pillar() {
+		return wasm.card_pillar(this.Cards.set, this.index);
+	}
+
 	valueOf() {
 		return this.code;
 	}
 
-	as(card) {
-		return card.asUpped(this.upped).asShiny(this.shiny);
-	}
-
 	isFree() {
-		return (
-			this.getStatus('pillar') && !this.upped && !this.rarity && !this.shiny
-		);
+		return this.pillar && !this.upped && !this.rarity && !this.shiny;
 	}
 
 	info() {
@@ -76,15 +76,5 @@ export default class Card {
 		return this.shiny === !!shiny
 			? this
 			: this.Cards.Codes[etgutil.asShiny(this.code, shiny)];
-	}
-
-	isOf(card) {
-		return (
-			card.code === etgutil.asShiny(etgutil.asUpped(this.code, false), false)
-		);
-	}
-
-	getStatus(key) {
-		return this.status.get(key) | 0;
 	}
 }

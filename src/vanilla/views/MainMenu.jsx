@@ -2,7 +2,7 @@ import * as etg from '../../etg.js';
 import aiDecks from '../Decks.json' assert { type: 'json' };
 import * as etgutil from '../../etgutil.js';
 import Game from '../../Game.js';
-import { choose, randint, randomcard, shuffle, upto } from '../../util.js';
+import { choose, randint, shuffle, upto } from '../../util.js';
 import * as store from '../../store.jsx';
 import Card from '../../Components/Card.jsx';
 import ExitBtn from '../../Components/ExitBtn.jsx';
@@ -58,19 +58,11 @@ export default function OriginalMainMenu() {
 
 	let ocard = null;
 	if (rx.orig.oracle !== rx.user.oracle) {
-		const nymph = Math.random() < 0.03;
 		const fg = upto(aiDecks.fg.length);
-		ocard = randomcard(
-			Cards,
-			false,
-			card =>
-				card.name !== 'Relic' &&
-				!card.name.startsWith('Mark of ') &&
-				!card.isFree() &&
-				nymph === etg.NymphList.includes(card.code + 4000),
-		);
+		const ocode = wasm.original_oracle(randint());
+		ocard = Cards.Codes[ocode];
 		const update = {
-			pool: '01' + etgutil.encodeCode(ocard.code),
+			pool: '01' + etgutil.encodeCode(ocode),
 			oracle: rx.user.oracle,
 			fg,
 		};

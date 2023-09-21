@@ -8,7 +8,7 @@ use core::mem::drop;
 use wasm_bindgen::prelude::*;
 
 use crate::card::{self, Card, Cards};
-use crate::game::{CardSet, Kind, Game, Flag, Stat};
+use crate::game::{CardSet, Flag, Game, Kind, Stat};
 use crate::skill::{Event, Skill};
 
 #[derive(Copy, Clone)]
@@ -85,7 +85,12 @@ impl<'a> SkillThing<'a> {
 	fn get_stat(&self, stat: Stat) -> i32 {
 		match *self {
 			Self::Thing(game, id) => game.get(id, stat),
-			Self::Card(cards, card) => card.status.iter().find(|&(st, _)| *st == stat).map(|&(_, val)| val).unwrap_or(0),
+			Self::Card(cards, card) => card
+				.status
+				.iter()
+				.find(|&(st, _)| *st == stat)
+				.map(|&(_, val)| val)
+				.unwrap_or(0),
 		}
 	}
 
@@ -121,7 +126,11 @@ impl<'a> SkillThing<'a> {
 		}
 	}
 
-	fn skills<'b, F>(&self, mut f: F) where 'a: 'b, F: FnMut(Event, &'b [Skill]) {
+	fn skills<'b, F>(&self, mut f: F)
+	where
+		'a: 'b,
+		F: FnMut(Event, &'b [Skill]),
+	{
 		match *self {
 			Self::Thing(game, id) => {
 				for (ev, sk) in game.iter_skills(id) {
@@ -213,7 +222,7 @@ impl<'a> SkillThing<'a> {
 				s.push_str("|1 Phantom");
 				Cow::from(s)
 			}
-			Skill::bubbleclear => Cow::from("Remove statuses (positive & negative) from target creature or permanent, & heal target creature 1.\nTarget gains a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages the affected card"),
+			Skill::bubbleclear => Cow::from("Remove statuses (positive & negative) from target creature or permanent, & heal target creature 1.\nTarget gains a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages affected card"),
 			Skill::butterfly => Cow::from(if self.set() == CardSet::Open {
 					"Target creature or weapon with either strength or HP less than 3 has its skills replaced with \"3:1 Destroy target permanent.\""
 			} else {
@@ -323,7 +332,7 @@ impl<'a> SkillThing<'a> {
 			Skill::endow =>
 				Cow::from("Gain the strength, skills, & statuses of target weapon. Gain 0|2.\nCannot gain Endow skill"),
 			Skill::envenom =>
-				Cow::from("Target equipment gains \"Give 1 poison on hit. Throttled (only triggers at most twice from Adrenaline)\" & \"25% chance to give non-ranged attackers 1 poison counter.\""),
+				Cow::from("Target equipment gains \"Give 1 poison on hit. Throttled (only triggers twice from Adrenaline)\" & \"25% chance to give non-ranged attackers 1 poison counter.\""),
 			Skill::epidemic =>
 				Cow::from("When any creature dies, give opponent poison counters equal to the dead creature's poison counters"),
 			Skill::epoch =>
@@ -488,9 +497,9 @@ impl<'a> SkillThing<'a> {
 			Skill::mutant =>
 				Cow::from("When this card enters play, it gains a random active ability with a random activation cost"),
 			Skill::neuro =>
-				Cow::from("Give 1 poison counter on hit. Apply neurotoxin on hit. Neurotoxin gives 1 poison counter for every card played by the affected player or active ability used by the affected creature. Throttled (only triggers at most twice from Adrenaline.)"),
+				Cow::from("Give 1 poison counter on hit. Apply neurotoxin on hit. Neurotoxin gives 1 poison counter for every card played by affected player or active ability used by affected creature. Throttled (only triggers twice from Adrenaline)"),
 			Skill::neuroify =>
-				Cow::from("If target creature or player is poisoned, target gains neurotoxin. Neurotoxin gives 1 poison counter for every card played by the affected player or active ability used by the affected creature. Remove target's purify counters"),
+				Cow::from("If target creature or player is poisoned, target gains neurotoxin. Neurotoxin gives 1 poison counter for every card played by affected player or active ability used by affected creature. Remove target's purify counters"),
 			Skill::nightmare =>
 				Cow::from(if self.set() == CardSet::Open && !self.upped() {
 					"Fill opponent's hand with fresh copies of target creature. Deal 1 damage per card added in this way. Heal yourself an equal amount."
@@ -545,7 +554,7 @@ impl<'a> SkillThing<'a> {
 				let mut s = if x == 1 { String::from("Give poison counter ") } else { format!("Give {} poison counters ", x) };
 				match ev {
 					Event::Cast => s.push_str("to target creature"),
-					Event::Hit => s.push_str(" on hit. Throttled (only triggers at most twice from Adrenaline.)"),
+					Event::Hit => s.push_str(" on hit. Throttled (only triggers twice from Adrenaline)"),
 					_ => return None,
 				}
 				Cow::from(s)
@@ -565,7 +574,7 @@ impl<'a> SkillThing<'a> {
 			Skill::predator =>
 				Cow::from("If opponent has more than four cards in their hand, this card attacks a second time & opponent discards the last card in their hand"),
 			Skill::protectall =>
-				Cow::from("All your creatures, permanents, weapon, & shield gain a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages the affected card"),
+				Cow::from("All your creatures, permanents, weapon, & shield gain a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages affected card"),
 			Skill::protectonce =>
 				Cow::from("Nullify the next spell, ability, or spell damage used by opponent that targets or damages this card"),
 			Skill::purify =>
@@ -607,7 +616,7 @@ impl<'a> SkillThing<'a> {
 			Skill::reducemaxhp =>
 				Cow::from("Damage dealt by this card also reduces the defender's maximum HP"),
 			Skill::regen =>
-				Cow::from("Give 1 purify counter to this card's owner on hit. Throttled (only triggers at most twice from Adrenaline.)"),
+				Cow::from("Give 1 purify counter to this card's owner on hit. Throttled (only triggers twice from Adrenaline)"),
 			Skill::regenerate(x) => Cow::from(format!("Heal yourself {x} every turn or when this card attacks")),
 			Skill::regeneratespell =>
 				Cow::from("Replace target creature or non-stacking permanent's skills with \"Heal this card's owner 5 every turn or when this card attacks.\""),
@@ -655,7 +664,7 @@ impl<'a> SkillThing<'a> {
 				"Burrow target creature. Replace target creature's skills with 2:4: unburrow"
 			}),
 			Skill::siphon =>
-				Cow::from("Remove 1:0 randomly from opponent's quanta pool when this creature attacks. Gain 1:11 for each quanta removed. Throttled (only triggers at most twice from Adrenaline.)"),
+				Cow::from("Remove 1:0 randomly from opponent's quanta pool when this creature attacks. Gain 1:11 for each quanta removed. Throttled (only triggers twice from Adrenaline)"),
 			Skill::siphonactive =>
 				Cow::from("Copy target creature or weapon's skills. Remove skills from target. Caster can be reactivated"),
 			Skill::siphonstrength => Cow::from("Target creature loses 1|0. Gain 1|0"),
@@ -720,7 +729,7 @@ impl<'a> SkillThing<'a> {
 				"This creature takes 3 damage. If this damage kills the creature, deal 4 spell damage to all of opponent's creatures."
 			}),
 			Skill::tidalhealing =>
-				Cow::from("Remove frozen status & poison counters from all your creatures. Your aquatic creatures gain \"Give 1 purify counter to this card's owner on hit. Throttled (only triggers at most twice from Adrenaline.)\". This ability does not stack"),
+				Cow::from("Remove frozen status & poison counters from all your creatures. Your aquatic creatures gain \"Give 1 purify counter to this card's owner on hit. Throttled (only triggers twice from Adrenaline)\". This ability does not stack"),
 			Skill::tornado => Cow::from(if self.upped() {
 				"Randomly choose two of opponent's permanents. Each selected permanent is shuffled into a random player's deck."
 			} else {
@@ -853,7 +862,8 @@ impl<'a> SkillThing<'a> {
 	fn info(&self) -> String {
 		let card = self.card();
 		if card.kind == Kind::Spell && matches!(self, &Self::Card(..)) {
-			card.skill.iter()
+			card.skill
+				.iter()
 				.find(|&(k, _)| *k == Event::Cast)
 				.and_then(|&(_, sk)| sk.first())
 				.cloned()
@@ -868,7 +878,9 @@ impl<'a> SkillThing<'a> {
 			let mut ret = String::new();
 			let mut stext = String::new();
 			for (k, v) in self.status().iter().cloned() {
-				if v == 0 { continue }
+				if v == 0 {
+					continue;
+				}
 				match k {
 					Stat::cost => {
 						let card = self.card();
@@ -981,7 +993,10 @@ impl<'a> SkillThing<'a> {
 			drop(stext);
 
 			self.skills(|ev, sk| {
-				if ev != Event::Cast || self.kind() != Kind::Spell || self.card().kind != Kind::Spell {
+				if ev != Event::Cast
+					|| self.kind() != Kind::Spell
+					|| self.card().kind != Kind::Spell
+				{
 					for &s in sk {
 						if let Some(text) = self.sktext(ev, s) {
 							if ev == Event::Cast {
@@ -1014,7 +1029,14 @@ pub fn thingText(game: &Game, id: i32) -> String {
 			thing.kind
 		};
 		if instkind == Kind::Creature || instkind == Kind::Weapon {
-			write!(ret, "{}|{}/{}", game.trueatk(id), game.truehp(id), game.get(id, Stat::maxhp)).ok();
+			write!(
+				ret,
+				"{}|{}/{}",
+				game.trueatk(id),
+				game.truehp(id),
+				game.get(id, Stat::maxhp)
+			)
+			.ok();
 		} else if instkind == Kind::Shield {
 			write!(ret, "{}", game.truedr(id)).ok();
 		}

@@ -15,8 +15,7 @@ export default function DeckDisplay(props) {
 				j++;
 				let opacity;
 				if (props.pool && !card.isFree()) {
-					const tooMany =
-						!card.getStatus('pillar') && cardCount(cardCounts, card) >= 6;
+					const tooMany = !card.pillar && cardCount(cardCounts, card) >= 6;
 					const notEnough = !props.cards.checkPool(
 						props.pool,
 						cardCounts,

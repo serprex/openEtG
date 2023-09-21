@@ -330,7 +330,7 @@ export default function Bazaar() {
 				maxedIndicator
 				filter={card => !card.isFree()}
 				onClick={card => {
-					if (~card.rarity && !card.getStatus('pillar') && !card.isFree()) {
+					if (~card.rarity && !card.pillar && !card.isFree()) {
 						setBcard(card);
 					}
 				}}

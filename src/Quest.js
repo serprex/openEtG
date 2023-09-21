@@ -1,7 +1,7 @@
 import * as etg from './etg.js';
 import * as sock from './sock.jsx';
 import * as store from './store.jsx';
-import { randint, randomcard, shuffle } from './util.js';
+import { randint, shuffle } from './util.js';
 import { decodedeck } from './etgutil.js';
 import Cards from './Cards.js';
 import Game from './Game.js';

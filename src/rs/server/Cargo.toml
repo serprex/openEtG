@@ -17,7 +17,7 @@ lto = "thin"
 base64 = { version = "0.21", default-features = false }
 bb8-postgres = { version = "0.8", features = ["with-serde_json-1"] }
 brotli = { version = "3", default-features = false, features = ["std"] }
-etg = { version = "0.1", path = "../" }
+etg = { version = "0.1", default-features = false, path = "../" }
 futures = { version = "0.3", default-features = false, features = ["alloc"] }
 fxhash = "0.2"
 getrandom = "0.2"

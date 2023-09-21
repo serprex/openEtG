@@ -7,6 +7,7 @@ use core::cmp::Ordering;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
+use crate::etg;
 pub use crate::game::CardSet;
 use crate::game::{Flag, Kind, Stat};
 pub use crate::generated::*;
@@ -106,6 +107,10 @@ impl Card {
 
 	pub const fn isOf(&self, code: i32) -> bool {
 		IsOf(self.code as i32, code)
+	}
+
+	pub fn free(&self) -> bool {
+		self.rarity == 0 && (self.flag & Flag::pillar) != 0 && self.upped()
 	}
 }
 
@@ -221,18 +226,20 @@ pub fn card_costele(set: CardSet, index: usize) -> Option<i8> {
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_stats(set: CardSet, index: usize) -> Option<Vec<i32>> {
-	cardSetCards(set).try_get_index(index).map(|&card| {
-		card.status
-			.iter()
-			.flat_map(|&(k, v)| [id_stat(k), v].into_iter())
-			.chain(
-				Flag(*card.flag)
-					.into_iter()
-					.flat_map(|k| [id_flag(k), 1].into_iter()),
-			)
-			.collect()
-	})
+pub fn card_pillar(set: CardSet, index: usize) -> bool {
+	cardSetCards(set)
+		.try_get_index(index)
+		.map(|&card| (card.flag & Flag::pillar) != 0)
+		.unwrap_or(false)
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn card_token(set: CardSet, index: usize) -> bool {
+	cardSetCards(set)
+		.try_get_index(index)
+		.map(|&card| (card.flag & Flag::token) != 0)
+		.unwrap_or(false)
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -240,7 +247,9 @@ pub fn card_stats(set: CardSet, index: usize) -> Option<Vec<i32>> {
 pub fn code_cmp(set: CardSet, x: i32, y: i32) -> i32 {
 	let cards = cardSetCards(set);
 	if let (Some(cx), Some(cy)) = (cards.try_get(x), cards.try_get(y)) {
-		match cx.upped().cmp(&cy.upped())
+		match cx
+			.upped()
+			.cmp(&cy.upped())
 			.then(cx.element.cmp(&cy.element))
 			.then((cy.flag & Flag::pillar).cmp(&(cx.flag & Flag::pillar)))
 			.then(cx.cost.cmp(&cy.cost))
@@ -254,4 +263,21 @@ pub fn code_cmp(set: CardSet, x: i32, y: i32) -> i32 {
 	} else {
 		0
 	}
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn original_oracle(seed: i32) -> u16 {
+	use rand::{Rng, SeedableRng};
+	use rand_pcg::Pcg32;
+	let mut rng = Pcg32::seed_from_u64(seed as u64);
+	let nymph = rng.gen_bool(0.03);
+	OrigSet
+		.random_card(&mut rng, false, |c| {
+			c.code != v_Relic as u16
+				&& !(c.code >= v_MarkofEntropy as u16 && c.code <= v_MarkofAether as u16)
+				&& !c.free() && nymph == etg::NymphList.contains(&(c.code + 4000))
+		})
+		.map(|c| c.code)
+		.unwrap_or(0)
 }

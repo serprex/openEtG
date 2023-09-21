@@ -59,7 +59,7 @@ export default function OriginalResult({ game }) {
 				const spins = [];
 				while (spins.length < 4) {
 					let card = choose(foeDeck);
-					if (card.getStatus('pillar')) card = choose(foeDeck);
+					if (card.pillar) card = choose(foeDeck);
 					if (card.rarity === 15 || card.rarity === 20) {
 						card = game.Cards.Codes[1033];
 					}

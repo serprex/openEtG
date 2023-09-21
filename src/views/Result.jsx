@@ -9,7 +9,7 @@ import Card from '../Components/Card.jsx';
 import Text from '../Components/Text.jsx';
 import Game from '../Game.js';
 import Cards from '../Cards.js';
-import { choose, randomcard } from '../util.js';
+import { choose } from '../util.js';
 
 const streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
 
@@ -295,16 +295,12 @@ export default function Result(props) {
 				foedeck = choose(foedecks);
 			if (cardreward === undefined && foedeck) {
 				const foeDeck = etgutil.decodedeck(foedeck.deck);
+				// Chromatic Butterfly if nothing winnable
 				let winnable = foeDeck.filter(code => {
 						const card = game.Cards.Codes[code];
 						return card && card.rarity > 0 && card.rarity < 4;
 					}),
-					cardwon;
-				if (winnable.length) {
-					cardwon = choose(winnable);
-				} else {
-					cardwon = randomcard(Cards, false, x => x.rarity > 0 && x.rarity < 4);
-				}
+					cardwon = winnable.length ? choose(winnable) : 5009;
 				cardreward = '01' + etgutil.encodeCode(etgutil.asShiny(cardwon, false));
 			}
 			if (goldreward === undefined) {
