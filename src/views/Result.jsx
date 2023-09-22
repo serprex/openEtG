@@ -1,6 +1,5 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 
-import * as etg from '../etg.js';
 import * as etgutil from '../etgutil.js';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
@@ -8,6 +7,7 @@ import { calcWealth, pveCostReward } from '../userutil.js';
 import Card from '../Components/Card.jsx';
 import Text from '../Components/Text.jsx';
 import Game from '../Game.js';
+import { Kind } from '../rs/pkg/etg.js';
 import Cards from '../Cards.js';
 import { choose } from '../util.js';
 
@@ -191,10 +191,10 @@ function computeBonuses(game, p1id, lefttext, streakrate, setTip, clearTip) {
 	for (const move of game.replay) {
 		if (replayGame.turn === p1id && move.x === 'cast') {
 			const type = replayGame.get_kind(move.c);
-			if (type === etg.Spell) {
+			if (type === Kind.Spell) {
 				const card = replayGame.Cards.Codes[replayGame.get(move.c, 'card')];
-				if (card.type === etg.Creature) replayStats.creaturesPlayed++;
-				if (card.type === etg.Weapon) replayStats.weaponsPlayed++;
+				if (card.type === Kind.Creature) replayStats.creaturesPlayed++;
+				if (card.type === Kind.Weapon) replayStats.weaponsPlayed++;
 				if (replayGame.get(move.c, 'pillar')) replayStats.pillarsPlayed++;
 			}
 		}
