@@ -1,3 +1,0 @@
-{
-{{#files}}"{{{name}}}":[{{x}},{{y}},{{width}},{{height}}]{{^isLast}},{{/isLast}}{{/files}}
-}
