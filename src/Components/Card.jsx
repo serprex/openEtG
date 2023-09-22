@@ -35,7 +35,7 @@ export default function Card(p) {
 						style="position:absolute;top:20px;left:8px;width:128px;height:128px;border-width:1px;border-color:#000;border-style:solid"
 					/>
 					<Text
-						text={p.card.info()}
+						text={p.card.text}
 						icoprefix="te"
 						style={{
 							position: 'absolute',
