@@ -2,8 +2,8 @@ import { onCleanup } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
 
 import * as usercmd from './usercmd.js';
-import * as sfx from './audio.js';
-import * as etgutil from './etgutil.js';
+import { changeMusic, changeSound } from './audio.js';
+import { mergedecks, removedecks } from './etgutil.js';
 import Login from './views/Login.jsx';
 
 const opts = { channel: 'Main' };
@@ -14,8 +14,8 @@ try {
 } catch (e) {
 	hasLocalStorage = false;
 }
-sfx.changeSound(opts.enableSound);
-sfx.changeMusic(opts.enableMusic);
+changeSound(opts.enableSound);
+changeMusic(opts.enableMusic);
 
 const listeners = new Set();
 export let state = {
@@ -99,8 +99,8 @@ export function updateOrig(data) {
 }
 export function addOrig(update) {
 	let pool = state.orig.pool;
-	if (update.pool) pool = etgutil.mergedecks(pool, update.pool);
-	if (update.rmpool) pool = etgutil.removedecks(pool, update.rmpool);
+	if (update.pool) pool = mergedecks(pool, update.pool);
+	if (update.rmpool) pool = removedecks(pool, update.rmpool);
 	dispatch({
 		...state,
 		orig: {

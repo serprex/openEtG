@@ -1,5 +1,4 @@
-import * as etg from './etg.js';
-import * as etgutil from './etgutil.js';
+import { iterdeck, fromTrueMark } from './etgutil.js';
 import OriginalCards from './vanilla/Cards.js';
 import OpenCards from './Cards.js';
 import enums from './enum.json' assert { type: 'json' };
@@ -66,11 +65,11 @@ export default class Game {
 			let mark = 0;
 			const dp = data.players[i],
 				deck = [];
-			for (const code of etgutil.iterdeck(dp.deck)) {
+			for (const code of iterdeck(dp.deck)) {
 				let idx;
 				if (this.Cards.Codes[code]) {
 					deck.push(code);
-				} else if (~(idx = etgutil.fromTrueMark(code))) {
+				} else if (~(idx = fromTrueMark(code))) {
 					mark = idx;
 				}
 			}

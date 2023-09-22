@@ -2,8 +2,10 @@ import { render } from 'solid-js/web';
 import { createSignal } from 'solid-js';
 import Game from '../Game.js';
 import { toTrueMark, encodedeck } from '../etgutil.js';
-import { Creature, Earth } from '../etg.js';
+import { Kind } from '../rs/pkg/etg.js';
 import Text from '../Components/Text.jsx';
+
+const Earth = 4;
 
 function Shard(element) {
 	return 5030 + element * 100;
@@ -40,7 +42,7 @@ function App() {
 				game.nextCmd({ x: 'cast', c: id }, false);
 				const golemId = game
 					.visible_instances(1)
-					.find(id => game.get_kind(id) === Creature);
+					.find(id => game.get_kind(id) === Kind.Creature);
 				return golemId ? game.info(golemId) : 'No Shard Golem spawned';
 			} else return 'No Shard of Integrity to cast';
 		} else return 'Too many cards';

@@ -2,7 +2,7 @@ import { createSignal, onMount } from 'solid-js';
 import { For } from 'solid-js/web';
 
 import Cards from '../Cards.js';
-import * as etgutil from '../etgutil.js';
+import { addcard, encodeCount } from '../etgutil.js';
 import Card from '../Components/Card.jsx';
 import CardImage from '../Components/CardImage.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
@@ -43,7 +43,7 @@ export default function Reward(props) {
 				codedone: data => {
 					const { user } = store.state;
 					store.updateUser({
-						pool: etgutil.addcard(user.pool, data.card),
+						pool: addcard(user.pool, data.card),
 					});
 					store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System');
 					store.doNav(import('./MainMenu.jsx'));
@@ -66,9 +66,7 @@ export default function Reward(props) {
 						if (chosenReward()) {
 							if (props.code === undefined) {
 								sock.userExec('addboundcards', {
-									c:
-										etgutil.encodeCount(numberofcopies) +
-										chosenReward().toString(32),
+									c: encodeCount(numberofcopies) + chosenReward().toString(32),
 								});
 								store.doNav(import('./MainMenu.jsx'));
 							} else {

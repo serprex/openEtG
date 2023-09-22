@@ -2,7 +2,7 @@ import { createMemo, createSignal, onMount } from 'solid-js';
 
 import Cards from '../Cards.js';
 import * as sock from '../sock.jsx';
-import * as etgutil from '../etgutil.js';
+import { deck2pool, asShiny, asUpped } from '../etgutil.js';
 import { calcWealth } from '../userutil.js';
 import Card from '../Components/Card.jsx';
 import CardSelector from '../Components/CardSelector.jsx';
@@ -24,10 +24,10 @@ export default function Library(props) {
 			shinyprogress = 0,
 			reprog = [],
 			reprogmax = [];
-		const cardpool = etgutil.deck2pool(data().pool),
-			boundpool = etgutil.deck2pool(data().bound),
+		const cardpool = deck2pool(data().pool),
+			boundpool = deck2pool(data().bound),
 			codeprog = code => {
-				const upcode = etgutil.asUpped(code, true);
+				const upcode = asUpped(code, true);
 				return Math.min(
 					(cardpool[code] ?? 0) +
 						(boundpool[code] ?? 0) +
@@ -43,7 +43,7 @@ export default function Library(props) {
 				reprog[idx] = (reprog[idx] ?? 0) + prog;
 				reprogmax[idx] = (reprogmax[idx] ?? 0) + 42;
 				progress += prog;
-				shinyprogress += codeprog(etgutil.asShiny(code, true));
+				shinyprogress += codeprog(asShiny(code, true));
 			}
 		});
 		return {

@@ -5,7 +5,6 @@ function writetd(...args) {
 	for (const arg of args) if (arg !== undefined) write(`[td]${arg}[/td]`);
 	write('[/tr]');
 }
-import * as etg from '../src/etg.js';
 import Cards from '../src/Cards.js';
 import decks from '../src/Decks.json' assert { type: 'json' };
 import { eleNames } from '../src/ui.js';
@@ -20,9 +19,9 @@ if (process.argv.length < 3) {
 			comm = new Uint32Array(3),
 			last = 0;
 		ofele.forEach(x => {
-			if (x.type <= etg.Permanent) perms++;
-			else if (x.type === etg.Creature) creas++;
-			else if (x.type === etg.Spell) spels++;
+			if (x.type <= 3) perms++;
+			else if (x.type === 5) creas++;
+			else if (x.type === 4) spels++;
 			if (x.rarity > 0 && x.rarity < 4) {
 				comm[x.rarity - 1]++;
 				if (x.code > last) last = x.code;

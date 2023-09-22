@@ -1,4 +1,3 @@
-import * as etg from '../../etg.js';
 import aiDecks from '../Decks.json' assert { type: 'json' };
 import * as etgutil from '../../etgutil.js';
 import Game from '../../Game.js';
@@ -9,7 +8,7 @@ import ExitBtn from '../../Components/ExitBtn.jsx';
 import Text from '../../Components/Text.jsx';
 import Cards from '../Cards.js';
 import { userEmit, sendChallenge } from '../../sock.jsx';
-import * as wasm from '../../rs/pkg/etg.js';
+import { deckgen_ai4, original_oracle } from '../../rs/pkg/etg.js';
 import { deckgenAi4, aiNames } from '../../deckgen.js';
 
 export function parseDeck(dcode) {
@@ -47,7 +46,7 @@ function parseAiDeck(dcode) {
 					return {
 						level: 'ai4',
 						name: aiNames[e1][0] + aiNames[e2][1],
-						deck: etgutil.encodedeck(wasm.deckgen_ai4(e1, e2)),
+						deck: etgutil.encodedeck(deckgen_ai4(e1, e2)),
 					};
 	return { level: 'custom', name: 'Custom', deck: parseDeck(dcode) };
 }
@@ -59,7 +58,7 @@ export default function OriginalMainMenu() {
 	let ocard = null;
 	if (rx.orig.oracle !== rx.user.oracle) {
 		const fg = upto(aiDecks.fg.length);
-		const ocode = wasm.original_oracle(randint());
+		const ocode = original_oracle(randint());
 		ocard = Cards.Codes[ocode];
 		const update = {
 			pool: '01' + etgutil.encodeCode(ocode),

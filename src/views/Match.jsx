@@ -11,8 +11,7 @@ import {
 import { For, Show } from 'solid-js/web';
 
 import { playSound } from '../audio.js';
-import * as ui from '../ui.js';
-import * as etg from '../etg.js';
+import { eleNames, strcols, maybeLightenStr } from '../ui.js';
 import { encodeCode, asShiny } from '../etgutil.js';
 import * as mkAi from '../mkAi.js';
 import * as sock from '../sock.jsx';
@@ -22,8 +21,64 @@ import Text from '../Components/Text.jsx';
 import * as store from '../store.jsx';
 import { mkQuestAi } from '../Quest.js';
 import enums from '../enum.json' assert { type: 'json' };
-import * as wasm from '../rs/pkg/etg.js';
+import { getAdrenalRow, Kind, Phase, Sfx } from '../rs/pkg/etg.js';
 import AiWorker from '../AiWorker.js';
+
+const Chroma = 0;
+const Entropy = 1;
+const Death = 2;
+const Gravity = 3;
+const Earth = 4;
+const Life = 5;
+const Fire = 6;
+const Water = 7;
+const Light = 8;
+const Air = 9;
+const Time = 10;
+const Darkness = 11;
+const Aether = 12;
+
+function reflectPos(j, pos) {
+	if (j) pos.y = 594 - pos.y;
+	return pos;
+}
+function creaturePos(j, i) {
+	const row = i < 8 ? 0 : i < 15 ? 1 : 2;
+	const column = row === 2 ? (i + 1) % 8 : i % 8;
+	return reflectPos(j, {
+		x: 204 + column * 90 + (row === 1 ? 45 : 0),
+		y: 334 + row * 44,
+	});
+}
+function permanentPos(j, i) {
+	return reflectPos(j, { x: 280 + (i % 9) * 70, y: 492 + ((i / 9) | 0) * 70 });
+}
+function cardPos(j, i) {
+	return { x: 132, y: (j ? 36 : 336) + 28 * i };
+}
+function tgtToPos(game, id, p1id) {
+	const type = game.get_kind(id);
+	if (type === Kind.Player) {
+		return reflectPos(id !== p1id, { x: 50, y: 560 });
+	}
+	const index = game.getIndex(id);
+	if (~index) {
+		const ownerId = game.get_owner(id);
+		switch (type) {
+			case Kind.Creature:
+				return creaturePos(ownerId !== p1id, index);
+			case Kind.Weapon:
+				return reflectPos(ownerId !== p1id, { x: 207, y: 492 });
+			case Kind.Shield:
+				return reflectPos(ownerId !== p1id, { x: 207, y: 562 });
+			case Kind.Permanent:
+				return permanentPos(ownerId !== p1id, index);
+			case Kind.Spell:
+				return cardPos(ownerId !== p1id, index);
+		}
+	}
+	return null;
+}
 
 const aiWorker = new AiWorker();
 const novaCodes = new Set([1107, 3107, 5107, 7107]);
@@ -84,19 +139,16 @@ function cloaksvg() {
 const activeInfo = {
 	firebolt: (game, c, t) =>
 		3 +
-		(((game.get_quanta(game.get_owner(c), etg.Fire) - game.getCard(c).cost) /
-			4) |
+		(((game.get_quanta(game.get_owner(c), Fire) - game.getCard(c).cost) / 4) |
 			0),
 	drainlife: (game, c, t) =>
 		2 +
-		(((game.get_quanta(game.get_owner(c), etg.Darkness) -
-			game.getCard(c).cost) /
+		(((game.get_quanta(game.get_owner(c), Darkness) - game.getCard(c).cost) /
 			5) |
 			0),
 	icebolt: (game, c, t) => {
 		const bolts =
-			((game.get_quanta(game.get_owner(c), etg.Water) - game.getCard(c).cost) /
-				5) |
+			((game.get_quanta(game.get_owner(c), Water) - game.getCard(c).cost) / 5) |
 			0;
 		return `${2 + bolts} ${35 + bolts * 5}%`;
 	},
@@ -107,7 +159,7 @@ const activeInfo = {
 		),
 	corpseexplosion: (game, c, t) => 1 + ((game.truehp(c) / 8) | 0),
 	adrenaline: (game, c, t) =>
-		`Extra: ${wasm.getAdrenalRow(game.trueatk(t)).join(',')}`,
+		`Extra: ${getAdrenalRow(game.trueatk(t)).join(',')}`,
 };
 
 const activetexts = [
@@ -125,7 +177,7 @@ const activetexts = [
 ];
 const activetextsRename = {
 	burrow: (game, id, x) => (game.get(id, 'burrowed') ? 'unburrow' : 'burrow'),
-	quanta: (game, id, x) => ui.eleNames[x[1]].toLowerCase(),
+	quanta: (game, id, x) => eleNames[x[1]].toLowerCase(),
 	summon: (game, id, x) => game.Cards.Codes[x[1] & 0xffff].name.toLowerCase(),
 };
 function skillName(game, id, sk) {
@@ -478,8 +530,8 @@ function ArrowLine(props) {
 }
 
 function Thing(props) {
-	const isSpell = () => props.game.get_kind(props.id) === etg.Spell,
-		bgcolor = () => ui.maybeLightenStr(props.game.getCard(props.id)),
+	const isSpell = () => props.game.get_kind(props.id) === Kind.Spell,
+		bgcolor = () => maybeLightenStr(props.game.getCard(props.id)),
 		faceDown = () =>
 			isSpell() &&
 			props.game.get_owner(props.id) !== props.p1id &&
@@ -514,11 +566,11 @@ function Thing(props) {
 		if (!isSpell()) {
 			const charges = props.game.get(props.id, 'charges');
 			topText = activeText(props.game, props.id);
-			if (props.game.get_kind(props.id) === etg.Creature) {
+			if (props.game.get_kind(props.id) === Kind.Creature) {
 				statText = `${props.game.trueatk(props.id)} | ${props.game.truehp(
 					props.id,
 				)}${charges ? ` \u00d7${charges}` : ''}`;
-			} else if (props.game.get_kind(props.id) === etg.Permanent) {
+			} else if (props.game.get_kind(props.id) === Kind.Permanent) {
 				if (props.game.get(props.id, 'pillar')) {
 					statText = `1:${
 						props.game.get(props.id, 'pendstate')
@@ -537,11 +589,11 @@ function Thing(props) {
 						statText = `${charges || ''}`;
 					}
 				}
-			} else if (props.game.get_kind(props.id) === etg.Weapon) {
+			} else if (props.game.get_kind(props.id) === Kind.Weapon) {
 				statText = `${props.game.trueatk(props.id)}${
 					charges ? ` \u00d7${charges}` : ''
 				}`;
-			} else if (props.game.get_kind(props.id) === etg.Shield) {
+			} else if (props.game.get_kind(props.id) === Kind.Shield) {
 				statText = charges
 					? '\u00d7' + charges
 					: props.game.truedr(props.id).toString();
@@ -678,7 +730,7 @@ function Things(props) {
 				? { opacity: 0, x: 103, y: -start === props.p1id ? 551 : 258 }
 				: start
 				? { opacity: 0, x: -99, y: -99, ...props.getIdTrack(start) }
-				: { opacity: 0, ...ui.tgtToPos(props.game, id, props.p1id) };
+				: { opacity: 0, ...tgtToPos(props.game, id, props.p1id) };
 		});
 	const death = new Map(),
 		[getDeath, updateDeath] = createSignal(death, { equals: false }),
@@ -725,7 +777,7 @@ function Things(props) {
 						state={
 							getDeath().get(id) ?? {
 								opacity: 1,
-								...ui.tgtToPos(props.game, id, props.p1id),
+								...tgtToPos(props.game, id, props.p1id),
 							}
 						}
 						compare={thingTweenCompare}
@@ -902,7 +954,7 @@ export default function Match(props) {
 		setIdTrack = (id, pos) => idtrack.set(id, pos),
 		getIdTrack = id =>
 			id === p1id() || id === p2id()
-				? ui.tgtToPos(game(), id, p1id())
+				? tgtToPos(game(), id, p1id())
 				: idtrack.get(id);
 	const [showFoeplays, setShowFoeplays] = createSignal(false);
 	const [resigning, setResigning] = createSignal(false);
@@ -979,7 +1031,7 @@ export default function Match(props) {
 				let play;
 				if (cmd.x === 'cast') {
 					const id = cmd.c,
-						isSpell = game.get_kind(id) === etg.Spell,
+						isSpell = game.get_kind(id) === Kind.Spell,
 						card = game.getCard(id);
 					play = {
 						card: card,
@@ -1060,8 +1112,8 @@ export default function Match(props) {
 						case 'Bolt': {
 							newstate.effects ??= new Set(state.effects);
 							const pos = getIdTrack(id) ?? { x: -99, y: -99 },
-								color = ui.strcols[param & 255],
-								upcolor = ui.strcols[(param & 255) + 13],
+								color = strcols[param & 255],
+								upcolor = strcols[(param & 255) + 13],
 								bolts = (param >> 8) + 1,
 								duration = 96 + bolts * 32;
 							const BoltEffect = () => (
@@ -1150,7 +1202,7 @@ export default function Match(props) {
 							);
 							break;
 						case 'Sfx':
-							playSound(wasm.Sfx[param]);
+							playSound(Sfx[param]);
 							break;
 						default:
 							newstate.effects ??= new Set(state.effects);
@@ -1237,7 +1289,7 @@ export default function Match(props) {
 
 	const endClick = (discard = 0) => {
 		const { game } = props;
-		if (game.turn === p1id() && game.phase === wasm.Phase.Mulligan) {
+		if (game.turn === p1id() && game.phase === Phase.Mulligan) {
 			applyNext({ x: 'accept' });
 		} else if (game.winner) {
 			gotoResult();
@@ -1245,7 +1297,7 @@ export default function Match(props) {
 			if (discard === 0 && game.full_hand(p1id())) {
 				setTargeting({
 					filter: id =>
-						game.get_kind(id) === etg.Spell && game.get_owner(id) === p1id(),
+						game.get_kind(id) === Kind.Spell && game.get_owner(id) === p1id(),
 					cb: tgt => {
 						endClick(tgt);
 						setTargeting(null);
@@ -1268,7 +1320,7 @@ export default function Match(props) {
 		if (resigning()) {
 			setResigning(false);
 		} else if (game.turn === p1id()) {
-			if (game.phase === wasm.Phase.Mulligan && !game.empty_hand(p1id())) {
+			if (game.phase === Phase.Mulligan && !game.empty_hand(p1id())) {
 				applyNext({ x: 'mulligan' });
 			} else {
 				setTargeting(null);
@@ -1292,7 +1344,7 @@ export default function Match(props) {
 	const thingClick = id => {
 		const { game } = props;
 		clearCard();
-		if (props.replay || game.phase !== wasm.Phase.Play) return;
+		if (props.replay || game.phase !== Phase.Play) return;
 		if (targeting()) {
 			if (targeting().filter(id)) {
 				targeting().cb(id);
@@ -1300,8 +1352,8 @@ export default function Match(props) {
 		} else if (game.get_owner(id) === p1id() && game.canactive(id)) {
 			const cb = tgt => applyNext({ x: 'cast', c: id, t: tgt });
 			if (
-				game.get_kind(id) === etg.Spell &&
-				game.getCard(id).type !== etg.Spell
+				game.get_kind(id) === Kind.Spell &&
+				game.getCard(id).type !== Kind.Spell
 			) {
 				cb();
 			} else {
@@ -1325,7 +1377,7 @@ export default function Match(props) {
 	const gameStep = game => {
 		if (
 			game.data.players[game.getIndex(game.turn)].ai === 1 &&
-			game.phase <= wasm.Phase.Play
+			game.phase <= Phase.Play
 		) {
 			aiWorker
 				.send({
@@ -1340,7 +1392,7 @@ export default function Match(props) {
 					const now = Date.now();
 					if (
 						now < aiDelay &&
-						game.phase === wasm.Phase.Play &&
+						game.phase === Phase.Play &&
 						e.data.cmd.x !== 'end'
 					) {
 						await new Promise(resolve => setTimeout(resolve, aiDelay - now));
@@ -1472,7 +1524,7 @@ export default function Match(props) {
 				'z-index': '5',
 			},
 		});
-		if (game().get_kind(id) !== etg.Player) setCard(e, game().getCard(id));
+		if (game().get_kind(id) !== Kind.Player) setCard(e, game().getCard(id));
 	};
 
 	const clearCard = () => {
@@ -1493,11 +1545,11 @@ export default function Match(props) {
 	const texts = createMemo(() => {
 		const g = game();
 		let turntell, endText, cancelText;
-		if (g.phase !== wasm.Phase.End) {
+		if (g.phase !== Phase.End) {
 			turntell = targeting()
 				? targeting().text
 				: `${g.turn === p1id() ? 'Your' : 'Their'} turn${
-						g.phase > wasm.Phase.Mulligan
+						g.phase > Phase.Mulligan
 							? ''
 							: g.player_idx(0) === p1id()
 							? "\nYou're first"
@@ -1506,12 +1558,12 @@ export default function Match(props) {
 			if (g.turn === p1id()) {
 				endText = targeting()
 					? ''
-					: g.phase === wasm.Phase.Play
+					: g.phase === Phase.Play
 					? 'End Turn'
 					: g.turn === p1id()
 					? 'Accept'
 					: '';
-				if (g.phase !== wasm.Phase.Play) {
+				if (g.phase !== Phase.Play) {
 					cancelText = g.turn === p1id() ? 'Mulligan' : '';
 				} else {
 					cancelText = targeting() || resigning() ? 'Cancel' : '';
@@ -1561,7 +1613,7 @@ export default function Match(props) {
 			<For each={[0, 1]}>
 				{j => {
 					const pl = j ? p2id : p1id,
-						plpos = () => ui.tgtToPos(game(), pl(), p1id()),
+						plpos = () => tgtToPos(game(), pl(), p1id()),
 						handOverlay = () =>
 							game().get(pl(), 'casts') === 0
 								? 12
@@ -1681,7 +1733,7 @@ export default function Match(props) {
 										top: j ? '0px' : '300px',
 										width: '66px',
 										height: '263px',
-										'background-color': ui.strcols[handOverlay()],
+										'background-color': strcols[handOverlay()],
 										opacity: '.3',
 										'border-radius': '4px',
 										'pointer-events': 'none',
@@ -1724,7 +1776,7 @@ export default function Match(props) {
 									<>
 										<div
 											style={{
-												'background-color': ui.strcols[etg.Life],
+												'background-color': strcols[Life],
 												position: 'absolute',
 												left: '3px',
 												top: j ? '37px' : '532px',
@@ -1738,12 +1790,12 @@ export default function Match(props) {
 											<div
 												style={{
 													'background-color':
-														ui.strcols[
+														strcols[
 															expectedDamage() >= game().get(pl(), 'hp')
-																? etg.Fire
+																? Fire
 																: expectedDamage() > 0
-																? etg.Time
-																: etg.Water
+																? Time
+																: Water
 														],
 													position: 'absolute',
 													left: `${3 + Math.min(state().x1, state().x2)}px`,

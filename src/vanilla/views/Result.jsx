@@ -2,8 +2,7 @@ import { onCleanup, onMount } from 'solid-js';
 import { For } from 'solid-js/web';
 
 import { userEmit } from '../../sock.jsx';
-import * as etg from '../../etg.js';
-import * as etgutil from '../../etgutil.js';
+import { addcard, decodedeck } from '../../etgutil.js';
 import Card from '../../Components/Card.jsx';
 import Text from '../../Components/Text.jsx';
 import * as store from '../../store.jsx';
@@ -48,8 +47,7 @@ export default function OriginalResult({ game }) {
 		const foedecks = game.data.players.filter(pd => !pd.user);
 		if (foedecks.length !== 0) {
 			const foedeck = choose(foedecks);
-			const foeDeck = etgutil
-				.decodedeck(foedeck.deck)
+			const foeDeck = decodedeck(foedeck.deck)
 				.map(code => game.Cards.Codes[code])
 				.filter(
 					card => card && !card.isFree() && !card.name.startsWith('Mark of '),
@@ -70,7 +68,7 @@ export default function OriginalResult({ game }) {
 					c2 = choose(spins);
 				cardswon.push([c0, c1, c2]);
 				if (c0 === c1 && c1 === c2) {
-					newpool = etgutil.addcard(newpool, c0.code);
+					newpool = addcard(newpool, c0.code);
 				}
 			}
 			electrumwon =

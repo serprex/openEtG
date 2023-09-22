@@ -1,4 +1,4 @@
-import * as wasm from './rs/pkg/etg.js';
+import { deckgen_duo, deckgen_bow, deckgen_ai4 } from './rs/pkg/etg.js';
 import { randint, upto } from './util.js';
 import { encodedeck } from './etgutil.js';
 
@@ -26,14 +26,12 @@ export function deckgen(uprate, markpower, maxRarity) {
 			e2 = (es % 12) + 1;
 		return [
 			aiNames[e1 * 2] + aiNames[e2 * 2 + 1],
-			encodedeck(
-				wasm.deckgen_duo(e1, e2, uprate, markpower, maxRarity, randint()),
-			),
+			encodedeck(deckgen_duo(e1, e2, uprate, markpower, maxRarity, randint())),
 		];
 	} else {
 		return [
 			'Celeste',
-			encodedeck(wasm.deckgen_bow(uprate, markpower, maxRarity, randint())),
+			encodedeck(deckgen_bow(uprate, markpower, maxRarity, randint())),
 		];
 	}
 }
@@ -44,6 +42,6 @@ export function deckgenAi4() {
 		e2 = (es % 12) + 1;
 	return [
 		aiNames[e1 * 2] + aiNames[e2 * 2 + 1],
-		encodedeck(wasm.deckgen_ai4(e1, e2)),
+		encodedeck(deckgen_ai4(e1, e2)),
 	];
 }

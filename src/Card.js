@@ -1,6 +1,5 @@
 import enums from './enum.json' assert { type: 'json' };
-import * as etg from './etg.js';
-import * as etgutil from './etgutil.js';
+import { asShiny, asUpped } from './etgutil.js';
 import * as wasm from './rs/pkg/etg.js';
 
 export default class Card {
@@ -31,11 +30,11 @@ export default class Card {
 	}
 
 	asUpped(upped) {
-		return this.Cards.Codes[etgutil.asUpped(this.code, upped)];
+		return this.Cards.Codes[asUpped(this.code, upped)];
 	}
 
 	asShiny(shiny) {
-		return this.Cards.Codes[etgutil.asShiny(this.code, shiny)];
+		return this.Cards.Codes[asShiny(this.code, shiny)];
 	}
 }
 

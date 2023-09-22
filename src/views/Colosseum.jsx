@@ -1,10 +1,13 @@
-import * as etg from '../etg.js';
 import * as mkAi from '../mkAi.js';
 import * as sock from '../sock.jsx';
 import Decks from '../Decks.json' assert { type: 'json' };
 import ExitBtn from '../Components/ExitBtn.jsx';
 import Text from '../Components/Text.jsx';
 import * as store from '../store.jsx';
+
+const NymphList = new Uint16Array([
+	0, 5120, 5220, 5320, 5420, 5520, 5620, 5720, 5820, 5920, 6020, 6120, 6220,
+]);
 
 function mkDaily(type) {
 	let game;
@@ -111,7 +114,7 @@ export default function Colosseum(props) {
 						value="Nymph!"
 						style="position:absolute;left:50px;top:280px"
 						onClick={() => {
-							const nymph = etg.NymphList[(Math.random() * 12 + 1) | 0];
+							const nymph = NymphList[(Math.random() * 12 + 1) | 0];
 							sock.userExec('donedaily', { daily: 6, c: nymph });
 							store.doNav(import('./MainMenu.jsx'), { nymph });
 						}}

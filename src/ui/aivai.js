@@ -1,7 +1,6 @@
 import Game from '../Game.js';
 import * as wasm from '../rs/pkg/etg.js';
-import * as etg from '../etg.js';
-import * as etgutil from '../etgutil.js';
+import { encodedeck, fromTrueMark } from '../etgutil.js';
 import { randint } from '../util.js';
 import AiWorker from '../AiWorker.js';
 
@@ -58,10 +57,10 @@ function fightItOut() {
 	const decks = deckeles.map(item => {
 		const deckstr = item.value.trim();
 		return deckstr.charAt(3) === ' '
-			? etgutil.encodedeck(
+			? encodedeck(
 					deckstr.split(' ').map(x => {
 						const code = parseInt(x, 32);
-						return ~etgutil.fromTrueMark(code) ? code : code - 4000;
+						return ~fromTrueMark(code) ? code : code - 4000;
 					}),
 			  )
 			: deckstr;

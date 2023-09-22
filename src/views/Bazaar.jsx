@@ -2,8 +2,7 @@ import { createMemo, createSignal, onMount } from 'solid-js';
 import { For, Show } from 'solid-js/web';
 
 import Cards from '../Cards.js';
-import * as etg from '../etg.js';
-import * as etgutil from '../etgutil.js';
+import { deck2pool, encodeCode, encodeCount } from '../etgutil.js';
 import { cardValue, sellValue } from '../userutil.js';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
@@ -178,7 +177,7 @@ function OrderBook(p) {
 
 export default function Bazaar() {
 	const rx = store.useRx();
-	const cardpool = createMemo(() => etgutil.deck2pool(rx.user.pool));
+	const cardpool = createMemo(() => deck2pool(rx.user.pool));
 
 	const [bz, setBz] = createSignal(null);
 	const [bcard, setBcard] = createSignal(null);
@@ -244,9 +243,7 @@ export default function Bazaar() {
 						onClick={() => {
 							sock.userEmit('bzbid', {
 								price: -sell(),
-								cards:
-									etgutil.encodeCount(sellq() || 1) +
-									etgutil.encodeCode(bcard().code),
+								cards: encodeCount(sellq() || 1) + encodeCode(bcard().code),
 							});
 						}}
 						style="position:absolute;left:100px;top:8px"
@@ -270,9 +267,7 @@ export default function Bazaar() {
 							onClick={() => {
 								sock.userEmit('bzbid', {
 									price: buy(),
-									cards:
-										etgutil.encodeCount(buyq() || 1) +
-										etgutil.encodeCode(bcard().code),
+									cards: encodeCount(buyq() || 1) + encodeCode(bcard().code),
 								});
 							}}
 							style="position:absolute;left:100px;top:40px"

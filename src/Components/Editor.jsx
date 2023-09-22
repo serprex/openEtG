@@ -4,7 +4,7 @@ import Card from './Card.jsx';
 import CardSelector from './CardSelector.jsx';
 import DeckDisplay from './DeckDisplay.jsx';
 import IconBtn from './IconBtn.jsx';
-import * as etgutil from '../etgutil.js';
+import { asShiny } from '../etgutil.js';
 
 export default function Editor(props) {
 	const [card, setCard] = createSignal(null);
@@ -20,7 +20,7 @@ export default function Editor(props) {
 			newdeck.splice(idx, 1);
 			props.setDeck(newdeck);
 		} else {
-			code = etgutil.asShiny(code, true);
+			code = asShiny(code, true);
 			const idx = props.deck.indexOf(code);
 			if (~idx) {
 				const newdeck = props.deck.slice();

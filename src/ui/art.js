@@ -1,4 +1,4 @@
-import * as wasm from '../rs/pkg/etg.js';
+import { card_index, card_set, CardSet } from '../rs/pkg/etg.js';
 
 function hookRowMouseover(tr) {
 	tr.addEventListener('mouseover', function (e) {
@@ -514,11 +514,8 @@ for (const credit of [
 		incx(credit[i][0], credit[i][1]);
 	}
 	for (const code of credit[credit.length - 1]) {
-		const index = wasm.card_index(
-			wasm.CardSet.Open,
-			parseInt(code, 32) & 0x3fff,
-		);
-		const name = wasm.card_name(wasm.CardSet.Open, index);
+		const index = card_index(CardSet.Open, parseInt(code, 32) & 0x3fff);
+		const name = card_name(CardSet.Open, index);
 		incx(name, `Cards/${code}.webp`);
 	}
 	table.appendChild(tr);

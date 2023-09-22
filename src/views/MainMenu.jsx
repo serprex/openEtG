@@ -1,11 +1,11 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 
-import * as audio from '../audio.js';
+import { changeMusic, changeSound } from '../audio.js';
 import Chat from '../Components/Chat.jsx';
 import * as sock from '../sock.jsx';
 import * as mkAi from '../mkAi.js';
 import Cards from '../Cards.js';
-import * as etgutil from '../etgutil.js';
+import { addcard, decodedeck } from '../etgutil.js';
 import * as store from '../store.jsx';
 import Card from '../Components/Card.jsx';
 import Text from '../Components/Text.jsx';
@@ -162,7 +162,7 @@ export default function MainMenu(props) {
 			},
 			codecode: data => {
 				store.updateUser({
-					pool: etgutil.addcard(rx.user.pool, data.card),
+					pool: addcard(rx.user.pool, data.card),
 				});
 				store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System');
 			},
@@ -174,7 +174,7 @@ export default function MainMenu(props) {
 	const arenaAi = i => {
 		const cost = arenaCost(i);
 		return e => {
-			if (!Cards.isDeckLegal(etgutil.decodedeck(sock.getDeck()), rx.user)) {
+			if (!Cards.isDeckLegal(decodedeck(sock.getDeck()), rx.user)) {
 				store.chatMsg('Invalid deck', 'System');
 			} else if (rx.user.gold < cost) {
 				store.chatMsg(`Requires ${cost}$`, 'System');
@@ -575,7 +575,7 @@ export default function MainMenu(props) {
 								type="checkbox"
 								checked={!!rx.opts.enableSound}
 								onChange={e => {
-									audio.changeSound(e.target.checked);
+									changeSound(e.target.checked);
 									store.setOpt('enableSound', e.target.checked);
 								}}
 							/>
@@ -586,7 +586,7 @@ export default function MainMenu(props) {
 								type="checkbox"
 								checked={!!rx.opts.enableMusic}
 								onChange={e => {
-									audio.changeMusic(e.target.checked);
+									changeMusic(e.target.checked);
 									store.setOpt('enableMusic', e.target.checked);
 								}}
 							/>

@@ -1,4 +1,3 @@
-import * as etg from './etg.js';
 import * as sock from './sock.jsx';
 import * as store from './store.jsx';
 import { randint, shuffle } from './util.js';

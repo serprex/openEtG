@@ -1,7 +1,7 @@
 import config from '../wsconfig.json' assert { type: 'json' };
 
 import Cards from './Cards.js';
-import * as etgutil from './etgutil.js';
+import { decodedeck, fromTrueMark } from './etgutil.js';
 import Game from './Game.js';
 import * as store from './store.jsx';
 import { arenaCost } from './userutil.js';
@@ -63,9 +63,7 @@ const sockEvents = {
 		}
 		const now = new Date(),
 			h = now.getHours(),
-			m = now.getMinutes(),
-			hs = h < 10 ? '0' + h : h.toString(),
-			ms = m < 10 ? '0' + m : m.toString();
+			m = now.getMinutes();
 		const text = () => {
 			const text = [];
 			let decklink = /\b(([01][0-9a-v]{4})+)\b/g,
@@ -80,7 +78,7 @@ const sockEvents = {
 					if (
 						!Cards.Codes[code] &&
 						!OrigCards.Codes[code] &&
-						etgutil.fromTrueMark(code) === -1
+						fromTrueMark(code) === -1
 					) {
 						notlink = true;
 						break;
@@ -112,8 +110,8 @@ const sockEvents = {
 							? 'overflow:auto;color:#ddd'
 							: 'overflow:auto'
 					}>
-					{`${hs}${ms} `}
-					{data.u && <b>{data.u} </b>}
+					{`${h < 10 ? '0' : ''}${h}${m < 10 ? '0' : ''}${m} `}
+					{data.u && <b>{data.u + ' '}</b>}
 					{text}
 				</div>
 			),
@@ -147,7 +145,7 @@ const sockEvents = {
 			cost: arenaCost(data.lv),
 			rematch: () => {
 				const { user } = store.state;
-				if (!Cards.isDeckLegal(etgutil.decodedeck(getDeck()), user)) {
+				if (!Cards.isDeckLegal(decodedeck(getDeck()), user)) {
 					store.chatMsg('Invalid deck', 'System');
 					return;
 				}
@@ -280,7 +278,7 @@ export function sendChallenge(foe, orig = false, deckcheck = true) {
 	if (
 		deckcheck &&
 		!(orig ? OrigCards : Cards).isDeckLegal(
-			etgutil.decodedeck(deck),
+			decodedeck(deck),
 			orig ? state.orig : state.user,
 		)
 	) {

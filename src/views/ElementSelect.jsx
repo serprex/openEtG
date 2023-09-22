@@ -1,7 +1,7 @@
 import { createSignal, onMount } from 'solid-js';
 import { For } from 'solid-js/web';
 
-import * as ui from '../ui.js';
+import { eleNames } from '../ui.js';
 import { run } from '../mkAi.js';
 import * as sock from '../sock.jsx';
 import Card from '../Components/Card.jsx';
@@ -171,7 +171,7 @@ export default function ElementSelect() {
 							}}
 							onMouseOver={() => setEledesc(i - 1)}>
 							<span style="position:absolute;left:48px;top:6px;width:144px">
-								{ui.eleNames[i]}
+								{eleNames[i]}
 							</span>
 						</span>
 					)}

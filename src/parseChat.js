@@ -1,4 +1,3 @@
-import * as etgutil from './etgutil.js';
 import * as sock from './sock.jsx';
 import * as store from './store.jsx';
 

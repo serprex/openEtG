@@ -1,4 +1,4 @@
-import * as etgutil from './etgutil.js';
+import { decodedeck } from './etgutil.js';
 import Cards from './Cards.js';
 import Decks from './Decks.json' assert { type: 'json' };
 import * as sock from './sock.jsx';
@@ -17,7 +17,7 @@ export function mkPremade(level, daily, datafn = null) {
 	const urdeck = sock.getDeck(),
 		{ user } = store.state,
 		minsize = user ? 30 : 10;
-	if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user, minsize)) {
+	if (!Cards.isDeckLegal(decodedeck(urdeck), user, minsize)) {
 		store.chatMsg('Invalid deck', 'System');
 		return;
 	}
@@ -68,7 +68,7 @@ export function mkAi(level, daily, datafn = null) {
 	const urdeck = sock.getDeck(),
 		{ user } = store.state,
 		minsize = user ? 30 : 10;
-	if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user, minsize)) {
+	if (!Cards.isDeckLegal(decodedeck(urdeck), user, minsize)) {
 		store.chatMsg('Invalid deck', 'System');
 		return;
 	}
