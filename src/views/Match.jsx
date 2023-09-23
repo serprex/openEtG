@@ -38,48 +38,6 @@ const Time = 10;
 const Darkness = 11;
 const Aether = 12;
 
-function reflectPos(j, pos) {
-	if (j) pos.y = 594 - pos.y;
-	return pos;
-}
-function creaturePos(j, i) {
-	const row = i < 8 ? 0 : i < 15 ? 1 : 2;
-	const column = row === 2 ? (i + 1) % 8 : i % 8;
-	return reflectPos(j, {
-		x: 204 + column * 90 + (row === 1 ? 45 : 0),
-		y: 334 + row * 44,
-	});
-}
-function permanentPos(j, i) {
-	return reflectPos(j, { x: 280 + (i % 9) * 70, y: 492 + ((i / 9) | 0) * 70 });
-}
-function cardPos(j, i) {
-	return { x: 132, y: (j ? 36 : 336) + 28 * i };
-}
-function tgtToPos(game, id, p1id) {
-	const type = game.get_kind(id);
-	if (type === Kind.Player) {
-		return reflectPos(id !== p1id, { x: 50, y: 560 });
-	}
-	const index = game.getIndex(id);
-	if (~index) {
-		const ownerId = game.get_owner(id);
-		switch (type) {
-			case Kind.Creature:
-				return creaturePos(ownerId !== p1id, index);
-			case Kind.Weapon:
-				return reflectPos(ownerId !== p1id, { x: 207, y: 492 });
-			case Kind.Shield:
-				return reflectPos(ownerId !== p1id, { x: 207, y: 562 });
-			case Kind.Permanent:
-				return permanentPos(ownerId !== p1id, index);
-			case Kind.Spell:
-				return cardPos(ownerId !== p1id, index);
-		}
-	}
-	return null;
-}
-
 const aiWorker = new AiWorker();
 const novaCodes = new Set([1107, 3107, 5107, 7107]);
 
@@ -190,8 +148,7 @@ function skillName(game, id, sk) {
 	return namelist.join(' ');
 }
 function activeText(game, id) {
-	const skills = game.skillsOf(id);
-	const acast = skills.get('cast');
+	const acast = game.getSkill(id, 'cast');
 	if (acast)
 		return `${game.get(id, 'cast')}:${game.get(id, 'castele')}${skillName(
 			game,
@@ -199,10 +156,10 @@ function activeText(game, id) {
 			acast,
 		)}`;
 	for (const akey of activetexts) {
-		const a = skills.get(akey);
+		const a = game.getSkill(id, akey);
 		if (a) return `${akey} ${skillName(game, id, a)}`;
 	}
-	const aauto = skills.get('ownattack');
+	const aauto = game.getSkill(id, 'ownattack');
 	return aauto ? skillName(game, id, aauto) : '';
 }
 
@@ -729,7 +686,7 @@ function Things(props) {
 				? { opacity: 0, x: 103, y: -start === props.p1id ? 551 : 258 }
 				: start
 				? { opacity: 0, x: -99, y: -99, ...props.getIdTrack(start) }
-				: { opacity: 0, ...tgtToPos(props.game, id, props.p1id) };
+				: { opacity: 0, ...props.game.tgtToPos(id, props.p1id) };
 		});
 	const death = new Map(),
 		[getDeath, updateDeath] = createSignal(death, { equals: false }),
@@ -776,7 +733,7 @@ function Things(props) {
 						state={
 							getDeath().get(id) ?? {
 								opacity: 1,
-								...tgtToPos(props.game, id, props.p1id),
+								...props.game.tgtToPos(id, props.p1id),
 							}
 						}
 						compare={thingTweenCompare}
@@ -953,7 +910,7 @@ export default function Match(props) {
 		setIdTrack = (id, pos) => idtrack.set(id, pos),
 		getIdTrack = id =>
 			id === p1id() || id === p2id()
-				? tgtToPos(game(), id, p1id())
+				? game().tgtToPos(id, p1id())
 				: idtrack.get(id);
 	const [showFoeplays, setShowFoeplays] = createSignal(false);
 	const [resigning, setResigning] = createSignal(false);
@@ -1607,7 +1564,7 @@ export default function Match(props) {
 			<For each={[0, 1]}>
 				{j => {
 					const pl = j ? p2id : p1id,
-						plpos = () => tgtToPos(game(), pl(), p1id()),
+						plpos = () => game().tgtToPos(pl(), p1id()),
 						handOverlay = () =>
 							game().get(pl(), 'casts') === 0
 								? 12

@@ -884,34 +884,6 @@ impl Game {
 		}
 	}
 
-	pub fn get_stats(&self, id: i32) -> Vec<i32> {
-		let thing = self.get_thing(id);
-		thing
-			.status
-			.iter()
-			.flat_map(|&(k, v)| [generated::id_stat(k), v].into_iter())
-			.chain(
-				thing
-					.flag
-					.into_iter()
-					.flat_map(|k| [generated::id_flag(k), 1].into_iter()),
-			)
-			.collect()
-	}
-
-	pub fn get_skills(&self, id: i32) -> Vec<i32> {
-		self.get_thing(id)
-			.skill
-			.iter()
-			.flat_map(|(k, v)| {
-				once(u8::from(k) as i32 | (v.len() as i32) << 8).chain(
-					v.iter()
-						.map(|&sk| generated::id_skill(sk) | sk.param1() << 16 | sk.param2() << 24),
-				)
-			})
-			.collect()
-	}
-
 	pub fn get_one_skill(&self, id: i32, k: u8) -> Vec<i32> {
 		if let Ok(event) = Event::try_from(k) {
 			self.get_thing(id)
@@ -1148,6 +1120,44 @@ impl Game {
 
 	pub fn tracedeath(&mut self) {
 		self.setSkill(0, Event::Death, &[Skill::_tracedeath]);
+	}
+
+	pub fn tgt_to_pos(&self, id: i32, p1id: i32) -> u32 {
+		let owner = self.get_owner(id);
+		let (x, y) = match self.get_kind(id) {
+			Kind::Player => (50, 560),
+			Kind::Weapon => (207, 492),
+			Kind::Shield => (207, 562),
+			kind => {
+				let i = self.getIndex(id);
+				if i == -1 {
+					return 0;
+				}
+				let i = i as u32;
+				match kind {
+					Kind::Creature => {
+						let row = if i < 8 {
+							0
+						} else if i < 15 {
+							1
+						} else {
+							2
+						};
+						let column = if row == 2 { i + 1 } else { i } % 8;
+						(
+							204 + column * 90 + if row == 1 { 45 } else { 0 },
+							334 + row * 44,
+						)
+					}
+					Kind::Permanent => (280 + (i % 9) * 70, 492 + (i / 9) * 70),
+					Kind::Spell => {
+						return 132 | (if owner != p1id { 36 } else { 336 } + 28 * i as u32) << 12
+					}
+					_ => return 0,
+				}
+			}
+		};
+		x | if owner != p1id { 594 - y } else { y } << 12
 	}
 }
 

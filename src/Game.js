@@ -18,29 +18,6 @@ function decodeSkillName(cell) {
 		: `${n} ${(((cell >> 16) & 0xff) << 24) >> 24} ${cell >> 24}`;
 }
 
-function read_skill(raw) {
-	const skills = new Map();
-	let idx = 0;
-	while (idx < raw.length) {
-		const ev = enums.Event[raw[idx] & 255],
-			lastidx = idx + (raw[idx] >>> 8),
-			name = [];
-		while (idx++ < lastidx) {
-			name.push(decodeSkillName(raw[idx]));
-		}
-		if (name.length) skills.set(ev, name);
-	}
-	return skills;
-}
-
-function read_status(raw) {
-	const status = new Map();
-	for (let i = 0; i < raw.length; i += 2) {
-		status.set(enums.Stat[raw[i]] ?? enums.Flag[raw[i]], raw[i + 1]);
-	}
-	return status;
-}
-
 export default class Game {
 	constructor(data) {
 		this.game = new wasm.Game(
@@ -165,12 +142,6 @@ export default class Game {
 			})
 		);
 	}
-	statusesOf(id) {
-		return read_status(this.get_stats(id));
-	}
-	skillsOf(id) {
-		return read_skill(this.get_skills(id));
-	}
 	getSkill(id, k) {
 		const name = Array.from(
 			this.get_one_skill(id, enums.EventId[k]),
@@ -178,23 +149,12 @@ export default class Game {
 		);
 		if (name.length) return name;
 	}
+	tgtToPos(id, p1id) {
+		const pos = this.tgt_to_pos(id, p1id);
+		return pos === 0 ? null : { x: pos & 4095, y: pos >> 12 };
+	}
 	info(id) {
-		if (this.get_kind(id) == wasm.Kind.Player) {
-			const info = [
-				`${this.get(id, 'hp')}/${this.get(id, 'maxhp')} ${this.deck_length(
-					id,
-				)}cards`,
-			];
-			for (const [k, v] of this.statusesOf(id)) {
-				if (v && !infoskipkeys.has(k)) info.push(v === true ? k : v + k);
-			}
-			info.push(this.get_drawpower(id) + 'drawpower');
-			if (this.get(id, 'casts') === 0) info.push('silenced');
-			if (this.get(id, 'gpull')) info.push('gpull');
-			return info.join('\n');
-		} else {
-			return wasm.thingText(this.game, id);
-		}
+		return wasm.thingText(this.game, id);
 	}
 }
 
