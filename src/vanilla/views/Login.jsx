@@ -29,11 +29,7 @@ export default function OriginalLogin() {
 			mainc.push(
 				<span
 					class={`imgb ico e${i}`}
-					style={{
-						position: 'absolute',
-						left: '12px',
-						top: `${24 + (i - 1) * 40}px`,
-					}}
+					style={`position:absolute;left:12px;top:${24 + (i - 1) * 40}px`}
 					onClick={() => {
 						sock.userEmit('initoriginal', {
 							e: i === 13 ? (Math.random() * 12 + 1) | 0 : i,

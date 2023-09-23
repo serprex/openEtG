@@ -72,18 +72,9 @@ export default function OriginalEditor(props) {
 					store.updateOrig(update);
 					store.doNav(import('./MainMenu.jsx'));
 				}}
-				style={{
-					position: 'absolute',
-					left: '8px',
-					top: '110px',
-				}}
+				style="position:absolute;left:8px;top:110px"
 			/>
-			<label
-				style={{
-					position: 'absolute',
-					left: '536px',
-					top: '238px',
-				}}>
+			<label style="position:absolute;left:536px;top:238px">
 				Deck&nbsp;
 				<input
 					autoFocus
@@ -97,11 +88,7 @@ export default function OriginalEditor(props) {
 			</label>
 			<span
 				class={'ico e' + data().mark}
-				style={{
-					position: 'absolute',
-					left: '66px',
-					top: '200px',
-				}}
+				style="position:absolute;left:66px;top:200px"
 			/>
 		</>
 	);

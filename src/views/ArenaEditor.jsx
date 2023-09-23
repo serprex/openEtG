@@ -159,21 +159,13 @@ export default function ArenaEditor(props) {
 					store.chatMsg('Arena deck submitted', 'System');
 					store.doNav(import('../views/MainMenu.jsx'));
 				}}
-				style={{
-					position: 'absolute',
-					left: '8px',
-					top: '58px',
-				}}
+				style="position:absolute;left:8px;top:58px"
 			/>
 			<input
 				type="button"
 				value="Exit"
 				onClick={() => store.doNav(import('../views/ArenaInfo.jsx'))}
-				style={{
-					position: 'absolute',
-					left: '8px',
-					top: '84px',
-				}}
+				style="position:absolute;left:8px;top:84px"
 			/>
 		</>
 	);

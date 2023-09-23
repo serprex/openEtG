@@ -53,74 +53,36 @@ function RenderInfo(props) {
 				/>
 			)}
 			<Text
-				style={{
-					position: 'absolute',
-					left: '100px',
-					top: `${4 + props.y}px`,
-				}}
+				style={`position:absolute;left:100px;top:${4 + props.y}px`}
 				text={`W-L: ${props.info.win ?? 0} - ${props.info.loss ?? 0}, Rank: ${
 					props.info.rank ?? 'Inactive'
 				}, ${(props.info.win ?? 0) * 15 + (props.info.loss ?? 0) * 5}$`}
 			/>
 			<input
 				readOnly
-				style={{
-					position: 'absolute',
-					left: '330px',
-					top: `${4 + props.y}px`,
-					width: '190px',
-				}}
+				style={`position:absolute;left:330px;top:${4 + props.y}px;width:190px`}
 				onClick={e => e.target.setSelectionRange(0, 999)}
 				value={adeck ?? ''}
 			/>
-			<span
-				style={{
-					position: 'absolute',
-					left: '600px',
-					top: `${4 + props.y}px`,
-				}}>
+			<span style={`position:absolute;left:600px;top:${4 + props.y}px`}>
 				Best Rank: {props.info.bestrank}
 			</span>
-			<span
-				style={{
-					position: 'absolute',
-					left: '400px',
-					top: `${224 + props.y}px`,
-				}}>
+			<span style={`position:absolute;left:400px;top:${224 + props.y}px`}>
 				Age: {props.info.day}
 			</span>
-			<span
-				style={{
-					position: 'absolute',
-					left: '100px',
-					top: `${224 + props.y}px`,
-				}}>
+			<span style={`position:absolute;left:100px;top:${224 + props.y}px`}>
 				HP: {props.info.hp}
 			</span>
-			<span
-				style={{
-					position: 'absolute',
-					left: '200px',
-					top: `${224 + props.y}px`,
-				}}>
+			<span style={`position:absolute;left:200px;top:${224 + props.y}px`}>
 				Mark: {props.info.mark}
 			</span>
-			<span
-				style={{
-					position: 'absolute',
-					left: '300px',
-					top: `${224 + props.y}px`,
-				}}>
+			<span style={`position:absolute;left:300px;top:${224 + props.y}px`}>
 				Draw: {props.info.draw}
 			</span>
 			<input
 				type="button"
 				value="Modify"
-				style={{
-					position: 'absolute',
-					left: '500px',
-					top: `${224 + props.y}px`,
-				}}
+				style={`position:absolute;left:500px;top:${224 + props.y}px`}
 				onClick={() => {
 					store.doNav(import('./ArenaEditor.jsx'), {
 						adeck: props.info.deck,
@@ -133,11 +95,7 @@ function RenderInfo(props) {
 				<input
 					type="button"
 					value="Test"
-					style={{
-						position: 'absolute',
-						left: '600px',
-						top: `${224 + props.y}px`,
-					}}
+					style={`position:absolute;left:600px;top:${224 + props.y}px`}
 					onClick={testDeck}
 				/>
 			)}
@@ -150,11 +108,7 @@ function ArenaCard(props) {
 			<input
 				type="button"
 				value="Create"
-				style={{
-					position: 'absolute',
-					left: '734px',
-					top: `${260 + props.y}px`,
-				}}
+				style={`position:absolute;left:734px;top:${260 + props.y}px`}
 				onClick={() => {
 					store.doNav(import('./ArenaEditor.jsx'), {
 						adeck: '',
@@ -181,7 +135,9 @@ export default function ArenaInfo() {
 		<>
 			<Text
 				style="position:absolute;left:96px;top:560px"
-				text="Earn 5$ when your deck is faced, & 10$ more when it wins\nEarn 25$ per age of old deck when creating new deck, up to 350$"
+				text={
+					'Earn 5$ when your deck is faced, & 10$ more when it wins\nEarn 25$ per age of old deck when creating new deck, up to 350$'
+				}
 			/>
 			<ExitBtn x={8} y={300} />
 			<Show when={AB().A}>

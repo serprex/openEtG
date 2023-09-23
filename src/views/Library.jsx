@@ -61,11 +61,7 @@ export default function Library(props) {
 		children.push(
 			<span
 				class={`ico e${e}`}
-				style={{
-					position: 'absolute',
-					left: `${36 + e * 53}px`,
-					top: '54px',
-				}}
+				style={`position:absolute;left:${36 + e * 53}px;top:54px`}
 			/>,
 		);
 	}
@@ -73,11 +69,7 @@ export default function Library(props) {
 		children.push(
 			<span
 				class={`ico r${r}`}
-				style={{
-					position: 'absolute',
-					left: '8px',
-					top: `${64 + r * 32}px`,
-				}}
+				style={`position:absolute;left:8px;top:${64 + r * 32}px`}
 			/>,
 		);
 		for (let e = 0; e < 13; e++) {
