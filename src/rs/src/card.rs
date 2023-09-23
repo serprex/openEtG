@@ -57,19 +57,13 @@ impl Cards {
 		self.data.get(index)
 	}
 
-	pub fn filter<Ffilt>(&self, upped: bool, ffilt: Ffilt) -> Vec<&'static Card>
-	where
-		Ffilt: Fn(&'static Card) -> bool,
-	{
+	pub fn filter(&self, upped: bool) -> &'static [Card] {
 		let pivot = self.data.len() / 2;
 		if upped {
 			&self.data[pivot..]
 		} else {
 			&self.data[..pivot]
 		}
-		.iter()
-		.filter(|c| (c.flag & Flag::token) == 0 && ffilt(c))
-		.collect::<Vec<_>>()
 	}
 
 	pub fn random_card<Ffilt, R>(
@@ -84,15 +78,10 @@ impl Cards {
 	{
 		use rand::seq::IteratorRandom;
 
-		let pivot = self.data.len() / 2;
-		if upped {
-			&self.data[pivot..]
-		} else {
-			&self.data[..pivot]
-		}
-		.iter()
-		.filter(|c| (c.flag & Flag::token) == 0 && ffilt(c))
-		.choose(rng)
+		self.filter(upped)
+			.iter()
+			.filter(|c| (c.flag & Flag::token) == 0 && ffilt(c))
+			.choose(rng)
 	}
 }
 
@@ -246,22 +235,24 @@ pub fn card_token(set: CardSet, index: usize) -> bool {
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn code_cmp(set: CardSet, x: i32, y: i32) -> i32 {
 	let cards = cardSetCards(set);
+	match code_cmp_core(cards, x, y) {
+		Ordering::Less => -1,
+		Ordering::Equal => 0,
+		Ordering::Greater => 1,
+	}
+}
+
+pub fn code_cmp_core(cards: &'static Cards, x: i32, y: i32) -> Ordering {
 	if let (Some(cx), Some(cy)) = (cards.try_get(x), cards.try_get(y)) {
-		match cx
-			.upped()
+		cx.upped()
 			.cmp(&cy.upped())
 			.then(cx.element.cmp(&cy.element))
 			.then((cy.flag & Flag::pillar).cmp(&(cx.flag & Flag::pillar)))
 			.then(cx.cost.cmp(&cy.cost))
 			.then(cx.kind.cmp(&cy.kind))
 			.then(x.cmp(&y))
-		{
-			Ordering::Less => -1,
-			Ordering::Equal => 0,
-			Ordering::Greater => 1,
-		}
 	} else {
-		0
+		Ordering::Equal
 	}
 }
 
@@ -280,4 +271,24 @@ pub fn original_oracle(seed: i32) -> u16 {
 		})
 		.map(|c| c.code)
 		.unwrap_or(0)
+}
+
+#[cfg(target_arch = "wasm32")]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn selector_filter(set: CardSet, col: u32, element: i8, rarity: i8) -> Vec<u16> {
+	let cards = cardSetCards(set);
+	let mut result = Vec::with_capacity(15);
+	for card in cards.filter(col > 2) {
+		if (rarity == 4 || card.element == element)
+			&& (rarity == 0 || card.rarity == rarity)
+			&& match col % 3 {
+				0 => card.kind == Kind::Creature,
+				1 => card.kind <= Kind::Permanent,
+				_ => card.kind == Kind::Spell,
+			} {
+			result.push(card.code);
+		}
+	}
+	result.sort_unstable_by(|&x, &y| code_cmp_core(cards, x as i32, y as i32));
+	result
 }

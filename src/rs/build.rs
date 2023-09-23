@@ -257,7 +257,7 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 			}
 		}
 	}
-	cards.sort_by(|a, b| a.code.cmp(&b.code));
+	cards.sort_unstable_by(|a, b| a.code.cmp(&b.code));
 	write!(
 		source,
 		"\npub const {}Set:Cards=Cards{{set:CardSet::{},data:&[",

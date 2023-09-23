@@ -1,4 +1,4 @@
-#!/usr/bin/node --experimental-json-modules
+#!/usr/bin/env -Snode --experimental-wasm-modules --experimental-json-modules
 const write = process.stdout.write.bind(process.stdout);
 function writetd(...args) {
 	write('[tr]');
@@ -12,13 +12,16 @@ if (process.argv.length < 3) {
 	write('[right][table]');
 	writetd('Tot', 'E', 'C', 'P', 'S', '|', 'R', 'U', 'C', '', '');
 	for (let i = 0; i < 13; i++) {
-		const ofele = Cards.filter(false, x => x.element === i);
+		const ofele = [];
+		Cards.Codes.forEach(card => {
+			if (!card.upped && !card.shiny && card.element === i) ofele.push(card);
+		});
 		let creas = 0,
 			perms = 0,
 			spels = 0,
 			comm = new Uint32Array(3),
 			last = 0;
-		ofele.forEach(x => {
+		for (const x of ofele) {
 			if (x.type <= 3) perms++;
 			else if (x.type === 5) creas++;
 			else if (x.type === 4) spels++;
@@ -26,7 +29,7 @@ if (process.argv.length < 3) {
 				comm[x.rarity - 1]++;
 				if (x.code > last) last = x.code;
 			}
-		});
+		}
 		writetd(
 			ofele.length,
 			':' + eleNames[i].toLowerCase(),

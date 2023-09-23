@@ -1,7 +1,7 @@
 import { createMemo, createSignal } from 'solid-js';
 import { Index } from 'solid-js/web';
 
-import { Kind } from '../rs/pkg/etg.js';
+import { selector_filter } from '../rs/pkg/etg.js';
 import { asShiny, asUpped } from '../etgutil.js';
 import * as store from '../store.jsx';
 import Card from './Card.jsx';
@@ -148,20 +148,12 @@ function CardSelectorCore(props) {
 		const columns = [];
 		const count = props.noupped ? 3 : 6;
 		for (let i = 0; i < count; i++) {
-			columns.push(
-				props.cards
-					.filter(
-						i > 2,
-						x =>
-							(!props.filter || props.filter(x)) &&
-							(x.element === props.element || props.rarity === 4) &&
-							((i % 3 === 0 && x.type === Kind.Creature) ||
-								(i % 3 === 1 && x.type <= Kind.Permanent) ||
-								(i % 3 === 2 && x.type === Kind.Spell)) &&
-							(!props.rarity || props.rarity === x.rarity),
-					)
-					.sort(props.cards.cardCmp),
+			let column = Array.from(
+				selector_filter(props.cards.set, i, props.element, props.rarity),
+				code => props.cards.Codes[code],
 			);
+			if (props.filter) column = column.filter(props.filter);
+			columns.push(column);
 		}
 		if (props.shiny && !props.filterboth) {
 			for (const column of columns) {

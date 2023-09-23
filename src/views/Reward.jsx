@@ -23,9 +23,17 @@ function getRewardList(reward) {
 		if (shiny) reward = reward.slice(1);
 		const upped = reward.slice(0, 5) === 'upped';
 		const rarity = rewardwords[upped ? reward.slice(5) : reward];
-		return Cards.filter(upped, x => x.rarity === rarity).map(
-			card => card.asShiny(shiny).code,
-		);
+		const result = [];
+		Cards.Codes.forEach(card => {
+			if (
+				card.upped === upped &&
+				card.shiny === shiny &&
+				card.rarity === rarity
+			) {
+				result.push(card.code);
+			}
+		});
+		return result;
 	} else if (reward instanceof Array) {
 		return reward;
 	} else {

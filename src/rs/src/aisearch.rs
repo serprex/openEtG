@@ -126,7 +126,7 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 			}
 		}
 	});
-	dmgmoves.sort_by_key(|&x| x.2);
+	dmgmoves.sort_unstable_by_key(|&x| x.2);
 	if let Some(&firstmove) = dmgmoves.first() {
 		let firstmove = Some(GameMove::Cast(firstmove.0, firstmove.1));
 		let mut gclone = ctx.clone();
