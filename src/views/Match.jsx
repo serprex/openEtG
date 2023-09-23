@@ -185,7 +185,6 @@ function skillName(game, id, sk) {
 	for (const name of sk) {
 		const nsplit = name.split(' ');
 		const rename = activetextsRename[nsplit[0]];
-		if (rename === null) continue;
 		namelist.push(rename ? rename(game, id, nsplit) : name);
 	}
 	return namelist.join(' ');
@@ -1517,12 +1516,7 @@ export default function Match(props) {
 			text: `${game().info(id)}${
 				actinfo ? '\n' + actinfo(game(), targeting().src, id) : ''
 			}`,
-			style: {
-				position: 'absolute',
-				left: `${e.pageX}px`,
-				top: `${e.pageY}px`,
-				'z-index': '5',
-			},
+			style: `position:absolute;left:${e.pageX}px;top:${e.pageY}px;z-index:5`,
 		});
 		if (game().get_kind(id) !== Kind.Player) setCard(e, game().getCard(id));
 	};
@@ -1680,30 +1674,23 @@ export default function Match(props) {
 							/>
 							<span
 								class={'ico e' + game().get_mark(pl())}
-								style={{
-									position: 'absolute',
-									left: '32px',
-									top: j ? '228px' : '430px',
-									transform: 'translate(-50%,-50%)',
-									'text-align': 'center',
-									'pointer-events': 'none',
-									'font-size': '18px',
-									'text-shadow': '2px 2px 1px #000,2px 2px 2px #000',
-								}}>
+								style={`position:absolute;left:32px;top:${
+									j ? 228 : 430
+								}px;transform:translate(-50%,-50%);text-align:center;pointer-events:none;font-size:18px;text-shadow:2px 2px 1px #000,2px 2px 2px #000`}>
 								{game().get_markpower(pl()) !== 1 && game().get_markpower(pl())}
 							</span>
 							<Show when={game().get(pl(), 'sosa')}>
 								<div
 									class="ico sacrifice"
 									style={`position:absolute;left:0;top:${
-										j ? '7' : '502'
+										j ? 7 : 502
 									}px;pointer-events:none`}
 								/>
 							</Show>
 							<Show when={game().get(pl(), 'sabbath')}>
 								<span
 									class="ico sabbath"
-									style={`position:absolute;left:0;top:${j ? '96' : '300'}px`}
+									style={`position:absolute;left:0;top:${j ? 96 : 300}px`}
 								/>
 							</Show>
 							<Show
@@ -1744,29 +1731,18 @@ export default function Match(props) {
 								{k => (
 									<span
 										class={'ico ce' + k}
-										style={{
-											position: 'absolute',
-											left: `${k & 1 ? 2 : 48}px`,
-											top: `${(j ? 106 : 308) + (((k - 1) / 2) | 0) * 18}px`,
-											'font-size': '16px',
-											'pointer-events': 'none',
-											'padding-left': '16px',
-										}}>
+										style={`position:absolute;left:${k & 1 ? 2 : 48}px;top:${
+											(j ? 106 : 308) + (((k - 1) / 2) | 0) * 18
+										}px;font-size:16px;pointer-events:none;padding-left:16px`}>
 										&nbsp;
 										{game().get_quanta(pl(), k) || ''}
 									</span>
 								)}
 							</For>
 							<div
-								style={{
-									'background-color': '#000',
-									position: 'absolute',
-									left: '2px',
-									top: j ? '36px' : '531px',
-									width: '98px',
-									height: '22px',
-									'pointer-events': 'none',
-								}}
+								style={`background-color:#000;position:absolute;left:2px;top:${
+									j ? 36 : 531
+								}px;width:98px;height:22px;pointer-events:none`}
 							/>
 							<Tween
 								state={{ x1: x1(), x2: x2() }}
@@ -1815,32 +1791,15 @@ export default function Match(props) {
 							</Tween>
 							<Text
 								text={hptext()}
-								style={{
-									'text-align': 'center',
-									width: '100px',
-									'pointer-events': 'none',
-									'font-size': '12px',
-									'line-height': '1.1',
-									position: 'absolute',
-									left: '0',
-									top: j ? '40px' : '535px',
-									'text-shadow': '1px 1px 1px #000,2px 2px 2px #000',
-									'z-index': '2',
-								}}
+								style={`text-align:center;width:100px;pointer-events:none;font-size:12px;line-height:1.1;position:absolute;left:0;top:${
+									j ? 40 : 535
+								}px;text-shadow:1px 1px 1px #000,2px 2px 2px #000;z-index:2`}
 							/>
 							<div
 								class={game().deck_length(pl()) ? 'ico ccback' : ''}
-								style={{
-									position: 'absolute',
-									left: '103px',
-									top: j ? '258px' : '551px',
-									'text-align': 'center',
-									'padding-top': '7px',
-									'pointer-events': 'none',
-									'font-size': '18px',
-									'text-shadow': '2px 2px 1px #000,2px 2px 2px #000',
-									'z-index': '3',
-								}}>
+								style={`position:absolute;left:103px;top:${
+									j ? 258 : 551
+								}px;text-align:center;padding-top:7px;pointer-events:none;font-size:18px;text-shadow:2px 2px 1px #000,2px 2px 2px #000;z-index:3`}>
 								{game().deck_length(pl()) || '0!!'}
 							</div>
 						</>

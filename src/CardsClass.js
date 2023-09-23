@@ -27,8 +27,6 @@ export default class Cards {
 			etgutil.asShiny(y, false),
 		) || (x > y) - (x < y);
 
-	cardCmp = (x, y) => this.codeCmp(x.code, y.code);
-
 	checkPool(pool, cardCount, cardMinus, card) {
 		const uncode = etgutil.asShiny(etgutil.asUpped(card.code, false), false);
 

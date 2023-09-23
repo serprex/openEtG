@@ -1,19 +1,17 @@
-import { card_index, card_set, CardSet } from '../rs/pkg/etg.js';
+import { card_index, card_name, card_set, CardSet } from '../rs/pkg/etg.js';
 
-function hookRowMouseover(tr) {
-	tr.addEventListener('mouseover', function (e) {
-		let i = 1;
-		for (; i < this.children.length; i++) {
-			const child = this.children[i].children[0];
-			if (child.href && child.href.match(/\/Cards\/...\.webp$/)) {
-				imgs[i - 1].src = child.href;
-				imgs[i - 1].style.visibility = '';
-			} else imgs[i - 1].style.visibility = 'hidden';
-		}
-		for (; i - 1 < imgs.length; i++) {
-			imgs[i - 1].style.visibility = 'hidden';
-		}
-	});
+function trMouseOver(e) {
+	let i = 1;
+	for (; i < this.children.length; i++) {
+		const child = this.children[i].children[0];
+		if (child.href && child.href.match(/\/Cards\/...\.webp$/)) {
+			imgs[i - 1].src = child.href;
+			imgs[i - 1].style.visibility = '';
+		} else imgs[i - 1].style.visibility = 'hidden';
+	}
+	for (; i - 1 < imgs.length; i++) {
+		imgs[i - 1].style.visibility = 'hidden';
+	}
 }
 const imgs = new Array(8),
 	imgdiv = document.getElementById('imgdiv');
@@ -492,7 +490,7 @@ for (const credit of [
 	[['freeSFX', 'https://freesfx.co.uk'], []],
 ]) {
 	let tr = document.createElement('tr');
-	hookRowMouseover(tr);
+	tr.addEventListener('mouseover', trMouseOver);
 	tr.className = 'padtop';
 	let x = 0;
 	function incx(text, link) {
@@ -505,7 +503,7 @@ for (const credit of [
 		if (++x === 9) {
 			table.appendChild(tr);
 			tr = document.createElement('tr');
-			hookRowMouseover(tr);
+			tr.addEventListener('mouseover', trMouseOver);
 			tr.appendChild(document.createElement('td'));
 			x = 1;
 		}

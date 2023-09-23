@@ -75,7 +75,7 @@ pub fn card(code: i32) -> Option<String> {
 		))
 	});
 	result.push_str(".webp' style='position:absolute;top:-130px;left:0px'/>");
-	result.push_str(&etg::text::rawCardText(cards, card));
+	result.push_str(&etg::text::rawCardText(cards, card).replace('&', "&amp;"));
 	if card.rarity != 0 {
 		write!(
 			result,
