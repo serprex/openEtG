@@ -26,6 +26,7 @@ function getRewardList(reward) {
 		const result = [];
 		Cards.Codes.forEach(card => {
 			if (
+				!card.token &&
 				card.upped === upped &&
 				card.shiny === shiny &&
 				card.rarity === rarity

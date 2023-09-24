@@ -279,7 +279,8 @@ pub fn selector_filter(set: CardSet, col: u32, element: i8, rarity: i8) -> Vec<u
 	let cards = cardSetCards(set);
 	let mut result = Vec::with_capacity(15);
 	for card in cards.filter(col > 2) {
-		if (rarity == 4 || card.element == element)
+		if (card.flag & Flag::token) == 0
+			&& (rarity == 4 || card.element == element)
 			&& (rarity == 0 || card.rarity == rarity)
 			&& match col % 3 {
 				0 => card.kind == Kind::Creature,
