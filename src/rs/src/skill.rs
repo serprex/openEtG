@@ -556,7 +556,6 @@ pub enum Skill {
 	v_bblood,
 	v_blackhole,
 	v_bow,
-	v_burrow,
 	v_cold,
 	v_cseed,
 	v_dagger,
@@ -565,13 +564,11 @@ pub enum Skill {
 	v_drainlife(u8),
 	v_dshield,
 	v_endow,
-	v_fiery,
 	v_firebolt(u8),
 	v_firewall,
 	v_flyingweapon,
 	v_freedom,
 	v_freeevade,
-	v_gaincharge2,
 	v_gratitude,
 	v_hatch,
 	v_heal,
@@ -602,9 +599,7 @@ pub enum Skill {
 	v_swarm,
 	v_swarmhp,
 	v_thorn,
-	v_unburrow,
 	v_virusplague,
-	v_void,
 }
 
 #[derive(Clone, Copy)]
@@ -1120,7 +1115,7 @@ impl Skill {
 	pub fn proc(self, ctx: &mut Game, c: i32, t: i32, data: &mut ProcData) {
 		match self {
 			Self::r#_tracedeath => {
-				ctx.incrStatus(ctx.turn, Stat::creaturesDied, 1);
+				ctx.incrStatus(ctx.turn, Stat::lives, 1);
 			}
 			Self::abomination => {
 				if data.tgt == c && data.active == Some(Self::mutation) {
@@ -1421,10 +1416,17 @@ impl Skill {
 				if ctx.get(c, Flag::burrowed) {
 					ctx.set(c, Flag::burrowed, false);
 					ctx.set(c, Stat::cast, 1);
+					if ctx.cardset() == CardSet::Original {
+						*ctx.get_mut(c, Stat::atk) *= 2;
+					}
 				} else {
-					ctx.set(c, Flag::airborne, false);
 					ctx.set(c, Flag::burrowed, true);
 					ctx.set(c, Stat::cast, 0);
+					if ctx.cardset() == CardSet::Original {
+						*ctx.get_mut(c, Stat::atk) /= 2;
+					} else {
+						ctx.set(c, Flag::airborne, false);
+					}
 				}
 			}
 			Self::butterfly => {
@@ -2246,7 +2248,7 @@ impl Skill {
 			Self::fungusrebirth => {
 				ctx.transform(c, card::As(ctx.get(c, Stat::card), card::Fungus));
 			}
-			Self::gaincharge2 | Self::v_gaincharge2 => {
+			Self::gaincharge2 => {
 				if c != t {
 					ctx.incrStatus(c, Stat::charges, 2);
 				}
@@ -4255,9 +4257,18 @@ impl Skill {
 				return Skill::plague.proc(ctx, c, t, data);
 			}
 			Self::void => {
+				let amt = if ctx.cardset() == CardSet::Open {
+					3
+				} else {
+					(if ctx.get_player(ctx.get_owner(c)).mark == etg::Darkness {
+						3
+					} else {
+						2
+					}) * ctx.get(c, Stat::charges)
+				};
 				let foe = ctx.get_foe(ctx.get_owner(c));
 				let maxhp = ctx.get_mut(foe, Stat::maxhp);
-				*maxhp = cmp::max(*maxhp - 3, 1);
+				*maxhp = cmp::max(maxhp.saturating_sub(3), 1);
 				let maxhp = *maxhp;
 				let hp = ctx.get_mut(foe, Stat::hp);
 				if *hp > maxhp {
@@ -4329,12 +4340,6 @@ impl Skill {
 						ctx.set(weapon, Stat::delayed, 6);
 					}
 				}
-			}
-			Self::v_burrow => {
-				ctx.set(c, Flag::burrowed, true);
-				ctx.setSkill(c, Event::Cast, &[Skill::v_unburrow]);
-				ctx.set(c, Stat::cast, 0);
-				*ctx.get_mut(c, Stat::atk) /= 2;
 			}
 			Self::v_cold => {
 				if ctx.get_kind(t) == Kind::Creature && data.dmg > 0 && ctx.rng_ratio(3, 10) {
@@ -4541,7 +4546,7 @@ impl Skill {
 						Skill::v_blackhole,
 					],
 					[
-						Skill::v_burrow,
+						Skill::burrow,
 						Skill::v_stoneform,
 						Skill::guard,
 						Skill::guard,
@@ -4559,7 +4564,7 @@ impl Skill {
 					[
 						Skill::growth(2, 0),
 						Skill::growth(2, 0),
-						Skill::v_fiery,
+						Skill::fiery,
 						Skill::destroy,
 						Skill::destroy,
 						Skill::rage,
@@ -4659,7 +4664,7 @@ impl Skill {
 				shmax = cmp::min(shmax - 1, 5);
 				let active = Cow::from(&shardSkills[shpick][shmax..=shmax]);
 				let activecost = match active[0] {
-					Skill::v_burrow => 1,
+					Skill::burrow => 1,
 					Skill::v_stoneform => 1,
 					Skill::guard => 1,
 					Skill::v_bblood => 2,
@@ -4684,7 +4689,7 @@ impl Skill {
 					Skill::adrenaline => 2,
 					Skill::mitosis => 4,
 					Skill::growth(2, 0) => 1,
-					Skill::v_fiery => -3,
+					Skill::fiery => -3,
 					Skill::destroy => 3,
 					Skill::rage => 2,
 					Skill::steam => 2,
@@ -4962,30 +4967,9 @@ impl Skill {
 					ctx.poison(t, 1);
 				}
 			}
-			Self::v_unburrow => {
-				ctx.set(c, Flag::burrowed, false);
-				ctx.setSkill(c, Event::Cast, &[Skill::v_burrow]);
-				ctx.set(c, Stat::cast, 1);
-				*ctx.get_mut(c, Stat::atk) *= 2;
-			}
 			Self::v_virusplague => {
 				ctx.die(c);
 				return Skill::v_plague.proc(ctx, c, t, data);
-			}
-			Self::v_void => {
-				let amt = if ctx.get_player(ctx.get_owner(c)).mark == etg::Darkness {
-					3
-				} else {
-					2
-				} * ctx.get(c, Stat::charges);
-				let foe = ctx.get_foe(ctx.get_owner(c));
-				let maxhp = ctx.get_mut(foe, Stat::maxhp);
-				*maxhp = cmp::max(*maxhp - amt, 1);
-				let maxhp = *maxhp;
-				let hp = ctx.get_mut(foe, Stat::hp);
-				if *hp > maxhp {
-					*hp = maxhp;
-				}
 			}
 			Self::accumulation
 			| Self::axe
@@ -5000,7 +4984,6 @@ impl Skill {
 			| Self::swarm
 			| Self::v_bow
 			| Self::v_dagger
-			| Self::v_fiery
 			| Self::v_hopedr
 			| Self::v_swarmhp => panic!("Pure skill triggered with impurity"),
 		}
@@ -5063,7 +5046,7 @@ impl Skill {
 					cr != 0 && ctx.hasskill(cr, Event::OwnAttack, Skill::quanta(etg::Light as i8))
 				})
 				.count() as i32,
-			Self::fiery | Self::v_fiery => {
+			Self::fiery => {
 				let pl = ctx.get_player(ctx.get_owner(c));
 				pl.quanta(etg::Fire) as i32 / 5
 			}

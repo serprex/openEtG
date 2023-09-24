@@ -108,22 +108,18 @@ export default function Trade(props) {
 				x={450}
 				onMouseOver={(i, card) => setCard(card)}
 			/>
-			<Text
-				text={`${gold() + calcWealth(Cards, deck(), true)}$`}
-				style="position:absolute;left:100px;top:235px"
-			/>
-			<Text
-				text={`(${gold()}$)`}
-				style="position:absolute;left:250px;top:235px"
-			/>
-			<Text
-				text={`${gopher() + calcWealth(Cards, offer(), true)}$`}
-				style="position:absolute;left:350px;top:235px"
-			/>
-			<Text
-				text={`(${gopher()}$)`}
-				style="position:absolute;left:500px;top:235px"
-			/>
+			<div style="position:absolute;left:100px;top:235px">
+				<Text text={`${gold() + calcWealth(Cards, deck(), true)}$`} />
+			</div>
+			<div style="position:absolute;left:250px;top:235px">
+				<Text text={`(${gold()}$)`} />
+			</div>
+			<div style="position:absolute;left:350px;top:235px">
+				<Text text={`${gopher() + calcWealth(Cards, offer(), true)}$`} />
+			</div>
+			<div style="position:absolute;left:500px;top:235px">
+				<Text text={`(${gopher()}$)`} />
+			</div>
 			<input
 				type="button"
 				value="Cancel"

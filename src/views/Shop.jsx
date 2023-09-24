@@ -166,11 +166,12 @@ export default function Shop() {
 				class="bgbox"
 				style="position:absolute;left:768px;top:90px;width:94px;height:184px"
 			/>
-			<Text
-				text={rx.user.gold + '$'}
-				style="position:absolute;left:775px;top:101px"
-			/>
-			<Text text={info1()} style="position:absolute;left:50px;top:25px" />
+			<div style="position:absolute;left:775px;top:101px">
+				<Text text={rx.user.gold + '$'} />
+			</div>
+			<div style="position:absolute;left:50px;top:25px">
+				<Text text={info1()} />
+			</div>
 			<span style="position:absolute;left:50px;top:50px">{info2()}</span>
 			<ExitBtn x={775} y={246} />
 			{hasFreePacks() && (
@@ -232,16 +233,12 @@ export default function Shop() {
 								top: '278px',
 							}}
 						/>
-						<Text
-							text={pack.cost + '$'}
-							style={{
-								position: 'absolute',
-								left: `${48 + 176 * n()}px`,
-								top: '542px',
-								width: '160px',
-								'text-align': 'center',
-							}}
-						/>
+						<div
+							style={`position:absolute;left:${
+								48 + 176 * n()
+							}px;top:542px;width:160px;text-align:center`}>
+							<Text text={pack.cost + '$'} />
+						</div>
 					</>
 				)}
 			</For>

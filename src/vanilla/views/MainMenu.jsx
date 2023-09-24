@@ -181,10 +181,9 @@ export default function OriginalMainMenu() {
 				style="position:absolute;left:300px;top:140px"
 			/>
 			<ExitBtn x={9} y={140} />
-			<Text
-				text={`${rx.orig.electrum}$`}
-				style="font-size:14px;pointer-events:none;position:absolute;left:8px;top:160px"
-			/>
+			<div style="font-size:14px;pointer-events:none;position:absolute;left:8px;top:160px">
+				<Text text={`${rx.orig.electrum}$`} />
+			</div>
 			{ocard && <Card y={300} card={ocard} />}
 		</div>
 	);

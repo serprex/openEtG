@@ -85,7 +85,9 @@ function App() {
 	return (
 		<>
 			<div style="display:flex;justify-content:space-between">{form}</div>
-			<Text text={info()} style="width:900px" />
+			<div style="width:900px">
+				<Text text={info()} />
+			</div>
 		</>
 	);
 }

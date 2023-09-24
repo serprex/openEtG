@@ -52,12 +52,13 @@ function RenderInfo(props) {
 					y={props.y}
 				/>
 			)}
-			<Text
-				style={`position:absolute;left:100px;top:${4 + props.y}px`}
-				text={`W-L: ${props.info.win ?? 0} - ${props.info.loss ?? 0}, Rank: ${
-					props.info.rank ?? 'Inactive'
-				}, ${(props.info.win ?? 0) * 15 + (props.info.loss ?? 0) * 5}$`}
-			/>
+			<div style={`position:absolute;left:100px;top:${4 + props.y}px`}>
+				<Text
+					text={`W-L: ${props.info.win ?? 0} - ${props.info.loss ?? 0}, Rank: ${
+						props.info.rank ?? 'Inactive'
+					}, ${(props.info.win ?? 0) * 15 + (props.info.loss ?? 0) * 5}$`}
+				/>
+			</div>
 			<input
 				readOnly
 				style={`position:absolute;left:330px;top:${4 + props.y}px;width:190px`}
@@ -133,12 +134,13 @@ export default function ArenaInfo() {
 
 	return (
 		<>
-			<Text
-				style="position:absolute;left:96px;top:560px"
-				text={
-					'Earn 5$ when your deck is faced, & 10$ more when it wins\nEarn 25$ per age of old deck when creating new deck, up to 350$'
-				}
-			/>
+			<div style="position:absolute;left:96px;top:560px">
+				<Text
+					text={
+						'Earn 5$ when your deck is faced, & 10$ more when it wins\nEarn 25$ per age of old deck when creating new deck, up to 350$'
+					}
+				/>
+			</div>
 			<ExitBtn x={8} y={300} />
 			<Show when={AB().A}>
 				<RenderInfo info={AB().A} y={0} name={user.name} />

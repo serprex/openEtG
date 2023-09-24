@@ -18,7 +18,9 @@ export function Tutor(props) {
 				<div class="tutorialbg">
 					<For each={props.panels}>
 						{([style, text]) => (
-							<Text class="tutorialbox" text={text} style={style} />
+							<div class="tutorialbox" style={style}>
+								<Text text={text} />
+							</div>
 						)}
 					</For>
 				</div>

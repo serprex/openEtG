@@ -78,10 +78,9 @@ export default function OriginalUpgrade(props) {
 					setDeck(newdeck);
 				}}
 			/>
-			<Text
-				text={`${rx.orig.electrum}$`}
-				style="position:absolute;left:4px;top:235px"
-			/>
+			<div style="position:absolute;left:4px;top:235px">
+				<Text text={`${rx.orig.electrum}$`} />
+			</div>
 			<div style="position:absolute;left:200px;top:4px">
 				{canBuy() && rx.orig.electrum < buyCost()
 					? `Need ${buyCost() - rx.orig.electrum} more to afford card${
@@ -94,7 +93,9 @@ export default function OriginalUpgrade(props) {
 					: ''}
 			</div>
 			<div style="position:absolute;left:100px;top:235px">
-				<Text text={`${buyCost()}$`} style="display:inline;margin-right:4px" />
+				<div style="display:inline;margin-right:4px">
+					<Text text={`${buyCost()}$`} />
+				</div>
 				<Show when={canBuy() && rx.orig.electrum >= buyCost()}>
 					<input
 						type="button"
@@ -112,7 +113,9 @@ export default function OriginalUpgrade(props) {
 				</Show>
 			</div>
 			<div style="position:absolute;left:300px;top:235px">
-				<Text text={`${sellCost()}$`} style="display:inline;margin-right:4px" />
+				<div style="display:inline;margin-right:4px">
+					<Text text={`${sellCost()}$`} />
+				</div>
 				<Show when={canSell()}>
 					<input
 						type="button"
@@ -130,10 +133,9 @@ export default function OriginalUpgrade(props) {
 				</Show>
 			</div>
 			<div style="position:absolute;left:500px;top:235px">
-				<Text
-					text={`${upgradeCost()}$`}
-					style="display:inline;margin-right:4px"
-				/>
+				<span style="margin-right:4px">
+					<Text text={`${upgradeCost()}$`} />
+				</span>
 				<Show when={canUpgrade() && rx.orig.electrum >= upgradeCost()}>
 					<input
 						type="button"

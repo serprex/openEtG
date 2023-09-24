@@ -114,10 +114,9 @@ export default function OriginalResult({ game }) {
 				)}
 			</For>
 			{electrumwon > 0 && (
-				<Text
-					text={`${electrumwon}$`}
-					style="text-align:center;width:900px;position:absolute;left:0px;top:550px"
-				/>
+				<div style="text-align:center;width:900px;position:absolute;left:0px;top:550px">
+					<Text text={`${electrumwon}$`} />
+				</div>
 			)}
 		</>
 	);

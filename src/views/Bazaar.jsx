@@ -314,10 +314,9 @@ export default function Bazaar() {
 					/>
 				</>
 			)}
-			<Text
-				text={rx.user.gold + '$'}
-				style="position:absolute;left:5px;top:240px"
-			/>
+			<div style="position:absolute;left:5px;top:240px">
+				<Text text={rx.user.gold + '$'} />
+			</div>
 			<Card x={732} y={8} card={bcard()} />
 			<CardSelector
 				cards={Cards}

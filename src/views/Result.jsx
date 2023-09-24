@@ -200,7 +200,7 @@ function computeBonuses(game, p1id, lefttext, streakrate, setTip, clearTip) {
 		}
 		replayGame.nextCmd(move);
 	}
-	replayStats.creaturesDied = replayGame.get(p1id, 'creaturesDied');
+	replayStats.creaturesDied = replayGame.get(p1id, 'lives');
 
 	const p1foe = game.get_foe(p1id);
 	const bonus = BonusList.reduce((bsum, bonus) => {
@@ -222,13 +222,12 @@ function computeBonuses(game, p1id, lefttext, streakrate, setTip, clearTip) {
 
 export default function Result(props) {
 	const rx = store.useRx();
-	const { game } = props;
+	const { game } = props,
+		p1id = game.userId(rx.user.name);
 	const [tooltip, setTip] = createSignal(null);
 	const leftext = [];
 	let goldreward = game.data.goldreward,
 		cardreward = game.data.cardreward;
-
-	const p1id = game.userId(rx.user ? rx.user.name : '');
 
 	const canRematch = () =>
 		game.data.rematch &&
@@ -418,22 +417,17 @@ export default function Result(props) {
 			{game.winner === p1id && (
 				<>
 					{goldreward > 0 && (
-						<Text
-							text={`${goldreward - (game.data.cost | 0)}$`}
-							style="text-align:center;width:900px;position:absolute;left:0px;top:550px"
-						/>
+						<div style="text-align:center;width:900px;position:absolute;left:0;top:550px">
+							<Text text={`${goldreward - (game.data.cost | 0)}$`} />
+						</div>
 					)}
 					{cards}
-					<Text
-						text={game.data.wintext || 'You won!'}
-						style={{
-							'text-align': 'center',
-							width: '700px',
-							position: 'absolute',
-							left: '100px',
-							bottom: cardreward ? '444px' : '180px',
-						}}
-					/>
+					<div
+						style={`text-align:center;width:700px;position:absolute;left:100px;bottom:${
+							cardreward ? 444 : 180
+						}px`}>
+						<Text text={game.data.wintext || 'You won!'} />
+					</div>
 				</>
 			)}
 			<span style="position:absolute;left:8px;top:290px">{lefttext}</span>

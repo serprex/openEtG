@@ -65,10 +65,9 @@ function CostRewardHeaders(props) {
 }
 function LabelText(props) {
 	return (
-		<Text
-			text={props.text}
-			style={`font-size:14px;pointer-events:none;${props.style ?? ''}`}
-		/>
+		<div style={`font-size:14px;pointer-events:none;${props.style ?? ''}`}>
+			<Text text={props.text} />
+		</div>
 	);
 }
 function CostText(props) {

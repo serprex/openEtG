@@ -354,7 +354,7 @@ impl<'a> SkillThing<'a> {
 			Skill::feed => Cow::from("Give target creature 1 poison counter, gain 3|3, & lose immaterial"),
 			Skill::fickle =>
 				Cow::from("Swap target card in either player's hand with a random card from their deck that they have enough quanta to play"),
-			Skill::fiery => Cow::from("Gains +1 strength for every 5:6 owned"),
+			Skill::fiery => Cow::from("Gains 1 strength for every 5:6 owned"),
 			Skill::firebolt =>
 				Cow::from("Deal 3 spell damage plus one per 4:6 you have after playing this card. If target is frozen, it loses frozen status"),
 			Skill::firebrand => Cow::from("Last an additional turn when targeted with Tempering"),
@@ -760,7 +760,10 @@ impl<'a> SkillThing<'a> {
 				Cow::from("Sacrifice this creature. Give target creature 1 poison counter. Give opponent 1 poison counter"),
 			Skill::virusplague =>
 				Cow::from("Sacrifice this creature. Give target player's creatures 1 poison counter"),
-			Skill::void => Cow::from("Reduce opponent's maximum HP by 3"),
+			Skill::void => Cow::from(if self.set() == CardSet::Open {
+				"Reduce opponent's maximum HP by 3"} else {
+			"Reduce foe's maximum HP by 2, 3 if mark is 1:11"
+				}),
 			Skill::voidshell =>
 				Cow::from("Block all damage from attackers. Reduce your maximum HP equal to the damage blocked by this card"),
 			Skill::web => Cow::from("Target creature loses airborne status"),
@@ -777,7 +780,6 @@ impl<'a> SkillThing<'a> {
 			Skill::v_bblood => Cow::from("Target creature gains 0|20 & is delayed 6 turns"),
 			Skill::v_blackhole =>
 				Cow::from("Absorb 3 quanta per element from target player. Heal 1 per absorbed quantum"),
-			Skill::v_burrow => Cow::from("Burrow this creature. Strength is halved while burrowed"),
 			Skill::v_cold => Cow::from("30% chance to freeze attackers for 3"),
 			Skill::v_cseed => Cow::from("A random effect is inflicted to target creature"),
 			Skill::v_dessication =>
@@ -786,13 +788,11 @@ impl<'a> SkillThing<'a> {
 			Skill::v_drainlife(..) => Cow::from("Drain 2HP from target, plus an extra 2HP per 10:11 remaining"),
 			Skill::v_dshield => Cow::from("Become immaterial until next turn"),
 			Skill::v_endow => Cow::from("Replicate attributes of target weapon"),
-			Skill::v_fiery => Cow::from("Increment damage per 5:6 owned"),
 			Skill::v_firebolt(..) => Cow::from("Deals 3 damage to target. Deal 3 more per 10:6 remaining"),
 			Skill::v_firewall => Cow::from("Damage attackers"),
 			Skill::v_flyingweapon => Cow::from("Own weapon becomes a flying creature"),
 			Skill::v_freedom =>
 				Cow::from("Your airborne creatures have a 25% chance to deal 50% more damage, bypass shields & evade targeting if 1:9"),
-			Skill::v_gaincharge2 => Cow::from("Gain 2 stacks per death"),
 			Skill::v_gratitude => Cow::from("Heal owner 3, 5 if your mark is 1:5"),
 			Skill::v_hatch => Cow::from("Become a random creature"),
 			Skill::v_heal => Cow::from("Heal self 20"),
@@ -839,7 +839,6 @@ impl<'a> SkillThing<'a> {
 			Skill::v_swarm => Cow::from("Increment hp per scarab"),
 			Skill::v_thorn => Cow::from("75% chance to poison attackers"),
 			Skill::v_virusplague => Cow::from("Sacrifice self & poison foe's creatures"),
-			Skill::v_void => Cow::from("Reduce foe's maximum HP by 2, 3 if mark is 1:11"),
 			Skill::dagger | Skill::hammer | Skill::bow | Skill::staff | Skill::disc | Skill::axe | Skill::v_dagger | Skill::v_bow => {
 				let mut s = String::from("Gain 1 strength if your mark is ");
 				s.push_str(match sk {
@@ -1076,13 +1075,19 @@ pub fn thingText(game: &Game, id: i32) -> String {
 			});
 		}
 		for &(k, v) in game.get_thing(id).status.iter() {
-			write!(ret, "{}{}", v, match k {
-				Stat::nova => " nova\n",
-				Stat::nova2 => " nova2\n",
-				Stat::poison => " poison\n",
-				Stat::sosa => " sosa\n",
-				_ => continue,
-			}).ok();
+			write!(
+				ret,
+				"{}{}",
+				v,
+				match k {
+					Stat::nova => " nova\n",
+					Stat::nova2 => " nova2\n",
+					Stat::poison => " poison\n",
+					Stat::sosa => " sosa\n",
+					_ => continue,
+				}
+			)
+			.ok();
 		}
 		ret.truncate(ret.len() - 1);
 	}

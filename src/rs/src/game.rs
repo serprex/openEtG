@@ -374,7 +374,6 @@ pub enum Stat {
 	charges,
 	cost,
 	costele,
-	creaturesDied,
 	delayed,
 	dive,
 	flooding,
@@ -1326,7 +1325,7 @@ impl Game {
 			&[
 				Skill::v_hatch,
 				Skill::freeze(3),
-				Skill::v_burrow,
+				Skill::burrow,
 				Skill::destroy,
 				Skill::v_steal,
 				Skill::dive,

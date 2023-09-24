@@ -73,13 +73,14 @@ export default function QuestView(props) {
 				style="position:absolute;left:8px;top:8px;width:880px;height:108px"
 			/>
 			<ExitBtn x={750} y={120} />
-			<Text
-				text={
-					questInfo().selectedQuest?.info ??
-					"Click list items to see quest lines, & FIGHT button to challenge them!\nNames in red are quests you haven't completed."
-				}
-				style="position:absolute;left:26px;top:26px;max-width:850px"
-			/>
+			<div style="position:absolute;left:26px;top:26px;max-width:850px">
+				<Text
+					text={
+						questInfo().selectedQuest?.info ??
+						"Click list items to see quest lines, & FIGHT button to challenge them!\nNames in red are quests you haven't completed."
+					}
+				/>
+			</div>
 			{questInfo().selectedQuest?.key && (
 				<input
 					type="button"

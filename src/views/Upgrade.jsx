@@ -100,19 +100,18 @@ export default function Upgrade() {
 				onClick={autoCards}
 				style="position:absolute;left:5px;top:138px"
 			/>
-			<Text
-				text={user.gold + '$'}
-				style="position:absolute;left:5px;top:240px"
-			/>
-			<Text
-				text={state().info1}
-				style="position:absolute;left:250px;top:50px"
-			/>
-			<Text
-				text={state().info3}
-				style="position:absolute;left:250px;top:95px"
-			/>
-			<Text text={error()} style="position:absolute;left:100px;top:170px" />
+			<div style="position:absolute;left:5px;top:240px">
+				<Text text={user.gold + '$'} />
+			</div>
+			<div style="position:absolute;left:250px;top:50px">
+				<Text text={state().info1} />
+			</div>
+			<div style="position:absolute;left:250px;top:95px">
+				<Text text={state().info3} />
+			</div>
+			<div style="position:absolute;left:100px;top:170px">
+				<Text text={error()} />
+			</div>
 			<Card x={534} y={8} card={state().card1} />
 			<Card x={734} y={8} card={state().card2} />
 			<input

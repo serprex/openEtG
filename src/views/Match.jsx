@@ -303,8 +303,7 @@ function TextFx(props) {
 	const y = () => props.y0 + yy();
 	const fade = () => 1 - Math.tan(yy() / 91);
 	return (
-		<Text
-			text={props.text}
+		<div
 			style={{
 				position: 'absolute',
 				left: `${props.pos.x}px`,
@@ -315,8 +314,9 @@ function TextFx(props) {
 				'text-align': 'center',
 				'pointer-events': 'none',
 				'text-shadow': '1px 1px 2px #000',
-			}}
-		/>
+			}}>
+			<Text text={props.text} />
+		</div>
 	);
 }
 
@@ -635,35 +635,18 @@ function Thing(props) {
 						/>
 					</Show>
 					<div style="position:absolute;width:64px">
-						<Text
-							text={memo().topText}
-							icoprefix="se"
-							style={{
-								width: '64px',
-								'white-space': 'nowrap',
-								overflow: 'hidden',
-								'background-color': bgcolor(),
-							}}
-						/>
-						<Text
-							text={memo().statText}
-							icoprefix="se"
-							style={`float:right;background-color:${bgcolor()}`}
-						/>
+						<div
+							style={`width:64px;white-space:nowrap;overflow:hidden;background-color:${bgcolor()}`}>
+							<Text text={memo().topText} icoprefix="se" />
+						</div>
+						<div style={`float:right;background-color:${bgcolor()}`}>
+							<Text text={memo().statText} icoprefix="se" />
+						</div>
 						<Show when={!isSpell()}>
-							<Text
-								text={props.game.getCard(props.id).name}
-								icoprefix="se"
-								style={{
-									position: 'absolute',
-									top: '54px',
-									height: '10px',
-									width: '64px',
-									overflow: 'hidden',
-									'white-space': 'nowrap',
-									'background-color': bgcolor(),
-								}}
-							/>
+							<div
+								style={`position:absolute;top:54px;height:10px;width:64px;overflow:hidden;white-space:nowrap;background-color:${bgcolor()}`}>
+								<Text text={props.game.getCard(props.id).name} icoprefix="se" />
+							</div>
 						</Show>
 					</div>
 				</div>
@@ -812,12 +795,9 @@ function FoePlays(props) {
 	return (
 		<Show when={props.foeplays}>
 			<div
-				style={{
-					position: 'absolute',
-					left: '800px',
-					top: `${540 - props.foeplays.length * 20}px`,
-					'z-index': '6',
-				}}>
+				style={`position:absolute;left:800px;top:${
+					540 - props.foeplays.length * 20
+				}px;z-index:6`}>
 				<For each={props.foeplays}>
 					{play => (
 						<CardImage
@@ -902,7 +882,7 @@ export default function Match(props) {
 		props.replay ? replayhistory()[replayindex()] : tempgame() ?? pgame();
 
 	const [p1id, setPlayer1] = createSignal(
-		props.replay ? game().turn : game().userId(rx.user ? rx.user.name : ''),
+		props.replay ? game().turn : game().userId(rx.user.name),
 	);
 	const [p2id, setPlayer2] = createSignal(game().get_foe(p1id()));
 
@@ -1229,7 +1209,7 @@ export default function Match(props) {
 					);
 					return;
 				} else {
-					const daily = game.data.daily;
+					const { daily } = game.data;
 					sock.userExec('donedaily', {
 						daily: daily === 4 ? 5 : daily === 3 ? 0 : daily,
 					});
@@ -1746,12 +1726,12 @@ export default function Match(props) {
 									</>
 								)}
 							</Tween>
-							<Text
-								text={hptext()}
+							<div
 								style={`text-align:center;width:100px;pointer-events:none;font-size:12px;line-height:1.1;position:absolute;left:0;top:${
 									j ? 40 : 535
-								}px;text-shadow:1px 1px 1px #000,2px 2px 2px #000;z-index:2`}
-							/>
+								}px;text-shadow:1px 1px 1px #000,2px 2px 2px #000;z-index:2`}>
+								<Text text={hptext()} />
+							</div>
 							<div
 								class={game().deck_length(pl()) ? 'ico ccback' : ''}
 								style={`position:absolute;left:103px;top:${
@@ -1802,7 +1782,13 @@ export default function Match(props) {
 			</span>
 			<For each={Array.from(effects().effects)}>{fx => untrack(fx)}</For>
 			<Card x={734} y={hovery()} card={hovercard()} />
-			<Text class="infobox" icoprefix="te" {...tooltip()} />
+			<Show when={tooltip()}>
+				{tooltip => (
+					<div class="infobox" style={tooltip().style}>
+						<Text icoprefix="te" text={tooltip().text} />
+					</div>
+				)}
+			</Show>
 			{!!foeplays().get(p2id())?.length && (
 				<input
 					type="button"

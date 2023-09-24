@@ -226,7 +226,7 @@ fn eval_skill(
 				}
 			}
 			Skill::bubbleclear => 3.0,
-			Skill::burrow | Skill::v_burrow | Skill::v_unburrow => 1.0,
+			Skill::burrow => 1.0,
 			Skill::butterfly => 12.0,
 			Skill::catapult => 6.0,
 			Skill::chimera => 4.0,
@@ -632,7 +632,13 @@ fn eval_skill(
 				}
 			}
 			Skill::virusplague | Skill::v_virusplague => 1.0,
-			Skill::void => 5.0,
+			Skill::void => {
+				if ctx.cardset() == CardSet::Open {
+					5.0
+				} else {
+					(ctx.get(c, Stat::charges) * 5) as f32
+				}
+			}
 			Skill::web => 1.0,
 			Skill::wind => ctx.get(c, Stat::storedpower) as f32 / 2.0,
 			Skill::wisdom => 4.0,
@@ -690,7 +696,6 @@ fn eval_skill(
 			Skill::v_gratitude => (ctx.get(c, Stat::charges) * 4) as f32,
 			Skill::v_heal => 8.0,
 			Skill::v_thorn => 5.0,
-			Skill::v_void => (ctx.get(c, Stat::charges) * 5) as f32,
 			_ => 0.0,
 		})
 		.sum()
