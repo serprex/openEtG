@@ -99,7 +99,7 @@ impl Card {
 	}
 
 	pub fn free(&self) -> bool {
-		self.rarity == 0 && (self.flag & Flag::pillar) != 0 && self.upped()
+		self.rarity == 0 && (self.flag & Flag::pillar) != 0 && !self.upped()
 	}
 }
 
