@@ -1,5 +1,4 @@
-import { render } from 'solid-js/web';
-import { chatMsg } from '../store.jsx';
+import { chatMsg, doNav, Login } from '../store.jsx';
 
 let lastError = 0;
 window.onerror = function (...args) {
@@ -10,11 +9,14 @@ window.onerror = function (...args) {
 	}
 };
 
-import { emit } from '../sock.jsx';
-import App from '../views/App.js';
-import Rightpane from '../views/Rightpane.jsx';
+doNav(Login);
+import { render } from 'solid-js/web';
 
-render(() => <App />, document.getElementById('leftpane'));
+import Rightpane from '../views/Rightpane.jsx';
 render(() => <Rightpane />, document.getElementById('rightpane'));
 
+import App from '../views/App.js';
+render(() => <App />, document.getElementById('leftpane'));
+
+import { emit } from '../sock.jsx';
 emit({ x: 'motd' });

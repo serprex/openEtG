@@ -4,7 +4,11 @@ import { createStore, reconcile } from 'solid-js/store';
 import * as usercmd from './usercmd.js';
 import { changeMusic, changeSound } from './audio.js';
 import { mergedecks, removedecks } from './etgutil.js';
-import Login from './views/Login.jsx';
+
+export const Login =
+	typeof kongregateAPI === 'undefined'
+		? import('./views/Login.jsx')
+		: import('./views/KongLogin.jsx');
 
 const opts = { channel: 'Main' };
 let hasLocalStorage = true;
@@ -19,7 +23,7 @@ changeMusic(opts.enableMusic);
 
 const listeners = new Set();
 export let state = {
-	nav: { view: Login, props: undefined, key: 0 },
+	nav: { view: () => null, props: undefined, key: 0 },
 	opts,
 	chat: new Map(),
 	muted: new Set(),

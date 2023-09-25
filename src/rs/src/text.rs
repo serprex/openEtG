@@ -192,18 +192,13 @@ impl<'a> SkillThing<'a> {
 				let mut s = String::from("Each stack fully blocks one attacker");
 				if self.set() == CardSet::Open {
 					s.push_str(" & is then destroyed");
-				} else {
-					s.push('.');
 				}
 				Cow::from(s)
 			}
 			Skill::bloodmoon => Cow::from("Aquatic creatures gain \"Gain 1:8 when it attacks.\"\nGolems gain \"Damage dealt by this card also reduces the defender's maximum HP.\"\nNocturnal creatures gain \"Heal yourself equal to the damage dealt by this card.\""),
 			Skill::bolsterintodeck => Cow::from("Add 3 copies of target creature on top of your deck"),
 			Skill::boneyard => {
-				let mut s = String::from("Whenever a creature which isn't a Skeleton dies, summon a ");
-				s.push_str(if self.upped() { "2|2" } else { "1|1" });
-				s.push_str(" Skeleton");
-				Cow::from(s)
+				Cow::from(format!("Whenever a creature which isn't a Skeleton dies, summon a {} Skeleton", if self.upped() { "2|2" } else { "1|1" }))
 			}
 			Skill::bounce => Cow::from("When dying instead return to owner's hand. Modified state besides this effect remains when played again"),
 			Skill::bravery => {
@@ -724,9 +719,9 @@ impl<'a> SkillThing<'a> {
 				"Deal 3 damage to target creature, then shuffle Throw Rock into its owner's deck"
 			}),
 			Skill::tick => Cow::from(if self.upped() {
-				"This creature takes 1 damage. If this damage kills the creature, deal 18 spell damage to opponent"
-			} else {
 				"This creature takes 3 damage. If this damage kills the creature, deal 4 spell damage to all of opponent's creatures"
+			} else {
+				"This creature takes 1 damage. If this damage kills the creature, deal 18 spell damage to opponent"
 			}),
 			Skill::tidalhealing =>
 				Cow::from("Remove frozen status & poison counters from all your creatures. Your aquatic creatures gain \"Give 1 purify counter to this card's owner on hit. Throttled (only triggers twice from Adrenaline)\". This ability does not stack"),
@@ -812,9 +807,9 @@ impl<'a> SkillThing<'a> {
 				"Damage owner 10 on discard"
 			}),
 			Skill::v_pandemonium => Cow::from(if self.upped() {
-				"Random effects are inflicted to all creatures. Removes cloak"
-			} else {
 				"Random effects are inflicted to opponent's creatures. Removes cloak"
+			} else {
+				"Random effects are inflicted to all creatures. Removes cloak"
 			}),
 			Skill::v_plague => Cow::from("Poison foe's creatures. Removes cloak"),
 			Skill::v_readiness =>

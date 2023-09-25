@@ -113,7 +113,7 @@ function logout(cmd) {
 	sock.userEmit('logout');
 	store.setUser(null);
 	store.setOpt('remember', false);
-	store.doNav(import('./Login.jsx'));
+	store.doNav(store.Login);
 }
 
 export default function MainMenu(props) {

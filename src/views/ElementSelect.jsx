@@ -141,7 +141,7 @@ export default function ElementSelect() {
 						store.setUser(null);
 					}
 					store.setOpt('remember', false);
-					store.doNav(import('./Login.jsx'));
+					store.doNav(store.Login);
 				}}
 				style="position:absolute;left:800px;top:200px"
 			/>

@@ -49,7 +49,7 @@ export default function parseChat(e) {
 				sock.userEmit('delete');
 				store.setUser(null);
 				store.setOpt('remember', false);
-				store.doNav(import('./views/Login.jsx'));
+				store.doNav(store.Login);
 			} else {
 				store.chatMsg(
 					`Input '${user.name}yesdelete' into Player's Name to delete your account`,
