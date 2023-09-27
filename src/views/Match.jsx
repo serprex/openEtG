@@ -1467,7 +1467,7 @@ export default function Match(props) {
 		prev && pgame().replay.length === prev.replaylength
 			? prev
 			: {
-					expectedDamage: pgame().expectedDamage(expectedDamageSamples),
+					expectedDamage: pgame().expected_damage(expectedDamageSamples),
 					replaylength: pgame().replay.length,
 			  },
 	);

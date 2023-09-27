@@ -530,11 +530,12 @@ async fn handle_get_core(
 		}
 	} else if path == "/speed" {
 		use rand::RngCore;
-		let mut newpath = String::from("/speed/");
-		write!(newpath, "{}", rand::thread_rng().next_u32()).ok();
 		return response::Builder::new()
 			.status(302)
-			.header(header::LOCATION, newpath)
+			.header(
+				header::LOCATION,
+				format!("/speed/{}", rand::thread_rng().next_u32()),
+			)
 			.body(Bytes::new());
 	} else {
 		return response::Builder::new().status(404).body(Bytes::new());

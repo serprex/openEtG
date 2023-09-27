@@ -1,4 +1,3 @@
-import enums from './enum.json' assert { type: 'json' };
 import { asShiny, asUpped } from './etgutil.js';
 import * as wasm from './rs/pkg/etg.js';
 

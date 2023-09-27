@@ -219,15 +219,15 @@ impl<'a> SkillThing<'a> {
 			}
 			Skill::bubbleclear => Cow::from("Remove statuses (positive & negative) from target creature or permanent, & heal target creature 1.\nTarget gains a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages affected card"),
 			Skill::butterfly => Cow::from(if self.set() == CardSet::Open {
-					"Target creature or weapon with either strength or HP less than 3 has its skills replaced with \"3:1 Destroy target permanent.\""
+				"Target creature or weapon with either strength or HP less than 3 has its skills replaced with \"3:1 Destroy target permanent.\""
 			} else {
-					"Target creature with less attack than 3. Replace target's skills with \"3:1 Destroy target permanent\""
+				"Target creature with less attack than 3. Replace target's skills with \"3:1 Destroy target permanent\""
 			}),
 			Skill::burrow => Cow::from(if self.get_flag(Flag::burrowed) {
 				"Unburrow"
 			} else {
-					"Burrow this creature. Strength is halved while burrowed"
-				}),
+				"Burrow this creature. Strength is halved while burrowed"
+			}),
 			Skill::catapult => Cow::from("Sacrifice target creature you control to damage opponent for 100 * Creature's HP / (100 + Creature's HP). Frozen creautres deal 1.5x more. Poisoned creatures transfer their poison to opponent"),
 			Skill::catlife => {
 				let card = self.card();
@@ -642,9 +642,9 @@ impl<'a> SkillThing<'a> {
 			Skill::scramblespam =>
 				Cow::from("Randomize up to 9 quanta randomly chosen from target player's quanta pool. This ability may be used multiple times per turn"),
 			Skill::serendipity => Cow::from(if self.upped() {
-				"Add 3 random non-pillar cards to your hand. At least one will be 1:1"
-			} else {
 				"Add 3 random upgraded non-pillar cards to your hand. At least one will be 1:1"
+			} else {
+				"Add 3 random non-pillar cards to your hand. At least one will be 1:1"
 			}),
 			Skill::shtriga => Cow::from("Gain immaterial when your next turn starts"),
 			Skill::shuffle3 =>
@@ -654,9 +654,9 @@ impl<'a> SkillThing<'a> {
 			Skill::sing => Cow::from("Target creature without this ability attacks its owner"),
 			Skill::singularity => Cow::from("That was a bad idea"),
 			Skill::sinkhole => Cow::from(if self.upped() {
-				"Burrow target creature. Replace target creature's skills with 1:4: unburrow"
-			} else {
 				"Burrow target creature. Replace target creature's skills with 2:4: unburrow"
+			} else {
+				"Burrow target creature. Replace target creature's skills with 1:4: unburrow"
 			}),
 			Skill::siphon =>
 				Cow::from("Remove 1:0 randomly from opponent's quanta pool when this creature attacks. Gain 1:11 for each quanta removed. Throttled (only triggers twice from Adrenaline)"),
@@ -674,9 +674,9 @@ impl<'a> SkillThing<'a> {
 			Skill::solar => Cow::from("Gain 1:8 for each attacker"),
 			Skill::sosa =>
 				Cow::from(if self.upped() {
-					"Sacrifice 48HP. Consume all non-1:2 quanta. For two turns, damage heals you & healing damages you"
-				} else {
 					"Sacrifice 40HP. Consume all non-1:2 quanta. For two turns, damage heals you & healing damages you"
+				} else {
+					"Sacrifice 48HP. Consume all non-1:2 quanta. For two turns, damage heals you & healing damages you"
 				}),
 			Skill::soulcatch => Cow::from(
 				if self.set() == CardSet::Original && !self.upped() {
@@ -756,9 +756,10 @@ impl<'a> SkillThing<'a> {
 			Skill::virusplague =>
 				Cow::from("Sacrifice this creature. Give target player's creatures 1 poison counter"),
 			Skill::void => Cow::from(if self.set() == CardSet::Open {
-				"Reduce opponent's maximum HP by 3"} else {
-			"Reduce foe's maximum HP by 2, 3 if mark is 1:11"
-				}),
+				"Reduce opponent's maximum HP by 3"
+			} else {
+				"Reduce foe's maximum HP by 2, 3 if mark is 1:11"
+			}),
 			Skill::voidshell =>
 				Cow::from("Block all damage from attackers. Reduce your maximum HP equal to the damage blocked by this card"),
 			Skill::web => Cow::from("Target creature loses airborne status"),
@@ -834,21 +835,14 @@ impl<'a> SkillThing<'a> {
 			Skill::v_swarm => Cow::from("Increment hp per scarab"),
 			Skill::v_thorn => Cow::from("75% chance to poison attackers"),
 			Skill::v_virusplague => Cow::from("Sacrifice self & poison foe's creatures"),
-			Skill::dagger | Skill::hammer | Skill::bow | Skill::staff | Skill::disc | Skill::axe | Skill::v_dagger | Skill::v_bow => {
-				let mut s = String::from("Gain 1 strength if your mark is ");
-				s.push_str(match sk {
-					Skill::dagger => "1:2 1:11. Gain 1 strength per Darkness or Death non-pillar permanent you control",
-					Skill::hammer => "1:3 1:4",
-					Skill::bow => "1:8 1:9",
-					Skill::staff => "1:5 1:7",
-					Skill::disc => "1:1 1:12",
-					Skill::axe => "1:6 1:10",
-					Skill::v_dagger => "1:2 1:11",
-					Skill::v_bow => "1:9",
-					_ => "",
-				});
-				Cow::from(s)
-			}
+			Skill::dagger => Cow::from("Gain 1 strength if your mark is 1:2 1:11. Gain 1 strength per Darkness or Death non-pillar permanent you control"),
+			Skill::hammer => Cow::from("Gain 1 strength if your mark is 1:3 1:4"),
+			Skill::bow => Cow::from("Gain 1 strength if your mark is 1:8 1:9"),
+			Skill::staff => Cow::from("Gain 1 strength if your mark is 1:5 1:7"),
+			Skill::disc => Cow::from("Gain 1 strength if your mark is 1:1 1:12"),
+			Skill::axe => Cow::from("Gain 1 strength if your mark is 1:6 1:10"),
+			Skill::v_dagger => Cow::from("Gain 1 strength if your mark is 1:2 1:11"),
+			Skill::v_bow => Cow::from("Gain 1 strength if your mark is 1:9"),
 			_ => return None
 		})
 	}

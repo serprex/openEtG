@@ -5,8 +5,6 @@ import enums from './enum.json' assert { type: 'json' };
 import { randint } from './util.js';
 import * as wasm from './rs/pkg/etg.js';
 
-const infoskipkeys = new Set(['casts', 'gpull', 'hp', 'maxhp']);
-
 function decodeSkillName(cell) {
 	const skid = cell & 0xffff,
 		n = enums.Skill[skid],
@@ -126,9 +124,6 @@ export default class Game {
 			newgame.next(move, false);
 		}
 		return newgame;
-	}
-	expectedDamage(samples) {
-		return this.expected_damage(samples);
 	}
 	replayJson() {
 		return (
