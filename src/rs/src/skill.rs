@@ -3329,7 +3329,12 @@ impl Skill {
 			Self::photosynthesis => {
 				ctx.fx(c, Fx::Quanta(2, etg::Life as u8));
 				ctx.spend(ctx.get_owner(c), etg::Life, -2);
-				if ctx.get(c, Stat::castele) != etg::Chroma || ctx.get(c, Stat::cast) > 1 {
+				if ctx.get(c, Stat::cast)
+					> if ctx.get(c, Stat::castele) == etg::Chroma {
+						1
+					} else {
+						0
+					} {
 					ctx.set(c, Stat::casts, 1);
 				}
 			}
