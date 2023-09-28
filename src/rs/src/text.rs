@@ -209,7 +209,7 @@ impl<'a> SkillThing<'a> {
 				s.push_str(" cards. Draw cards equal to what opponent drew");
 				Cow::from(s)
 			}
-			Skill::brawl => Cow::from("Your creatures attack. If a creature exists in opposing creature slot, the two creatures deal their damage to one another instead of opponent. Consumes all remaining 1:3"),
+			Skill::brawl => Cow::from("Your creatures attack. If a creature exists in opposing creature slot, the two creatures deal their damage to one another instead of opponent. Consumes all 1:3"),
 			Skill::brew => Cow::from("Add a random Alchemy card to your hand. Possible cards are Antimatter, Black Hole, Adrenaline, Nymph's Tears, Unstable Gas, Liquid Shadow, Aflatoxin, Basilisk Blood, Rage Potion, Luciferin, Precognition, Quintessence"),
 			Skill::brokenmirror => {
 				let mut s = String::from("When opponent plays a creature from their hand, summon a ");
@@ -366,7 +366,7 @@ impl<'a> SkillThing<'a> {
 			Skill::forceplay =>
 				Cow::from("The owner of target card in hand plays that card on a random target if they are able, or the owner of target card in play without this ability activates that card's ability on a random target if they are able"),
 			Skill::fractal =>
-				Cow::from("Fill your hand with copies of target creature. Remove all remaining 1:12"),
+				Cow::from("Fill your hand with copies of target creature. Consumes all 1:12. If this spell costs 1:0, consumes all quanta"),
 			Skill::freeevade =>
 				Cow::from("If your opponent has a shield, your airborne creatures have a 25% chance to bypass the shield. Otherwise, your creatures have a 25% chance to deal 50% more damage. Your creatures have 20% chance to evade opponent's targeted spells & skills"),
 			Skill::freeze(x) =>
@@ -481,7 +481,7 @@ impl<'a> SkillThing<'a> {
 			Skill::mimic =>
 				Cow::from("Whenever another creature enters play, transform this card into a fresh copy of that creature. This creature retains this ability"),
 			Skill::miracle =>
-				Cow::from("Heal yourself to one below your maximum HP. Consumes all remaining 1:8"),
+				Cow::from("Heal yourself to one below your maximum HP. Consumes all 1:8"),
 			Skill::mitosis => Cow::from("Summon a fresh copy of this creature"),
 			Skill::mitosisspell =>
 				Cow::from("Target creature gains 0|1. Target's active ability becomes \"Summon a fresh copy of this creature.\" That ability costs target's cost"),
@@ -668,7 +668,7 @@ impl<'a> SkillThing<'a> {
 			Skill::skull =>
 				Cow::from("Attacking creatures may randomly die & are replaced by Skeletons. Creatures with lower HP are more likely to die"),
 			Skill::skyblitz =>
-				Cow::from("Your airborne creatures all dive (double their strength until end of turn.) Consumes all remaining 1:9"),
+				Cow::from("Your airborne creatures all dive (double their strength until end of turn.) Consumes all 1:9"),
 			Skill::slow => Cow::from("Non-ranged attackers are delayed for one turn after their attack. Delayed creatures may not attack or use active skills"),
 			Skill::snipe => Cow::from("Deal 3 damage to target creature"),
 			Skill::solar => Cow::from("Gain 1:8 for each attacker"),

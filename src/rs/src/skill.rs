@@ -2206,9 +2206,17 @@ impl Skill {
 			}
 			Self::fractal => {
 				ctx.fx(t, Fx::Fractal);
+				let costele = ctx.get(c, Stat::costele);
 				let owner = ctx.get_owner(c);
-				ctx.set_quanta(owner, etg::Aether, 0);
-				let copies = 8 - ctx.get_player(owner).hand_len();
+				let copies = {
+					let pl = ctx.get_player_mut(owner);
+					if costele == etg::Chroma {
+						pl.quanta.fill(0);
+					} else {
+						pl.quanta[etg::Aether as usize - 1] = 0;
+					}
+					8 - pl.hand_len()
+				};
 				let code = ctx.get(t, Stat::card);
 				for _ in 0..copies {
 					let inst = ctx.new_thing(code, owner);

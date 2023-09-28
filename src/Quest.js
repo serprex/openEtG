@@ -6,7 +6,9 @@ import Cards from './Cards.js';
 import Game from './Game.js';
 
 export function requireQuest(quest, user) {
-	return quest.questdependencies.every(dependency => user.quests[dependency]);
+	return (quest.questdependencies ?? []).every(
+		dependency => user.quests[dependency],
+	);
 }
 
 export const quarks = Object.create(null);

@@ -38,9 +38,7 @@ export default function QuestView(props) {
 				const area = qbag.children[i];
 				if (typeof area === 'string') {
 					const quark = Quest.quarks[area];
-					if (quark.questdependencies && !Quest.requireQuest(quark, rx.user)) {
-						continue;
-					}
+					if (!Quest.requireQuest(quark, rx.user)) continue;
 				}
 				questAreas.push(
 					<QuestButton
