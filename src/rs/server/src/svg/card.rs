@@ -75,7 +75,47 @@ pub fn card(code: i32) -> Option<String> {
 		))
 	});
 	result.push_str(".webp' style='position:absolute;top:-130px;left:0px'/>");
-	result.push_str(&etg::text::rawCardText(cards, card).replace('&', "&amp;"));
+	let mut text = etg::text::rawCardText(cards, card).replace('&', "&amp;");
+	let colons = text.rmatch_indices(':').map(|m| m.0).collect::<Vec<_>>();
+	for colon_idx in colons {
+		let start = if matches!(text.as_bytes().get(colon_idx - 1), Some(b'0'..=b'9')) {
+			if matches!(text.as_bytes().get(colon_idx - 2), Some(b'0'..=b'9')) {
+				colon_idx - 2
+			} else {
+				colon_idx - 1
+			}
+		} else {
+			continue;
+		};
+		let end = if matches!(text.as_bytes().get(colon_idx + 1), Some(b'0'..=b'9')) {
+			if matches!(text.as_bytes().get(colon_idx + 2), Some(b'0'..=b'2')) {
+				colon_idx + 2
+			} else {
+				colon_idx + 1
+			}
+		} else {
+			continue;
+		};
+		let num = text[start..colon_idx].parse::<i8>().unwrap();
+		let ele = text[colon_idx + 1..=end].parse::<i8>().unwrap();
+		let end = if text.as_bytes().get(end + 1) == Some(&b' ') {
+			end + 1
+		} else {
+			end
+		};
+		match num {
+			0 => text.replace_range(start..=end, "0"),
+			1 | 2 | 3 => text.replace_range(
+				start..=end,
+				&format!("<span class='ico te{}'></span>", ele).repeat(num as usize),
+			),
+			_ => text.replace_range(
+				start..=end,
+				&format!("{}<span class='ico te{}'></span>", num, ele),
+			),
+		}
+	}
+	result.push_str(&text);
 	if card.rarity != 0 {
 		write!(
 			result,

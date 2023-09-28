@@ -511,8 +511,11 @@ impl<'a> SkillThing<'a> {
 				Cow::from("Until your next turn, the next spell any player casts is nullified. If this ability nullifies a spell, this creature gains 1|1"),
 			Skill::nymph =>
 				Cow::from("Transform target pillar, pendulum, or tower into a Nymph matching target's element"),
-			Skill::obsession =>
-				Cow::from("When discarded, its owner receives ${c.upped ? 13 : 10} spell damage"),
+			Skill::obsession => Cow::from(if self.upped() {
+				"When discarded, its owner receives 13 spell damage"
+			} else {
+				"When discarded, its owner receives 10 spell damage"
+			}),
 			Skill::ouija => Cow::from("Whenever a creature dies, add an Ouija Essence to opponent's hand"),
 			Skill::ouijadestroy => Cow::from("When destroyed, add 1 to opponent's maximum health"),
 			Skill::ouijagrowth => Cow::from("Summon an Ouija Essence on opponent's side of the field"),
