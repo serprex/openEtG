@@ -4,6 +4,7 @@
 #![allow(non_upper_case_globals)]
 
 use alloc::borrow::Cow;
+use alloc::boxed::Box;
 use alloc::rc::Rc;
 use alloc::string::String;
 use alloc::vec;
@@ -26,6 +27,7 @@ use crate::card::{self, Card, Cards};
 use crate::etg;
 use crate::generated;
 use crate::skill::{Event, ProcData, Skill, Skills};
+use crate::text::SkillThing;
 use crate::{now, set_panic_hook};
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -128,30 +130,8 @@ impl PlayerData {
 		self.hand[7] = 0;
 	}
 
-	pub fn hand_iter(&self) -> HandIter {
-		HandIter {
-			hand: self.hand,
-			idx: 0,
-		}
-	}
-}
-
-pub struct HandIter {
-	hand: [i32; 8],
-	idx: usize,
-}
-
-impl Iterator for HandIter {
-	type Item = i32;
-
-	fn next(&mut self) -> Option<Self::Item> {
-		if let Some(&id) = self.hand.get(self.idx) {
-			if id != 0 {
-				self.idx += 1;
-				return Some(id);
-			}
-		}
-		None
+	pub fn hand_iter(&self) -> impl Iterator<Item = i32> {
+		self.hand.into_iter().take_while(|&id| id != 0)
 	}
 }
 
@@ -195,52 +175,29 @@ pub enum GameMove {
 	Resign(i32),
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-#[derive(Clone, Copy)]
-pub enum GameMoveType {
-	end = 0,
-	cast = 1,
-	accept = 2,
-	mulligan = 3,
-	foe = 4,
-	resign = 5,
-}
-
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-#[derive(Clone, Copy)]
-pub struct JsGameMove {
-	pub x: GameMoveType,
-	pub c: i32,
-	pub t: i32,
-}
-
-impl From<GameMove> for JsGameMove {
-	fn from(cmd: GameMove) -> JsGameMove {
-		let triplet = match cmd {
-			GameMove::End(t) => (GameMoveType::end, 0, t),
-			GameMove::Cast(c, t) => (GameMoveType::cast, c, t),
-			GameMove::Accept => (GameMoveType::accept, 0, 0),
-			GameMove::Mulligan => (GameMoveType::mulligan, 0, 0),
-			GameMove::Foe(t) => (GameMoveType::foe, 0, t),
-			GameMove::Resign(c) => (GameMoveType::resign, c, 0),
-		};
-		JsGameMove {
-			x: triplet.0,
-			c: triplet.1,
-			t: triplet.2,
+impl From<GameMove> for [i32; 3] {
+	fn from(cmd: GameMove) -> [i32; 3] {
+		match cmd {
+			GameMove::End(t) => [0, 0, t],
+			GameMove::Cast(c, t) => [1, c, t],
+			GameMove::Accept => [2, 0, 0],
+			GameMove::Mulligan => [3, 0, 0],
+			GameMove::Foe(t) => [4, 0, t],
+			GameMove::Resign(c) => [5, c, 0],
 		}
 	}
 }
 
-impl From<JsGameMove> for GameMove {
-	fn from(cmd: JsGameMove) -> GameMove {
-		match cmd.x {
-			GameMoveType::end => GameMove::End(cmd.t),
-			GameMoveType::cast => GameMove::Cast(cmd.c, cmd.t),
-			GameMoveType::accept => GameMove::Accept,
-			GameMoveType::mulligan => GameMove::Mulligan,
-			GameMoveType::foe => GameMove::Foe(cmd.t),
-			GameMoveType::resign => GameMove::Resign(cmd.c),
+impl From<[i32; 3]> for GameMove {
+	fn from(cmd: [i32; 3]) -> GameMove {
+		match cmd[0] {
+			0 => GameMove::End(cmd[2]),
+			1 => GameMove::Cast(cmd[1], cmd[2]),
+			2 => GameMove::Accept,
+			3 => GameMove::Mulligan,
+			4 => GameMove::Foe(cmd[2]),
+			5 => GameMove::Resign(cmd[1]),
+			_ => GameMove::Mulligan,
 		}
 	}
 }
@@ -736,8 +693,9 @@ impl Game {
 		id >= 0 && (id as usize) < self.props.len()
 	}
 
-	pub fn get_hand(&self, id: i32) -> Vec<i32> {
-		self.get_player(id).hand_iter().collect()
+	pub fn get_hand(&self, id: i32) -> Box<[i32]> {
+		let pl = self.get_player(id);
+		pl.hand[..pl.hand_len()].into()
 	}
 
 	pub fn deck_length(&self, id: i32) -> usize {
@@ -997,9 +955,85 @@ impl Game {
 		})
 	}
 
-	pub fn next(&mut self, x: GameMoveType, c: i32, t: i32, fx: bool) -> Option<Vec<i32>> {
+	pub fn thingText(&self, id: i32) -> String {
+		let thing = self.get_thing(id);
+		let mut ret = String::new();
+		if thing.kind != Kind::Player {
+			let instkind = if thing.kind == Kind::Spell {
+				self.get_card(self.get(id, Stat::card)).kind
+			} else {
+				thing.kind
+			};
+			if instkind == Kind::Creature || instkind == Kind::Weapon {
+				write!(
+					ret,
+					"{}|{}/{}",
+					self.trueatk(id),
+					self.truehp(id),
+					self.get(id, Stat::maxhp)
+				)
+				.ok();
+			} else if instkind == Kind::Shield {
+				write!(ret, "{}", self.truedr(id)).ok();
+			}
+			let skills = SkillThing::Thing(self, id).info();
+			if ret.is_empty() {
+				return skills;
+			}
+			if (!skills.is_empty()) {
+				ret.push('\n');
+				ret.push_str(&skills);
+			}
+		} else {
+			write!(
+				ret,
+				"{}/{} {}cards\n{} drawpower\n",
+				self.get(id, Stat::hp),
+				self.get(id, Stat::maxhp),
+				self.deck_length(id),
+				self.get_drawpower(id)
+			)
+			.ok();
+			if self.get(id, Stat::casts) == 0 {
+				ret.push_str("silenced\n");
+			}
+			if self.get(id, Stat::gpull) != 0 {
+				ret.push_str("gpull\n");
+			}
+			for k in self.get_thing(id).flag {
+				ret.push_str(match k {
+					Flag::aflatoxin => "aflatoxin\n",
+					Flag::drawlock => "drawlock\n",
+					Flag::neuro => "neuro\n",
+					Flag::protectdeck => "protectdeck\n",
+					Flag::sabbath => "sabbath\n",
+					Flag::sanctuary => "sanctuary\n",
+					_ => continue,
+				});
+			}
+			for &(k, v) in self.get_thing(id).status.iter() {
+				write!(
+					ret,
+					"{}{}",
+					v,
+					match k {
+						Stat::nova => " nova\n",
+						Stat::nova2 => " nova2\n",
+						Stat::poison => " poison\n",
+						Stat::sosa => " sosa\n",
+						_ => continue,
+					}
+				)
+				.ok();
+			}
+			ret.truncate(ret.len() - 1);
+		}
+		ret
+	}
+
+	pub fn next(&mut self, x: i32, c: i32, t: i32, fx: bool) -> Option<Vec<i32>> {
 		self.fx = if fx { Some(Fxs::new()) } else { None };
-		self.r#move(JsGameMove { x, c, t }.into());
+		self.r#move([x, c, t].into());
 		self.fx.take().map(|fxs| fxs.js())
 	}
 
@@ -1136,9 +1170,9 @@ impl Game {
 			.unwrap_or(false)
 	}
 
-	pub fn aisearch(&self) -> JsGameMove {
+	pub fn aisearch(&self) -> Box<[i32]> {
 		use crate::aisearch::search;
-		search(self).into()
+		Box::<[i32; 3]>::new(search(self).into()) as Box<[i32]>
 	}
 
 	pub fn aieval(&self) -> f32 {

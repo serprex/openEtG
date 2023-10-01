@@ -5,6 +5,8 @@ import enums from './enum.json' assert { type: 'json' };
 import { randint } from './util.js';
 import * as wasm from './rs/pkg/etg.js';
 
+const GameMoveType = ['end', 'cast', 'accept', 'mulligan', 'foe', 'resign'];
+
 export default class Game {
 	constructor(data) {
 		this.game = new wasm.Game(
@@ -90,9 +92,9 @@ export default class Game {
 	aiSearch() {
 		const cmd = this.aisearch();
 		return {
-			x: wasm.GameMoveType[cmd.x],
-			c: cmd.c,
-			t: cmd.t,
+			x: GameMoveType[cmd[0]],
+			c: cmd[1],
+			t: cmd[2],
 		};
 	}
 	countPlies() {
@@ -105,7 +107,7 @@ export default class Game {
 	}
 	nextCmd(cmd, fx = true) {
 		if (this.replay) this.replay.push(cmd);
-		return this.next(wasm.GameMoveType[cmd.x], cmd.c | 0, cmd.t | 0, fx);
+		return this.next(GameMoveType.indexOf(cmd.x), cmd.c | 0, cmd.t | 0, fx);
 	}
 	withMoves(moves) {
 		const newgame = new Game(this.data);
@@ -132,9 +134,6 @@ export default class Game {
 	tgtToPos(id, p1id) {
 		const pos = this.tgt_to_pos(id, p1id);
 		return pos === 0 ? null : { x: pos & 4095, y: pos >> 12 };
-	}
-	info(id) {
-		return wasm.thingText(this.game, id);
 	}
 }
 

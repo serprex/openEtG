@@ -1381,7 +1381,7 @@ export default function Match(props) {
 			targeting().filter(id) &&
 			game().actinfo(targeting().src, id);
 		setTooltip({
-			text: `${game().info(id)}${actinfo ? '\n' + actinfo : ''}`,
+			text: `${game().thingText(id)}${actinfo ? '\n' + actinfo : ''}`,
 			style: `position:absolute;left:${e.pageX}px;top:${e.pageY}px;z-index:5`,
 		});
 		if (game().get_kind(id) !== Kind.Player) setCard(e, game().getCard(id));

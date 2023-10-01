@@ -43,7 +43,7 @@ function App() {
 				const golemId = game
 					.visible_instances(1)
 					.find(id => game.get_kind(id) === Kind.Creature);
-				return golemId ? game.info(golemId) : 'No Shard Golem spawned';
+				return golemId ? game.thingText(golemId) : 'No Shard Golem spawned';
 			} else return 'No Shard of Integrity to cast';
 		} else return 'Too many cards';
 	};

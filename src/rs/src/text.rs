@@ -12,7 +12,7 @@ use crate::game::{CardSet, Flag, Game, Kind, Stat};
 use crate::skill::{Event, Skill};
 
 #[derive(Copy, Clone)]
-enum SkillThing<'a> {
+pub enum SkillThing<'a> {
 	Thing(&'a Game, i32),
 	Card(Cards, &'static Card),
 }
@@ -850,7 +850,7 @@ impl<'a> SkillThing<'a> {
 		})
 	}
 
-	fn info(&self) -> String {
+	pub fn info(&self) -> String {
 		let card = self.card();
 		if card.kind == Kind::Spell && matches!(self, &Self::Card(..)) {
 			card.skill
@@ -1007,83 +1007,6 @@ impl<'a> SkillThing<'a> {
 			ret
 		}
 	}
-}
-
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn thingText(game: &Game, id: i32) -> String {
-	let thing = game.get_thing(id);
-	let mut ret = String::new();
-	if thing.kind != Kind::Player {
-		let instkind = if thing.kind == Kind::Spell {
-			game.get_card(game.get(id, Stat::card)).kind
-		} else {
-			thing.kind
-		};
-		if instkind == Kind::Creature || instkind == Kind::Weapon {
-			write!(
-				ret,
-				"{}|{}/{}",
-				game.trueatk(id),
-				game.truehp(id),
-				game.get(id, Stat::maxhp)
-			)
-			.ok();
-		} else if instkind == Kind::Shield {
-			write!(ret, "{}", game.truedr(id)).ok();
-		}
-		let skills = SkillThing::Thing(game, id).info();
-		if ret.is_empty() {
-			return skills;
-		}
-		if (!skills.is_empty()) {
-			ret.push('\n');
-			ret.push_str(&skills);
-		}
-	} else {
-		write!(
-			ret,
-			"{}/{} {}cards\n{} drawpower\n",
-			game.get(id, Stat::hp),
-			game.get(id, Stat::maxhp),
-			game.deck_length(id),
-			game.get_drawpower(id)
-		)
-		.ok();
-		if game.get(id, Stat::casts) == 0 {
-			ret.push_str("silenced\n");
-		}
-		if game.get(id, Stat::gpull) != 0 {
-			ret.push_str("gpull\n");
-		}
-		for k in game.get_thing(id).flag {
-			ret.push_str(match k {
-				Flag::aflatoxin => "aflatoxin\n",
-				Flag::drawlock => "drawlock\n",
-				Flag::neuro => "neuro\n",
-				Flag::protectdeck => "protectdeck\n",
-				Flag::sabbath => "sabbath\n",
-				Flag::sanctuary => "sanctuary\n",
-				_ => continue,
-			});
-		}
-		for &(k, v) in game.get_thing(id).status.iter() {
-			write!(
-				ret,
-				"{}{}",
-				v,
-				match k {
-					Stat::nova => " nova\n",
-					Stat::nova2 => " nova2\n",
-					Stat::poison => " poison\n",
-					Stat::sosa => " sosa\n",
-					_ => continue,
-				}
-			)
-			.ok();
-		}
-		ret.truncate(ret.len() - 1);
-	}
-	ret
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
