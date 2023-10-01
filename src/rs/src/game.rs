@@ -5,6 +5,7 @@
 
 use alloc::borrow::Cow;
 use alloc::rc::Rc;
+use alloc::string::String;
 use alloc::vec;
 use alloc::vec::Vec;
 use core::cmp;
@@ -883,19 +884,62 @@ impl Game {
 		}
 	}
 
-	pub fn get_one_skill(&self, id: i32, k: u8) -> Vec<i32> {
-		if let Ok(event) = Event::try_from(k) {
-			self.get_thing(id)
-				.skill
-				.get(event)
-				.map(|sk| sk.as_ref())
-				.unwrap_or(&[])
-				.iter()
-				.map(|&sk| generated::id_skill(sk) | sk.param1() << 16 | sk.param2() << 24)
-				.collect()
-		} else {
-			Vec::new()
+	pub fn get_one_skill(&self, id: i32, k: u8) -> Option<String> {
+		Event::try_from(k)
+			.ok()
+			.and_then(|ev| self.skill_text(id, ev))
+	}
+
+	pub fn active_text(&self, id: i32) -> String {
+		if let Some(acast) = self.skill_text(id, Event::Cast) {
+			return format!(
+				"{}:{}{}",
+				self.get(id, Stat::cast),
+				self.get(id, Stat::castele),
+				acast
+			);
 		}
+
+		for ev in [
+			Event::Hit,
+			Event::Death,
+			Event::OwnDeath,
+			Event::Buff,
+			Event::Destroy,
+			Event::Draw,
+			Event::Play,
+			Event::Spell,
+			Event::Dmg,
+			Event::Shield,
+			Event::Postauto,
+		] {
+			if let Some(a) = self.skill_text(id, ev) {
+				return format!(
+					"{}{}",
+					match ev {
+						Event::Hit => "hit ",
+						Event::Death => "death ",
+						Event::OwnDeath => "owndeath ",
+						Event::Buff => "buff ",
+						Event::Destroy => "destroy ",
+						Event::Draw => "draw ",
+						Event::Play => "play ",
+						Event::Spell => "spell ",
+						Event::Dmg => "dmg ",
+						Event::Shield => "shield ",
+						Event::Postauto => "postauto ",
+						_ => "",
+					},
+					a
+				);
+			}
+		}
+
+		if let Some(auto) = self.skill_text(id, Event::OwnAttack) {
+			return auto;
+		}
+
+		String::new()
 	}
 
 	pub fn next(&mut self, x: GameMoveType, c: i32, t: i32, fx: bool) -> Option<Vec<i32>> {
@@ -1265,6 +1309,21 @@ impl Game {
 		let card = self.cards.random_card(&mut rng, upped, |c| ffilt(self, c));
 		self.rng = rng;
 		card
+	}
+
+	pub fn skill_text(&self, id: i32, ev: Event) -> Option<String> {
+		if let Some(sk) = self.get_thing(id).skill.get(ev) {
+			if !sk.is_empty() {
+				let mut name = String::new();
+				for s in sk.iter() {
+					s.push_name(self, id, &mut name);
+					name.push(' ');
+				}
+				name.truncate(name.len() - 1);
+				return Some(name);
+			}
+		}
+		None
 	}
 
 	fn mutantactive(&mut self, id: i32, actives: &'static [Skill]) -> bool {

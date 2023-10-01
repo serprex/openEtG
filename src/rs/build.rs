@@ -9,14 +9,9 @@ use serde_json::Value;
 
 #[derive(Default, Serialize)]
 struct Enums {
-	Event: BTreeMap<u16, String>,
 	EventId: BTreeMap<String, u16>,
-	Flag: BTreeMap<u16, String>,
 	FlagId: BTreeMap<String, u16>,
 	Fx: BTreeMap<u16, String>,
-	Skill: BTreeMap<u16, String>,
-	SkillParams: BTreeMap<u16, u16>,
-	Stat: BTreeMap<u16, String>,
 	StatId: BTreeMap<String, u16>,
 }
 
@@ -182,35 +177,30 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 						if event.starts_with(b"Own") {
 							event[3] -= b'a' - b'A';
 						}
-						if skill == b"static" {
-							skill.insert(0, b'r');
-							skill.insert(1, b'#');
-						} else {
-							let mut idx = 0;
-							loop {
-								let mut replaced = false;
-								while idx < skill.len() {
-									let ch = skill[idx];
-									if ch == b' ' {
-										skill[idx] = if replaced { b',' } else { b'(' };
-										replaced = true;
-									} else if ch == b',' {
-										idx += 1;
-										break;
-									}
+						let mut idx = 0;
+						loop {
+							let mut replaced = false;
+							while idx < skill.len() {
+								let ch = skill[idx];
+								if ch == b' ' {
+									skill[idx] = if replaced { b',' } else { b'(' };
+									replaced = true;
+								} else if ch == b',' {
 									idx += 1;
-								}
-								if replaced {
-									skill.insert(idx - (idx < skill.len()) as usize, b')');
-									idx += 1;
-								}
-								if idx < skill.len() {
-									skill.splice(idx..idx, b"Skill::".iter().cloned());
-									idx += "Skill::".len();
-									continue;
-								} else {
 									break;
 								}
+								idx += 1;
+							}
+							if replaced {
+								skill.insert(idx - (idx < skill.len()) as usize, b')');
+								idx += 1;
+							}
+							if idx < skill.len() {
+								skill.splice(idx..idx, b"Skill::".iter().cloned());
+								idx += "Skill::".len();
+								continue;
+							} else {
+								break;
 							}
 						}
 						write!(
@@ -298,44 +288,11 @@ fn main() {
 				eventid += 1;
 				let mut ownname = String::from("own");
 				ownname.push_str(&name);
-				enums.Event.insert(id, name.clone());
-				enums.Event.insert(id | 128, ownname.clone());
 				enums.EventId.insert(name, id);
 				enums.EventId.insert(ownname, id | 128);
 			}
 		}
 	}
-
-	source.push_str("pub fn id_skill(s:Skill)->i32{match s{\n");
-	let skillskill = subsource(&skillrs, "pub enum Skill {\n");
-	let mut skillid = 1;
-	for line in skillskill.lines() {
-		let line = line.trim();
-		if let Some(end) = line.rfind(",") {
-			let start = if line.starts_with("r#") { 2 } else { 0 };
-			let line = &line[start..end];
-			let end = end - start;
-			let id = skillid;
-			skillid += 1;
-			let skillend = line.find("(");
-			let name = &line[..skillend.unwrap_or(end)];
-			enums.Skill.insert(id, String::from(name));
-			source.push_str("Skill::");
-			if name == "static" {
-				source.push_str("r#");
-			}
-			source.push_str(name);
-			if let Some(skillend) = skillend {
-				enums.SkillParams.insert(
-					id,
-					line[skillend..].bytes().filter(|&c| c == b',').count() as u16 + 1,
-				);
-				source.push_str("(..)")
-			}
-			write!(source, "=>{},\n", id).ok();
-		}
-	}
-	source.push_str("}}\n");
 
 	source.push_str("pub fn id_stat(s:Stat)->i32{match s{\n");
 	let gamestat = subsource(&gamers, "pub enum Stat {\n");
@@ -347,7 +304,6 @@ fn main() {
 			let name = line[start..end].trim();
 			let id = statid;
 			statid += 1;
-			enums.Stat.insert(id, String::from(name));
 			enums.StatId.insert(String::from(name), id);
 			write!(source, "Stat::{}=>{},\n", name, id).ok();
 			write!(stat_source, "{}=>Stat::{},\n", id, name).ok();
@@ -367,7 +323,6 @@ fn main() {
 				let name = &line["pub const ".len()..colonidx];
 				let id = statid;
 				statid += 1;
-				enums.Flag.insert(id, String::from(name));
 				enums.FlagId.insert(String::from(name), id);
 				write!(source, "Flag::{}=>{},\n", name, id).ok();
 				write!(flag_source, "{}=>Flag::{},\n", id, name).ok();

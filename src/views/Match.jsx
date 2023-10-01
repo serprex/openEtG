@@ -120,49 +120,6 @@ const activeInfo = {
 		`Extra: ${getAdrenalRow(game.trueatk(t)).join(',')}`,
 };
 
-const activetexts = [
-	'hit',
-	'death',
-	'owndeath',
-	'buff',
-	'destroy',
-	'draw',
-	'play',
-	'spell',
-	'dmg',
-	'shield',
-	'postauto',
-];
-const activetextsRename = {
-	burrow: (game, id, x) => (game.get(id, 'burrowed') ? 'unburrow' : 'burrow'),
-	quanta: (game, id, x) => eleNames[x[1]].toLowerCase(),
-	summon: (game, id, x) => game.Cards.Codes[x[1] & 0xffff].name.toLowerCase(),
-};
-function skillName(game, id, sk) {
-	const namelist = [];
-	for (const name of sk) {
-		const nsplit = name.split(' ');
-		const rename = activetextsRename[nsplit[0]];
-		namelist.push(rename ? rename(game, id, nsplit) : name);
-	}
-	return namelist.join(' ');
-}
-function activeText(game, id) {
-	const acast = game.getSkill(id, 'cast');
-	if (acast)
-		return `${game.get(id, 'cast')}:${game.get(id, 'castele')}${skillName(
-			game,
-			id,
-			acast,
-		)}`;
-	for (const akey of activetexts) {
-		const a = game.getSkill(id, akey);
-		if (a) return `${akey} ${skillName(game, id, a)}`;
-	}
-	const aauto = game.getSkill(id, 'ownattack');
-	return aauto ? skillName(game, id, aauto) : '';
-}
-
 function Tween(props) {
 	let start = null,
 		raf = null,
@@ -521,7 +478,7 @@ function Thing(props) {
 		let statText, topText;
 		if (!isSpell()) {
 			const charges = props.game.get(props.id, 'charges');
-			topText = activeText(props.game, props.id);
+			topText = props.game.active_text(props.id);
 			if (props.game.get_kind(props.id) === Kind.Creature) {
 				statText = `${props.game.trueatk(props.id)} | ${props.game.truehp(
 					props.id,
@@ -536,7 +493,7 @@ function Thing(props) {
 					topText = '';
 				} else {
 					const ownattack = props.game.getSkill(props.id, 'ownattack');
-					if (ownattack?.length === 1 && ownattack[0] === 'locket') {
+					if (ownattack === 'locket') {
 						const mode = props.game.get(props.id, 'mode');
 						statText = `1:${
 							~mode ? mode : props.game.get_mark(props.game.get_owner(props.id))
@@ -974,9 +931,7 @@ export default function Match(props) {
 						element: card.element,
 						costele: game.get(id, isSpell ? 'costele' : 'castele'),
 						cost: game.get(id, isSpell ? 'cost' : 'cast'),
-						name: isSpell
-							? card.name
-							: skillName(game, id, game.getSkill(id, 'cast')),
+						name: isSpell ? card.name : game.getSkill(id, 'cast'),
 						upped: card.upped,
 						shiny: card.shiny,
 						c: id,
@@ -1302,7 +1257,7 @@ export default function Match(props) {
 							cb(tgt);
 							setTargeting(null);
 						},
-						text: skillName(game, id, game.getSkill(id, 'cast')),
+						text: game.getSkill(id, 'cast'),
 						src: id,
 					});
 				}

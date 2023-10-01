@@ -5,17 +5,6 @@ import enums from './enum.json' assert { type: 'json' };
 import { randint } from './util.js';
 import * as wasm from './rs/pkg/etg.js';
 
-function decodeSkillName(cell) {
-	const skid = cell & 0xffff,
-		n = enums.Skill[skid],
-		c = enums.SkillParams[skid] ?? 0;
-	return c === 0
-		? n
-		: c === 1
-		? `${n} ${cell >> 16}`
-		: `${n} ${(((cell >> 16) & 0xff) << 24) >> 24} ${cell >> 24}`;
-}
-
 export default class Game {
 	constructor(data) {
 		this.game = new wasm.Game(
@@ -138,11 +127,7 @@ export default class Game {
 		);
 	}
 	getSkill(id, k) {
-		const name = Array.from(
-			this.get_one_skill(id, enums.EventId[k]),
-			decodeSkillName,
-		);
-		if (name.length) return name;
+		return this.get_one_skill(id, enums.EventId[k]);
 	}
 	tgtToPos(id, p1id) {
 		const pos = this.tgt_to_pos(id, p1id);
