@@ -755,7 +755,7 @@ impl<'a> SkillThing<'a> {
 			Skill::virtue =>
 				Cow::from("When this creature attacks, if any damage is blocked by opponent's shield, your maximum HP is increased by the amount of this creature's damage that was blocked"),
 			Skill::virusinfect =>
-				Cow::from("Sacrifice this creature. Give target creature 1 poison counter. Give opponent 1 poison counter"),
+				Cow::from("Sacrifice this creature. Give target creature 1 poison counter"),
 			Skill::virusplague =>
 				Cow::from("Sacrifice this creature. Give target player's creatures 1 poison counter"),
 			Skill::void => Cow::from(if self.set() == CardSet::Open {
