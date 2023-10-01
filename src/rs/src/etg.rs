@@ -57,31 +57,6 @@ pub fn calcAdrenaline(y: i32, dmg: i32) -> i32 {
 	}
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn getAdrenalRow(x: i32) -> Vec<i8> {
-	let xabs = x.abs() as usize;
-	if xabs > 15 {
-		Vec::new()
-	} else {
-		let mut v = Vec::<i8>::with_capacity(4);
-		let vp = v.as_mut_ptr();
-		let len = AdrenalineTable[xabs * 5] as usize;
-		unsafe {
-			v.set_len(len);
-			core::ptr::copy_nonoverlapping(
-				AdrenalineTable.as_ptr().offset(xabs as isize * 5 + 1),
-				vp,
-				4,
-			);
-			if x < 0 {
-				let vp = vp.cast::<u32>();
-				*vp = (!*vp) + 0x01010101;
-			}
-		}
-		v
-	}
-}
-
 pub const Chroma: i32 = 0;
 pub const Entropy: i32 = 1;
 pub const Death: i32 = 2;

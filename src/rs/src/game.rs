@@ -10,6 +10,7 @@ use alloc::vec;
 use alloc::vec::Vec;
 use core::cmp;
 use core::default::Default;
+use core::fmt::Write;
 use core::hash::{Hash, Hasher};
 use core::iter::once;
 
@@ -940,6 +941,60 @@ impl Game {
 		}
 
 		String::new()
+	}
+
+	pub fn actinfo(&self, c: i32, t: i32) -> Option<String> {
+		self.getSkill(c, Event::Cast).first().and_then(|&sk| {
+			Some(match sk {
+				Skill::firebolt => {
+					format!(
+						"{}",
+						3 + (self.get_quanta(self.get_owner(c), etg::Fire) as i32
+							- self.get(c, Stat::cost)) / 4
+					)
+				}
+				Skill::drainlife => {
+					format!(
+						"{}",
+						2 + (self.get_quanta(self.get_owner(c), etg::Darkness) as i32
+							- self.get(c, Stat::cost)) / 5
+					)
+				}
+				Skill::icebolt => {
+					let bolts = (self.get_quanta(self.get_owner(c), etg::Water) as i32
+						- self.get(c, Stat::cost))
+						/ 5;
+					format!("{} {}%", 2 + bolts, 35 + bolts * 5)
+				}
+				Skill::catapult => {
+					let truehp = self.truehp(t);
+					format!(
+						"{}",
+						(truehp
+							* (if self.get(t, Stat::frozen) != 0 {
+								151
+							} else {
+								101
+							}) + 99) / (truehp + 100)
+					)
+				}
+				Skill::corpseexplosion => {
+					format!("{}", 1 + self.truehp(t) / 8)
+				}
+				Skill::adrenaline => {
+					let mut s = String::from("Extra: ");
+					let num = etg::countAdrenaline(self.trueatk(t));
+					for adrenaline in 2..=num {
+						write!(s, "{},", self.trueatk_adrenaline(t, adrenaline));
+					}
+					if num > 1 {
+						s.truncate(s.len() - 1);
+					}
+					s
+				}
+				_ => return None,
+			})
+		})
 	}
 
 	pub fn next(&mut self, x: GameMoveType, c: i32, t: i32, fx: bool) -> Option<Vec<i32>> {

@@ -21,7 +21,7 @@ import Text from '../Components/Text.jsx';
 import * as store from '../store.jsx';
 import { mkQuestAi } from '../Quest.js';
 import enums from '../enum.json' assert { type: 'json' };
-import { getAdrenalRow, Kind, Phase, Sfx } from '../rs/pkg/etg.js';
+import { Kind, Phase, Sfx } from '../rs/pkg/etg.js';
 import AiWorker from '../AiWorker.js';
 
 const Chroma = 0;
@@ -93,32 +93,6 @@ function cloaksvg() {
 		<div style="position:absolute;left:0;top:0;width:900px;height:299px;background-color:#000;z-index:1;pointer-events:none" />
 	);
 }
-
-const activeInfo = {
-	firebolt: (game, c, t) =>
-		3 +
-		(((game.get_quanta(game.get_owner(c), Fire) - game.getCard(c).cost) / 4) |
-			0),
-	drainlife: (game, c, t) =>
-		2 +
-		(((game.get_quanta(game.get_owner(c), Darkness) - game.getCard(c).cost) /
-			5) |
-			0),
-	icebolt: (game, c, t) => {
-		const bolts =
-			((game.get_quanta(game.get_owner(c), Water) - game.getCard(c).cost) / 5) |
-			0;
-		return `${2 + bolts} ${35 + bolts * 5}%`;
-	},
-	catapult: (game, c, t) =>
-		Math.ceil(
-			(game.truehp(t) * (game.get(t, 'frozen') ? 150 : 100)) /
-				(game.truehp(t) + 100),
-		),
-	corpseexplosion: (game, c, t) => 1 + ((game.truehp(c) / 8) | 0),
-	adrenaline: (game, c, t) =>
-		`Extra: ${getAdrenalRow(game.trueatk(t)).join(',')}`,
-};
 
 function Tween(props) {
 	let start = null,
@@ -1403,11 +1377,11 @@ export default function Match(props) {
 
 	const setInfo = (e, id) => {
 		const actinfo =
-			targeting() && targeting().filter(id) && activeInfo[targeting().text];
+			targeting() &&
+			targeting().filter(id) &&
+			game().actinfo(targeting().src, id);
 		setTooltip({
-			text: `${game().info(id)}${
-				actinfo ? '\n' + actinfo(game(), targeting().src, id) : ''
-			}`,
+			text: `${game().info(id)}${actinfo ? '\n' + actinfo : ''}`,
 			style: `position:absolute;left:${e.pageX}px;top:${e.pageY}px;z-index:5`,
 		});
 		if (game().get_kind(id) !== Kind.Player) setCard(e, game().getCard(id));
