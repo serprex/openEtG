@@ -11,6 +11,7 @@ decks.demigod.forEach(buildPool);
 const a = [];
 Cards.Codes.forEach(card => {
 	if (
+		!card.token &&
 		!card.upped &&
 		!card.shiny &&
 		card.rarity > 0 &&

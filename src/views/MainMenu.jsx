@@ -39,30 +39,6 @@ const tipjar = [
 	'Wealth T99 is a leaderboard for player wealth. Wealth is a combination of current gold & cardpool',
 ];
 
-function Rect(props) {
-	return (
-		<div
-			style={{
-				position: 'absolute',
-				left: props.x + 'px',
-				top: props.y + 'px',
-				width: props.wid + 'px',
-				height: props.hei + 'px',
-			}}>
-			{props.children}
-		</div>
-	);
-}
-
-function CostRewardHeaders(props) {
-	return (
-		<Rect x={props.x} y={props.y} wid={props.wid} hei={props.hei}>
-			{props.children}
-			<span style="position:absolute;top:24px;right:114px">Cost</span>
-			<span style="position:absolute;top:24px;right:4px">Reward</span>
-		</Rect>
-	);
-}
 function LabelText(props) {
 	return (
 		<div style={`font-size:14px;pointer-events:none;${props.style ?? ''}`}>
@@ -236,7 +212,7 @@ export default function MainMenu(props) {
 	return (
 		rx.user && (
 			<div class="bg_main">
-				<Rect x={196} y={4} wid={504} hei={48}>
+				<div style="position:absolute;left:196px;top:4px;width:504px;height:48px">
 					<Text text={tip()} />
 					<input
 						type="button"
@@ -248,7 +224,7 @@ export default function MainMenu(props) {
 						}}
 						style="position:absolute;right:2px;bottom:2px"
 					/>
-				</Rect>
+				</div>
 				<input
 					type="button"
 					value="Settings"
@@ -260,7 +236,7 @@ export default function MainMenu(props) {
 						if (newpass2) newpass2.value = '';
 					}}
 				/>
-				<Rect x={86} y={92} wid={196} hei={120}>
+				<div style="position:absolute;left:86px;top:92px;width:196px;height:120px">
 					<TitleText text="Stats" />
 					<Text
 						text={
@@ -268,8 +244,8 @@ export default function MainMenu(props) {
 							`${rx.user.name}\n${rx.user.gold}$\nPvE ${rx.user.aiwins} - ${rx.user.ailosses}\nPvP ${rx.user.pvpwins} - ${rx.user.pvplosses}`
 						}
 					/>
-				</Rect>
-				<Rect x={304} y={380} wid={292} hei={130}>
+				</div>
+				<div style="position:absolute;left:304px;top:380px;width:292px;height:130px">
 					<TitleText text="Miscellaneous" />
 					<div>
 						<div style="display:inline-block;width:49%;text-align:center">
@@ -330,7 +306,7 @@ export default function MainMenu(props) {
 							/>
 						</div>
 					</div>
-				</Rect>
+				</div>
 				{showcard ? (
 					<Card x={92} y={340} card={Cards.Codes[showcard]} />
 				) : (
@@ -348,7 +324,7 @@ export default function MainMenu(props) {
 						</>
 					)
 				)}
-				<Rect x={626} y={420} wid={196} hei={120}>
+				<div style="position:absolute;left:626px;top:420px;width:196px;height:120px">
 					<TitleText text="Leaderboards" />
 					<input
 						type="button"
@@ -358,8 +334,10 @@ export default function MainMenu(props) {
 						style="margin-left:25%"
 					/>
 					<div style="margin-top:4px">{leadc}</div>
-				</Rect>
-				<CostRewardHeaders x={304} y={120} wid={292} hei={240}>
+				</div>
+				<div style="position:absolute;left:304px;top:120px;width:292px;height:240px">
+					<span style="position:absolute;top:24px;right:114px">Cost</span>
+					<span style="position:absolute;top:24px;right:4px">Reward</span>
 					<TitleText text="Battle" />
 					<AiButton
 						name="Commoner"
@@ -418,8 +396,8 @@ export default function MainMenu(props) {
 						y={168}
 						lv={5}
 					/>
-				</CostRewardHeaders>
-				<Rect x={620} y={92} wid={196} hei={176}>
+				</div>
+				<div style="position:absolute;left:620px;top:92px;width:196px;height:176px">
 					<TitleText text="Cards" />
 					<input
 						type="button"
@@ -460,8 +438,8 @@ export default function MainMenu(props) {
 						]}
 						style="position:absolute;left:102px;top:132px"
 					/>
-				</Rect>
-				<Rect x={616} y={300} wid={206} hei={130}>
+				</div>
+				<div style="position:absolute;left:616px;top:300px;width:206px;height:130px">
 					<TitleText text="Players" />
 					<input
 						placeholder="Player's Name"
@@ -512,7 +490,7 @@ export default function MainMenu(props) {
 						onMouseOver={[setTip, 'Redeem a reward code']}
 						style="position:absolute;left:112px;top:88px"
 					/>
-				</Rect>
+				</div>
 				{typeof kongregateAPI === 'undefined' && (
 					<input
 						type="button"
