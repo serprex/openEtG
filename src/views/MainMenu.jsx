@@ -39,45 +39,24 @@ const tipjar = [
 	'Wealth T99 is a leaderboard for player wealth. Wealth is a combination of current gold & cardpool',
 ];
 
-function LabelText(props) {
-	return (
-		<div style={`font-size:14px;pointer-events:none;${props.style ?? ''}`}>
-			<Text text={props.text} />
-		</div>
-	);
-}
-function CostText(props) {
-	return (
-		<LabelText
-			text={pveCostReward[props.lv * 2 + props.n] + '$'}
-			style={props.style}
-		/>
-	);
-}
-function TitleText(props) {
-	return <div style="font-size:20px;text-align:center">{props.text}</div>;
-}
 function AiButton({ name, onClick, onMouseOver, y, lv }) {
 	return (
-		<>
+		<div style="display:flex;font-size:14px;padding-top:4px">
 			<input
 				type="button"
 				value={name}
 				onClick={onClick}
 				onMouseOver={onMouseOver}
-				style={`position:absolute;left:4px;top:${y}px`}
 			/>
-			<CostText
-				n={0}
-				lv={lv}
-				style={`position:absolute;top:${y}px;right:114px`}
-			/>
-			<CostText
-				n={1}
-				lv={lv}
-				style={`position:absolute;top:${y}px;right:4px`}
-			/>
-		</>
+			<div class="costcolumn">
+				{pveCostReward[lv * 2]}
+				<span class="ico gold" />
+			</div>
+			<div class="costcolumn">
+				{pveCostReward[lv * 2 + 1]}
+				<span class="ico gold" />
+			</div>
+		</div>
 	);
 }
 
@@ -237,7 +216,7 @@ export default function MainMenu(props) {
 					}}
 				/>
 				<div style="position:absolute;left:86px;top:92px;width:196px;height:120px">
-					<TitleText text="Stats" />
+					<div class="maintitle">Stats</div>
 					<Text
 						text={
 							rx.user &&
@@ -246,7 +225,7 @@ export default function MainMenu(props) {
 					/>
 				</div>
 				<div style="position:absolute;left:304px;top:380px;width:292px;height:130px">
-					<TitleText text="Miscellaneous" />
+					<div class="maintitle">Miscellaneous</div>
 					<div>
 						<div style="display:inline-block;width:49%;text-align:center">
 							<input
@@ -325,7 +304,7 @@ export default function MainMenu(props) {
 					)
 				)}
 				<div style="position:absolute;left:626px;top:420px;width:196px;height:120px">
-					<TitleText text="Leaderboards" />
+					<div class="maintitle">Leaderboards</div>
 					<input
 						type="button"
 						value="Wealth T99"
@@ -335,10 +314,12 @@ export default function MainMenu(props) {
 					/>
 					<div style="margin-top:4px">{leadc}</div>
 				</div>
-				<div style="position:absolute;left:304px;top:120px;width:292px;height:240px">
-					<span style="position:absolute;top:24px;right:114px">Cost</span>
-					<span style="position:absolute;top:24px;right:4px">Reward</span>
-					<TitleText text="Battle" />
+				<div style="position:absolute;left:308px;top:120px;width:288px;height:240px">
+					<div class="maintitle">Battle</div>
+					<div style="display:flex;padding-left:80px">
+						<div class="costcolumn">Cost</div>
+						<div class="costcolumn">Reward</div>
+					</div>
 					<AiButton
 						name="Commoner"
 						y={48}
@@ -398,7 +379,7 @@ export default function MainMenu(props) {
 					/>
 				</div>
 				<div style="position:absolute;left:620px;top:92px;width:196px;height:176px">
-					<TitleText text="Cards" />
+					<div class="maintitle">Cards</div>
 					<input
 						type="button"
 						value="Editor"
@@ -406,10 +387,9 @@ export default function MainMenu(props) {
 						onMouseOver={[setTip, 'Edit & manage your decks']}
 						style="position:absolute;left:14px;top:108px"
 					/>
-					<LabelText
-						text={`Deck: ${rx.user?.selectedDeck}`}
-						style="width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:16px;margin-top:12px"
-					/>
+					<div style="font-size:14px;pointer-events:none;width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:16px;margin-top:12px">
+						{`Deck: ${rx.user?.selectedDeck}`}
+					</div>
 					<div style="text-align:center">{quickslots}</div>
 					<input
 						type="button"
@@ -440,7 +420,7 @@ export default function MainMenu(props) {
 					/>
 				</div>
 				<div style="position:absolute;left:616px;top:300px;width:206px;height:130px">
-					<TitleText text="Players" />
+					<div class="maintitle">Players</div>
 					<input
 						placeholder="Player's Name"
 						value={rx.opts.foename ?? ''}

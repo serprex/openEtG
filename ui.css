@@ -45,6 +45,8 @@ select:hover:active{background-color:#9ab}
 .atop3{display:inline-block;width:48px}
 .atop4{display:inline-block;width:48px;text-align:right;margin-right:32px}
 .cardslot{font-size:11px;height:20px;width:100px;line-height:16px;padding:2px;border:1px solid;overflow:hidden;white-space:nowrap}
+.maintitle{font-size:20px;text-align:center}
+.costcolumn{text-align:right;width:96px}
 .infobox{
 	opacity:.7;
 	background-color:#000;
