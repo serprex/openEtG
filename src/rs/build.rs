@@ -9,7 +9,6 @@ use serde_json::Value;
 
 #[derive(Default, Serialize)]
 struct Enums {
-	EventId: BTreeMap<String, u16>,
 	FlagId: BTreeMap<String, u16>,
 	Fx: BTreeMap<u16, String>,
 	StatId: BTreeMap<String, u16>,
@@ -272,27 +271,9 @@ fn main() {
 	println!("cargo:rerun-if-changed=./src/skill.rs");
 
 	let gamers = fs::read_to_string("src/game.rs").expect("failed to read game.rs");
-	let skillrs = fs::read_to_string("src/skill.rs").expect("failed to read skill.rs");
 
 	let mut enums = Enums::default();
 	let mut source = String::from("#![no_std]\n#![allow(non_upper_case_globals)]\nuse crate::card::{Card,CardSet,Cards};use crate::game::{Flag,Fx,Kind,Stat};use crate::skill::{Event,Skill};\n");
-
-	let skillevent = subsource(&skillrs, "impl Event {\n");
-	let mut eventid = 1;
-	for line in skillevent.lines() {
-		if let Some(endname) = line.find(": Event = Event") {
-			if let Some(startname) = line.find("pub const ") {
-				let mut name = String::from(&line[startname + "pub const ".len()..endname]);
-				unsafe { name.as_mut_vec()[0] += b'a' - b'A' };
-				let id = eventid;
-				eventid += 1;
-				let mut ownname = String::from("own");
-				ownname.push_str(&name);
-				enums.EventId.insert(name, id);
-				enums.EventId.insert(ownname, id | 128);
-			}
-		}
-	}
 
 	source.push_str("pub fn id_stat(s:Stat)->i32{match s{\n");
 	let gamestat = subsource(&gamers, "pub enum Stat {\n");

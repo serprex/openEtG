@@ -420,49 +420,7 @@ function Thing(props) {
 
 	const memo = createMemo(() => {
 		if (faceDown()) return {};
-		let statText, topText;
-		if (!isSpell()) {
-			const charges = props.game.get(props.id, 'charges');
-			topText = props.game.active_text(props.id);
-			if (props.game.get_kind(props.id) === Kind.Creature) {
-				statText = `${props.game.trueatk(props.id)} | ${props.game.truehp(
-					props.id,
-				)}${charges ? ` \u00d7${charges}` : ''}`;
-			} else if (props.game.get_kind(props.id) === Kind.Permanent) {
-				if (props.game.get(props.id, 'pillar')) {
-					statText = `1:${
-						props.game.get(props.id, 'pendstate')
-							? props.game.get_mark(props.game.get_owner(props.id))
-							: props.game.getCard(props.id).element
-					}\u00d7${charges}`;
-					topText = '';
-				} else {
-					const ownattack = props.game.getSkill(props.id, 'ownattack');
-					if (ownattack === 'locket') {
-						const mode = props.game.get(props.id, 'mode');
-						statText = `1:${
-							~mode ? mode : props.game.get_mark(props.game.get_owner(props.id))
-						}`;
-					} else {
-						statText = `${charges || ''}`;
-					}
-				}
-			} else if (props.game.get_kind(props.id) === Kind.Weapon) {
-				statText = `${props.game.trueatk(props.id)}${
-					charges ? ` \u00d7${charges}` : ''
-				}`;
-			} else if (props.game.get_kind(props.id) === Kind.Shield) {
-				statText = charges
-					? '\u00d7' + charges
-					: props.game.truedr(props.id).toString();
-			}
-		} else {
-			topText = props.game.getCard(props.id).name;
-			statText = `${props.game.get(props.id, 'cost')}:${props.game.get(
-				props.id,
-				'costele',
-			)}`;
-		}
+		const [topText, statText] = props.game.instance_text(props.id).split('\n');
 		return { topText, statText };
 	});
 
@@ -876,7 +834,7 @@ export default function Match(props) {
 						element: card.element,
 						costele: game.get(id, isSpell ? 'costele' : 'castele'),
 						cost: game.get(id, isSpell ? 'cost' : 'cast'),
-						name: isSpell ? card.name : game.getSkill(id, 'cast'),
+						name: isSpell ? card.name : game.get_cast_skill(id),
 						upped: card.upped,
 						shiny: card.shiny,
 						c: id,
@@ -1202,7 +1160,7 @@ export default function Match(props) {
 							cb(tgt);
 							setTargeting(null);
 						},
-						text: game.getSkill(id, 'cast'),
+						text: game.get_cast_skill(id),
 						src: id,
 					});
 				}

@@ -843,62 +843,8 @@ impl Game {
 		}
 	}
 
-	pub fn get_one_skill(&self, id: i32, k: u8) -> Option<String> {
-		Event::try_from(k)
-			.ok()
-			.and_then(|ev| self.skill_text(id, ev))
-	}
-
-	pub fn active_text(&self, id: i32) -> String {
-		if let Some(acast) = self.skill_text(id, Event::Cast) {
-			return format!(
-				"{}:{}{}",
-				self.get(id, Stat::cast),
-				self.get(id, Stat::castele),
-				acast
-			);
-		}
-
-		for ev in [
-			Event::Hit,
-			Event::Death,
-			Event::OwnDeath,
-			Event::Buff,
-			Event::Destroy,
-			Event::Draw,
-			Event::Play,
-			Event::Spell,
-			Event::Dmg,
-			Event::Shield,
-			Event::Postauto,
-		] {
-			if let Some(a) = self.skill_text(id, ev) {
-				return format!(
-					"{}{}",
-					match ev {
-						Event::Hit => "hit ",
-						Event::Death => "death ",
-						Event::OwnDeath => "owndeath ",
-						Event::Buff => "buff ",
-						Event::Destroy => "destroy ",
-						Event::Draw => "draw ",
-						Event::Play => "play ",
-						Event::Spell => "spell ",
-						Event::Dmg => "dmg ",
-						Event::Shield => "shield ",
-						Event::Postauto => "postauto ",
-						_ => "",
-					},
-					a
-				);
-			}
-		}
-
-		if let Some(auto) = self.skill_text(id, Event::OwnAttack) {
-			return auto;
-		}
-
-		String::new()
+	pub fn get_cast_skill(&self, id: i32) -> Option<String> {
+		self.skill_text(id, Event::Cast)
 	}
 
 	pub fn actinfo(&self, c: i32, t: i32) -> Option<String> {
@@ -955,12 +901,84 @@ impl Game {
 		})
 	}
 
+	pub fn instance_text(&self, id: i32) -> String {
+		let thing = self.get_thing(id);
+		let card = self.cards.get(thing.status.get(Stat::card).unwrap_or(0));
+		if thing.kind == Kind::Spell {
+			format!(
+				"{}\n{}:{}",
+				card.name,
+				thing.status.get(Stat::cost).unwrap_or(0),
+				thing.status.get(Stat::costele).unwrap_or(0)
+			)
+		} else {
+			let charges = thing.status.get(Stat::charges).unwrap_or(0);
+			let mut text = self.active_text(id);
+			match thing.kind {
+				Kind::Creature => {
+					write!(text, "\n{} | {}", self.trueatk(id), self.truehp(id));
+					if charges != 0 {
+						write!(text, " \u{00d7}{}", charges);
+					}
+				}
+				Kind::Permanent => {
+					if thing.flag.get(Flag::pillar) {
+						text.clear();
+						write!(
+							text,
+							"\n1:{}\u{00d7}{}",
+							if thing.flag.get(Flag::pendstate) {
+								self.get_mark(thing.owner)
+							} else {
+								card.element as i32
+							},
+							charges
+						);
+					} else if thing
+						.skill
+						.get(Event::OwnAttack)
+						.map(|sk| sk.as_ref())
+						.unwrap_or(&[]) == &[Skill::locket]
+					{
+						let mode = thing.status.get(Stat::mode).unwrap_or(0);
+						write!(
+							text,
+							"\n1:{}",
+							if mode != -1 {
+								mode
+							} else {
+								self.get_mark(thing.owner)
+							}
+						);
+					} else if charges != 0 {
+						write!(text, "\n{}", charges);
+					}
+				}
+				Kind::Weapon => {
+					write!(text, "\n{}", self.trueatk(id));
+					if charges != 0 {
+						write!(text, " \u{00d7}{}", charges);
+					}
+				}
+				Kind::Shield => {
+					if charges != 0 {
+						write!(text, "\n\u{00d7}{}", charges);
+					} else {
+						write!(text, "\n{}", self.truedr(id));
+					}
+				}
+				_ => (),
+			};
+			text
+		}
+	}
+
 	pub fn thingText(&self, id: i32) -> String {
 		let thing = self.get_thing(id);
 		let mut ret = String::new();
 		if thing.kind != Kind::Player {
 			let instkind = if thing.kind == Kind::Spell {
-				self.get_card(self.get(id, Stat::card)).kind
+				self.cards.get(self.get(id, Stat::card)).kind
 			} else {
 				thing.kind
 			};
@@ -1097,18 +1115,6 @@ impl Game {
 		}) && (ckind == Kind::Spell || !self.get(id, Flag::immaterial | Flag::burrowed))
 	}
 
-	pub fn truedr(&self, id: i32) -> i32 {
-		self.get(id, Stat::hp) + self.trigger_pure(Event::Buff, id, 0)
-	}
-
-	pub fn truehp(&self, id: i32) -> i32 {
-		self.get(id, Stat::hp) + self.calcBonusHp(id)
-	}
-
-	pub fn trueatk(&self, id: i32) -> i32 {
-		self.trueatk_adrenaline(id, self.get(id, Stat::adrenaline))
-	}
-
 	pub fn visible_instances(&self, id: i32, isp1: bool, cloaked: bool) -> Vec<i32> {
 		let pl = self.get_player(id);
 		let mut ids =
@@ -1141,19 +1147,17 @@ impl Game {
 		if self.get_kind(id) == Kind::Spell {
 			0
 		} else {
-			(self.get(id, Flag::psionic) as u32) |
-				(self.get(id, Flag::aflatoxin) as u32) << 1 |
-				((!self.get(id, Flag::aflatoxin) &&
-				  (self.get(id, Stat::poison) > 0)) as u32) << 2 |
-				  (self.get(id, Flag::airborne) as u32) << 3 |
-				((!self.get(id, Flag::airborne) &&
-				  self.get(id, Flag::ranged)) as u32) << 4 |
-				(self.get(id, Flag::momentum) as u32) << 5 |
-				((self.get(id, Stat::adrenaline) > 0) as u32) << 6 |
-				((self.get(id, Stat::poison) < 0) as u32) << 7 |
-				((self.get(id, Stat::delayed) > 0) as u32) << 8 |
-				((id == self.get(self.get_owner(id), Stat::gpull)) as u32) << 9 |
-				((self.get(id, Stat::frozen) > 0) as u32) << 10
+			(self.get(id, Flag::psionic) as u32)
+				| (self.get(id, Flag::aflatoxin) as u32) << 1
+				| ((!self.get(id, Flag::aflatoxin) && (self.get(id, Stat::poison) > 0)) as u32) << 2
+				| (self.get(id, Flag::airborne) as u32) << 3
+				| ((!self.get(id, Flag::airborne) && self.get(id, Flag::ranged)) as u32) << 4
+				| (self.get(id, Flag::momentum) as u32) << 5
+				| ((self.get(id, Stat::adrenaline) > 0) as u32) << 6
+				| ((self.get(id, Stat::poison) < 0) as u32) << 7
+				| ((self.get(id, Stat::delayed) > 0) as u32) << 8
+				| ((id == self.get(self.get_owner(id), Stat::gpull)) as u32) << 9
+				| ((self.get(id, Stat::frozen) > 0) as u32) << 10
 		}
 	}
 
@@ -1435,6 +1439,58 @@ impl Game {
 		None
 	}
 
+	pub fn active_text(&self, id: i32) -> String {
+		if let Some(acast) = self.skill_text(id, Event::Cast) {
+			return format!(
+				"{}:{}{}",
+				self.get(id, Stat::cast),
+				self.get(id, Stat::castele),
+				acast
+			);
+		}
+
+		for ev in [
+			Event::Hit,
+			Event::Death,
+			Event::OwnDeath,
+			Event::Buff,
+			Event::Destroy,
+			Event::Draw,
+			Event::Play,
+			Event::Spell,
+			Event::Dmg,
+			Event::Shield,
+			Event::Postauto,
+		] {
+			if let Some(a) = self.skill_text(id, ev) {
+				return format!(
+					"{}{}",
+					match ev {
+						Event::Hit => "hit ",
+						Event::Death => "death ",
+						Event::OwnDeath => "owndeath ",
+						Event::Buff => "buff ",
+						Event::Destroy => "destroy ",
+						Event::Draw => "draw ",
+						Event::Play => "play ",
+						Event::Spell => "spell ",
+						Event::Dmg => "dmg ",
+						Event::Shield => "shield ",
+						Event::Postauto => "postauto ",
+						_ => "",
+					},
+					a
+				);
+			}
+		}
+
+		if let Some(auto) = self.skill_text(id, Event::OwnAttack) {
+			return auto;
+		}
+
+		String::new()
+	}
+
 	fn mutantactive(&mut self, id: i32, actives: &'static [Skill]) -> bool {
 		self.lobo(id);
 		let idx = self.rng.gen_range(-3..actives.len() as isize);
@@ -1451,7 +1507,7 @@ impl Game {
 			false
 		} else {
 			let cast = self.rng.gen_range(1..=2);
-			let castele = self.get_card(self.get(id, Stat::card)).element as i32;
+			let castele = self.cards.get(self.get(id, Stat::card)).element as i32;
 			self.set(id, Stat::cast, cast);
 			self.set(id, Stat::castele, castele);
 			self.setSkill(id, Event::Cast, &actives[idx as usize..=idx as usize]);
@@ -1586,6 +1642,18 @@ impl Game {
 			}
 			_ => 0,
 		}
+	}
+
+	pub fn truedr(&self, id: i32) -> i32 {
+		self.get(id, Stat::hp) + self.trigger_pure(Event::Buff, id, 0)
+	}
+
+	pub fn truehp(&self, id: i32) -> i32 {
+		self.get(id, Stat::hp) + self.calcBonusHp(id)
+	}
+
+	pub fn trueatk(&self, id: i32) -> i32 {
+		self.trueatk_adrenaline(id, self.get(id, Stat::adrenaline))
 	}
 
 	pub fn trueatk_adrenaline(&self, id: i32, adrenaline: i32) -> i32 {
@@ -1971,7 +2039,7 @@ impl Game {
 	}
 
 	pub fn transform(&mut self, c: i32, code: i32) {
-		let card = self.get_card(code);
+		let card = self.cards.get(code);
 		let thing = self.get_thing_mut(c);
 		thing.status.insert(Stat::card, code);
 		thing.status.insert(Stat::hp, card.health as i32);
@@ -2620,7 +2688,7 @@ impl Game {
 		}
 		for (i, &cr) in self.get_player(id).creatures.clone().iter().enumerate() {
 			if cr != 0 {
-				let crcard = self.get_card(self.get(cr, Stat::card));
+				let crcard = self.cards.get(self.get(cr, Stat::card));
 				if patienceFlag {
 					let floodbuff = if i > floodingIndex && crcard.element == etg::Water as i8 {
 						5
@@ -2744,7 +2812,7 @@ impl Game {
 	}
 
 	pub fn play(&mut self, c: i32, t: i32, fromhand: bool) {
-		let kind = self.get_card(self.get(c, Stat::card)).kind;
+		let kind = self.cards.get(self.get(c, Stat::card)).kind;
 		self.remove(c);
 		if kind == Kind::Spell {
 			self.castSpell(c, t, self.getSkill(c, Event::Cast)[0])

@@ -128,9 +128,6 @@ export default class Game {
 			})
 		);
 	}
-	getSkill(id, k) {
-		return this.get_one_skill(id, enums.EventId[k]);
-	}
 	tgtToPos(id, p1id) {
 		const pos = this.tgt_to_pos(id, p1id);
 		return pos === 0 ? null : { x: pos & 4095, y: pos >> 12 };
