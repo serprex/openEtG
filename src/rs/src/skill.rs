@@ -875,9 +875,9 @@ impl Skill {
 			Self::brokenmirror => out.push_str("brokenmirror"),
 			Self::bubbleclear => out.push_str("bubbleclear"),
 			Self::burrow => out.push_str(if ctx.get(id, Flag::burrowed) {
-				"burrow"
-			} else {
 				"unburrow"
+			} else {
+				"burrow"
 			}),
 			Self::butterfly => out.push_str("butterfly"),
 			Self::catapult => out.push_str("catapult"),

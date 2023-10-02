@@ -8,7 +8,7 @@ import {
 	onCleanup,
 	onMount,
 } from 'solid-js';
-import { For, Show } from 'solid-js/web';
+import { Index, For, Show } from 'solid-js/web';
 
 import { playSound } from '../audio.js';
 import { eleNames, strcols, maybeLightenStr } from '../ui.js';
@@ -189,25 +189,16 @@ function PagedModal(props) {
 
 function LastCardFx(props) {
 	const ms = useAnimation();
+	let div;
 	createEffect(() => {
+		div.style.opacity = Math.sin(ms() / 864) * 1.25;
 		if (ms() > 864 * Math.PI) props.setEffects(removeFx(props.self));
 	});
 	return (
 		<div
-			style={{
-				position: 'absolute',
-				left: '450px',
-				top: '300px',
-				transform: 'translate(-50%,-50%)',
-				'font-size': '16px',
-				color: '#fff',
-				'background-color': '#000',
-				padding: '18px',
-				opacity: Math.min(Math.sin(ms() / 864) * 1.25, 1),
-				'z-index': '8',
-				'pointer-events': 'none',
-			}}>
-			Last card for {props.name}
+			ref={div}
+			style="position:absolute;left:450px;top:300px;transform:translate(-50%,-50%);font-size:16px;color:#fff;background-color:#000;padding:18px;opacity:0;z-index:8;pointer-events:none">
+			{`Last card for ${props.name}`}
 		</div>
 	);
 }
@@ -230,9 +221,8 @@ function TextFx(props) {
 			});
 		}
 	});
-	const yy = () => ms() / 5;
-	const y = () => props.y0 + yy();
-	const fade = () => 1 - Math.tan(yy() / 91);
+	const y = () => props.y0 + ms() / 5;
+	const fade = () => 1 - Math.tan(ms() / 451);
 	return (
 		<div
 			style={{
@@ -271,13 +261,9 @@ function LightningFx(props) {
 		<svg
 			height="64"
 			width="64"
-			style={{
-				position: 'absolute',
-				left: `${props.pos.x - 32}px`,
-				top: `${props.pos.y - 32}px`,
-				'pointer-events': 'none',
-				'z-index': '4',
-			}}>
+			style={`position:absolute;left:${props.pos.x - 32}px;top:${
+				props.pos.y - 32
+			}px;pointer-events:none;z-index:4`}>
 			<path d={path()} stroke="#fff" strokeWidth="2" fill="none" />
 		</svg>
 	);
@@ -311,13 +297,9 @@ function BoltFx(props) {
 		<svg
 			height="128"
 			width="128"
-			style={{
-				position: 'absolute',
-				left: `${props.pos.x - 64}px`,
-				top: `${props.pos.y - 64}px`,
-				'pointer-events': 'none',
-				'z-index': '4',
-			}}>
+			style={`position:absolute;left:${props.pos.x - 64}px;top:${
+				props.pos.y - 64
+			}px;pointer-events:none;z-index:4`}>
 			<defs>
 				<radialGradient id="g">
 					<stop offset="10%" stop-color={props.upcolor} stop-opacity="1" />
@@ -427,25 +409,14 @@ function Thing(props) {
 			if (!faceDown() && props.setInfo) props.setInfo(e, props.id);
 		};
 
-	const visible = [
-		() => props.game.get(props.id, 'psionic'),
-		() => props.game.get(props.id, 'aflatoxin'),
-		() =>
-			!props.game.get(props.id, 'aflatoxin') &&
-			props.game.get(props.id, 'poison') > 0,
-		() => props.game.get(props.id, 'airborne'),
-		() =>
-			!props.game.get(props.id, 'airborne') &&
-			props.game.get(props.id, 'ranged'),
-		() => props.game.get(props.id, 'momentum'),
-		() => props.game.get(props.id, 'adrenaline'),
-		() => props.game.get(props.id, 'poison') < 0,
-	];
-	const bordervisible = [
-		() => props.game.get(props.id, 'delayed'),
-		() => props.id === props.game.get(props.game.get_owner(props.id), 'gpull'),
-		() => props.game.get(props.id, 'frozen'),
-	];
+	const visible_status = createMemo(() => {
+		const v = props.game.visible_status(props.id);
+		const res = [];
+		for (let i = 0; i < 11; i++) {
+			res.push(!!(v & (1 << i)));
+		}
+		return res;
+	});
 
 	const memo = createMemo(() => {
 		if (faceDown()) return {};
@@ -539,26 +510,28 @@ function Thing(props) {
 							style="position:absolute;width:64px;height:64px;pointer-events:none"
 						/>
 					</Show>
-					<Show when={!isSpell()}>
-						{visible.map((v, k) => (
+					<Index each={visible_status().slice(0, 8)}>
+						{(v, k) => (
 							<Show when={v()}>
 								<div
 									class={`ico s${k}`}
 									style={`position:absolute;bottom:-8px;left:${
-										['32', '8', '8', '0', '0', '24', '16', '8'][k]
+										[32, 8, 8, 0, 0, 24, 16, 8][k]
 									}px;opacity:.6;z-index:1`}
 								/>
 							</Show>
-						))}
-						{bordervisible.map((v, k) => (
+						)}
+					</Index>
+					<Index each={visible_status().slice(8)}>
+						{(v, k) => (
 							<Show when={v()}>
 								<div
 									class={`ico sborder${k}`}
 									style="position:absolute;left:0;top:0;width:64px;height:64px"
 								/>
 							</Show>
-						))}
-					</Show>
+						)}
+					</Index>
 					<Show when={props.game.has_protectonce(props.id)}>
 						<div
 							class="ico protection"
@@ -576,7 +549,7 @@ function Thing(props) {
 						<Show when={!isSpell()}>
 							<div
 								style={`position:absolute;top:54px;height:10px;width:64px;overflow:hidden;white-space:nowrap;background-color:${bgcolor()}`}>
-								<Text text={props.game.getCard(props.id).name} icoprefix="se" />
+								{props.game.getCard(props.id).name}
 							</div>
 						</Show>
 					</div>
@@ -775,14 +748,6 @@ function hpTweenCompare(prev, next) {
 	return prev.x1 === next.x1 && prev.x2 === next.x2;
 }
 
-const initialSpells = [];
-const initialEffects = {
-	effects: new Set(),
-	startPos: new Map(),
-	endPos: new Map(),
-	fxTextPos: new Map(),
-	fxStatChange: new Map(),
-};
 function removeFx(fx) {
 	return state => {
 		const neweffects = new Set(state.effects);
@@ -829,9 +794,15 @@ export default function Match(props) {
 	const [hovery, setHovery] = createSignal(null);
 	const [tooltip, setTooltip] = createSignal({});
 	const [foeplays, setFoeplays] = createSignal(new Map());
-	const [spells, setSpells] = createSignal(initialSpells);
+	const [spells, setSpells] = createSignal([]);
 	const [targeting, setTargeting] = createSignal(null);
-	const [effects, setEffects] = createSignal(initialEffects);
+	const [effects, setEffects] = createSignal({
+		effects: new Set(),
+		startPos: new Map(),
+		endPos: new Map(),
+		fxTextPos: new Map(),
+		fxStatChange: new Map(),
+	});
 	const [popup, setPopup] = createSignal(props.game.data.quest?.opentext);
 
 	const mkText = (state, newstate, id, text, onRest) => {
@@ -1470,208 +1441,172 @@ export default function Match(props) {
 					/>
 				)
 			)}
-			<For each={[0, 1]}>
-				{j => {
-					const pl = j ? p2id : p1id,
-						plpos = () => game().tgtToPos(pl(), p1id()),
-						handOverlay = () =>
-							game().get(pl(), 'casts') === 0
-								? 12
-								: game().get(pl(), 'sanctuary')
-								? 8
-								: (game().get(pl(), 'nova') >= 2 ||
-										game().get(pl(), 'nova2') >= 1) &&
-								  (pl() !== p1id() ||
-										game()
-											.get_hand(pl())
-											.some(id => novaCodes.has(game().get(id, 'card'))))
-								? 1
-								: null;
-					const expectedDamage = () =>
-						expectedDamages().expectedDamage[game().getIndex(pl())];
-					const x1 = () =>
-							Math.max(
-								Math.round(
-									96 * (game().get(pl(), 'hp') / game().get(pl(), 'maxhp')),
-								),
-								0,
+			{[0, 1].map(j => {
+				const pl = j ? p2id : p1id,
+					plpos = () => game().tgtToPos(pl(), p1id()),
+					handOverlay = () =>
+						game().get(pl(), 'casts') === 0
+							? 12
+							: game().get(pl(), 'sanctuary')
+							? 8
+							: (game().get(pl(), 'nova') >= 2 ||
+									game().get(pl(), 'nova2') >= 1) &&
+							  (pl() !== p1id() ||
+									game()
+										.get_hand(pl())
+										.some(id => novaCodes.has(game().get(id, 'card'))))
+							? 1
+							: null;
+				const expectedDamage = () =>
+					expectedDamages().expectedDamage[game().getIndex(pl())];
+				const x1 = () =>
+						Math.max(
+							Math.round(
+								96 * (game().get(pl(), 'hp') / game().get(pl(), 'maxhp')),
 							),
-						x2 = () =>
-							Math.max(
-								x1() -
-									Math.round(
-										96 * (expectedDamage() / game().get(pl(), 'maxhp')),
-									),
-								0,
-							);
-					const poison = () => game().get(pl(), 'poison'),
-						poisoninfo = () =>
-							`${
-								poison() > 0
-									? poison() + ' 1:2'
-									: poison() < 0
-									? -poison() + ' 1:7'
-									: ''
-							} ${game().get(pl(), 'neuro') ? ' 1:10' : ''}`;
-					const hptext = () =>
-						`${game().get(pl(), 'hp')}/${game().get(pl(), 'maxhp')} ${
-							!cloaked() && expectedDamage() ? `(${expectedDamage()})` : ''
-						}\n${poisoninfo() ? `\n${poisoninfo()}` : ''}${
-							pl() !== p1id() && pl() !== game().get_foe(p1id())
-								? '\n(Not targeted)'
+							0,
+						),
+					x2 = () =>
+						Math.max(
+							x1() -
+								Math.round(96 * (expectedDamage() / game().get(pl(), 'maxhp'))),
+							0,
+						);
+				const poison = () => game().get(pl(), 'poison'),
+					poisoninfo = () =>
+						`${
+							poison() > 0
+								? poison() + ' 1:2'
+								: poison() < 0
+								? -poison() + ' 1:7'
 								: ''
-						}`;
-					return (
-						<>
+						} ${game().get(pl(), 'neuro') ? ' 1:10' : ''}`;
+				const hptext = () =>
+					`${game().get(pl(), 'hp')}/${game().get(pl(), 'maxhp')} ${
+						!cloaked() && expectedDamage() ? `(${expectedDamage()})` : ''
+					}\n${poisoninfo() ? `\n${poisoninfo()}` : ''}${
+						pl() !== p1id() && pl() !== game().get_foe(p1id())
+							? '\n(Not targeted)'
+							: ''
+					}`;
+				return (
+					<>
+						<div
+							class={tgtclass(game(), p1id(), pl(), targeting())}
+							style={`position:absolute;left:${plpos().x - 48}px;top:${
+								plpos().y - 40
+							}px;width:96px;height:80px;border:transparent 2px solid;z-index:4`}
+							onClick={[thingClick, pl()]}
+							onMouseOver={e => setInfo(e, pl())}
+							onMouseMove={e => setInfo(e, pl())}
+						/>
+						<span
+							class={'ico e' + game().get_mark(pl())}
+							style={`position:absolute;left:32px;top:${
+								j ? 228 : 430
+							}px;transform:translate(-50%,-50%);text-align:center;pointer-events:none;font-size:18px;text-shadow:2px 2px 1px #000,2px 2px 2px #000`}>
+							{game().get_markpower(pl()) !== 1 && game().get_markpower(pl())}
+						</span>
+						<Show when={game().get(pl(), 'sosa')}>
 							<div
-								class={tgtclass(game(), p1id(), pl(), targeting())}
-								style={{
-									position: 'absolute',
-									left: `${plpos().x - 48}px`,
-									top: `${plpos().y - 40}px`,
-									width: '96px',
-									height: '80px',
-									border: 'transparent 2px solid',
-									'z-index': '4',
-								}}
-								onClick={[thingClick, pl()]}
-								onMouseOver={e => setInfo(e, pl())}
-								onMouseMove={e => setInfo(e, pl())}
+								class="ico sacrifice"
+								style={`position:absolute;left:0;top:${
+									j ? 7 : 502
+								}px;pointer-events:none`}
 							/>
+						</Show>
+						<Show when={game().get(pl(), 'sabbath')}>
 							<span
-								class={'ico e' + game().get_mark(pl())}
-								style={`position:absolute;left:32px;top:${
-									j ? 228 : 430
-								}px;transform:translate(-50%,-50%);text-align:center;pointer-events:none;font-size:18px;text-shadow:2px 2px 1px #000,2px 2px 2px #000`}>
-								{game().get_markpower(pl()) !== 1 && game().get_markpower(pl())}
-							</span>
-							<Show when={game().get(pl(), 'sosa')}>
-								<div
-									class="ico sacrifice"
-									style={`position:absolute;left:0;top:${
-										j ? 7 : 502
-									}px;pointer-events:none`}
-								/>
-							</Show>
-							<Show when={game().get(pl(), 'sabbath')}>
-								<span
-									class="ico sabbath"
-									style={`position:absolute;left:0;top:${j ? 96 : 300}px`}
-								/>
-							</Show>
-							<Show
-								when={
-									game().get(pl(), 'drawlock') ||
-									game().get(pl(), 'protectdeck')
-								}>
-								<span
-									style={{
-										position: 'absolute',
-										left: '95px',
-										top: j ? '250px' : '543px',
-										width: '48px',
-										height: '48px',
-										'background-color': game().get(pl(), 'drawlock')
-											? '#931'
-											: '#ede',
-									}}
-								/>
-							</Show>
-							<Show when={handOverlay()}>
-								<span
-									style={{
-										'z-index': '1',
-										position: 'absolute',
-										left: '101px',
-										top: j ? '0px' : '300px',
-										width: '66px',
-										height: '263px',
-										'background-color': strcols[handOverlay()],
-										opacity: '.3',
-										'border-radius': '4px',
-										'pointer-events': 'none',
-									}}
-								/>
-							</Show>
-							<For each={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}>
-								{k => (
-									<span
-										class={'ico ce' + k}
-										style={`position:absolute;left:${k & 1 ? 2 : 48}px;top:${
-											(j ? 106 : 308) + (((k - 1) / 2) | 0) * 18
-										}px;font-size:16px;pointer-events:none;padding-left:16px`}>
-										&nbsp;
-										{game().get_quanta(pl(), k) || ''}
-									</span>
-								)}
-							</For>
-							<div
-								style={`background-color:#000;position:absolute;left:2px;top:${
-									j ? 36 : 531
-								}px;width:98px;height:22px;pointer-events:none`}
+								class="ico sabbath"
+								style={`position:absolute;left:0;top:${j ? 96 : 300}px`}
 							/>
-							<Tween
-								state={{ x1: x1(), x2: x2() }}
-								proc={hpTweenProc}
-								compare={hpTweenCompare}>
-								{state => (
-									<>
+						</Show>
+						<Show
+							when={
+								game().get(pl(), 'drawlock') || game().get(pl(), 'protectdeck')
+							}>
+							<span
+								style={`position:absolute;left:95px;top:${
+									j ? 250 : 543
+								}px;width:48px;height:48px;background-color:#${
+									game().get(pl(), 'drawlock') ? '931' : 'ede'
+								}`}
+							/>
+						</Show>
+						<Show when={handOverlay()}>
+							<span
+								style={`z-index:1;position:absolute;left:101px;top:${
+									j ? 0 : 300
+								}px;width:66px;height:263px;background-color:${
+									strcols[handOverlay()]
+								};opacity:.3;border-radius:4px;pointer-events:none`}
+							/>
+						</Show>
+						{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(k => (
+							<span
+								class={'ico ce' + k}
+								style={`position:absolute;left:${k & 1 ? 2 : 48}px;top:${
+									(j ? 106 : 308) + (((k - 1) / 2) | 0) * 18
+								}px;font-size:16px;pointer-events:none;padding-left:16px`}>
+								&nbsp;
+								{game().get_quanta(pl(), k) || ''}
+							</span>
+						))}
+						<div
+							style={`background-color:#000;position:absolute;left:2px;top:${
+								j ? 36 : 531
+							}px;width:98px;height:22px;pointer-events:none`}
+						/>
+						<Tween
+							state={{ x1: x1(), x2: x2() }}
+							proc={hpTweenProc}
+							compare={hpTweenCompare}>
+							{state => (
+								<>
+									<div
+										style={`background-color:${
+											strcols[Life]
+										};position:absolute;left:3px;top:${j ? 37 : 532}px;width:${
+											state().x1
+										}px;height:20px;pointer-events:none;z-index:2`}
+									/>
+									<Show when={!cloaked() && expectedDamage() !== 0}>
 										<div
-											style={{
-												'background-color': strcols[Life],
-												position: 'absolute',
-												left: '3px',
-												top: j ? '37px' : '532px',
-												width: `${state().x1}px`,
-												height: '20px',
-												'pointer-events': 'none',
-												'z-index': '2',
-											}}
+											style={`background-color:${
+												strcols[
+													expectedDamage() >= game().get(pl(), 'hp')
+														? Fire
+														: expectedDamage() > 0
+														? Time
+														: Water
+												]
+											};position:absolute;left:${
+												3 + Math.min(state().x1, state().x2)
+											}px;top:${j ? 37 : 532}px;width:${
+												Math.max(state().x1, state().x2) -
+												Math.min(state().x1, state().x2)
+											}px;height:20px;pointer-events:none;z-index:2`}
 										/>
-										<Show when={!cloaked() && expectedDamage() !== 0}>
-											<div
-												style={{
-													'background-color':
-														strcols[
-															expectedDamage() >= game().get(pl(), 'hp')
-																? Fire
-																: expectedDamage() > 0
-																? Time
-																: Water
-														],
-													position: 'absolute',
-													left: `${3 + Math.min(state().x1, state().x2)}px`,
-													top: j ? '37px' : '532px',
-													width:
-														Math.max(state().x1, state().x2) -
-														Math.min(state().x1, state().x2) +
-														'px',
-													height: '20px',
-													'pointer-events': 'none',
-													'z-index': '2',
-												}}
-											/>
-										</Show>
-									</>
-								)}
-							</Tween>
-							<div
-								style={`text-align:center;width:100px;pointer-events:none;font-size:12px;line-height:1.1;position:absolute;left:0;top:${
-									j ? 40 : 535
-								}px;text-shadow:1px 1px 1px #000,2px 2px 2px #000;z-index:2`}>
-								<Text text={hptext()} />
-							</div>
-							<div
-								class={game().deck_length(pl()) ? 'ico ccback' : ''}
-								style={`position:absolute;left:103px;top:${
-									j ? 258 : 551
-								}px;text-align:center;padding-top:7px;pointer-events:none;font-size:18px;text-shadow:2px 2px 1px #000,2px 2px 2px #000;z-index:3`}>
-								{game().deck_length(pl()) || '0!!'}
-							</div>
-						</>
-					);
-				}}
-			</For>
+									</Show>
+								</>
+							)}
+						</Tween>
+						<div
+							style={`text-align:center;width:100px;pointer-events:none;font-size:12px;line-height:1.1;position:absolute;left:0;top:${
+								j ? 40 : 535
+							}px;text-shadow:1px 1px 1px #000,2px 2px 2px #000;z-index:2`}>
+							<Text text={hptext()} />
+						</div>
+						<div
+							class={game().deck_length(pl()) ? 'ico ccback' : ''}
+							style={`position:absolute;left:103px;top:${
+								j ? 258 : 551
+							}px;text-align:center;padding-top:7px;pointer-events:none;font-size:18px;text-shadow:2px 2px 1px #000,2px 2px 2px #000;z-index:3`}>
+							{game().deck_length(pl()) || '0!!'}
+						</div>
+					</>
+				);
+			})}
 			<Things
 				startPos={effects().startPos}
 				endPos={effects().endPos}

@@ -1,5 +1,4 @@
 import { createSignal, onMount } from 'solid-js';
-import { For } from 'solid-js/web';
 
 import { eleNames } from '../ui.js';
 import { run } from '../mkAi.js';
@@ -158,25 +157,22 @@ export default function ElementSelect() {
 				/>{' '}
 				Skip Tutorial
 			</label>
-			{rx.user && (
-				<For each={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]}>
-					{i => (
-						<span
-							class={`imgb ico e${i === 14 ? 13 : i === 13 ? 14 : i}`}
-							style={`position:absolute;left:12px;top:${24 + (i - 1) * 40}px`}
-							onClick={() => {
-								sock.userEmit('inituser', {
-									e: i === 14 ? (Math.random() * 12 + 1) | 0 : i,
-								});
-							}}
-							onMouseOver={() => setEledesc(i - 1)}>
-							<span style="position:absolute;left:48px;top:6px;width:144px">
-								{eleNames[i]}
-							</span>
+			{rx.user &&
+				[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(i => (
+					<span
+						class={`imgb ico e${i === 14 ? 13 : i === 13 ? 14 : i}`}
+						style={`position:absolute;left:12px;top:${24 + (i - 1) * 40}px`}
+						onClick={() => {
+							sock.userEmit('inituser', {
+								e: i === 14 ? (Math.random() * 12 + 1) | 0 : i,
+							});
+						}}
+						onMouseOver={() => setEledesc(i - 1)}>
+						<span style="position:absolute;left:48px;top:6px;width:144px">
+							{eleNames[i]}
 						</span>
-					)}
-				</For>
-			)}
+					</span>
+				))}
 		</>
 	);
 }

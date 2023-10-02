@@ -1,5 +1,4 @@
 import { createMemo, createSignal } from 'solid-js';
-import { For } from 'solid-js/web';
 
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
@@ -16,9 +15,9 @@ const artable = {
 };
 function AttrUi(p) {
 	return (
-		<For each={['hp', 'mark', 'draw']}>
-			{(name, y) => {
-				const top = 128 + y() * 20;
+		<>
+			{['hp', 'mark', 'draw'].map((name, y) => {
+				const top = 128 + y * 20;
 				const { min = 0, incr = 1 } = artable[name];
 				const value = p.attr[name];
 				return (
@@ -49,8 +48,8 @@ function AttrUi(p) {
 						</div>
 					</>
 				);
-			}}
-		</For>
+			})}
+		</>
 	);
 }
 

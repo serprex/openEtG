@@ -11,31 +11,31 @@ import Text from './Text.jsx';
 
 function RaritySelector(props) {
 	return (
-		<For each={[0, 1, 2, 3, 4]}>
-			{i => (
+		<>
+			{[0, 1, 2, 3, 4].map(i => (
 				<IconBtn
 					e={(i ? 'r' : 't') + i}
 					x={props.x}
 					y={props.y + i * 24}
 					click={() => props.onChange(i)}
 				/>
-			)}
-		</For>
+			))}
+		</>
 	);
 }
 
 function ElementSelector(props) {
 	return (
-		<For each={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}>
-			{i => (
+		<>
+			{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => (
 				<IconBtn
 					e={'e' + i}
 					x={props.x + (!i || i & 1) * 36}
 					y={286 + (((i + 1) / 2) | 0) * 32}
 					click={() => props.onChange(i)}
 				/>
-			)}
-		</For>
+			))}
+		</>
 	);
 }
 

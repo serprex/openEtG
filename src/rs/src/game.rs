@@ -1137,6 +1137,26 @@ impl Game {
 		ids
 	}
 
+	pub fn visible_status(&self, id: i32) -> u32 {
+		if self.get_kind(id) == Kind::Spell {
+			0
+		} else {
+			(self.get(id, Flag::psionic) as u32) |
+				(self.get(id, Flag::aflatoxin) as u32) << 1 |
+				((!self.get(id, Flag::aflatoxin) &&
+				  (self.get(id, Stat::poison) > 0)) as u32) << 2 |
+				  (self.get(id, Flag::airborne) as u32) << 3 |
+				((!self.get(id, Flag::airborne) &&
+				  self.get(id, Flag::ranged)) as u32) << 4 |
+				(self.get(id, Flag::momentum) as u32) << 5 |
+				((self.get(id, Stat::adrenaline) > 0) as u32) << 6 |
+				((self.get(id, Stat::poison) < 0) as u32) << 7 |
+				((self.get(id, Stat::delayed) > 0) as u32) << 8 |
+				((id == self.get(self.get_owner(id), Stat::gpull)) as u32) << 9 |
+				((self.get(id, Stat::frozen) > 0) as u32) << 10
+		}
+	}
+
 	pub fn has_flooding(&self) -> bool {
 		self.players.iter().any(|&pl| {
 			self.get_player(pl)
