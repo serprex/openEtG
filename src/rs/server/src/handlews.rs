@@ -27,7 +27,7 @@ use crate::json::{
 	WsResponse,
 };
 use crate::starters::{ORIGINAL_STARTERS, STARTERS};
-use crate::users::{self, HashAlgo, UserData, UserObject, Users};
+use crate::users::{self, HashAlgo, UserData, UserObject, UserRole, Users};
 use crate::{get_day, PgPool};
 
 static NEXT_SOCK_ID: AtomicUsize = AtomicUsize::new(0);
@@ -88,13 +88,14 @@ fn wilson(up: f64, total: f64) -> f64 {
 		/ (1.0 + Z2 / total)
 }
 
-async fn role_check<'a>(
-	role: &'static str,
-	tx: &'a WsSender,
-	client: &'a Client,
-	userid: i64,
-) -> bool {
-	let ret = if let Ok(row) = client.query_one("select exists(select * from user_role ur join roles r on ur.role_id = r.id where ur.user_id = $1 and r.val = $2) res", &[&userid, &role]).await {
+async fn role_check<'a>(role: UserRole, tx: &'a WsSender, client: &'a Client, userid: i64) -> bool {
+	let ret = if let Ok(row) = client
+		.query_one(
+			"select exists(select * from user_role where user_id = $1 and role_id = $2) res",
+			&[&userid, &role],
+		)
+		.await
+	{
 		row.get::<usize, bool>(0)
 	} else {
 		false
@@ -112,26 +113,26 @@ async fn role_check<'a>(
 }
 
 async fn add_role_handler<'a>(
-	role: &'static str,
+	role: UserRole,
 	tx: &'a WsSender,
 	client: &'a Client,
 	userid: i64,
 	m: &'a str,
 ) {
 	if role_check(role, tx, client, userid).await {
-		client.execute("insert into user_role (user_id, role_id) select u.id, r.id from users u, roles r where u.name = $1 and r.val = $2 on conflict do nothing", &[&m, &role]).await.ok();
+		client.execute("insert into user_role (user_id, role_id) select u.id, $2 from users u where u.name = $1 on conflict do nothing", &[&m, &role]).await.ok();
 	}
 }
 
 async fn rm_role_handler<'a>(
-	role: &'static str,
+	role: UserRole,
 	tx: &'a WsSender,
 	client: &'a Client,
 	userid: i64,
 	m: &'a str,
 ) {
 	if role_check(role, tx, client, userid).await {
-		client.execute("delete from user_role ur using users u, roles r where ur.user_id = u.id and ur.role_id = r.id and u.name = $1 and r.val = $2", &[&m, &role]).await.ok();
+		client.execute("delete from user_role ur using users u where ur.user_id = u.id and ur.role_id = $2 and u.name = $1", &[&m, &role]).await.ok();
 	}
 }
 
@@ -411,10 +412,10 @@ pub async fn handle_ws(
 					};
 					match msg {
 						AuthMessage::modadd { m } => {
-							add_role_handler("Mod", &tx, &client, userid, &m).await;
+							add_role_handler(UserRole::Mod, &tx, &client, userid, &m).await;
 						}
 						AuthMessage::modrm { m } => {
-							rm_role_handler("Mod", &tx, &client, userid, &m).await;
+							rm_role_handler(UserRole::Mod, &tx, &client, userid, &m).await;
 						}
 						AuthMessage::modresetpass { m } => {
 							if u == "serprex" {
@@ -426,13 +427,13 @@ pub async fn handle_ws(
 							}
 						}
 						AuthMessage::codesmithadd { m } => {
-							add_role_handler("Codesmith", &tx, &client, userid, &m).await;
+							add_role_handler(UserRole::Codesmith, &tx, &client, userid, &m).await;
 						}
 						AuthMessage::codesmithrm { m } => {
-							rm_role_handler("Codesmith", &tx, &client, userid, &m).await;
+							rm_role_handler(UserRole::Codesmith, &tx, &client, userid, &m).await;
 						}
 						AuthMessage::modguest { m } => {
-							if role_check("Mod", &tx, &client, userid).await {
+							if role_check(UserRole::Mod, &tx, &client, userid).await {
 								client
 									.execute(
 										if m == "off" {
@@ -447,17 +448,17 @@ pub async fn handle_ws(
 							}
 						}
 						AuthMessage::modmute { m } => {
-							if role_check("Mod", &tx, &client, userid).await {
+							if role_check(UserRole::Mod, &tx, &client, userid).await {
 								broadcast(&socks, &WsResponse::mute { m: &m }).await;
 							}
 						}
 						AuthMessage::modclear => {
-							if role_check("Mod", &tx, &client, userid).await {
+							if role_check(UserRole::Mod, &tx, &client, userid).await {
 								broadcast(&socks, &WsResponse::clear).await;
 							}
 						}
 						AuthMessage::modmotd { m } => {
-							if role_check("Mod", &tx, &client, userid).await {
+							if role_check(UserRole::Mod, &tx, &client, userid).await {
 								let mbytes = m.as_bytes();
 								let mut nend = 0;
 								while nend < mbytes.len()
@@ -745,7 +746,7 @@ pub async fn handle_ws(
 							client.execute("insert into stats (user_id, \"set\", stats, players) values ($1, $2, $3, $4)", &[&userid, &set, &Json(stats), &players]).await.ok();
 						}
 						AuthMessage::setgold { t, g } => {
-							if role_check("Codesmith", &tx, &client, userid).await {
+							if role_check(UserRole::Codesmith, &tx, &client, userid).await {
 								if let Some(tgt) = users.write().await.load(&*client, &t).await {
 									let mut tgt = tgt.lock().await;
 									sendmsg(
@@ -763,7 +764,7 @@ pub async fn handle_ws(
 							}
 						}
 						AuthMessage::addpool { t, pool, bound } => {
-							if role_check("Codesmith", &tx, &client, userid).await {
+							if role_check(UserRole::Codesmith, &tx, &client, userid).await {
 								if let Some(tgt) = users.write().await.load(&*client, &t).await {
 									let mut tgt = tgt.lock().await;
 									let curpool = if bound {
@@ -800,7 +801,7 @@ pub async fn handle_ws(
 									},
 								);
 							} else {
-								if role_check("Codesmith", &tx, &client, userid).await {
+								if role_check(UserRole::Codesmith, &tx, &client, userid).await {
 									use rand::distributions::Alphanumeric;
 									let mut codebin = [0u8; 8];
 									let code = {
@@ -2395,12 +2396,12 @@ pub async fn handle_ws(
 					}
 				}
 				UserMessage::r#mod | UserMessage::codesmith => {
-					let xstr = if let UserMessage::codesmith { .. } = msg {
-						"Codesmith"
+					let role = if let UserMessage::codesmith { .. } = msg {
+						UserRole::Codesmith
 					} else {
-						"Mod"
+						UserRole::Mod
 					};
-					if let Ok(rows) = client.query("select u.name from user_role ur join users u on u.id = ur.user_id join roles r on r.id = ur.role_id where r.val = $1 order by u.name", &[&xstr]).await {
+					if let Ok(rows) = client.query("select u.name from user_role ur join users u on u.id = ur.user_id where ur.role_id = $1 order by u.name", &[&role]).await {
 						let mut msgmsg = String::new();
 						for (idx, row) in rows.iter().enumerate() {
 							if idx != 0 {

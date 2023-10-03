@@ -11,6 +11,13 @@ use crate::cardpool::Cardpool;
 use crate::handlews::{AsyncSocks, AsyncUserSocks};
 
 #[derive(Clone, Copy, Debug, ToSql, FromSql)]
+#[postgres(name = "userrole")]
+pub enum UserRole {
+	Codesmith,
+	Mod,
+}
+
+#[derive(Clone, Copy, Debug, ToSql, FromSql)]
 #[postgres(name = "pbkdf2algo")]
 pub enum HashAlgo {
 	#[postgres(name = "SHA1")]

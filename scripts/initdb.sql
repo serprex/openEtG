@@ -1,4 +1,5 @@
 create type pbkdf2algo as enum('SHA1', 'SHA512');
+create type userrole as enum('Codesmith', 'Mod');
 create table users (
 	id bigserial not null primary key,
 	name text not null unique,
@@ -8,14 +9,10 @@ create table users (
 	algo pbkdf2algo not null,
 	wealth int not null default(0)
 );
-create table user_data_types (
-	id int not null primary key,
-	val text not null
-);
 create table user_data (
 	id bigserial not null primary key,
 	user_id bigint not null references users(id),
-	type_id int not null references user_data_types,
+	type_id int not null,
 	name text not null,
 	data json not null
 );
@@ -25,7 +22,7 @@ create table roles (
 );
 create table user_role (
 	user_id bigint not null references users(id),
-	role_id int not null references roles(id),
+	role_id userrole not null,
 	unique (user_id, role_id)
 );
 create table motd (
@@ -39,13 +36,9 @@ create table bazaar (
 	q int not null,
 	p int not null
 );
-create table arena_types (
-	id int not null primary key,
-	val text not null
-);
 create table arena (
 	user_id bigint not null references users(id),
-	arena_id int not null references arena_types(id),
+	arena_id int not null,
 	code int not null,
 	deck text not null,
 	day int not null,
@@ -98,15 +91,9 @@ create table match_request (
 	unique (game_id, user_id)
 );
 
-insert into roles values (1, 'Codesmith'), (2, 'Mod');
-insert into arena_types values (1, 'A1'), (2, 'A2');
-insert into user_data_types values (1, 'open'), (2, 'orig');
-
 create index ix_users_wealth on users (wealth);
 create index ix_users_name on users using hash (name);
 create index ix_roles_val on roles using hash (val);
-create index ix_arena_types_val on arena_types using hash (val);
-create index ix_user_data_types_val on user_data_types using hash (val);
 create index ix_arena_score on arena (arena_id, score desc, day desc, "rank");
 create index ix_arena_user_id on arena using hash (user_id);
 create index ix_bazaar_user_id on bazaar using hash (user_id);
