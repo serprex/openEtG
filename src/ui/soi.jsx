@@ -1,11 +1,9 @@
 import { render } from 'solid-js/web';
 import { createSignal } from 'solid-js';
 import Game from '../Game.js';
-import { toTrueMark, encodedeck } from '../etgutil.js';
+import { encodedeck } from '../etgutil.js';
 import { Kind } from '../rs/pkg/etg.js';
 import Text from '../Components/Text.jsx';
-
-const Earth = 4;
 
 function Shard(element) {
 	return 5030 + element * 100;
@@ -15,7 +13,7 @@ function App() {
 	const [cards, setCards] = createSignal(new Uint8Array(24));
 
 	const info = () => {
-		const deck = [toTrueMark(Earth), Shard(Earth) + 2000];
+		const deck = [9014, Shard(Earth) + 2000];
 		cards().forEach((count, idx) => {
 			for (let i = 0; i < count; i++)
 				deck.push(Shard((idx % 12) + 1) + (idx >= 12 ? 2000 : 0));

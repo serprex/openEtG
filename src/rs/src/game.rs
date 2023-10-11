@@ -722,6 +722,46 @@ impl Game {
 			.sum()
 	}
 
+	pub fn hand_overlay(&self, id: i32, p1id: i32) -> i32 {
+		if self.get(id, Stat::casts) == 0 {
+			12
+		} else if self.get(id, Flag::sanctuary) {
+			8
+		} else if (self.get(id, Stat::nova) >= 2 || self.get(id, Stat::nova2) >= 1) &&
+			(id != p1id || self.get_player(id).hand.into_iter().any(|x| x != 0 && matches!(self.get(x, Stat::card), 1107 | 3107 | 5107 | 7107)))
+		{
+			1
+		} else {
+			0
+		}
+	}
+
+	pub fn hp_text(&self, id: i32, p1id: i32, p2id: i32, expected: i32) -> String {
+		let mut s = format!("{}/{}", self.get(id, Stat::hp), self.get(id, Stat::maxhp));
+		if expected != 0 && !self.is_cloaked(p2id) {
+			write!(s, " ({})", expected);
+		}
+		let poison = self.get(id, Stat::poison);
+		if poison != 0 {
+			if poison > 0 {
+				write!(s, "\n\n{} 1:2", poison);
+			} else {
+				write!(s, "\n\n{} 1:7", -poison);
+			}
+		}
+		if self.get(id, Flag::neuro) {
+			s.push_str(if poison == 0 {
+				"\n\n1:10"
+			} else {
+				" 1:10"
+			});
+		}
+		if id != p1id && id != self.get_foe(p1id) {
+			s.push_str("\n(Not targeted)");
+		}
+		s
+	}
+
 	pub fn hash(&self) -> u32 {
 		let mut hasher: FxHasher64 = Default::default();
 		self.phase.hash(&mut hasher);

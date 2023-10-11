@@ -39,7 +39,6 @@ const Darkness = 11;
 const Aether = 12;
 
 const aiWorker = new AiWorker();
-const novaCodes = new Set([1107, 3107, 5107, 7107]);
 
 function updateMap(map, k, f) {
 	return new Map(map).set(k, f(map.get(k)));
@@ -1402,51 +1401,24 @@ export default function Match(props) {
 			{[0, 1].map(j => {
 				const pl = j ? p2id : p1id,
 					plpos = () => game().tgtToPos(pl(), p1id()),
-					handOverlay = () =>
-						game().get(pl(), 'casts') === 0
-							? 12
-							: game().get(pl(), 'sanctuary')
-							? 8
-							: (game().get(pl(), 'nova') >= 2 ||
-									game().get(pl(), 'nova2') >= 1) &&
-							  (pl() !== p1id() ||
-									game()
-										.get_hand(pl())
-										.some(id => novaCodes.has(game().get(id, 'card'))))
-							? 1
-							: null;
+					handOverlay = () => game().hand_overlay(pl(), p1id());
 				const expectedDamage = () =>
 					expectedDamages().expectedDamage[game().getIndex(pl())];
 				const x1 = () =>
 						Math.max(
 							Math.round(
-								96 * (game().get(pl(), 'hp') / game().get(pl(), 'maxhp')),
+								(96 * game().get(pl(), 'hp')) / game().get(pl(), 'maxhp'),
 							),
 							0,
 						),
 					x2 = () =>
 						Math.max(
 							x1() -
-								Math.round(96 * (expectedDamage() / game().get(pl(), 'maxhp'))),
+								Math.round((96 * expectedDamage()) / game().get(pl(), 'maxhp')),
 							0,
 						);
-				const poison = () => game().get(pl(), 'poison'),
-					poisoninfo = () =>
-						`${
-							poison() > 0
-								? poison() + ' 1:2'
-								: poison() < 0
-								? -poison() + ' 1:7'
-								: ''
-						} ${game().get(pl(), 'neuro') ? ' 1:10' : ''}`;
 				const hptext = () =>
-					`${game().get(pl(), 'hp')}/${game().get(pl(), 'maxhp')} ${
-						!cloaked() && expectedDamage() ? `(${expectedDamage()})` : ''
-					}\n${poisoninfo() ? `\n${poisoninfo()}` : ''}${
-						pl() !== p1id() && pl() !== game().get_foe(p1id())
-							? '\n(Not targeted)'
-							: ''
-					}`;
+					game().hp_text(pl(), p1id(), p2id(), expectedDamage());
 				return (
 					<>
 						<div

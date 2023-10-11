@@ -1,4 +1,4 @@
-import * as etgutil from './etgutil.js';
+import { iterraw } from './etgutil.js';
 
 const cardValues24 = new Uint16Array([200, 33, 120, 720, 6000]),
 	sellValues = new Uint8Array([5, 1, 3, 15, 150]);
@@ -35,7 +35,7 @@ export function calcWealth(Cards, cardpool, isDecoded) {
 		}
 	}
 	if (typeof cardpool === 'string') {
-		for (const [code, count] of etgutil.iterraw(cardpool)) {
+		for (const [code, count] of iterraw(cardpool)) {
 			wealthIter(code, count);
 		}
 	} else {

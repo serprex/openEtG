@@ -20,9 +20,6 @@ export function asShiny(code, shiny) {
 export function fromTrueMark(code) {
 	return code >= 9010 && code <= 9022 ? code - 9010 : -1;
 }
-export function toTrueMark(n) {
-	return n + 9010;
-}
 export function toTrueMarkSuffix(n) {
 	return `01${encodeCode(n + 9010)}`;
 }
@@ -37,9 +34,6 @@ export function* iterdeck(deck) {
 	for (const [code, count] of iterraw(deck)) {
 		for (let j = 0; j < count; j++) yield code;
 	}
-}
-export function cardCount(counts, card) {
-	return counts[asShiny(asUpped(card.code, false), false)] ?? 0;
 }
 export function count(deck, code) {
 	let total = 0;
