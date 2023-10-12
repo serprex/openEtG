@@ -48,6 +48,14 @@ export function doNav(view, props = {}) {
 	);
 }
 
+export function navGame(game) {
+	if (game) doNav(import('./views/Match.jsx'), { game });
+}
+
+export function getDeck() {
+	return state.user.decks[state.user.selectedDeck] ?? '';
+}
+
 export function setOptTemp(key, val) {
 	if (hasLocalStorage && !val) delete localStorage[key];
 	dispatch({ ...state, opts: { ...state.opts, [key]: val } });

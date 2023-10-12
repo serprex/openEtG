@@ -1,4 +1,3 @@
-import * as sock from './sock.jsx';
 import * as store from './store.jsx';
 import { randint, shuffle } from './util.js';
 import { decodedeck } from './etgutil.js';
@@ -700,7 +699,7 @@ export function mkQuestAi(quest, datafn) {
 	const { user } = store.state;
 	let urdeck = quest.urdeck;
 	if (!urdeck) {
-		urdeck = sock.getDeck();
+		urdeck = store.getDeck();
 		if (!Cards.isDeckLegal(decodedeck(urdeck), user)) {
 			store.chatMsg('Invalid deck', 'System');
 			return;

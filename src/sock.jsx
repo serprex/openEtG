@@ -126,7 +126,7 @@ const sockEvents = {
 					idx: 1,
 					name: user.name,
 					user: user.name,
-					deck: getDeck(),
+					deck: store.getDeck(),
 				},
 				{
 					idx: 2,
@@ -145,7 +145,7 @@ const sockEvents = {
 			cost: arenaCost(data.lv),
 			rematch: () => {
 				const { user } = store.state;
-				if (!Cards.isDeckLegal(decodedeck(getDeck()), user)) {
+				if (!Cards.isDeckLegal(decodedeck(store.getDeck()), user)) {
 					store.chatMsg('Invalid deck', 'System');
 					return;
 				}
@@ -264,16 +264,8 @@ export function userExec(x, data = {}) {
 	userEmit(x, data);
 	store.userCmd(x, data);
 }
-export function getDeck() {
-	const state = store.state;
-	return state.user.decks[state.user.selectedDeck] ?? '';
-}
-export function getOrigDeck() {
-	const state = store.state;
-	return state.orig.deck;
-}
 export function sendChallenge(foe, orig = false, deckcheck = true) {
-	const deck = orig ? getOrigDeck() : getDeck(),
+	const deck = orig ? store.state.orig.deck : store.getDeck(),
 		state = store.state;
 	if (
 		deckcheck &&

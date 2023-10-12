@@ -3,7 +3,7 @@ import { createSignal, onCleanup, onMount } from 'solid-js';
 import { changeMusic, changeSound } from '../audio.js';
 import Chat from '../Components/Chat.jsx';
 import * as sock from '../sock.jsx';
-import * as mkAi from '../mkAi.js';
+import { mkAi, mkPremade } from '../mkAi.js';
 import Cards from '../Cards.js';
 import { addcard, decodedeck } from '../etgutil.js';
 import * as store from '../store.jsx';
@@ -128,7 +128,7 @@ export default function MainMenu(props) {
 	const arenaAi = i => {
 		const cost = arenaCost(i);
 		return e => {
-			if (!Cards.isDeckLegal(decodedeck(sock.getDeck()), rx.user)) {
+			if (!Cards.isDeckLegal(decodedeck(store.getDeck()), rx.user)) {
 				store.chatMsg('Invalid deck', 'System');
 			} else if (rx.user.gold < cost) {
 				store.chatMsg(`Requires ${cost}$`, 'System');
@@ -324,7 +324,7 @@ export default function MainMenu(props) {
 						name="Commoner"
 						y={48}
 						lv={0}
-						onClick={() => mkAi.run(mkAi.mkAi(0))}
+						onClick={() => store.navGame(mkAi(0))}
 						onMouseOver={[
 							setTip,
 							'Commoners have no upgraded cards & mostly common cards',
@@ -334,7 +334,7 @@ export default function MainMenu(props) {
 						name="Mage"
 						y={72}
 						lv={1}
-						onClick={() => mkAi.run(mkAi.mkPremade(1))}
+						onClick={() => store.navGame(mkPremade(1))}
 						onMouseOver={[
 							setTip,
 							'Mages have preconstructed decks with a couple rares',
@@ -344,14 +344,14 @@ export default function MainMenu(props) {
 						name="Champion"
 						y={96}
 						lv={2}
-						onClick={() => mkAi.run(mkAi.mkAi(2))}
+						onClick={() => store.navGame(mkAi(2))}
 						onMouseOver={[setTip, 'Champions have some upgraded cards']}
 					/>
 					<AiButton
 						name="Demigod"
 						y={120}
 						lv={3}
-						onClick={() => mkAi.run(mkAi.mkPremade(3))}
+						onClick={() => store.navGame(mkPremade(3))}
 						onMouseOver={[
 							setTip,
 							'Demigods are extremely powerful. Come prepared',

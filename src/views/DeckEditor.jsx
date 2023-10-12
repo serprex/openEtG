@@ -5,7 +5,7 @@ import Cards from '../Cards.js';
 import Editor from '../Components/Editor.jsx';
 import * as Tutor from '../Components/Tutor.jsx';
 import * as etgutil from '../etgutil.js';
-import * as sock from '../sock.jsx';
+import { userExec } from '../sock.jsx';
 import * as store from '../store.jsx';
 import { chain } from '../util.js';
 
@@ -48,12 +48,12 @@ function Qecks(props) {
 							}
 						}
 						if (~swap) {
-							sock.userExec('changeqeck', {
+							userExec('changeqeck', {
 								number: swap,
 								name: props.user.qecks[i],
 							});
 						}
-						sock.userExec('changeqeck', {
+						userExec('changeqeck', {
 							number: i,
 							name: props.user.selectedDeck,
 						});
@@ -171,7 +171,7 @@ function DeckSelector(props) {
 						value="Rename"
 						style="position:absolute;left:258px;top:4px"
 						onClick={() => {
-							sock.userExec('rmdeck', { name: props.user.selectedDeck });
+							userExec('rmdeck', { name: props.user.selectedDeck });
 							props.saveDeck(name(), true);
 							props.onClose();
 						}}
@@ -217,21 +217,21 @@ export default function DeckEditor() {
 
 	const saveDeck = (name, force) => {
 		if (deckData().deck.length === 0) {
-			sock.userExec('rmdeck', { name });
+			userExec('rmdeck', { name });
 			return;
 		}
 		const currentDeckCode =
 			etgutil.encodedeck(deckData().deck) +
 			etgutil.toTrueMarkSuffix(deckData().mark);
 		if (currentDeckCode !== rx.user.decks[name]) {
-			sock.userExec('setdeck', { d: currentDeckCode, name });
-		} else if (force) sock.userExec('setdeck', { name });
+			userExec('setdeck', { d: currentDeckCode, name });
+		} else if (force) userExec('setdeck', { name });
 	};
 
 	const loadDeck = name => {
 		saveDeck(rx.user.selectedDeck);
-		sock.userExec('setdeck', { name });
-		setDeckData(processDeck(sock.getDeck()));
+		userExec('setdeck', { name });
+		setDeckData(processDeck(store.getDeck()));
 	};
 
 	const onkeydown = e => {
@@ -314,7 +314,7 @@ export default function DeckEditor() {
 			<input
 				type="button"
 				value="Revert"
-				onClick={() => setDeckData(processDeck(sock.getDeck()))}
+				onClick={() => setDeckData(processDeck(store.getDeck()))}
 				style="position:absolute;left:8px;top:162px"
 			/>
 			<input

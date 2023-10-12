@@ -2,7 +2,6 @@ import { createMemo } from 'solid-js';
 import * as Quest from '../Quest.js';
 import ExitBtn from '../Components/ExitBtn.jsx';
 import Text from '../Components/Text.jsx';
-import * as mkAi from '../mkAi.js';
 import * as store from '../store.jsx';
 
 function QuestButton(props) {
@@ -84,7 +83,9 @@ export default function QuestView(props) {
 					type="button"
 					value="Fight!"
 					style="position:absolute;left:8px;top:120px"
-					onClick={() => mkAi.run(Quest.mkQuestAi(questInfo().selectedQuest))}
+					onClick={() =>
+						store.navGame(Quest.mkQuestAi(questInfo().selectedQuest))
+					}
 				/>
 			)}
 			{questInfo().questAreas}

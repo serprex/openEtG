@@ -14,7 +14,7 @@ import Text from '../Components/Text.jsx';
 
 function RenderInfo(props) {
 	const testDeck = () => {
-		const deck = sock.getDeck();
+		const deck = store.getDeck();
 		if (decklength(deck) < 9 || decklength(adeck) < 9) {
 			store.chatMsg('Deck too small');
 			return;

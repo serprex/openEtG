@@ -1,7 +1,6 @@
 import { createMemo, createSignal } from 'solid-js';
 import { Index } from 'solid-js/web';
 
-import * as sock from '../sock.jsx';
 import Cards from '../Cards.js';
 import { choose, parseInput, randint, shuffle } from '../util.js';
 import Game from '../Game.js';
@@ -265,7 +264,7 @@ export default function Challenge(props) {
 	);
 	const [editing, setEditing] = createSignal([new Set(), new Set()]);
 	const [replay, setReplay] = createSignal('');
-	const [mydeck, setMyDeck] = createSignal(sock.getDeck());
+	const [mydeck, setMyDeck] = createSignal(store.getDeck());
 
 	let nextIdx = 2;
 	const getNextIdx = () => nextIdx++;

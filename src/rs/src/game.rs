@@ -1155,31 +1155,34 @@ impl Game {
 		}) && (ckind == Kind::Spell || !self.get(id, Flag::immaterial | Flag::burrowed))
 	}
 
-	pub fn visible_instances(&self, id: i32, isp1: bool, cloaked: bool) -> Vec<i32> {
-		let pl = self.get_player(id);
-		let mut ids =
-			Vec::with_capacity(pl.hand_len() + pl.permanents.len() + pl.creatures.len() + 2);
-		if isp1 || !cloaked {
-			ids.extend(pl.hand_iter());
-			if pl.weapon != 0 {
-				ids.push(pl.weapon);
+	pub fn visible_instances(&self, p1id: i32, p2id: i32) -> Vec<i32> {
+		let cloaked = self.is_cloaked(p2id);
+		let mut ids = Vec::with_capacity(98);
+		for id in [p1id, p2id] {
+			let isp1 = id == p1id;
+			let pl = self.get_player(id);
+			if isp1 || !cloaked {
+				ids.extend(pl.hand_iter());
+				if pl.weapon != 0 {
+					ids.push(pl.weapon);
+				}
+				if pl.shield != 0 {
+					ids.push(pl.shield);
+				}
+				let creas = pl.creatures.iter().cloned().filter(|&cr| cr != 0);
+				if isp1 {
+					ids.extend(creas);
+				} else {
+					ids.extend(creas.rev());
+				}
 			}
-			if pl.shield != 0 {
-				ids.push(pl.shield);
-			}
-			let creas = pl.creatures.iter().cloned().filter(|&cr| cr != 0);
-			if isp1 {
-				ids.extend(creas);
-			} else {
-				ids.extend(creas.rev());
-			}
+			ids.extend(
+				pl.permanents
+					.iter()
+					.cloned()
+					.filter(|&pr| pr != 0 && (isp1 || !cloaked || self.get(pr, Flag::cloak))),
+			);
 		}
-		ids.extend(
-			pl.permanents
-				.iter()
-				.cloned()
-				.filter(|&pr| pr != 0 && (isp1 || !cloaked || self.get(pr, Flag::cloak))),
-		);
 		ids
 	}
 

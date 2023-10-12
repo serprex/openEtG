@@ -1,6 +1,6 @@
 import { createSignal, onMount, Show } from 'solid-js';
 
-import * as sock from '../sock.jsx';
+import { emit, setCmds } from '../sock.jsx';
 import * as store from '../store.jsx';
 const MainMenu = import('./MainMenu.jsx');
 
@@ -15,7 +15,7 @@ export default function Login(props) {
 			const data = { x: 'login', u: rx.opts.username };
 			if (auth) data.a = auth;
 			else data.p = password.value;
-			sock.emit(data);
+			emit(data);
 		}
 	};
 
@@ -24,7 +24,7 @@ export default function Login(props) {
 	};
 
 	onMount(() => {
-		sock.setCmds({
+		setCmds({
 			login: data => {
 				if (!data.err) {
 					delete data.x;
@@ -35,7 +35,7 @@ export default function Login(props) {
 					if (!data.accountbound && !data.pool) {
 						store.doNav(import('./ElementSelect.jsx'));
 					} else {
-						store.setOptTemp('deck', sock.getDeck());
+						store.setOptTemp('deck', store.getDeck());
 						store.doNav(MainMenu);
 					}
 				} else {

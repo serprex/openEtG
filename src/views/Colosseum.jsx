@@ -1,4 +1,4 @@
-import * as mkAi from '../mkAi.js';
+import { mkAi, mkPremade } from '../mkAi.js';
 import * as sock from '../sock.jsx';
 import Decks from '../Decks.json' assert { type: 'json' };
 import ExitBtn from '../Components/ExitBtn.jsx';
@@ -12,7 +12,7 @@ const NymphList = new Uint16Array([
 function mkDaily(type) {
 	let game;
 	if (type < 3) {
-		game = mkAi.mkAi(type === 1 ? 0 : 2, type, data => {
+		game = mkAi(type === 1 ? 0 : 2, type, data => {
 			const dataNext =
 				type === 1
 					? {
@@ -38,7 +38,7 @@ function mkDaily(type) {
 		});
 		if (!game) return;
 	} else {
-		game = mkAi.mkPremade(type === 3 ? 1 : 3, type, data => {
+		game = mkPremade(type === 3 ? 1 : 3, type, data => {
 			data.daily = type;
 			data.colobonus = type === 3 ? 6 : 1;
 			data.rematch = undefined;
@@ -47,7 +47,7 @@ function mkDaily(type) {
 		if (!game) return;
 		sock.userExec('donedaily', { daily: type });
 	}
-	mkAi.run(game);
+	store.navGame(game);
 }
 export default function Colosseum(props) {
 	const user = store.useRx(state => state.user);

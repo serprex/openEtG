@@ -1,20 +1,15 @@
 import { decodedeck } from './etgutil.js';
 import Cards from './Cards.js';
 import Decks from './Decks.json' assert { type: 'json' };
-import * as sock from './sock.jsx';
 import * as store from './store.jsx';
 import { pveCostReward } from './userutil.js';
 import { choose, randint, shuffle } from './util.js';
 import { deckgen } from './deckgen.js';
 import Game from './Game.js';
 
-export function run(game) {
-	if (game) store.doNav(import('./views/Match.jsx'), { game });
-}
-
 export function mkPremade(level, daily, datafn = null) {
 	const name = level === 1 ? 'mage' : 'demigod';
-	const urdeck = sock.getDeck(),
+	const urdeck = store.getDeck(),
 		{ user } = store.state,
 		minsize = user ? 30 : 10;
 	if (!Cards.isDeckLegal(decodedeck(urdeck), user, minsize)) {
@@ -38,7 +33,7 @@ export function mkPremade(level, daily, datafn = null) {
 		level: level,
 		seed: randint(),
 		cost,
-		rematch: () => run(mkPremade(level)),
+		rematch: () => store.navGame(mkPremade(level)),
 		players: [
 			{
 				idx: 1,
@@ -65,7 +60,7 @@ export function mkPremade(level, daily, datafn = null) {
 	return new Game(datafn ? datafn(data) : data);
 }
 export function mkAi(level, daily, datafn = null) {
-	const urdeck = sock.getDeck(),
+	const urdeck = store.getDeck(),
 		{ user } = store.state,
 		minsize = user ? 30 : 10;
 	if (!Cards.isDeckLegal(decodedeck(urdeck), user, minsize)) {
@@ -84,7 +79,7 @@ export function mkAi(level, daily, datafn = null) {
 		level,
 		seed: randint(),
 		cost,
-		rematch: () => run(mkAi(level)),
+		rematch: () => store.navGame(mkAi(level)),
 		players: [
 			{
 				idx: 1,

@@ -13,8 +13,8 @@ import { Index, For, Show } from 'solid-js/web';
 import { playSound } from '../audio.js';
 import { eleNames, strcols, maybeLightenStr } from '../ui.js';
 import { encodeCode, asShiny } from '../etgutil.js';
-import * as mkAi from '../mkAi.js';
-import * as sock from '../sock.jsx';
+import { mkAi } from '../mkAi.js';
+import { userEmit, userExec, setCmds } from '../sock.jsx';
 import Card from '../Components/Card.jsx';
 import CardImage from '../Components/CardImage.jsx';
 import Text from '../Components/Text.jsx';
@@ -877,7 +877,7 @@ export default function Match(props) {
 				!iscmd &&
 				game.data.players.some(pl => pl.user && pl.user !== rx.user.name)
 			) {
-				sock.userEmit('move', {
+				userEmit('move', {
 					id: props.gameid,
 					prehash,
 					hash: game.hash(),
@@ -1036,7 +1036,7 @@ export default function Match(props) {
 	const gotoResult = () => {
 		const { game } = props;
 		if (game.data.arena) {
-			sock.userEmit('modarena', {
+			userEmit('modarena', {
 				aname: game.data.arena,
 				won: game.winner !== p1id(),
 				lv: game.data.level - 4,
@@ -1045,29 +1045,27 @@ export default function Match(props) {
 		if (game.winner === p1id()) {
 			if (game.data.quest !== undefined) {
 				if (game.data.quest.autonext) {
-					mkAi.run(
+					store.navGame(
 						mkQuestAi(game.data.quest.autonext, qdata =>
 							addNoHealData(game, qdata),
 						),
 					);
 					return;
 				} else if (!rx.user.quests[game.data.quest.key]) {
-					sock.userExec('setquest', {
+					userExec('setquest', {
 						quest: game.data.quest.key,
 					});
 				}
 			} else if (game.data.daily) {
 				const endurance = game.data.endurance;
 				if (endurance !== undefined && endurance > 0) {
-					mkAi.run(
-						mkAi.mkAi(game.data.level, true, gdata =>
-							addNoHealData(game, gdata),
-						),
+					store.navGame(
+						mkAi(game.data.level, true, gdata => addNoHealData(game, gdata)),
 					);
 					return;
 				} else {
 					const { daily } = game.data;
-					sock.userExec('donedaily', {
+					userExec('donedaily', {
 						daily: daily === 4 ? 5 : daily === 3 ? 0 : daily,
 					});
 				}
@@ -1226,7 +1224,7 @@ export default function Match(props) {
 				applyNext({ x: 'foe', t: p2id() });
 			}
 		} else if (ch === 'l' && props.gameid) {
-			sock.userEmit('reloadmoves', { id: props.gameid });
+			userEmit('reloadmoves', { id: props.gameid });
 		} else if (~(chi = '[]'.indexOf(ch))) {
 			const { players } = pgame(),
 				dir = chi ? players.length + 1 : 1;
@@ -1266,20 +1264,20 @@ export default function Match(props) {
 			(game.data.level !== undefined || isMultiplayer(game))
 		) {
 			streakback = rx.user.streak[game.data.level];
-			sock.userExec('addloss', {
+			userExec('addloss', {
 				pvp: isMultiplayer(game),
 				l: game.data.level,
 				g: -(game.data.cost | 0),
 			});
 		}
-		sock.setCmds({
+		setCmds({
 			move: ({ cmd, hash }) => {
 				const { game } = props;
 				if ((!cmd.c || game.has_id(cmd.c)) && (!cmd.t || game.has_id(cmd.t))) {
 					applyNext(cmd, true);
 					if (game.hash() === hash) return;
 				}
-				sock.userEmit('reloadmoves', { id: props.gameid });
+				userEmit('reloadmoves', { id: props.gameid });
 			},
 			reloadmoves: ({ moves }) => {
 				store.doNav(Promise.resolve({ default: Match }), {
@@ -1293,7 +1291,7 @@ export default function Match(props) {
 	});
 
 	onCleanup(() => {
-		sock.setCmds({});
+		setCmds({});
 		document.removeEventListener('keydown', onkeydown);
 		window.removeEventListener('beforeunload', onbeforeunload);
 	});
@@ -1367,10 +1365,9 @@ export default function Match(props) {
 		return { turntell, endText, cancelText };
 	});
 
-	const things = createMemo(() => [
-		...game().visible_instances(p1id(), true, cloaked()),
-		...game().visible_instances(p2id(), false, cloaked()),
-	]);
+	const things = createMemo(() =>
+		Array.from(game().visible_instances(p1id(), p2id())),
+	);
 
 	return (
 		<>

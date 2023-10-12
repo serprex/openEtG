@@ -1,7 +1,6 @@
 import { createSignal, onMount } from 'solid-js';
 
 import { eleNames } from '../ui.js';
-import { run } from '../mkAi.js';
 import * as sock from '../sock.jsx';
 import Card from '../Components/Card.jsx';
 import * as store from '../store.jsx';
@@ -70,7 +69,7 @@ export default function ElementSelect() {
 						store.doNav(import('./MainMenu.jsx'));
 					} else {
 						store.setOptTemp('quest', [0]);
-						run(mkQuestAi(quarks.basic_damage));
+						store.navGame(mkQuestAi(quarks.basic_damage));
 					}
 				} else {
 					setErr(
