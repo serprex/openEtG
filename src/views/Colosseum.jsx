@@ -2,7 +2,6 @@ import { mkAi, mkPremade } from '../mkAi.js';
 import * as sock from '../sock.jsx';
 import Decks from '../Decks.json' assert { type: 'json' };
 import ExitBtn from '../Components/ExitBtn.jsx';
-import Text from '../Components/Text.jsx';
 import * as store from '../store.jsx';
 
 const NymphList = new Uint16Array([
@@ -125,23 +124,28 @@ export default function Colosseum(props) {
 				</>
 			) : (
 				<div style="position:absolute;left:56px;top:300px">
-					<Text
-						text={
-							'Completing any colosseum event contributes to a 5 day reward cycle.\n' +
-							'At the end of the cycle, your streak is reset.\n\n' +
-							`Reward Cycle: 15$, 25$, 77$, 100$, 250$\n\n${
-								user.ostreak
-									? `You currently have a ${user.ostreak} day colosseum streak.`
-									: "You'ven't begun a streak."
-							}\n${
-								user.ostreak && user.ostreakday
-									? `You've redeemed ${
-											[250, 15, 25, 77, 100][user.ostreak % 5]
-									  }$ today.`
-									: "You'ven't redeemed a colosseum streak today."
-							}`
-						}
-					/>
+					Completing any colosseum event contributes to a 5 day reward cycle.
+					<br />
+					At the end of the cycle, your streak is reset.
+					<br />
+					<br />
+					Reward Cycle: 15
+					<span class="ico gold" />, 25
+					<span class="ico gold" />, 77
+					<span class="ico gold" />, 100
+					<span class="ico gold" />, 250
+					<span class="ico gold" />
+					<br />
+					<br />
+					{user.ostreak
+						? `You currently have a ${user.ostreak} day colosseum streak.`
+						: "You'ven't begun a streak."}
+					<br />
+					{user.ostreak && user.ostreakday
+						? `You've redeemed ${
+								[250, 15, 25, 77, 100][user.ostreak % 5]
+						  }$ today.`
+						: "You'ven't redeemed a colosseum streak today."}
 				</div>
 			)}
 		</>

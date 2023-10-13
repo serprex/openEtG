@@ -8,7 +8,6 @@ import Cards from '../Cards.js';
 import { addcard, decodedeck } from '../etgutil.js';
 import * as store from '../store.jsx';
 import Card from '../Components/Card.jsx';
-import Text from '../Components/Text.jsx';
 import { arenaCost, pveCostReward } from '../userutil.js';
 import parseChat from '../parseChat.js';
 
@@ -22,7 +21,7 @@ const tipjar = [
 	'If you are a new user, be sure to get the free Bronze & Silver packs from the Shop',
 	'Starter decks, cards from free packs, & all non-Common Daily Cards are account-bound; they cannot be traded or sold',
 	'If you include account-bound cards in an upgrade, the upgrade will also be account-bound',
-	"You'll receive a Daily Card upon logging in after midnight GMT0. If you submit an Arena deck, it contain 5 copies of that card",
+	"You'll receive a Daily Card upon logging in after midnight UTC. If you submit an Arena deck, it contain 5 copies of that card",
 	'Cards sell for around half as much as they cost to buy from a pack',
 	'Quests are free to try, & you always face the same deck. Keep trying until you collect your reward',
 	'You may mulligan at the start of the game to shuffle & redraw your hand with one less card',
@@ -131,7 +130,7 @@ export default function MainMenu(props) {
 			if (!Cards.isDeckLegal(decodedeck(store.getDeck()), rx.user)) {
 				store.chatMsg('Invalid deck', 'System');
 			} else if (rx.user.gold < cost) {
-				store.chatMsg(`Requires ${cost}$`, 'System');
+				store.requiresGold(cost);
 			} else {
 				sock.userEmit('foearena', { lv: i });
 				e.target.style.display = 'none';
@@ -192,7 +191,7 @@ export default function MainMenu(props) {
 		rx.user && (
 			<div class="bg_main">
 				<div style="position:absolute;left:196px;top:4px;width:504px;height:48px">
-					<Text text={tip()} />
+					{tip()}
 					<input
 						type="button"
 						value="Next Tip"
@@ -217,12 +216,17 @@ export default function MainMenu(props) {
 				/>
 				<div style="position:absolute;left:86px;top:92px;width:196px;height:120px">
 					<div class="maintitle">Stats</div>
-					<Text
-						text={
-							rx.user &&
-							`${rx.user.name}\n${rx.user.gold}$\nPvE ${rx.user.aiwins} - ${rx.user.ailosses}\nPvP ${rx.user.pvpwins} - ${rx.user.pvplosses}`
-						}
-					/>
+					<div>{rx.user?.name}</div>
+					<div>
+						{rx.user?.gold}
+						<span class="ico gold" />
+					</div>
+					<div>
+						PvE {rx.user?.aiwins} - {rx.user?.ailosses}
+					</div>
+					<div>
+						PvP {rx.user?.pvpwins} - {rx.user?.pvplosses}
+					</div>
 				</div>
 				<div style="position:absolute;left:304px;top:380px;width:292px;height:130px">
 					<div class="maintitle">Miscellaneous</div>

@@ -1,10 +1,9 @@
 import { onCleanup, onMount } from 'solid-js';
-import { For } from 'solid-js/web';
+import { Index } from 'solid-js/web';
 
 import { userEmit } from '../../sock.jsx';
 import { addcard, decodedeck } from '../../etgutil.js';
 import Card from '../../Components/Card.jsx';
-import Text from '../../Components/Text.jsx';
 import * as store from '../../store.jsx';
 import { choose } from '../../util.js';
 
@@ -104,18 +103,20 @@ export default function OriginalResult({ game }) {
 					style="position:absolute;left:412px;top:490px"
 				/>
 			)}
-			<For each={cardswon}>
+			<Index each={cardswon}>
 				{(c, i) => (
-					<div style={c[0] === c[1] && c[1] === c[2] ? '' : 'opacity:.3'}>
-						<Card x={16 + i() * 300} y={16} card={c[0]} />
-						<Card x={48 + i() * 300} y={48} card={c[1]} />
-						<Card x={80 + i() * 300} y={80} card={c[2]} />
+					<div
+						style={c()[0] === c()[1] && c()[1] === c()[2] ? '' : 'opacity:.3'}>
+						{c().map((card, ci) => (
+							<Card x={16 + ci * 32 + i * 300} y={16 + ci * 32} card={card} />
+						))}
 					</div>
 				)}
-			</For>
+			</Index>
 			{electrumwon > 0 && (
 				<div style="text-align:center;width:900px;position:absolute;left:0px;top:550px">
-					<Text text={`${electrumwon}$`} />
+					{electrumwon}
+					<span class="ico gold" />
 				</div>
 			)}
 		</>

@@ -16,16 +16,8 @@ export default class Card {
 		return ((this.code & 0x3fff) - 1000) % 4000 > 1999;
 	}
 
-	valueOf() {
-		return this.code;
-	}
-
 	isFree() {
 		return this.pillar && !this.upped && !this.rarity && !this.shiny;
-	}
-
-	toString() {
-		return this.code.toString();
 	}
 
 	asUpped(upped) {

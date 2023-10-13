@@ -1,14 +1,14 @@
 import { createSignal, onMount } from 'solid-js';
-import * as sock from '../sock.jsx';
+import { emit, setCmds } from '../sock.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
-import * as store from '../store.jsx';
+import { doNav } from '../store.jsx';
 
 export default function WealthTop(props) {
 	const [getTop, setTop] = createSignal(null);
 
 	onMount(() => {
-		sock.setCmds({ wealthtop: ({ top }) => setTop(top) });
-		sock.emit({ x: 'wealthtop' });
+		setCmds({ wealthtop: ({ top }) => setTop(top) });
+		emit({ x: 'wealthtop' });
 	});
 
 	const list = () => {
@@ -19,27 +19,23 @@ export default function WealthTop(props) {
 				olc.push(
 					<div
 						style="display:flex;justify-content:space-between"
-						onClick={() =>
-							store.doNav(import('./Library.jsx'), { name: top[i] })
-						}>
+						onClick={() => doNav(import('./Library.jsx'), { name: top[i] })}>
 						<div style="text-overflow:ellipsis;overflow:hidden">
 							{`${(i >> 1) + 1}. ${top[i]}`}
 						</div>
-						{Math.round(top[i + 1])}
+						{top[i + 1]}
 					</div>,
 				);
 			}
 		}
-		return (
-			<div style="position:absolute;left:90px;width:810px;display:grid;grid-template-rows:repeat(33,18px);column-gap:18px;grid-auto-flow:column;grid-auto-columns:257px;white-space:nowrap">
-				{olc}
-			</div>
-		);
+		return olc;
 	};
 
 	return (
 		<>
-			{list}
+			<div style="position:absolute;left:90px;width:810px;display:grid;grid-template-rows:repeat(33,18px);column-gap:18px;grid-auto-flow:column;grid-auto-columns:257px;white-space:nowrap">
+				{list}
+			</div>
 			<ExitBtn x={4} y={300} />
 		</>
 	);

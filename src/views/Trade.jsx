@@ -6,7 +6,6 @@ import { calcWealth } from '../userutil.js';
 import Card from '../Components/Card.jsx';
 import CardSelector from '../Components/CardSelector.jsx';
 import DeckDisplay from '../Components/DeckDisplay.jsx';
-import Text from '../Components/Text.jsx';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 
@@ -109,16 +108,20 @@ export default function Trade(props) {
 				onMouseOver={(i, card) => setCard(card)}
 			/>
 			<div style="position:absolute;left:100px;top:235px">
-				<Text text={`${gold() + calcWealth(Cards, deck(), true)}$`} />
+				{gold() + calcWealth(Cards, deck(), true)}
+				<span class="ico gold" />
 			</div>
 			<div style="position:absolute;left:250px;top:235px">
-				<Text text={`(${gold()}$)`} />
+				({gold()}
+				<span class="ico gold" />)
 			</div>
 			<div style="position:absolute;left:350px;top:235px">
-				<Text text={`${gopher() + calcWealth(Cards, offer(), true)}$`} />
+				{gopher() + calcWealth(Cards, offer(), true)}
+				<span class="ico gold" />
 			</div>
 			<div style="position:absolute;left:500px;top:235px">
-				<Text text={`(${gopher()}$)`} />
+				({gopher()}
+				<span class="ico gold" />)
 			</div>
 			<input
 				type="button"

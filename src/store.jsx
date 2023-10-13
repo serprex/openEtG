@@ -91,6 +91,17 @@ export function chat(span, name = state.opts.channel) {
 export function chatMsg(msg, name) {
 	chat(() => <div>{msg}</div>, name);
 }
+export function requiresGold(gold) {
+	chat(
+		() => (
+			<div>
+				{`Requires ${gold}`}
+				<span class="ico gold" />
+			</div>
+		),
+		'System',
+	);
+}
 export function setUser(user) {
 	dispatch({ ...state, user });
 }

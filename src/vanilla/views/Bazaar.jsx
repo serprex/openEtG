@@ -8,7 +8,6 @@ import * as store from '../../store.jsx';
 import Card from '../../Components/Card.jsx';
 import CardSelector from '../../Components/CardSelector.jsx';
 import DeckDisplay from '../../Components/DeckDisplay.jsx';
-import Text from '../../Components/Text.jsx';
 
 export default function OriginalUpgrade(props) {
 	const rx = store.useRx();
@@ -79,7 +78,8 @@ export default function OriginalUpgrade(props) {
 				}}
 			/>
 			<div style="position:absolute;left:4px;top:235px">
-				<Text text={`${rx.orig.electrum}$`} />
+				{rx.orig.electrum}
+				<span class="ico gold" />
 			</div>
 			<div style="position:absolute;left:200px;top:4px">
 				{canBuy() && rx.orig.electrum < buyCost()
@@ -94,7 +94,8 @@ export default function OriginalUpgrade(props) {
 			</div>
 			<div style="position:absolute;left:100px;top:235px">
 				<div style="display:inline;margin-right:4px">
-					<Text text={`${buyCost()}$`} />
+					{buyCost()}
+					<span class="ico gold" />
 				</div>
 				<Show when={canBuy() && rx.orig.electrum >= buyCost()}>
 					<input
@@ -114,7 +115,8 @@ export default function OriginalUpgrade(props) {
 			</div>
 			<div style="position:absolute;left:300px;top:235px">
 				<div style="display:inline;margin-right:4px">
-					<Text text={`${sellCost()}$`} />
+					{sellCost()}
+					<span class="ico gold" />
 				</div>
 				<Show when={canSell()}>
 					<input
@@ -134,7 +136,8 @@ export default function OriginalUpgrade(props) {
 			</div>
 			<div style="position:absolute;left:500px;top:235px">
 				<span style="margin-right:4px">
-					<Text text={`${upgradeCost()}$`} />
+					{upgradeCost()}
+					<span class="ico gold" />
 				</span>
 				<Show when={canUpgrade() && rx.orig.electrum >= upgradeCost()}>
 					<input

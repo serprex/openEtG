@@ -9,7 +9,6 @@ import * as store from '../store.jsx';
 import Card from '../Components/Card.jsx';
 import CardSelector from '../Components/CardSelector.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
-import Text from '../Components/Text.jsx';
 
 function Order(p) {
 	return (
@@ -315,7 +314,8 @@ export default function Bazaar() {
 				</>
 			)}
 			<div style="position:absolute;left:5px;top:240px">
-				<Text text={rx.user.gold + '$'} />
+				{rx.user.gold}
+				<span class="ico gold" />
 			</div>
 			<Card x={732} y={8} card={bcard()} />
 			<CardSelector

@@ -10,7 +10,6 @@ import { randint, shuffle } from '../util.js';
 import Card from '../Components/Card.jsx';
 import DeckDisplay from '../Components/DeckDisplay.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
-import Text from '../Components/Text.jsx';
 
 function RenderInfo(props) {
 	const testDeck = () => {
@@ -53,11 +52,10 @@ function RenderInfo(props) {
 				/>
 			)}
 			<div style={`position:absolute;left:100px;top:${4 + props.y}px`}>
-				<Text
-					text={`W-L: ${props.info.win ?? 0} - ${props.info.loss ?? 0}, Rank: ${
-						props.info.rank ?? 'Inactive'
-					}, ${(props.info.win ?? 0) * 15 + (props.info.loss ?? 0) * 5}$`}
-				/>
+				{`W-L: ${props.info.win ?? 0} - ${props.info.loss ?? 0}, Rank: ${
+					props.info.rank ?? 'Inactive'
+				}, ${(props.info.win ?? 0) * 15 + (props.info.loss ?? 0) * 5}`}
+				<span class="ico gold" />
 			</div>
 			<input
 				readOnly
@@ -135,11 +133,11 @@ export default function ArenaInfo() {
 	return (
 		<>
 			<div style="position:absolute;left:96px;top:560px">
-				<Text
-					text={
-						'Earn 5$ when your deck is faced, & 10$ more when it wins\nEarn 25$ per age of old deck when creating new deck, up to 350$'
-					}
-				/>
+				Earn 5<span class="ico gold" /> when your deck is faced, & 10
+				<span class="ico gold" /> more when it wins\nEarn 25
+				<span class="ico gold" /> per age of old deck when creating new deck, up
+				to 350
+				<span class="ico gold" />
 			</div>
 			<ExitBtn x={8} y={300} />
 			<Show when={AB().A}>

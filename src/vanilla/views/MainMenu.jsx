@@ -5,7 +5,6 @@ import { choose, randint, shuffle, upto } from '../../util.js';
 import * as store from '../../store.jsx';
 import Card from '../../Components/Card.jsx';
 import ExitBtn from '../../Components/ExitBtn.jsx';
-import Text from '../../Components/Text.jsx';
 import Cards from '../Cards.js';
 import { userEmit, sendChallenge } from '../../sock.jsx';
 import { deckgen_ai4, original_oracle } from '../../rs/pkg/etg.js';
@@ -182,7 +181,8 @@ export default function OriginalMainMenu() {
 			/>
 			<ExitBtn x={9} y={140} />
 			<div style="font-size:14px;pointer-events:none;position:absolute;left:8px;top:160px">
-				<Text text={`${rx.orig.electrum}$`} />
+				{rx.orig.electrum}
+				<span class="ico gold" />
 			</div>
 			{ocard && <Card y={300} card={ocard} />}
 		</div>

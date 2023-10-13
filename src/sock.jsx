@@ -151,7 +151,7 @@ const sockEvents = {
 				}
 				const cost = arenaCost(data.lv);
 				if (user.gold < cost) {
-					store.chatMsg(`Requires ${cost}$`, 'System');
+					store.requiresGold(cost);
 					return;
 				}
 				userEmit('foearena', { lv: data.lv });

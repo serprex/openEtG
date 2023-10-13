@@ -21,7 +21,7 @@ export function mkPremade(level, daily, datafn = null) {
 	if (user) {
 		if (daily === undefined) {
 			if (user.gold < cost) {
-				store.chatMsg(`Requires ${cost}$`, 'System');
+				store.requiresGold(cost);
 				return;
 			}
 		} else {
@@ -69,7 +69,7 @@ export function mkAi(level, daily, datafn = null) {
 	}
 	const cost = daily !== undefined ? 0 : pveCostReward[level * 2];
 	if (cost && user.gold < cost) {
-		store.chatMsg(`Requires ${cost}$`, 'System');
+		store.requiresGold(cost);
 		return;
 	}
 	const [aiName, deck] = level === 0 ? deckgen(0, 1, 2) : deckgen(0.4, 2, 3);

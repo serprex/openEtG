@@ -1,12 +1,12 @@
 import { createSignal, onMount } from 'solid-js';
-import { For } from 'solid-js/web';
+import { Index } from 'solid-js/web';
 
 import Cards from '../Cards.js';
 import { addcard, encodeCount } from '../etgutil.js';
 import Card from '../Components/Card.jsx';
 import CardImage from '../Components/CardImage.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
-import * as sock from '../sock.jsx';
+import { setCmds, userEmit, userExec } from '../sock.jsx';
 import * as store from '../store.jsx';
 
 const rewardwords = {
@@ -48,7 +48,7 @@ export default function Reward(props) {
 
 	onMount(() => {
 		if (rewardList) {
-			sock.setCmds({
+			setCmds({
 				codedone: data => {
 					const { user } = store.state;
 					store.updateUser({
@@ -74,12 +74,12 @@ export default function Reward(props) {
 					onClick={() => {
 						if (chosenReward()) {
 							if (props.code === undefined) {
-								sock.userExec('addboundcards', {
+								userExec('addboundcards', {
 									c: encodeCount(numberofcopies) + chosenReward().toString(32),
 								});
 								store.doNav(import('./MainMenu.jsx'));
 							} else {
-								sock.userEmit('codesubmit2', {
+								userEmit('codesubmit2', {
 									code: props.code,
 									card: chosenReward(),
 								});
@@ -96,19 +96,19 @@ export default function Reward(props) {
 					</div>
 				)}
 				{!!props.code && <ExitBtn x={10} y={10} />}
-				<For each={rewardList}>
+				<Index each={rewardList}>
 					{(reward, i) => (
 						<CardImage
 							style={{
 								position: 'absolute',
-								left: `${100 + ((i() / 12) | 0) * 108}px`,
-								top: `${272 + (i() % 12) * 20}px`,
+								left: `${100 + ((i / 12) | 0) * 108}px`,
+								top: `${272 + (i % 12) * 20}px`,
 							}}
-							card={Cards.Codes[reward]}
-							onClick={[setChosenReward, reward]}
+							card={Cards.Codes[reward()]}
+							onClick={[setChosenReward, reward()]}
 						/>
 					)}
-				</For>
+				</Index>
 				<Card x={233} y={10} card={Cards.Codes[chosenReward()]} />
 			</>
 		)

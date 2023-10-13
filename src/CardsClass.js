@@ -25,7 +25,7 @@ export default class Cards {
 		(x > y) - (x < y);
 
 	checkPool(pool, cardCount, cardMinus, card) {
-		const uncode = asShiny(asUpped(card.code, false), false);
+		const uncode = asUpped(asShiny(card.code, false), false);
 
 		if ((cardMinus[card.code] ?? 0) + 1 <= pool[card.code]) {
 			cardMinus[card.code] = (cardMinus[card.code] ?? 0) + 1;

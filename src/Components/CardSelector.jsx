@@ -3,7 +3,7 @@ import { Index } from 'solid-js/web';
 
 import { selector_filter } from '../rs/pkg/etg.js';
 import { asShiny, asUpped } from '../etgutil.js';
-import * as store from '../store.jsx';
+import { useRx, setOpt } from '../store.jsx';
 import Card from './Card.jsx';
 import CardImage from './CardImage.jsx';
 import IconBtn from './IconBtn.jsx';
@@ -41,7 +41,7 @@ function ElementSelector(props) {
 
 function maybeShiny(props, card) {
 	if (props.filterboth && props.shiny) {
-		const shinycode = asShiny(card.code);
+		const shinycode = asShiny(card.code, true);
 		if (
 			shinycode in props.cardpool &&
 			props.cardpool[shinycode] >
@@ -180,7 +180,7 @@ function CardSelectorCore(props) {
 }
 
 export default function CardSelector(props) {
-	const opts = store.useRx(state => state.opts);
+	const opts = useRx(state => state.opts);
 	const [element, setElement] = createSignal(0);
 	const [rarity, setRarity] = createSignal(0);
 
@@ -191,7 +191,7 @@ export default function CardSelector(props) {
 					type="button"
 					value="Toggle Shiny"
 					style="position:absolute;left:4px;top:578px"
-					onClick={() => store.setOpt('toggleshiny', !opts.toggleshiny)}
+					onClick={() => setOpt('toggleshiny', !opts.toggleshiny)}
 				/>
 			)}
 			<RaritySelector x={80} y={338} value={rarity()} onChange={setRarity} />

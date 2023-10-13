@@ -418,7 +418,8 @@ export default function Result(props) {
 				<>
 					{goldreward > 0 && (
 						<div style="text-align:center;width:900px;position:absolute;left:0;top:550px">
-							<Text text={`${goldreward - (game.data.cost | 0)}$`} />
+							{goldreward - (game.data.cost | 0)}
+							<span class="ico gold" />
 						</div>
 					)}
 					{cards}
@@ -426,7 +427,7 @@ export default function Result(props) {
 						style={`text-align:center;width:700px;position:absolute;left:100px;bottom:${
 							cardreward ? 444 : 180
 						}px`}>
-						<Text text={game.data.wintext || 'You won!'} />
+						<Text text={game.data.wintext ?? 'You won!'} />
 					</div>
 				</>
 			)}

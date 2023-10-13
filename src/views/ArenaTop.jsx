@@ -4,15 +4,15 @@ import { For } from 'solid-js/web';
 import Cards from '../Cards.js';
 import Card from '../Components/Card.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
-import * as sock from '../sock.jsx';
+import { emit, setCmds } from '../sock.jsx';
 
 export default function ArenaTop({ lv }) {
 	const [top, setTop] = createSignal([]);
 	const [card, setCard] = createSignal(null);
 
 	onMount(() => {
-		sock.setCmds({ arenatop: ({ top }) => setTop(top) });
-		sock.emit({ x: 'arenatop', lv });
+		setCmds({ arenatop: ({ top }) => setTop(top) });
+		emit({ x: 'arenatop', lv });
 	});
 
 	return (
