@@ -9,23 +9,23 @@ use core::default::Default;
 use wasm_bindgen::prelude::*;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const AdrenalineTable: [i8; 80] = [
-	4, 0, 0, 0, 0,
-	3, 1, 1, 1, 0,
-	3, 2, 2, 2, 0,
-	3, 3, 3, 3, 0,
-	2, 3, 2, 0, 0,
-	2, 4, 2, 0, 0,
-	2, 4, 2, 0, 0,
-	2, 5, 3, 0, 0,
-	2, 6, 3, 0, 0,
-	1, 3, 0, 0, 0,
-	1, 4, 0, 0, 0,
-	1, 4, 0, 0, 0,
-	1, 4, 0, 0, 0,
-	1, 5, 0, 0, 0,
-	1, 5, 0, 0, 0,
-	1, 5, 0, 0, 0,
+const AdrenalineTable: [u16; 16] = [
+	5,
+	4 | 1 << 6 | 1 << 9 | 1 << 12,
+	4 | 2 << 6 | 2 << 9 | 2 << 12,
+	4 | 3 << 6 | 3 << 9 | 3 << 12,
+	3 | 3 << 6 | 2 << 9,
+	3 | 4 << 6 | 2 << 9,
+	3 | 4 << 6 | 2 << 9,
+	3 | 5 << 6 | 3 << 9,
+	3 | 6 << 6 | 3 << 9,
+	2 | 3 << 6,
+	2 | 4 << 6,
+	2 | 4 << 6,
+	2 | 4 << 6,
+	2 | 5 << 6,
+	2 | 5 << 6,
+	2 | 5 << 6,
 ];
 
 pub fn countAdrenaline(x: i32) -> i32 {
@@ -33,7 +33,7 @@ pub fn countAdrenaline(x: i32) -> i32 {
 	if x > 15 {
 		1
 	} else {
-		AdrenalineTable[x * 5] as i32 + 1
+		(AdrenalineTable[x] as i32) & 7
 	}
 }
 
@@ -43,11 +43,11 @@ pub fn calcAdrenaline(y: i32, dmg: i32) -> i32 {
 	} else if y > 5 {
 		0
 	} else {
-		let absdmg = dmg.abs();
+		let absdmg = dmg.abs() as usize;
 		if absdmg > 15 {
 			0
 		} else {
-			let admg = AdrenalineTable[(absdmg * 5 + y - 1) as usize] as i32;
+			let admg = ((AdrenalineTable[absdmg] as u32) >> (y * 3) & 7) as i32;
 			if dmg < 0 {
 				-admg
 			} else {
