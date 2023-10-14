@@ -21,7 +21,7 @@ pub struct Cards {
 
 #[derive(Clone, Copy)]
 pub struct Card {
-	pub code: u16,
+	pub code: i16,
 	pub name: &'static str,
 	pub kind: Kind,
 	pub element: i8,
@@ -33,12 +33,12 @@ pub struct Card {
 	pub cast: i8,
 	pub castele: i8,
 	pub flag: &'static u64,
-	pub status: &'static [(Stat, i32)],
+	pub status: &'static [(Stat, i16)],
 	pub skill: &'static [(Event, &'static [Skill])],
 }
 
 impl Cards {
-	pub fn get(&self, code: i32) -> &'static Card {
+	pub fn get(&self, code: i16) -> &'static Card {
 		if let Some(card) = self.try_get(code) {
 			card
 		} else {
@@ -46,9 +46,9 @@ impl Cards {
 		}
 	}
 
-	pub fn try_get(&self, code: i32) -> Option<&'static Card> {
+	pub fn try_get(&self, code: i16) -> Option<&'static Card> {
 		self.data
-			.binary_search_by_key(&AsShiny(code, false), |card| card.code as i32)
+			.binary_search_by_key(&AsShiny(code, false), |card| card.code)
 			.ok()
 			.and_then(|idx| self.data.get(idx))
 	}
@@ -87,15 +87,15 @@ impl Cards {
 
 impl Card {
 	pub const fn upped(&self) -> bool {
-		Upped(self.code as i32)
+		Upped(self.code)
 	}
 
 	pub const fn shiny(&self) -> bool {
-		Shiny(self.code as i32)
+		Shiny(self.code)
 	}
 
-	pub const fn isOf(&self, code: i32) -> bool {
-		IsOf(self.code as i32, code)
+	pub const fn isOf(&self, code: i16) -> bool {
+		IsOf(self.code, code)
 	}
 
 	pub fn free(&self) -> bool {
@@ -103,24 +103,24 @@ impl Card {
 	}
 }
 
-pub const fn IsOf(code: i32, ofcode: i32) -> bool {
+pub const fn IsOf(code: i16, ofcode: i16) -> bool {
 	ofcode == AsShiny(AsUpped(code, false), false)
 }
 
-pub const fn As(code: i32, ofcode: i32) -> i32 {
+pub const fn As(code: i16, ofcode: i16) -> i16 {
 	AsShiny(AsUpped(ofcode, Upped(code)), Shiny(code))
 }
 
-pub const fn Upped(code: i32) -> bool {
+pub const fn Upped(code: i16) -> bool {
 	let code = AsShiny(code, false);
 	code >= 7000 || (code < 5000 && code >= 3000)
 }
 
-pub const fn Shiny(code: i32) -> bool {
+pub const fn Shiny(code: i16) -> bool {
 	(code & 0x4000) != 0
 }
 
-pub const fn AsUpped(code: i32, upped: bool) -> i32 {
+pub const fn AsUpped(code: i16, upped: bool) -> i16 {
 	code + if Upped(code) == upped {
 		0
 	} else if upped {
@@ -130,7 +130,7 @@ pub const fn AsUpped(code: i32, upped: bool) -> i32 {
 	}
 }
 
-pub const fn AsShiny(code: i32, shiny: bool) -> i32 {
+pub const fn AsShiny(code: i16, shiny: bool) -> i16 {
 	if shiny {
 		code | 0x4000
 	} else {
@@ -147,18 +147,18 @@ pub const fn cardSetCards(set: CardSet) -> &'static Cards {
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_codes(set: CardSet) -> Vec<u16> {
+pub fn card_codes(set: CardSet) -> Vec<i16> {
 	cardSetCards(set)
 		.data
 		.iter()
 		.map(|&card| card.code)
-		.filter(|&code| !Upped(code as i32))
+		.filter(|&code| !Upped(code))
 		.collect::<Vec<_>>()
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn card_index(set: CardSet, code: u16) -> Option<usize> {
+pub fn card_index(set: CardSet, code: i16) -> Option<usize> {
 	cardSetCards(set)
 		.data
 		.binary_search_by_key(&code, |card| card.code)
@@ -233,7 +233,7 @@ pub fn card_token(set: CardSet, index: usize) -> bool {
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn code_cmp(set: CardSet, x: i32, y: i32) -> i32 {
+pub fn code_cmp(set: CardSet, x: i16, y: i16) -> i32 {
 	let cards = cardSetCards(set);
 	match code_cmp_core(cards, x, y) {
 		Ordering::Less => -1,
@@ -242,7 +242,7 @@ pub fn code_cmp(set: CardSet, x: i32, y: i32) -> i32 {
 	}
 }
 
-pub fn code_cmp_core(cards: &'static Cards, x: i32, y: i32) -> Ordering {
+pub fn code_cmp_core(cards: &'static Cards, x: i16, y: i16) -> Ordering {
 	if let (Some(cx), Some(cy)) = (cards.try_get(x), cards.try_get(y)) {
 		cx.upped()
 			.cmp(&cy.upped())
@@ -258,15 +258,15 @@ pub fn code_cmp_core(cards: &'static Cards, x: i32, y: i32) -> Ordering {
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn original_oracle(seed: i32) -> u16 {
+pub fn original_oracle(seed: i32) -> i16 {
 	use rand::{Rng, SeedableRng};
 	use rand_pcg::Pcg32;
 	let mut rng = Pcg32::seed_from_u64(seed as u64);
-	let nymph = rng.gen_bool(0.03);
+	let nymph = rng.gen_range(0..100) < 3;
 	OrigSet
 		.random_card(&mut rng, false, |c| {
-			c.code != v_Relic as u16
-				&& !(c.code >= v_MarkofEntropy as u16 && c.code <= v_MarkofAether as u16)
+			c.code != v_Relic as i16
+				&& !(c.code >= v_MarkofEntropy as i16 && c.code <= v_MarkofAether as i16)
 				&& !c.free() && nymph == etg::NymphList.contains(&(c.code + 4000))
 		})
 		.map(|c| c.code)
@@ -275,7 +275,7 @@ pub fn original_oracle(seed: i32) -> u16 {
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn selector_filter(set: CardSet, col: u32, element: i8, rarity: i8) -> Vec<u16> {
+pub fn selector_filter(set: CardSet, col: u32, element: i8, rarity: i8) -> Vec<i16> {
 	let cards = cardSetCards(set);
 	let mut result = Vec::with_capacity(15);
 	for card in cards.filter(col > 2) {
@@ -290,6 +290,6 @@ pub fn selector_filter(set: CardSet, col: u32, element: i8, rarity: i8) -> Vec<u
 			result.push(card.code);
 		}
 	}
-	result.sort_unstable_by(|&x, &y| code_cmp_core(cards, x as i32, y as i32));
+	result.sort_unstable_by(|&x, &y| code_cmp_core(cards, x, y));
 	result
 }

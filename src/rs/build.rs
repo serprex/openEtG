@@ -241,7 +241,7 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 							source.push(ch);
 						}
 					}
-					write!(source, ":i32={};", code).ok();
+					write!(source, ":i16={};", code).ok();
 				}
 			}
 		}
@@ -314,7 +314,7 @@ fn main() {
 	source.push_str(&flag_source);
 	source.push_str("_=>return None})}\n");
 
-	source.push_str("pub fn id_fx(s:Fx)->i32{match s{\n");
+	source.push_str("pub fn id_fx(s:Fx)->i16{match s{\n");
 	let gamefx = subsource(&gamers, "pub enum Fx {");
 	let mut fxid = 1;
 	for line in gamefx.lines() {

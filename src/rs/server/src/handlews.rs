@@ -42,7 +42,7 @@ enum BzBidOp<'a> {
 
 struct BzBidSell {
 	u: String,
-	code: u16,
+	code: i16,
 	amt: u16,
 	p: i32,
 }
@@ -164,12 +164,12 @@ async fn login_success(
 			user.data.ostreakday2 = today;
 			user.data.oracle = today;
 			let mut rng = rand::thread_rng();
-			let ocardnymph = rng.gen_bool(0.03);
+			let ocardnymph = rng.gen_range(0..100) < 3;
 			if let Some(card) = etg::card::OpenSet.random_card(&mut rng, false, |card| {
 				(card.rarity != 4) ^ ocardnymph && (card.flag & etg::game::Flag::pillar) == 0
 			}) {
 				let ccode = if card.rarity == 4 {
-					etg::card::AsShiny(card.code as i32, true) as u16
+					etg::card::AsShiny(card.code, true)
 				} else {
 					card.code
 				};
@@ -213,7 +213,7 @@ async fn login_success(
 				let mut wealth: i32 = 0;
 				let mut wealth24: u32 = 0;
 				for bid in bids.iter() {
-					let code: i32 = bid.get(0);
+					let code = bid.get::<usize, i32>(0) as i16;
 					let q: i32 = bid.get(1);
 					let p: i32 = bid.get(2);
 					if p < 0 {
@@ -227,7 +227,6 @@ async fn login_success(
 					}
 				}
 				for (&code, &count) in user.data.pool.0.iter() {
-					let code = code as i32;
 					if let Some(card) = etg::card::OpenSet.try_get(code) {
 						let upped = etg::card::Upped(code);
 						let shiny = etg::card::Shiny(code);
@@ -286,16 +285,15 @@ fn card_val24(rarity: i8, upped: bool, shiny: bool) -> u32 {
 	}
 }
 
-fn upshpi<F>(user: &mut UserData, code: u16, f: F)
+fn upshpi<F>(user: &mut UserData, code: i16, f: F)
 where
-	F: FnOnce(i32) -> i32,
+	F: FnOnce(i16) -> i16,
 {
-	let c32 = code as i32;
-	if user.gold >= 50 && !etg::card::Upped(c32) && !etg::card::Shiny(c32) {
-		if let Some(card) = etg::card::OpenSet.try_get(c32) {
+	if user.gold >= 50 && !etg::card::Upped(code) && !etg::card::Shiny(code) {
+		if let Some(card) = etg::card::OpenSet.try_get(code) {
 			if card.rarity == 0 {
 				user.gold -= 50;
-				let c = user.pool.0.entry(f(c32) as u16).or_default();
+				let c = user.pool.0.entry(f(code)).or_default();
 				*c = c.saturating_add(1);
 			}
 		}
@@ -304,8 +302,8 @@ where
 
 fn transmute_core(
 	pool: &mut Cardpool,
-	oldcode: u16,
-	newcode: u16,
+	oldcode: i16,
+	newcode: i16,
 	oldcopies: u16,
 	newcopies: u16,
 ) -> bool {
@@ -320,7 +318,7 @@ fn transmute_core(
 	false
 }
 
-fn transmute(user: &mut UserData, oldcode: u16, newcode: u16, oldcopies: u16, newcopies: u16) {
+fn transmute(user: &mut UserData, oldcode: i16, newcode: i16, oldcopies: u16, newcopies: u16) {
 	if oldcode != newcode {
 		if !transmute_core(&mut user.pool, oldcode, newcode, oldcopies, newcopies) {
 			transmute_core(
@@ -730,7 +728,7 @@ pub async fn handle_ws(
 										let hp: i32 = row.get(2);
 										let mark: i32 = row.get(3);
 										let draw: i32 = row.get(4);
-										let code: i32 = row.get(5);
+										let code = row.get::<usize, i32>(5) as i16;
 										deck.push_str("05");
 										deck.push_str(unsafe { std::str::from_utf8_unchecked(&encode_code(etg::card::AsUpped(code, lv != 0))) });
 										sendmsg(&tx, &WsResponse::foearena { seed: seed, name: &name, hp: hp, mark: mark, draw: draw, deck: &deck, rank: idx, lv: lv });
@@ -773,8 +771,8 @@ pub async fn handle_ws(
 										&mut tgt.data.pool
 									};
 									for (code, count) in iterraw(pool.as_bytes()) {
-										let c = curpool.0.entry(code as u16).or_default();
-										*c = c.saturating_add(count as u16);
+										let c = curpool.0.entry(code).or_default();
+										*c = c.saturating_add(count);
 									}
 									sendmsg(
 										&tx,
@@ -891,7 +889,7 @@ pub async fn handle_ws(
 														.data
 														.pool
 														.0
-														.entry(ccode as u16)
+														.entry(ccode)
 														.or_default();
 													*c = c.saturating_add(1);
 													sendmsg(
@@ -958,8 +956,8 @@ pub async fn handle_ws(
 									let shiny = val.starts_with('!');
 									let mut startidx = shiny as usize;
 									let upped = val[startidx..].starts_with("upped");
-									if shiny != etg::card::Shiny(card as i32)
-										|| upped != etg::card::Upped(card as i32)
+									if shiny != etg::card::Shiny(card)
+										|| upped != etg::card::Upped(card)
 									{
 										sendmsg(
 											&tx,
@@ -973,7 +971,7 @@ pub async fn handle_ws(
 											startidx += 5;
 										}
 										if let Some(cardcard) =
-											etg::card::OpenSet.try_get(card as i32)
+											etg::card::OpenSet.try_get(card)
 										{
 											if let Some(rarity) = match &val[startidx..] {
 												"mark" => Some(-1),
@@ -1236,14 +1234,14 @@ pub async fn handle_ws(
 									}
 									if let Some(pool) = pool {
 										for (code, count) in iterraw(pool.as_bytes()) {
-											let c = data.pool.0.entry(code as u16).or_default();
-											*c = c.saturating_add(count as u16);
+											let c = data.pool.0.entry(code).or_default();
+											*c = c.saturating_add(count);
 										}
 									}
 									if let Some(rmpool) = rmpool {
 										for (code, count) in iterraw(rmpool.as_bytes()) {
-											let c = data.pool.0.entry(code as u16).or_default();
-											*c = c.saturating_sub(count as u16);
+											let c = data.pool.0.entry(code).or_default();
+											*c = c.saturating_sub(count);
 										}
 									}
 									if let Some(fg) = fg {
@@ -1339,11 +1337,10 @@ pub async fn handle_ws(
 																		err = Some("Not enough gold between players");
 																	}
 																	{
-																		let mut usertally = HashMap::<u16, u16>::new();
+																		let mut usertally = HashMap::<i16, u16>::new();
 																		for (code, count) in iterraw(cards.as_bytes()) {
-																			let code = code as u16;
 																			let c = usertally.entry(code).or_default();
-																			if let Some(newc) = c.checked_add(count as u16) {
+																			if let Some(newc) = c.checked_add(count) {
 																				*c = newc;
 																				if user.data.pool.0.get(&code).cloned().unwrap_or(0) < newc {
 																					err = Some("Not enough cards between players");
@@ -1354,11 +1351,10 @@ pub async fn handle_ws(
 																		}
 																	}
 																	{
-																		let mut foetally = HashMap::<u16, u16>::new();
+																		let mut foetally = HashMap::<i16, u16>::new();
 																		for (code, count) in iterraw(forcardsref.as_bytes()) {
-																			let code = code as u16;
 																			let c = foetally.entry(code).or_default();
-																			if let Some(newc) = c.checked_add(count as u16) {
+																			if let Some(newc) = c.checked_add(count) {
 																				*c = newc;
 																				if foeuser.data.pool.0.get(&code).cloned().unwrap_or(0) < newc {
 																					err = Some("Not enough cards between players");
@@ -1397,16 +1393,12 @@ pub async fn handle_ws(
 																		user.data.gold = user.data.gold.saturating_add(p1gdelta);
 																		foeuser.data.gold = foeuser.data.gold.saturating_add(p2gdelta);
 																		for (code, count) in iterraw(cards.as_bytes()) {
-																			let code = code as u16;
-																			let count = count as u16;
 																			let foec = foeuser.data.pool.0.entry(code).or_default();
 																			let userc = user.data.pool.0.entry(code).or_default();
 																			*userc -= count;
 																			*foec = foec.saturating_add(count);
 																		}
 																		for (code, count) in iterraw(forcardsref.as_bytes()) {
-																			let code = code as u16;
-																			let count = count as u16;
 																			let foec = foeuser.data.pool.0.entry(code).or_default();
 																			let userc = user.data.pool.0.entry(code).or_default();
 																			*foec -= count;
@@ -1588,7 +1580,7 @@ pub async fn handle_ws(
 										while rarity - 1 < rares.len() && i == rares[rarity - 1] {
 											rarity += 1;
 										}
-										let code: u16 = if rarity == 4 {
+										let code = if rarity == 4 {
 											etg::etg::NymphList[if element > 0 && element < 13 {
 												element as usize
 											} else {
@@ -1648,8 +1640,8 @@ pub async fn handle_ws(
 							}
 						}
 						AuthMessage::bzbid { price, cards } => {
-							let mut add: FxHashMap<u16, Vec<BzBid>> = Default::default();
-							let mut rm: FxHashMap<u16, Vec<BzBid>> = Default::default();
+							let mut add: FxHashMap<i16, Vec<BzBid>> = Default::default();
+							let mut rm: FxHashMap<i16, Vec<BzBid>> = Default::default();
 							if let Ok(trx) = client.transaction().await {
 								if trx
 									.execute("lock bazaar in row exclusive mode", &[])
@@ -1660,7 +1652,6 @@ pub async fn handle_ws(
 									let mut sells: Vec<BzBidSell> = Vec::new();
 									for (code, mut count) in iterraw(cards.as_bytes()) {
 										if let Some(card) = etg::card::OpenSet.try_get(code) {
-											let code16 = code as u16;
 											let sellval = SELL_VALUES[card.rarity as usize] as i32
 												* match (
 													etg::card::Upped(code),
@@ -1673,24 +1664,18 @@ pub async fn handle_ws(
 											let mut codecount = if price > 0 {
 												0
 											} else {
-												user.data.pool.0.get(&code16).cloned().unwrap_or(0)
-													as i32
+												user.data.pool.0.get(&code).cloned().unwrap_or(0) as i32
 											};
 											if price > 0 {
 												if price as i32 <= sellval {
 													continue;
 												}
-											} else if (codecount as u32) < count {
+											} else if codecount < count as i32 {
 												continue;
 											} else if -(price as i32) <= sellval {
 												user.data.gold += sellval * count as i32;
-												let c = user
-													.data
-													.pool
-													.0
-													.entry(code16)
-														.or_default();
-													*c = c.saturating_sub(count as u16);
+												let c = user.data.pool.0.entry(code).or_default();
+													*c = c.saturating_sub(count);
 												continue;
 											}
 											if let Ok(bids) = trx.query("select b.id, u.name u, b.p, b.q from bazaar b join users u on b.user_id = u.id where b.code = $1 order by b.p desc", &[&code]).await {
@@ -1716,11 +1701,11 @@ pub async fn handle_ws(
 																codecount >= happened
 															} {
 																user.data.gold -= cost;
-																let c = user.data.pool.0.entry(code16).or_default();
+																let c = user.data.pool.0.entry(code).or_default();
 																let newc = (*c as i32) + happened;
 																*c = if newc < 0 { 0 } else if newc > 65535 { 65535 } else { newc as u16 };
 																codecount += happened;
-																sells.push(BzBidSell { u: bu.clone(), code: code16, amt: amt as u16, p: bp });
+																sells.push(BzBidSell { u: bu.clone(), code, amt: amt as u16, p: bp });
 																if bq > count as i32 {
 																	ops.push(BzBidOp::Update {
 																		id,
@@ -1733,7 +1718,7 @@ pub async fn handle_ws(
 																		id,
 																		bid: BzBid { u: Cow::from(bu.clone()), q: bq, p: bp },
 																	});
-																	count -= bq as u32;
+																	count -= bq as u16;
 																}
 																if count == 0 {
 																	break
@@ -1748,7 +1733,7 @@ pub async fn handle_ws(
 																	bidmade = true;
 																}
 															} else if codecount >= count as i32 {
-																let c = user.data.pool.0.entry(code16).or_default();
+																let c = user.data.pool.0.entry(code).or_default();
 																if let Some(newc) = c.checked_sub(count as u16) {
 																	*c = newc;
 																	bidmade = true;
@@ -1782,14 +1767,14 @@ pub async fn handle_ws(
 														for op in ops.into_iter() {
 															if match op {
 																BzBidOp::Delete { id, bid } => {
-																	rm.entry(code16).or_default().push(bid);
+																	rm.entry(code).or_default().push(bid);
 																	trx.execute(
 																		"delete from bazaar where id = $1",
 																		&[&id]
 																		).await
 																}
 																BzBidOp::Insert { q, p } => {
-																	add.entry(code16).or_default().push(BzBid {
+																	add.entry(code).or_default().push(BzBid {
 																		u: Cow::from(u.as_str()), q, p,
 																	});
 																	trx.execute(
@@ -1798,10 +1783,10 @@ pub async fn handle_ws(
 																		).await
 																}
 																BzBidOp::Update { id, bid, q } => {
-																	add.entry(code16).or_default().push(BzBid {
+																	add.entry(code).or_default().push(BzBid {
 																		u: bid.u.clone(), q, p: bid.p
 																	});
-																	rm.entry(code16).or_default().push(bid);
+																	rm.entry(code).or_default().push(bid);
 																	trx.execute(
 																		"update bazaar set q = $2 where id = $1",
 																		&[&id, &q]
@@ -1863,11 +1848,11 @@ pub async fn handle_ws(
 												.map(|sock| sock.tx.clone())
 										} {
 											if let Some(card) =
-												etg::card::OpenSet.try_get(sell.code as i32)
+												etg::card::OpenSet.try_get(sell.code)
 											{
 												if sell.p > 0 {
 													let ecount = encode_count(sell.amt as u32);
-													let ecode = encode_code(sell.code as i32);
+													let ecode = encode_code(sell.code);
 													let givec = [
 														ecount[0], ecount[1], ecode[0], ecode[1],
 														ecode[2],
@@ -1911,7 +1896,7 @@ pub async fn handle_ws(
 								"delete from bazaar where user_id = $1 and code = $2 returning q, p",
 								&[&user.id, &(c as i32)]).await
 							{
-								let mut rm: FxHashMap<u16, Vec<BzBid>> = Default::default();
+								let mut rm: FxHashMap<i16, Vec<BzBid>> = Default::default();
 								for bid in bids.iter() {
 									let q: i32 = bid.get(0);
 									let p: i32 = bid.get(1);
@@ -1969,15 +1954,15 @@ pub async fn handle_ws(
 						AuthMessage::addcards { c } => {
 							let mut user = user.lock().await;
 							for (code, count) in iterraw(c.as_bytes()) {
-								let q = user.data.pool.0.entry(code as u16).or_default();
-								*q = q.saturating_add(count as u16);
+								let q = user.data.pool.0.entry(code).or_default();
+								*q = q.saturating_add(count);
 							}
 						}
 						AuthMessage::addboundcards { c } => {
 							let mut user = user.lock().await;
 							for (code, count) in iterraw(c.as_bytes()) {
-								let q = user.data.accountbound.0.entry(code as u16).or_default();
-								*q = q.saturating_add(count as u16);
+								let q = user.data.accountbound.0.entry(code).or_default();
+								*q = q.saturating_add(count);
 							}
 						}
 						AuthMessage::donedaily { daily, c } => {
@@ -2024,10 +2009,10 @@ pub async fn handle_ws(
 							user.data.quests.insert(quest, 1);
 						}
 						AuthMessage::upgrade { card } => {
-							if let Some(carddata) = etg::card::OpenSet.try_get(card as i32) {
+							if let Some(carddata) = etg::card::OpenSet.try_get(card) {
 								let mut user = user.lock().await;
 								let copies = if carddata.rarity != -1
-									&& !(carddata.rarity == 4 && etg::card::Shiny(card as i32))
+									&& !(carddata.rarity == 4 && etg::card::Shiny(card))
 								{
 									6
 								} else {
@@ -2036,17 +2021,17 @@ pub async fn handle_ws(
 								transmute(
 									&mut user.data,
 									card,
-									etg::card::AsUpped(card as i32, true) as u16,
+									etg::card::AsUpped(card, true),
 									copies,
 									1,
 								);
 							}
 						}
 						AuthMessage::downgrade { card } => {
-							if let Some(carddata) = etg::card::OpenSet.try_get(card as i32) {
+							if let Some(carddata) = etg::card::OpenSet.try_get(card) {
 								let mut user = user.lock().await;
 								let copies = if carddata.rarity != -1
-									&& !(carddata.rarity == 4 && etg::card::Shiny(card as i32))
+									&& !(carddata.rarity == 4 && etg::card::Shiny(card))
 								{
 									6
 								} else {
@@ -2055,33 +2040,33 @@ pub async fn handle_ws(
 								transmute(
 									&mut user.data,
 									card,
-									etg::card::AsUpped(card as i32, false) as u16,
+									etg::card::AsUpped(card, false),
 									1,
 									copies,
 								);
 							}
 						}
 						AuthMessage::polish { card } => {
-							if let Some(carddata) = etg::card::OpenSet.try_get(card as i32) {
+							if let Some(carddata) = etg::card::OpenSet.try_get(card) {
 								let mut user = user.lock().await;
 								let copies = if carddata.rarity != -1 { 6 } else { 2 };
 								transmute(
 									&mut user.data,
 									card,
-									etg::card::AsShiny(card as i32, true) as u16,
+									etg::card::AsShiny(card, true),
 									copies,
 									1,
 								);
 							}
 						}
 						AuthMessage::unpolish { card } => {
-							if let Some(carddata) = etg::card::OpenSet.try_get(card as i32) {
+							if let Some(carddata) = etg::card::OpenSet.try_get(card) {
 								let mut user = user.lock().await;
 								let copies = if carddata.rarity != -1 { 6 } else { 2 };
 								transmute(
 									&mut user.data,
 									card,
-									etg::card::AsShiny(card as i32, false) as u16,
+									etg::card::AsShiny(card, false),
 									1,
 									copies,
 								);
@@ -2102,17 +2087,15 @@ pub async fn handle_ws(
 								.pool
 								.0
 								.keys()
-								.map(|&code| {
-									etg::card::AsShiny(
-										etg::card::AsUpped(code as i32, false),
+								.map(|&code| etg::card::AsShiny(
+										etg::card::AsUpped(code, false),
 										false,
-									) as u16
-								})
-								.collect::<Vec<u16>>();
+									))
+								.collect::<Vec<i16>>();
 							base.sort_unstable();
 							base.dedup();
 							let convert =
-								|pool: &mut Cardpool, oldcode: u16, oldamt: u16, newcode: u16| {
+								|pool: &mut Cardpool, oldcode: i16, oldamt: u16, newcode: i16| {
 									if pool.0.get(&newcode).cloned() == Some(u16::max_value())
 										|| pool
 											.0
@@ -2129,12 +2112,11 @@ pub async fn handle_ws(
 									}
 								};
 							for &code in base.iter() {
-								let c32 = code as i32;
-								if let Some(card) = etg::card::OpenSet.try_get(c32) {
+								if let Some(card) = etg::card::OpenSet.try_get(code) {
 									if card.rarity > 0 {
-										let upcode = etg::card::AsUpped(c32, true) as u16;
-										let shcode = etg::card::AsShiny(c32, true) as u16;
-										let uhcode = etg::card::AsShiny(upcode as i32, true) as u16;
+										let upcode = etg::card::AsUpped(code, true);
+										let shcode = etg::card::AsShiny(code, true);
+										let uhcode = etg::card::AsShiny(upcode, true);
 										let mut un =
 											user.data.pool.0.get(&code).cloned().unwrap_or(0)
 												as i32 + user
@@ -2446,11 +2428,11 @@ pub async fn handle_ws(
 							.await
 						{
 							for bid in bids.iter() {
-								let code: i32 = bid.get(0);
+								let code = bid.get::<usize, i32>(0) as i16;
 								let q: i32 = bid.get(1);
 								let p: i32 = bid.get(2);
 								if p < 0 {
-									let amt = pool.0.entry(code as u16).or_insert(0);
+									let amt = pool.0.entry(code).or_insert(0);
 									*amt = amt.saturating_add(q as u16);
 								} else {
 									gold += p * q;
@@ -2506,14 +2488,14 @@ pub async fn handle_ws(
 					}
 				}
 				UserMessage::bzread => {
-					let mut bz: FxHashMap<u16, Vec<_>> = Default::default();
+					let mut bz: FxHashMap<i16, Vec<_>> = Default::default();
 					if let Ok(bids) = client.query("select u.name, b.code, b.q, b.p from bazaar b join users u on b.user_id = u.id", &[]).await {
 						for bid in bids.iter() {
 							let name: String = bid.get(0);
-							let code: i32 = bid.get(1);
+							let code = bid.get::<usize, i32>(1) as i16;
 							let q: i32 = bid.get(2);
 							let p: i32 = bid.get(3);
-							bz.entry(code as u16).or_default().push(BzBid {
+							bz.entry(code).or_default().push(BzBid {
 								u: Cow::Owned(name), q, p
 							});
 						}

@@ -6,7 +6,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crate::etgutil;
 
 #[derive(Clone, Default, Debug)]
-pub struct Cardpool(pub HashMap<u16, u16>);
+pub struct Cardpool(pub HashMap<i16, u16>);
 
 impl From<&Cardpool> for String {
 	fn from(pool: &Cardpool) -> String {
@@ -16,7 +16,7 @@ impl From<&Cardpool> for String {
 			while count > 0 {
 				let amt = cmp::min(count, 1023);
 				ascii.extend(&etgutil::encode_count(amt as u32));
-				ascii.extend(&etgutil::encode_code(code as i32));
+				ascii.extend(&etgutil::encode_code(code));
 				count -= amt;
 			}
 		}
@@ -26,12 +26,12 @@ impl From<&Cardpool> for String {
 
 impl From<&str> for Cardpool {
 	fn from(code: &str) -> Cardpool {
-		let mut pool = HashMap::<u16, u16>::new();
+		let mut pool = HashMap::<i16, u16>::new();
 		for chunk in code.as_bytes().chunks_exact(5) {
-			let count = etgutil::decode_count(&chunk[..2]) as u16;
-			let code = etgutil::decode_code(&chunk[2..]) as u16;
+			let count = etgutil::decode_count(&chunk[..2]);
+			let code = etgutil::decode_code(&chunk[2..]);
 			let c = pool.entry(code).or_insert(0);
-			*c = c.saturating_add(count as u16);
+			*c = c.saturating_add(count);
 		}
 		Cardpool(pool)
 	}

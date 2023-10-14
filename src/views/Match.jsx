@@ -631,7 +631,7 @@ function addNoHealData(game, newdata) {
 				for (let i = 0; i < newdata.players.length; i++) {
 					const pldata = newdata.players[i];
 					if (pldata.user === user) {
-						const pl = game.player_idx(gi);
+						const pl = gi + 1;
 						pldata.hp = Math.max(game.get(pl, 'hp'), 1);
 						pldata.maxhp = game.get(pl, 'maxhp');
 					}
@@ -887,10 +887,11 @@ export default function Match(props) {
 			gameStep(game);
 			setEffects(state => {
 				const newstate = {};
-				for (let idx = 0; idx < effects.length; idx += 3) {
+				for (let idx = 0; idx < effects.length; idx += 4) {
 					const kind = enums.Fx[effects[idx]],
 						id = effects[idx + 1],
-						param = effects[idx + 2];
+						param = effects[idx + 2],
+						param2 = effects[idx + 3];
 					switch (kind) {
 						case 'StartPos':
 							newstate.startPos ??= new Map(state.startPos);
@@ -905,9 +906,9 @@ export default function Match(props) {
 						case 'Bolt': {
 							newstate.effects ??= new Set(state.effects);
 							const pos = getIdTrack(id) ?? { x: -99, y: -99 },
-								color = strcols[param & 255],
-								upcolor = strcols[(param & 255) + 13],
-								bolts = (param >> 8) + 1,
+								color = strcols[param2],
+								upcolor = strcols[param2 + 13],
+								bolts = param + 1,
 								duration = 96 + bolts * 32;
 							const BoltEffect = () => (
 								<BoltFx
@@ -991,7 +992,7 @@ export default function Match(props) {
 						case 'Quanta':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
-								mkText(state, newstate, id, `${param >> 8}:${param & 255}`),
+								mkText(state, newstate, id, `${param}:${param2}`),
 							);
 							break;
 						case 'Sfx':
@@ -1304,6 +1305,7 @@ export default function Match(props) {
 	const setInfo = (e, id) => {
 		const actinfo =
 			targeting() &&
+			targeting().src &&
 			targeting().filter(id) &&
 			game().actinfo(targeting().src, id);
 		setTooltip({
@@ -1337,7 +1339,7 @@ export default function Match(props) {
 				: `${g.turn === p1id() ? 'Your' : 'Their'} turn${
 						g.phase > Phase.Mulligan
 							? ''
-							: g.player_idx(0) === p1id()
+							: p1id() === 1
 							? "\nYou're first"
 							: "\nYou're second"
 				  }`;

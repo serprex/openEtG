@@ -40,12 +40,12 @@ fn main() {
 			)
 		};
 		println!("{}", seed);
-		let mut game = Game::new(seed, set);
-		let players = [game.new_player(), game.new_player()];
-		for &p in players.iter() {
+		let mut game = Game::new(seed, set, 2);
+		let players = [1, 2];
+		for p in players {
 			game.set_leader(p, p);
 		}
-		for &p in players.iter() {
+		for p in players {
 			game.init_player(
 				p,
 				100,

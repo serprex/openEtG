@@ -90,7 +90,7 @@ pub enum AuthMessage {
 	},
 	codesubmit2 {
 		code: String,
-		card: u16,
+		card: i16,
 	},
 	foewant {
 		f: String,
@@ -126,7 +126,7 @@ pub enum AuthMessage {
 		msg: String,
 	},
 	bzcancel {
-		c: u16,
+		c: i16,
 	},
 	bzbid {
 		price: i16,
@@ -163,22 +163,22 @@ pub enum AuthMessage {
 		sides: u32,
 	},
 	upgrade {
-		card: u16,
+		card: i16,
 	},
 	downgrade {
-		card: u16,
+		card: i16,
 	},
 	polish {
-		card: u16,
+		card: i16,
 	},
 	unpolish {
-		card: u16,
+		card: i16,
 	},
 	uppillar {
-		c: u16,
+		c: i16,
 	},
 	shpillar {
-		c: u16,
+		c: i16,
 	},
 	upshall,
 	addgold {
@@ -204,7 +204,7 @@ pub enum AuthMessage {
 	},
 	donedaily {
 		#[serde(default)]
-		c: u16,
+		c: i16,
 		daily: u8,
 	},
 	changeqeck {
@@ -296,8 +296,8 @@ pub enum WsResponse<'a> {
 		packtype: u8,
 	},
 	bzbid {
-		add: &'a FxHashMap<u16, Vec<BzBid<'a>>>,
-		rm: &'a FxHashMap<u16, Vec<BzBid<'a>>>,
+		add: &'a FxHashMap<i16, Vec<BzBid<'a>>>,
+		rm: &'a FxHashMap<i16, Vec<BzBid<'a>>>,
 		g: i32,
 		pool: &'a Cardpool,
 	},
@@ -312,7 +312,7 @@ pub enum WsResponse<'a> {
 		g: i32,
 	},
 	bzread {
-		bz: &'a FxHashMap<u16, Vec<BzBid<'a>>>,
+		bz: &'a FxHashMap<i16, Vec<BzBid<'a>>>,
 	},
 	challenge {
 		f: &'a str,
@@ -340,10 +340,10 @@ pub enum WsResponse<'a> {
 		r#type: &'a str,
 	},
 	codecode {
-		card: i32,
+		card: i16,
 	},
 	codedone {
-		card: u16,
+		card: i16,
 	},
 	codegold {
 		g: i32,

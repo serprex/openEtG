@@ -19,17 +19,17 @@ use crate::skill::{Event, Skill};
 pub fn deckgen_duo(
 	e1: i8,
 	e2: i8,
-	uprate: f64,
+	uprate: u8,
 	markpower: i32,
 	maxrarity: i32,
 	seed: i32,
-) -> Vec<u16> {
+) -> Vec<i16> {
 	let mut rng = Pcg32::seed_from_u64(seed as u64);
-	let mut build = Builder::new(e2 as i32, uprate, markpower, &mut rng);
+	let mut build = Builder::new(e2 as i16, uprate, markpower, &mut rng);
 	for j in 0..=1 {
 		let ele = if j == 0 { e1 } else { e2 };
 		for i in 0..(20 - j * 10) {
-			let upped = rng.gen_bool(uprate);
+			let upped = rng.gen_range(0..100) < uprate;
 			if let Some(card) = card::OpenSet.random_card(&mut rng, upped, |card| {
 				card.element == ele
 					&& (card.flag & Flag::pillar) == 0
@@ -52,27 +52,27 @@ pub fn deckgen_duo(
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn deckgen_bow(uprate: f64, markpower: i32, maxrarity: i32, seed: i32) -> Vec<u16> {
+pub fn deckgen_bow(uprate: u8, markpower: i32, maxrarity: i32, seed: i32) -> Vec<i16> {
 	let mut rng = Pcg32::seed_from_u64(seed as u64);
 	let mut build: Builder;
-	if (rng.gen_bool(uprate / 2.0)) {
+	if rng.gen_range(0..200) < uprate {
 		build = Builder::new(etg::Entropy, uprate, markpower, &mut rng);
 		for _ in 0..rng.gen_range(4..=6) {
-			build.add_card(card::AsUpped(card::Nova, true) as u16);
+			build.add_card(card::AsUpped(card::Nova, true));
 		}
 	} else {
 		build = Builder::new(etg::Chroma, uprate, markpower, &mut rng);
 		for _ in 0..rng.gen_range(2..=6) {
-			build.add_card(card::Nova as u16);
+			build.add_card(card::Nova);
 		}
 		for _ in 0..rng.gen_range(0..=2) {
-			build.add_card(card::ChromaticButterfly as u16);
+			build.add_card(card::ChromaticButterfly);
 		}
 	}
 	while build.deck.len() < 30 {
 		for ele in 1..=12 {
 			for i in 0..=rng.gen_range(1..=4) {
-				let upped = rng.gen_bool(uprate);
+				let upped = rng.gen_range(0..100) < uprate;
 				if let Some(card) = card::OpenSet.random_card(&mut rng, upped, |card| {
 					card.element == ele
 						&& (card.flag & Flag::pillar) == 0
@@ -96,7 +96,7 @@ pub fn deckgen_bow(uprate: f64, markpower: i32, maxrarity: i32, seed: i32) -> Ve
 			cost += build.ecost[i];
 		}
 		for i in (0..cost as i32).step_by(12) {
-			build.deck.push(build.up_code(card::QuantumPillar as u16));
+			build.deck.push(build.up_code(card::QuantumPillar));
 		}
 	}
 	build.finish()
@@ -104,17 +104,17 @@ pub fn deckgen_bow(uprate: f64, markpower: i32, maxrarity: i32, seed: i32) -> Ve
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn deckgen_ai4(e1: i8, e2: i8, seed: i32) -> Vec<u16> {
+pub fn deckgen_ai4(e1: i8, e2: i8, seed: i32) -> Vec<i16> {
 	let mut rng = Pcg32::seed_from_u64(seed as u64);
 	let mut deck = Vec::with_capacity(65);
 	for i in 0..24 {
-		let upped = rng.gen_bool(0.3);
+		let upped = rng.gen_range(0..100) < 30;
 		deck.push(
 			etg::PillarList[if i < 4 { 0 } else { e1 as usize }] - if upped { 2000 } else { 4000 },
 		);
 	}
 	for i in 0..40 {
-		let upped = rng.gen_bool(0.3);
+		let upped = rng.gen_range(0..100) < 30;
 		let e = if i < 30 { e1 } else { e2 };
 		if let Some(card) = card::OrigSet.random_card(&mut rng, upped, |card| {
 			card.element == e
@@ -130,41 +130,40 @@ pub fn deckgen_ai4(e1: i8, e2: i8, seed: i32) -> Vec<u16> {
 			deck.push(card.code);
 		}
 	}
-	deck.push((e2 as u16) + 9010);
+	deck.push((e2 as i16) + 9010);
 	deck
 }
 
-const HAS_BUFF: [u16; 20] = [
+const HAS_BUFF: [i16; 20] = [
 	5125, 5318, 8230, 5306, 5730, 5721, 5807, 6115, 6218, 6230, 7106, 7125, 7306, 7318, 7730, 7721,
 	7807, 8115, 8218, 9015,
 ];
-const HAS_POISON: [u16; 23] = [
+const HAS_POISON: [i16; 23] = [
 	5218, 5219, 5225, 7208, 5208, 5210, 5214, 5212, 5512, 5518, 5507, 5701, 7218, 7210, 7225, 7214,
 	7219, 7212, 7512, 7518, 7507, 7701, 7710,
 ];
-const CAN_INFECT: [u16; 16] = [
+const CAN_INFECT: [i16; 16] = [
 	5220, 5224, 7202, 7209, 5202, 5212, 5710, 6103, 6110, 6120, 7212, 7224, 7220, 8103, 8110, 8120,
 ];
-const HAS_BURROW: [u16; 4] = [5408, 5409, 5416, 5401];
-const HAS_LIGHT: [u16; 6] = [5811, 5820, 5908, 7811, 7801, 7820];
+const HAS_BURROW: [i16; 4] = [5408, 5409, 5416, 5401];
+const HAS_LIGHT: [i16; 6] = [5811, 5820, 5908, 7811, 7801, 7820];
 
-fn scorpion(card: &'static Card, deck: &[u16]) -> bool {
+fn scorpion(card: &'static Card, deck: &[i16]) -> bool {
 	let isdeath = card.isOf(card::Deathstalker);
 	deck.iter().any(|&code| {
 		HAS_BUFF.iter().any(|&buffcode| buffcode == code)
 			|| (isdeath
-				&& (code == card::Nightfall as u16
-					|| code == card::AsUpped(card::Nightfall, true) as u16))
+				&& (code == card::Nightfall || code == card::AsUpped(card::Nightfall, true)))
 	})
 }
-fn filters(code: u16, deck: &[u16], ecost: &[f32; 13]) -> bool {
-	let card = card::OpenSet.get(code as i32);
-	match card::AsUpped(code as i32, false) {
+fn filters(code: i16, deck: &[i16], ecost: &[f32; 13]) -> bool {
+	let card = card::OpenSet.get(code);
+	match card::AsUpped(code, false) {
 		card::SchrdingersCat => {
 			let mut n = 0;
 			deck.iter()
 				.filter(|&&dcode| {
-					let c = card::OpenSet.get(dcode as i32);
+					let c = card::OpenSet.get(dcode);
 					c.skill.iter().any(|kv| kv.0 == Event::Death)
 						|| c.skill.iter().any(|&(k, sks)| {
 							k == Event::Cast
@@ -184,7 +183,7 @@ fn filters(code: u16, deck: &[u16], ecost: &[f32; 13]) -> bool {
 		card::TidalHealing => {
 			let mut aquatics: i32 = 0;
 			for &dcode in deck.iter() {
-				if card::OpenSet.get(dcode as i32).flag & Flag::aquatic != 0 {
+				if card::OpenSet.get(dcode).flag & Flag::aquatic != 0 {
 					if aquatics > 3 {
 						return true;
 					}
@@ -251,26 +250,26 @@ const MATERIAL: [u8; 4] = [4, 6, 7, 9];
 const SPIRITUAL: [u8; 4] = [2, 5, 8, 11];
 const CARDINAL: [u8; 4] = [1, 3, 10, 12];
 struct Builder {
-	pub mark: i32,
-	pub deck: Vec<u16>,
+	pub mark: i16,
+	pub deck: Vec<i16>,
 	pub anyshield: u8,
 	pub anyweapon: u8,
 	pub ecost: [f32; 13],
-	pub uprate: f64,
+	pub uprate: u8,
 	pub rng: RefCell<Pcg32>,
 }
 
 impl Builder {
-	fn new(mark: i32, uprate: f64, markpower: i32, rng: &mut Pcg32) -> Builder {
+	fn new(mark: i16, uprate: u8, markpower: i32, rng: &mut Pcg32) -> Builder {
 		let mut ecost = [0.0; 13];
 		ecost[mark as usize] = (-8 * markpower) as f32;
 		Builder {
-			mark: mark,
+			mark,
 			deck: Vec::with_capacity(60),
 			anyshield: 0,
 			anyweapon: 0,
 			ecost: [0.0; 13],
-			uprate: uprate,
+			uprate,
 			rng: RefCell::new(Pcg32::from_rng(rng).unwrap()),
 		}
 	}
@@ -279,7 +278,7 @@ impl Builder {
 		let mut idx = self.deck.len() - 1;
 		loop {
 			let code = self.deck[idx];
-			let card = card::OpenSet.get(code as i32);
+			let card = card::OpenSet.get(code);
 			if !filters(code, &self.deck, &self.ecost) {
 				self.ecost[card.element as usize] -= card.cost as f32;
 				self.deck.swap_remove(idx);
@@ -293,12 +292,12 @@ impl Builder {
 		}
 	}
 
-	fn card_count(&self, code: u16) -> usize {
+	fn card_count(&self, code: i16) -> usize {
 		self.deck.iter().filter(|&&dcode| dcode == code).count()
 	}
 
-	fn add_card(&mut self, code: u16) {
-		let card = card::OpenSet.get(code as i32);
+	fn add_card(&mut self, code: i16) {
+		let card = card::OpenSet.get(code);
 		self.deck.push(code);
 		if (!(((card.kind == Kind::Weapon && self.anyweapon == 0)
 			|| (card.kind == Kind::Shield && self.anyshield == 0))
@@ -306,26 +305,26 @@ impl Builder {
 		{
 			self.ecost[card.costele as usize] += card.cost as f32;
 		}
-		if (card.kind != Kind::Spell && card.cast > 0) {
+		if card.kind != Kind::Spell && card.cast > 0 {
 			self.ecost[card.castele as usize] += (card.cast as f32) * 1.5;
 		}
-		if (card.isOf(card::Nova)) {
+		if card.isOf(card::Nova) {
 			self.ecost[0] -= if card.upped() { 24.0 } else { 12.0 };
-		} else if (card.isOf(card::Immolation)) {
+		} else if card.isOf(card::Immolation) {
 			self.ecost[0] -= 12.0;
 			self.ecost[etg::Fire as usize] -= if card.upped() { 7.0 } else { 5.0 };
-		} else if (card.isOf(card::GiftofOceanus)) {
-			if (self.mark == etg::Water) {
+		} else if card.isOf(card::GiftofOceanus) {
+			if self.mark == etg::Water {
 				self.ecost[etg::Water as usize] -= 3.0;
 			} else {
 				self.ecost[etg::Water as usize] -= 2.0;
 				self.ecost[self.mark as usize] -= 2.0;
 			}
-		} else if (card.isOf(card::Georesonator)) {
+		} else if card.isOf(card::Georesonator) {
 			self.ecost[self.mark as usize] -= 6.0;
 			self.ecost[0] -= 4.0;
 		}
-		if (card.kind == Kind::Creature) {
+		if card.kind == Kind::Creature {
 			if let Some(&(_, sks)) = card.skill.iter().find(|&&(k, sks)| k == Event::OwnAttack) {
 				for &sk in sks.iter() {
 					if let Skill::quanta(q) = sk {
@@ -335,9 +334,9 @@ impl Builder {
 					}
 				}
 			}
-		} else if (card.kind == Kind::Shield) {
+		} else if card.kind == Kind::Shield {
 			self.anyshield += 1;
-		} else if (card.kind == Kind::Weapon) {
+		} else if card.kind == Kind::Weapon {
 			self.anyweapon += 1;
 		}
 	}
@@ -367,22 +366,22 @@ impl Builder {
 			let hascar = (qc & CARBITS).count_ones() > 2;
 			let quadcount = (hasmat as i32) + (hasspi as i32) + (hascar as i32);
 			if quadcount == 1 && hasmat {
-				self.deck.push(self.up_code(card::MaterialPillar as u16));
+				self.deck.push(self.up_code(card::MaterialPillar));
 				for &e in MATERIAL.iter() {
 					self.ecost[e as usize] -= 2.0;
 				}
 			} else if quadcount == 1 && hasspi {
-				self.deck.push(self.up_code(card::SpiritualPillar as u16));
+				self.deck.push(self.up_code(card::SpiritualPillar));
 				for &e in SPIRITUAL.iter() {
 					self.ecost[e as usize] -= 2.0;
 				}
 			} else if quadcount == 1 && hascar {
-				self.deck.push(self.up_code(card::CardinalPillar as u16));
+				self.deck.push(self.up_code(card::CardinalPillar));
 				for &e in CARDINAL.iter() {
 					self.ecost[e as usize] -= 2.0;
 				}
 			} else {
-				self.deck.push(self.up_code(card::QuantumPillar as u16));
+				self.deck.push(self.up_code(card::QuantumPillar));
 				for i in 1..=12 {
 					self.ecost[i] -= 1.25;
 				}
@@ -397,9 +396,9 @@ impl Builder {
 		}
 	}
 
-	fn up_code(&self, code: u16) -> u16 {
-		if self.uprate > 0.0 {
-			card::AsUpped(code as i32, self.rng.borrow_mut().gen_bool(self.uprate)) as u16
+	fn up_code(&self, code: i16) -> i16 {
+		if self.uprate > 0 {
+			card::AsUpped(code, self.rng.borrow_mut().gen_range(0..100) < self.uprate)
 		} else {
 			code
 		}
@@ -407,14 +406,14 @@ impl Builder {
 
 	fn add_equipment(&mut self) {
 		if self.anyshield == 0 {
-			self.add_card(self.up_code(card::Shield as u16));
+			self.add_card(self.up_code(card::Shield));
 		}
 		if self.anyweapon == 0 {
 			self.add_card(self.default_weapon());
 		}
 	}
 
-	fn default_weapon(&self) -> u16 {
+	fn default_weapon(&self) -> i16 {
 		self.up_code(match self.mark {
 			etg::Air | etg::Light => card::ShortBow,
 			etg::Gravity | etg::Earth => card::Hammer,
@@ -423,11 +422,11 @@ impl Builder {
 			etg::Entropy | etg::Aether => card::Disc,
 			etg::Fire | etg::Time => card::BattleAxe,
 			_ => card::ShortSword,
-		} as u16)
+		})
 	}
 
-	fn finish(mut self) -> Vec<u16> {
-		self.deck.push((self.mark as u16) + 9010);
+	fn finish(mut self) -> Vec<i16> {
+		self.deck.push(self.mark + 9010);
 		self.deck
 	}
 }

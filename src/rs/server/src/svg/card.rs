@@ -36,13 +36,13 @@ pub fn eleup_str(element: i8, upped: bool) -> &'static str {
 	}
 }
 
-pub fn card(code: i32) -> Option<String> {
-	let cards = if code < 5000 {
+pub fn card(code: i16) -> Option<String> {
+	let cards = if card::AsShiny(code, false) < 5000 {
 		card::OrigSet
 	} else {
 		card::OpenSet
 	};
-	let card = cards.try_get(code)?;
+	let card = cards.try_get(code & 0x3fff)?;
 	let upped = card::Upped(code);
 	let shiny = card::Shiny(code);
 	let mut result = String::new();

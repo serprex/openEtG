@@ -271,9 +271,9 @@ async fn handle_get_core(
 				file: Some(uppath),
 			}
 		} else if let Ok(code) =
-			i32::from_str_radix(&path["/Cards/".len()..path.len() - ".webp".len()], 32)
+			i16::from_str_radix(&path["/Cards/".len()..path.len() - ".webp".len()], 32)
 		{
-			if card::Shiny(code) {
+			if card::Shiny(code as i16) {
 				let mut newpath = b"/Cards/".to_vec();
 				newpath.extend_from_slice(&encode_code(card::AsShiny(code, false)));
 				newpath.extend_from_slice(b".webp");
@@ -282,7 +282,7 @@ async fn handle_get_core(
 					.status(302)
 					.header(header::LOCATION, newpath)
 					.body(Bytes::new());
-			} else if card::Upped(code) {
+			} else if card::Upped(code as i16) {
 				let mut newpath = b"/Cards/".to_vec();
 				newpath.extend_from_slice(&encode_code(card::AsUpped(code, false)));
 				newpath.extend_from_slice(b".webp");
@@ -425,13 +425,12 @@ async fn handle_get_core(
 				let user = user.lock().await;
 				let pool = &user.data.pool;
 				let bound = &user.data.accountbound;
-				let mut cards: BTreeMap<u16, [u16; 8]> = BTreeMap::new();
+				let mut cards: BTreeMap<i16, [u16; 8]> = BTreeMap::new();
 				for i in 0..2 {
 					let (cards0, counts) = if i == 0 { (0, pool) } else { (4, bound) };
 					for (&code, &count) in counts.0.iter() {
-						let code = code as i32;
 						let row = cards
-							.entry(card::AsUpped(card::AsShiny(code, false), false) as u16)
+							.entry(card::AsUpped(card::AsShiny(code, false), false))
 							.or_default();
 						row[cards0
 							| if card::Shiny(code) { 2 } else { 0 }
@@ -440,7 +439,7 @@ async fn handle_get_core(
 				}
 				let mut userdata = String::new();
 				for (&code, row) in cards.iter() {
-					if let Some(card) = card::OpenSet.try_get(code as i32) {
+					if let Some(card) = card::OpenSet.try_get(code as i16) {
 						write!(
 							userdata,
 							"{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
@@ -481,7 +480,7 @@ async fn handle_get_core(
 
 			let mut rng = Pcg32::seed_from_u64(seed);
 			let mut eles = [false; 12];
-			let mut codes = [0u16; 84];
+			let mut codes = [0i16; 84];
 			for i in 0..12 {
 				let mut ele = rng.gen_range(0..12 - i);
 				for idx in 0..12 {
@@ -512,7 +511,7 @@ async fn handle_get_core(
 			let mut deck = Vec::with_capacity(5 * 43);
 			for &code in codes.iter() {
 				deck.extend(&b"01"[..]);
-				deck.extend(&encode_code(code as i32));
+				deck.extend(&encode_code(code));
 			}
 			deck.extend(&b"01"[..]);
 			deck.extend(&encode_code(rng.gen_range(9010..9022)));

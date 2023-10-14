@@ -13,7 +13,7 @@ use crate::skill::{Event, Skill};
 
 #[derive(Copy, Clone)]
 pub enum SkillThing<'a> {
-	Thing(&'a Game, i32),
+	Thing(&'a Game, i16),
 	Card(Cards, &'static Card),
 }
 
@@ -29,10 +29,10 @@ impl fmt::Display for DecodeQuad {
 }
 
 impl<'a> SkillThing<'a> {
-	fn code(&self) -> i32 {
+	fn code(&self) -> i16 {
 		match *self {
 			Self::Thing(game, id) => game.get(id, Stat::card),
-			Self::Card(cards, card) => card.code as i32,
+			Self::Card(cards, card) => card.code,
 		}
 	}
 
@@ -47,31 +47,31 @@ impl<'a> SkillThing<'a> {
 		card::Upped(self.code())
 	}
 
-	fn cast(&self) -> i32 {
+	fn cast(&self) -> i16 {
 		match *self {
 			Self::Thing(game, id) => game.get(id, Stat::cast),
-			Self::Card(cards, c) => c.cast as i32,
+			Self::Card(cards, c) => c.cast as i16,
 		}
 	}
 
-	fn castele(&self) -> i32 {
+	fn castele(&self) -> i16 {
 		match *self {
 			Self::Thing(game, id) => game.get(id, Stat::castele),
-			Self::Card(cards, c) => c.castele as i32,
+			Self::Card(cards, c) => c.castele as i16,
 		}
 	}
 
-	fn cost(&self) -> i32 {
+	fn cost(&self) -> i16 {
 		match *self {
 			Self::Thing(game, id) => game.get(id, Stat::cost),
-			Self::Card(cards, c) => c.cost as i32,
+			Self::Card(cards, c) => c.cost as i16,
 		}
 	}
 
-	fn costele(&self) -> i32 {
+	fn costele(&self) -> i16 {
 		match *self {
 			Self::Thing(game, id) => game.get(id, Stat::costele),
-			Self::Card(cards, c) => c.costele as i32,
+			Self::Card(cards, c) => c.costele as i16,
 		}
 	}
 
@@ -82,7 +82,7 @@ impl<'a> SkillThing<'a> {
 		}
 	}
 
-	fn get_stat(&self, stat: Stat) -> i32 {
+	fn get_stat(&self, stat: Stat) -> i16 {
 		match *self {
 			Self::Thing(game, id) => game.get(id, stat),
 			Self::Card(cards, card) => card
@@ -112,7 +112,7 @@ impl<'a> SkillThing<'a> {
 		self.cards().set
 	}
 
-	fn status(&self) -> &[(Stat, i32)] {
+	fn status(&self) -> &[(Stat, i16)] {
 		match *self {
 			Self::Thing(game, id) => &game.get_thing(id).status.0[..],
 			Self::Card(cards, c) => c.status,
@@ -706,7 +706,7 @@ impl<'a> SkillThing<'a> {
 			Skill::storm(x) =>
 				Cow::from(format!("Deal {x} spell damage to all of target player's creatures. Removes cloak")),
 			Skill::summon(code) =>
-				Cow::from(format!("Summon a {}", self.cards().get(code as i32).name)),
+				Cow::from(format!("Summon a {}", self.cards().get(code as i16).name)),
 			Skill::swarm =>
 				Cow::from("Base HP is equal to the number of Scarabs you control, including this one"),
 			Skill::swave =>
@@ -876,7 +876,7 @@ impl<'a> SkillThing<'a> {
 					Stat::cost => {
 						let card = self.card();
 						let costele = self.costele();
-						if v != card.cost as i32 || costele != card.costele as i32 {
+						if v != card.cost as i16 || costele != card.costele as i16 {
 							write!(ret, "{v}:{}, ", costele).ok();
 						}
 					}

@@ -54,7 +54,7 @@ pub struct UserData {
 	#[serde(default)]
 	pub gold: i32,
 	#[serde(default)]
-	pub ocard: u16,
+	pub ocard: i16,
 	#[serde(default)]
 	pub oracle: u32,
 	#[serde(default)]

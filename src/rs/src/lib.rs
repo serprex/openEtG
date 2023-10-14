@@ -56,8 +56,8 @@ mod test {
 	fn upped_alignment_and_spell_skill() {
 		for set in [card::OpenSet, card::OrigSet].iter() {
 			for card in set.data.iter() {
-				let un = set.get(card::AsUpped(card.code as i32, false));
-				let up = set.get(card::AsUpped(card.code as i32, true));
+				let un = set.get(card::AsUpped(card.code, false));
+				let up = set.get(card::AsUpped(card.code, true));
 				if card.kind == Kind::Spell {
 					assert!(card.skill.iter().any(|&(k, v)| k == Event::Cast));
 				}
@@ -65,18 +65,18 @@ mod test {
 		}
 	}
 
-	fn setup(set: CardSet) -> (Game, i32, i32) {
-		let mut ctx = Game::new(1728, set);
-		let players = [ctx.new_player(), ctx.new_player()];
-		for &p in players.iter() {
+	fn setup(set: CardSet) -> (Game, i16, i16) {
+		let mut ctx = Game::new(1728, set, 2);
+		let players = [1, 2];
+		for p in players {
 			ctx.set_leader(p, p);
 		}
-		for &p in players.iter() {
+		for p in players {
 			ctx.init_player(
 				p,
 				100,
 				100,
-				etg::Entropy,
+				etg::Entropy as i8,
 				1,
 				1,
 				1,
@@ -91,10 +91,10 @@ mod test {
 		}
 		ctx.r#move(GameMove::Accept);
 		ctx.r#move(GameMove::Accept);
-		(ctx, players[0], players[1])
+		(ctx, 1, 2)
 	}
 
-	fn init_deck(ctx: &mut Game, id: i32, deck: &[i32]) {
+	fn init_deck(ctx: &mut Game, id: i16, deck: &[i16]) {
 		let mut newdeck = Vec::new();
 		for &code in deck.iter() {
 			newdeck.push(ctx.new_thing(code, id));
@@ -104,7 +104,7 @@ mod test {
 		deck.extend_from_slice(&newdeck);
 	}
 
-	fn attack_foe(ctx: &mut Game, id: i32) {
+	fn attack_foe(ctx: &mut Game, id: i16) {
 		ctx.attack(
 			id,
 			&ProcData {

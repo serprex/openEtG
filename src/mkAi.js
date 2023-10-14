@@ -72,7 +72,7 @@ export function mkAi(level, daily, datafn = null) {
 		store.requiresGold(cost);
 		return;
 	}
-	const [aiName, deck] = level === 0 ? deckgen(0, 1, 2) : deckgen(0.4, 2, 3);
+	const [aiName, deck] = level === 0 ? deckgen(0, 1, 2) : deckgen(40, 2, 3);
 	store.setOptTemp('aideck', deck);
 
 	const data = {

@@ -12,22 +12,19 @@ export default class Game {
 		this.game = new wasm.Game(
 			data.seed,
 			wasm.CardSet[data.set] ?? wasm.CardSet.Open,
+			data.players.length,
 		);
 		this.data = data;
 		this.replay = [];
-		const players = [];
 		const playersByIdx = new Map();
 		for (let i = 0; i < data.players.length; i++) {
-			const id = this.new_player(),
-				pdata = data.players[i];
-			players.push(id);
-			playersByIdx.set(pdata.idx, id);
+			playersByIdx.set(data.players[i].idx, i + 1);
 		}
-		for (let i = 0; i < players.length; i++) {
+		for (let i = 0; i < data.players.length; i++) {
 			const pdata = data.players[i];
-			this.set_leader(players[i], playersByIdx.get(pdata.leader ?? pdata.idx));
+			this.set_leader(i + 1, playersByIdx.get(pdata.leader ?? pdata.idx));
 		}
-		for (let i = 0; i < players.length; i++) {
+		for (let i = 0; i < data.players.length; i++) {
 			let mark = 0;
 			const dp = data.players[i],
 				deck = [];
@@ -40,7 +37,7 @@ export default class Game {
 				}
 			}
 			this.init_player(
-				players[i],
+				i + 1,
 				dp.hp ?? 100,
 				dp.maxhp ?? dp.hp ?? 100,
 				mark,
@@ -72,7 +69,7 @@ export default class Game {
 		const pldata = this.data.players;
 		for (let i = 0; i < pldata.length; i++) {
 			if (pldata[i].user === name) {
-				return this.player_idx(i);
+				return i + 1;
 			}
 		}
 		return null;

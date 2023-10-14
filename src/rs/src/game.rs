@@ -52,36 +52,54 @@ pub enum Kind {
 #[derive(Clone, Default)]
 pub struct ThingData {
 	pub kind: Kind,
-	pub owner: i32,
+	pub owner: i16,
 	pub flag: Flag,
 	pub status: Status,
 	pub skill: Skills,
 }
 
+impl ThingData {
+	fn hash(&self, hasher: &mut FxHasher64) {
+		self.flag.0.hash(hasher);
+		for &(k, v) in self.status.iter() {
+			if v != 0 {
+				k.hash(hasher);
+				v.hash(hasher);
+			}
+		}
+		for (k, v) in self.skill.iter() {
+			if !v.is_empty() {
+				k.hash(hasher);
+				v.hash(hasher);
+			}
+		}
+	}
+}
+
 #[derive(Clone, Default)]
 pub struct PlayerData {
 	pub thing: ThingData,
-	pub foe: i32,
-	pub leader: i32,
-	pub weapon: i32,
-	pub shield: i32,
-	pub mark: i32,
-	pub markpower: i16,
+	pub foe: i16,
+	pub leader: i16,
+	pub weapon: i16,
+	pub shield: i16,
+	pub mark: i8,
+	pub markpower: i8,
 	pub deckpower: u8,
 	pub drawpower: u8,
-	pub creatures: Rc<[i32; 23]>,
-	pub permanents: Rc<[i32; 16]>,
+	pub creatures: [i16; 23],
+	pub permanents: [i16; 16],
 	pub quanta: [u8; 12],
-	pub hand: [i32; 8],
-	pub deck: Rc<Vec<i32>>,
+	pub hand: [i16; 8],
+	pub deck: Rc<Vec<i16>>,
 }
 
 impl PlayerData {
-	pub fn quanta(&self, q: i32) -> u8 {
+	pub fn quanta(&self, q: i16) -> u8 {
 		self.quanta[(q - 1) as usize]
 	}
 
-	pub fn deck_mut(&mut self) -> &mut Vec<i32> {
+	pub fn deck_mut(&mut self) -> &mut Vec<i16> {
 		Rc::make_mut(&mut self.deck)
 	}
 
@@ -90,15 +108,10 @@ impl PlayerData {
 	}
 
 	pub fn hand_len(&self) -> usize {
-		for (idx, &id) in self.hand.iter().enumerate() {
-			if id == 0 {
-				return idx;
-			}
-		}
-		return 8;
+		self.hand.into_iter().position(|id| id == 0).unwrap_or(8)
 	}
 
-	pub fn hand_last(&self) -> Option<i32> {
+	pub fn hand_last(&self) -> Option<i16> {
 		if self.hand[0] == 0 {
 			None
 		} else {
@@ -112,15 +125,14 @@ impl PlayerData {
 		}
 	}
 
-	pub fn hand_push(&mut self, id: i32) -> i32 {
+	pub fn hand_push(&mut self, id: i16) -> i32 {
 		for (idx, handid) in self.hand.iter_mut().enumerate() {
 			if *handid == 0 {
 				*handid = id;
 				return idx as i32;
 			}
 		}
-
-		return -1;
+		-1
 	}
 
 	pub fn hand_remove(&mut self, idx: usize) {
@@ -130,30 +142,8 @@ impl PlayerData {
 		self.hand[7] = 0;
 	}
 
-	pub fn hand_iter(&self) -> impl Iterator<Item = i32> {
+	pub fn hand_iter(&self) -> impl Iterator<Item = i16> {
 		self.hand.into_iter().take_while(|&id| id != 0)
-	}
-}
-
-#[derive(Clone)]
-pub enum Entity {
-	Thing(Rc<ThingData>),
-	Player(Rc<PlayerData>),
-}
-
-impl Entity {
-	pub fn get_thing(&self) -> &ThingData {
-		match self {
-			Entity::Thing(ref thing) => thing,
-			Entity::Player(ref player) => &player.thing,
-		}
-	}
-
-	pub fn get_thing_mut(&mut self) -> &mut ThingData {
-		match self {
-			Entity::Thing(ref mut thing) => Rc::make_mut(thing),
-			Entity::Player(ref mut player) => &mut Rc::make_mut(player).thing,
-		}
 	}
 }
 
@@ -167,16 +157,16 @@ pub enum Phase {
 
 #[derive(Clone, Copy)]
 pub enum GameMove {
-	End(i32),
-	Cast(i32, i32),
+	End(i16),
+	Cast(i16, i16),
 	Accept,
 	Mulligan,
-	Foe(i32),
-	Resign(i32),
+	Foe(i16),
+	Resign(i16),
 }
 
-impl From<GameMove> for [i32; 3] {
-	fn from(cmd: GameMove) -> [i32; 3] {
+impl From<GameMove> for [i16; 3] {
+	fn from(cmd: GameMove) -> [i16; 3] {
 		match cmd {
 			GameMove::End(t) => [0, 0, t],
 			GameMove::Cast(c, t) => [1, c, t],
@@ -188,8 +178,8 @@ impl From<GameMove> for [i32; 3] {
 	}
 }
 
-impl From<[i32; 3]> for GameMove {
-	fn from(cmd: [i32; 3]) -> GameMove {
+impl From<[i16; 3]> for GameMove {
+	fn from(cmd: [i16; 3]) -> GameMove {
 		match cmd[0] {
 			0 => GameMove::End(cmd[2]),
 			1 => GameMove::Cast(cmd[1], cmd[2]),
@@ -223,35 +213,35 @@ pub enum Fx {
 	Adrenaline,
 	Aflatoxin,
 	Appeased,
-	Atk(i32),
-	Bolt(u16, u8),
-	Card(u16),
+	Atk(i16),
+	Bolt(i16, i8),
+	Card(i16),
 	Catapult,
 	Clear,
 	Death,
-	Delay(i32),
+	Delay(i16),
 	Destroy,
 	Devoured,
 	Dive,
-	Dmg(i32),
+	Dmg(i16),
 	Draft,
 	Earthquake,
 	Endow,
-	EndPos(i32),
+	EndPos(i16),
 	Embezzle,
 	Enchant,
 	Evade,
 	Forced,
 	Fractal,
 	Free,
-	Freeze(i32),
+	Freeze(i16),
 	Hatch,
-	Heal(i32),
+	Heal(i16),
 	Improve,
 	LastCard,
 	Lightning,
 	Liquid,
-	Lives(i32),
+	Lives(i16),
 	Lobotomize,
 	Looted,
 	Materialize,
@@ -262,7 +252,7 @@ pub enum Fx {
 	Oops,
 	Paradox,
 	Parallel,
-	Poison(i32),
+	Poison(i16),
 	Pull,
 	Ren,
 	Rewind,
@@ -272,51 +262,47 @@ pub enum Fx {
 	Shuffled,
 	Sinkhole,
 	Siphon,
-	StartPos(i32),
-	Quanta(u16, u8),
+	StartPos(i16),
+	Quanta(i16, i8),
 	Quintessence,
 	Ready,
 	Web,
 }
 
-impl Fx {
-	pub fn param(self) -> i32 {
-		match self {
-			Fx::Atk(amt) => amt,
-			Fx::Card(code) => code as i32,
-			Fx::Delay(amt) => amt,
-			Fx::Dmg(amt) => amt,
-			Fx::EndPos(tgt) => tgt,
-			Fx::Freeze(amt) => amt,
-			Fx::Heal(amt) => amt,
-			Fx::Lives(amt) => amt,
-			Fx::Poison(amt) => amt,
-			Fx::Sfx(sfx) => sfx as i32,
-			Fx::StartPos(src) => src,
-			Fx::Quanta(amt, e) | Fx::Bolt(amt, e) => (amt as i32) << 8 | (e as i32),
-			_ => 0,
-		}
-	}
-}
-
-pub struct Fxs(Vec<(i32, Fx)>);
+pub struct Fxs(Vec<(i16, Fx)>);
 
 impl Fxs {
 	pub fn new() -> Fxs {
 		Fxs(Vec::new())
 	}
 
-	pub fn js(&self) -> Vec<i32> {
-		let mut ret = Vec::with_capacity(self.0.len() * 3);
+	pub fn js(&self) -> Vec<i16> {
+		let mut ret = Vec::with_capacity(self.0.len() * 4);
 		for &(id, fx) in self.0.iter() {
 			ret.push(generated::id_fx(fx));
 			ret.push(id);
-			ret.push(fx.param());
+			let (p1, p2) = match fx {
+				Fx::Atk(x)
+				| Fx::Card(x)
+				| Fx::Delay(x)
+				| Fx::Dmg(x)
+				| Fx::EndPos(x)
+				| Fx::Freeze(x)
+				| Fx::Heal(x)
+				| Fx::Lives(x)
+				| Fx::Poison(x)
+				| Fx::StartPos(x) => (x, 0),
+				Fx::Sfx(sfx) => (sfx as i16, 0),
+				Fx::Quanta(amt, e) | Fx::Bolt(amt, e) => (amt, e as i16),
+				_ => (0, 0),
+			};
+			ret.push(p1);
+			ret.push(p2);
 		}
 		ret
 	}
 
-	pub fn push(&mut self, id: i32, fx: Fx) {
+	pub fn push(&mut self, id: i16, fx: Fx) {
 		self.0.push((id, fx))
 	}
 }
@@ -354,7 +340,7 @@ pub enum Stat {
 }
 
 #[derive(Clone, Default)]
-pub struct Status(pub Vec<(Stat, i32)>);
+pub struct Status(pub Vec<(Stat, i16)>);
 
 pub struct StatusVacant<'a> {
 	pub status: &'a mut Status,
@@ -368,8 +354,8 @@ pub struct StatusOccupied<'a> {
 }
 
 impl<'a> StatusOccupied<'a> {
-	pub fn get(&self) -> &i32 {
-		&self.status.0[self.idx].1
+	pub fn get(&self) -> i16 {
+		self.status.0[self.idx].1
 	}
 
 	pub fn remove(mut self) {
@@ -383,7 +369,7 @@ pub enum StatusEntry<'a> {
 }
 
 impl<'a> StatusEntry<'a> {
-	pub fn or_insert(self, val: i32) -> &'a mut i32 {
+	pub fn or_insert(self, val: i16) -> &'a mut i16 {
 		match self {
 			StatusEntry::Vacant(hole) => {
 				hole.status.0.insert(hole.idx, (hole.stat, val));
@@ -395,21 +381,21 @@ impl<'a> StatusEntry<'a> {
 }
 
 impl Status {
-	pub fn get(&self, stat: Stat) -> Option<i32> {
+	pub fn get(&self, stat: Stat) -> Option<i16> {
 		match self.0.binary_search_by_key(&stat, |kv| kv.0) {
 			Err(_) => None,
 			Ok(idx) => Some(self.0[idx].1),
 		}
 	}
 
-	pub fn get_mut(&mut self, stat: Stat) -> Option<&mut i32> {
+	pub fn get_mut(&mut self, stat: Stat) -> Option<&mut i16> {
 		match self.0.binary_search_by_key(&stat, |kv| kv.0) {
 			Err(_) => None,
 			Ok(idx) => Some(&mut self.0[idx].1),
 		}
 	}
 
-	pub fn insert(&mut self, stat: Stat, val: i32) {
+	pub fn insert(&mut self, stat: Stat, val: i16) {
 		match self.0.binary_search_by_key(&stat, |kv| kv.0) {
 			Err(idx) => self.0.insert(idx, (stat, val)),
 			Ok(idx) => self.0[idx].1 = val,
@@ -430,8 +416,12 @@ impl Status {
 		}
 	}
 
-	pub fn iter(&self) -> impl Iterator<Item = &(Stat, i32)> {
+	pub fn iter(&self) -> impl Iterator<Item = &(Stat, i16)> {
 		self.0.iter()
+	}
+
+	pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut (Stat, i16)> {
+		self.0.iter_mut()
 	}
 }
 
@@ -523,18 +513,18 @@ impl IntoIterator for Flag {
 pub trait ThingGetter {
 	type Value;
 
-	fn get(self, ctx: &Game, id: i32) -> Self::Value;
-	fn set(self, ctx: &mut Game, id: i32, val: Self::Value);
+	fn get(self, ctx: &Game, id: i16) -> Self::Value;
+	fn set(self, ctx: &mut Game, id: i16, val: Self::Value);
 }
 
 impl ThingGetter for Stat {
-	type Value = i32;
+	type Value = i16;
 
-	fn get(self, ctx: &Game, id: i32) -> Self::Value {
+	fn get(self, ctx: &Game, id: i16) -> Self::Value {
 		ctx.get_thing(id).status.get(self).unwrap_or(0)
 	}
 
-	fn set(self, ctx: &mut Game, id: i32, val: Self::Value) {
+	fn set(self, ctx: &mut Game, id: i16, val: Self::Value) {
 		*ctx.get_mut(id, self) = val;
 	}
 }
@@ -542,11 +532,11 @@ impl ThingGetter for Stat {
 impl ThingGetter for u64 {
 	type Value = bool;
 
-	fn get(self, ctx: &Game, id: i32) -> Self::Value {
+	fn get(self, ctx: &Game, id: i16) -> Self::Value {
 		ctx.get_thing(id).flag.get(self)
 	}
 
-	fn set(self, ctx: &mut Game, id: i32, val: Self::Value) {
+	fn set(self, ctx: &mut Game, id: i16, val: Self::Value) {
 		if val {
 			ctx.get_thing_mut(id).flag.0 |= self;
 		} else {
@@ -558,14 +548,14 @@ impl ThingGetter for u64 {
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub struct Game {
 	rng: Pcg32,
-	pub turn: i32,
-	pub winner: i32,
+	pub turn: i16,
+	pub winner: i16,
 	pub phase: Phase,
-	players: Rc<Vec<i32>>,
 	pub time: f64,
 	pub duration: f64,
-	props: Vec<Entity>,
-	attacks: Vec<(i32, i32)>,
+	plprops: Vec<Rc<PlayerData>>,
+	props: Vec<Rc<ThingData>>,
+	attacks: Vec<(i16, i16)>,
 	cards: &'static Cards,
 	fx: Option<Fxs>,
 }
@@ -577,9 +567,9 @@ impl Clone for Game {
 			turn: self.turn,
 			winner: self.winner,
 			phase: self.phase,
-			players: self.players.clone(),
 			time: 0.0,
 			duration: 0.0,
+			plprops: self.plprops.clone(),
 			props: self.props.clone(),
 			attacks: self.attacks.clone(),
 			cards: self.cards,
@@ -591,8 +581,17 @@ impl Clone for Game {
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl Game {
 	#[cfg_attr(target_arch = "wasm32", wasm_bindgen(constructor))]
-	pub fn new(seed: u32, set: CardSet) -> Game {
+	pub fn new(seed: u32, set: CardSet, players: u8) -> Game {
 		set_panic_hook();
+		let mut plprops = Vec::with_capacity(players as usize);
+		for id in 1..=players as i16 {
+			let mut pl: PlayerData = Default::default();
+			pl.thing.owner = id;
+			pl.thing.kind = Kind::Player;
+			pl.thing.status.insert(Stat::casts, 1);
+			plprops.push(Rc::new(pl));
+		}
+
 		Game {
 			rng: Pcg32::seed_from_u64(seed as u64),
 			turn: 1,
@@ -602,74 +601,87 @@ impl Game {
 			} else {
 				Phase::Mulligan
 			},
-			players: Default::default(),
 			time: now(),
 			duration: 0.0,
-			props: vec![Entity::Thing(Default::default())],
+			plprops,
+			props: Vec::new(),
 			attacks: Vec::new(),
 			cards: card::cardSetCards(set),
 			fx: None,
 		}
 	}
 
-	pub fn get_stat(&self, id: i32, k: i32) -> i32 {
+	pub fn get_stat(&self, id: i16, k: i32) -> i16 {
 		if let Some(k) = generated::stat_id(k) {
 			self.get(id, k)
 		} else if let Some(k) = generated::flag_id(k) {
-			self.get(id, k) as i32
+			self.get(id, k) as i16
 		} else {
 			0
 		}
 	}
 
-	pub fn get_mark(&self, id: i32) -> i32 {
+	pub fn get_mark(&self, id: i16) -> i8 {
 		self.get_player(id).mark
 	}
 
-	pub fn get_drawpower(&self, id: i32) -> i32 {
-		self.get_player(id).drawpower as i32
+	pub fn get_drawpower(&self, id: i16) -> i16 {
+		self.get_player(id).drawpower as i16
 	}
 
-	pub fn get_deckpower(&self, id: i32) -> i32 {
-		self.get_player(id).deckpower as i32
+	pub fn get_deckpower(&self, id: i16) -> i16 {
+		self.get_player(id).deckpower as i16
 	}
 
-	pub fn get_markpower(&self, id: i32) -> i32 {
-		self.get_player(id).markpower as i32
+	pub fn get_markpower(&self, id: i16) -> i8 {
+		self.get_player(id).markpower
 	}
 
-	pub fn get_owner(&self, id: i32) -> i32 {
-		match self.props[id as usize] {
-			Entity::Thing(ref thing) => thing.owner,
-			_ => id,
+	fn props_idx(&self, id: i16) -> usize {
+		id as usize - self.plprops.len() - 1
+	}
+
+	fn plprops_idx(&self, id: i16) -> usize {
+		(id - 1) as usize
+	}
+
+	pub fn get_owner(&self, id: i16) -> i16 {
+		if id <= self.players_len() {
+			id
+		} else {
+			self.props[self.props_idx(id)].owner
 		}
 	}
 
-	pub fn get_kind(&self, id: i32) -> Kind {
-		match self.props[id as usize] {
-			Entity::Thing(ref thing) => thing.kind,
-			_ => Kind::Player,
+	pub fn get_kind(&self, id: i16) -> Kind {
+		if id <= self.players_len() {
+			Kind::Player
+		} else {
+			self.props[self.props_idx(id)].kind
 		}
 	}
 
-	pub fn get_foe(&self, id: i32) -> i32 {
-		match self.props[id as usize] {
-			Entity::Player(ref p) => p.foe,
-			_ => 0,
+	pub fn get_foe(&self, id: i16) -> i16 {
+		if id <= self.players_len() {
+			self.plprops[self.plprops_idx(id)].foe
+		} else {
+			0
 		}
 	}
 
-	pub fn get_weapon(&self, id: i32) -> i32 {
-		match self.props[id as usize] {
-			Entity::Player(ref p) => p.weapon,
-			_ => 0,
+	pub fn get_weapon(&self, id: i16) -> i16 {
+		if id <= self.players_len() {
+			self.plprops[self.plprops_idx(id)].weapon
+		} else {
+			0
 		}
 	}
 
-	pub fn get_shield(&self, id: i32) -> i32 {
-		match self.props[id as usize] {
-			Entity::Player(ref p) => p.shield,
-			_ => 0,
+	pub fn get_shield(&self, id: i16) -> i16 {
+		if id <= self.players_len() {
+			self.plprops[self.plprops_idx(id)].shield
+		} else {
+			0
 		}
 	}
 
@@ -677,66 +689,64 @@ impl Game {
 		self.clone()
 	}
 
-	pub fn player_idx(&self, idx: usize) -> i32 {
-		self.players[idx]
-	}
-
-	pub fn full_hand(&self, id: i32) -> bool {
+	pub fn full_hand(&self, id: i16) -> bool {
 		self.get_player(id).hand_full()
 	}
 
-	pub fn empty_hand(&self, id: i32) -> bool {
+	pub fn empty_hand(&self, id: i16) -> bool {
 		self.get_player(id).hand[0] == 0
 	}
 
-	pub fn has_id(&self, id: i32) -> bool {
-		id >= 0 && (id as usize) < self.props.len()
+	pub fn has_id(&self, id: i16) -> bool {
+		id > 0 && (id as usize) <= self.props_len()
 	}
 
-	pub fn get_hand(&self, id: i32) -> Box<[i32]> {
+	pub fn get_hand(&self, id: i16) -> Box<[i16]> {
 		let pl = self.get_player(id);
 		pl.hand[..pl.hand_len()].into()
 	}
 
-	pub fn deck_length(&self, id: i32) -> usize {
+	pub fn deck_length(&self, id: i16) -> usize {
 		self.get_player(id).deck.len()
 	}
 
-	pub fn get_quanta(&self, id: i32, ele: i32) -> u8 {
+	pub fn get_quanta(&self, id: i16, ele: i16) -> u8 {
 		self.get_player(id).quanta(ele)
 	}
 
-	pub fn count_creatures(&self, id: i32) -> i32 {
+	pub fn count_creatures(&self, id: i16) -> i16 {
 		self.get_player(id)
 			.creatures
-			.iter()
-			.map(|&cr| (cr != 0) as i32)
+			.into_iter()
+			.map(|cr| (cr != 0) as i16)
 			.sum()
 	}
 
-	pub fn count_permanents(&self, id: i32) -> i32 {
+	pub fn count_permanents(&self, id: i16) -> i16 {
 		self.get_player(id)
 			.permanents
-			.iter()
-			.map(|&cr| (cr != 0) as i32)
+			.into_iter()
+			.map(|cr| (cr != 0) as i16)
 			.sum()
 	}
 
-	pub fn hand_overlay(&self, id: i32, p1id: i32) -> i32 {
+	pub fn hand_overlay(&self, id: i16, p1id: i16) -> i32 {
 		if self.get(id, Stat::casts) == 0 {
 			12
 		} else if self.get(id, Flag::sanctuary) {
 			8
-		} else if (self.get(id, Stat::nova) >= 2 || self.get(id, Stat::nova2) >= 1) &&
-			(id != p1id || self.get_player(id).hand.into_iter().any(|x| x != 0 && matches!(self.get(x, Stat::card), 1107 | 3107 | 5107 | 7107)))
-		{
+		} else if (self.get(id, Stat::nova) >= 2 || self.get(id, Stat::nova2) >= 1)
+			&& (id != p1id
+				|| self.get_player(id).hand.into_iter().any(|x| {
+					x != 0 && matches!(self.get(x, Stat::card), 1107 | 3107 | 5107 | 7107)
+				})) {
 			1
 		} else {
 			0
 		}
 	}
 
-	pub fn hp_text(&self, id: i32, p1id: i32, p2id: i32, expected: i32) -> String {
+	pub fn hp_text(&self, id: i16, p1id: i16, p2id: i16, expected: i32) -> String {
 		let mut s = format!("{}/{}", self.get(id, Stat::hp), self.get(id, Stat::maxhp));
 		if expected != 0 && !self.is_cloaked(p2id) {
 			write!(s, " ({})", expected);
@@ -750,11 +760,7 @@ impl Game {
 			}
 		}
 		if self.get(id, Flag::neuro) {
-			s.push_str(if poison == 0 {
-				"\n\n1:10"
-			} else {
-				" 1:10"
-			});
+			s.push_str(if poison == 0 { "\n\n1:10" } else { " 1:10" });
 		}
 		if id != p1id && id != self.get_foe(p1id) {
 			s.push_str("\n(Not targeted)");
@@ -768,71 +774,46 @@ impl Game {
 		self.turn.hash(&mut hasher);
 		self.winner.hash(&mut hasher);
 		self.cards.set.hash(&mut hasher);
+		for (k, v) in self.plprops.iter().enumerate() {
+			k.hash(&mut hasher);
+			v.creatures.hash(&mut hasher);
+			v.permanents.hash(&mut hasher);
+			v.hand.hash(&mut hasher);
+			v.deck.hash(&mut hasher);
+			v.quanta.hash(&mut hasher);
+			v.thing.hash(&mut hasher);
+		}
 		for (k, v) in self.props.iter().enumerate() {
 			k.hash(&mut hasher);
-			let thing = match v {
-				Entity::Player(p) => {
-					p.creatures.hash(&mut hasher);
-					p.permanents.hash(&mut hasher);
-					p.hand.hash(&mut hasher);
-					p.deck.hash(&mut hasher);
-					p.quanta.hash(&mut hasher);
-					&p.thing
-				}
-				Entity::Thing(t) => t,
-			};
-			thing.flag.0.hash(&mut hasher);
-			for &(k, v) in thing.status.iter() {
-				if v != 0 {
-					k.hash(&mut hasher);
-					v.hash(&mut hasher);
-				}
-			}
-			for (k, v) in thing.skill.iter() {
-				if !v.is_empty() {
-					k.hash(&mut hasher);
-					v.hash(&mut hasher);
-				}
-			}
+			v.hash(&mut hasher);
 		}
 		let h64 = hasher.finish();
 		(h64 >> 32) as u32 ^ h64 as u32
 	}
 
-	pub fn new_player(&mut self) -> i32 {
-		let id = self.new_id(Entity::Player(Default::default()));
-		let thing = self.get_thing_mut(id);
-		thing.owner = id;
-		thing.kind = Kind::Player;
-		thing.status.insert(Stat::casts, 1);
-		Rc::make_mut(&mut self.players).push(id);
-		id
-	}
-
-	pub fn set_leader(&mut self, id: i32, leader: i32) {
+	pub fn set_leader(&mut self, id: i16, leader: i16) {
 		self.get_player_mut(id).leader = leader;
 	}
 
-	pub fn get_leader(&self, id: i32) -> i32 {
+	pub fn get_leader(&self, id: i16) -> i16 {
 		self.get_player(id).leader
 	}
 
 	pub fn init_player(
 		&mut self,
-		id: i32,
-		hp: i32,
-		maxhp: i32,
-		mark: i32,
+		id: i16,
+		hp: i16,
+		maxhp: i16,
+		mark: i8,
 		drawpower: u8,
 		deckpower: u8,
-		markpower: i16,
-		mut deck: Vec<i32>,
+		markpower: i8,
+		mut deck: Vec<i16>,
 	) {
-		let plen = self.players.len();
-		let idx = self.getIndex(id) as usize;
+		let plen = self.players_len();
 		let leader = self.get_leader(id);
 		for i in 1..plen {
-			let pid = self.players[(idx + i) % plen];
+			let pid = (id - 1 + i) % plen + 1;
 			if leader != self.get_leader(pid) {
 				self.get_player_mut(id).foe = pid;
 			}
@@ -861,8 +842,8 @@ impl Game {
 			&& self
 				.get_player(id)
 				.hand
-				.iter()
-				.all(|&card| self.get(card, Stat::cost) != 0)
+				.into_iter()
+				.all(|card| self.get(card, Stat::cost) != 0)
 		{
 			let pl = self.get_player_mut(id);
 			let pldecklen = pl.deck.len();
@@ -883,29 +864,29 @@ impl Game {
 		}
 	}
 
-	pub fn get_cast_skill(&self, id: i32) -> Option<String> {
+	pub fn get_cast_skill(&self, id: i16) -> Option<String> {
 		self.skill_text(id, Event::Cast)
 	}
 
-	pub fn actinfo(&self, c: i32, t: i32) -> Option<String> {
+	pub fn actinfo(&self, c: i16, t: i16) -> Option<String> {
 		self.getSkill(c, Event::Cast).first().and_then(|&sk| {
 			Some(match sk {
 				Skill::firebolt => {
 					format!(
 						"{}",
-						3 + (self.get_quanta(self.get_owner(c), etg::Fire) as i32
+						3 + (self.get_quanta(self.get_owner(c), etg::Fire) as i16
 							- self.get(c, Stat::cost)) / 4
 					)
 				}
 				Skill::drainlife => {
 					format!(
 						"{}",
-						2 + (self.get_quanta(self.get_owner(c), etg::Darkness) as i32
+						2 + (self.get_quanta(self.get_owner(c), etg::Darkness) as i16
 							- self.get(c, Stat::cost)) / 5
 					)
 				}
 				Skill::icebolt => {
-					let bolts = (self.get_quanta(self.get_owner(c), etg::Water) as i32
+					let bolts = (self.get_quanta(self.get_owner(c), etg::Water) as i16
 						- self.get(c, Stat::cost))
 						/ 5;
 					format!("{} {}%", 2 + bolts, 35 + bolts * 5)
@@ -941,7 +922,7 @@ impl Game {
 		})
 	}
 
-	pub fn instance_text(&self, id: i32) -> String {
+	pub fn instance_text(&self, id: i16) -> String {
 		let thing = self.get_thing(id);
 		let card = self.cards.get(thing.status.get(Stat::card).unwrap_or(0));
 		if thing.kind == Kind::Spell {
@@ -970,7 +951,7 @@ impl Game {
 							if thing.flag.get(Flag::pendstate) {
 								self.get_mark(thing.owner)
 							} else {
-								card.element as i32
+								card.element
 							},
 							charges
 						);
@@ -987,7 +968,7 @@ impl Game {
 							if mode != -1 {
 								mode
 							} else {
-								self.get_mark(thing.owner)
+								self.get_mark(thing.owner) as i16
 							}
 						);
 					} else if charges != 0 {
@@ -1013,7 +994,7 @@ impl Game {
 		}
 	}
 
-	pub fn thingText(&self, id: i32) -> String {
+	pub fn thingText(&self, id: i16) -> String {
 		let thing = self.get_thing(id);
 		let mut ret = String::new();
 		if thing.kind != Kind::Player {
@@ -1089,21 +1070,16 @@ impl Game {
 		ret
 	}
 
-	pub fn next(&mut self, x: i32, c: i32, t: i32, fx: bool) -> Option<Vec<i32>> {
+	pub fn next(&mut self, x: i16, c: i16, t: i16, fx: bool) -> Option<Vec<i16>> {
 		self.fx = if fx { Some(Fxs::new()) } else { None };
 		self.r#move([x, c, t].into());
 		self.fx.take().map(|fxs| fxs.js())
 	}
 
-	pub fn getIndex(&self, id: i32) -> i32 {
+	pub fn getIndex(&self, id: i16) -> i32 {
 		let owner = self.get_owner(id);
 		match self.get_kind(id) {
-			Kind::Player => self
-				.players
-				.iter()
-				.position(|&pid| pid == id)
-				.map(|p| p as i32)
-				.unwrap_or(-1),
+			Kind::Player => id as i32 - 1,
 			Kind::Weapon => {
 				if self.get_weapon(owner) == id {
 					0
@@ -1121,28 +1097,28 @@ impl Game {
 			Kind::Creature => self
 				.get_player(owner)
 				.creatures
-				.iter()
-				.position(|&pid| pid == id)
+				.into_iter()
+				.position(|pid| pid == id)
 				.map(|p| p as i32)
 				.unwrap_or(-1),
 			Kind::Permanent => self
 				.get_player(owner)
 				.permanents
-				.iter()
-				.position(|&pid| pid == id)
+				.into_iter()
+				.position(|pid| pid == id)
 				.map(|p| p as i32)
 				.unwrap_or(-1),
 			Kind::Spell => self
 				.get_player(owner)
 				.hand
-				.iter()
-				.position(|&pid| pid == id)
+				.into_iter()
+				.position(|pid| pid == id)
 				.map(|p| p as i32)
 				.unwrap_or(-1),
 		}
 	}
 
-	pub fn material(&self, id: i32, kind: Option<Kind>) -> bool {
+	pub fn material(&self, id: i16, kind: Option<Kind>) -> bool {
 		let ckind = self.get_kind(id);
 		(if let Some(kind) = kind {
 			if kind == Kind::Permanent {
@@ -1155,7 +1131,7 @@ impl Game {
 		}) && (ckind == Kind::Spell || !self.get(id, Flag::immaterial | Flag::burrowed))
 	}
 
-	pub fn visible_instances(&self, p1id: i32, p2id: i32) -> Vec<i32> {
+	pub fn visible_instances(&self, p1id: i16, p2id: i16) -> Vec<i16> {
 		let cloaked = self.is_cloaked(p2id);
 		let mut ids = Vec::with_capacity(98);
 		for id in [p1id, p2id] {
@@ -1169,7 +1145,7 @@ impl Game {
 				if pl.shield != 0 {
 					ids.push(pl.shield);
 				}
-				let creas = pl.creatures.iter().cloned().filter(|&cr| cr != 0);
+				let creas = pl.creatures.into_iter().filter(|&cr| cr != 0);
 				if isp1 {
 					ids.extend(creas);
 				} else {
@@ -1186,7 +1162,7 @@ impl Game {
 		ids
 	}
 
-	pub fn visible_status(&self, id: i32) -> u32 {
+	pub fn visible_status(&self, id: i16) -> u32 {
 		if self.get_kind(id) == Kind::Spell {
 			0
 		} else {
@@ -1205,31 +1181,30 @@ impl Game {
 	}
 
 	pub fn has_flooding(&self) -> bool {
-		self.players.iter().any(|&pl| {
-			self.get_player(pl)
-				.permanents
-				.iter()
-				.any(|&pr| self.is_flooding(pr))
+		self.plprops.iter().any(|pl| {
+			pl.permanents
+				.into_iter()
+				.any(|pr| pr != 0 && self.is_flooding(pr))
 		})
 	}
 
-	pub fn has_protectonce(&self, id: i32) -> bool {
+	pub fn has_protectonce(&self, id: i16) -> bool {
 		self.hasskill(id, Event::Prespell, Skill::protectonce)
 	}
 
-	pub fn is_cloaked(&self, id: i32) -> bool {
+	pub fn is_cloaked(&self, id: i16) -> bool {
 		self.get_player(id)
 			.permanents
-			.iter()
-			.any(|&pr| pr != 0 && self.get(pr, Flag::cloak))
+			.into_iter()
+			.any(|pr| pr != 0 && self.get(pr, Flag::cloak))
 	}
 
-	pub fn requires_target(&self, id: i32) -> bool {
+	pub fn requires_target(&self, id: i16) -> bool {
 		let skill = self.getSkill(id, Event::Cast);
 		!skill.is_empty() && skill[0].targeting(self.cardset()).is_some()
 	}
 
-	pub fn can_target(&self, c: i32, t: i32) -> bool {
+	pub fn can_target(&self, c: i16, t: i16) -> bool {
 		self.getSkill(c, Event::Cast)
 			.first()
 			.and_then(|sk| sk.targeting(self.cardset()))
@@ -1237,9 +1212,9 @@ impl Game {
 			.unwrap_or(false)
 	}
 
-	pub fn aisearch(&self) -> Box<[i32]> {
+	pub fn aisearch(&self) -> Box<[i16]> {
 		use crate::aisearch::search;
-		Box::<[i32; 3]>::new(search(self).into()) as Box<[i32]>
+		Box::<[i16; 3]>::new(search(self).into()) as Box<[i16]>
 	}
 
 	pub fn aieval(&self) -> f32 {
@@ -1247,7 +1222,7 @@ impl Game {
 		eval(self)
 	}
 
-	pub fn canactive(&self, id: i32) -> bool {
+	pub fn canactive(&self, id: i16) -> bool {
 		let owner = self.get_owner(id);
 		self.turn == owner
 			&& self.phase == Phase::Play
@@ -1264,7 +1239,7 @@ impl Game {
 			}
 	}
 
-	pub fn canspend(&self, id: i32, qtype: i32, amt: i32) -> bool {
+	pub fn canspend(&self, id: i16, qtype: i16, amt: i16) -> bool {
 		if amt <= 0 {
 			return true;
 		}
@@ -1272,27 +1247,26 @@ impl Game {
 		if qtype == 0 {
 			let mut totalq = amt;
 			for &q in &player.quanta {
-				totalq -= q as i32;
+				totalq -= q as i16;
 				if totalq <= 0 {
 					return true;
 				}
 			}
 			false
 		} else {
-			player.quanta[(qtype - 1) as usize] as i32 >= amt
+			player.quanta[(qtype - 1) as usize] as i16 >= amt
 		}
 	}
 
 	pub fn expected_damage(&self, samples: i16) -> Vec<i16> {
-		let pcount = self.players.len();
-		let mut expected = vec![0; pcount];
+		let mut expected = vec![0; self.players().len()];
 		if self.winner == 0 {
 			let mut seedrng = self.rng.clone();
 			for _ in 0..samples {
 				let mut gclone = self.clone();
 				gclone.rng = Pcg32::from_rng(&mut seedrng).unwrap();
-				for &pl in gclone.players.clone().iter() {
-					for &pr in gclone.get_player(pl).permanents.clone().iter() {
+				for pl in 1..=gclone.players_len() {
+					for pr in gclone.get_player(pl).permanents {
 						if pr != 0
 							&& (gclone.hasskill(pr, Event::Attack, Skill::patience)
 								|| gclone.get(pr, Flag::patience))
@@ -1305,8 +1279,8 @@ impl Game {
 				if gclone.winner == 0 {
 					gclone.r#move(GameMove::End(0));
 				}
-				for (idx, &pl) in gclone.players.iter().enumerate() {
-					expected[idx] += (cmp::max(self.get(pl, Stat::hp), -500)
+				for pl in 1..=gclone.players_len() {
+					expected[pl as usize - 1] += (cmp::max(self.get(pl, Stat::hp), -500)
 						- cmp::max(gclone.get(pl, Stat::hp), -500)) as i16;
 				}
 			}
@@ -1318,10 +1292,10 @@ impl Game {
 	}
 
 	pub fn tracedeath(&mut self) {
-		self.setSkill(0, Event::Death, &[Skill::_tracedeath]);
+		self.setSkill(1, Event::Death, &[Skill::_tracedeath]);
 	}
 
-	pub fn tgt_to_pos(&self, id: i32, p1id: i32) -> u32 {
+	pub fn tgt_to_pos(&self, id: i16, p1id: i16) -> u32 {
 		let owner = self.get_owner(id);
 		let (x, y) = match self.get_kind(id) {
 			Kind::Player => (50, 560),
@@ -1361,7 +1335,7 @@ impl Game {
 }
 
 impl Game {
-	pub fn rng(&mut self) -> f64 {
+	pub fn rng(&mut self) -> f32 {
 		self.rng.gen()
 	}
 
@@ -1377,33 +1351,41 @@ impl Game {
 		slice.shuffle(&mut self.rng);
 	}
 
+	pub fn players_len(&self) -> i16 {
+		self.plprops.len() as i16
+	}
+
+	pub fn players(&self) -> &[Rc<PlayerData>] {
+		&self.plprops
+	}
+
 	pub fn props_len(&self) -> usize {
-		self.props.len()
+		self.props.len() + self.plprops.len()
 	}
 
 	pub fn cardset(&self) -> CardSet {
 		self.cards.set
 	}
 
-	pub fn get<T: ThingGetter>(&self, id: i32, k: T) -> T::Value {
+	pub fn get<T: ThingGetter>(&self, id: i16, k: T) -> T::Value {
 		k.get(self, id)
 	}
 
-	pub fn set<T: ThingGetter>(&mut self, id: i32, k: T, val: T::Value) {
+	pub fn set<T: ThingGetter>(&mut self, id: i16, k: T, val: T::Value) {
 		k.set(self, id, val);
 	}
 
-	pub fn set_kind(&mut self, id: i32, val: Kind) {
-		match self.props[id as usize] {
-			Entity::Thing(ref mut thing) => Rc::make_mut(thing).kind = val,
-			_ => (),
+	pub fn set_kind(&mut self, id: i16, val: Kind) {
+		if id > self.players_len() {
+			let idx = self.props_idx(id);
+			Rc::make_mut(&mut self.props[idx]).kind = val;
 		}
 	}
 
-	pub fn set_owner(&mut self, id: i32, val: i32) {
-		match self.props[id as usize] {
-			Entity::Thing(ref mut thing) => Rc::make_mut(thing).owner = val,
-			_ => (),
+	pub fn set_owner(&mut self, id: i16, val: i16) {
+		if id > self.players_len() {
+			let idx = self.props_idx(id);
+			Rc::make_mut(&mut self.props[idx]).owner = val;
 		}
 	}
 
@@ -1411,41 +1393,38 @@ impl Game {
 		slice.choose(&mut self.rng)
 	}
 
-	pub fn cloneinst(&mut self, id: i32) -> i32 {
-		self.new_id(self.props[id as usize].clone())
+	pub fn cloneinst(&mut self, id: i16) -> i16 {
+		self.new_id(self.props[self.props_idx(id)].clone())
 	}
 
-	pub fn players_ref(&self) -> &[i32] {
-		&self.players
+	pub fn get_player(&self, id: i16) -> &PlayerData {
+		self.plprops[self.plprops_idx(id)].as_ref()
 	}
 
-	pub fn players(&self) -> Rc<Vec<i32>> {
-		self.players.clone()
+	pub fn get_player_mut(&mut self, id: i16) -> &mut PlayerData {
+		let idx = self.plprops_idx(id);
+		Rc::make_mut(&mut self.plprops[idx])
 	}
 
-	pub fn get_player(&self, id: i32) -> &PlayerData {
-		match self.props[id as usize] {
-			Entity::Player(ref player) => player,
-			_ => panic!("Not a player: {}", id),
+	pub fn get_thing(&self, id: i16) -> &ThingData {
+		if id <= self.players_len() {
+			&self.plprops[self.plprops_idx(id)].thing
+		} else {
+			self.props[self.props_idx(id)].as_ref()
 		}
 	}
 
-	pub fn get_player_mut(&mut self, id: i32) -> &mut PlayerData {
-		match self.props[id as usize] {
-			Entity::Player(ref mut player) => Rc::make_mut(player),
-			_ => panic!("Not a player: {}", id),
+	pub fn get_thing_mut(&mut self, id: i16) -> &mut ThingData {
+		if id <= self.players_len() {
+			let idx = self.plprops_idx(id);
+			&mut Rc::make_mut(&mut self.plprops[idx]).thing
+		} else {
+			let idx = self.props_idx(id);
+			Rc::make_mut(&mut self.props[idx])
 		}
 	}
 
-	pub fn get_thing(&self, id: i32) -> &ThingData {
-		self.props[id as usize].get_thing()
-	}
-
-	pub fn get_thing_mut(&mut self, id: i32) -> &mut ThingData {
-		self.props[id as usize].get_thing_mut()
-	}
-
-	pub fn get_mut(&mut self, id: i32, k: Stat) -> &mut i32 {
+	pub fn get_mut(&mut self, id: i16, k: Stat) -> &mut i16 {
 		self.get_thing_mut(id).status.entry(k).or_insert(0)
 	}
 
@@ -1453,7 +1432,7 @@ impl Game {
 		*self.cards
 	}
 
-	pub fn get_card(&self, code: i32) -> &'static Card {
+	pub fn get_card(&self, code: i16) -> &'static Card {
 		self.cards.get(code)
 	}
 
@@ -1467,7 +1446,7 @@ impl Game {
 		card
 	}
 
-	pub fn skill_text(&self, id: i32, ev: Event) -> Option<String> {
+	pub fn skill_text(&self, id: i16, ev: Event) -> Option<String> {
 		if let Some(sk) = self.get_thing(id).skill.get(ev) {
 			if !sk.is_empty() {
 				let mut name = String::new();
@@ -1482,7 +1461,7 @@ impl Game {
 		None
 	}
 
-	pub fn active_text(&self, id: i32) -> String {
+	pub fn active_text(&self, id: i16) -> String {
 		if let Some(acast) = self.skill_text(id, Event::Cast) {
 			return format!(
 				"{}:{}{}",
@@ -1534,7 +1513,7 @@ impl Game {
 		String::new()
 	}
 
-	fn mutantactive(&mut self, id: i32, actives: &'static [Skill]) -> bool {
+	fn mutantactive(&mut self, id: i16, actives: &'static [Skill]) -> bool {
 		self.lobo(id);
 		let idx = self.rng.gen_range(-3..actives.len() as isize);
 		if idx == -3 {
@@ -1550,7 +1529,7 @@ impl Game {
 			false
 		} else {
 			let cast = self.rng.gen_range(1..=2);
-			let castele = self.cards.get(self.get(id, Stat::card)).element as i32;
+			let castele = self.cards.get(self.get(id, Stat::card)).element as i16;
 			self.set(id, Stat::cast, cast);
 			self.set(id, Stat::castele, castele);
 			self.setSkill(id, Event::Cast, &actives[idx as usize..=idx as usize]);
@@ -1558,7 +1537,7 @@ impl Game {
 		}
 	}
 
-	pub fn o_mutantactive(&mut self, id: i32) -> bool {
+	pub fn o_mutantactive(&mut self, id: i16) -> bool {
 		self.mutantactive(
 			id,
 			&[
@@ -1586,7 +1565,7 @@ impl Game {
 		)
 	}
 
-	pub fn v_mutantactive(&mut self, id: i32) -> bool {
+	pub fn v_mutantactive(&mut self, id: i16) -> bool {
 		self.mutantactive(
 			id,
 			&[
@@ -1614,11 +1593,11 @@ impl Game {
 		)
 	}
 
-	pub fn is_flooding(&self, id: i32) -> bool {
+	pub fn is_flooding(&self, id: i16) -> bool {
 		self.hasskill(id, Event::Attack, Skill::flooddeath) || self.get(id, Stat::flooding) != 0
 	}
 
-	pub fn calcCore(&self, id: i32, filterstat: u64) -> i32 {
+	pub fn calcCore(&self, id: i16, filterstat: u64) -> i16 {
 		let owner = self.get_owner(id);
 		for j in 0..2 {
 			let pl = if j == 0 { owner } else { self.get_foe(owner) };
@@ -1631,7 +1610,7 @@ impl Game {
 		0
 	}
 
-	pub fn calcCore2(&self, id: i32, filterstat: u64) -> i32 {
+	pub fn calcCore2(&self, id: i16, filterstat: u64) -> i16 {
 		let mut bonus = 0;
 		let owner = self.get_owner(id);
 		for j in 0..2 {
@@ -1648,17 +1627,17 @@ impl Game {
 		bonus
 	}
 
-	pub fn isEclipseCandidate(&self, id: i32) -> bool {
+	pub fn isEclipseCandidate(&self, id: i16) -> bool {
 		self.get(id, Flag::nocturnal) && self.get_kind(id) == Kind::Creature
 	}
 
-	pub fn isWhetCandidate(&self, id: i32) -> bool {
+	pub fn isWhetCandidate(&self, id: i16) -> bool {
 		self.get(id, Flag::golem)
 			|| self.get_kind(id) == Kind::Weapon
 			|| self.cards.get(self.get(id, Stat::card)).kind == Kind::Weapon
 	}
 
-	pub fn calcBonusAtk(&self, id: i32) -> i32 {
+	pub fn calcBonusAtk(&self, id: i16) -> i16 {
 		(if self.isEclipseCandidate(id) {
 			self.calcCore2(id, Flag::nightfall)
 		} else {
@@ -1670,36 +1649,35 @@ impl Game {
 		})
 	}
 
-	pub fn calcBonusHp(&self, id: i32) -> i32 {
-		match self.props[id as usize] {
-			Entity::Thing(_) => {
-				(if self.isEclipseCandidate(id) {
-					self.calcCore(id, Flag::nightfall)
-				} else {
-					0
-				}) + (if self.isWhetCandidate(id) {
-					self.calcCore2(id, Flag::whetstone)
-				} else {
-					0
-				}) + self.trigger_pure(Event::Hp, id, 0)
-			}
-			_ => 0,
+	pub fn calcBonusHp(&self, id: i16) -> i16 {
+		if id > self.players_len() {
+			(if self.isEclipseCandidate(id) {
+				self.calcCore(id, Flag::nightfall)
+			} else {
+				0
+			}) + (if self.isWhetCandidate(id) {
+				self.calcCore2(id, Flag::whetstone)
+			} else {
+				0
+			}) + self.trigger_pure(Event::Hp, id, 0)
+		} else {
+			0
 		}
 	}
 
-	pub fn truedr(&self, id: i32) -> i32 {
+	pub fn truedr(&self, id: i16) -> i16 {
 		self.get(id, Stat::hp) + self.trigger_pure(Event::Buff, id, 0)
 	}
 
-	pub fn truehp(&self, id: i32) -> i32 {
+	pub fn truehp(&self, id: i16) -> i16 {
 		self.get(id, Stat::hp) + self.calcBonusHp(id)
 	}
 
-	pub fn trueatk(&self, id: i32) -> i32 {
+	pub fn trueatk(&self, id: i16) -> i16 {
 		self.trueatk_adrenaline(id, self.get(id, Stat::adrenaline))
 	}
 
-	pub fn trueatk_adrenaline(&self, id: i32, adrenaline: i32) -> i32 {
+	pub fn trueatk_adrenaline(&self, id: i16, adrenaline: i16) -> i16 {
 		let dmg = self.get(id, Stat::atk)
 			+ self.get(id, Stat::dive)
 			+ self.trigger_pure(Event::Buff, id, 0)
@@ -1714,16 +1692,16 @@ impl Game {
 		)
 	}
 
-	pub fn incrAtk(&mut self, c: i32, amt: i32) {
+	pub fn incrAtk(&mut self, c: i16, amt: i16) {
 		self.fx(c, Fx::Atk(amt));
 		self.incrStatus(c, Stat::atk, amt);
 	}
 
-	pub fn attackCreature(&mut self, c: i32, t: i32) {
+	pub fn attackCreature(&mut self, c: i16, t: i16) {
 		self.attackCreatureDmg(c, t, self.trueatk(c))
 	}
 
-	pub fn attackCreatureDmg(&mut self, c: i32, t: i32, trueatk: i32) {
+	pub fn attackCreatureDmg(&mut self, c: i16, t: i16, trueatk: i16) {
 		if trueatk != 0 {
 			let dmg = self.dmg(t, trueatk);
 			if dmg != 0 {
@@ -1735,7 +1713,7 @@ impl Game {
 		}
 	}
 
-	pub fn attack(&mut self, id: i32, data: &ProcData) {
+	pub fn attack(&mut self, id: i16, data: &ProcData) {
 		loop {
 			let mut data = data.clone();
 			let kind = self.get_kind(id);
@@ -1830,7 +1808,7 @@ impl Game {
 		}
 	}
 
-	pub fn v_attack(&mut self, id: i32, data: &ProcData) {
+	pub fn v_attack(&mut self, id: i16, data: &ProcData) {
 		loop {
 			let mut data = data.clone();
 			let kind = self.get_kind(id);
@@ -1919,18 +1897,17 @@ impl Game {
 		}
 	}
 
-	pub fn dmg(&mut self, id: i32, dmg: i32) -> i32 {
+	pub fn dmg(&mut self, id: i16, dmg: i16) -> i16 {
 		self.dmg_die(id, dmg, false)
 	}
 
-	pub fn spelldmg(&mut self, mut id: i32, dmg: i32) -> i32 {
-		match self.props[id as usize] {
-			Entity::Player(ref p) => {
-				if p.shield != 0 && self.get(p.shield, Flag::reflective) {
-					id = p.foe;
-				}
+	pub fn spelldmg(&mut self, mut id: i16, dmg: i16) -> i16 {
+		if id <= self.players_len() {
+			let idx = self.plprops_idx(id);
+			let pl = &self.plprops[idx];
+			if pl.shield != 0 && self.get(pl.shield, Flag::reflective) {
+				id = pl.foe;
 			}
-			_ => (),
 		}
 		let mut dmgdata = ProcData::default();
 		dmgdata.dmg = dmg;
@@ -1942,7 +1919,7 @@ impl Game {
 		}
 	}
 
-	pub fn dmg_die(&mut self, mut id: i32, dmg: i32, dontdie: bool) -> i32 {
+	pub fn dmg_die(&mut self, mut id: i16, dmg: i16, dontdie: bool) -> i16 {
 		if dmg == 0 {
 			return 0;
 		}
@@ -1958,13 +1935,18 @@ impl Game {
 		let sosa = self.get(id, Stat::sosa) != 0;
 		let realdmg = if sosa { -dmg } else { dmg };
 		let capdmg = if realdmg < 0 {
-			cmp::max(self.get(id, Stat::hp) - self.get(id, Stat::maxhp), realdmg)
+			cmp::max(
+				self.get(id, Stat::hp)
+					.saturating_sub(self.get(id, Stat::maxhp)),
+				realdmg,
+			)
 		} else if kind != Kind::Player {
 			cmp::min(self.truehp(id), realdmg)
 		} else {
 			realdmg
 		};
-		*self.get_mut(id, Stat::hp) -= capdmg;
+		let hp = self.get_mut(id, Stat::hp);
+		*hp = hp.saturating_sub(capdmg);
 		if kind != Kind::Player {
 			self.fx(id, Fx::Dmg(capdmg));
 		}
@@ -1989,7 +1971,7 @@ impl Game {
 		}
 	}
 
-	pub fn buffhp(&mut self, id: i32, amt: i32) -> i32 {
+	pub fn buffhp(&mut self, id: i16, amt: i16) -> i16 {
 		if amt > 0 {
 			let mut maxhp = self.get(id, Stat::maxhp) + amt;
 			if maxhp > 500 {
@@ -2003,7 +1985,7 @@ impl Game {
 		self.dmg_die(id, -amt, true)
 	}
 
-	pub fn getSkill(&self, id: i32, k: Event) -> &[Skill] {
+	pub fn getSkill(&self, id: i16, k: Event) -> &[Skill] {
 		self.get_thing(id)
 			.skill
 			.get(k)
@@ -2011,11 +1993,11 @@ impl Game {
 			.unwrap_or(&[])
 	}
 
-	pub fn setSkill(&mut self, id: i32, k: Event, val: &'static [Skill]) {
+	pub fn setSkill(&mut self, id: i16, k: Event, val: &'static [Skill]) {
 		self.get_thing_mut(id).skill.insert(k, Cow::Borrowed(val));
 	}
 
-	pub fn hasskill(&self, id: i32, k: Event, skill: Skill) -> bool {
+	pub fn hasskill(&self, id: i16, k: Event, skill: Skill) -> bool {
 		self.get_thing(id)
 			.skill
 			.get(k)
@@ -2023,16 +2005,7 @@ impl Game {
 			.unwrap_or(false)
 	}
 
-	pub fn addskill(&mut self, id: i32, k: Event, skill: Skill) {
-		let thing = self.get_thing_mut(id);
-		if let Some(smap) = thing.skill.get_mut(k) {
-			smap.to_mut().push(skill);
-		} else {
-			thing.skill.insert(k, Cow::from(vec![skill]));
-		}
-	}
-
-	pub fn addskills(&mut self, id: i32, k: Event, skills: &'static [Skill]) {
+	pub fn addskills(&mut self, id: i16, k: Event, skills: &'static [Skill]) {
 		let thing = self.get_thing_mut(id);
 		if let Some(smap) = thing.skill.get_mut(k) {
 			smap.to_mut().extend(skills);
@@ -2041,32 +2014,32 @@ impl Game {
 		}
 	}
 
-	pub fn rmskill(&mut self, id: i32, k: Event, skill: Skill) {
+	pub fn rmskill(&mut self, id: i16, k: Event, skill: Skill) {
 		let thing = self.get_thing_mut(id);
 		if let Some(smap) = thing.skill.get_mut(k) {
 			smap.to_mut().retain(|&smaps| smaps != skill);
 		}
 	}
 
-	pub fn iter_skills(&self, id: i32) -> impl Iterator<Item = (Event, &[Skill])> {
+	pub fn iter_skills(&self, id: i16) -> impl Iterator<Item = (Event, &[Skill])> {
 		self.get_thing(id)
 			.skill
 			.iter()
 			.map(|(k, v)| (k, v.as_ref()))
 	}
 
-	pub fn new_thing(&mut self, code: i32, owner: i32) -> i32 {
+	pub fn new_thing(&mut self, code: i16, owner: i16) -> i16 {
 		let mut thing = ThingData::default();
 		thing.owner = owner;
 		thing.status.insert(Stat::card, code);
 		let card = self.cards.get(code);
-		thing.status.insert(Stat::cast, card.cast as i32);
-		thing.status.insert(Stat::castele, card.castele as i32);
-		thing.status.insert(Stat::cost, card.cost as i32);
-		thing.status.insert(Stat::costele, card.costele as i32);
-		thing.status.insert(Stat::hp, card.health as i32);
-		thing.status.insert(Stat::maxhp, card.health as i32);
-		thing.status.insert(Stat::atk, card.attack as i32);
+		thing.status.insert(Stat::cast, card.cast as i16);
+		thing.status.insert(Stat::castele, card.castele as i16);
+		thing.status.insert(Stat::cost, card.cost as i16);
+		thing.status.insert(Stat::costele, card.costele as i16);
+		thing.status.insert(Stat::hp, card.health as i16);
+		thing.status.insert(Stat::maxhp, card.health as i16);
+		thing.status.insert(Stat::atk, card.attack as i16);
 		thing.status.insert(Stat::casts, 0);
 		thing.flag.0 |= card.flag;
 		for &(k, v) in card.status.iter() {
@@ -2078,18 +2051,18 @@ impl Game {
 				.map(|&(k, v)| (k, Cow::Borrowed(v)))
 				.collect::<Vec<_>>(),
 		);
-		self.new_id(Entity::Thing(Rc::new(thing)))
+		self.new_id(Rc::new(thing))
 	}
 
-	pub fn transform(&mut self, c: i32, code: i32) {
+	pub fn transform(&mut self, c: i16, code: i16) {
 		let card = self.cards.get(code);
 		let thing = self.get_thing_mut(c);
 		thing.status.insert(Stat::card, code);
-		thing.status.insert(Stat::hp, card.health as i32);
-		thing.status.insert(Stat::maxhp, card.health as i32);
-		thing.status.insert(Stat::atk, card.attack as i32);
-		thing.status.insert(Stat::cost, card.cost as i32);
-		thing.status.insert(Stat::costele, card.costele as i32);
+		thing.status.insert(Stat::hp, card.health as i16);
+		thing.status.insert(Stat::maxhp, card.health as i16);
+		thing.status.insert(Stat::atk, card.attack as i16);
+		thing.status.insert(Stat::cost, card.cost as i16);
+		thing.status.insert(Stat::costele, card.costele as i16);
 		thing.flag.0 &=
 			!(Flag::additive
 				| Flag::airborne | Flag::aquatic
@@ -2121,18 +2094,22 @@ impl Game {
 				self.o_mutantactive(c);
 			}
 		} else {
-			thing.status.insert(Stat::cast, card.cast as i32);
-			thing.status.insert(Stat::castele, card.castele as i32);
+			thing.status.insert(Stat::cast, card.cast as i16);
+			thing.status.insert(Stat::castele, card.castele as i16);
 		}
 	}
 
-	pub fn new_id(&mut self, ent: Entity) -> i32 {
-		let id = self.props.len() as i32;
-		self.props.push(ent);
-		id
+	pub fn new_id(&mut self, ent: Rc<ThingData>) -> i16 {
+		if self.props.len() < 32000 {
+			self.props.push(ent);
+			self.players_len() + self.props.len() as i16
+		} else {
+			self.die(self.turn);
+			31999 + self.players_len()
+		}
 	}
 
-	fn place(&mut self, kind: Kind, id: i32, thingid: i32, fromhand: bool) {
+	fn place(&mut self, kind: Kind, id: i16, thingid: i16, fromhand: bool) {
 		self.set_owner(thingid, id);
 		self.set_kind(thingid, kind);
 		self.proc_data(
@@ -2145,20 +2122,20 @@ impl Game {
 		);
 	}
 
-	pub fn setWeapon(&mut self, id: i32, weapon: i32) {
+	pub fn setWeapon(&mut self, id: i16, weapon: i16) {
 		self.setWeaponCore(id, weapon, false)
 	}
 
-	fn setWeaponCore(&mut self, id: i32, weapon: i32, fromhand: bool) {
+	fn setWeaponCore(&mut self, id: i16, weapon: i16, fromhand: bool) {
 		self.get_player_mut(id).weapon = weapon;
 		self.place(Kind::Weapon, id, weapon, fromhand);
 	}
 
-	pub fn setShield(&mut self, id: i32, shield: i32) {
+	pub fn setShield(&mut self, id: i16, shield: i16) {
 		self.setShieldCore(id, shield, false)
 	}
 
-	fn setShieldCore(&mut self, id: i32, shield: i32, fromhand: bool) {
+	fn setShieldCore(&mut self, id: i16, shield: i16, fromhand: bool) {
 		if !self.get(shield, Flag::additive)
 			|| ({
 				let curshield = self.get_shield(id);
@@ -2180,13 +2157,13 @@ impl Game {
 		self.place(Kind::Shield, id, shield, fromhand);
 	}
 
-	pub fn addCrea(&mut self, id: i32, crea: i32) {
+	pub fn addCrea(&mut self, id: i16, crea: i16) {
 		self.addCreaCore(id, crea, false)
 	}
 
-	pub fn addCreaCore(&mut self, id: i32, crea: i32, fromhand: bool) {
+	pub fn addCreaCore(&mut self, id: i16, crea: i16, fromhand: bool) {
 		let pl = self.get_player_mut(id);
-		for cr in Rc::make_mut(&mut pl.creatures).iter_mut() {
+		for cr in pl.creatures.iter_mut() {
 			if *cr == 0 {
 				*cr = crea;
 				self.place(Kind::Creature, id, crea, fromhand);
@@ -2195,14 +2172,14 @@ impl Game {
 		}
 	}
 
-	pub fn addPerm(&mut self, id: i32, perm: i32) {
+	pub fn addPerm(&mut self, id: i16, perm: i16) {
 		self.addPermCore(id, perm, false)
 	}
 
-	fn addPermCore(&mut self, id: i32, perm: i32, fromhand: bool) {
+	fn addPermCore(&mut self, id: i16, perm: i16, fromhand: bool) {
 		if self.get(perm, Flag::additive) {
 			let code = card::AsShiny(self.get(perm, Stat::card), false);
-			for &pr in self.get_player(id).permanents.clone().iter() {
+			for pr in self.get_player(id).permanents {
 				if pr != 0 && code == card::AsShiny(self.get(pr, Stat::card), false) {
 					let charges = self.get(perm, Stat::charges);
 					self.incrStatus(pr, Stat::charges, charges);
@@ -2213,7 +2190,7 @@ impl Game {
 			}
 		}
 		let pl = self.get_player_mut(id);
-		for pr in Rc::make_mut(&mut pl.permanents).iter_mut() {
+		for pr in pl.permanents.iter_mut() {
 			if *pr == 0 {
 				*pr = perm;
 				self.place(Kind::Permanent, id, perm, fromhand);
@@ -2222,24 +2199,23 @@ impl Game {
 		}
 	}
 
-	pub fn setCrea(&mut self, id: i32, index: i32, crea: i32) {
+	pub fn setCrea(&mut self, id: i16, index: usize, crea: i16) {
 		let pl = self.get_player_mut(id);
-		Rc::make_mut(&mut pl.creatures)[index as usize] = crea;
+		pl.creatures[index] = crea;
 		self.place(Kind::Creature, id, crea, false);
 	}
 
-	pub fn addCard(&mut self, id: i32, cardid: i32) -> i32 {
+	pub fn addCard(&mut self, id: i16, cardid: i16) -> i32 {
 		if !self.get_player(id).hand_full() {
 			self.set_owner(cardid, id);
 			self.set_kind(cardid, Kind::Spell);
-			let pl = self.get_player_mut(id);
-			pl.hand_push(cardid)
+			self.get_player_mut(id).hand_push(cardid)
 		} else {
 			-1
 		}
 	}
 
-	pub fn delay(&mut self, mut id: i32, amt: i32) {
+	pub fn delay(&mut self, mut id: i16, amt: i16) {
 		if self.get_kind(id) == Kind::Player {
 			id = self.get_weapon(id);
 			if id == 0 {
@@ -2255,7 +2231,7 @@ impl Game {
 		}
 	}
 
-	pub fn freeze(&mut self, mut id: i32, amt: i32) {
+	pub fn freeze(&mut self, mut id: i16, amt: i16) {
 		if self.get_kind(id) == Kind::Player {
 			id = self.get_weapon(id);
 			if id == 0 {
@@ -2278,7 +2254,7 @@ impl Game {
 		}
 	}
 
-	pub fn poison(&mut self, mut id: i32, amt: i32) {
+	pub fn poison(&mut self, mut id: i16, amt: i16) {
 		if self.get_kind(id) == Kind::Weapon {
 			id = self.get_owner(id);
 		}
@@ -2298,18 +2274,18 @@ impl Game {
 		}
 	}
 
-	pub fn lobo(&mut self, id: i32) {
+	pub fn lobo(&mut self, id: i16) {
 		let mut thing = self.get_thing_mut(id);
 		for (k, v) in thing.skill.iter_mut() {
 			v.to_mut().retain(|s| s.passive());
 		}
 	}
 
-	pub fn trigger(&mut self, k: Event, c: i32, t: i32) {
+	pub fn trigger(&mut self, k: Event, c: i16, t: i16) {
 		self.trigger_data(k, c, t, &mut ProcData::default())
 	}
 
-	pub fn trigger_data(&mut self, k: Event, c: i32, t: i32, data: &mut ProcData) {
+	pub fn trigger_data(&mut self, k: Event, c: i16, t: i16, data: &mut ProcData) {
 		if let Some(ss) = self.get_thing(c).skill.get(k) {
 			for &s in ss.clone().iter() {
 				s.proc(self, c, t, data);
@@ -2317,7 +2293,7 @@ impl Game {
 		}
 	}
 
-	pub fn trigger_pure(&self, k: Event, c: i32, t: i32) -> i32 {
+	pub fn trigger_pure(&self, k: Event, c: i16, t: i16) -> i16 {
 		let mut n = 0;
 		if let Some(ss) = self.get_thing(c).skill.get(k) {
 			for &s in ss.iter() {
@@ -2327,23 +2303,23 @@ impl Game {
 		n
 	}
 
-	pub fn proc(&mut self, k: Event, c: i32) {
+	pub fn proc(&mut self, k: Event, c: i16) {
 		let mut nodata = ProcData::default();
 		self.proc_data(k, c, &mut nodata)
 	}
 
-	pub fn proc_data(&mut self, k: Event, c: i32, data: &mut ProcData) {
+	pub fn proc_data(&mut self, k: Event, c: i16, data: &mut ProcData) {
 		let owner = self.get_owner(c);
 		let foe = self.get_foe(owner);
 		self.trigger_data(Event::own(k), c, c, data);
-		self.trigger_data(k, 0, c, data);
 		for &pl in &[owner, foe] {
-			for &cr in self.get_player(pl).creatures.clone().iter() {
+			self.trigger_data(k, pl, c, data);
+			for cr in self.get_player(pl).creatures {
 				if cr != 0 {
 					self.trigger_data(k, cr, c, data);
 				}
 			}
-			for &pr in self.get_player(pl).permanents.clone().iter() {
+			for pr in self.get_player(pl).permanents {
 				if pr != 0 {
 					self.trigger_data(k, pr, c, data);
 				}
@@ -2359,25 +2335,25 @@ impl Game {
 		}
 	}
 
-	pub fn masscc<F>(&mut self, owner: i32, foe: i32, func: F)
+	pub fn masscc<F>(&mut self, owner: i16, foe: i16, func: F)
 	where
-		F: Fn(&mut Game, i32),
+		F: Fn(&mut Game, i16),
 	{
-		for &pr in self.get_player(owner).permanents.clone().iter() {
+		for pr in self.get_player(owner).permanents {
 			if pr != 0 && self.get(pr, Flag::cloak) {
 				self.die(pr);
 			}
 		}
 		if foe != 0 {
-			for &pr in self.get_player(foe).permanents.clone().iter() {
+			for pr in self.get_player(foe).permanents {
 				if pr != 0 && self.get(pr, Flag::cloak) {
 					self.die(pr);
 				}
 			}
 		}
-		let crs = self.get_player(owner).creatures.clone();
+		let crs = self.get_player(owner).creatures;
 		let foecrs = if foe != 0 {
-			Some(self.get_player(foe).creatures.clone())
+			Some(self.get_player(foe).creatures)
 		} else {
 			None
 		};
@@ -2395,7 +2371,7 @@ impl Game {
 		}
 	}
 
-	pub fn remove(&mut self, id: i32) -> i32 {
+	pub fn remove(&mut self, id: i16) -> i32 {
 		let index = self.getIndex(id);
 		if index != -1 {
 			let owner = self.get_owner(id);
@@ -2405,14 +2381,14 @@ impl Game {
 				Kind::Creature => {
 					let mut pl = self.get_player_mut(owner);
 					if let StatusEntry::Occupied(o) = pl.thing.status.entry(Stat::gpull) {
-						if *o.get() == id {
+						if o.get() == id {
 							o.remove();
 						}
 					}
-					Rc::make_mut(&mut pl.creatures)[index as usize] = 0;
+					pl.creatures[index as usize] = 0;
 				}
 				Kind::Permanent => {
-					Rc::make_mut(&mut self.get_player_mut(owner).permanents)[index as usize] = 0;
+					self.get_player_mut(owner).permanents[index as usize] = 0;
 				}
 				Kind::Spell => {
 					self.get_player_mut(owner).hand_remove(index as usize);
@@ -2423,7 +2399,7 @@ impl Game {
 		index
 	}
 
-	pub fn unsummon(&mut self, id: i32) {
+	pub fn unsummon(&mut self, id: i16) {
 		self.remove(id);
 		let owner = self.get_owner(id);
 		let handfull = self.get_player(owner).hand_full();
@@ -2434,7 +2410,7 @@ impl Game {
 		}
 	}
 
-	pub fn destroy(&mut self, id: i32, data: Option<&mut ProcData>) {
+	pub fn destroy(&mut self, id: i16, data: Option<&mut ProcData>) {
 		if !self.get(id, Flag::stackable) || self.maybeDecrStatus(id, Stat::charges) < 2 {
 			self.remove(id);
 		}
@@ -2443,7 +2419,7 @@ impl Game {
 		}
 	}
 
-	pub fn die(&mut self, id: i32) {
+	pub fn die(&mut self, id: i16) {
 		let idx = self.remove(id);
 		if idx == -1 {
 			return;
@@ -2468,8 +2444,7 @@ impl Game {
 						let owner = self.get_owner(id);
 						let cell = self.new_thing(cellcode, owner);
 						self.set_kind(cell, Kind::Creature);
-						Rc::make_mut(&mut self.get_player_mut(owner).creatures)[idx as usize] =
-							cell;
+						self.get_player_mut(owner).creatures[idx as usize] = cell;
 					}
 				}
 				self.deatheffect(id, idx);
@@ -2478,11 +2453,10 @@ impl Game {
 			self.set(id, Flag::out, true);
 			if self.winner == 0 {
 				let mut winners = 0;
-				for &pl in self.players.iter() {
-					if !self.get(pl, Flag::out) {
-						let leader = self.get_leader(pl);
+				for pl in self.plprops.iter() {
+					if !pl.thing.flag.get(Flag::out) {
 						if winners == 0 {
-							winners = leader;
+							winners = pl.leader;
 						} else {
 							winners = 0;
 							break;
@@ -2493,12 +2467,14 @@ impl Game {
 					self.winner = winners;
 					self.phase = Phase::End;
 					self.duration = now() - self.time;
+				} else if self.turn == id {
+					self.nextTurn();
 				}
 			}
 		}
 	}
 
-	pub fn deatheffect(&mut self, id: i32, index: i32) {
+	pub fn deatheffect(&mut self, id: i16, index: i32) {
 		self.proc_data(
 			Event::Death,
 			id,
@@ -2509,7 +2485,7 @@ impl Game {
 		);
 	}
 
-	pub fn draw(&mut self, id: i32) -> i32 {
+	pub fn draw(&mut self, id: i16) -> i16 {
 		let pl = self.get_player_mut(id);
 		if let Some(cardid) = pl.deck_mut().pop() {
 			if pl.deck.is_empty() {
@@ -2522,15 +2498,15 @@ impl Game {
 		}
 	}
 
-	pub fn drawcard(&mut self, id: i32) {
+	pub fn drawcard(&mut self, id: i16) {
 		self.drawcore(id, false)
 	}
 
-	pub fn drawstep(&mut self, id: i32) {
+	pub fn drawstep(&mut self, id: i16) {
 		self.drawcore(id, true)
 	}
 
-	fn drawcore(&mut self, id: i32, isstep: bool) {
+	fn drawcore(&mut self, id: i16, isstep: bool) {
 		if !self.get_player(id).hand_full() {
 			let cardid = if self.get(id, Flag::drawlock) {
 				self.new_thing(card::Singularity, id)
@@ -2551,7 +2527,7 @@ impl Game {
 		}
 	}
 
-	pub fn mill(&mut self, id: i32, amt: i32) {
+	pub fn mill(&mut self, id: i16, amt: i16) {
 		if !self.get(id, Flag::protectdeck) {
 			for _ in 0..amt {
 				self.draw(id);
@@ -2559,13 +2535,11 @@ impl Game {
 		}
 	}
 
-	pub fn drawhand(&mut self, id: i32, size: usize) {
+	pub fn drawhand(&mut self, id: i16, size: usize) {
 		let pl = self.get_player_mut(id);
 		let mut deckrc = pl.deck.clone();
 		let deck = Rc::make_mut(&mut deckrc);
-		for id in pl.hand_iter() {
-			deck.push(id);
-		}
+		deck.extend(pl.hand_iter());
 		pl.hand = [0; 8];
 		deck[..].shuffle(&mut self.rng);
 		for _ in 0..size {
@@ -2577,16 +2551,16 @@ impl Game {
 		self.get_player_mut(id).deck = deckrc;
 	}
 
-	pub fn sanctified(&self, id: i32) -> bool {
+	pub fn sanctified(&self, id: i16) -> bool {
 		self.turn != id && self.get(id, Flag::sanctuary)
 	}
 
-	pub fn incrStatus(&mut self, id: i32, k: Stat, amt: i32) {
+	pub fn incrStatus(&mut self, id: i16, k: Stat, amt: i16) {
 		let stat = self.get_mut(id, k);
 		*stat = stat.saturating_add(amt);
 	}
 
-	pub fn maybeDecrStatus(&mut self, id: i32, k: Stat) -> i32 {
+	pub fn maybeDecrStatus(&mut self, id: i16, k: Stat) -> i16 {
 		let valref = self.get_mut(id, k);
 		let val = *valref;
 		if val > 0 {
@@ -2595,7 +2569,7 @@ impl Game {
 		val
 	}
 
-	pub fn clearStatus(&mut self, id: i32) {
+	pub fn clearStatus(&mut self, id: i16) {
 		let thing = self.get_thing_mut(id);
 		thing.flag.0 &=
 			!(Flag::additive
@@ -2609,7 +2583,7 @@ impl Game {
 		}
 	}
 
-	pub fn nextTurn(&mut self) -> i32 {
+	pub fn nextTurn(&mut self) -> i16 {
 		loop {
 			let turn = self.turn;
 			let next = self.nextPlayer(turn);
@@ -2643,24 +2617,19 @@ impl Game {
 		}
 	}
 
-	fn proc_mark(&mut self, id: i32) -> bool {
+	fn proc_mark(&mut self, id: i16) -> bool {
 		let (mark, markpower) = {
 			let pl = self.get_player(id);
-			(pl.mark, pl.markpower as i32)
+			(pl.mark as i16, pl.markpower as i16)
 		};
 		self.spend(id, mark, markpower * if mark > 0 { -1 } else { -3 })
 	}
 
-	pub fn nextPlayer(&self, id: i32) -> i32 {
-		for i in 0..self.players.len() - 1 {
-			if self.players[i] == id {
-				return self.players[i + 1];
-			}
-		}
-		return self.players[0];
+	pub fn nextPlayer(&self, id: i16) -> i16 {
+		id % self.players_len() + 1
 	}
 
-	pub fn o_endturn(&mut self, id: i32) {
+	pub fn o_endturn(&mut self, id: i16) {
 		self.proc_mark(id);
 		let mut data = ProcData {
 			tgt: self.get_foe(id),
@@ -2668,14 +2637,14 @@ impl Game {
 			..Default::default()
 		};
 		self.proc_data(Event::Beginattack, id, &mut data);
-		for &pr in self.get_player(id).permanents.clone().iter() {
+		for pr in self.get_player(id).permanents {
 			if pr != 0 {
 				self.trigger_data(Event::OwnAttack, pr, 0, &mut data);
 				self.set(pr, Stat::casts, 1);
 				self.maybeDecrStatus(pr, Stat::frozen);
 			}
 		}
-		for &cr in self.get_player(id).creatures.clone().iter() {
+		for cr in self.get_player(id).creatures {
 			if cr != 0 {
 				self.attack(cr, &data);
 			}
@@ -2693,7 +2662,7 @@ impl Game {
 		thing.flag.0 &= !(Flag::sabbath | Flag::drawlock);
 	}
 
-	pub fn v_endturn(&mut self, id: i32) {
+	pub fn v_endturn(&mut self, id: i16) {
 		self.proc_mark(id);
 		let foe = self.get_foe(id);
 		self.dmg(foe, self.get(foe, Stat::poison));
@@ -2729,7 +2698,7 @@ impl Game {
 				}
 			}
 		}
-		for (i, &cr) in self.get_player(id).creatures.clone().iter().enumerate() {
+		for (i, cr) in self.get_player(id).creatures.into_iter().enumerate() {
 			if cr != 0 {
 				let crcard = self.cards.get(self.get(cr, Stat::card));
 				if patienceFlag {
@@ -2767,14 +2736,14 @@ impl Game {
 		self.set(id, Stat::casts, 1);
 	}
 
-	pub fn spend(&mut self, id: i32, qtype: i32, amt: i32) -> bool {
+	pub fn spend(&mut self, id: i16, qtype: i16, amt: i16) -> bool {
 		if amt < 0 && self.get(id, Flag::sabbath) {
 			return false;
 		}
 		self.spendscramble(id, qtype, amt)
 	}
 
-	pub fn spendscramble(&mut self, id: i32, qtype: i32, amt: i32) -> bool {
+	pub fn spendscramble(&mut self, id: i16, qtype: i16, amt: i16) -> bool {
 		if amt == 0 {
 			true
 		} else if !self.canspend(id, qtype, amt) {
@@ -2792,7 +2761,7 @@ impl Game {
 					let uni12 = Uniform::from(0..12);
 					for _ in 0..amt {
 						let q = &mut quanta[uni12.sample(&mut self.rng)];
-						*q += ((*q as i32) < cap) as u8;
+						*q += ((*q as i16) < cap) as u8;
 					}
 				} else {
 					let amt = cmp::min(amt, 1188);
@@ -2811,7 +2780,7 @@ impl Game {
 			} else {
 				let q = &mut quanta[(qtype - 1) as usize];
 				if amt < 0 {
-					*q = cmp::min((*q as i32).saturating_sub(amt), cap) as u8;
+					*q = cmp::min((*q as i16).saturating_sub(amt), cap) as u8;
 				} else {
 					*q -= amt as u8;
 				}
@@ -2821,19 +2790,19 @@ impl Game {
 		}
 	}
 
-	pub fn set_quanta(&mut self, id: i32, qtype: i32, val: u8) {
+	pub fn set_quanta(&mut self, id: i16, qtype: i16, val: u8) {
 		self.get_player_mut(id).quanta[(qtype - 1) as usize] = val;
 	}
 
-	pub fn castSpell(&mut self, c: i32, t: i32, skill: Skill) {
+	pub fn castSpell(&mut self, c: i16, t: i16, skill: Skill) {
 		self.castSpellCore(c, t, skill, true)
 	}
 
-	pub fn castSpellNoSpell(&mut self, c: i32, t: i32, skill: Skill) {
+	pub fn castSpellNoSpell(&mut self, c: i16, t: i16, skill: Skill) {
 		self.castSpellCore(c, t, skill, false)
 	}
 
-	pub fn castSpellCore(&mut self, c: i32, t: i32, skill: Skill, procspell: bool) {
+	pub fn castSpellCore(&mut self, c: i16, t: i16, skill: Skill, procspell: bool) {
 		let mut data = ProcData {
 			tgt: t,
 			active: Some(skill),
@@ -2854,7 +2823,7 @@ impl Game {
 		}
 	}
 
-	pub fn play(&mut self, c: i32, t: i32, fromhand: bool) {
+	pub fn play(&mut self, c: i16, t: i16, fromhand: bool) {
 		let kind = self.cards.get(self.get(c, Stat::card)).kind;
 		self.remove(c);
 		if kind == Kind::Spell {
@@ -2877,7 +2846,7 @@ impl Game {
 		}
 	}
 
-	pub fn useactive(&mut self, c: i32, t: i32) {
+	pub fn useactive(&mut self, c: i16, t: i16) {
 		let cowner = self.get_owner(c);
 		let kind = self.get_kind(c);
 		if kind == Kind::Spell {
@@ -2900,7 +2869,7 @@ impl Game {
 		}
 	}
 
-	pub fn queue_attack(&mut self, c: i32, t: i32) {
+	pub fn queue_attack(&mut self, c: i16, t: i16) {
 		self.attacks.push((c, t));
 	}
 
@@ -2965,7 +2934,7 @@ impl Game {
 		}
 	}
 
-	pub fn fx(&mut self, id: i32, fx: Fx) {
+	pub fn fx(&mut self, id: i16, fx: Fx) {
 		if let Some(ref mut fxs) = self.fx {
 			fxs.push(id, fx);
 		}

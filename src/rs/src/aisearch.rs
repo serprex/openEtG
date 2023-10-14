@@ -9,14 +9,14 @@ use crate::card;
 use crate::game::{Flag, Game, GameMove, Kind, Phase, Stat};
 use crate::skill::{Event, Skill, Tgt};
 
-fn has_sopa(ctx: &Game, id: i32) -> bool {
+fn has_sopa(ctx: &Game, id: i16) -> bool {
 	ctx.get_kind(id) == Kind::Permanent
 		&& ctx.hasskill(id, Event::Cast, Skill::die)
 		&& (ctx.hasskill(id, Event::Attack, Skill::patience) || ctx.get(id, Flag::patience))
 }
 
-fn proc_sopa(gclone: &mut Game, turn: i32) {
-	for &pr in gclone.get_player(turn).permanents.clone().iter() {
+fn proc_sopa(gclone: &mut Game, turn: i16) {
+	for pr in gclone.get_player(turn).permanents {
 		if pr != 0 && has_sopa(gclone, pr) && gclone.canactive(pr) {
 			gclone.r#move(GameMove::Cast(pr, 0));
 		}
@@ -30,13 +30,13 @@ struct Candidate {
 	pub score: f32,
 }
 
-fn get_worst_card(ctx: &Game) -> (i32, f32) {
+fn get_worst_card(ctx: &Game) -> (i16, f32) {
 	if ctx.full_hand(ctx.turn) {
 		ctx.get_player(ctx.turn)
 			.hand
-			.iter()
-			.filter(|&&card| card != 0)
-			.map(|&card| {
+			.into_iter()
+			.filter(|&card| card != 0)
+			.map(|card| {
 				let mut clone = ctx.clonegame();
 				clone.die(card);
 				(card, eval(&clone))
@@ -59,8 +59,8 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 		}
 		if let Some(&active) = ctx.getSkill(id, Event::Cast).first() {
 			if let Some(tgting) = active.targeting(ctx.cardset()) {
-				let mut tgts = Vec::with_capacity(50 * ctx.players_ref().len());
-				for &id in ctx.players_ref().iter() {
+				let mut tgts = Vec::with_capacity(50 * ctx.players().len());
+				for id in 1..=ctx.players_len() {
 					let pl = ctx.get_player(id);
 					if id == turn {
 						if (pl.shield != 0 && ctx.get(pl.shield, Flag::reflective))
@@ -73,12 +73,11 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 						if matches!(active, Skill::catapult | Skill::golemhit) {
 							tgts.extend(
 								pl.creatures
-									.iter()
-									.cloned()
+									.into_iter()
 									.filter(|&t| t != 0 && tgting.full_check(ctx, id, t)),
 							);
 						} else {
-							tgts.extend(pl.creatures.iter().cloned().filter(|&t| {
+							tgts.extend(pl.creatures.into_iter().filter(|&t| {
 								t != 0 && ctx.get(t, Flag::voodoo) && tgting.full_check(ctx, id, t)
 							}));
 						}
@@ -99,7 +98,7 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 							id,
 							t,
 							if gclone.winner == turn {
-								i32::MIN
+								i16::MIN
 							} else if gclone.winner == 0 {
 								gclone.get(foe, Stat::hp)
 							} else {
@@ -116,7 +115,7 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 				let mut gclone = ctx.clone();
 				gclone.r#move(GameMove::Cast(id, 0));
 				if gclone.winner == turn {
-					dmgmoves.push((id, 0, i32::MIN));
+					dmgmoves.push((id, 0, i16::MIN));
 				} else if gclone.winner == 0 {
 					let clonefoehp = gclone.get(foe, Stat::hp);
 					if clonefoehp < foehp {
@@ -152,11 +151,10 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 			if gclone
 				.get_player(turn)
 				.creatures
-				.iter()
-				.cloned()
+				.into_iter()
 				.filter(|&id| id != 0)
 				.map(|id| gclone.trueatk(id))
-				.sum::<i32>() > 0
+				.sum::<i16>() > 0
 			{
 				proc_sopa(&mut gclone, turn);
 			}
@@ -169,16 +167,16 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 	None
 }
 
-fn alltgtsforplayer<F>(ctx: &Game, id: i32, func: &mut F)
+fn alltgtsforplayer<F>(ctx: &Game, id: i16, func: &mut F)
 where
-	F: FnMut(&Game, i32),
+	F: FnMut(&Game, i16),
 {
 	let pl = ctx.get_player(id);
 	for id in once(id)
 		.chain(once(pl.weapon))
 		.chain(once(pl.shield))
-		.chain(pl.creatures.iter().cloned())
-		.chain(pl.permanents.iter().cloned())
+		.chain(pl.creatures.into_iter())
+		.chain(pl.permanents.into_iter())
 		.chain(pl.hand_iter())
 	{
 		if id != 0 {
@@ -189,13 +187,13 @@ where
 
 fn alltgts<F>(ctx: &Game, mut func: F)
 where
-	F: FnMut(&Game, i32),
+	F: FnMut(&Game, i16),
 {
 	alltgtsforplayer(ctx, ctx.turn, &mut func);
 	alltgtsforplayer(ctx, ctx.get_foe(ctx.turn), &mut func);
 }
 
-fn scantgt(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32, id: i32, tgt: Tgt) {
+fn scantgt(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32, id: i16, tgt: Tgt) {
 	alltgts(ctx, |ctx, t| {
 		if tgt.full_check(ctx, id, t) {
 			scancore(ctx, depth, candy, limit, GameMove::Cast(id, t));
@@ -264,8 +262,7 @@ fn scan(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32) {
 	let pl = ctx.get_player(ctx.turn);
 	for (id, sk) in pl
 		.hand
-		.iter()
-		.cloned()
+		.into_iter()
 		.filter(|&id| ctx.canactive(id))
 		.map(|id| {
 			let card = ctx.get_card(ctx.get(id, Stat::card));
@@ -281,8 +278,8 @@ fn scan(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32) {
 		.chain(
 			once(pl.weapon)
 				.chain(once(pl.shield))
-				.chain(pl.creatures.iter().cloned())
-				.chain(pl.permanents.iter().cloned())
+				.chain(pl.creatures.into_iter())
+				.chain(pl.permanents.into_iter())
 				.filter(|&id| id != 0 && ctx.canactive(id))
 				.map(|id| (id, ctx.getSkill(id, Event::Cast).first())),
 		) {

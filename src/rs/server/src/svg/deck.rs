@@ -46,15 +46,15 @@ pub fn deck(deck: &str) -> String {
 	let mut textml = String::new();
 	let mut y = 0;
 	let mut x = 16;
-	let mut mark: i32 = -1;
+	let mut mark: i16 = -1;
 	for chunk in deck.as_bytes().chunks_exact(5) {
 		let code = decode_code(&chunk[2..]);
-		let set = if code < 5000 {
+		let set = if card::AsShiny(code, false) < 5000 {
 			card::OrigSet
 		} else {
 			card::OpenSet
 		};
-		if let Some(card) = set.try_get(code) {
+		if let Some(card) = set.try_get(code & 0x3fff) {
 			let count = parse_digit32(chunk[0]) * 32 + parse_digit32(chunk[1]);
 			let upped = card::Upped(code);
 			let shiny = card::Shiny(code);
