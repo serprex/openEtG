@@ -2490,8 +2490,9 @@ impl Skill {
 			Self::fickle => {
 				let town = ctx.get_owner(t);
 				if !ctx.sanctified(town) {
-					let mut cards = Vec::new();
-					for (idx, &id) in ctx.get_player(town).deck.iter().enumerate() {
+					let pl = ctx.get_player(town);
+					let mut cards = Vec::with_capacity(pl.deck.len());
+					for (idx, &id) in pl.deck.iter().enumerate() {
 						if ctx.canspend(town, ctx.get(id, Stat::costele), ctx.get(id, Stat::cost)) {
 							cards.push(idx);
 						}

@@ -25,7 +25,7 @@ quarks.basic_damage = {
 		'To win a game of openEtG, you need to defeat your opponent before they defeat you. This is usually done by doing damage until their health reaches zero. The easiest way to do damage is with creatures.\n\n' +
 			'Every creature has two numbers listed at the top of the card text box (when viewing the full card), and shown in the lower right when the card is in play.\n\n' +
 			"The first of those two numbers is the creature's strength, or attack power. At the end of your turn, all of your creatures will attack the opponent, doing damage equal to their attack power.\n\n" +
-			"The second of those numbers is the creature's largeness, or health. That represents the amount of damage a creature can take before dying. Creatures cannot directly attack each other, but there are a variety of options available to damage your opponent's creatures before they can kill you.",
+			"The second of those numbers is the creature's health. That represents the amount of damage a creature can take before dying. Creatures cannot directly attack each other, but there are a variety of options available to damage your opponent's creatures before they can kill you.",
 		"For this battle, you have a deck full of creatures. You and your opponent will each start with seven cards in your hand. If you don't like your hand, you can mulligan to shuffle it back into your deck and draw a new hand with one less card. Every turn (except the first turn for whoever goes first), you will draw a card. If you end your turn with eight cards in your hand, you will have to discard.\n\n" +
 			'When you draw a creature, you can play it from your hand by clicking on it.\n\n' +
 			'Defeat your opponent before they defeat you!',

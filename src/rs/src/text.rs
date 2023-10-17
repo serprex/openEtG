@@ -621,7 +621,7 @@ impl<'a> SkillThing<'a> {
 			Skill::regrade =>
 				Cow::from("If target card is upgraded, it becomes unupgraded. If target card is unupgraded, it becomes upgraded. Gain 1 quanta of target card's element. Cannot target stacks"),
 			Skill::reinforce =>
-				Cow::from("Target creature gains strength & HP equal to this creature's strength & HP. Destroy this creature"),
+				Cow::from("Combine with target creature, causing it to gain strength & HP equal to this creature's strength & HP"),
 			Skill::ren => Cow::from("Target creature gains: \"When dying instead return to owner's hand. Modified state besides this effect remains when played again.\""),
 			Skill::resummon => Cow::from("Target creature is summoned again as is"),
 			Skill::rewind =>
