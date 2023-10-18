@@ -203,19 +203,22 @@ function computeBonuses(game, p1id, lefttext, streakrate, setTip, clearTip) {
 	replayStats.creaturesDied = replayGame.get(p1id, 'lives');
 
 	const p1foe = game.get_foe(p1id);
-	const bonus = BonusList.reduce((bsum, bonus) => {
-		const b = bonus.func(game, p1id, p1foe, replayStats);
+	let bonus = 1;
+	for (const item of BonusList) {
+		const b = item.func(game, p1id, p1foe, replayStats);
 		if (b > 0) {
 			lefttext.push(() => (
-				<TooltipText tip={bonus.desc} setTip={setTip} clearTip={clearTip}>
-					{Math.round(b * 100)}% {bonus.name}
+				<TooltipText tip={item.desc} setTip={setTip} clearTip={clearTip}>
+					{`${Math.round(b * 100)}% ${item.name}`}
 				</TooltipText>
 			));
-			return bsum + b;
-		} else return bsum;
-	}, 1);
+			bonus += b;
+		}
+	}
 	lefttext.push(() => (
-		<div>{((streakrate + 1) * bonus * 100 - 100).toFixed(1)}% total bonus</div>
+		<div>{`${((streakrate + 1) * bonus * 100 - 100).toFixed(
+			1,
+		)}% total bonus`}</div>
 	));
 	return bonus;
 }

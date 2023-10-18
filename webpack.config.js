@@ -27,7 +27,7 @@ export default {
 		webassemblyModuleFilename: 'hash/[hash].wasm',
 		sourceMapFilename: '[name].js.map',
 		hashFunction: 'sha512',
-		hashDigestLength: 64,
+		hashDigestLength: 16,
 	},
 	optimization: {
 		chunkIds: 'deterministic',
@@ -68,12 +68,9 @@ export default {
 		],
 	},
 	plugins: [
-		...['favicon.ico', 'whale144.webp', 'manifest.json', 'ui.css'].map(
-			file =>
-				new CopyPlugin({
-					patterns: [{ from: file }],
-				}),
-		),
+		new CopyPlugin({
+			patterns: ['favicon.ico', 'whale144.webp', 'manifest.json', 'ui.css'],
+		}),
 		new HtmlPlugin({
 			chunks: ['main'],
 			filename: 'index.html',

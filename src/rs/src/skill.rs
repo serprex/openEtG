@@ -4252,8 +4252,7 @@ impl Skill {
 			}
 			Self::siphonactive => {
 				ctx.fx(c, Fx::Siphon);
-				let cskill = ctx.get_thing(t).skill.clone();
-				ctx.get_thing_mut(c).skill = cskill;
+				ctx.get_thing_mut(c).skill = ctx.get_thing(t).skill.clone();
 				ctx.set(c, Stat::cast, ctx.get(t, Stat::cast));
 				ctx.set(c, Stat::castele, ctx.get(t, Stat::castele));
 				ctx.set(c, Stat::casts, 1);

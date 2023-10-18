@@ -65,6 +65,7 @@ impl QuantaMap {
 				.creatures
 				.into_iter()
 				.chain(player.permanents.into_iter())
+				.chain(player.hand_iter().filter(|&id| ctx.get(id, Stat::cost) == 0))
 			{
 				if id == 0 {
 					continue;

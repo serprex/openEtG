@@ -641,28 +641,28 @@ pub async fn handle_ws(
 									let draw: i32 = row.get(2);
 									let mark: i32 = row.get(3);
 									let hp: i32 = row.get(4);
-									let won: i32 = row.get(5);
+									let win: i32 = row.get(5);
 									let loss: i32 = row.get(6);
-									let code: i32 = row.get(7);
-									let deck: String = row.get(8);
+									let card: i32 = row.get(7);
+									let deck: &str = row.get(8);
 									let rank: i32 = row.get(9);
 									let bestrank: i32 = row.get(10);
 									*if arena_id == 1 {
 										&mut a1
 									} else {
 										&mut a2
-									} = Some(Box::new(ArenaInfo {
+									} = Some(ArenaInfo {
 										day: today.saturating_sub(day as u32),
-										draw: draw,
-										mark: mark,
-										hp: hp,
-										win: won,
-										loss: loss,
-										card: code,
-										deck: deck,
-										rank: rank,
-										bestrank: bestrank,
-									}));
+										draw,
+										mark,
+										hp,
+										win,
+										loss,
+										card,
+										deck,
+										rank,
+										bestrank,
+									});
 								}
 								sendmsg(&tx, &WsResponse::arenainfo { a1, a2 });
 							}
@@ -723,7 +723,7 @@ pub async fn handle_ws(
 										(rng.gen::<u32>(), idx)
 									};
 									if let Ok(row) = client.query_one("select u.name, a.deck, a.hp, a.mark, a.draw, a.code from arena a join users u on u.id = a.user_id where a.arena_id = $1 and a.user_id <> $2 order by a.\"rank\" limit 1 offset $3", &[&arenaid, &userid, &idx]).await {
-										let name: String = row.get(0);
+										let name: &str = row.get(0);
 										let mut deck: String = row.get(1);
 										let hp: i32 = row.get(2);
 										let mark: i32 = row.get(3);
@@ -731,7 +731,7 @@ pub async fn handle_ws(
 										let code = row.get::<usize, i32>(5) as i16;
 										deck.push_str("05");
 										deck.push_str(unsafe { std::str::from_utf8_unchecked(&encode_code(etg::card::AsUpped(code, lv != 0))) });
-										sendmsg(&tx, &WsResponse::foearena { seed: seed, name: &name, hp: hp, mark: mark, draw: draw, deck: &deck, rank: idx, lv: lv });
+										sendmsg(&tx, &WsResponse::foearena { seed, name, hp, mark, draw, deck: &deck, rank: idx, lv });
 									}
 								}
 							}
@@ -842,7 +842,7 @@ pub async fn handle_ws(
 									)
 									.await
 								{
-									let val: String = row.get(0);
+									let val: &str = row.get(0);
 									if val.starts_with('G') {
 										if let Ok(g) = val[1..].parse::<i32>() {
 											if trx
@@ -952,7 +952,7 @@ pub async fn handle_ws(
 									)
 									.await
 								{
-									let val: String = row.get(0);
+									let val: &str = row.get(0);
 									let shiny = val.starts_with('!');
 									let mut startidx = shiny as usize;
 									let upped = val[startidx..].starts_with("upped");
@@ -1183,8 +1183,8 @@ pub async fn handle_ws(
 												for row in users.iter() {
 													let uid: i64 = row.get(0);
 													if uid != userid {
-														let name: String = row.get(1);
-														if let Some(sockid) = rusersocks.get(&name) {
+														let name: &str = row.get(1);
+														if let Some(sockid) = rusersocks.get(name) {
 															if let Some(sock) = rsocks.get(sockid) {
 																sock.tx.send(Message::text(movejson.clone())).ok();
 															}
@@ -2274,7 +2274,7 @@ pub async fn handle_ws(
 						.query_one("select val from strings where key = 'kongapi'", &[])
 						.await
 					{
-						let key: String = row.get(0);
+						let key: &str = row.get(0);
 
 						use warp::hyper;
 						let https = hyper::Client::builder().build::<_, hyper::Body>(

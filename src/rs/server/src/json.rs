@@ -264,7 +264,7 @@ pub enum UserMessage {
 }
 
 #[derive(Serialize, Clone)]
-pub struct ArenaInfo {
+pub struct ArenaInfo<'a> {
 	pub day: u32,
 	pub draw: i32,
 	pub mark: i32,
@@ -272,7 +272,7 @@ pub struct ArenaInfo {
 	pub win: i32,
 	pub loss: i32,
 	pub card: i32,
-	pub deck: String,
+	pub deck: &'a str,
 	pub rank: i32,
 	pub bestrank: i32,
 }
@@ -282,9 +282,9 @@ pub struct ArenaInfo {
 pub enum WsResponse<'a> {
 	arenainfo {
 		#[serde(rename = "A")]
-		a1: Option<Box<ArenaInfo>>,
+		a1: Option<ArenaInfo<'a>>,
 		#[serde(rename = "B")]
-		a2: Option<Box<ArenaInfo>>,
+		a2: Option<ArenaInfo<'a>>,
 	},
 	arenatop {
 		lv: u8,
