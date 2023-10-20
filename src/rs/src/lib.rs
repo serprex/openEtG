@@ -105,13 +105,7 @@ mod test {
 	}
 
 	fn attack_foe(ctx: &mut Game, id: i16) {
-		ctx.attack(
-			id,
-			&ProcData {
-				tgt: ctx.get_foe(ctx.get_owner(id)),
-				..Default::default()
-			},
-		)
+		ctx.attack(id, &ProcData { tgt: ctx.get_foe(ctx.get_owner(id)), ..Default::default() })
 	}
 
 	#[test]
@@ -237,13 +231,9 @@ mod test {
 		let (mut ctx, p1, p2) = setup(CardSet::Open);
 		ctx.set_quanta(p1, etg::Death, 10);
 		ctx.get_player_mut(p1).hand = [0; 8];
-		for &code in &[
-			card::AmethystPillar,
-			card::AmethystPillar,
-			card::SoulCatcher,
-			card::Shield,
-			card::Dagger,
-		] {
+		for &code in
+			&[card::AmethystPillar, card::AmethystPillar, card::SoulCatcher, card::Shield, card::Dagger]
+		{
 			let card = ctx.new_thing(code, p1);
 			ctx.addCard(p1, card);
 			ctx.play(card, 0, true);

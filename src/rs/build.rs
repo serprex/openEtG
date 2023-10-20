@@ -16,9 +16,7 @@ struct Enums {
 
 fn subsource<'a, 'b>(source: &'a str, prefix: &'b str) -> &'a str {
 	let prefixidx = source.find(prefix).expect("failed to find prefix");
-	let length = source[prefixidx..]
-		.find("\n}\n")
-		.expect("failed to find } after prefix");
+	let length = source[prefixidx..].find("\n}\n").expect("failed to find } after prefix");
 	&source[prefixidx + prefix.len()..prefixidx + length]
 }
 
@@ -41,17 +39,11 @@ struct Card {
 
 fn parseCost(s: &str, ele: u8) -> Option<(i8, u8)> {
 	if let Some(colonidx) = s.find(':') {
-		let cost = s[..colonidx]
-			.parse::<i8>()
-			.expect("invalid cost in cost:ele");
-		let costele = s[colonidx + 1..]
-			.parse::<u8>()
-			.expect("invalid ele in cost:ele");
+		let cost = s[..colonidx].parse::<i8>().expect("invalid cost in cost:ele");
+		let costele = s[colonidx + 1..].parse::<u8>().expect("invalid ele in cost:ele");
 		Some((cost, costele))
 	} else {
-		s.parse::<i8>()
-			.ok()
-			.map(|val| (val, if val == 0 { 0 } else { ele }))
+		s.parse::<i8>().ok().map(|val| (val, if val == 0 { 0 } else { ele }))
 	}
 }
 
@@ -59,9 +51,7 @@ fn parseCostValue(value: &Value, ele: u8) -> Option<(i8, u8)> {
 	if let Some(num) = value.as_i64() {
 		Some((num as i8, ele))
 	} else {
-		let s = value
-			.as_str()
-			.expect("non-numerical potential costs must be strings");
+		let s = value.as_str().expect("non-numerical potential costs must be strings");
 		parseCost(s, ele)
 	}
 }
@@ -73,8 +63,8 @@ const CREATURE: u8 = 4;
 
 fn process_cards(set: &'static str, path: &'static str, source: &mut String, enums: &mut Enums) {
 	let cards_json = fs::read_to_string(path).expect("failed to read Cards.json");
-	let cards_data = serde_json::from_str::<Vec<Vec<Vec<Value>>>>(&cards_json)
-		.expect("failed to parse Cards.json");
+	let cards_data =
+		serde_json::from_str::<Vec<Vec<Vec<Value>>>>(&cards_json).expect("failed to parse Cards.json");
 	let mut cards: Vec<Card> = Vec::new();
 	for (kind, data0) in cards_data.into_iter().enumerate() {
 		let kind = kind as u8;
@@ -85,19 +75,13 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 				let name = data[0].as_str().expect("name not a string");
 				let code = data[1].as_u64().expect("code not an integer") as u16;
 				let (cost, costele) = parseCostValue(&data[2], ele).expect("cost not a cost");
-				let rarity = if set == "Open" {
-					&data[3]
-				} else {
-					data.last().unwrap()
-				}
-				.as_i64()
-				.expect("rarity not an integer") as i8;
+				let rarity = if set == "Open" { &data[3] } else { data.last().unwrap() }
+					.as_i64()
+					.expect("rarity not an integer") as i8;
 				let upped = (code - 1000) % 4000 > 1999;
 				let (attack, health) = if kind == WEAPON || kind == CREATURE || kind == SHIELD {
 					let a = if kind != SHIELD {
-						data[4 + (set == "Open") as usize]
-							.as_i64()
-							.expect("attack not an integer") as i8
+						data[4 + (set == "Open") as usize].as_i64().expect("attack not an integer") as i8
 					} else {
 						0
 					};
@@ -147,9 +131,7 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 				statstr.push(']');
 
 				let mut skillstr = String::from("&[");
-				let skill = data[3 + (set == "Open") as usize]
-					.as_str()
-					.expect("skill not a string");
+				let skill = data[3 + (set == "Open") as usize].as_str().expect("skill not a string");
 				if !skill.is_empty() {
 					for sk in skill.split("+") {
 						let (event, skill) = if sk.contains('=') {
@@ -167,11 +149,8 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 							("ownattack", sk)
 						};
 						let mut event = Vec::from(event.as_bytes());
-						let mut skill = Vec::from(if skill == "static" {
-							b"r#static"
-						} else {
-							skill.as_bytes()
-						});
+						let mut skill =
+							Vec::from(if skill == "static" { b"r#static" } else { skill.as_bytes() });
 						event[0] -= b'a' - b'A';
 						if event.starts_with(b"Own") {
 							event[3] -= b'a' - b'A';
@@ -337,10 +316,7 @@ fn main() {
 	process_cards("Open", "../Cards.json", &mut source, &mut enums);
 	process_cards("Orig", "../vanilla/Cards.json", &mut source, &mut enums);
 
-	fs::write(
-		"../enum.json",
-		&serde_json::to_string(&enums).expect("failed to serialize enums"),
-	)
-	.expect("Failed to write enum.json");
+	fs::write("../enum.json", &serde_json::to_string(&enums).expect("failed to serialize enums"))
+		.expect("Failed to write enum.json");
 	fs::write("src/generated.rs", &source).expect("failed to write generated.rs");
 }

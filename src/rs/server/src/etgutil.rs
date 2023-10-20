@@ -34,6 +34,5 @@ pub fn encode_count(count: u32) -> [u8; 2] {
 }
 
 pub fn iterraw<'a>(deck: &'a [u8]) -> impl Iterator<Item = (i16, u16)> + 'a {
-	deck.chunks_exact(5)
-		.map(|chunk| (decode_code(&chunk[2..]), decode_count(&chunk[..2])))
+	deck.chunks_exact(5).map(|chunk| (decode_code(&chunk[2..]), decode_count(&chunk[..2])))
 }

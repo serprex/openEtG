@@ -18,14 +18,7 @@ use crate::skill::{Event, Skill};
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn deckgen_duo(
-	e1: i8,
-	e2: i8,
-	uprate: u8,
-	markpower: i16,
-	maxrarity: i32,
-	seed: i32,
-) -> Vec<i16> {
+pub fn deckgen_duo(e1: i8, e2: i8, uprate: u8, markpower: i16, maxrarity: i32, seed: i32) -> Vec<i16> {
 	let mut rng = Pcg32::seed_from_u64(seed as u64);
 	let mut build = Builder::new(e2 as i16, uprate, markpower, &mut rng);
 	for j in 0..=1 {
@@ -111,9 +104,7 @@ pub fn deckgen_ai4(e1: i8, e2: i8, seed: i32) -> Vec<i16> {
 	let mut deck = Vec::with_capacity(65);
 	for i in 0..24 {
 		let upped = rng.gen_range(0..100) < 30;
-		deck.push(
-			etg::PillarList[if i < 4 { 0 } else { e1 as usize }] - if upped { 2000 } else { 4000 },
-		);
+		deck.push(etg::PillarList[if i < 4 { 0 } else { e1 as usize }] - if upped { 2000 } else { 4000 });
 	}
 	for i in 0..40 {
 		let upped = rng.gen_range(0..100) < 30;
@@ -137,16 +128,15 @@ pub fn deckgen_ai4(e1: i8, e2: i8, seed: i32) -> Vec<i16> {
 }
 
 const HAS_BUFF: [i16; 20] = [
-	5125, 5318, 8230, 5306, 5730, 5721, 5807, 6115, 6218, 6230, 7106, 7125, 7306, 7318, 7730, 7721,
-	7807, 8115, 8218, 9015,
+	5125, 5318, 8230, 5306, 5730, 5721, 5807, 6115, 6218, 6230, 7106, 7125, 7306, 7318, 7730, 7721, 7807,
+	8115, 8218, 9015,
 ];
 const HAS_POISON: [i16; 23] = [
-	5218, 5219, 5225, 7208, 5208, 5210, 5214, 5212, 5512, 5518, 5507, 5701, 7218, 7210, 7225, 7214,
-	7219, 7212, 7512, 7518, 7507, 7701, 7710,
+	5218, 5219, 5225, 7208, 5208, 5210, 5214, 5212, 5512, 5518, 5507, 5701, 7218, 7210, 7225, 7214, 7219,
+	7212, 7512, 7518, 7507, 7701, 7710,
 ];
-const CAN_INFECT: [i16; 16] = [
-	5220, 5224, 7202, 7209, 5202, 5212, 5710, 6103, 6110, 6120, 7212, 7224, 7220, 8103, 8110, 8120,
-];
+const CAN_INFECT: [i16; 16] =
+	[5220, 5224, 7202, 7209, 5202, 5212, 5710, 6103, 6110, 6120, 7212, 7224, 7220, 8103, 8110, 8120];
 const HAS_BURROW: [i16; 4] = [5408, 5409, 5416, 5401];
 const HAS_LIGHT: [i16; 6] = [5811, 5820, 5908, 7811, 7801, 7820];
 
@@ -154,8 +144,7 @@ fn scorpion(card: &'static Card, deck: &[i16]) -> bool {
 	let isdeath = card.isOf(card::Deathstalker);
 	deck.iter().any(|&code| {
 		HAS_BUFF.iter().any(|&buffcode| buffcode == code)
-			|| (isdeath
-				&& (code == card::Nightfall || code == card::AsUpped(card::Nightfall, true)))
+			|| (isdeath && (code == card::Nightfall || code == card::AsUpped(card::Nightfall, true)))
 	})
 }
 fn filters(code: i16, deck: &[i16], ecost: &[i16; 13]) -> bool {
@@ -347,12 +336,9 @@ impl Builder {
 		for i in 1..=12 {
 			self.ecost[i] += self.ecost[0] / 12;
 		}
-		const MATBITS: u16 =
-			1 << MATERIAL[0] | 1 << MATERIAL[1] | 1 << MATERIAL[2] | 1 << MATERIAL[3];
-		const SPIBITS: u16 =
-			1 << SPIRITUAL[0] | 1 << SPIRITUAL[1] | 1 << SPIRITUAL[2] | 1 << SPIRITUAL[3];
-		const CARBITS: u16 =
-			1 << CARDINAL[0] | 1 << CARDINAL[1] | 1 << CARDINAL[2] | 1 << CARDINAL[3];
+		const MATBITS: u16 = 1 << MATERIAL[0] | 1 << MATERIAL[1] | 1 << MATERIAL[2] | 1 << MATERIAL[3];
+		const SPIBITS: u16 = 1 << SPIRITUAL[0] | 1 << SPIRITUAL[1] | 1 << SPIRITUAL[2] | 1 << SPIRITUAL[3];
+		const CARBITS: u16 = 1 << CARDINAL[0] | 1 << CARDINAL[1] | 1 << CARDINAL[2] | 1 << CARDINAL[3];
 		let mut qc: u16 = 0x1ffe;
 		loop {
 			for i in 1..=12 {

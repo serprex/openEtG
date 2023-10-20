@@ -62,9 +62,7 @@ impl From<ConfigRaw> for Config {
 async fn main() {
 	let _sigpipestream = signal(SignalKind::pipe()).expect("Failed to setup pipe handler");
 	let (listenport, pgpool) = {
-		let configjson = tokio::fs::read("../../../config.json")
-			.await
-			.expect("Failed to load config.json");
+		let configjson = tokio::fs::read("../../../config.json").await.expect("Failed to load config.json");
 		let configraw =
 			serde_json::from_slice::<ConfigRaw>(&configjson).expect("Failed to parse config.json");
 		let Config { listen, pg, certs } = Config::from(configraw);
@@ -125,18 +123,13 @@ async fn main() {
 		}
 	});
 
-	let ws = warp::path::path("ws")
-		.and(warp::path::end())
-		.and(warp::ws())
-		.map(move |ws: Ws| {
-			let pgpool = wspgpool.clone();
-			let users = wsusers.clone();
-			let usersocks = usersocks.clone();
-			let socks = socks.clone();
-			ws.on_upgrade(move |socket| {
-				handlews::handle_ws(socket, pgpool, users, usersocks, socks)
-			})
-		});
+	let ws = warp::path::path("ws").and(warp::path::end()).and(warp::ws()).map(move |ws: Ws| {
+		let pgpool = wspgpool.clone();
+		let users = wsusers.clone();
+		let usersocks = usersocks.clone();
+		let socks = socks.clone();
+		ws.on_upgrade(move |socket| handlews::handle_ws(socket, pgpool, users, usersocks, socks))
+	});
 	let full = warp::path::full()
 		.and(header::optional::<HttpDate>("if-modified-since"))
 		.and(header::optional::<AcceptEncoding>("accept-encoding"))

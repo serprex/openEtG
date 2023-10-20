@@ -85,12 +85,9 @@ impl<'a> SkillThing<'a> {
 	fn get_stat(&self, stat: Stat) -> i16 {
 		match *self {
 			Self::Thing(game, id) => game.get(id, stat),
-			Self::Card(cards, card) => card
-				.status
-				.iter()
-				.find(|&(st, _)| *st == stat)
-				.map(|&(_, val)| val)
-				.unwrap_or(0),
+			Self::Card(cards, card) => {
+				card.status.iter().find(|&(st, _)| *st == stat).map(|&(_, val)| val).unwrap_or(0)
+			}
 		}
 	}
 
@@ -984,10 +981,7 @@ impl<'a> SkillThing<'a> {
 			drop(stext);
 
 			self.skills(|ev, sk| {
-				if ev != Event::Cast
-					|| self.kind() != Kind::Spell
-					|| self.card().kind != Kind::Spell
-				{
+				if ev != Event::Cast || self.kind() != Kind::Spell || self.card().kind != Kind::Spell {
 					for &s in sk {
 						if let Some(text) = self.sktext(ev, s) {
 							if ev == Event::Cast {

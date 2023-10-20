@@ -179,10 +179,7 @@ impl Users {
 					.await
 			});
 		}
-		futures::future::join_all(queries)
-			.await
-			.into_iter()
-			.all(|x| x.is_ok())
+		futures::future::join_all(queries).await.into_iter().all(|x| x.is_ok())
 	}
 
 	pub async fn store(&mut self, client: &Client, usersocks: AsyncUserSocks, socks: AsyncSocks) {

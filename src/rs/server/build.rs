@@ -12,8 +12,7 @@ struct Decks {
 fn main() {
 	println!("cargo:rerun-if-changed=../../Decks.json");
 	let decks_json = fs::read_to_string("../../Decks.json").expect("failed to read Decks.json");
-	let decks_data =
-		serde_json::from_str::<Decks>(&decks_json).expect("failed to parse Decks.json");
+	let decks_data = serde_json::from_str::<Decks>(&decks_json).expect("failed to parse Decks.json");
 	fs::write(
 		"src/generated.rs",
 		format!(

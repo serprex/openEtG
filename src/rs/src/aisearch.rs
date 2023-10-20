@@ -83,9 +83,7 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 						}
 					} else {
 						tgts.extend(
-							once(turn)
-								.chain(pl.hand_iter())
-								.filter(|&t| tgting.full_check(ctx, id, t)),
+							once(turn).chain(pl.hand_iter()).filter(|&t| tgting.full_check(ctx, id, t)),
 						)
 					}
 				}
@@ -132,10 +130,8 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 		for &(c, t, _) in dmgmoves.iter() {
 			if gclone.getIndex(c) != -1
 				&& gclone.canactive(c)
-				&& (if let Some(tgt) = gclone
-					.getSkill(c, Event::Cast)
-					.first()
-					.and_then(|sk| sk.targeting(ctx.cardset()))
+				&& (if let Some(tgt) =
+					gclone.getSkill(c, Event::Cast).first().and_then(|sk| sk.targeting(ctx.cardset()))
 				{
 					t != 0 && gclone.getIndex(t) != -1 && gclone.can_target(c, t)
 				} else {
@@ -266,14 +262,7 @@ fn scan(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32) {
 		.filter(|&id| ctx.canactive(id))
 		.map(|id| {
 			let card = ctx.get_card(ctx.get(id, Stat::card));
-			(
-				id,
-				(if card.kind == Kind::Spell {
-					ctx.getSkill(id, Event::Cast).first()
-				} else {
-					None
-				}),
-			)
+			(id, (if card.kind == Kind::Spell { ctx.getSkill(id, Event::Cast).first() } else { None }))
 		})
 		.chain(
 			once(pl.weapon)
@@ -313,11 +302,7 @@ pub fn search(ctx: &Game) -> GameMove {
 	}
 	lethal(ctx).unwrap_or_else(|| {
 		let (discard, score) = get_worst_card(ctx);
-		let mut candy = Candidate {
-			cmd: GameMove::End(discard),
-			depth: 0,
-			score,
-		};
+		let mut candy = Candidate { cmd: GameMove::End(discard), depth: 0, score };
 		scan(ctx, 0, &mut candy, &mut 5040);
 		candy.cmd
 	})

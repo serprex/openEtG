@@ -101,13 +101,7 @@ async fn role_check<'a>(role: UserRole, tx: &'a WsSender, client: &'a Client, us
 		false
 	};
 	if !ret {
-		sendmsg(
-			&tx,
-			&WsResponse::chat {
-				mode: 1,
-				msg: "Insufficient permissions",
-			},
-		);
+		sendmsg(&tx, &WsResponse::chat { mode: 1, msg: "Insufficient permissions" });
 	}
 	ret
 }
@@ -168,16 +162,9 @@ async fn login_success(
 			if let Some(card) = etg::card::OpenSet.random_card(&mut rng, false, |card| {
 				(card.rarity != 4) ^ ocardnymph && (card.flag & etg::game::Flag::pillar) == 0
 			}) {
-				let ccode = if card.rarity == 4 {
-					etg::card::AsShiny(card.code, true)
-				} else {
-					card.code
-				};
-				let curpool = if card.rarity > 2 {
-					&mut user.data.accountbound
-				} else {
-					&mut user.data.pool
-				};
+				let ccode = if card.rarity == 4 { etg::card::AsShiny(card.code, true) } else { card.code };
+				let curpool =
+					if card.rarity > 2 { &mut user.data.accountbound } else { &mut user.data.pool };
 				let c = curpool.0.entry(ccode).or_default();
 				*c = c.saturating_add(1);
 				user.data.ocard = ccode;
@@ -190,10 +177,7 @@ async fn login_success(
 
 	if let Ok(userstr) = serde_json::to_string(&WsResponse::login(&*user)) {
 		if tx.send(Message::text(userstr)).is_ok() {
-			usersocks
-				.write()
-				.await
-				.insert(String::from(username), sockid);
+			usersocks.write().await.insert(String::from(username), sockid);
 		}
 	}
 
@@ -203,12 +187,8 @@ async fn login_success(
 
 	if let Ok(trx) = client.transaction().await {
 		if user.id != -1 {
-			if let Ok(bids) = trx
-				.query(
-					"select code, q, p from bazaar where user_id = $1",
-					&[&user.id],
-				)
-				.await
+			if let Ok(bids) =
+				trx.query("select code, q, p from bazaar where user_id = $1", &[&user.id]).await
 			{
 				let mut wealth: i32 = 0;
 				let mut wealth24: u32 = 0;
@@ -300,13 +280,7 @@ where
 	}
 }
 
-fn transmute_core(
-	pool: &mut Cardpool,
-	oldcode: i16,
-	newcode: i16,
-	oldcopies: u16,
-	newcopies: u16,
-) -> bool {
+fn transmute_core(pool: &mut Cardpool, oldcode: i16, newcode: i16, oldcopies: u16, newcopies: u16) -> bool {
 	if let Some(oldc) = pool.0.get_mut(&oldcode) {
 		if *oldc >= oldcopies {
 			*oldc -= oldcopies;
@@ -321,13 +295,7 @@ fn transmute_core(
 fn transmute(user: &mut UserData, oldcode: i16, newcode: i16, oldcopies: u16, newcopies: u16) {
 	if oldcode != newcode {
 		if !transmute_core(&mut user.pool, oldcode, newcode, oldcopies, newcopies) {
-			transmute_core(
-				&mut user.accountbound,
-				oldcode,
-				newcode,
-				oldcopies,
-				newcopies,
-			);
+			transmute_core(&mut user.accountbound, oldcode, newcode, oldcopies, newcopies);
 		}
 	}
 }
@@ -362,35 +330,21 @@ pub async fn handle_ws(
 	let mut rx = UnboundedReceiverStream::new(rx);
 	tokio::spawn(async move {
 		while let Some(result) = rx.next().await {
-			user_ws_tx
-				.send(result)
-				.unwrap_or_else(|e| println!("send err {}", e))
-				.await;
+			user_ws_tx.send(result).unwrap_or_else(|e| println!("send err {}", e)).await;
 		}
 	});
 
-	socks.write().await.insert(
-		sockid,
-		Sock {
-			tx: tx.clone(),
-			afk: false,
-			hide: false,
-		},
-	);
+	socks.write().await.insert(sockid, Sock { tx: tx.clone(), afk: false, hide: false });
 
 	'msgloop: while let Some(Ok(result)) = user_ws_rx.next().await {
 		let Ok(msg) = result.to_str() else { continue };
 		if let Ok(msg) = serde_json::from_str::<UserMessage>(msg) {
-			let mut client = pgpool
-				.get()
-				.await
-				.expect("Failed to acquire sql connection");
+			let mut client = pgpool.get().await.expect("Failed to acquire sql connection");
 
 			match msg {
 				UserMessage::a { u, a, msg } => {
-					let (user, userid) = if let Ok(row) = client
-						.query_one("select id, auth from users where name = $1", &[&u])
-						.await
+					let (user, userid) = if let Ok(row) =
+						client.query_one("select id, auth from users where name = $1", &[&u]).await
 					{
 						if a == row.get::<usize, &str>(1) {
 							if let Some(user) = users.write().await.load(&*client, &u).await {
@@ -2178,21 +2132,13 @@ pub async fn handle_ws(
 					}
 				}
 				UserMessage::guestchat { u, msg } => {
-					if let Ok(None) = client
-						.query_opt("select 1 from strings where key = 'GuestBanned'", &[])
-						.await
+					if let Ok(None) =
+						client.query_opt("select 1 from strings where key = 'GuestBanned'", &[]).await
 					{
 						let mut guestname = String::from("Guest_");
 						guestname.push_str(&u);
-						broadcast(
-							&socks,
-							&WsResponse::chatguest {
-								guest: true,
-								u: &guestname,
-								msg: &msg,
-							},
-						)
-						.await;
+						broadcast(&socks, &WsResponse::chatguest { guest: true, u: &guestname, msg: &msg })
+							.await;
 					}
 				}
 				UserMessage::login { u, a, p } => {
@@ -2217,10 +2163,7 @@ pub async fn handle_ws(
 								salt: Vec::new(),
 								iter: 0,
 								algo: users::HASH_ALGO,
-								data: UserData {
-									oracle: u32::MAX,
-									..Default::default()
-								},
+								data: UserData { oracle: u32::MAX, ..Default::default() },
 							}));
 							wusers.insert(u.clone(), user.clone());
 							user
@@ -2257,22 +2200,15 @@ pub async fn handle_ws(
 						} else {
 							user.auth.is_empty()
 						} {
-							login_success(&usersocks, &tx, sockid, &mut *user, &u, &mut client)
-								.await;
+							login_success(&usersocks, &tx, sockid, &mut *user, &u, &mut client).await;
 						} else {
-							sendmsg(
-								&tx,
-								&WsResponse::loginfail {
-									err: "Authentication failed",
-								},
-							);
+							sendmsg(&tx, &WsResponse::loginfail { err: "Authentication failed" });
 						}
 					}
 				}
 				UserMessage::konglogin { u, g } => {
-					if let Ok(row) = client
-						.query_one("select val from strings where key = 'kongapi'", &[])
-						.await
+					if let Ok(row) =
+						client.query_one("select val from strings where key = 'kongapi'", &[]).await
 					{
 						let key: &str = row.get(0);
 
@@ -2292,19 +2228,13 @@ pub async fn handle_ws(
 								while let Some(Ok(chunk)) = rawbody.next().await {
 									output.extend(&chunk);
 								}
-								if let Ok(Value::Object(body)) =
-									serde_json::from_slice::<Value>(&output)
-								{
-									let success = body
-										.get("success")
-										.and_then(|v| v.as_bool())
-										.unwrap_or(false);
+								if let Ok(Value::Object(body)) = serde_json::from_slice::<Value>(&output) {
+									let success =
+										body.get("success").and_then(|v| v.as_bool()).unwrap_or(false);
 									if success {
 										let mut name = String::from("Kong:");
 										name.push_str(
-											body.get("username")
-												.and_then(|v| v.as_str())
-												.unwrap_or(""),
+											body.get("username").and_then(|v| v.as_str()).unwrap_or(""),
 										);
 										let mut wusers = users.write().await;
 										if let Some(user) = wusers.load(&*client, &name).await {
@@ -2360,21 +2290,11 @@ pub async fn handle_ws(
 									);
 								}
 							} else {
-								sendmsg(
-									&tx,
-									&WsResponse::loginfail {
-										err: "Kongregate refused request",
-									},
-								);
+								sendmsg(&tx, &WsResponse::loginfail { err: "Kongregate refused request" });
 							}
 						}
 					} else {
-						sendmsg(
-							&tx,
-							&WsResponse::loginfail {
-								err: "Global error: no kong api in db",
-							},
-						);
+						sendmsg(&tx, &WsResponse::loginfail { err: "Global error: no kong api in db" });
 					}
 				}
 				UserMessage::r#mod | UserMessage::codesmith => {
@@ -2395,23 +2315,11 @@ pub async fn handle_ws(
 					}
 				}
 				UserMessage::motd => {
-					if let Ok(rows) = client
-						.query("select id, val from motd order by id", &[])
-						.await
-					{
+					if let Ok(rows) = client.query("select id, val from motd order by id", &[]).await {
 						for row in rows.iter() {
-							let msgmsg = format!(
-								"motd {} {}",
-								row.get::<usize, i32>(0),
-								row.get::<usize, &str>(1)
-							);
-							sendmsg(
-								&tx,
-								&WsResponse::chat {
-									mode: 1,
-									msg: &msgmsg,
-								},
-							);
+							let msgmsg =
+								format!("motd {} {}", row.get::<usize, i32>(0), row.get::<usize, &str>(1));
+							sendmsg(&tx, &WsResponse::chat { mode: 1, msg: &msgmsg });
 						}
 					}
 				}
@@ -2421,10 +2329,7 @@ pub async fn handle_ws(
 						let mut gold = user.data.gold;
 						let mut pool = user.data.pool.clone();
 						if let Ok(bids) = client
-							.query(
-								"select code, q, p from bazaar where user_id = $1",
-								&[&user.id],
-							)
+							.query("select code, q, p from bazaar where user_id = $1", &[&user.id])
 							.await
 						{
 							for bid in bids.iter() {
@@ -2444,7 +2349,7 @@ pub async fn handle_ws(
 							&WsResponse::librarygive {
 								pool: &pool,
 								bound: &user.data.accountbound,
-								gold: gold,
+								gold,
 								pvpwins: user.data.pvpwins,
 								pvplosses: user.data.pvplosses,
 								aiwins: user.data.aiwins,
@@ -2452,13 +2357,7 @@ pub async fn handle_ws(
 							},
 						);
 					} else {
-						sendmsg(
-							&tx,
-							&WsResponse::chat {
-								mode: 1,
-								msg: "User does not exist",
-							},
-						);
+						sendmsg(&tx, &WsResponse::chat { mode: 1, msg: "User does not exist" });
 					}
 				}
 				UserMessage::arenatop { lv } => {
@@ -2473,10 +2372,7 @@ pub async fn handle_ws(
 				}
 				UserMessage::wealthtop => {
 					if let Ok(rows) = client
-						.query(
-							"select name, wealth from users order by wealth desc limit 99",
-							&[],
-						)
+						.query("select name, wealth from users order by wealth desc limit 99", &[])
 						.await
 					{
 						let mut top = Vec::with_capacity(rows.len() * 2);

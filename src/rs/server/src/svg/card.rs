@@ -37,11 +37,7 @@ pub fn eleup_str(element: i8, upped: bool) -> &'static str {
 }
 
 pub fn card(code: i16) -> Option<String> {
-	let cards = if card::AsShiny(code, false) < 5000 {
-		card::OrigSet
-	} else {
-		card::OpenSet
-	};
+	let cards = if card::AsShiny(code, false) < 5000 { card::OrigSet } else { card::OpenSet };
 	let card = cards.try_get(code & 0x3fff)?;
 	let upped = card::Upped(code);
 	let shiny = card::Shiny(code);
@@ -67,11 +63,7 @@ pub fn card(code: i16) -> Option<String> {
 	result.push_str("src='/Cards/");
 	result.push_str(unsafe {
 		std::str::from_utf8_unchecked(&encode_code(
-			code + if card::AsShiny(code, false) < 5000 {
-				4000
-			} else {
-				0
-			},
+			code + if card::AsShiny(code, false) < 5000 { 4000 } else { 0 },
 		))
 	});
 	result.push_str(".webp' style='position:absolute;top:-130px;left:0px'/>");
@@ -98,21 +90,14 @@ pub fn card(code: i16) -> Option<String> {
 		};
 		let num = text[start..colon_idx].parse::<i8>().unwrap();
 		let ele = text[colon_idx + 1..=end].parse::<i8>().unwrap();
-		let end = if text.as_bytes().get(end + 1) == Some(&b' ') {
-			end + 1
-		} else {
-			end
-		};
+		let end = if text.as_bytes().get(end + 1) == Some(&b' ') { end + 1 } else { end };
 		match num {
 			0 => text.replace_range(start..=end, "0"),
 			1 | 2 | 3 => text.replace_range(
 				start..=end,
 				&format!("<span class='ico te{}'></span>", ele).repeat(num as usize),
 			),
-			_ => text.replace_range(
-				start..=end,
-				&format!("{}<span class='ico te{}'></span>", num, ele),
-			),
+			_ => text.replace_range(start..=end, &format!("{}<span class='ico te{}'></span>", num, ele)),
 		}
 	}
 	result.push_str(&text);
@@ -128,8 +113,7 @@ pub fn card(code: i16) -> Option<String> {
 		write!(
 			result,
 			"<span style='position:absolute;right:2px;top:-150px'>{}<span class='ico ce{}'></span></span>",
-			card.cost,
-			card.costele,
+			card.cost, card.costele,
 		)
 		.ok();
 	}

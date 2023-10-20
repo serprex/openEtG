@@ -29,13 +29,11 @@ impl std::str::FromStr for AcceptEncoding {
 	type Err = Infallible;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		Ok(AcceptEncoding(
-			if s.split(',').any(|code| code.trim() == "br") {
-				Encoding::br
-			} else {
-				Encoding::identity
-			},
-		))
+		Ok(AcceptEncoding(if s.split(',').any(|code| code.trim() == "br") {
+			Encoding::br
+		} else {
+			Encoding::identity
+		}))
 	}
 }
 
@@ -90,21 +88,16 @@ pub async fn compress_and_cache(
 		Ok(compressed) => {
 			let mtime = resp.mtime.unwrap_or_else(SystemTime::now);
 			let cached_resp = CachedResponse {
-				encoding: encoding,
+				encoding,
 				cache: resp.cache,
 				kind: resp.kind,
-				mtime: mtime
-					.duration_since(SystemTime::UNIX_EPOCH)
-					.unwrap()
-					.as_secs(),
+				mtime: mtime.duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs(),
 				mtimestring: Some(HttpDate::from(mtime).to_string()),
 				content: Bytes::from(compressed),
 				file: resp.file,
 			};
 			let mut wcache = cache.write().await;
-			wcache
-				.get_map_mut(encoding)
-				.insert(path, cached_resp.clone());
+			wcache.get_map_mut(encoding).insert(path, cached_resp.clone());
 			cached_resp
 		}
 		Err(content) => CachedResponse {
@@ -235,11 +228,7 @@ async fn handle_get_core(
 				true
 			} else {
 				return if ims
-					.and_then(|ims| {
-						SystemTime::from(ims)
-							.duration_since(SystemTime::UNIX_EPOCH)
-							.ok()
-					})
+					.and_then(|ims| SystemTime::from(ims).duration_since(SystemTime::UNIX_EPOCH).ok())
 					.map(|ims| cached.mtime <= ims.as_secs().saturating_add(12))
 					.unwrap_or(false)
 				{
@@ -270,8 +259,7 @@ async fn handle_get_core(
 				content: data,
 				file: Some(uppath),
 			}
-		} else if let Ok(code) =
-			i16::from_str_radix(&path["/Cards/".len()..path.len() - ".webp".len()], 32)
+		} else if let Ok(code) = i16::from_str_radix(&path["/Cards/".len()..path.len() - ".webp".len()], 32)
 		{
 			if card::Shiny(code as i16) {
 				let mut newpath = b"/Cards/".to_vec();
@@ -301,16 +289,9 @@ async fn handle_get_core(
 		let mut uppath = String::from("../../..");
 		uppath.push_str(&path);
 		let data = tokio::fs::read(&uppath).await.unwrap_or(Vec::new());
-		let mtime = tokio::fs::metadata(&uppath)
-			.await
-			.ok()
-			.and_then(|md| md.modified().ok());
+		let mtime = tokio::fs::metadata(&uppath).await.ok().and_then(|md| md.modified().ok());
 		PlainResponse {
-			kind: if path.ends_with(".css") {
-				ContentType::TextCss
-			} else {
-				ContentType::ImageWebp
-			},
+			kind: if path.ends_with(".css") { ContentType::TextCss } else { ContentType::ImageWebp },
 			cache: CacheControl::NoCache,
 			content: data,
 			mtime,
@@ -320,10 +301,7 @@ async fn handle_get_core(
 		let mut uppath = String::from("../../..");
 		uppath.push_str(&path);
 		let data = tokio::fs::read(&uppath).await.unwrap_or(Vec::new());
-		let mtime = tokio::fs::metadata(&uppath)
-			.await
-			.ok()
-			.and_then(|md| md.modified().ok());
+		let mtime = tokio::fs::metadata(&uppath).await.ok().and_then(|md| md.modified().ok());
 		PlainResponse {
 			kind: ContentType::ApplicationOgg,
 			cache: CacheControl::NoCache,
@@ -344,21 +322,15 @@ async fn handle_get_core(
 		let mut uppath = String::from("../../../bundle");
 		uppath.push_str(&path);
 		let data = tokio::fs::read(&uppath).await.unwrap_or(Vec::new());
-		let cache = if path.starts_with("/hash/") {
-			CacheControl::Immutable
-		} else {
-			CacheControl::NoCache
-		};
+		let cache =
+			if path.starts_with("/hash/") { CacheControl::Immutable } else { CacheControl::NoCache };
 		let mtime = if matches!(cache, CacheControl::Immutable) {
 			None
 		} else {
-			tokio::fs::metadata(&uppath)
-				.await
-				.ok()
-				.and_then(|md| md.modified().ok())
+			tokio::fs::metadata(&uppath).await.ok().and_then(|md| md.modified().ok())
 		};
 		PlainResponse {
-			cache: cache,
+			cache,
 			kind: if path.ends_with(".js") {
 				ContentType::ApplicationJavascript
 			} else if path.ends_with(".json") {
@@ -378,11 +350,7 @@ async fn handle_get_core(
 			},
 			content: data,
 			mtime,
-			file: if matches!(cache, CacheControl::Immutable) {
-				None
-			} else {
-				Some(uppath)
-			},
+			file: if matches!(cache, CacheControl::Immutable) { None } else { Some(uppath) },
 		}
 	} else if path.starts_with("/card/") && path.len() >= "/card/".len() + 3 {
 		let code = decode_code(path["/card/".len().."/card/".len() + 3].as_bytes());
@@ -429,12 +397,10 @@ async fn handle_get_core(
 				for i in 0..2 {
 					let (cards0, counts) = if i == 0 { (0, pool) } else { (4, bound) };
 					for (&code, &count) in counts.0.iter() {
-						let row = cards
-							.entry(card::AsUpped(card::AsShiny(code, false), false))
-							.or_default();
-						row[cards0
-							| if card::Shiny(code) { 2 } else { 0 }
-							| card::Upped(code) as usize] = count;
+						let row =
+							cards.entry(card::AsUpped(card::AsShiny(code, false), false)).or_default();
+						row[cards0 | if card::Shiny(code) { 2 } else { 0 } | card::Upped(code) as usize] =
+							count;
 					}
 				}
 				let mut userdata = String::new();
@@ -494,9 +460,7 @@ async fn handle_get_core(
 									.random_card(&mut rng, false, |card| {
 										card.element == ele
 											&& (card.flag & etg::game::Flag::pillar) == 0
-											&& !codes[i * 7..ij]
-												.iter()
-												.any(|&code| code == card.code)
+											&& !codes[i * 7..ij].iter().any(|&code| code == card.code)
 									})
 									.unwrap()
 									.code;
@@ -518,9 +482,7 @@ async fn handle_get_core(
 			PlainResponse {
 				cache: CacheControl::NoCache,
 				kind: ContentType::ImageSvgXml,
-				content: Vec::<u8>::from(svg::deck(unsafe {
-					std::str::from_utf8_unchecked(&deck)
-				})),
+				content: Vec::<u8>::from(svg::deck(unsafe { std::str::from_utf8_unchecked(&deck) })),
 				mtime: None,
 				file: None,
 			}
@@ -531,17 +493,12 @@ async fn handle_get_core(
 		use rand::RngCore;
 		return response::Builder::new()
 			.status(302)
-			.header(
-				header::LOCATION,
-				format!("/speed/{}", rand::thread_rng().next_u32()),
-			)
+			.header(header::LOCATION, format!("/speed/{}", rand::thread_rng().next_u32()))
 			.body(Bytes::new());
 	} else {
 		return response::Builder::new().status(404).body(Bytes::new());
 	};
-	compress_and_cache(cache, accept, path.to_string(), res)
-		.await
-		.response()
+	compress_and_cache(cache, accept, path.to_string(), res).await.response()
 }
 
 pub async fn handle_get(
@@ -552,7 +509,5 @@ pub async fn handle_get(
 	users: AsyncUsers,
 	cache: AsyncCache,
 ) -> Response<Bytes> {
-	handle_get_core(path, ims, accept, pgpool, users, cache)
-		.await
-		.unwrap()
+	handle_get_core(path, ims, accept, pgpool, users, cache).await.unwrap()
 }

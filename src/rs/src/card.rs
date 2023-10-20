@@ -66,22 +66,14 @@ impl Cards {
 		}
 	}
 
-	pub fn random_card<Ffilt, R>(
-		&self,
-		rng: &mut R,
-		upped: bool,
-		ffilt: Ffilt,
-	) -> Option<&'static Card>
+	pub fn random_card<Ffilt, R>(&self, rng: &mut R, upped: bool, ffilt: Ffilt) -> Option<&'static Card>
 	where
 		Ffilt: Fn(&'static Card) -> bool,
 		R: rand::Rng,
 	{
 		use rand::seq::IteratorRandom;
 
-		self.filter(upped)
-			.iter()
-			.filter(|c| (c.flag & Flag::token) == 0 && ffilt(c))
-			.choose(rng)
+		self.filter(upped).iter().filter(|c| (c.flag & Flag::token) == 0 && ffilt(c)).choose(rng)
 	}
 }
 
@@ -148,87 +140,61 @@ pub const fn cardSetCards(set: CardSet) -> &'static Cards {
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn card_codes(set: CardSet) -> Vec<i16> {
-	cardSetCards(set)
-		.data
-		.iter()
-		.map(|&card| card.code)
-		.filter(|&code| !Upped(code))
-		.collect::<Vec<_>>()
+	cardSetCards(set).data.iter().map(|&card| card.code).filter(|&code| !Upped(code)).collect::<Vec<_>>()
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn card_index(set: CardSet, code: i16) -> Option<usize> {
-	cardSetCards(set)
-		.data
-		.binary_search_by_key(&code, |card| card.code)
-		.ok()
+	cardSetCards(set).data.binary_search_by_key(&code, |card| card.code).ok()
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn card_name(set: CardSet, index: usize) -> Option<String> {
-	cardSetCards(set)
-		.try_get_index(index)
-		.map(|&card| String::from(card.name))
+	cardSetCards(set).try_get_index(index).map(|&card| String::from(card.name))
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn card_type(set: CardSet, index: usize) -> Option<Kind> {
-	cardSetCards(set)
-		.try_get_index(index)
-		.map(|&card| card.kind)
+	cardSetCards(set).try_get_index(index).map(|&card| card.kind)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn card_element(set: CardSet, index: usize) -> Option<i8> {
-	cardSetCards(set)
-		.try_get_index(index)
-		.map(|&card| card.element)
+	cardSetCards(set).try_get_index(index).map(|&card| card.element)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn card_rarity(set: CardSet, index: usize) -> Option<i8> {
-	cardSetCards(set)
-		.try_get_index(index)
-		.map(|&card| card.rarity)
+	cardSetCards(set).try_get_index(index).map(|&card| card.rarity)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn card_cost(set: CardSet, index: usize) -> Option<i8> {
-	cardSetCards(set)
-		.try_get_index(index)
-		.map(|&card| card.cost)
+	cardSetCards(set).try_get_index(index).map(|&card| card.cost)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn card_costele(set: CardSet, index: usize) -> Option<i8> {
-	cardSetCards(set)
-		.try_get_index(index)
-		.map(|&card| card.costele)
+	cardSetCards(set).try_get_index(index).map(|&card| card.costele)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn card_pillar(set: CardSet, index: usize) -> bool {
-	cardSetCards(set)
-		.try_get_index(index)
-		.map(|&card| (card.flag & Flag::pillar) != 0)
-		.unwrap_or(false)
+	cardSetCards(set).try_get_index(index).map(|&card| (card.flag & Flag::pillar) != 0).unwrap_or(false)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn card_token(set: CardSet, index: usize) -> bool {
-	cardSetCards(set)
-		.try_get_index(index)
-		.map(|&card| (card.flag & Flag::token) != 0)
-		.unwrap_or(false)
+	cardSetCards(set).try_get_index(index).map(|&card| (card.flag & Flag::token) != 0).unwrap_or(false)
 }
 
 #[cfg(target_arch = "wasm32")]

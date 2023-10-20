@@ -404,15 +404,8 @@ impl Status {
 
 	pub fn entry(&mut self, stat: Stat) -> StatusEntry {
 		match self.0.binary_search_by_key(&stat, |kv| kv.0) {
-			Err(idx) => StatusEntry::Vacant(StatusVacant {
-				status: self,
-				idx: idx,
-				stat: stat,
-			}),
-			Ok(idx) => StatusEntry::Occupied(StatusOccupied {
-				status: self,
-				idx: idx,
-			}),
+			Err(idx) => StatusEntry::Vacant(StatusVacant { status: self, idx, stat }),
+			Ok(idx) => StatusEntry::Occupied(StatusOccupied { status: self, idx }),
 		}
 	}
 
@@ -481,11 +474,7 @@ impl Iterator for FlagIter {
 
 	fn next(&mut self) -> Option<Self::Item> {
 		while self.value != 0 {
-			let result = if (self.value & 1) != 0 {
-				Some(self.result)
-			} else {
-				None
-			};
+			let result = if (self.value & 1) != 0 { Some(self.result) } else { None };
 
 			self.value >>= 1;
 			self.result <<= 1;
@@ -503,10 +492,7 @@ impl IntoIterator for Flag {
 	type IntoIter = FlagIter;
 
 	fn into_iter(self) -> Self::IntoIter {
-		FlagIter {
-			value: self.0,
-			result: 1,
-		}
+		FlagIter { value: self.0, result: 1 }
 	}
 }
 
@@ -596,11 +582,7 @@ impl Game {
 			rng: Pcg32::seed_from_u64(seed as u64),
 			turn: 1,
 			winner: 0,
-			phase: if set == CardSet::Original {
-				Phase::Play
-			} else {
-				Phase::Mulligan
-			},
+			phase: if set == CardSet::Original { Phase::Play } else { Phase::Mulligan },
 			time: now(),
 			duration: 0.0,
 			plprops,
@@ -715,19 +697,11 @@ impl Game {
 	}
 
 	pub fn count_creatures(&self, id: i16) -> i16 {
-		self.get_player(id)
-			.creatures
-			.into_iter()
-			.map(|cr| (cr != 0) as i16)
-			.sum()
+		self.get_player(id).creatures.into_iter().map(|cr| (cr != 0) as i16).sum()
 	}
 
 	pub fn count_permanents(&self, id: i16) -> i16 {
-		self.get_player(id)
-			.permanents
-			.into_iter()
-			.map(|cr| (cr != 0) as i16)
-			.sum()
+		self.get_player(id).permanents.into_iter().map(|cr| (cr != 0) as i16).sum()
 	}
 
 	pub fn hand_overlay(&self, id: i16, p1id: i16) -> i32 {
@@ -737,9 +711,12 @@ impl Game {
 			8
 		} else if (self.get(id, Stat::nova) >= 2 || self.get(id, Stat::nova2) >= 1)
 			&& (id != p1id
-				|| self.get_player(id).hand.into_iter().any(|x| {
-					x != 0 && matches!(self.get(x, Stat::card), 1107 | 3107 | 5107 | 7107)
-				})) {
+				|| self
+					.get_player(id)
+					.hand
+					.into_iter()
+					.any(|x| x != 0 && matches!(self.get(x, Stat::card), 1107 | 3107 | 5107 | 7107)))
+		{
 			1
 		} else {
 			0
@@ -839,20 +816,14 @@ impl Game {
 		}
 		self.drawhand(id, 7);
 		if self.cards.set == CardSet::Original
-			&& self
-				.get_player(id)
-				.hand
-				.into_iter()
-				.all(|card| self.get(card, Stat::cost) != 0)
+			&& self.get_player(id).hand.into_iter().all(|card| self.get(card, Stat::cost) != 0)
 		{
 			let pl = self.get_player_mut(id);
 			let pldecklen = pl.deck.len();
 			let oldhand = pl.hand;
 			let mut newhand = [0; 8];
-			for (idx, id) in pl
-				.deck_mut()
-				.drain(if pldecklen <= 7 { 0 } else { pldecklen - 7 }..)
-				.enumerate()
+			for (idx, id) in
+				pl.deck_mut().drain(if pldecklen <= 7 { 0 } else { pldecklen - 7 }..).enumerate()
 			{
 				newhand[idx] = id;
 			}
@@ -895,12 +866,8 @@ impl Game {
 					let truehp = self.truehp(t);
 					format!(
 						"{}",
-						(truehp
-							* (if self.get(t, Stat::frozen) != 0 {
-								151
-							} else {
-								101
-							}) + 99) / (truehp + 100)
+						(truehp * (if self.get(t, Stat::frozen) != 0 { 151 } else { 101 }) + 99)
+							/ (truehp + 100)
 					)
 				}
 				Skill::corpseexplosion => {
@@ -955,21 +922,14 @@ impl Game {
 							},
 							charges
 						);
-					} else if thing
-						.skill
-						.get(Event::OwnAttack)
-						.map(|sk| sk.as_ref())
-						.unwrap_or(&[]) == &[Skill::locket]
+					} else if thing.skill.get(Event::OwnAttack).map(|sk| sk.as_ref()).unwrap_or(&[])
+						== &[Skill::locket]
 					{
 						let mode = thing.status.get(Stat::mode).unwrap_or(0);
 						write!(
 							text,
 							"\n1:{}",
-							if mode != -1 {
-								mode
-							} else {
-								self.get_mark(thing.owner) as i16
-							}
+							if mode != -1 { mode } else { self.get_mark(thing.owner) as i16 }
 						);
 					} else if charges != 0 {
 						write!(text, "\n{}", charges);
@@ -1004,14 +964,7 @@ impl Game {
 				thing.kind
 			};
 			if instkind == Kind::Creature || instkind == Kind::Weapon {
-				write!(
-					ret,
-					"{}|{}/{}",
-					self.trueatk(id),
-					self.truehp(id),
-					self.get(id, Stat::maxhp)
-				)
-				.ok();
+				write!(ret, "{}|{}/{}", self.trueatk(id), self.truehp(id), self.get(id, Stat::maxhp)).ok();
 			} else if instkind == Kind::Shield {
 				write!(ret, "{}", self.truedr(id)).ok();
 			}
@@ -1181,11 +1134,7 @@ impl Game {
 	}
 
 	pub fn has_flooding(&self) -> bool {
-		self.plprops.iter().any(|pl| {
-			pl.permanents
-				.into_iter()
-				.any(|pr| pr != 0 && self.is_flooding(pr))
-		})
+		self.plprops.iter().any(|pl| pl.permanents.into_iter().any(|pr| pr != 0 && self.is_flooding(pr)))
 	}
 
 	pub fn has_protectonce(&self, id: i16) -> bool {
@@ -1193,10 +1142,7 @@ impl Game {
 	}
 
 	pub fn is_cloaked(&self, id: i16) -> bool {
-		self.get_player(id)
-			.permanents
-			.into_iter()
-			.any(|pr| pr != 0 && self.get(pr, Flag::cloak))
+		self.get_player(id).permanents.into_iter().any(|pr| pr != 0 && self.get(pr, Flag::cloak))
 	}
 
 	pub fn requires_target(&self, id: i16) -> bool {
@@ -1317,10 +1263,7 @@ impl Game {
 							2
 						};
 						let column = if row == 2 { i + 1 } else { i } % 8;
-						(
-							204 + column * 90 + if row == 1 { 45 } else { 0 },
-							334 + row * 44,
-						)
+						(204 + column * 90 + if row == 1 { 45 } else { 0 }, 334 + row * 44)
 					}
 					Kind::Permanent => (280 + (i % 9) * 70, 492 + (i / 9) * 70),
 					Kind::Spell => {
@@ -1455,12 +1398,7 @@ impl Game {
 
 	pub fn active_text(&self, id: i16) -> String {
 		if let Some(acast) = self.skill_text(id, Event::Cast) {
-			return format!(
-				"{}:{}{}",
-				self.get(id, Stat::cast),
-				self.get(id, Stat::castele),
-				acast
-			);
+			return format!("{}:{}{}", self.get(id, Stat::cast), self.get(id, Stat::castele), acast);
 		}
 
 		for ev in [
@@ -1512,11 +1450,7 @@ impl Game {
 			self.addskills(id, Event::Death, &[Skill::growth(1, 1)]);
 			false
 		} else if idx < 0 {
-			let flag = if idx == -1 {
-				Flag::momentum
-			} else {
-				Flag::immaterial
-			};
+			let flag = if idx == -1 { Flag::momentum } else { Flag::immaterial };
 			self.set(id, flag, true);
 			false
 		} else {
@@ -1630,28 +1564,15 @@ impl Game {
 	}
 
 	pub fn calcBonusAtk(&self, id: i16) -> i16 {
-		(if self.isEclipseCandidate(id) {
-			self.calcCore2(id, Flag::nightfall)
-		} else {
-			0
-		}) + (if self.isWhetCandidate(id) {
-			self.calcCore(id, Flag::whetstone)
-		} else {
-			0
-		})
+		(if self.isEclipseCandidate(id) { self.calcCore2(id, Flag::nightfall) } else { 0 })
+			+ (if self.isWhetCandidate(id) { self.calcCore(id, Flag::whetstone) } else { 0 })
 	}
 
 	pub fn calcBonusHp(&self, id: i16) -> i16 {
 		if id > self.players_len() {
-			(if self.isEclipseCandidate(id) {
-				self.calcCore(id, Flag::nightfall)
-			} else {
-				0
-			}) + (if self.isWhetCandidate(id) {
-				self.calcCore2(id, Flag::whetstone)
-			} else {
-				0
-			}) + self.trigger_pure(Event::Hp, id, 0)
+			(if self.isEclipseCandidate(id) { self.calcCore(id, Flag::nightfall) } else { 0 })
+				+ (if self.isWhetCandidate(id) { self.calcCore2(id, Flag::whetstone) } else { 0 })
+				+ self.trigger_pure(Event::Hp, id, 0)
 		} else {
 			0
 		}
@@ -1716,10 +1637,7 @@ impl Game {
 			let frozen = self.get(id, Stat::frozen);
 			if frozen == 0 {
 				self.proc_data(Event::Attack, id, &mut data);
-				if kind != Kind::Shield
-					&& !data.get(ProcData::stasis)
-					&& self.get(id, Stat::delayed) == 0
-				{
+				if kind != Kind::Shield && !data.get(ProcData::stasis) && self.get(id, Stat::delayed) == 0 {
 					let mut trueatk = self.trueatk(id);
 					if trueatk != 0 {
 						let psionic = self.get(id, Flag::psionic);
@@ -1749,11 +1667,8 @@ impl Game {
 						} else if gpull != 0 {
 							self.attackCreatureDmg(id, gpull, trueatk);
 						} else {
-							let truedr = if shield != 0 {
-								cmp::min(self.truedr(shield), trueatk)
-							} else {
-								0
-							};
+							let truedr =
+								if shield != 0 { cmp::min(self.truedr(shield), trueatk) } else { 0 };
 							let mut hitdata = data.clone();
 							hitdata.dmg = trueatk - truedr;
 							hitdata.blocked = truedr;
@@ -1837,20 +1752,13 @@ impl Game {
 							self.trigger_data(Event::Hit, id, target, &mut hitdata);
 						} else if kind == Kind::Creature && self.get(target, Stat::gpull) != 0 {
 							let dmg = self.dmg(self.get(target, Stat::gpull), trueatk);
-							if self
-								.getSkill(id, Event::Hit)
-								.iter()
-								.any(|&s| s == Skill::vampire)
-							{
+							if self.getSkill(id, Event::Hit).iter().any(|&s| s == Skill::vampire) {
 								self.dmg(owner, -dmg);
 							}
 						} else {
 							let shield = self.get_shield(target);
-							let truedr = if shield != 0 {
-								cmp::min(self.truedr(shield), trueatk)
-							} else {
-								0
-							};
+							let truedr =
+								if shield != 0 { cmp::min(self.truedr(shield), trueatk) } else { 0 };
 							let mut hitdata = data.clone();
 							let reducedmg = trueatk - truedr;
 							hitdata.dmg = reducedmg;
@@ -1927,11 +1835,7 @@ impl Game {
 		let sosa = self.get(id, Stat::sosa) != 0;
 		let realdmg = if sosa { -dmg } else { dmg };
 		let capdmg = if realdmg < 0 {
-			cmp::max(
-				self.get(id, Stat::hp)
-					.saturating_sub(self.get(id, Stat::maxhp)),
-				realdmg,
-			)
+			cmp::max(self.get(id, Stat::hp).saturating_sub(self.get(id, Stat::maxhp)), realdmg)
 		} else if kind != Kind::Player {
 			cmp::min(self.truehp(id), realdmg)
 		} else {
@@ -1978,11 +1882,7 @@ impl Game {
 	}
 
 	pub fn getSkill(&self, id: i16, k: Event) -> &[Skill] {
-		self.get_thing(id)
-			.skill
-			.get(k)
-			.map(|v| &v[..])
-			.unwrap_or(&[])
+		self.get_thing(id).skill.get(k).map(|v| &v[..]).unwrap_or(&[])
 	}
 
 	pub fn setSkill(&mut self, id: i16, k: Event, val: &'static [Skill]) {
@@ -1990,11 +1890,7 @@ impl Game {
 	}
 
 	pub fn hasskill(&self, id: i16, k: Event, skill: Skill) -> bool {
-		self.get_thing(id)
-			.skill
-			.get(k)
-			.map(|ss| ss.iter().any(|&s| s == skill))
-			.unwrap_or(false)
+		self.get_thing(id).skill.get(k).map(|ss| ss.iter().any(|&s| s == skill)).unwrap_or(false)
 	}
 
 	pub fn addskills(&mut self, id: i16, k: Event, skills: &'static [Skill]) {
@@ -2014,10 +1910,7 @@ impl Game {
 	}
 
 	pub fn iter_skills(&self, id: i16) -> impl Iterator<Item = (Event, &[Skill])> {
-		self.get_thing(id)
-			.skill
-			.iter()
-			.map(|(k, v)| (k, v.as_ref()))
+		self.get_thing(id).skill.iter().map(|(k, v)| (k, v.as_ref()))
 	}
 
 	pub fn new_thing(&mut self, code: i16, owner: i16) -> i16 {
@@ -2037,12 +1930,8 @@ impl Game {
 		for &(k, v) in card.status.iter() {
 			thing.status.insert(k, v);
 		}
-		thing.skill = Skills::from(
-			card.skill
-				.iter()
-				.map(|&(k, v)| (k, Cow::Borrowed(v)))
-				.collect::<Vec<_>>(),
-		);
+		thing.skill =
+			Skills::from(card.skill.iter().map(|&(k, v)| (k, Cow::Borrowed(v))).collect::<Vec<_>>());
 		self.new_id(Rc::new(thing))
 	}
 
@@ -2068,12 +1957,8 @@ impl Game {
 		for &(k, v) in card.status {
 			thing.status.insert(k, v);
 		}
-		thing.skill = Skills::from(
-			card.skill
-				.iter()
-				.map(|&(k, v)| (k, Cow::Borrowed(v)))
-				.collect::<Vec<_>>(),
-		);
+		thing.skill =
+			Skills::from(card.skill.iter().map(|&(k, v)| (k, Cow::Borrowed(v))).collect::<Vec<_>>());
 		if thing.flag.get(Flag::mutant) {
 			let buff = self.rng.gen_range(0..25);
 			if card.code < 5000 {
@@ -2107,10 +1992,7 @@ impl Game {
 		self.proc_data(
 			Event::Play,
 			thingid,
-			&mut ProcData {
-				flags: if fromhand { ProcData::fromhand } else { 0 },
-				..Default::default()
-			},
+			&mut ProcData { flags: if fromhand { ProcData::fromhand } else { 0 }, ..Default::default() },
 		);
 	}
 
@@ -2344,11 +2226,7 @@ impl Game {
 			}
 		}
 		let crs = self.get_player(owner).creatures;
-		let foecrs = if foe != 0 {
-			Some(self.get_player(foe).creatures)
-		} else {
-			None
-		};
+		let foecrs = if foe != 0 { Some(self.get_player(foe).creatures) } else { None };
 		for i in 0..23 {
 			let cr = crs[i];
 			if cr != 0 && self.material(cr, None) {
@@ -2467,14 +2345,7 @@ impl Game {
 	}
 
 	pub fn deatheffect(&mut self, id: i16, index: i32) {
-		self.proc_data(
-			Event::Death,
-			id,
-			&mut ProcData {
-				index: index as i8,
-				..Default::default()
-			},
-		);
+		self.proc_data(Event::Death, id, &mut ProcData { index: index as i8, ..Default::default() });
 	}
 
 	pub fn draw(&mut self, id: i16) -> i16 {
@@ -2623,11 +2494,8 @@ impl Game {
 
 	pub fn o_endturn(&mut self, id: i16) {
 		self.proc_mark(id);
-		let mut data = ProcData {
-			tgt: self.get_foe(id),
-			flags: ProcData::attackphase,
-			..Default::default()
-		};
+		let mut data =
+			ProcData { tgt: self.get_foe(id), flags: ProcData::attackphase, ..Default::default() };
 		self.proc_data(Event::Beginattack, id, &mut data);
 		for pr in self.get_player(id).permanents {
 			if pr != 0 {
@@ -2658,10 +2526,7 @@ impl Game {
 		self.proc_mark(id);
 		let foe = self.get_foe(id);
 		self.dmg(foe, self.get(foe, Stat::poison));
-		let mut data = ProcData {
-			flags: ProcData::attackphase,
-			..ProcData::default()
-		};
+		let mut data = ProcData { flags: ProcData::attackphase, ..ProcData::default() };
 		let mut patienceFlag = false;
 		let mut floodingIndex = 23;
 		self.proc_data(Event::Beginattack, id, &mut data);
@@ -2694,11 +2559,8 @@ impl Game {
 			if cr != 0 {
 				let crcard = self.cards.get(self.get(cr, Stat::card));
 				if patienceFlag {
-					let floodbuff = if i > floodingIndex && crcard.element == etg::Water as i8 {
-						5
-					} else {
-						2
-					};
+					let floodbuff =
+						if i > floodingIndex && crcard.element == etg::Water as i8 { 5 } else { 2 };
 					self.incrAtk(cr, floodbuff);
 					self.buffhp(cr, floodbuff);
 					if self.get(cr, Stat::delayed) == 0 {
@@ -2742,11 +2604,7 @@ impl Game {
 			false
 		} else {
 			let mut quanta = self.get_player(id).quanta;
-			let cap = if self.cards.set == CardSet::Original {
-				75
-			} else {
-				99
-			};
+			let cap = if self.cards.set == CardSet::Original { 75 } else { 99 };
 			if qtype == 0 {
 				if amt < 0 {
 					let amt = cmp::min(-amt, 1188);
@@ -2795,11 +2653,7 @@ impl Game {
 	}
 
 	pub fn castSpellCore(&mut self, c: i16, t: i16, skill: Skill, procspell: bool) {
-		let mut data = ProcData {
-			tgt: t,
-			active: Some(skill),
-			..Default::default()
-		};
+		let mut data = ProcData { tgt: t, active: Some(skill), ..Default::default() };
 		self.proc_data(Event::Prespell, c, &mut data);
 		let t = data.tgt;
 		let evade = data.get(ProcData::evade);
@@ -2871,11 +2725,7 @@ impl Game {
 			let mut data = ProcData::default();
 			while n < self.attacks.len() {
 				let (c, t) = self.attacks[n];
-				data.tgt = if t == 0 {
-					self.get_foe(self.get_owner(c))
-				} else {
-					t
-				};
+				data.tgt = if t == 0 { self.get_foe(self.get_owner(c)) } else { t };
 				self.attack(c, &data);
 				n += 1;
 			}
