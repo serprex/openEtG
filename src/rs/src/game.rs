@@ -1217,7 +1217,7 @@ impl Game {
 		Box::<[i16; 3]>::new(search(self).into()) as Box<[i16]>
 	}
 
-	pub fn aieval(&self) -> f32 {
+	pub fn aieval(&self) -> i32 {
 		use crate::aieval::eval;
 		eval(self)
 	}
@@ -1335,16 +1335,8 @@ impl Game {
 }
 
 impl Game {
-	pub fn rng(&mut self) -> f32 {
-		self.rng.gen()
-	}
-
 	pub fn rng_range<T: SampleUniform, R: SampleRange<T>>(&mut self, range: R) -> T {
 		self.rng.gen_range(range)
-	}
-
-	pub fn rng_ratio(&mut self, numerator: u32, denominator: u32) -> bool {
-		self.rng.gen_ratio(numerator, denominator)
 	}
 
 	pub fn shuffle<T>(&mut self, slice: &mut [T]) {

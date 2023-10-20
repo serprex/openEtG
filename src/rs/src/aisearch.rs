@@ -27,10 +27,10 @@ fn proc_sopa(gclone: &mut Game, turn: i16) {
 struct Candidate {
 	pub cmd: GameMove,
 	pub depth: i32,
-	pub score: f32,
+	pub score: i32,
 }
 
-fn get_worst_card(ctx: &Game) -> (i16, f32) {
+fn get_worst_card(ctx: &Game) -> (i16, i32) {
 	if ctx.full_hand(ctx.turn) {
 		ctx.get_player(ctx.turn)
 			.hand

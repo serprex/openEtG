@@ -811,7 +811,7 @@ fn quadpillarcore(ctx: &mut Game, eles: u16, c: i16, n: i16) {
 	for _ in 0..n {
 		let r = ctx.rng_range(0..16);
 		ctx.spend(owner, ((eles >> ((r << 2) & 12)) & 15) as i16, -1);
-		if ctx.rng_ratio(2, 3) {
+		if ctx.rng_range(0..3) < 2 {
 			ctx.spend(owner, ((eles >> (r & 12)) & 15) as i16, -1);
 		}
 	}
@@ -1891,9 +1891,9 @@ impl Skill {
 				data.amt = 0;
 			}
 			Self::chaos => {
-				let rng = ctx.rng();
-				if rng < 0.5 {
-					if rng < 0.3 {
+				let rng = ctx.rng_range(0..10);
+				if rng < 5 {
+					if rng < 3 {
 						if ctx.get_kind(t) == Kind::Creature && !ctx.get(t, Flag::ranged) {
 							Skill::cseed.proc(ctx, c, t, data);
 						}
@@ -1964,7 +1964,7 @@ impl Skill {
 				}
 			}
 			Self::cold => {
-				if !ctx.get(t, Flag::ranged) && ctx.rng_ratio(3, 10) {
+				if !ctx.get(t, Flag::ranged) && ctx.rng_range(0..10) < 3 {
 					ctx.freeze(t, 3);
 				}
 			}
@@ -2031,7 +2031,7 @@ impl Skill {
 				}
 			}
 			Self::cseed2 => {
-				let upped = ctx.rng_ratio(1, 2);
+				let upped = ctx.rng_range(0..2) == 0;
 				if let Some(card) = ctx.random_card(upped, |ctx, card| {
 					card.kind == Kind::Spell
 						&& card
@@ -2087,7 +2087,7 @@ impl Skill {
 									as u32
 							})
 							.sum::<u32>();
-						if totaldw > 0 && ctx.rng_ratio(1, totaldw) {
+						if totaldw > 0 && ctx.rng_range(0..totaldw) == 0 {
 							data.tgt = c;
 						}
 					}
@@ -2154,7 +2154,7 @@ impl Skill {
 						.into_iter()
 						.map(|cr| (cr != 0 && ctx.get(cr, Flag::nocturnal)) as u32)
 						.sum();
-					if ctx.rng_ratio(40 + nocturnal, 100) {
+					if ctx.rng_range(0..100) < 40 + nocturnal {
 						ctx.incrAtk(t, -1);
 						ctx.dmg(t, 1);
 					}
@@ -2444,7 +2444,7 @@ impl Skill {
 				ctx.set(c, Stat::charges, 0);
 			}
 			Self::evade(chance) => {
-				if ctx.rng_ratio(chance as u32, 100) {
+				if ctx.rng_range(0..100) < chance {
 					data.dmg = 0;
 				}
 			}
@@ -2646,7 +2646,7 @@ impl Skill {
 					&& ctx.get_kind(t) == Kind::Creature
 					&& ctx.get(t, Flag::airborne)
 					&& !data.get(ProcData::freedom)
-					&& ctx.rng_ratio(1, 4)
+					&& ctx.rng_range(0..4) == 0
 				{
 					ctx.fx(t, Fx::Free);
 					data.flags |= ProcData::freedom;
@@ -2662,7 +2662,7 @@ impl Skill {
 						&& ctx.get_kind(tgt) == Kind::Creature
 						&& ctx.get(tgt, Flag::airborne)
 						&& ctx.get(tgt, Stat::frozen) == 0
-						&& ctx.rng_ratio(1, 5)
+						&& ctx.rng_range(0..5) == 0
 					{
 						data.flags |= ProcData::evade;
 					}
@@ -3081,7 +3081,7 @@ impl Skill {
 						shlen = 1;
 					} else if count != 0 && count == shmax {
 						shlen += 1;
-						if (ctx.rng_ratio(1, shlen)) {
+						if ctx.rng_range(0..shlen) == 0 {
 							shidx = idx;
 						}
 					}
@@ -3429,11 +3429,11 @@ impl Skill {
 				ctx.set(c, Flag::mutant, true);
 			}
 			Self::mutation => {
-				let r = ctx.rng();
-				if r < 0.1 {
+				let r = ctx.rng_range(0..10);
+				if r < 1 {
 					ctx.fx(c, Fx::Oops);
 					ctx.die(t);
-				} else if r < 0.5 {
+				} else if r < 5 {
 					Skill::improve.proc(ctx, c, t, data);
 				} else {
 					ctx.fx(c, Fx::Abomination);
@@ -3591,7 +3591,7 @@ impl Skill {
 			}
 			Self::paleomagnetism => {
 				let owner = ctx.get_owner(c);
-				let roll = ctx.rng_ratio(2, 3);
+				let roll = ctx.rng_range(0..3) < 2;
 				let e = ctx
 					.get_player(if roll { owner } else { ctx.get_foe(owner) })
 					.mark;
@@ -4277,7 +4277,7 @@ impl Skill {
 				let tcard = ctx.get(t, Stat::card);
 				if ctx.get_kind(t) == Kind::Creature && !card::IsOf(tcard, cardskele) {
 					let thp = ctx.truehp(t);
-					if thp <= 0 || ctx.rng() < 0.5 / thp as f32 {
+					if thp <= 0 || ctx.rng_range(0..thp * 2) == 0 {
 						let index = ctx.getIndex(t);
 						if index != -1 {
 							let town = ctx.get_owner(t);
@@ -4476,7 +4476,7 @@ impl Skill {
 				}
 			}
 			Self::thorn(chance) => {
-				if !ctx.get(t, Flag::ranged) && ctx.rng_ratio(chance as u32, 100) {
+				if !ctx.get(t, Flag::ranged) && ctx.rng_range(0..100) < chance {
 					ctx.poison(t, 1);
 				}
 			}
@@ -4539,7 +4539,7 @@ impl Skill {
 					);
 					if let Some(&pr) = ctx.choose(&perms) {
 						ctx.fx(pr, Fx::Shuffled);
-						let newowner = if ctx.rng_ratio(1, 2) {
+						let newowner = if ctx.rng_range(0..2) == 0 {
 							pl
 						} else {
 							ctx.get_foe(pl)
@@ -4761,7 +4761,7 @@ impl Skill {
 				}
 			}
 			Self::v_cold => {
-				if ctx.get_kind(t) == Kind::Creature && data.dmg > 0 && ctx.rng_ratio(3, 10) {
+				if ctx.get_kind(t) == Kind::Creature && data.dmg > 0 && ctx.rng_range(0..10) < 3 {
 					ctx.freeze(t, 3);
 				}
 			}
@@ -5190,11 +5190,11 @@ impl Skill {
 				ctx.addCreaCore(owner, inst, true);
 			}
 			Self::v_mutation => {
-				let r = ctx.rng();
-				if r < 0.1 {
+				let r = ctx.rng_range(0..10);
+				if r < 1 {
 					ctx.fx(c, Fx::Oops);
 					ctx.die(t);
-				} else if r < 0.5 {
+				} else if r < 5 {
 					Skill::v_improve.proc(ctx, c, t, data);
 				} else {
 					ctx.fx(c, Fx::Abomination);
@@ -5382,7 +5382,7 @@ impl Skill {
 				ctx.set(c, Stat::swarmhp, hp - 1);
 			}
 			Self::v_thorn => {
-				if ctx.get_kind(t) == Kind::Creature && data.dmg > 0 && ctx.rng_ratio(3, 4) {
+				if ctx.get_kind(t) == Kind::Creature && data.dmg > 0 && ctx.rng_range(0..4) < 3 {
 					ctx.poison(t, 1);
 				}
 			}
