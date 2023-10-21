@@ -540,9 +540,9 @@ fn eval_skill(
 			Skill::reap => 7 * PREC,
 			Skill::rebirth => {
 				if card::Upped(ctx.get(c, Stat::card)) {
-					5 * PREC
-				} else {
 					2 * PREC
+				} else {
+					5 * PREC
 				}
 			}
 			Skill::reducemaxhp => {
