@@ -213,6 +213,8 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 					source.push_str("pub const ");
 					if set == "Orig" {
 						source.push_str("v_");
+					} else if name.starts_with('5') {
+						source.push('_');
 					}
 					for ch in name.bytes() {
 						let ch = ch as char;

@@ -11,7 +11,7 @@ const PREC: i16 = 12;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
-use crate::card::{self, Card, Cards};
+use crate::card::{self, AsUpped, Card, Cards};
 use crate::etg;
 use crate::game::{Flag, Kind};
 use crate::skill::{Event, Skill};
@@ -21,9 +21,9 @@ use crate::skill::{Event, Skill};
 pub fn deckgen_duo(e1: i8, e2: i8, uprate: u8, markpower: i16, maxrarity: i32, seed: i32) -> Vec<i16> {
 	let mut rng = Pcg32::seed_from_u64(seed as u64);
 	let mut build = Builder::new(e2 as i16, uprate, markpower, &mut rng);
-	for j in 0..=1 {
-		let ele = if j == 0 { e1 } else { e2 };
-		for i in 0..(20 - j * 10) {
+	for j in [false, true] {
+		let ele = if j { e2 } else { e1 };
+		for i in 0..(if j { 9 } else { 15 }) {
 			let upped = rng.gen_range(0..100) < uprate;
 			if let Some(card) = card::OpenSet.random_card(&mut rng, upped, |card| {
 				card.element == ele
@@ -53,7 +53,7 @@ pub fn deckgen_bow(uprate: u8, markpower: i16, maxrarity: i32, seed: i32) -> Vec
 	if rng.gen_range(0..200) < uprate {
 		build = Builder::new(etg::Entropy, uprate, markpower, &mut rng);
 		for _ in 0..rng.gen_range(4..=6) {
-			build.add_card(card::AsUpped(card::Nova, true));
+			build.add_card(AsUpped(card::Nova, true));
 		}
 	} else {
 		build = Builder::new(etg::Chroma, uprate, markpower, &mut rng);
@@ -127,18 +127,91 @@ pub fn deckgen_ai4(e1: i8, e2: i8, seed: i32) -> Vec<i16> {
 	deck
 }
 
-const HAS_BUFF: [i16; 20] = [
-	5125, 5318, 8230, 5306, 5730, 5721, 5807, 6115, 6218, 6230, 7106, 7125, 7306, 7318, 7730, 7721, 7807,
-	8115, 8218, 9015,
+const HAS_BUFF: [i16; 19] = [
+	card::Osmosis,
+	card::GravitonDeployer,
+	card::Momentum,
+	card::ShardofPatience,
+	card::Waterfall,
+	card::Blessing,
+	card::Shadling,
+	card::Byt,
+	card::ShardofWisdom,
+	AsUpped(card::ChaosSeed, true),
+	AsUpped(card::Osmosis, true),
+	AsUpped(card::Momentum, true),
+	AsUpped(card::GravitonDeployer, true),
+	AsUpped(card::ShardofPatience, true),
+	AsUpped(card::Waterfall, true),
+	AsUpped(card::Blessing, true),
+	AsUpped(card::Shadling, true),
+	AsUpped(card::Byt, true),
+	AsUpped(card::ShardofWisdom, true),
 ];
-const HAS_POISON: [i16; 23] = [
-	5218, 5219, 5225, 7208, 5208, 5210, 5214, 5212, 5512, 5518, 5507, 5701, 7218, 7210, 7225, 7214, 7219,
-	7212, 7512, 7518, 7507, 7701, 7710,
+const HAS_POISON: [i16; 21] = [
+	card::Poison,
+	card::CorpseExplosion,
+	card::Envenom,
+	card::Arsenic,
+	card::Aflatoxin,
+	card::Virus,
+	card::Deathstalker,
+	card::Scorpion,
+	card::Chrysaora,
+	card::ThornCarapace,
+	AsUpped(card::Poison, true),
+	AsUpped(card::CorpseExplosion, true),
+	AsUpped(card::Envenom, true),
+	AsUpped(card::Arsenic, true),
+	AsUpped(card::Aflatoxin, true),
+	AsUpped(card::Deathstalker, true),
+	AsUpped(card::Scorpion, true),
+	AsUpped(card::Chrysaora, true),
+	AsUpped(card::ThornCarapace, true),
+	AsUpped(card::Fungus, true),
+	AsUpped(card::Toadfish, true),
 ];
-const CAN_INFECT: [i16; 16] =
-	[5220, 5224, 7202, 7209, 5202, 5212, 5710, 6103, 6110, 6120, 7212, 7224, 7220, 8103, 8110, 8120];
-const HAS_BURROW: [i16; 4] = [5408, 5409, 5416, 5401];
-const HAS_LIGHT: [i16; 6] = [5811, 5820, 5908, 7811, 7801, 7820];
+const CAN_INFECT: [i16; 17] = [
+	card::GreyNymph,
+	card::Shtriga,
+	card::Virus,
+	card::Plague,
+	card::Aflatoxin,
+	card::Toadfish,
+	card::Parasite,
+	card::LiquidShadow,
+	card::BlackNymph,
+	AsUpped(card::GreyNymph, true),
+	AsUpped(card::Shtriga, true),
+	AsUpped(card::Virus, true),
+	AsUpped(card::Plague, true),
+	AsUpped(card::Aflatoxin, true),
+	AsUpped(card::Parasite, true),
+	AsUpped(card::LiquidShadow, true),
+	AsUpped(card::BlackNymph, true),
+];
+const HAS_BURROW: [i16; 10] = [
+	card::Antlion,
+	card::Graboid,
+	card::Shrieker,
+	card::Sinkhole,
+	card::BobbitWorm,
+	AsUpped(card::Antlion, true),
+	AsUpped(card::Graboid, true),
+	AsUpped(card::Shrieker, true),
+	AsUpped(card::Sinkhole, true),
+	AsUpped(card::BobbitWorm, true),
+];
+const HAS_LIGHT: [i16; 8] = [
+	card::Luciferin,
+	card::WhiteNymph,
+	card::FireflyQueen,
+	card::BloodMoon,
+	AsUpped(card::Luciferin, true),
+	AsUpped(card::Photon, true),
+	AsUpped(card::WhiteNymph, true),
+	AsUpped(card::BloodMoon, true),
+];
 
 fn scorpion(card: &'static Card, deck: &[i16]) -> bool {
 	let isdeath = card.isOf(card::Deathstalker);
@@ -170,7 +243,7 @@ fn filters(code: i16, deck: &[i16], ecost: &[i16; 13]) -> bool {
 				})
 				.count() > 3
 		}
-		card::Scorpion | card::Deathstalker => scorpion(card, deck),
+		card::Deathstalker | card::DuneScorpion => scorpion(card, deck),
 		card::TidalHealing => {
 			let mut aquatics: i32 = 0;
 			for &dcode in deck.iter() {
@@ -220,12 +293,12 @@ fn filters(code: i16, deck: &[i16], ecost: &[i16; 13]) -> bool {
 			}
 			false
 		}
-		card::DuneScorpion => {
+		card::Neurotoxin => {
 			for &dcode in deck.iter() {
-				if (HAS_POISON.contains(&dcode)) {
+				if HAS_POISON.contains(&dcode) {
 					return true;
 				}
-				if (dcode == 6112 || dcode == 8112) {
+				if dcode == card::VoodooDoll || dcode == AsUpped(card::VoodooDoll, true) {
 					if deck.iter().any(|dcode2| CAN_INFECT.contains(dcode2)) {
 						return true;
 					}
