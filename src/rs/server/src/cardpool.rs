@@ -1,4 +1,3 @@
-use std::cmp;
 use std::collections::HashMap;
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -14,7 +13,7 @@ impl From<&Cardpool> for String {
 		for (&code, &count) in pool.0.iter() {
 			let mut count = count;
 			while count > 0 {
-				let amt = cmp::min(count, 1023);
+				let amt = count.min(1023);
 				ascii.extend(&etgutil::encode_count(amt as u32));
 				ascii.extend(&etgutil::encode_code(code));
 				count -= amt;

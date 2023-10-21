@@ -7,14 +7,13 @@ use alloc::rc::Rc;
 use alloc::string::String;
 use alloc::vec;
 use alloc::vec::Vec;
-use core::cmp;
 use core::fmt::Write;
 use core::iter::once;
 use core::num::{NonZeroU32, NonZeroU8};
 
 use crate::card::{self, CardSet};
 use crate::etg;
-use crate::game::{Flag, Fx, Game, Kind, Sfx, Stat, ThingData};
+use crate::game::{Flag, Fx, Game, Kind, Sfx, Stat, StatusEntry, ThingData};
 
 #[derive(Clone, Copy, Hash, Eq, PartialEq)]
 pub struct Event(NonZeroU8);
@@ -1651,7 +1650,7 @@ impl Skill {
 				if !ctx.sanctified(t) {
 					let mut heal = 0;
 					for q in ctx.get_player_mut(t).quanta.iter_mut() {
-						let amt = cmp::min(*q, 3);
+						let amt = (*q).min(3);
 						heal -= amt as i16;
 						*q -= amt;
 					}
@@ -1872,7 +1871,7 @@ impl Skill {
 				ctx.set(owner, Stat::gpull, chim);
 			}
 			Self::chromastat => {
-				let n = cmp::min(ctx.truehp(c) + ctx.trueatk(c), 1188);
+				let n = ctx.truehp(c).saturating_add(ctx.trueatk(c)).min(1188);
 				ctx.fx(c, Fx::Quanta(n, etg::Chroma as i8));
 				ctx.spend(ctx.get_owner(c), etg::Chroma, -n);
 			}
@@ -2152,7 +2151,7 @@ impl Skill {
 			Self::divinity => {
 				let owner = ctx.get_owner(c);
 				let maxhp = ctx.get_mut(owner, Stat::maxhp);
-				*maxhp = cmp::min(*maxhp + 24, 500);
+				*maxhp = (*maxhp + 24).min(500);
 				ctx.dmg(owner, -16);
 			}
 			Self::dmgproduce => {
@@ -2961,7 +2960,7 @@ impl Skill {
 						}
 					}
 				}
-				shmax = cmp::min(shmax - 1, 5);
+				shmax = (shmax - 1).min(5);
 				let soicode = ctx.get(c, Stat::card);
 				let active = match shardSkills[shidx][shmax..=shmax] {
 					[Skill::summon(code)] => Cow::from(vec![Skill::summon(card::AsUpped(
@@ -3412,7 +3411,7 @@ impl Skill {
 			Self::ouijadestroy => {
 				let foe = ctx.get_foe(ctx.get_owner(c));
 				let maxhp = ctx.get_mut(foe, Stat::maxhp);
-				*maxhp = cmp::min(*maxhp + 1, 500);
+				*maxhp += (*maxhp < 500) as i16;
 			}
 			Self::ouijagrowth => {
 				let foe = ctx.get_foe(ctx.get_owner(c));
@@ -3665,11 +3664,14 @@ impl Skill {
 			}
 			Self::purify => {
 				let thing = ctx.get_thing_mut(t);
-				let poison = thing.status.entry(Stat::poison).or_insert(0);
-				if *poison < 0 {
-					*poison = poison.saturating_sub(2);
-				} else {
-					*poison = -2;
+				match thing.status.entry(Stat::poison) {
+					StatusEntry::Vacant(hole) => {
+						hole.status.0.insert(hole.idx, (hole.stat, -2));
+					}
+					StatusEntry::Occupied(spot) => {
+						let poison = &mut spot.status.0[spot.idx].1;
+						*poison = poison.saturating_sub(2).min(-2);
+					}
 				}
 				thing.flag.0 &= !(Flag::aflatoxin | Flag::neuro);
 				if let Some(val) = thing.status.get_mut(Stat::sosa) {
@@ -3754,7 +3756,7 @@ impl Skill {
 			Self::reducemaxhp => {
 				let dmg = data.dmg;
 				let maxhp = ctx.get_mut(t, Stat::maxhp);
-				*maxhp = cmp::max(*maxhp - dmg, 1);
+				*maxhp = maxhp.saturating_sub(dmg).max(1);
 				let maxhp = *maxhp;
 				if maxhp > 500 && ctx.get_kind(t) == Kind::Player {
 					ctx.set(t, Stat::maxhp, 500);
@@ -3835,8 +3837,8 @@ impl Skill {
 									tgts.extend(
 										once(pl.weapon)
 											.chain(once(pl.shield))
-											.chain(pl.creatures.iter().cloned())
-											.chain(pl.permanents.iter().cloned())
+											.chain(pl.creatures.into_iter())
+											.chain(pl.permanents.into_iter())
 											.chain(pl.hand_iter())
 											.filter(|&id| id != 0 && tgting.check(ctx, t, id))
 											.map(|id| (id, caster)),
@@ -3932,7 +3934,7 @@ impl Skill {
 			}
 			Self::serendipity => {
 				let owner = ctx.get_owner(c);
-				let num = cmp::min(8 - ctx.get_player(owner).hand_len(), 3);
+				let num = (8 - ctx.get_player(owner).hand_len()).min(3);
 				let mut anyentro = false;
 				let ccard = ctx.get(c, Stat::card);
 				for i in (0..num).rev() {
@@ -4000,20 +4002,17 @@ impl Skill {
 					r = 0;
 				}
 				if r == 0 {
-					let owner = ctx.get_owner(c);
 					let cap = if self == Self::singularity { 99 } else { 75 };
-					for q in ctx.get_player_mut(ctx.get_foe(owner)).quanta.iter_mut() {
+					for q in ctx.get_player_mut(ctx.get_foe(ctx.get_owner(c))).quanta.iter_mut() {
 						*q += (*q < cap) as u8;
 					}
-				} else if r < 5 {
+				} else if r < 3 {
 					if self == Self::v_singularity {
 						ctx.lobo(c);
 					}
-					if r < 3 {
-						ctx.setSkill(c, Event::Hit, &[Skill::vampire]);
-					} else {
-						ctx.set(c, Flag::immaterial, true);
-					}
+					ctx.setSkill(c, Event::Hit, &[Skill::vampire]);
+				} else if r < 5 {
+					ctx.set(c, Flag::immaterial, true);
 				} else if r < 7 {
 					let buff = ctx.rng_range(0..25);
 					ctx.buffhp(c, buff / 5 + 1);
@@ -4326,7 +4325,7 @@ impl Skill {
 					perms.extend(
 						once(plpl.weapon)
 							.chain(once(plpl.shield))
-							.chain(plpl.permanents.iter().cloned())
+							.chain(plpl.permanents.into_iter())
 							.filter(|&pr| pr != 0 && ctx.material(pr, None)),
 					);
 					if let Some(&pr) = ctx.choose(&perms) {
@@ -4368,7 +4367,11 @@ impl Skill {
 			Self::turngolem => {
 				ctx.remove(c);
 				let thing = ctx.get_thing_mut(c);
-				let stored = core::mem::replace(thing.status.entry(Stat::storedpower).or_insert(0), 0);
+				let stored = if let Some(stored) = thing.status.get_mut(Stat::storedpower) {
+					core::mem::replace(stored, 0)
+				} else {
+					0
+				};
 				thing.skill.remove(Event::Cast);
 				thing.status.insert(Stat::atk, stored / 2);
 				thing.status.insert(Stat::maxhp, stored);
@@ -4467,7 +4470,7 @@ impl Skill {
 				};
 				let foe = ctx.get_foe(ctx.get_owner(c));
 				let maxhp = ctx.get_mut(foe, Stat::maxhp);
-				*maxhp = cmp::max(maxhp.saturating_sub(3), 1);
+				*maxhp = maxhp.saturating_sub(3).max(1);
 				let maxhp = *maxhp;
 				let hp = ctx.get_mut(foe, Stat::hp);
 				if *hp > maxhp {
@@ -4574,7 +4577,7 @@ impl Skill {
 				let owner = ctx.get_owner(c);
 				let amt = if ctx.get_player(owner).mark == etg::Light as i8 { 24 } else { 16 };
 				let maxhp = ctx.get_mut(owner, Stat::maxhp);
-				*maxhp = cmp::min(*maxhp + amt, 500);
+				*maxhp = (*maxhp + amt).min(500);
 				ctx.dmg(owner, -amt);
 			}
 			Self::v_drainlife(cost) => {
@@ -4829,7 +4832,7 @@ impl Skill {
 						shpick = idx;
 					}
 				}
-				shmax = cmp::min(shmax - 1, 5);
+				shmax = (shmax - 1).min(5);
 				let active = Cow::from(&shardSkills[shpick][shmax..=shmax]);
 				let activecost = match active[0] {
 					Skill::burrow => 1,
@@ -5032,7 +5035,7 @@ impl Skill {
 			}
 			Self::v_serendipity => {
 				let owner = ctx.get_owner(c);
-				let num = cmp::min(8 - ctx.get_player(owner).hand_len(), 3);
+				let num = (8 - ctx.get_player(owner).hand_len()).min(3);
 				let mut anyentro = false;
 				let ccard = ctx.get(c, Stat::card);
 				for i in (0..num).rev() {

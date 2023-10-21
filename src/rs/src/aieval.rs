@@ -2,7 +2,6 @@
 #![allow(non_upper_case_globals)]
 
 use alloc::vec::Vec;
-use core::cmp;
 use core::default::Default;
 use core::iter::once;
 use core::ops::{Index, IndexMut};
@@ -214,8 +213,7 @@ fn eval_skill(
 			Skill::bellweb => PREC,
 			Skill::blackhole | Skill::v_blackhole => {
 				let foe = ctx.get_foe(ctx.get_owner(c));
-				(ctx.get_player(foe).quanta.into_iter().map(|q| cmp::min(q, 3)).sum::<u8>()) as i32 * PREC
-					/ 24
+				(ctx.get_player(foe).quanta.into_iter().map(|q| q.min(3)).sum::<u8>()) as i32 * PREC / 24
 			}
 			Skill::bless => 4 * PREC,
 			Skill::bloodmoon => 9 * (PREC / 2),
@@ -223,13 +221,11 @@ fn eval_skill(
 			Skill::bounce => PREC,
 			Skill::bravery => {
 				let owner = ctx.get_owner(c);
-				cmp::min(
-					2,
-					8 - cmp::max(
-						ctx.get_player(owner).hand_len() - 1,
-						ctx.get_player(ctx.get_foe(owner)).hand_len(),
-					),
-				) as i32 * PREC
+				(8 - ctx
+					.get_player(ctx.get_foe(owner))
+					.hand_len()
+					.max(ctx.get_player(owner).hand_len() - 1))
+				.min(2) as i32 * PREC
 			}
 			Skill::brawl => 8 * PREC,
 			Skill::brew => 4 * PREC,
@@ -308,9 +304,9 @@ fn eval_skill(
 			Skill::deployblobs => {
 				(8 + if ctx.get_kind(c) == Kind::Spell {
 					let card = ctx.get_card(ctx.get(c, Stat::card));
-					cmp::min(card.attack, card.health) as i32
+					card.attack.min(card.health) as i32
 				} else {
-					cmp::min(ctx.truehp(c), ctx.truehp(c)) as i32
+					ctx.trueatk(c).min(ctx.truehp(c)) as i32
 				}) * (PREC / 4)
 			}
 			Skill::destroy => 8 * PREC,
@@ -522,7 +518,7 @@ fn eval_skill(
 			Skill::predator => {
 				let foehandlen = ctx.get_player(ctx.get_foe(ctx.get_owner(c))).hand_len() as i32;
 				if foehandlen > 4 && ctx.get_kind(c) != Kind::Spell {
-					ttatk + cmp::max(foehandlen - 6, 1) * PREC
+					ttatk + (foehandlen - 6).max(1) * PREC
 				} else {
 					PREC
 				}
@@ -639,10 +635,9 @@ fn eval_skill(
 				if ctx.get_kind(c) == Kind::Spell {
 					let foeshield = ctx.get_shield(ctx.get_foe(ctx.get_owner(c)));
 					if foeshield != 0 {
-						cmp::min(
-							ctx.truedr(foeshield) as i32,
-							ctx.get_card(ctx.get(c, Stat::card)).attack as i32,
-						) * PREC
+						(ctx.truedr(foeshield) as i32)
+							.min(ctx.get_card(ctx.get(c, Stat::card)).attack as i32)
+							* PREC
 					} else {
 						PREC / 2
 					}
@@ -693,7 +688,7 @@ fn eval_skill(
 						.creatures
 						.into_iter()
 						.filter(|&cr| cr != 0)
-						.map(|cr| log2(cmp::max(6 - ctx.get(c, Stat::hp) as i32, 2) * PREC))
+						.map(|cr| log2((6 - ctx.get(c, Stat::hp) as i32).max(2) * PREC))
 						.sum::<i32>() / 2
 			}
 			Skill::chaos => {
@@ -769,7 +764,7 @@ impl WallShield {
 			}
 			WallShield::Voidshell(ref mut maxhp) => {
 				if *maxhp > 1 {
-					*maxhp = cmp::max(*maxhp - dmg, 1);
+					*maxhp = (*maxhp - dmg).max(1);
 					return 0;
 				}
 			}
@@ -799,7 +794,7 @@ struct Wall {
 }
 
 fn estimate_damage(ctx: &Game, id: i16, freedom: i32, wall: &mut Wall) -> i32 {
-	let mut delay = cmp::min(ctx.get(id, Stat::frozen), ctx.get(id, Stat::delayed));
+	let mut delay = ctx.get(id, Stat::frozen).max(ctx.get(id, Stat::delayed));
 	if delay != 0 && ctx.get(id, Stat::adrenaline) == 0 {
 		return 0;
 	}
@@ -841,9 +836,9 @@ fn estimate_damage(ctx: &Game, id: i16, freedom: i32, wall: &mut Wall) -> i32 {
 		momatk += dmg as i32;
 		if !momentum {
 			atk += if let Some(ref mut wshield) = wall.shield {
-				wshield.dmg(ctx, id, cmp::max(dmg - dr, 0))
+				wshield.dmg(ctx, id, (dmg - dr).max(0))
 			} else {
-				cmp::max(dmg - dr, 0) as i32 * PREC
+				(dmg - dr).max(0) as i32 * PREC
 			}
 		}
 	}
@@ -908,7 +903,7 @@ fn evalthing(
 	let kind = if inhand { cdata.kind } else { ctx.get_kind(id) };
 	let iscrea = kind == Kind::Creature;
 	let mut score = 0;
-	let mut delaymix = cmp::max(ctx.get(id, Stat::frozen), ctx.get(id, Stat::delayed)) as i32 * PREC;
+	let mut delaymix = ctx.get(id, Stat::frozen).max(ctx.get(id, Stat::delayed)) as i32 * PREC;
 	let (ttatk, ctrueatk, adrenaline, delayfactor) = if iscrea || kind == Kind::Weapon {
 		let ttatk = damage[id];
 		let ctrueatk = ctx.trueatk(id);
@@ -950,7 +945,7 @@ fn evalthing(
 					score -= 2 * PREC;
 				}
 			} else if poison < 0 {
-				hp = cmp::min(hp.saturating_sub(poison), ctx.get(id, Stat::maxhp));
+				hp = hp.saturating_sub(poison).min(ctx.get(id, Stat::maxhp));
 			}
 			if hp < 0 {
 				hp = 0;
@@ -1144,15 +1139,13 @@ pub fn eval(ctx: &Game) -> i32 {
 				.cloned()
 				.unwrap_or(64u8) as i32
 		} else {
-			cmp::min(
-				player
-					.permanents
-					.into_iter()
-					.filter(|&pr| pr != 0 && ctx.hasskill(pr, Event::Attack, Skill::v_freedom))
-					.map(|pr| ctx.get(pr, Stat::charges))
-					.sum::<i16>(),
-				4,
-			) as i32 * (PREC / 4)
+			player
+				.permanents
+				.into_iter()
+				.filter(|&pr| pr != 0 && ctx.hasskill(pr, Event::Attack, Skill::v_freedom))
+				.map(|pr| ctx.get(pr, Stat::charges))
+				.sum::<i16>()
+				.min(4) as i32 * (PREC / 4)
 		};
 		if !stasis && !patience {
 			for cr in player.creatures {

@@ -9,7 +9,6 @@ use alloc::rc::Rc;
 use alloc::string::String;
 use alloc::vec;
 use alloc::vec::Vec;
-use core::cmp;
 use core::default::Default;
 use core::fmt::Write;
 use core::hash::{Hash, Hasher};
@@ -381,10 +380,10 @@ impl<'a> StatusEntry<'a> {
 }
 
 impl Status {
-	pub fn get(&self, stat: Stat) -> Option<i16> {
+	pub fn get(&self, stat: Stat) -> i16 {
 		match self.0.binary_search_by_key(&stat, |kv| kv.0) {
-			Err(_) => None,
-			Ok(idx) => Some(self.0[idx].1),
+			Err(_) => 0,
+			Ok(idx) => self.0[idx].1,
 		}
 	}
 
@@ -507,7 +506,7 @@ impl ThingGetter for Stat {
 	type Value = i16;
 
 	fn get(self, ctx: &Game, id: i16) -> Self::Value {
-		ctx.get_thing(id).status.get(self).unwrap_or(0)
+		ctx.get_thing(id).status.get(self)
 	}
 
 	fn set(self, ctx: &mut Game, id: i16, val: Self::Value) {
@@ -891,16 +890,11 @@ impl Game {
 
 	pub fn instance_text(&self, id: i16) -> String {
 		let thing = self.get_thing(id);
-		let card = self.cards.get(thing.status.get(Stat::card).unwrap_or(0));
+		let card = self.cards.get(thing.status.get(Stat::card));
 		if thing.kind == Kind::Spell {
-			format!(
-				"{}\n{}:{}",
-				card.name,
-				thing.status.get(Stat::cost).unwrap_or(0),
-				thing.status.get(Stat::costele).unwrap_or(0)
-			)
+			format!("{}\n{}:{}", card.name, thing.status.get(Stat::cost), thing.status.get(Stat::costele))
 		} else {
-			let charges = thing.status.get(Stat::charges).unwrap_or(0);
+			let charges = thing.status.get(Stat::charges);
 			let mut text = self.active_text(id);
 			match thing.kind {
 				Kind::Creature => {
@@ -925,7 +919,7 @@ impl Game {
 					} else if thing.skill.get(Event::OwnAttack).map(|sk| sk.as_ref()).unwrap_or(&[])
 						== &[Skill::locket]
 					{
-						let mode = thing.status.get(Stat::mode).unwrap_or(0);
+						let mode = thing.status.get(Stat::mode);
 						write!(
 							text,
 							"\n1:{}",
@@ -1226,8 +1220,8 @@ impl Game {
 					gclone.r#move(GameMove::End(0));
 				}
 				for pl in 1..=gclone.players_len() {
-					expected[pl as usize - 1] += (cmp::max(self.get(pl, Stat::hp), -500)
-						- cmp::max(gclone.get(pl, Stat::hp), -500)) as i16;
+					expected[pl as usize - 1] +=
+						(self.get(pl, Stat::hp).max(-500) - gclone.get(pl, Stat::hp).max(-500)) as i16;
 				}
 			}
 			for x in expected.iter_mut() {
@@ -1527,7 +1521,7 @@ impl Game {
 		let owner = self.get_owner(id);
 		for j in 0..2 {
 			let pl = if j == 0 { owner } else { self.get_foe(owner) };
-			for pr in self.get_player(pl).permanents.iter().cloned() {
+			for pr in self.get_player(pl).permanents {
 				if pr != 0 && self.get(pr, filterstat) {
 					return 1;
 				}
@@ -1541,7 +1535,7 @@ impl Game {
 		let owner = self.get_owner(id);
 		for j in 0..2 {
 			let pl = if j == 0 { owner } else { self.get_foe(owner) };
-			for pr in self.get_player(pl).permanents.iter().cloned() {
+			for pr in self.get_player(pl).permanents {
 				if pr != 0 && self.get(pr, filterstat) {
 					if card::Upped(self.get(pr, Stat::card)) {
 						return 2;
@@ -1667,8 +1661,7 @@ impl Game {
 						} else if gpull != 0 {
 							self.attackCreatureDmg(id, gpull, trueatk);
 						} else {
-							let truedr =
-								if shield != 0 { cmp::min(self.truedr(shield), trueatk) } else { 0 };
+							let truedr = if shield != 0 { self.truedr(shield).min(trueatk) } else { 0 };
 							let mut hitdata = data.clone();
 							hitdata.dmg = trueatk - truedr;
 							hitdata.blocked = truedr;
@@ -1757,8 +1750,7 @@ impl Game {
 							}
 						} else {
 							let shield = self.get_shield(target);
-							let truedr =
-								if shield != 0 { cmp::min(self.truedr(shield), trueatk) } else { 0 };
+							let truedr = if shield != 0 { self.truedr(shield).min(trueatk) } else { 0 };
 							let mut hitdata = data.clone();
 							let reducedmg = trueatk - truedr;
 							hitdata.dmg = reducedmg;
@@ -1823,21 +1815,18 @@ impl Game {
 		if dmg == 0 {
 			return 0;
 		}
-		let mut kind = self.get_kind(id);
-		if kind == Kind::Weapon {
-			if dmg < 0 {
-				return 0;
-			} else {
-				id = self.get_owner(id);
-				kind = Kind::Player;
-			}
+		let thing = self.get_thing(id);
+		let mut kind = thing.kind;
+		if kind == Kind::Weapon && dmg > 0 {
+			id = thing.owner;
+			kind = Kind::Player;
 		}
-		let sosa = self.get(id, Stat::sosa) != 0;
+		let sosa = thing.status.get(Stat::sosa) != 0;
 		let realdmg = if sosa { -dmg } else { dmg };
 		let capdmg = if realdmg < 0 {
-			cmp::max(self.get(id, Stat::hp).saturating_sub(self.get(id, Stat::maxhp)), realdmg)
+			thing.status.get(Stat::hp).saturating_sub(thing.status.get(Stat::maxhp)).max(realdmg)
 		} else if kind != Kind::Player {
-			cmp::min(self.truehp(id), realdmg)
+			self.truehp(id).min(realdmg)
 		} else {
 			realdmg
 		};
@@ -2607,16 +2596,14 @@ impl Game {
 			let cap = if self.cards.set == CardSet::Original { 75 } else { 99 };
 			if qtype == 0 {
 				if amt < 0 {
-					let amt = cmp::min(-amt, 1188);
 					let uni12 = Uniform::from(0..12);
-					for _ in 0..amt {
+					for _ in 0..(-amt).min(1188) {
 						let q = &mut quanta[uni12.sample(&mut self.rng)];
 						*q += ((*q as i16) < cap) as u8;
 					}
 				} else {
-					let amt = cmp::min(amt, 1188);
 					let total: u32 = quanta.iter().map(|&q| q as u32).sum();
-					for n in 0..amt as u32 {
+					for n in 0..(amt as u32).min(1188) {
 						let mut pick = self.rng.gen_range(0..total - n);
 						for q in quanta.iter_mut() {
 							if pick < *q as u32 {
@@ -2630,7 +2617,7 @@ impl Game {
 			} else {
 				let q = &mut quanta[(qtype - 1) as usize];
 				if amt < 0 {
-					*q = cmp::min((*q as i16).saturating_sub(amt), cap) as u8;
+					*q = (*q as i16).saturating_sub(amt).min(cap) as u8;
 				} else {
 					*q -= amt as u8;
 				}

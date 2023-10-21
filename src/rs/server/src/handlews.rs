@@ -566,7 +566,7 @@ pub async fn handle_ws(
 										if age > 0 {
 											let mut user = user.lock().await;
 											user.data.gold = user.data.gold.saturating_add(
-												std::cmp::min(age.saturating_mul(25), 350) as i32,
+												age.saturating_mul(25).min(350) as i32,
 											);
 										}
 									}
@@ -1639,7 +1639,7 @@ pub async fn handle_ws(
 															let bu: String = bid.get(1);
 															let bp: i32 = bid.get(2);
 															let bq: i32 = bid.get(3);
-															let amt = std::cmp::min(bq, count as i32);
+															let amt = bq.min(count as i32);
 															let mut happened = 0;
 															if price > 0 {
 																if bp < 0 && -bp <= price as i32 {
