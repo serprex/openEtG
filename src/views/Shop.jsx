@@ -94,7 +94,7 @@ export default function Shop() {
 					}
 				} else {
 					const bdata = {};
-					parseInput(bdata, 'bulk', bulk(), 99);
+					parseInput(bdata, 'bulk', bulk(), 255);
 					userdelta.pool = etgutil.mergedecks(rx.user.pool, data.cards);
 					userdelta.gold =
 						rx.user.gold - packdata[data.packtype].cost * (bdata.bulk || 1);
@@ -123,7 +123,7 @@ export default function Shop() {
 			pack: rarity(),
 			element: ele(),
 		};
-		parseInput(boostdata, 'bulk', bulk(), 99);
+		parseInput(boostdata, 'bulk', bulk(), 255);
 		boostdata.bulk ||= 1;
 		if (
 			rx.user.gold >= pack.cost * (boostdata.bulk || 1) ||
@@ -182,7 +182,7 @@ export default function Shop() {
 						}`}
 				</span>
 			)}
-			{cards && (
+			{cards() && (
 				<input
 					type="button"
 					value="Take Cards"
@@ -203,7 +203,7 @@ export default function Shop() {
 								const pack = packdata[rarity()];
 								store.setOptTemp(
 									'bulk',
-									Math.min((rx.user.gold / pack.cost) | 0, 99).toString(),
+									Math.min((rx.user.gold / pack.cost) | 0, 255).toString(),
 								);
 							}}
 							style="position:absolute;left:775px;top:128px"
@@ -249,6 +249,8 @@ export default function Shop() {
 					type="number"
 					placeholder="Bulk"
 					value={bulk()}
+					min="0"
+					max="255"
 					onChange={e => store.setOptTemp('bulk', e.target.value)}
 					onKeyPress={e => {
 						if (e.which === 13) buyPack();
