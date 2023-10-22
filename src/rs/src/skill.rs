@@ -553,7 +553,6 @@ pub enum Skill {
 	yoink,
 	v_bblood,
 	v_blackhole,
-	v_bow,
 	v_cold,
 	v_cseed,
 	v_dagger,
@@ -572,7 +571,6 @@ pub enum Skill {
 	v_heal,
 	v_holylight,
 	v_hope,
-	v_hopedr,
 	v_icebolt(u8),
 	v_improve,
 	v_integrity,
@@ -1172,7 +1170,6 @@ impl Skill {
 			Self::yoink => out.push_str("yoink"),
 			Self::v_bblood => out.push_str("v_bblood"),
 			Self::v_blackhole => out.push_str("v_blackhole"),
-			Self::v_bow => out.push_str("v_bow"),
 			Self::v_cold => out.push_str("v_cold"),
 			Self::v_cseed => out.push_str("v_cseed"),
 			Self::v_dagger => out.push_str("v_dagger"),
@@ -1191,7 +1188,6 @@ impl Skill {
 			Self::v_heal => out.push_str("v_heal"),
 			Self::v_holylight => out.push_str("v_holylight"),
 			Self::v_hope => out.push_str("v_hope"),
-			Self::v_hopedr => out.push_str("v_hopedr"),
 			Self::v_icebolt(_) => out.push_str("v_icebolt"),
 			Self::v_improve => out.push_str("v_improve"),
 			Self::v_integrity => out.push_str("v_integrity"),
@@ -1829,15 +1825,11 @@ impl Skill {
 				data.amt = 0;
 			}
 			Self::chaos => {
-				let rng = ctx.rng_range(0..10);
-				if rng < 5 {
-					if rng < 3 {
-						if ctx.get_kind(t) == Kind::Creature && !ctx.get(t, Flag::ranged) {
-							Skill::cseed.proc(ctx, c, t, data);
-						}
-					} else if card::Upped(ctx.get(c, Stat::card)) {
-						data.dmg = 0;
-					}
+				if ctx.get_kind(t) == Kind::Creature
+					&& !ctx.get(t, Flag::ranged)
+					&& ctx.rng_range(0..10) < 3
+				{
+					Skill::cseed.proc(ctx, c, t, data);
 				}
 			}
 			Self::chimera => {
@@ -4674,7 +4666,7 @@ impl Skill {
 			}
 			Self::v_hope => {
 				let dr = Self::hope.proc_pure(ctx, c, t);
-				ctx.set(c, Stat::hope, dr);
+				ctx.set(c, Stat::hp, dr + card::Upped(ctx.get(c, Stat::card)) as i16);
 			}
 			Self::v_icebolt(cost) => {
 				let owner = ctx.get_owner(c);
@@ -5132,9 +5124,7 @@ impl Skill {
 			| Self::hope
 			| Self::staff
 			| Self::swarm
-			| Self::v_bow
 			| Self::v_dagger
-			| Self::v_hopedr
 			| Self::v_swarmhp => panic!("Pure skill triggered with impurity"),
 		}
 	}
@@ -5146,9 +5136,9 @@ impl Skill {
 				let mark = ctx.get_player(ctx.get_owner(c)).mark as i16;
 				(mark == etg::Fire || mark == etg::Time) as i16
 			}
-			Self::bow | Self::v_bow => {
+			Self::bow => {
 				let mark = ctx.get_player(ctx.get_owner(c)).mark as i16;
-				(mark == etg::Air || mark == etg::Light) as i16
+				(mark == etg::Air || ctx.cardset() == CardSet::Open && mark == etg::Light) as i16
 			}
 			Self::countimmbur => ctx
 				.players()
@@ -5213,7 +5203,6 @@ impl Skill {
 				let mark = ctx.get_player(ctx.get_owner(c)).mark as i16;
 				(mark == etg::Death || mark == etg::Darkness) as i16
 			}
-			Self::v_hopedr => ctx.get(c, Stat::hope),
 			Self::v_swarmhp => ctx.get(c, Stat::swarmhp),
 			_ => 0,
 		}

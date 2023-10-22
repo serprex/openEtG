@@ -232,11 +232,7 @@ impl<'a> SkillThing<'a> {
 					   self.get_stat(Stat::lives), card.attack, card.health))
 			}
 			Skill::cell => Cow::from("Becomes a Malignant Cell if poisoned"),
-			Skill::chaos => Cow::from(if self.upped() {
-				"20% chance to evade attacks. Non-ranged attacking creatures have a 30% chance to have a random effect cast on them"
-			} else {
-				"Non-ranged attacking creatures have a 30% chance to have a random effect cast on them"
-			}),
+			Skill::chaos => Cow::from("Non-ranged attacking creatures have a 30% chance to have a random effect cast on them"),
 			Skill::chimera =>
 				Cow::from("Combine all your creatures to form a Chimera with momentum, gravity pull, & the total of your creatures' combined strength & HP"),
 			Skill::chromastat =>
@@ -837,12 +833,15 @@ impl<'a> SkillThing<'a> {
 			Skill::v_virusplague => Cow::from("Sacrifice self & poison foe's creatures"),
 			Skill::dagger => Cow::from("Gain 1 strength if your mark is 1:2 1:11. Gain 1 strength per Darkness or Death non-pillar permanent you control"),
 			Skill::hammer => Cow::from("Gain 1 strength if your mark is 1:3 1:4"),
-			Skill::bow => Cow::from("Gain 1 strength if your mark is 1:8 1:9"),
+			Skill::bow => Cow::from(if self.set() == CardSet::Open {
+				"Gain 1 strength if your mark is 1:8 1:9"
+			} else { 
+				"Gain 1 strength if your mark is 1:9"
+			}),
 			Skill::staff => Cow::from("Gain 1 strength if your mark is 1:5 1:7"),
 			Skill::disc => Cow::from("Gain 1 strength if your mark is 1:1 1:12"),
 			Skill::axe => Cow::from("Gain 1 strength if your mark is 1:6 1:10"),
 			Skill::v_dagger => Cow::from("Gain 1 strength if your mark is 1:2 1:11"),
-			Skill::v_bow => Cow::from("Gain 1 strength if your mark is 1:9"),
 			_ => return None
 		})
 	}

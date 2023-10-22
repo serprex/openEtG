@@ -207,13 +207,12 @@ fn eval_skill(
 			}
 			Skill::bblood | Skill::v_bblood => 7 * PREC,
 			Skill::beguilestop => {
-				(if ctx.hasskill(c, Event::OwnAttack, Skill::singularity) { 60 * PREC } else { 0 })
-					- damage[c]
+				(if ctx.hasskill(c, Event::OwnAttack, Skill::singularity) { 60 * PREC } else { 0 }) - ttatk
 			}
 			Skill::bellweb => PREC,
 			Skill::blackhole | Skill::v_blackhole => {
 				let foe = ctx.get_foe(ctx.get_owner(c));
-				(ctx.get_player(foe).quanta.into_iter().map(|q| q.min(3)).sum::<u8>()) as i32 * PREC / 24
+				ctx.get_player(foe).quanta.into_iter().map(|q| (q as i32).min(3)).sum::<i32>() * PREC / 24
 			}
 			Skill::bless => 4 * PREC,
 			Skill::bloodmoon => 9 * (PREC / 2),
@@ -452,7 +451,7 @@ fn eval_skill(
 			Skill::mend => 3 * PREC,
 			Skill::metamorph => 2 * PREC,
 			Skill::midas => 6 * PREC,
-			Skill::mill => 1 * PREC,
+			Skill::mill => PREC,
 			Skill::millpillar => PREC,
 			Skill::mimic => 3 * PREC,
 			Skill::miracle => ctx.get(ctx.get_owner(c), Stat::maxhp) as i32 * (PREC / 8),
@@ -494,7 +493,7 @@ fn eval_skill(
 			Skill::paleomagnetism => {
 				let owner = ctx.get_owner(c);
 				log2(
-					if card::Upped(ctx.get(c, Stat::card)) { 2 * PREC } else { 1 * PREC }
+					if card::Upped(ctx.get(c, Stat::card)) { 2 * PREC } else { PREC }
 						+ 64 * PREC
 							/ (quantamap.get(owner, ctx.get_player(owner).mark as i16) as i32 * 3
 								+ quantamap.get(owner, ctx.get_player(ctx.get_foe(owner)).mark as i16)
@@ -514,7 +513,7 @@ fn eval_skill(
 			Skill::poison(x) => x as i32 * PREC,
 			Skill::poisonfoe(x) => x as i32 * PREC,
 			Skill::powerdrain => 6 * PREC,
-			Skill::precognition => 1 * PREC,
+			Skill::precognition => PREC,
 			Skill::predator => {
 				let foehandlen = ctx.get_player(ctx.get_foe(ctx.get_owner(c))).hand_len() as i32;
 				if foehandlen > 4 && ctx.get_kind(c) != Kind::Spell {
@@ -559,7 +558,7 @@ fn eval_skill(
 			Skill::ren => 5 * PREC,
 			Skill::rewind | Skill::v_rewind => 6 * PREC,
 			Skill::ricochet => 2 * PREC,
-			Skill::sabbath => 1 * PREC,
+			Skill::sabbath => PREC,
 			Skill::sadism => 5 * PREC,
 			Skill::salvage | Skill::v_salvage => 2 * PREC,
 			Skill::sanctify => 2 * PREC,
@@ -575,7 +574,7 @@ fn eval_skill(
 			Skill::serendipity | Skill::v_serendipity => 4 * PREC,
 			Skill::shtriga => 6 * PREC,
 			Skill::shuffle3 => 7 * PREC,
-			Skill::silence | Skill::v_silence => 1 * PREC,
+			Skill::silence | Skill::v_silence => PREC,
 			Skill::singularity | Skill::v_singularity => -64 * PREC,
 			Skill::sinkhole => 3 * PREC,
 			Skill::siphon => 4 * PREC,
@@ -587,10 +586,10 @@ fn eval_skill(
 			Skill::soulcatch => 2 * PREC,
 			Skill::spores => 4 * PREC,
 			Skill::sskin => 15 * PREC,
-			Skill::stasisdraw => 1 * PREC,
+			Skill::stasisdraw => PREC,
 			Skill::steal | Skill::v_steal => 6 * PREC,
 			Skill::steam => 6 * PREC,
-			Skill::stoneform | Skill::v_stoneform => 1 * PREC,
+			Skill::stoneform | Skill::v_stoneform => PREC,
 			Skill::storm(x) | Skill::v_storm(x) | Skill::firestorm(x) => x as i32 * (PREC * 4),
 			Skill::summon(FateEgg) => 3 * PREC,
 			Skill::summon(FateEggUp) => 4 * PREC,
@@ -610,17 +609,16 @@ fn eval_skill(
 			Skill::throwrock => 4 * PREC,
 			Skill::tick => {
 				if ctx.get_kind(c) == Kind::Spell {
-					1 * PREC
+					PREC
 				} else {
-					1 * PREC
-						+ (ctx.get(c, Stat::maxhp) - ctx.truehp(c)) as i32 * PREC
-							/ ctx.get(c, Stat::maxhp) as i32
+					PREC + (ctx.get(c, Stat::maxhp) - ctx.truehp(c)) as i32 * PREC
+						/ ctx.get(c, Stat::maxhp) as i32
 				}
 			}
 			Skill::tornado => 9 * PREC,
 			Skill::trick => 4 * PREC,
 			Skill::turngolem => ctx.get(c, Stat::storedpower) as i32 * (PREC / 2),
-			Skill::unsummon => 1 * PREC,
+			Skill::unsummon => PREC,
 			Skill::unsummonquanta => 3 * PREC,
 			Skill::upkeep => -PREC / 2,
 			Skill::upload => 3 * PREC,
@@ -642,10 +640,10 @@ fn eval_skill(
 						PREC / 2
 					}
 				} else {
-					(ctx.trueatk(c) as i32 * PREC - damage[c]) * 2 / 3
+					(ctx.trueatk(c) as i32 * PREC - ttatk) * 2 / 3
 				}
 			}
-			Skill::virusplague | Skill::v_virusplague => 1 * PREC,
+			Skill::virusplague | Skill::v_virusplague => PREC,
 			Skill::void => {
 				if ctx.cardset() == CardSet::Open {
 					5 * PREC
@@ -653,7 +651,7 @@ fn eval_skill(
 					ctx.get(c, Stat::charges) as i32 * (PREC * 5)
 				}
 			}
-			Skill::web => 1 * PREC,
+			Skill::web => PREC,
 			Skill::wind => ctx.get(c, Stat::storedpower) as i32 * (PREC / 2),
 			Skill::wisdom => 4 * PREC,
 			Skill::yoink => 4 * PREC,
@@ -677,10 +675,10 @@ fn eval_skill(
 				if ctx.get(c, Stat::charges) == 0 && ctx.get_owner(c) == ctx.turn {
 					0
 				} else {
-					1 * PREC
+					PREC
 				}
 			}
-			Skill::evade(_) => PREC,
+			Skill::evade(x) => x as i32,
 			Skill::firewall | Skill::v_firewall => {
 				4 * PREC
 					+ ctx
@@ -691,13 +689,7 @@ fn eval_skill(
 						.map(|cr| log2((6 - ctx.get(c, Stat::hp) as i32).max(2) * PREC))
 						.sum::<i32>() / 2
 			}
-			Skill::chaos => {
-				if card::Upped(ctx.get(c, Stat::card)) {
-					8 * PREC
-				} else {
-					9 * PREC
-				}
-			}
+			Skill::chaos => 8 * PREC,
 			Skill::skull => 5 * PREC,
 			Skill::slow | Skill::v_slow => 6 * PREC,
 			Skill::solar => {
@@ -705,7 +697,7 @@ fn eval_skill(
 				5 * PREC - (coq * 4 * PREC) / (4 + coq)
 			}
 			Skill::thorn(chance) => chance as i32 * (PREC / 16),
-			Skill::vend => 1 * PREC,
+			Skill::vend => PREC,
 			Skill::v_dessication => 8 * PREC,
 			Skill::v_freedom => ctx.get(c, Stat::charges) as i32 * 5 * PREC,
 			Skill::v_gratitude => ctx.get(c, Stat::charges) as i32 * 4 * PREC,
@@ -734,7 +726,7 @@ enum WallShield {
 	Disentro(i16),
 	Dischroma(i16),
 	Voidshell(i16),
-	Evade(i32),
+	Evade(i16),
 	Evade100,
 	Weight,
 	Wings,
@@ -755,7 +747,7 @@ impl WallShield {
 					return 0;
 				}
 			}
-			WallShield::Evade(x) => return dmg as i32 * x,
+			WallShield::Evade(x) => return dmg as i32 * x as i32 >> PRECBITS,
 			WallShield::Dischroma(ref mut q) => {
 				if *q > 0 {
 					*q -= dmg;
@@ -837,8 +829,10 @@ fn estimate_damage(ctx: &Game, id: i16, freedom: i32, wall: &mut Wall) -> i32 {
 		if !momentum {
 			atk += if let Some(ref mut wshield) = wall.shield {
 				wshield.dmg(ctx, id, (dmg - dr).max(0))
+			} else if dmg > dr {
+				(dmg - dr) as i32 * PREC
 			} else {
-				(dmg - dr).max(0) as i32 * PREC
+				0
 			}
 		}
 	}
@@ -856,9 +850,9 @@ fn estimate_damage(ctx: &Game, id: i16, freedom: i32, wall: &mut Wall) -> i32 {
 	for &skill in ctx.getSkill(id, Event::Hit) {
 		if skill == Skill::vampire {
 			if ctx.get(owner, Stat::sosa) == 0 {
-				wall.dmg -= atk as i16;
+				wall.dmg = wall.dmg.saturating_sub((atk >> PRECBITS) as i16);
 			} else {
-				wall.dmg += atk as i16;
+				wall.dmg = wall.dmg.saturating_add((atk >> PRECBITS) as i16);
 			}
 		}
 	}
@@ -904,7 +898,7 @@ fn evalthing(
 	let iscrea = kind == Kind::Creature;
 	let mut score = 0;
 	let mut delaymix = ctx.get(id, Stat::frozen).max(ctx.get(id, Stat::delayed)) as i32 * PREC;
-	let (ttatk, ctrueatk, adrenaline, delayfactor) = if iscrea || kind == Kind::Weapon {
+	let (ttatk, adrenaline, delayfactor) = if iscrea || kind == Kind::Weapon {
 		let ttatk = damage[id];
 		let ctrueatk = ctx.trueatk(id);
 		let adrenaline = if ctx.get(id, Stat::adrenaline) == 0 {
@@ -916,10 +910,10 @@ fn evalthing(
 		};
 		let delayfactor = if delaymix != 0 { PREC - (delaymix / 5).min(PREC * 6 / 10) } else { PREC };
 		score += ctrueatk as i32 * delayfactor / 16;
-		(ttatk, ctrueatk, adrenaline, delayfactor)
+		(ttatk, adrenaline, delayfactor)
 	} else {
 		let delayfactor = if delaymix != 0 { PREC - (delaymix / 5).min(PREC * 6 / 10) } else { PREC };
-		(0, 0, 1 * PREC, delayfactor)
+		(0, 1, delayfactor)
 	};
 	let mut hp = 0;
 	if iscrea {
@@ -969,15 +963,12 @@ fn evalthing(
 	for (ev, sk) in ctx.iter_skills(id) {
 		match ev {
 			Event::Hit => {
-				score += eval_skill(ctx, id, sk, ttatk, damage, quantamap)
-					* (if ttatk != 0 {
-						1
-					} else if ctx.get(id, Flag::immaterial) {
-						0
-					} else {
-						PREC / 10
-					}) * if sk.iter().cloned().any(throttled) { throttle } else { adrenaline }
-					* delayfactor;
+				if ttatk != 0 || !ctx.get(id, Flag::immaterial) {
+					let value = (eval_skill(ctx, id, sk, ttatk, damage, quantamap)
+						* if sk.iter().cloned().any(throttled) { throttle } else { adrenaline }
+						* delayfactor) >> PRECBITS;
+					score += if ttatk == 0 { value / 10 } else { value };
+				}
 			}
 			Event::OwnAttack => {
 				let mut autoscore = eval_skill(ctx, id, sk, ttatk, damage, quantamap)
@@ -986,7 +977,7 @@ fn evalthing(
 					&& ctx.get(id, Stat::frozen) != 0
 					&& sk.iter().cloned().any(|sk| matches!(sk, Skill::growth(_, _) | Skill::siphon))
 				{
-					autoscore *= delayfactor
+					autoscore = (autoscore * delayfactor) >> PRECBITS;
 				}
 				score += autoscore;
 			}
@@ -998,11 +989,11 @@ fn evalthing(
 					ctx.get(id, Stat::castele),
 					quantamap,
 				) {
-					score += eval_skill(ctx, id, sk, ttatk, damage, quantamap) * delayfactor;
+					score += eval_skill(ctx, id, sk, ttatk, damage, quantamap) * delayfactor >> PRECBITS;
 				}
 			}
 			ev => {
-				if ev != (if iscrea { Event::Shield } else { Event::OwnDeath }) {
+				if ev != if iscrea { Event::Shield } else { Event::OwnDeath } {
 					score += eval_skill(ctx, id, sk, ttatk, damage, quantamap)
 				}
 			}
@@ -1016,7 +1007,7 @@ fn evalthing(
 	} else if flag.get(Flag::patience) {
 		score += 2 * PREC;
 	} else if flag.get(Flag::reflective | Flag::tunnel | Flag::voodoo) {
-		score += 1 * PREC;
+		score += PREC;
 	}
 	if iscrea {
 		let voodoo = ctx.get(id, Flag::voodoo);
@@ -1105,10 +1096,7 @@ pub fn eval(ctx: &Game) -> i32 {
 						}
 					}
 					Skill::evade(x) => {
-						wall.shield = Some(WallShield::Evade(256 * (100 - x as i32) / 100));
-					}
-					Skill::chaos if card::Upped(ctx.get(shield, Stat::card)) => {
-						wall.shield = Some(WallShield::Evade(256 * 4 / 5));
+						wall.shield = Some(WallShield::Evade(PREC as i16 * (100 - x) / 100));
 					}
 					Skill::weight => wall.shield = Some(WallShield::Weight),
 					Skill::wings => wall.shield = Some(WallShield::Wings),
@@ -1126,7 +1114,7 @@ pub fn eval(ctx: &Game) -> i32 {
 		let pl = plidx as i16 + 1;
 		let player = ctx.get_player(pl);
 		let patience = walls[plidx].patience;
-		let mut foewall = &mut walls[ctx.getIndex(player.foe) as usize];
+		let mut foewall = &mut walls[player.foe as usize - 1];
 		let mut total = ctx.get(player.foe, Stat::poison) as i32 * PREC;
 		let freedom = if ctx.cardset() == CardSet::Open {
 			let sofrs = player
@@ -1164,7 +1152,7 @@ pub fn eval(ctx: &Game) -> i32 {
 		}
 		walls[plidx].dmg = (total >> PRECBITS).min(32000).max(-32000) as i16;
 	}
-	let wallturn = walls[ctx.getIndex(turn) as usize];
+	let wallturn = walls[turn as usize - 1];
 	if wallturn.dmg > ctx.get(turnfoe, Stat::hp) {
 		return (wallturn.dmg as i32 - ctx.get(turnfoe, Stat::hp) as i32) * (PREC * 1024);
 	}
@@ -1184,11 +1172,10 @@ pub fn eval(ctx: &Game) -> i32 {
 			.into_iter()
 			.filter(|&id| ctx.get_foe(id) == pl)
 			.map(|id| walls[id as usize - 1].dmg as i32)
-			.sum::<i32>()
-			* PREC;
+			.sum::<i32>();
 		let player = ctx.get_player(pl);
 		let wall = &walls[plidx];
-		let mut pscore = sqrt(player.markpower as i32 * PREC) - expected_damage + wall.dmg as i32 * PREC;
+		let mut pscore = sqrt(player.markpower as i32 * PREC) + (wall.dmg as i32 - expected_damage) * PREC;
 		let mut plhp = ctx.get(pl, Stat::hp);
 		if let Some(wshield) = wall.shield {
 			match wshield {
@@ -1210,8 +1197,8 @@ pub fn eval(ctx: &Game) -> i32 {
 		{
 			pscore += 3 * PREC;
 		}
-		if expected_damage > plhp as i32 * PREC {
-			pscore -= (expected_damage - plhp as i32 * PREC) * 99 + 33 * PREC;
+		if expected_damage > plhp as i32 {
+			pscore -= (expected_damage - plhp as i32) * (PREC * 99) + 33 * PREC;
 		}
 		let patience = wall.patience;
 		if patience {

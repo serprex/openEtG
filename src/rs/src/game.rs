@@ -40,12 +40,12 @@ pub enum CardSet {
 #[derive(Clone, Copy, Default, Hash, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Kind {
 	#[default]
-	Weapon = 1,
-	Shield = 2,
-	Permanent = 3,
-	Spell = 4,
-	Creature = 5,
-	Player = 6,
+	Weapon,
+	Shield,
+	Permanent,
+	Spell,
+	Creature,
+	Player,
 }
 
 #[derive(Clone, Default)]
@@ -107,7 +107,7 @@ impl PlayerData {
 	}
 
 	pub fn hand_len(&self) -> usize {
-		self.hand.into_iter().position(|id| id == 0).unwrap_or(8)
+		self.hand_iter().count()
 	}
 
 	pub fn hand_last(&self) -> Option<i16> {
@@ -323,7 +323,6 @@ pub enum Stat {
 	flooding,
 	frozen,
 	gpull,
-	hope,
 	hp,
 	lives,
 	maxhp,
@@ -2175,7 +2174,7 @@ impl Game {
 		let owner = self.get_owner(c);
 		let foe = self.get_foe(owner);
 		self.trigger_data(Event::own(k), c, c, data);
-		for &pl in &[owner, foe] {
+		for pl in [owner, foe] {
 			self.trigger_data(k, pl, c, data);
 			for cr in self.get_player(pl).creatures {
 				if cr != 0 {
