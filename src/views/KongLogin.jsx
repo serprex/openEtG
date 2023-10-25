@@ -1,7 +1,7 @@
 import { createSignal, onMount, Show } from 'solid-js';
 
-import * as sock from '../sock.jsx';
-import * as store from '../store.jsx';
+import { emit, setCmds } from '../sock.jsx';
+import { chatMsg, doNav, setUser } from '../store.jsx';
 const MainMenu = import('./MainMenu.jsx');
 
 export default function KongLogin() {
@@ -13,23 +13,23 @@ export default function KongLogin() {
 			if (kong.services.isGuest()) {
 				setGuest(true);
 			} else {
-				sock.setCmds({
+				setCmds({
 					login: data => {
 						if (!data.err) {
 							delete data.x;
-							store.setUser(data);
+							setUser(data);
 							if (!data.accountbound && !data.pool) {
-								store.doNav(import('./ElementSelect.jsx'));
+								doNav(import('./ElementSelect.jsx'));
 							} else {
-								store.doNav(MainMenu);
+								doNav(MainMenu);
 							}
 						} else {
-							store.chatMsg(data.err);
+							chatMsg(data.err);
 							alert(data.err);
 						}
 					},
 				});
-				sock.emit({
+				emit({
 					x: 'konglogin',
 					u: kong.services.getUserId(),
 					g: kong.services.getGameAuthToken(),

@@ -36,15 +36,15 @@ const SELL_VALUES: [u8; 5] = [5, 1, 3, 15, 150];
 
 enum BzBidOp<'a> {
 	Delete { id: i64, bid: BzBid<'a> },
-	Update { id: i64, bid: BzBid<'a>, q: i32 },
-	Insert { q: i32, p: i32 },
+	Update { id: i64, bid: BzBid<'a>, q: u16 },
+	Insert { q: u16, p: i16 },
 }
 
 struct BzBidSell {
 	u: String,
 	code: i16,
 	amt: u16,
-	p: i32,
+	p: i16,
 }
 
 pub async fn broadcast<T>(socks: &AsyncSocks, val: &T)
@@ -1584,259 +1584,264 @@ pub async fn handle_ws(
 											cards: &newcards,
 											accountbound: bound,
 											packtype: pack,
+											g: user.data.gold,
 										},
 									);
 								}
 							}
 						}
-						AuthMessage::bzbid { price, cards } => {
-							let mut add: FxHashMap<i16, Vec<BzBid>> = Default::default();
-							let mut rm: FxHashMap<i16, Vec<BzBid>> = Default::default();
-							if let Ok(trx) = client.transaction().await {
-								if trx
-									.execute("lock bazaar in row exclusive mode", &[])
-									.await
-									.is_ok()
-								{
-									let mut user = user.lock().await;
-									let mut sells: Vec<BzBidSell> = Vec::new();
-									for (code, mut count) in iterraw(cards.as_bytes()) {
-										if let Some(card) = etg::card::OpenSet.try_get(code) {
-											let sellval = SELL_VALUES[card.rarity as usize] as i32
-												* match (
-													etg::card::Upped(code),
-													etg::card::Shiny(code),
-												) {
-													(false, false) => 1,
-													(true, true) => 36,
-													_ => 6,
-												};
-											let mut codecount = if price > 0 {
-												0
-											} else {
-												user.data.pool.0.get(&code).cloned().unwrap_or(0) as i32
-											};
-											if price > 0 {
-												if price as i32 <= sellval {
-													continue;
-												}
-											} else if codecount < count as i32 {
-												continue;
-											} else if -(price as i32) <= sellval {
-												user.data.gold += sellval * count as i32;
-												let c = user.data.pool.0.entry(code).or_default();
-												*c = c.saturating_sub(count);
+						AuthMessage::bzbid { p, q: mut count, c: code } => {
+							if p > 999 || p < -999 || count > 999 {
+								continue;
+							}
+							if let Some(card) = etg::card::OpenSet.try_get(code) {
+								let sellval = SELL_VALUES[card.rarity as usize] as i32
+									* match (etg::card::Upped(code), etg::card::Shiny(code)) {
+										(false, false) => 1,
+										(true, true) => 36,
+										_ => 6,
+									};
+								let mut add: FxHashMap<i16, Vec<BzBid>> = Default::default();
+								let mut rm: FxHashMap<i16, Vec<BzBid>> = Default::default();
+								if let Ok(trx) = client.transaction().await {
+									if trx
+										.execute("lock bazaar in row exclusive mode", &[])
+										.await
+										.is_ok()
+									{
+										let mut user = user.lock().await;
+										let mut sells: Vec<BzBidSell> = Vec::new();
+										let mut codecount = if p > 0 {
+											0
+										} else {
+											user.data.pool.0.get(&code).cloned().unwrap_or(0)
+										};
+										if p > 0 {
+											if p as i32 <= sellval {
 												continue;
 											}
-											if let Ok(bids) = trx.query("select b.id, u.name u, b.p, b.q from bazaar b join users u on b.user_id = u.id where b.code = $1 order by b.p desc", &[&(code as i32)]).await {
-												let mut ops: Vec<BzBidOp> = Vec::new();
-												for bid in bids.iter() {
-													let id: i64 = bid.get(0);
-													let bu: &str = bid.get(1);
-													let bp: i32 = bid.get(2);
-													let bq: i32 = bid.get(3);
-													let amt = bq.min(count as i32);
-													let mut happened = 0;
-													if price > 0 {
-														if bp < 0 && -bp <= price as i32 {
-															happened = amt;
-														}
-													} else if bp > 0 && bp >= -(price as i32) {
-														happened = -amt;
+										} else if codecount < count {
+											continue;
+										} else if -(p as i32) <= sellval {
+											user.data.gold += sellval * count as i32;
+											let c = user.data.pool.0.entry(code).or_default();
+											*c = c.saturating_sub(count);
+											continue;
+										}
+										if let Ok(bids) = trx.query("select b.id, u.name u, b.p, b.q from bazaar b join users u on b.user_id = u.id where b.code = $1 order by b.p desc", &[&(code as i32)]).await {
+											let mut ops: Vec<BzBidOp> = Vec::new();
+											for bid in bids.iter() {
+												let id: i64 = bid.get(0);
+												let bu: &str = bid.get(1);
+												let bp = bid.get::<usize, i32>(2) as i16;
+												let bq = bid.get::<usize, i32>(3) as u16;
+												let amt = bq.min(count);
+												let mut happened = 0;
+												if p > 0 {
+													if bp < 0 && -bp <= p {
+														happened = amt as i32;
 													}
-													let cost = bp.abs() * happened;
-													if happened != 0 && if price > 0 {
-														user.data.gold >= cost
+												} else if bp > 0 && bp >= -p {
+													happened = -(amt as i32);
+												}
+												let cost = bp.abs() as i32 * happened;
+												if happened != 0 && if p > 0 {
+													user.data.gold >= cost
+												} else {
+													codecount as i32 >= happened
+												} {
+													user.data.gold -= cost;
+													let c = user.data.pool.0.entry(code).or_default();
+													if happened > 0 {
+														*c = c.saturating_add(happened as u16);
+														codecount = codecount.saturating_add(happened as u16);
 													} else {
-														codecount >= happened
-													} {
-														user.data.gold -= cost;
-														let c = user.data.pool.0.entry(code).or_default();
-														let newc = (*c as i32) + happened;
-														*c = if newc < 0 { 0 } else if newc > 65535 { 65535 } else { newc as u16 };
-														codecount += happened;
-														sells.push(BzBidSell { u: String::from(bu), code, amt: amt as u16, p: bp });
-														if bq > count as i32 {
-															ops.push(BzBidOp::Update {
-																id,
-																bid: BzBid { u: Cow::from(String::from(bu)), q: bq, p: bp },
-																q: bq - count as i32,
-															});
-															count = 0;
-														} else {
-															ops.push(BzBidOp::Delete {
-																id,
-																bid: BzBid { u: Cow::from(String::from(bu)), q: bq, p: bp },
-															});
-															count -= bq as u16;
-														}
-														if count == 0 {
-															break
+														*c = c.saturating_sub((-happened) as u16);
+														codecount = codecount.saturating_sub((-happened) as u16);
+													}
+													sells.push(BzBidSell { u: String::from(bu), code, amt: amt as u16, p: bp });
+													if bq > count {
+														ops.push(BzBidOp::Update {
+															id,
+															bid: BzBid { u: Cow::from(String::from(bu)), q: bq, p: bp },
+															q: bq - count,
+														});
+														count = 0;
+													} else {
+														ops.push(BzBidOp::Delete {
+															id,
+															bid: BzBid { u: Cow::from(String::from(bu)), q: bq, p: bp },
+														});
+														count -= bq as u16;
+													}
+													if count == 0 {
+														break
+													}
+												}
+											}
+											if count > 0 {
+												let mut bidmade = false;
+												if p > 0 {
+													if user.data.gold >= p as i32 * count as i32 {
+														user.data.gold -= p as i32 * count as i32;
+														bidmade = true;
+													}
+												} else if codecount >= count {
+													let c = user.data.pool.0.entry(code).or_default();
+													if let Some(newc) = c.checked_sub(count as u16) {
+														*c = newc;
+														bidmade = true;
+														#[allow(unused_assignments)] {
+															codecount -= count;
 														}
 													}
 												}
-												if count > 0 {
-													let mut bidmade = false;
-													if price > 0 {
-														if user.data.gold >= price as i32 * count as i32 {
-															user.data.gold -= price as i32 * count as i32;
-															bidmade = true;
-														}
-													} else if codecount >= count as i32 {
-														let c = user.data.pool.0.entry(code).or_default();
-														if let Some(newc) = c.checked_sub(count as u16) {
-															*c = newc;
-															bidmade = true;
-														}
-														#[allow(unused_assignments)] {
-															codecount -= count as i32;
-														}
-													}
-													if bidmade {
-														let mut hadmerge = false;
-														for bid in bids.iter() {
-															let id: i64 = bid.get(0);
-															let bu: &str = bid.get(1);
-															let bp: i32 = bid.get(2);
-															let bq: i32 = bid.get(3);
-															if bu == u && bp == price as i32 {
+												if bidmade {
+													let mut hadmerge = false;
+													for bid in bids.iter() {
+														let id: i64 = bid.get(0);
+														let bu: &str = bid.get(1);
+														let bp = bid.get::<usize, i32>(2) as i16;
+														let bq = bid.get::<usize, i32>(3) as u16;
+														if bu == u && bp == p {
+															if let Some(newq) = bq.checked_add(count) {
 																ops.push(BzBidOp::Update {
 																	id,
 																	bid: BzBid { u: Cow::from(u.as_str()), q: bq, p: bp },
-																	q: bq + count as i32
+																	q: newq
 																});
 																hadmerge = true;
 																break;
 															}
 														}
-														if !hadmerge {
-															ops.push(BzBidOp::Insert { q: count as i32, p: price as i32 });
-														}
 													}
-												}
-												for op in ops.into_iter() {
-													if match op {
-														BzBidOp::Delete { id, bid } => {
-															rm.entry(code).or_default().push(bid);
-															trx.execute(
-																"delete from bazaar where id = $1",
-																&[&id]
-																).await
-														}
-														BzBidOp::Insert { q, p } => {
-															add.entry(code).or_default().push(BzBid {
-																u: Cow::from(u.as_str()), q, p,
-															});
-															trx.execute(
-																"insert into bazaar (user_id, code, q, p) values ($1, $2, $3, $4)",
-																&[&user.id, &(code as i32), &q, &p]
-															).await
-														}
-														BzBidOp::Update { id, bid, q } => {
-															add.entry(code).or_default().push(BzBid {
-																u: bid.u.clone(), q, p: bid.p
-															});
-															rm.entry(code).or_default().push(bid);
-															trx.execute(
-																"update bazaar set q = $2 where id = $1",
-																&[&id, &q]
-															).await
-														}
-													}.is_err() {
-														continue 'msgloop;
+													if !hadmerge {
+														ops.push(BzBidOp::Insert { q: count, p });
 													}
 												}
 											}
-										}
-									}
-									sendmsg(
-										&tx,
-										&WsResponse::bzbid {
-											rm: &rm,
-											add: &add,
-											g: user.data.gold,
-											pool: &user.data.pool,
-										},
-									);
-									drop(user);
-									let mut wusers = users.write().await;
-									let rusersocks = usersocks.read().await;
-									let rsocks = socks.read().await;
-									for sell in sells {
-										{
-											if let Some(seller) = wusers.load(&trx, &sell.u).await {
-												let mut seller = seller.lock().await;
-												if sell.p > 0 {
-													let c = seller
-														.data
-														.pool
-														.0
-														.entry(sell.code)
-														.or_default();
-													let newc = (*c as i32) + (sell.amt as i32);
-													*c = if newc < 0 {
-														0
-													} else if newc > 0xffff {
-														0xffff
-													} else {
-														newc as u16
-													};
-												} else {
-													seller.data.gold = seller
-														.data
-														.gold
-														.saturating_add(sell.amt as i32 * -sell.p);
+											for op in ops.into_iter() {
+												if match op {
+													BzBidOp::Delete { id, bid } => {
+														rm.entry(code).or_default().push(bid);
+														trx.execute(
+															"delete from bazaar where id = $1",
+															&[&id]
+															).await
+													}
+													BzBidOp::Insert { q, p } => {
+														add.entry(code).or_default().push(BzBid {
+															u: Cow::from(u.as_str()), q, p,
+														});
+														trx.execute(
+															"insert into bazaar (user_id, code, q, p) values ($1, $2, $3, $4)",
+															&[&user.id, &(code as i32), &(q as i32), &(p as i32)]
+														).await
+													}
+													BzBidOp::Update { id, bid, q } => {
+														add.entry(code).or_default().push(BzBid {
+															u: bid.u.clone(), q, p: bid.p
+														});
+														rm.entry(code).or_default().push(bid);
+														trx.execute(
+															"update bazaar set q = $2 where id = $1",
+															&[&id, &(q as i32)]
+														).await
+													}
+												}.is_err() {
+													continue 'msgloop;
 												}
 											}
 										}
-										if let Some(selltx) = if sell.u == u {
-											Some(tx.clone())
-										} else {
-											rusersocks
-												.get(&sell.u)
-												.and_then(|sockid| rsocks.get(&sockid))
-												.map(|sock| sock.tx.clone())
-										} {
-											if let Some(card) =
-												etg::card::OpenSet.try_get(sell.code)
+										sendmsg(
+											&tx,
+											&WsResponse::bzbid {
+												rm: &rm,
+												add: &add,
+												g: user.data.gold,
+												pool: &user.data.pool,
+											},
+										);
+										drop(user);
+										let mut wusers = users.write().await;
+										let rusersocks = usersocks.read().await;
+										let rsocks = socks.read().await;
+										for sell in sells {
 											{
-												if sell.p > 0 {
-													let ecount = encode_count(sell.amt as u32);
-													let ecode = encode_code(sell.code);
-													let givec = [
-														ecount[0], ecount[1], ecode[0], ecode[1],
-														ecode[2],
-													];
-													sendmsg(
-														&selltx,
-														&WsResponse::bzgivec {
-															msg: &format!(
-																"{} sold you {} of {} @ {}",
-																u, sell.amt, card.name, sell.p
-															),
-															c: unsafe {
-																std::str::from_utf8_unchecked(
-																	&givec[..],
-																)
+												if let Some(seller) = wusers.load(&trx, &sell.u).await {
+													let mut seller = seller.lock().await;
+													if sell.p > 0 {
+														let c = seller
+															.data
+															.pool
+															.0
+															.entry(sell.code)
+															.or_default();
+														let newc = (*c as i32) + (sell.amt as i32);
+														*c = if newc < 0 {
+															0
+														} else if newc > 0xffff {
+															0xffff
+														} else {
+															newc as u16
+														};
+													} else {
+														seller.data.gold = seller
+															.data
+															.gold
+															.saturating_add(sell.amt as i32 * -sell.p as i32);
+													}
+												}
+											}
+											if let Some(selltx) = if sell.u == u {
+												Some(tx.clone())
+											} else {
+												rusersocks
+													.get(&sell.u)
+													.and_then(|sockid| rsocks.get(&sockid))
+													.map(|sock| sock.tx.clone())
+											} {
+												if let Some(card) =
+													etg::card::OpenSet.try_get(sell.code)
+												{
+													if sell.p > 0 {
+														let ecount = encode_count(sell.amt as u32);
+														let ecode = encode_code(sell.code);
+														let givec = [
+															ecount[0], ecount[1], ecode[0], ecode[1],
+															ecode[2],
+														];
+														sendmsg(
+															&selltx,
+															&WsResponse::bzgivec {
+																msg: &format!(
+																	"{} sold you {} of {} @ {}",
+																	u, sell.amt, card.name, sell.p
+																),
+																c: unsafe {
+																	std::str::from_utf8_unchecked(
+																		&givec[..],
+																	)
+																},
 															},
-														},
-													)
-												} else {
-													sendmsg(
-														&selltx,
-														&WsResponse::bzgiveg {
-															msg: &format!(
-																"{} bought {} of {} @ {} from you.",
-																u, sell.amt, card.name, -sell.p
-															),
-															g: sell.amt as i32 * -sell.p,
-														},
-													)
+														)
+													} else {
+														sendmsg(
+															&selltx,
+															&WsResponse::bzgiveg {
+																msg: &format!(
+																	"{} bought {} of {} @ {} from you.",
+																	u, sell.amt, card.name, -sell.p
+																),
+																g: sell.amt as i32 * -sell.p as i32,
+															},
+														)
+													}
 												}
 											}
 										}
+										trx.commit().await.ok();
 									}
-									trx.commit().await.ok();
 								}
 							}
 						}
@@ -1848,13 +1853,13 @@ pub async fn handle_ws(
 							{
 								let mut rm: FxHashMap<i16, Vec<BzBid>> = Default::default();
 								for bid in bids.iter() {
-									let q: i32 = bid.get(0);
-									let p: i32 = bid.get(1);
+									let q = bid.get::<usize, i32>(0) as u16;
+									let p = bid.get::<usize, i32>(1) as i16;
 									if p > 0 {
-										user.data.gold += p * q;
+										user.data.gold += p as i32 * q as i32;
 									} else {
 										let c = user.data.pool.0.entry(c).or_default();
-										*c = c.saturating_add(q as u16)
+										*c = c.saturating_add(q)
 									}
 									rm.entry(c).or_default().push(BzBid { u: Cow::from(u.as_str()), q, p });
 								}
@@ -2385,8 +2390,8 @@ pub async fn handle_ws(
 						for bid in bids.iter() {
 							let name: String = bid.get(0);
 							let code = bid.get::<usize, i32>(1) as i16;
-							let q: i32 = bid.get(2);
-							let p: i32 = bid.get(3);
+							let q = bid.get::<usize, i32>(2) as u16;
+							let p = bid.get::<usize, i32>(3) as i16;
 							bz.entry(code).or_default().push(BzBid {
 								u: Cow::Owned(name), q, p
 							});

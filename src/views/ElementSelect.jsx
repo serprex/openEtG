@@ -1,7 +1,7 @@
 import { createSignal, onMount } from 'solid-js';
 
 import { eleNames } from '../ui.js';
-import * as sock from '../sock.jsx';
+import { emit, userEmit, setCmds } from '../sock.jsx';
 import Card from '../Components/Card.jsx';
 import * as store from '../store.jsx';
 import { mkQuestAi, quarks } from '../Quest.js';
@@ -53,7 +53,7 @@ export default function ElementSelect() {
 		[err, setErr] = createSignal('');
 
 	onMount(() => {
-		sock.setCmds({
+		setCmds({
 			login: data => {
 				if (data.err) {
 					setErr(
@@ -118,7 +118,7 @@ export default function ElementSelect() {
 								errmsg = 'Passwords do not match';
 							} else {
 								errmsg = 'Registering..';
-								sock.emit({
+								emit({
 									x: 'login',
 									u: username.value,
 									p: password.value,
@@ -135,7 +135,7 @@ export default function ElementSelect() {
 				value="Exit"
 				onClick={() => {
 					if (rx.user) {
-						sock.userEmit('delete');
+						userEmit('delete');
 						store.setUser(null);
 					}
 					store.setOpt('remember', false);
@@ -162,7 +162,7 @@ export default function ElementSelect() {
 						class={`imgb ico e${i === 14 ? 13 : i === 13 ? 14 : i}`}
 						style={`position:absolute;left:12px;top:${24 + (i - 1) * 40}px`}
 						onClick={() => {
-							sock.userEmit('inituser', {
+							userEmit('inituser', {
 								e: i === 14 ? (Math.random() * 12 + 1) | 0 : i,
 							});
 						}}

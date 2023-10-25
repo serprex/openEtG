@@ -5,7 +5,6 @@ import * as sock from '../sock.jsx';
 import Cards from '../Cards.js';
 import * as Tutor from '../Components/Tutor.jsx';
 import * as etgutil from '../etgutil.js';
-import { parseInput } from '../util.js';
 import Card from '../Components/Card.jsx';
 import DeckDisplay from '../Components/DeckDisplay.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
@@ -93,11 +92,8 @@ export default function Shop() {
 						userdelta.freepacks = freepacks;
 					}
 				} else {
-					const bdata = {};
-					parseInput(bdata, 'bulk', bulk(), 255);
 					userdelta.pool = etgutil.mergedecks(rx.user.pool, data.cards);
-					userdelta.gold =
-						rx.user.gold - packdata[data.packtype].cost * (bdata.bulk || 1);
+					userdelta.gold = data.g;
 				}
 				store.updateUser(userdelta);
 				setCards(data.cards);
@@ -122,9 +118,8 @@ export default function Shop() {
 		const boostdata = {
 			pack: rarity(),
 			element: ele(),
+			bulk: bulk() | 0 || 1,
 		};
-		parseInput(boostdata, 'bulk', bulk(), 255);
-		boostdata.bulk ||= 1;
 		if (
 			rx.user.gold >= pack.cost * (boostdata.bulk || 1) ||
 			(rx.user.freepacks && rx.user.freepacks[rarity()] > 0)

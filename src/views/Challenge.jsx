@@ -2,7 +2,7 @@ import { createMemo, createSignal } from 'solid-js';
 import { Index } from 'solid-js/web';
 
 import Cards from '../Cards.js';
-import { choose, parseInput, randint, shuffle } from '../util.js';
+import { choose, randint, shuffle } from '../util.js';
 import Game from '../Game.js';
 import * as etgutil from '../etgutil.js';
 import DeckDisplay from '../Components/DeckDisplay.jsx';
@@ -45,53 +45,26 @@ function PremadePicker({ onClick, onClose }) {
 
 function PlayerEditor(props) {
 	const [pdeckgen, setdeckgen] = createSignal(props.player.deckgen ?? '');
-	const [deck, setdeck] = createSignal(props.player.deck ?? '');
-	const [name, setname] = createSignal(props.player.name ?? '');
-	const [hp, sethp] = createSignal(props.player.hp ?? '');
-	const [mark, setmark] = createSignal(props.player.markpower ?? '');
-	const [draw, setdraw] = createSignal(props.player.drawpower ?? '');
-	const [deckpower, setdrawpower] = createSignal(props.player.deckpower ?? '');
 	const [premade, setpremade] = createSignal(false);
-	const [rnguprate, setrnguprate] = createSignal(0);
-	const [rngmaxrare, setrngmaxrare] = createSignal(9);
+	let hp, mark, draw, deck, deckpower, name, rnguprate, rngmaxrare;
 
 	return (
 		<div>
 			<div>
-				<input
-					placeholder="HP"
-					class="numput"
-					value={hp()}
-					onChange={e => sethp(e.target.value)}
-				/>
-				<input
-					placeholder="Mark"
-					class="numput"
-					value={mark()}
-					onChange={e => setmark(e.target.value)}
-				/>
-				<input
-					placeholder="Draw"
-					class="numput"
-					value={draw()}
-					onChange={e => setdraw(e.target.value)}
-				/>
-				<input
-					placeholder="Deck"
-					class="numput"
-					value={deckpower()}
-					onChange={e => setdeckpower(e.target.value)}
-				/>
+				<input placeholder="HP" class="numput" max="500" ref={hp} />
+				<input placeholder="Mark" class="numput" max="1188" ref={mark} />
+				<input placeholder="Draw" class="numput" max="8" ref={draw} />
+				<input placeholder="Deck" class="numput" ref={deckpower} />
 				&emsp;
 				<input
 					type="button"
 					value="Ok"
 					onClick={() => {
 						const data = {};
-						parseInput(data, 'hp', hp());
-						parseInput(data, 'markpower', mark(), 1188);
-						parseInput(data, 'drawpower', draw(), 8);
-						parseInput(data, 'deckpower', deckpower());
+						if (!Number.isNaN(+hp.value)) data.hp = hp.value | 0;
+						if (!Number.isNaN(+mark.value)) data.markpower = mark.value | 0;
+						if (!Number.isNaN(+draw.value)) data.drawpower = draw.value | 0;
+						if (!Number.isNaN(+deckpower)) data.deckpower = deckpower.value | 0;
 						let newdeck;
 						switch (pdeckgen()) {
 							case 'mage':
@@ -101,15 +74,15 @@ function PlayerEditor(props) {
 								break;
 							case 'rng':
 								[data.name, newdeck] = deckgen(
-									rnguprate() * 100,
+									(rnguprate.value * 100) | 0,
 									data.markpower,
-									rngmaxrare() | 0,
+									rngmaxrare.value | 0,
 								);
 								break;
 							default:
-								newdeck = Promise.resolve(deck());
+								newdeck = Promise.resolve(deck.value);
 						}
-						if (name()) data.name = name();
+						if (name.value) data.name = name.value;
 						newdeck.then(x => {
 							data.deck = x;
 							props.updatePlayer(data);
@@ -128,11 +101,7 @@ function PlayerEditor(props) {
 			</div>
 			{pdeckgen() === '' && (
 				<div>
-					<input
-						placeholder="Deck"
-						value={deck()}
-						onInput={e => setdeck(e.target.value)}
-					/>
+					<input placeholder="Deck" ref={deck} />
 					&emsp;
 					<input
 						type="button"
@@ -143,39 +112,30 @@ function PlayerEditor(props) {
 			)}
 			{pdeckgen() === 'rng' && (
 				<div>
-					<input
-						placeholder="Upgrade %"
-						value={rnguprate()}
-						onInput={e => setrnguprate(e.target.value)}
-					/>
+					<input placeholder="Upgrade %" ref={rnguprate} />
 					&emsp;
-					<input
-						placeholder="Max Rarity"
-						value={rngmaxrare()}
-						onInput={e => setrngmaxrare(e.target.value)}
-					/>
+					<input placeholder="Max Rarity" ref={rngmaxrare} value="9" />
 				</div>
 			)}
 			<div>
-				<input
-					placeholder="Name"
-					value={name()}
-					onInput={e => setname(e.target.value)}
-				/>
+				<input placeholder="Name" ref={name} />
 			</div>
 			{premade() && (
 				<PremadePicker
 					onClose={() => setpremade(false)}
-					onClick={(name, deck, isdg) => {
+					onClick={(dname, dcode, isdg) => {
 						setpremade(false);
-						setname(name);
-						setdeck(deck);
+						name.value = dname;
+						deck.value = dcode;
+						drawpower.value = '';
 						if (isdg) {
-							sethp(200);
-							setdraw(2);
-							setmark(3);
+							hp.value = 200;
+							draw.value = 2;
+							mark.value = 3;
 						} else {
-							sethp(125);
+							hp.value = 125;
+							draw.value = '';
+							mark.value = '';
 						}
 					}}
 				/>

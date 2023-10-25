@@ -930,22 +930,12 @@ export default function Match(props) {
 								mkText(state, newstate, id, game.Cards.Codes[param].name),
 							);
 							break;
+						case 'Delay':
+						case 'Freeze':
 						case 'Poison':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
-								mkText(state, newstate, id, `Poison ${param}`),
-							);
-							break;
-						case 'Delay':
-							newstate.effects ??= new Set(state.effects);
-							newstate.effects.add(
-								mkmkText(state, newstate, id, `Delay ${param}`),
-							);
-							break;
-						case 'Freeze':
-							newstate.effects ??= new Set(state.effects);
-							newstate.effects.add(
-								mkText(state, newstate, id, `Freeze ${param}`),
+								mkText(state, newstate, id, `${kind} ${param}`),
 							);
 							break;
 						case 'Dmg':
@@ -956,7 +946,7 @@ export default function Match(props) {
 							break;
 						case 'LastCard':
 							newstate.effects ??= new Set(state.effects);
-							const playerName = game.data.players[game.getIndex(id)].name;
+							const playerName = game.data.players[id - 1].name;
 							const LastCardEffect = () => (
 								<LastCardFx
 									self={LastCardEffect}
@@ -1008,7 +998,7 @@ export default function Match(props) {
 			});
 			const newTurn = game.turn;
 			if (newTurn !== turn) {
-				if (game.data.players[game.getIndex(newTurn)].user === rx.user.name) {
+				if (game.data.players[newTurn - 1].user === rx.user.name) {
 					setPlayer1(newTurn);
 				}
 				setFoeplays(foeplays => new Map(foeplays).set(newTurn, []));
@@ -1167,10 +1157,7 @@ export default function Match(props) {
 	};
 
 	const gameStep = game => {
-		if (
-			game.data.players[game.getIndex(game.turn)].ai === 1 &&
-			game.phase <= Phase.Play
-		) {
+		if (game.data.players[game.turn - 1].ai === 1 && game.phase <= Phase.Play) {
 			aiWorker
 				.send({
 					data: {
@@ -1401,8 +1388,7 @@ export default function Match(props) {
 				const pl = j ? p2id : p1id,
 					plpos = () => game().tgtToPos(pl(), p1id()),
 					handOverlay = () => game().hand_overlay(pl(), p1id());
-				const expectedDamage = () =>
-					expectedDamages().expectedDamage[game().getIndex(pl())];
+				const expectedDamage = () => expectedDamages().expectedDamage[pl() - 1];
 				const x1 = () =>
 						Math.max(
 							Math.round(
@@ -1561,14 +1547,13 @@ export default function Match(props) {
 						'Arena1\n',
 						'Arena2\n',
 					][game().data.level] ??
-					(game().data.players[game().getIndex(p2id())].leader !== undefined
+					(game().data.players[p2id() - 1].leader !== undefined
 						? `${
-								game().playerDataByIdx(
-									game().data.players[game().getIndex(p2id())].leader,
-								).name || game().data.players[game().getIndex(p2id())].leader
+								game().playerDataByIdx(game().data.players[p2id() - 1].leader)
+									.name || game().data.players[p2id() - 1].leader
 						  }\n`
 						: '')
-				}${game().data.players[game().getIndex(p2id())].name || '-'}`}
+				}${game().data.players[p2id() - 1].name || '-'}`}
 			</div>
 			<span style="position:absolute;left:780px;top:560px;width:120px;text-align:center;pointer-events:none;white-space:pre">
 				{texts().turntell}

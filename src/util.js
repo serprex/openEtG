@@ -17,10 +17,6 @@ export function shuffle(array) {
 	}
 	return array;
 }
-export function parseInput(data, key, value, limit) {
-	const val = parseInt(value, 10);
-	if (val === 0 || val > 0) data[key] = limit ? Math.min(val, limit) : val;
-}
 export function* chain(...args) {
 	for (const arg of args) {
 		yield* arg;

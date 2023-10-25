@@ -140,8 +140,7 @@ const BonusList = [
 		name: 'Size matters',
 		desc: '0.5% per card in deck over 30',
 		func: (game, p1, p2, stats) =>
-			(etgutil.decklength(game.data.players[game.getIndex(p1)].deck) - 31) /
-			200,
+			(etgutil.decklength(game.data.players[p1 - 1].deck) - 31) / 200,
 	},
 	{
 		name: 'Toxic',
@@ -154,7 +153,7 @@ const BonusList = [
 		func: (game, p1, p2, stats) => {
 			let unupnu = 0;
 			for (const [code, count] of etgutil.iterraw(
-				game.data.players[game.getIndex(p1)].deck,
+				game.data.players[p1 - 1].deck,
 			)) {
 				const card = game.Cards.Codes[code];
 				if (card && !card.upped) unupnu += count;
@@ -357,9 +356,10 @@ export default function Result(props) {
 	) {
 		const stats = [
 			level,
-			(
-				game.data.players[game.getIndex(game.get_foe(p1id))].name || '?'
-			).replace(/,/g, ' '),
+			(game.data.players[game.get_foe(p1id) - 1].name || '?').replace(
+				/,/g,
+				' ',
+			),
 			winner ? 'W' : 'L',
 			game.countPlies(),
 			game.duration,

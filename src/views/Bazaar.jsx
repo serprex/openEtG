@@ -241,8 +241,9 @@ export default function Bazaar() {
 						value="Sell"
 						onClick={() => {
 							sock.userEmit('bzbid', {
-								price: -sell(),
-								cards: encodeCount(sellq() || 1) + encodeCode(bcard().code),
+								p: -sell(),
+								q: sellq() || 1,
+								c: bcard().code,
 							});
 						}}
 						style="position:absolute;left:100px;top:8px"
@@ -250,13 +251,13 @@ export default function Bazaar() {
 					<input
 						placeholder="Price"
 						value={sell() || ''}
-						onInput={e => setSell(e.target.value | 0)}
+						onInput={e => setSell(Math.min(e.target.value | 0, 999))}
 						style="position:absolute;left:200px;top:8px"
 					/>
 					<input
 						placeholder="Quantity"
 						value={sellq() || ''}
-						onInput={e => setSellq(e.target.value | 0)}
+						onInput={e => setSellq(Math.min(e.target.value | 0, 999))}
 						style="position:absolute;left:360px;top:8px"
 					/>
 					{buy() > sellValue(bcard()) && (
@@ -265,8 +266,9 @@ export default function Bazaar() {
 							value="Buy"
 							onClick={() => {
 								sock.userEmit('bzbid', {
-									price: buy(),
-									cards: encodeCount(buyq() || 1) + encodeCode(bcard().code),
+									p: buy(),
+									q: buyq() || 1,
+									c: bcard().code,
 								});
 							}}
 							style="position:absolute;left:100px;top:40px"
@@ -275,13 +277,13 @@ export default function Bazaar() {
 					<input
 						placeholder="Price"
 						value={buy() || ''}
-						onInput={e => setBuy(e.target.value | 0)}
+						onInput={e => setBuy(Math.min(e.target.value | 0, 999))}
 						style="position:absolute;left:200px;top:40px"
 					/>
 					<input
 						placeholder="Quantity"
 						value={buyq() || ''}
-						onInput={e => setBuyq(e.target.value | 0)}
+						onInput={e => setBuyq(Math.min(e.target.value | 0, 999))}
 						style="position:absolute;left:360px;top:40px"
 					/>
 					<div

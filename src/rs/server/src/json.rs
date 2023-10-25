@@ -129,8 +129,9 @@ pub enum AuthMessage {
 		c: i16,
 	},
 	bzbid {
-		price: i16,
-		cards: String,
+		p: i16,
+		q: u16,
+		c: i16,
 	},
 	booster {
 		pack: u8,
@@ -294,6 +295,7 @@ pub enum WsResponse<'a> {
 		cards: &'a Cardpool,
 		accountbound: bool,
 		packtype: u8,
+		g: i32,
 	},
 	bzbid {
 		add: &'a FxHashMap<i16, Vec<BzBid<'a>>>,
@@ -421,8 +423,8 @@ pub enum WsResponse<'a> {
 #[derive(Serialize, Clone)]
 pub struct BzBid<'a> {
 	pub u: Cow<'a, str>,
-	pub q: i32,
-	pub p: i32,
+	pub q: u16,
+	pub p: i16,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
