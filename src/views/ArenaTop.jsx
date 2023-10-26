@@ -1,6 +1,7 @@
 import { createSignal, onMount } from 'solid-js';
 import { For } from 'solid-js/web';
 
+import { encodeCode } from '../etgutil.js';
 import Cards from '../Cards.js';
 import Card from '../Components/Card.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
@@ -23,7 +24,12 @@ export default function ArenaTop({ lv }) {
 						const card = Cards.Codes[data[5]].asUpped(lv);
 						return (
 							<li>
-								<span class="atoptext">{data[0]}</span>
+								<a
+									class="atoptext"
+									href={`/deck/05${encodeCode(card.code)}${data[6]}`}
+									target="_blank">
+									{data[0]}
+								</a>
 								<span class="atop1">{data[1]}</span>
 								<span class="atop2">{data[2]}</span>
 								<span class="atopdash">-</span>

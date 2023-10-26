@@ -1073,7 +1073,7 @@ impl Skill {
 			Self::quantagift => out.push_str("quantagift"),
 			Self::quint => out.push_str("quint"),
 			Self::quinttog => out.push_str("quinttog"),
-			Self::r#static => out.push_str("r"),
+			Self::r#static => out.push_str("static"),
 			Self::rage => out.push_str("rage"),
 			Self::randomdr => out.push_str("randomdr"),
 			Self::readiness => out.push_str("readiness"),

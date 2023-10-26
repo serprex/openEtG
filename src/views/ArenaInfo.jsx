@@ -134,7 +134,9 @@ export default function ArenaInfo() {
 		<>
 			<div style="position:absolute;left:96px;top:560px">
 				Earn 5<span class="ico gold" /> when your deck is faced, & 10
-				<span class="ico gold" /> more when it wins\nEarn 25
+				<span class="ico gold" /> more when it wins
+				<br />
+				Earn 25
 				<span class="ico gold" /> per age of old deck when creating new deck, up
 				to 350
 				<span class="ico gold" />

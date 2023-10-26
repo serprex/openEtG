@@ -47,9 +47,8 @@ const descriptions = [
 
 export default function ElementSelect() {
 	const rx = store.useRx();
-	let username, password, confirmpass;
+	let username, password, confirmpass, skiptut;
 	const [eledesc, setEledesc] = createSignal(-1),
-		[skiptut, setSkiptut] = createSignal(false),
 		[err, setErr] = createSignal('');
 
 	onMount(() => {
@@ -65,7 +64,7 @@ export default function ElementSelect() {
 				} else if (rx.user) {
 					delete data.x;
 					store.setUser(data);
-					if (skiptut()) {
+					if (skiptut.checked) {
 						store.doNav(import('./MainMenu.jsx'));
 					} else {
 						store.setOptTemp('quest', [0]);
@@ -149,12 +148,7 @@ export default function ElementSelect() {
 					exit the tutorial at any time. You can access the tutorial through
 					Quests at any time.
 				</i>
-				<input
-					type="checkbox"
-					checked={skiptut()}
-					onChange={e => setSkiptut(e.target.checked)}
-				/>{' '}
-				Skip Tutorial
+				<input type="checkbox" ref={skiptut} /> Skip Tutorial
 			</label>
 			{rx.user &&
 				[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(i => (

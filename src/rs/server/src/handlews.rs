@@ -633,13 +633,13 @@ pub async fn handle_ws(
 								} {
 								if let Ok(trx) = client.transaction().await {
 									let lv = if lv == 0 { 1i32 } else { 2i32 };
-									if let Ok(row) = trx.query_one("select a.won, a.loss, a.day from arena a where a.arena_id = $1 and a.user_id = $2 for update", &[&lv, &auserid]).await {
-											let awon = row.get::<usize, i32>(0) + won as i32;
-											let aloss = row.get::<usize, i32>(1) + (!won) as i32;
-											let age = get_day().saturating_sub(row.get::<usize, i32>(2) as u32) as f64;
-											let sweet16 = age.powf(if lv == 1 { 1.6 } else { 1.7 });
+									if let Ok(row) = trx.query_one("select a.won, a.loss from arena a where a.arena_id = $1 and a.user_id = $2 for update", &[&lv, &auserid]).await {
+											let awon = (row.get::<usize, i32>(0) + won as i32 + 1) as f64;
+											let mut aloss = (row.get::<usize, i32>(1) + (!won) as i32) as f64;
+											aloss *= aloss.ln_1p();
+											let decay = if lv == 0 { aloss } else { awon + aloss };
 											let newscore =
-												((wilson((awon + 1) as f64, (awon + aloss + 1) as f64) - sweet16 / (sweet16 + 420.0)) * 1000.0) as i32;
+												(wilson(awon, awon + aloss) * (1.0 - decay / (decay + if lv == 0 { 256.0 } else { 128.0 })) * 1000.0) as i32;
 											trx.execute(
 												if won {
 													"update arena set won = won+1, score = $3 where arena_id = $1 and user_id = $2"
@@ -2363,10 +2363,10 @@ pub async fn handle_ws(
 				}
 				UserMessage::arenatop { lv } => {
 					let today = get_day();
-					if let Ok(rows) = client.query("select u.name, a.score, a.won, a.loss, a.day, a.code from arena a join users u on u.id = a.user_id where a.arena_id = $1 order by a.\"rank\" limit 30", &[if lv == 0 { &1i32 } else { &2i32 }]).await {
+					if let Ok(rows) = client.query("select u.name, a.score, a.won, a.loss, a.day, a.code, a.deck from arena a join users u on u.id = a.user_id where a.arena_id = $1 order by a.\"rank\" limit 30", &[if lv == 0 { &1i32 } else { &2i32 }]).await {
 						let mut top = Vec::with_capacity(rows.len());
 						for row in rows {
-							top.push((row.get::<usize, String>(0), row.get::<usize, i32>(1), row.get::<usize, i32>(2), row.get::<usize, i32>(3), today.saturating_sub(row.get::<usize, i32>(4) as u32), row.get::<usize, i32>(5)));
+							top.push((row.get::<usize, String>(0), row.get::<usize, i32>(1), row.get::<usize, i32>(2), row.get::<usize, i32>(3), today.saturating_sub(row.get::<usize, i32>(4) as u32), row.get::<usize, i32>(5), row.get::<usize, String>(6)));
 						}
 						sendmsg(&tx, &WsResponse::arenatop { lv, top: &top });
 					}

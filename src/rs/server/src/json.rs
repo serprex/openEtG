@@ -289,7 +289,7 @@ pub enum WsResponse<'a> {
 	},
 	arenatop {
 		lv: u8,
-		top: &'a [(String, i32, i32, i32, u32, i32)],
+		top: &'a [(String, i32, i32, i32, u32, i32, String)],
 	},
 	boostergive {
 		cards: &'a Cardpool,
