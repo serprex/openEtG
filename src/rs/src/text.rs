@@ -630,7 +630,7 @@ impl<'a> SkillThing<'a> {
 			Skill::salvageoff => Cow::from("Cannot salvage another destroyed permanent until next turn"),
 			Skill::sanctify if ev == Event::OwnAttack => Cow::from("During your opponent's turn, your hand & quanta pool are protected & you cannot be silenced"),
 			Skill::sanctify if ev == Event::OwnDraw => Cow::from("When drawn, your hand & quanta pool are protected & you cannot be silenced"),
-			Skill::unsanctify if ev == Event::OwnPlay => Cow::from("Nullify opponent's sanctuary effect from Sanctuary or Dream Catcher"),
+			Skill::unsanctify if ev == Event::OwnPlay => Cow::from("Nullify opponent's sanctuary effect"),
 			Skill::scatter =>
 				Cow::from("Target player mulligans their hand for an equal number of cards.\nTargeting a card will only shuffle that card.\nIncrease your mark power by 1"),
 			Skill::scramble if ev == Event::Hit => Cow::from("Randomize up to 9 quanta randomly chosen from opponent's quanta pool on hit"),
@@ -763,7 +763,7 @@ impl<'a> SkillThing<'a> {
 			Skill::wind => Cow::from("Restore any strength lost by halving after attacking. Increase HP by amount restored"),
 			Skill::wings => Cow::from("Evade all non-airborne, non-ranged attackers"),
 			Skill::wisdom => Cow::from(if self.set() == CardSet::Open {
-				"Target gains 4|0. May target immaterial cards. If it targets an immaterial card, that card gains psionic. Psionic cards deal spell damage & typically bypass shields"
+				"Target gains 3|0. May target immaterial cards. If it targets an immaterial card, that card gains psionic. Psionic cards deal spell damage & typically bypass shields"
 			} else {
 				"Target creature gains 4|0. May target immaterial cards. If it targets an immaterial card, that card gains psionic. Psionic cards deal spell damage & typically bypass shields"
 			}),
@@ -835,7 +835,7 @@ impl<'a> SkillThing<'a> {
 			Skill::hammer => Cow::from("Gain 1 strength if your mark is 1:3 1:4"),
 			Skill::bow => Cow::from(if self.set() == CardSet::Open {
 				"Gain 1 strength if your mark is 1:8 1:9"
-			} else { 
+			} else {
 				"Gain 1 strength if your mark is 1:9"
 			}),
 			Skill::staff => Cow::from("Gain 1 strength if your mark is 1:5 1:7"),
