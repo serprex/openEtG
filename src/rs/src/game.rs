@@ -6,11 +6,11 @@
 use alloc::borrow::Cow;
 use alloc::boxed::Box;
 use alloc::rc::Rc;
-use alloc::string::String;
+use alloc::string::{String, ToString};
 use alloc::vec;
 use alloc::vec::Vec;
 use core::default::Default;
-use core::fmt::Write;
+use core::fmt::{self, Display, Write};
 use core::hash::{Hash, Hasher};
 use core::iter::once;
 
@@ -25,7 +25,7 @@ use wasm_bindgen::prelude::*;
 use crate::card::{self, Card, Cards};
 use crate::etg;
 use crate::generated;
-use crate::skill::{Event, ProcData, Skill, Skills};
+use crate::skill::{Event, ProcData, Skill, SkillName, Skills};
 use crate::text::SkillThing;
 use crate::{now, set_panic_hook};
 
@@ -448,14 +448,13 @@ impl Flag {
 	pub const reflective: u64 = 1 << 25;
 	pub const resigned: u64 = 1 << 26;
 	pub const sabbath: u64 = 1 << 27;
-	pub const salvaged: u64 = 1 << 28;
-	pub const sanctuary: u64 = 1 << 29;
-	pub const stackable: u64 = 1 << 30;
-	pub const token: u64 = 1 << 31;
-	pub const tunnel: u64 = 1 << 32;
-	pub const vindicated: u64 = 1 << 33;
-	pub const voodoo: u64 = 1 << 34;
-	pub const whetstone: u64 = 1 << 35;
+	pub const sanctuary: u64 = 1 << 28;
+	pub const stackable: u64 = 1 << 29;
+	pub const token: u64 = 1 << 30;
+	pub const tunnel: u64 = 1 << 31;
+	pub const vindicated: u64 = 1 << 32;
+	pub const voodoo: u64 = 1 << 33;
+	pub const whetstone: u64 = 1 << 34;
 
 	pub fn get(self, key: u64) -> bool {
 		self.0 & key != 0
@@ -526,6 +525,21 @@ impl ThingGetter for u64 {
 		} else {
 			ctx.get_thing_mut(id).flag.0 &= !self;
 		}
+	}
+}
+
+pub struct SkillsName<'a> {
+	pub ctx: &'a Game,
+	pub sk: &'a [Skill],
+	pub id: i16,
+}
+
+impl<'a> Display for SkillsName<'a> {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		for &sk in self.sk {
+			SkillName { ctx: self.ctx, sk, id: self.id }.fmt(f)?;
+		}
+		Ok(())
 	}
 }
 
@@ -837,7 +851,7 @@ impl Game {
 	}
 
 	pub fn get_cast_skill(&self, id: i16) -> Option<String> {
-		self.skill_text(id, Event::Cast)
+		self.skill_text(id, Event::Cast).map(|s| s.to_string())
 	}
 
 	pub fn actinfo(&self, c: i16, t: i16) -> Option<String> {
@@ -921,12 +935,7 @@ impl Game {
 					} else if thing.skill.get(Event::OwnAttack).map(|sk| sk.as_ref()).unwrap_or(&[])
 						== &[Skill::locket]
 					{
-						let mode = thing.status.get(Stat::mode);
-						write!(
-							text,
-							"\n1:{}",
-							if mode != -1 { mode } else { self.get_mark(thing.owner) as i16 }
-						);
+						write!(text, "\n1:{}", thing.status.get(Stat::mode));
 					} else if charges != 0 {
 						write!(text, "\n{}", charges);
 					}
@@ -1377,16 +1386,10 @@ impl Game {
 		card
 	}
 
-	pub fn skill_text(&self, id: i16, ev: Event) -> Option<String> {
+	pub fn skill_text(&self, id: i16, ev: Event) -> Option<SkillsName> {
 		if let Some(sk) = self.get_thing(id).skill.get(ev) {
 			if !sk.is_empty() {
-				let mut name = String::new();
-				for s in sk.iter() {
-					s.push_name(self, id, &mut name);
-					name.push(' ');
-				}
-				name.truncate(name.len() - 1);
-				return Some(name);
+				return Some(SkillsName { ctx: self, sk, id });
 			}
 		}
 		None
@@ -1433,7 +1436,7 @@ impl Game {
 		}
 
 		if let Some(auto) = self.skill_text(id, Event::OwnAttack) {
-			return auto;
+			return auto.to_string();
 		}
 
 		String::new()
@@ -1587,7 +1590,11 @@ impl Game {
 	}
 
 	pub fn trueatk_adrenaline(&self, id: i16, adrenaline: i16) -> i16 {
-		let dmg = self.get(id, Stat::atk).saturating_add(self.get(id, Stat::dive)).saturating_add(self.trigger_pure(Event::Buff, id, 0)).saturating_add(self.calcBonusAtk(id));
+		let dmg = self
+			.get(id, Stat::atk)
+			.saturating_add(self.get(id, Stat::dive))
+			.saturating_add(self.trigger_pure(Event::Buff, id, 0))
+			.saturating_add(self.calcBonusAtk(id));
 		etg::calcAdrenaline(
 			adrenaline,
 			if self.get(id, Flag::burrowed) && self.cards.set != CardSet::Original {
@@ -1639,8 +1646,8 @@ impl Game {
 							bypass = self
 								.get_player(self.get_owner(id))
 								.permanents
-								.iter()
-								.any(|&pr| pr != 0 && self.get(pr, Flag::tunnel))
+								.into_iter()
+								.any(|pr| pr != 0 && self.get(pr, Flag::tunnel))
 						}
 						let gpull = self.get(data.tgt, Stat::gpull);
 						let shield = self.get_shield(data.tgt);
@@ -1913,7 +1920,6 @@ impl Game {
 		thing.status.insert(Stat::hp, card.health as i16);
 		thing.status.insert(Stat::maxhp, card.health as i16);
 		thing.status.insert(Stat::atk, card.attack as i16);
-		thing.status.insert(Stat::casts, 0);
 		thing.flag.0 |= card.flag;
 		for &(k, v) in card.status.iter() {
 			thing.status.insert(k, v);
@@ -2268,12 +2274,9 @@ impl Game {
 		}
 	}
 
-	pub fn destroy(&mut self, id: i16, data: Option<&mut ProcData>) {
+	pub fn destroy(&mut self, id: i16) {
 		if !self.get(id, Flag::stackable) || self.maybeDecrStatus(id, Stat::charges) < 2 {
 			self.remove(id);
-		}
-		if let Some(data) = data {
-			self.proc_data(Event::Destroy, id, data);
 		}
 	}
 
@@ -2427,8 +2430,8 @@ impl Game {
 				| Flag::cloak | Flag::nightfall
 				| Flag::stackable
 				| Flag::tunnel | Flag::whetstone);
-		for status in [Stat::charges, Stat::flooding] {
-			if let Some(val) = thing.status.get_mut(status) {
+		for (st, ref mut val) in thing.status.iter_mut() {
+			if matches!(st, Stat::charges | Stat::flooding) {
 				*val = 0;
 			}
 		}

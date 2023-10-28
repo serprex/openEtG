@@ -8,7 +8,7 @@
     "url": "https://github.com/serprex/openEtG"
   },
   "devDependencies": {
-    "@babel/plugin-syntax-import-attributes": "^7.22.5",
+    "@babel/plugin-syntax-import-attributes": "^7.23.3",
     "@pencil.js/spritesheet": "^1.5.1",
     "babel-loader": "^9.1.3",
     "babel-preset-solid": "^1.8.4",

@@ -128,12 +128,7 @@ impl QuantaMap {
 							}
 						}
 						Skill::locket => {
-							let element = ctx.get(id, Stat::mode);
-							QuantaMap::add(
-								&mut quanta,
-								if element == -1 { player.mark as i16 } else { element },
-								1,
-							);
+							QuantaMap::add(&mut quanta, ctx.get(id, Stat::mode), 1);
 						}
 						_ => {}
 					}
@@ -347,7 +342,7 @@ fn eval_skill(
 			Skill::dryspell => 5 * PREC,
 			Skill::dshield | Skill::v_dshield => 4 * PREC,
 			Skill::duality => 4 * PREC,
-			Skill::earthquake => 4 * PREC,
+			Skill::earthquake(x) => x as i32 * PREC,
 			Skill::eatspell => 3 * PREC,
 			Skill::embezzle => 7 * PREC,
 			Skill::empathy => ctx.count_creatures(ctx.get_owner(c)) as i32 * PREC,
@@ -359,12 +354,12 @@ fn eval_skill(
 				if pl.shield != 0 {
 					for &sk in ctx.getSkill(pl.shield, Event::Shield) {
 						if let Skill::thorn(x) = sk {
-							return 4 * PREC + ctx.count_creatures(pl.foe) as i32 * PREC * 100 / x as i32
+							return 4 * PREC + ctx.count_creatures(pl.foe) as i32 * PREC * 100 / x as i32;
 						}
 					}
 				}
 				4 * PREC
-			},
+			}
 			Skill::epoch => 2 * PREC,
 			Skill::evolve => 3 * PREC,
 			Skill::feed => 6 * PREC,
@@ -570,7 +565,7 @@ fn eval_skill(
 			Skill::ricochet => 2 * PREC,
 			Skill::sabbath => PREC,
 			Skill::sadism => 2 * PREC,
-			Skill::salvage | Skill::v_salvage => 2 * PREC,
+			Skill::salvage => 2 * PREC,
 			Skill::sanctify => 2 * PREC,
 			Skill::scramble | Skill::v_scramble => {
 				(13 - ctx
@@ -628,8 +623,8 @@ fn eval_skill(
 			Skill::tornado => 9 * PREC,
 			Skill::trick => 4 * PREC,
 			Skill::turngolem => ctx.get(c, Stat::storedpower) as i32 * (PREC / 2),
+			Skill::unsilence => PREC,
 			Skill::unsummon => PREC,
-			Skill::unsummonquanta => 3 * PREC,
 			Skill::upkeep => -PREC / 2,
 			Skill::upload => 3 * PREC,
 			Skill::vampire => {
@@ -1106,7 +1101,7 @@ pub fn eval(ctx: &Game) -> i32 {
 						}
 					}
 					Skill::evade(x) => {
-						wall.shield = Some(WallShield::Evade(PREC as i16 * (100 - x) / 100));
+						wall.shield = Some(WallShield::Evade(PREC as i16 * (100 - x as i16) / 100));
 					}
 					Skill::weight => wall.shield = Some(WallShield::Weight),
 					Skill::wings => wall.shield = Some(WallShield::Wings),

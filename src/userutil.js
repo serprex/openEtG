@@ -3,7 +3,7 @@ import { iterraw } from './etgutil.js';
 const cardValues24 = new Uint16Array([200, 33, 120, 720, 6000]),
 	sellValues = new Uint8Array([5, 1, 3, 15, 150]);
 export const pveCostReward = new Uint8Array([
-	0, 9, 1, 16, 15, 70, 22, 222, 20, 100, 30, 200,
+	0, 9, 1, 16, 15, 70, 30, 250, 20, 100, 30, 200,
 ]);
 function cardValue24(card) {
 	return ~card.rarity

@@ -7,7 +7,7 @@ use alloc::rc::Rc;
 use alloc::string::String;
 use alloc::vec;
 use alloc::vec::Vec;
-use core::fmt::Write;
+use core::fmt::{self, Display, Write};
 use core::iter::once;
 use core::num::{NonZeroU32, NonZeroU8};
 
@@ -324,7 +324,7 @@ pub enum Skill {
 	dshield,
 	dshieldoff,
 	duality,
-	earthquake,
+	earthquake(u8),
 	eatspell,
 	elf,
 	embezzle,
@@ -337,7 +337,7 @@ pub enum Skill {
 	epoch,
 	epochreset,
 	equalize,
-	evade(i16),
+	evade(u8),
 	evade100,
 	evadecrea,
 	evadespell,
@@ -464,7 +464,7 @@ pub enum Skill {
 	quantagift,
 	quint,
 	quinttog,
-	r#static,
+	r#static(u8),
 	rage,
 	randomdr,
 	readiness,
@@ -522,7 +522,7 @@ pub enum Skill {
 	swave,
 	tempering(i16),
 	tesseractsummon,
-	thorn(i16),
+	thorn(u8),
 	throwrock,
 	tick,
 	tidalhealing,
@@ -531,8 +531,8 @@ pub enum Skill {
 	turngolem,
 	unappease,
 	unsanctify,
+	unsilence,
 	unsummon,
-	unsummonquanta,
 	unvindicate,
 	upkeep,
 	upload,
@@ -583,7 +583,6 @@ pub enum Skill {
 	v_readiness,
 	v_relic,
 	v_rewind,
-	v_salvage,
 	v_scramble,
 	v_serendipity,
 	v_silence,
@@ -630,6 +629,7 @@ impl Tgt {
 	pub const groundcrea: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(26 << 1) });
 	pub const wisdom: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(27 << 1) });
 	pub const quinttog: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(28 << 1) });
+	pub const locket: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(29 << 1) });
 	pub const _own: u32 = 1 << 1;
 	pub const _foe: u32 = 2 << 1;
 	pub const _notself: u32 = 3 << 1;
@@ -658,8 +658,7 @@ impl Tgt {
 	pub const _groundcrea: u32 = 26 << 1;
 	pub const _wisdom: u32 = 27 << 1;
 	pub const _quinttog: u32 = 28 << 1;
-	pub const And: u32 = 2;
-	pub const Or: u32 = 3;
+	pub const _locket: u32 = 29 << 1;
 
 	const fn or(self) -> Tgt {
 		Tgt(unsafe { NonZeroU32::new_unchecked(3 | self.0.get() << 2) })
@@ -764,6 +763,13 @@ impl Tgt {
 					(tkind == Kind::Creature || tkind == Kind::Weapon) && !ctx.get(t, Flag::burrowed)
 				}
 				Tgt::_quinttog => ctx.get_kind(t) == Kind::Creature && !ctx.get(t, Flag::burrowed),
+				Tgt::_locket => {
+					let kind = ctx.get_kind(t);
+					kind != Kind::Player && {
+						let te = ctx.get_card(ctx.get(t, Stat::card)).element as i16;
+						te != 0 && ctx.get(c, Stat::mode) != te
+					}
+				}
 				_ => false,
 			}
 		} else {
@@ -817,250 +823,239 @@ impl Soya {
 	}
 }
 
-impl Skill {
-	pub fn push_name(self, ctx: &Game, id: i16, out: &mut String) {
-		match self {
-			Self::r#_tracedeath => (),
-			Self::abomination => out.push_str("abomination"),
-			Self::absorbdmg => out.push_str("absorbdmg"),
-			Self::absorber => out.push_str("absorber"),
-			Self::acceleration => out.push_str("acceleration"),
-			Self::accretion => out.push_str("accretion"),
-			Self::accumulation => out.push_str("accumulation"),
-			Self::adrenaline => out.push_str("adrenaline"),
-			Self::aflatoxin => out.push_str("aflatoxin"),
-			Self::aggroskele => out.push_str("aggroskele"),
-			Self::alphawolf => out.push_str("alphawolf"),
-			Self::antimatter => out.push_str("antimatter"),
-			Self::appease => out.push_str("appease"),
-			Self::autoburrow => out.push_str("autoburrow"),
-			Self::autoburrowoff => out.push_str("autoburrowoff"),
-			Self::autoburrowproc => out.push_str("autoburrowproc"),
-			Self::axe => out.push_str("axe"),
-			Self::axedraw => out.push_str("axedraw"),
-			Self::bblood => out.push_str("bblood"),
-			Self::becomearctic => out.push_str("becomearctic"),
-			Self::beguile => out.push_str("beguile"),
-			Self::beguilestop => out.push_str("beguilestop"),
-			Self::bellweb => out.push_str("bellweb"),
-			Self::blackhole => out.push_str("blackhole"),
-			Self::bless => out.push_str("bless"),
-			Self::blockwithcharge => out.push_str("blockwithcharge"),
-			Self::bloodmoon => out.push_str("bloodmoon"),
-			Self::bolsterintodeck => out.push_str("bolsterintodeck"),
-			Self::boneyard => out.push_str("boneyard"),
-			Self::bounce => out.push_str("bounce"),
-			Self::bow => out.push_str("bow"),
-			Self::bravery => out.push_str("bravery"),
-			Self::brawl => out.push_str("brawl"),
-			Self::brew => out.push_str("brew"),
-			Self::brokenmirror => out.push_str("brokenmirror"),
-			Self::bubbleclear => out.push_str("bubbleclear"),
-			Self::burrow => out.push_str(if ctx.get(id, Flag::burrowed) { "unburrow" } else { "burrow" }),
-			Self::butterfly => out.push_str("butterfly"),
-			Self::catapult => out.push_str("catapult"),
-			Self::catlife => out.push_str("catlife"),
-			Self::cell => out.push_str("cell"),
-			Self::chaos => out.push_str("chaos"),
-			Self::chimera => out.push_str("chimera"),
-			Self::chromastat => out.push_str("chromastat"),
-			Self::clear => out.push_str("clear"),
-			Self::cold => out.push_str("cold"),
-			Self::corpseexplosion => out.push_str("corpseexplosion"),
-			Self::counter => out.push_str("counter"),
-			Self::countimmbur => out.push_str("countimmbur"),
-			Self::cpower => out.push_str("cpower"),
-			Self::creatureupkeep => out.push_str("creatureupkeep"),
-			Self::cseed => out.push_str("cseed"),
-			Self::cseed2 => out.push_str("cseed2"),
-			Self::dagger => out.push_str("dagger"),
-			Self::deadalive => out.push_str("deadalive"),
-			Self::deathwish => out.push_str("deathwish"),
-			Self::deckblast => out.push_str("deckblast"),
-			Self::decrsteam => out.push_str("decrsteam"),
-			Self::deepdive => out.push_str("deepdive"),
-			Self::deepdiveproc => out.push_str("deepdiveproc"),
-			Self::deepdiveproc2 => out.push_str("deepdiveproc2"),
-			Self::deja => out.push_str("deja"),
-			Self::deployblobs => out.push_str("deployblobs"),
-			Self::despair => out.push_str("despair"),
-			Self::destroy => out.push_str("destroy"),
-			Self::destroycard => out.push_str("destroycard"),
-			Self::detain => out.push_str("detain"),
-			Self::devour => out.push_str("devour"),
-			Self::die => out.push_str("die"),
-			Self::disarm => out.push_str("disarm"),
-			Self::disc => out.push_str("disc"),
-			Self::discping => out.push_str("discping"),
-			Self::disfield => out.push_str("disfield"),
-			Self::disshield => out.push_str("disshield"),
-			Self::dive => out.push_str("dive"),
-			Self::divinity => out.push_str("divinity"),
-			Self::dmgproduce => out.push_str("dmgproduce"),
-			Self::draft => out.push_str("draft"),
-			Self::drainlife => out.push_str("drainlife"),
-			Self::drawcopy => out.push_str("drawcopy"),
-			Self::drawequip => out.push_str("drawequip"),
-			Self::drawpillar => out.push_str("drawpillar"),
-			Self::dryspell => out.push_str("dryspell"),
-			Self::dshield => out.push_str("dshield"),
-			Self::dshieldoff => out.push_str("dshieldoff"),
-			Self::duality => out.push_str("duality"),
-			Self::earthquake => out.push_str("earthquake"),
-			Self::eatspell => out.push_str("eatspell"),
-			Self::elf => out.push_str("elf"),
-			Self::embezzle => out.push_str("embezzle"),
-			Self::embezzledeath => out.push_str("embezzledeath"),
-			Self::empathy => out.push_str("empathy"),
-			Self::enchant => out.push_str("enchant"),
-			Self::endow => out.push_str("endow"),
-			Self::envenom => out.push_str("envenom"),
-			Self::epidemic => out.push_str("epidemic"),
-			Self::epoch => out.push_str("epoch"),
-			Self::epochreset => out.push_str("epochreset"),
-			Self::equalize => out.push_str("equalize"),
-			Self::evade(x) => {
-				write!(out, "evade{}", x);
-			}
-			Self::evade100 => out.push_str("evade100"),
-			Self::evadecrea => out.push_str("evadecrea"),
-			Self::evadespell => out.push_str("evadespell"),
-			Self::evolve => out.push_str("evolve"),
-			Self::feed => out.push_str("feed"),
-			Self::fickle => out.push_str("fickle"),
-			Self::fiery => out.push_str("fiery"),
-			Self::firebolt => out.push_str("firebolt"),
-			Self::firebrand => out.push_str("firebrand"),
-			Self::firestorm(x) => {
-				write!(out, "firestorm{}", x);
-			}
-			Self::firewall => out.push_str("firewall"),
-			Self::flood => out.push_str("flood"),
-			Self::flooddeath => out.push_str("flooddeath"),
-			Self::flyingweapon => out.push_str("flyingweapon"),
-			Self::flyself => out.push_str("flyself"),
-			Self::foedraw => out.push_str("foedraw"),
-			Self::forcedraw => out.push_str("forcedraw"),
-			Self::forceplay => out.push_str("forceplay"),
-			Self::fractal => out.push_str("fractal"),
-			Self::freedom => out.push_str("freedom"),
-			Self::freeevade => out.push_str("freeevade"),
-			Self::freeze(x) => {
-				write!(out, "freeze{}", x);
-			}
-			Self::freezeperm => out.push_str("freezeperm"),
-			Self::fungusrebirth => out.push_str("fungusrebirth"),
-			Self::gaincharge2 => out.push_str("gaincharge2"),
-			Self::gaintimecharge => out.push_str("gaintimecharge"),
-			Self::gas => out.push_str("gas"),
-			Self::give => out.push_str("give"),
-			Self::golemhit => out.push_str("golemhit"),
-			Self::gpull => out.push_str("gpull"),
-			Self::gpullspell => out.push_str("gpullspell"),
-			Self::grave => out.push_str("grave"),
-			Self::growth(atk, hp) => {
-				write!(out, "growth{:+}{:+}", atk, hp);
-			}
-			Self::guard => out.push_str("guard"),
-			Self::halveatk => out.push_str("halveatk"),
-			Self::hammer => out.push_str("hammer"),
-			Self::hasten => out.push_str("hasten"),
-			Self::hatch => out.push_str("hatch"),
-			Self::heal => out.push_str("heal"),
-			Self::heatmirror => out.push_str("heatmirror"),
-			Self::hitownertwice => out.push_str("hitownertwice"),
-			Self::holylight => out.push_str("holylight"),
-			Self::hope => out.push_str("hope"),
-			Self::icebolt => out.push_str("icebolt"),
-			Self::icegrowth(atk, hp) => {
-				write!(out, "icegrowth{:+}{:+}", atk, hp);
-			}
-			Self::ignite => out.push_str("ignite"),
-			Self::ignitediscard => out.push_str("ignitediscard"),
-			Self::immolate(x) => {
-				write!(out, "immolate{}", x);
-			}
-			Self::improve => out.push_str("improve"),
-			Self::inertia => out.push_str("inertia"),
-			Self::inflation => out.push_str("inflation"),
-			Self::ink => out.push_str("ink"),
-			Self::innovation => out.push_str("innovation"),
-			Self::integrity => out.push_str("integrity"),
-			Self::jelly => out.push_str("jelly"),
-			Self::jetstream => out.push_str("jetstream"),
-			Self::lightning => out.push_str("lightning"),
-			Self::liquid => out.push_str("liquid"),
-			Self::livingweapon => out.push_str("livingweapon"),
-			Self::lobotomize => out.push_str("lobotomize"),
-			Self::locket => out.push_str("locket"),
-			Self::locketshift => out.push_str("locketshift"),
-			Self::loot => out.push_str("loot"),
-			Self::losecharge => out.push_str("losecharge"),
-			Self::luciferin => out.push_str("luciferin"),
-			Self::lycanthropy => out.push_str("lycanthropy"),
-			Self::martyr => out.push_str("martyr"),
-			Self::mend => out.push_str("mend"),
-			Self::metamorph => out.push_str("metamorph"),
-			Self::midas => out.push_str("midas"),
-			Self::mill => out.push_str("mill"),
-			Self::millpillar => out.push_str("millpillar"),
-			Self::mimic => out.push_str("mimic"),
-			Self::miracle => out.push_str("miracle"),
-			Self::mitosis => out.push_str("mitosis"),
-			Self::mitosisspell => out.push_str("mitosisspell"),
-			Self::momentum => out.push_str("momentum"),
-			Self::mummy => out.push_str("mummy"),
-			Self::mutant => out.push_str("mutant"),
-			Self::mutation => out.push_str("mutation"),
-			Self::neuro => out.push_str("neuro"),
-			Self::neuroify => out.push_str("neuroify"),
-			Self::nightmare => out.push_str("nightmare"),
-			Self::nightshade => out.push_str("nightshade"),
-			Self::noeatspell => out.push_str("noeatspell"),
-			Self::nothrottle => out.push_str("nothrottle"),
-			Self::nova => out.push_str("nova"),
-			Self::nova2 => out.push_str("nova2"),
-			Self::nullspell => out.push_str("nullspell"),
-			Self::nymph => out.push_str("nymph"),
-			Self::obsession => out.push_str("obsession"),
-			Self::ouija => out.push_str("ouija"),
-			Self::ouijadestroy => out.push_str("ouijadestroy"),
-			Self::ouijagrowth => out.push_str("ouijagrowth"),
-			Self::pacify => out.push_str("pacify"),
-			Self::pairproduce => out.push_str("pairproduce"),
-			Self::paleomagnetism => out.push_str("paleomagnetism"),
-			Self::pandemonium => out.push_str("pandemonium"),
-			Self::pandemonium2 => out.push_str("pandemonium2"),
-			Self::pandemonium3 => out.push_str("pandemonium3"),
-			Self::paradox => out.push_str("paradox"),
-			Self::parallel => out.push_str("parallel"),
-			Self::patience => out.push_str("patience"),
-			Self::pend => out.push_str("pend"),
-			Self::phoenix => out.push_str("phoenix"),
-			Self::photosynthesis => out.push_str("photosynthesis"),
-			Self::pillar => out.push_str("pillar"),
-			Self::pillar1 => out.push_str("pillar1"),
-			Self::quadpillar(_) => out.push_str("quadpillar"),
-			Self::quadpillar1(_) => out.push_str("quadpillar1"),
-			Self::plague => out.push_str("plague"),
-			Self::platearmor(x) => {
-				write!(out, "platearmor{}", x);
-			}
-			Self::poison(x) => {
-				write!(out, "poison{}", x);
-			}
-			Self::poisonfoe(x) => {
-				write!(out, "poisonfoe{}", x);
-			}
-			Self::powerdrain => out.push_str("powerdrain"),
-			Self::precognition => out.push_str("precognition"),
-			Self::predator => out.push_str("predator"),
-			Self::predatoroff => out.push_str("predatoroff"),
-			Self::protectall => out.push_str("protectall"),
-			Self::protectonce => out.push_str("protectonce"),
-			Self::protectoncedmg => out.push_str("protectoncedmg"),
-			Self::purify => out.push_str("purify"),
-			Self::quanta(x) => out.push_str(match x {
+pub struct SkillName<'a> {
+	pub ctx: &'a Game,
+	pub sk: Skill,
+	pub id: i16,
+}
+
+impl<'a> Display for SkillName<'a> {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		let &SkillName { sk, ctx, id } = self;
+		match sk {
+			Skill::r#_tracedeath => Ok(()),
+			Skill::abomination => f.write_str("abomination"),
+			Skill::absorbdmg => f.write_str("absorbdmg"),
+			Skill::absorber => f.write_str("absorber"),
+			Skill::acceleration => f.write_str("acceleration"),
+			Skill::accretion => f.write_str("accretion"),
+			Skill::accumulation => f.write_str("accumulation"),
+			Skill::adrenaline => f.write_str("adrenaline"),
+			Skill::aflatoxin => f.write_str("aflatoxin"),
+			Skill::aggroskele => f.write_str("aggroskele"),
+			Skill::alphawolf => f.write_str("alphawolf"),
+			Skill::antimatter => f.write_str("antimatter"),
+			Skill::appease => f.write_str("appease"),
+			Skill::autoburrow => f.write_str("autoburrow"),
+			Skill::autoburrowoff => f.write_str("autoburrowoff"),
+			Skill::autoburrowproc => f.write_str("autoburrowproc"),
+			Skill::axe => f.write_str("axe"),
+			Skill::axedraw => f.write_str("axedraw"),
+			Skill::bblood => f.write_str("bblood"),
+			Skill::becomearctic => f.write_str("becomearctic"),
+			Skill::beguile => f.write_str("beguile"),
+			Skill::beguilestop => f.write_str("beguilestop"),
+			Skill::bellweb => f.write_str("bellweb"),
+			Skill::blackhole => f.write_str("blackhole"),
+			Skill::bless => f.write_str("bless"),
+			Skill::blockwithcharge => f.write_str("blockwithcharge"),
+			Skill::bloodmoon => f.write_str("bloodmoon"),
+			Skill::bolsterintodeck => f.write_str("bolsterintodeck"),
+			Skill::boneyard => f.write_str("boneyard"),
+			Skill::bounce => f.write_str("bounce"),
+			Skill::bow => f.write_str("bow"),
+			Skill::bravery => f.write_str("bravery"),
+			Skill::brawl => f.write_str("brawl"),
+			Skill::brew => f.write_str("brew"),
+			Skill::brokenmirror => f.write_str("brokenmirror"),
+			Skill::bubbleclear => f.write_str("bubbleclear"),
+			Skill::burrow => f.write_str(if ctx.get(id, Flag::burrowed) { "unburrow" } else { "burrow" }),
+			Skill::butterfly => f.write_str("butterfly"),
+			Skill::catapult => f.write_str("catapult"),
+			Skill::catlife => f.write_str("catlife"),
+			Skill::cell => f.write_str("cell"),
+			Skill::chaos => f.write_str("chaos"),
+			Skill::chimera => f.write_str("chimera"),
+			Skill::chromastat => f.write_str("chromastat"),
+			Skill::clear => f.write_str("clear"),
+			Skill::cold => f.write_str("cold"),
+			Skill::corpseexplosion => f.write_str("corpseexplosion"),
+			Skill::counter => f.write_str("counter"),
+			Skill::countimmbur => f.write_str("countimmbur"),
+			Skill::cpower => f.write_str("cpower"),
+			Skill::creatureupkeep => f.write_str("creatureupkeep"),
+			Skill::cseed => f.write_str("cseed"),
+			Skill::cseed2 => f.write_str("cseed2"),
+			Skill::dagger => f.write_str("dagger"),
+			Skill::deadalive => f.write_str("deadalive"),
+			Skill::deathwish => f.write_str("deathwish"),
+			Skill::deckblast => f.write_str("deckblast"),
+			Skill::decrsteam => f.write_str("decrsteam"),
+			Skill::deepdive => f.write_str("deepdive"),
+			Skill::deepdiveproc => f.write_str("deepdiveproc"),
+			Skill::deepdiveproc2 => f.write_str("deepdiveproc2"),
+			Skill::deja => f.write_str("deja"),
+			Skill::deployblobs => f.write_str("deployblobs"),
+			Skill::despair => f.write_str("despair"),
+			Skill::destroy => f.write_str("destroy"),
+			Skill::destroycard => f.write_str("destroycard"),
+			Skill::detain => f.write_str("detain"),
+			Skill::devour => f.write_str("devour"),
+			Skill::die => f.write_str("die"),
+			Skill::disarm => f.write_str("disarm"),
+			Skill::disc => f.write_str("disc"),
+			Skill::discping => f.write_str("discping"),
+			Skill::disfield => f.write_str("disfield"),
+			Skill::disshield => f.write_str("disshield"),
+			Skill::dive => f.write_str("dive"),
+			Skill::divinity => f.write_str("divinity"),
+			Skill::dmgproduce => f.write_str("dmgproduce"),
+			Skill::draft => f.write_str("draft"),
+			Skill::drainlife => f.write_str("drainlife"),
+			Skill::drawcopy => f.write_str("drawcopy"),
+			Skill::drawequip => f.write_str("drawequip"),
+			Skill::drawpillar => f.write_str("drawpillar"),
+			Skill::dryspell => f.write_str("dryspell"),
+			Skill::dshield => f.write_str("dshield"),
+			Skill::dshieldoff => f.write_str("dshieldoff"),
+			Skill::duality => f.write_str("duality"),
+			Skill::earthquake(x) => write!(f, "earthquake{x}"),
+			Skill::eatspell => f.write_str("eatspell"),
+			Skill::elf => f.write_str("elf"),
+			Skill::embezzle => f.write_str("embezzle"),
+			Skill::embezzledeath => f.write_str("embezzledeath"),
+			Skill::empathy => f.write_str("empathy"),
+			Skill::enchant => f.write_str("enchant"),
+			Skill::endow => f.write_str("endow"),
+			Skill::envenom => f.write_str("envenom"),
+			Skill::epidemic => f.write_str("epidemic"),
+			Skill::epoch => f.write_str("epoch"),
+			Skill::epochreset => f.write_str("epochreset"),
+			Skill::equalize => f.write_str("equalize"),
+			Skill::evade(x) => write!(f, "evade{x}"),
+			Skill::evade100 => f.write_str("evade100"),
+			Skill::evadecrea => f.write_str("evadecrea"),
+			Skill::evadespell => f.write_str("evadespell"),
+			Skill::evolve => f.write_str("evolve"),
+			Skill::feed => f.write_str("feed"),
+			Skill::fickle => f.write_str("fickle"),
+			Skill::fiery => f.write_str("fiery"),
+			Skill::firebolt => f.write_str("firebolt"),
+			Skill::firebrand => f.write_str("firebrand"),
+			Skill::firestorm(x) => write!(f, "firestorm{x}"),
+			Skill::firewall => f.write_str("firewall"),
+			Skill::flood => f.write_str("flood"),
+			Skill::flooddeath => f.write_str("flooddeath"),
+			Skill::flyingweapon => f.write_str("flyingweapon"),
+			Skill::flyself => f.write_str("flyself"),
+			Skill::foedraw => f.write_str("foedraw"),
+			Skill::forcedraw => f.write_str("forcedraw"),
+			Skill::forceplay => f.write_str("forceplay"),
+			Skill::fractal => f.write_str("fractal"),
+			Skill::freedom => f.write_str("freedom"),
+			Skill::freeevade => f.write_str("freeevade"),
+			Skill::freeze(x) => write!(f, "freeze{x}"),
+			Skill::freezeperm => f.write_str("freezeperm"),
+			Skill::fungusrebirth => f.write_str("fungusrebirth"),
+			Skill::gaincharge2 => f.write_str("gaincharge2"),
+			Skill::gaintimecharge => f.write_str("gaintimecharge"),
+			Skill::gas => f.write_str("gas"),
+			Skill::give => f.write_str("give"),
+			Skill::golemhit => f.write_str("golemhit"),
+			Skill::gpull => f.write_str("gpull"),
+			Skill::gpullspell => f.write_str("gpullspell"),
+			Skill::grave => f.write_str("grave"),
+			Skill::growth(atk, hp) => write!(f, "growth{atk:+}{hp:+}"),
+			Skill::guard => f.write_str("guard"),
+			Skill::halveatk => f.write_str("halveatk"),
+			Skill::hammer => f.write_str("hammer"),
+			Skill::hasten => f.write_str("hasten"),
+			Skill::hatch => f.write_str("hatch"),
+			Skill::heal => f.write_str("heal"),
+			Skill::heatmirror => f.write_str("heatmirror"),
+			Skill::hitownertwice => f.write_str("hitownertwice"),
+			Skill::holylight => f.write_str("holylight"),
+			Skill::hope => f.write_str("hope"),
+			Skill::icebolt => f.write_str("icebolt"),
+			Skill::icegrowth(atk, hp) => write!(f, "icegrowth{atk:+}{hp:+}"),
+			Skill::ignite => f.write_str("ignite"),
+			Skill::ignitediscard => f.write_str("ignitediscard"),
+			Skill::immolate(x) => write!(f, "immolate{x}"),
+			Skill::improve => f.write_str("improve"),
+			Skill::inertia => f.write_str("inertia"),
+			Skill::inflation => f.write_str("inflation"),
+			Skill::ink => f.write_str("ink"),
+			Skill::innovation => f.write_str("innovation"),
+			Skill::integrity => f.write_str("integrity"),
+			Skill::jelly => f.write_str("jelly"),
+			Skill::jetstream => f.write_str("jetstream"),
+			Skill::lightning => f.write_str("lightning"),
+			Skill::liquid => f.write_str("liquid"),
+			Skill::livingweapon => f.write_str("livingweapon"),
+			Skill::lobotomize => f.write_str("lobotomize"),
+			Skill::locket => f.write_str("locket"),
+			Skill::locketshift => f.write_str("locketshift"),
+			Skill::loot => f.write_str("loot"),
+			Skill::losecharge => f.write_str("losecharge"),
+			Skill::luciferin => f.write_str("luciferin"),
+			Skill::lycanthropy => f.write_str("lycanthropy"),
+			Skill::martyr => f.write_str("martyr"),
+			Skill::mend => f.write_str("mend"),
+			Skill::metamorph => f.write_str("metamorph"),
+			Skill::midas => f.write_str("midas"),
+			Skill::mill => f.write_str("mill"),
+			Skill::millpillar => f.write_str("millpillar"),
+			Skill::mimic => f.write_str("mimic"),
+			Skill::miracle => f.write_str("miracle"),
+			Skill::mitosis => f.write_str("mitosis"),
+			Skill::mitosisspell => f.write_str("mitosisspell"),
+			Skill::momentum => f.write_str("momentum"),
+			Skill::mummy => f.write_str("mummy"),
+			Skill::mutant => f.write_str("mutant"),
+			Skill::mutation => f.write_str("mutation"),
+			Skill::neuro => f.write_str("neuro"),
+			Skill::neuroify => f.write_str("neuroify"),
+			Skill::nightmare => f.write_str("nightmare"),
+			Skill::nightshade => f.write_str("nightshade"),
+			Skill::noeatspell => f.write_str("noeatspell"),
+			Skill::nothrottle => f.write_str("nothrottle"),
+			Skill::nova => f.write_str("nova"),
+			Skill::nova2 => f.write_str("nova2"),
+			Skill::nullspell => f.write_str("nullspell"),
+			Skill::nymph => f.write_str("nymph"),
+			Skill::obsession => f.write_str("obsession"),
+			Skill::ouija => f.write_str("ouija"),
+			Skill::ouijadestroy => f.write_str("ouijadestroy"),
+			Skill::ouijagrowth => f.write_str("ouijagrowth"),
+			Skill::pacify => f.write_str("pacify"),
+			Skill::pairproduce => f.write_str("pairproduce"),
+			Skill::paleomagnetism => f.write_str("paleomagnetism"),
+			Skill::pandemonium => f.write_str("pandemonium"),
+			Skill::pandemonium2 => f.write_str("pandemonium2"),
+			Skill::pandemonium3 => f.write_str("pandemonium3"),
+			Skill::paradox => f.write_str("paradox"),
+			Skill::parallel => f.write_str("parallel"),
+			Skill::patience => f.write_str("patience"),
+			Skill::pend => f.write_str("pend"),
+			Skill::phoenix => f.write_str("phoenix"),
+			Skill::photosynthesis => f.write_str("photosynthesis"),
+			Skill::pillar => f.write_str("pillar"),
+			Skill::pillar1 => f.write_str("pillar1"),
+			Skill::quadpillar(_) => f.write_str("quadpillar"),
+			Skill::quadpillar1(_) => f.write_str("quadpillar1"),
+			Skill::plague => f.write_str("plague"),
+			Skill::platearmor(x) => write!(f, "platearmor{x}"),
+			Skill::poison(x) => write!(f, "poison{x}"),
+			Skill::poisonfoe(x) => write!(f, "poisonfoe{x}"),
+			Skill::powerdrain => f.write_str("powerdrain"),
+			Skill::precognition => f.write_str("precognition"),
+			Skill::predator => f.write_str("predator"),
+			Skill::predatoroff => f.write_str("predatoroff"),
+			Skill::protectall => f.write_str("protectall"),
+			Skill::protectonce => f.write_str("protectonce"),
+			Skill::protectoncedmg => f.write_str("protectoncedmg"),
+			Skill::purify => f.write_str("purify"),
+			Skill::quanta(x) => f.write_str(match x {
 				0 => "chroma",
 				1 => "entropy",
 				2 => "death",
@@ -1076,154 +1071,145 @@ impl Skill {
 				12 => "aether",
 				_ => "",
 			}),
-			Self::quantagift => out.push_str("quantagift"),
-			Self::quint => out.push_str("quint"),
-			Self::quinttog => out.push_str("quinttog"),
-			Self::r#static => out.push_str("static"),
-			Self::rage => out.push_str("rage"),
-			Self::randomdr => out.push_str("randomdr"),
-			Self::readiness => out.push_str("readiness"),
-			Self::reap => out.push_str("reap"),
-			Self::rebirth => out.push_str("rebirth"),
-			Self::reducemaxhp => out.push_str("reducemaxhp"),
-			Self::regen => out.push_str("regen"),
-			Self::regenerate(x) => {
-				write!(out, "regenerate{}", x);
-			}
-			Self::regeneratespell => out.push_str("regeneratespell"),
-			Self::regrade => out.push_str("regrade"),
-			Self::reinforce => out.push_str("reinforce"),
-			Self::ren => out.push_str("ren"),
-			Self::resummon => out.push_str("resummon"),
-			Self::reveal => out.push_str("reveal"),
-			Self::rewind => out.push_str("rewind"),
-			Self::ricochet => out.push_str("ricochet"),
-			Self::sabbath => out.push_str("sabbath"),
-			Self::sadism => out.push_str("sadism"),
-			Self::salvage => out.push_str("salvage"),
-			Self::salvageoff => out.push_str("salvageoff"),
-			Self::sanctify => out.push_str("sanctify"),
-			Self::scatter => out.push_str("scatter"),
-			Self::scramble => out.push_str("scramble"),
-			Self::scramblespam => out.push_str("scramblespam"),
-			Self::serendipity => out.push_str("serendipity"),
-			Self::shardgolem => out.push_str("shardgolem"),
-			Self::shtriga => out.push_str("shtriga"),
-			Self::shuffle3 => out.push_str("shuffle3"),
-			Self::silence => out.push_str("silence"),
-			Self::sing => out.push_str("sing"),
-			Self::singularity => out.push_str("singularity"),
-			Self::sinkhole => out.push_str("sinkhole"),
-			Self::siphon => out.push_str("siphon"),
-			Self::siphonactive => out.push_str("siphonactive"),
-			Self::siphonstrength => out.push_str("siphonstrength"),
-			Self::skeleton => out.push_str("skeleton"),
-			Self::skull => out.push_str("skull"),
-			Self::skyblitz => out.push_str("skyblitz"),
-			Self::slow => out.push_str("slow"),
-			Self::snipe => out.push_str("snipe"),
-			Self::solar => out.push_str("solar"),
-			Self::sosa => out.push_str("sosa"),
-			Self::soulcatch => out.push_str("soulcatch"),
-			Self::spores => out.push_str("spores"),
-			Self::sskin => out.push_str("sskin"),
-			Self::staff => out.push_str("staff"),
-			Self::stasis => out.push_str("stasis"),
-			Self::stasisdraw => out.push_str("stasisdraw"),
-			Self::steal => out.push_str("steal"),
-			Self::steam => out.push_str("steam"),
-			Self::stoneform => out.push_str("stoneform"),
-			Self::storm(x) => {
-				write!(out, "storm{}", x);
-			}
-			Self::summon(code) => out.push_str(ctx.get_card(code as i16).name),
-			Self::swarm => out.push_str("swarm"),
-			Self::swave => out.push_str("swave"),
-			Self::tempering(x) => {
-				write!(out, "tempering{}", x);
-			}
-			Self::tesseractsummon => out.push_str("tesseractsummon"),
-			Self::thorn(x) => {
-				write!(out, "thorn{}", x);
-			}
-			Self::throwrock => out.push_str("throwrock"),
-			Self::tick => out.push_str("tick"),
-			Self::tidalhealing => out.push_str("tidalhealing"),
-			Self::tornado => out.push_str("tornado"),
-			Self::trick => out.push_str("trick"),
-			Self::turngolem => out.push_str("turngolem"),
-			Self::unappease => out.push_str("unappease"),
-			Self::unsanctify => out.push_str("unsanctify"),
-			Self::unsummon => out.push_str("unsummon"),
-			Self::unsummonquanta => out.push_str("unsummonquanta"),
-			Self::unvindicate => out.push_str("unvindicate"),
-			Self::upkeep => out.push_str("upkeep"),
-			Self::upload => out.push_str("upload"),
-			Self::vampire => out.push_str("vampire"),
-			Self::vend => out.push_str("vend"),
-			Self::vengeance => out.push_str("vengeance"),
-			Self::vindicate => out.push_str("vindicate"),
-			Self::virtue => out.push_str("virtue"),
-			Self::virusinfect => out.push_str("virusinfect"),
-			Self::virusplague => out.push_str("virusplague"),
-			Self::void => out.push_str("void"),
-			Self::voidshell => out.push_str("voidshell"),
-			Self::web => out.push_str("web"),
-			Self::weight => out.push_str("weight"),
-			Self::wind => out.push_str("wind"),
-			Self::wings => out.push_str("wings"),
-			Self::wisdom => out.push_str("wisdom"),
-			Self::yoink => out.push_str("yoink"),
-			Self::v_bblood => out.push_str("v_bblood"),
-			Self::v_blackhole => out.push_str("v_blackhole"),
-			Self::v_cold => out.push_str("v_cold"),
-			Self::v_cseed => out.push_str("v_cseed"),
-			Self::v_dagger => out.push_str("v_dagger"),
-			Self::v_dessication => out.push_str("v_dessication"),
-			Self::v_divinity => out.push_str("v_divinity"),
-			Self::v_drainlife(_) => out.push_str("v_drainlife"),
-			Self::v_dshield => out.push_str("v_dshield"),
-			Self::v_endow => out.push_str("v_endow"),
-			Self::v_firebolt(_) => out.push_str("v_firebolt"),
-			Self::v_firewall => out.push_str("v_firewall"),
-			Self::v_flyingweapon => out.push_str("v_flyingweapon"),
-			Self::v_freedom => out.push_str("v_freedom"),
-			Self::v_freeevade => out.push_str("v_freeevade"),
-			Self::v_gratitude => out.push_str("v_gratitude"),
-			Self::v_hatch => out.push_str("v_hatch"),
-			Self::v_heal => out.push_str("v_heal"),
-			Self::v_holylight => out.push_str("v_holylight"),
-			Self::v_hope => out.push_str("v_hope"),
-			Self::v_icebolt(_) => out.push_str("v_icebolt"),
-			Self::v_improve => out.push_str("v_improve"),
-			Self::v_integrity => out.push_str("v_integrity"),
-			Self::v_mutation => out.push_str("v_mutation"),
-			Self::v_noluci => out.push_str("v_noluci"),
-			Self::v_nymph => out.push_str("v_nymph"),
-			Self::v_obsession => out.push_str("v_obsession"),
-			Self::v_pandemonium => out.push_str("v_pandemonium"),
-			Self::v_plague => out.push_str("v_plague"),
-			Self::v_readiness => out.push_str("v_readiness"),
-			Self::v_relic => out.push_str("v_relic"),
-			Self::v_rewind => out.push_str("v_rewind"),
-			Self::v_salvage => out.push_str("v_salvage"),
-			Self::v_scramble => out.push_str("v_scramble"),
-			Self::v_serendipity => out.push_str("v_serendipity"),
-			Self::v_silence => out.push_str("v_silence"),
-			Self::v_singularity => out.push_str("v_singularity"),
-			Self::v_slow => out.push_str("v_slow"),
-			Self::v_steal => out.push_str("v_steal"),
-			Self::v_stoneform => out.push_str("v_stoneform"),
-			Self::v_storm(x) => {
-				write!(out, "v_storm{}", x);
-			}
-			Self::v_swarm => out.push_str("v_swarm"),
-			Self::v_swarmhp => out.push_str("v_swarmhp"),
-			Self::v_thorn => out.push_str("v_thorn"),
-			Self::v_virusplague => out.push_str("v_virusplague"),
-		};
+			Skill::quantagift => f.write_str("quantagift"),
+			Skill::quint => f.write_str("quint"),
+			Skill::quinttog => f.write_str("quinttog"),
+			Skill::r#static(x) => write!(f, "static{x}"),
+			Skill::rage => f.write_str("rage"),
+			Skill::randomdr => f.write_str("randomdr"),
+			Skill::readiness => f.write_str("readiness"),
+			Skill::reap => f.write_str("reap"),
+			Skill::rebirth => f.write_str("rebirth"),
+			Skill::reducemaxhp => f.write_str("reducemaxhp"),
+			Skill::regen => f.write_str("regen"),
+			Skill::regenerate(x) => write!(f, "regenerate{x}"),
+			Skill::regeneratespell => f.write_str("regeneratespell"),
+			Skill::regrade => f.write_str("regrade"),
+			Skill::reinforce => f.write_str("reinforce"),
+			Skill::ren => f.write_str("ren"),
+			Skill::resummon => f.write_str("resummon"),
+			Skill::reveal => f.write_str("reveal"),
+			Skill::rewind => f.write_str("rewind"),
+			Skill::ricochet => f.write_str("ricochet"),
+			Skill::sabbath => f.write_str("sabbath"),
+			Skill::sadism => f.write_str("sadism"),
+			Skill::salvage => f.write_str("salvage"),
+			Skill::salvageoff => f.write_str("salvageoff"),
+			Skill::sanctify => f.write_str("sanctify"),
+			Skill::scatter => f.write_str("scatter"),
+			Skill::scramble => f.write_str("scramble"),
+			Skill::scramblespam => f.write_str("scramblespam"),
+			Skill::serendipity => f.write_str("serendipity"),
+			Skill::shardgolem => f.write_str("shardgolem"),
+			Skill::shtriga => f.write_str("shtriga"),
+			Skill::shuffle3 => f.write_str("shuffle3"),
+			Skill::silence => f.write_str("silence"),
+			Skill::sing => f.write_str("sing"),
+			Skill::singularity => f.write_str("singularity"),
+			Skill::sinkhole => f.write_str("sinkhole"),
+			Skill::siphon => f.write_str("siphon"),
+			Skill::siphonactive => f.write_str("siphonactive"),
+			Skill::siphonstrength => f.write_str("siphonstrength"),
+			Skill::skeleton => f.write_str("skeleton"),
+			Skill::skull => f.write_str("skull"),
+			Skill::skyblitz => f.write_str("skyblitz"),
+			Skill::slow => f.write_str("slow"),
+			Skill::snipe => f.write_str("snipe"),
+			Skill::solar => f.write_str("solar"),
+			Skill::sosa => f.write_str("sosa"),
+			Skill::soulcatch => f.write_str("soulcatch"),
+			Skill::spores => f.write_str("spores"),
+			Skill::sskin => f.write_str("sskin"),
+			Skill::staff => f.write_str("staff"),
+			Skill::stasis => f.write_str("stasis"),
+			Skill::stasisdraw => f.write_str("stasisdraw"),
+			Skill::steal => f.write_str("steal"),
+			Skill::steam => f.write_str("steam"),
+			Skill::stoneform => f.write_str("stoneform"),
+			Skill::storm(x) => write!(f, "storm{x}"),
+			Skill::summon(code) => f.write_str(ctx.get_card(code as i16).name),
+			Skill::swarm => f.write_str("swarm"),
+			Skill::swave => f.write_str("swave"),
+			Skill::tempering(x) => write!(f, "tempering{x}"),
+			Skill::tesseractsummon => f.write_str("tesseractsummon"),
+			Skill::thorn(x) => write!(f, "thorn{x}"),
+			Skill::throwrock => f.write_str("throwrock"),
+			Skill::tick => f.write_str("tick"),
+			Skill::tidalhealing => f.write_str("tidalhealing"),
+			Skill::tornado => f.write_str("tornado"),
+			Skill::trick => f.write_str("trick"),
+			Skill::turngolem => f.write_str("turngolem"),
+			Skill::unappease => f.write_str("unappease"),
+			Skill::unsanctify => f.write_str("unsanctify"),
+			Skill::unsilence => f.write_str("unsilence"),
+			Skill::unsummon => f.write_str("unsummon"),
+			Skill::unvindicate => f.write_str("unvindicate"),
+			Skill::upkeep => f.write_str("upkeep"),
+			Skill::upload => f.write_str("upload"),
+			Skill::vampire => f.write_str("vampire"),
+			Skill::vend => f.write_str("vend"),
+			Skill::vengeance => f.write_str("vengeance"),
+			Skill::vindicate => f.write_str("vindicate"),
+			Skill::virtue => f.write_str("virtue"),
+			Skill::virusinfect => f.write_str("virusinfect"),
+			Skill::virusplague => f.write_str("virusplague"),
+			Skill::void => f.write_str("void"),
+			Skill::voidshell => f.write_str("voidshell"),
+			Skill::web => f.write_str("web"),
+			Skill::weight => f.write_str("weight"),
+			Skill::wind => f.write_str("wind"),
+			Skill::wings => f.write_str("wings"),
+			Skill::wisdom => f.write_str("wisdom"),
+			Skill::yoink => f.write_str("yoink"),
+			Skill::v_bblood => f.write_str("v_bblood"),
+			Skill::v_blackhole => f.write_str("v_blackhole"),
+			Skill::v_cold => f.write_str("v_cold"),
+			Skill::v_cseed => f.write_str("v_cseed"),
+			Skill::v_dagger => f.write_str("v_dagger"),
+			Skill::v_dessication => f.write_str("v_dessication"),
+			Skill::v_divinity => f.write_str("v_divinity"),
+			Skill::v_drainlife(_) => f.write_str("v_drainlife"),
+			Skill::v_dshield => f.write_str("v_dshield"),
+			Skill::v_endow => f.write_str("v_endow"),
+			Skill::v_firebolt(_) => f.write_str("v_firebolt"),
+			Skill::v_firewall => f.write_str("v_firewall"),
+			Skill::v_flyingweapon => f.write_str("v_flyingweapon"),
+			Skill::v_freedom => f.write_str("v_freedom"),
+			Skill::v_freeevade => f.write_str("v_freeevade"),
+			Skill::v_gratitude => f.write_str("v_gratitude"),
+			Skill::v_hatch => f.write_str("v_hatch"),
+			Skill::v_heal => f.write_str("v_heal"),
+			Skill::v_holylight => f.write_str("v_holylight"),
+			Skill::v_hope => f.write_str("v_hope"),
+			Skill::v_icebolt(_) => f.write_str("v_icebolt"),
+			Skill::v_improve => f.write_str("v_improve"),
+			Skill::v_integrity => f.write_str("v_integrity"),
+			Skill::v_mutation => f.write_str("v_mutation"),
+			Skill::v_noluci => f.write_str("v_noluci"),
+			Skill::v_nymph => f.write_str("v_nymph"),
+			Skill::v_obsession => f.write_str("v_obsession"),
+			Skill::v_pandemonium => f.write_str("v_pandemonium"),
+			Skill::v_plague => f.write_str("v_plague"),
+			Skill::v_readiness => f.write_str("v_readiness"),
+			Skill::v_relic => f.write_str("v_relic"),
+			Skill::v_rewind => f.write_str("v_rewind"),
+			Skill::v_scramble => f.write_str("v_scramble"),
+			Skill::v_serendipity => f.write_str("v_serendipity"),
+			Skill::v_silence => f.write_str("v_silence"),
+			Skill::v_singularity => f.write_str("v_singularity"),
+			Skill::v_slow => f.write_str("v_slow"),
+			Skill::v_steal => f.write_str("v_steal"),
+			Skill::v_stoneform => f.write_str("v_stoneform"),
+			Skill::v_storm(x) => write!(f, "v_storm{x}"),
+			Skill::v_swarm => f.write_str("v_swarm"),
+			Skill::v_swarmhp => f.write_str("v_swarmhp"),
+			Skill::v_thorn => f.write_str("v_thorn"),
+			Skill::v_virusplague => f.write_str("v_virusplague"),
+		}
 	}
+}
 
+impl Skill {
 	pub const fn passive(self) -> bool {
 		matches!(
 			self,
@@ -1245,7 +1231,6 @@ impl Skill {
 				| Self::salvage | Self::siphon
 				| Self::skeleton | Self::swarm
 				| Self::virtue | Self::v_obsession
-				| Self::v_salvage
 				| Self::v_singularity
 				| Self::v_swarm
 		)
@@ -1313,11 +1298,11 @@ impl Skill {
 			Self::destroy => Tgt::perm,
 			Self::destroycard => Tgt::card.mix(Tgt::play).or(),
 			Self::detain | Skill::devour => Tgt::devour,
-			Self::discping => Tgt::crea.mix(Tgt::play).or(),
+			Self::discping => Tgt::crea,
 			Self::drainlife => Tgt::crea.mix(Tgt::play).or(),
 			Self::draft => Tgt::crea,
 			Self::dshield => Tgt::crea,
-			Self::earthquake => {
+			Self::earthquake(_) => {
 				if set == CardSet::Open {
 					Tgt::permstack
 				} else {
@@ -1329,7 +1314,7 @@ impl Skill {
 			Self::endow => Tgt::weap,
 			Self::envenom => Tgt::weap.mix(Tgt::shie).or(),
 			Self::equalize => Tgt::crea.mix(Tgt::card.mix(Tgt::notself).and()).or(),
-			Self::feed => Tgt::crea,
+			Self::feed => Tgt::notself.mix(Tgt::crea).and(),
 			Self::fickle => Tgt::card,
 			Self::firebolt => Tgt::crea.mix(Tgt::play).or(),
 			Self::firestorm(_) => Tgt::play,
@@ -1366,7 +1351,7 @@ impl Skill {
 			Self::liquid => Tgt::crea,
 			Self::livingweapon => Tgt::crea,
 			Self::lobotomize => Tgt::crea,
-			Self::locketshift => Tgt::all,
+			Self::locketshift => Tgt::own.mix(Tgt::locket).and(),
 			Self::mend => Tgt::crea,
 			Self::metamorph => Tgt::all,
 			Self::midas => Tgt::perm,
@@ -1438,7 +1423,6 @@ impl Skill {
 			Self::throwrock => Tgt::crea,
 			Self::trick => Tgt::crea,
 			Self::unsummon => Tgt::crea,
-			Self::unsummonquanta => Tgt::crea,
 			Self::upload => Tgt::crea.mix(Tgt::weap).or(),
 			Self::virusinfect => Tgt::crea,
 			Self::virusplague => Tgt::play,
@@ -1473,8 +1457,7 @@ impl Skill {
 
 	pub const fn param1(self) -> i32 {
 		match self {
-			Skill::evade(x)
-			| Skill::firestorm(x)
+			Skill::firestorm(x)
 			| Skill::immolate(x)
 			| Skill::platearmor(x)
 			| Skill::poison(x)
@@ -1482,13 +1465,16 @@ impl Skill {
 			| Skill::regenerate(x)
 			| Skill::storm(x)
 			| Skill::tempering(x)
-			| Skill::thorn(x)
 			| Skill::v_storm(x) => x as i32,
 			Skill::summon(x) | Skill::quadpillar(x) | Skill::quadpillar1(x) => x as i32,
 			Skill::quanta(x) => x as i32,
-			Skill::freeze(x) | Skill::v_drainlife(x) | Skill::v_firebolt(x) | Skill::v_icebolt(x) => {
-				x as i32
-			}
+			Skill::thorn(x)
+			| Skill::evade(x)
+			| Skill::r#static(x)
+			| Skill::freeze(x)
+			| Skill::v_drainlife(x)
+			| Skill::v_firebolt(x)
+			| Skill::v_icebolt(x) => x as i32,
 			Skill::growth(x, _) | Skill::icegrowth(x, _) => x as i32,
 			_ => 0,
 		}
@@ -1532,8 +1518,8 @@ impl Skill {
 					Skill::destroy.proc(ctx, c, t, data);
 				}
 				let is_open = ctx.cardset() == CardSet::Open;
-				ctx.buffhp(c, if is_open { 10 } else { 15 });
-				if ctx.truehp(c) > if is_open { 30 } else { 45 } {
+				ctx.buffhp(c, 15);
+				if ctx.truehp(c) > 45 {
 					let owner = ctx.get_owner(c);
 					let card = ctx.get(c, Stat::card);
 					if is_open {
@@ -1628,6 +1614,9 @@ impl Skill {
 				ctx.remove(t);
 				ctx.addCrea(foe, t);
 				if c != t {
+					if ctx.hasskill(t, Event::OwnAttack, Skill::singularity) {
+						Skill::parallel.proc(ctx, c, t, data);
+					}
 					ctx.addskills(t, Event::Turnstart, &[Skill::beguilestop]);
 				}
 			}
@@ -1803,7 +1792,8 @@ impl Skill {
 				let truehp = ctx.truehp(t).max(0);
 				let thing = ctx.get_thing(t);
 				let frozen = thing.status.get(Stat::frozen);
-				let poison = thing.status.get(Stat::poison) + (is_open && thing.flag.get(Flag::poisonous)) as i16;
+				let poison =
+					thing.status.get(Stat::poison) + (is_open && thing.flag.get(Flag::poisonous)) as i16;
 				ctx.die(t);
 				ctx.dmg(foe, (truehp * (if frozen != 0 { 151 } else { 101 }) + 99) / (truehp + 100));
 				ctx.poison(foe, poison);
@@ -1878,7 +1868,7 @@ impl Skill {
 				ctx.fx(t, Fx::Clear);
 				let thing = ctx.get_thing_mut(t);
 				thing.flag.0 &= !(Flag::aflatoxin | Flag::neuro | Flag::momentum | Flag::psionic);
-				for &mut (st, ref mut val) in thing.status.iter_mut() {
+				for (st, ref mut val) in thing.status.iter_mut() {
 					if matches!(st, Stat::poison | Stat::adrenaline | Stat::delayed | Stat::frozen) {
 						*val = 0;
 					}
@@ -2074,7 +2064,8 @@ impl Skill {
 			}
 			Self::destroy => {
 				ctx.fx(t, Fx::Destroy);
-				ctx.destroy(t, Some(data));
+				ctx.destroy(t);
+				ctx.proc_data(Event::Destroy, t, data);
 			}
 			Self::destroycard => {
 				let kind = ctx.get_kind(t);
@@ -2087,7 +2078,7 @@ impl Skill {
 			Self::detain => {
 				ctx.dmg(t, 1);
 				ctx.incrAtk(t, -1);
-				Self::growth(1, 1).proc(ctx, c, 0, data);
+				Self::growth(2, 2).proc(ctx, c, 0, data);
 				ctx.set(t, Flag::airborne, false);
 				ctx.set(t, Flag::burrowed, true);
 			}
@@ -2111,8 +2102,7 @@ impl Skill {
 				}
 			}
 			Self::discping => {
-				ctx.dmg(t, 1);
-				ctx.remove(c);
+				ctx.attackCreature(c, t);
 				ctx.addCard(ctx.get_owner(c), c);
 			}
 			Self::disfield => {
@@ -2241,14 +2231,16 @@ impl Skill {
 					}
 				}
 			}
-			Self::earthquake => {
+			Self::earthquake(x) => {
 				ctx.fx(t, Fx::Earthquake);
-				if ctx.get(t, Stat::charges) > 3 {
-					ctx.incrStatus(t, Stat::charges, -3);
-				} else {
-					ctx.remove(t);
+				for _ in 0..x {
+					ctx.fx(t, Fx::Destroy);
+					ctx.destroy(t);
+					ctx.proc_data(Event::Destroy, t, data);
+					if ctx.getIndex(t) == -1 {
+						break;
+					}
 				}
-				ctx.proc_data(Event::Destroy, t, data);
 			}
 			Self::eatspell => {
 				if ctx.get_kind(t) == Kind::Spell
@@ -2272,15 +2264,15 @@ impl Skill {
 				ctx.addskills(t, Event::OwnDeath, &[Skill::embezzledeath]);
 			}
 			Self::embezzledeath => {
-				ctx.mill(ctx.get_foe(ctx.get_owner(c)), 2);
+				ctx.mill(ctx.get_foe(ctx.get_owner(c)), 1);
 			}
 			Self::empathy => {
 				let owner = ctx.get_owner(c);
 				let heal = ctx.count_creatures(owner);
 				ctx.fx(c, Fx::Heal(heal));
 				ctx.dmg(owner, -heal);
-				if ctx.cardset() == CardSet::Open && !ctx.spend(owner, etg::Life, heal / 8) {
-					ctx.set_quanta(owner, etg::Life, 0);
+				if ctx.cardset() == CardSet::Open && !ctx.spend(owner, etg::Chroma, heal / 8) {
+					ctx.get_player_mut(owner).quanta.fill(0);
 					ctx.die(c);
 				}
 			}
@@ -2306,7 +2298,7 @@ impl Skill {
 				if ctx.hasskill(c, Event::Cast, Skill::endow) {
 					ctx.rmskill(c, Event::Cast, Skill::endow);
 				}
-				for &(k, v) in tstatus.clone().iter() {
+				for &(k, v) in tstatus.iter() {
 					match k {
 						Stat::hp
 						| Stat::maxhp
@@ -3071,12 +3063,18 @@ impl Skill {
 				ctx.poison(t, 1);
 			}
 			Self::livingweapon => {
+				let cown = ctx.get_owner(c);
+				if card::Upped(ctx.get(c, Stat::card)) {
+					let costele = ctx.get(t, Stat::costele);
+					let cost = ctx.get(t, Stat::cost);
+					ctx.spend(cown, costele, -cost);
+				}
 				let town = ctx.get_owner(t);
 				let weapon = ctx.get_weapon(town);
 				if weapon != 0 {
 					ctx.unsummon(weapon);
 				}
-				ctx.dmg(town, -ctx.truehp(t));
+				ctx.dmg(cown, -ctx.truehp(t));
 				ctx.remove(t);
 				ctx.setWeapon(town, t);
 			}
@@ -3095,19 +3093,11 @@ impl Skill {
 				if ctx.get(c, Stat::frozen) == 0 {
 					let mode = ctx.get(c, Stat::mode);
 					let owner = ctx.get_owner(c);
-					ctx.spend(owner, if mode != -1 { mode } else { ctx.get_player(owner).mark as i16 }, -1);
+					ctx.spend(owner, mode, -1);
 				}
 			}
 			Self::locketshift => {
-				ctx.set(
-					c,
-					Stat::mode,
-					if ctx.get_kind(t) == Kind::Player {
-						ctx.get_player(t).mark
-					} else {
-						ctx.get_card(ctx.get(t, Stat::card)).element
-					} as i16,
-				);
+				ctx.set(c, Stat::mode, ctx.get_card(ctx.get(t, Stat::card)).element as i16);
 			}
 			Self::loot => {
 				let owner = ctx.get_owner(c);
@@ -3185,7 +3175,7 @@ impl Skill {
 			Self::midas => {
 				let reliccard = card::As(ctx.get(t, Stat::card), card::GoldenRelic);
 				if ctx.get(t, Flag::stackable) && ctx.get(t, Stat::charges) > 1 {
-					ctx.destroy(t, None);
+					ctx.destroy(t);
 					let town = ctx.get_owner(t);
 					let relic = ctx.new_thing(reliccard, town);
 					ctx.set(relic, Stat::casts, ctx.get(t, Stat::casts));
@@ -3380,7 +3370,7 @@ impl Skill {
 				let nymph = ctx.new_thing(card::As(code, nymphcode), town);
 				ctx.fx(nymph, Fx::StartPos(t));
 				ctx.addCrea(town, nymph);
-				ctx.destroy(t, None);
+				ctx.destroy(t);
 			}
 			Self::obsession => {
 				ctx.spelldmg(ctx.get_owner(c), if card::Upped(ctx.get(c, Stat::card)) { 13 } else { 10 });
@@ -3692,8 +3682,8 @@ impl Skill {
 					ctx.set(t, Flag::immaterial, false);
 				}
 			}
-			Self::r#static => {
-				ctx.spelldmg(ctx.get_foe(ctx.get_owner(c)), 2);
+			Self::r#static(x) => {
+				ctx.spelldmg(ctx.get_foe(ctx.get_owner(c)), x as i16);
 			}
 			Self::rage => {
 				let dmg = if card::Upped(ctx.get(c, Stat::card)) { 6 } else { 5 };
@@ -3858,18 +3848,22 @@ impl Skill {
 				}
 			}
 			Self::salvage => {
-				Skill::growth(1, 1).proc(ctx, c, t, data);
+				let is_open = ctx.cardset() == CardSet::Open;
+				if is_open {
+					Skill::growth(1, 1).proc(ctx, c, t, data);
+				}
 				let owner = ctx.get_owner(c);
 				if ctx.turn != owner
+					&& (is_open || owner != ctx.get_owner(t))
 					&& !data.get(ProcData::salvaged)
 					&& !ctx.hasskill(c, Event::Turnstart, Skill::salvageoff)
 				{
 					ctx.fx(c, Fx::Salvage);
 					data.flags |= ProcData::salvaged;
-					let inst = ctx.new_thing(ctx.get(t, Stat::card), owner);
-					ctx.addCard(owner, inst);
-					ctx.fx(inst, Fx::StartPos(t));
 					ctx.addskills(c, Event::Turnstart, &[Skill::salvageoff]);
+					let inst = ctx.new_thing(ctx.get(t, Stat::card), owner);
+					ctx.fx(inst, Fx::StartPos(t));
+					ctx.addCard(owner, inst);
 				}
 			}
 			Self::salvageoff => {
@@ -4165,7 +4159,7 @@ impl Skill {
 					let clone = ctx.cloneinst(t);
 					ctx.set(clone, Stat::charges, 1);
 					ctx.fx(clone, Fx::StartPos(t));
-					ctx.destroy(t, None);
+					ctx.destroy(t);
 					clone
 				} else {
 					ctx.remove(t);
@@ -4214,7 +4208,7 @@ impl Skill {
 						let weapon = ctx.get_weapon(t);
 						if weapon != 0 && ctx.get(weapon, Stat::frozen) != 0 {
 							ctx.fx(weapon, Fx::Shatter);
-							ctx.destroy(weapon, None);
+							ctx.destroy(weapon);
 						}
 					}
 					ctx.spelldmg(t, 4);
@@ -4227,14 +4221,10 @@ impl Skill {
 			Self::tesseractsummon => {
 				let owner = ctx.get_owner(c);
 				let foe = ctx.get_foe(owner);
-				let mut candidates = Vec::with_capacity(23);
+				let mut candidates = Vec::new();
 				for n in 0..3 {
-					let pl = if n > 0 {
-						candidates.clear();
-						owner
-					} else {
-						foe
-					};
+					let pl = if n == 0 { foe } else { owner };
+					candidates.clear();
 					candidates.extend(
 						ctx.get_player(pl)
 							.deck
@@ -4253,6 +4243,7 @@ impl Skill {
 						ctx.freeze(id, (ctx.get(id, Stat::cost) + 3) / 4);
 					}
 				}
+				ctx.freeze(c, 2);
 			}
 			Self::thorn(chance) => {
 				if !ctx.get(t, Flag::ranged) && ctx.rng_range(0..100) < chance {
@@ -4321,7 +4312,7 @@ impl Skill {
 						let idx = ctx.rng_range(0..=ctx.get_player(newowner).deck.len());
 						let inst = ctx.new_thing(ctx.get(pr, Stat::card), newowner);
 						ctx.get_player_mut(newowner).deck_mut().insert(idx, inst);
-						ctx.destroy(pr, None);
+						ctx.destroy(pr);
 					}
 				}
 			}
@@ -4377,7 +4368,15 @@ impl Skill {
 			Self::unsanctify => {
 				ctx.set(ctx.get_foe(ctx.get_owner(c)), Flag::sanctuary, false);
 			}
+			Self::unsilence => {
+				ctx.set(ctx.get_owner(c), Stat::casts, 1);
+			}
 			Self::unsummon => {
+				if card::Upped(ctx.get(c, Stat::card)) {
+					let costele = ctx.get(t, Stat::costele);
+					let cost = ctx.get(t, Stat::cost);
+					ctx.spend(ctx.get_owner(c), costele, -cost);
+				}
 				let town = ctx.get_owner(t);
 				if ctx.get_player(town).hand_full() {
 					return Skill::rewind.proc(ctx, c, t, data);
@@ -4387,12 +4386,6 @@ impl Skill {
 					ctx.fx(inst, Fx::StartPos(c));
 					ctx.addCard(town, inst);
 				}
-			}
-			Self::unsummonquanta => {
-				let costele = ctx.get(t, Stat::costele);
-				let cost = ctx.get(t, Stat::cost);
-				ctx.spend(ctx.get_owner(c), costele, -cost);
-				return Skill::unsummon.proc(ctx, c, t, data);
 			}
 			Self::unvindicate => {
 				ctx.set(c, Flag::vindicated, false);
@@ -4954,7 +4947,7 @@ impl Skill {
 				let nymph = ctx.new_thing(card::As(code, nymphcode), town);
 				ctx.fx(nymph, Fx::StartPos(t));
 				ctx.addCrea(town, nymph);
-				ctx.destroy(t, None);
+				ctx.destroy(t);
 			}
 			Self::v_obsession => {
 				ctx.dmg(ctx.get_owner(c), if card::Upped(ctx.get(c, Stat::card)) { 13 } else { 10 });
@@ -4996,19 +4989,6 @@ impl Skill {
 						ctx.poison(ctx.get_foe(ctx.get_owner(t)), -poison);
 					}
 					return Skill::rewind.proc(ctx, c, t, data);
-				}
-			}
-			Self::v_salvage => {
-				let owner = ctx.get_owner(c);
-				if owner != ctx.turn
-					&& owner != ctx.get_owner(t)
-					&& !ctx.get(c, Flag::salvaged)
-					&& !ctx.get(t, Flag::salvaged)
-				{
-					ctx.set(c, Flag::salvaged, true);
-					ctx.set(t, Flag::salvaged, true);
-					let inst = ctx.new_thing(ctx.get(t, Stat::card), owner);
-					ctx.addCard(owner, inst);
 				}
 			}
 			Self::v_scramble => {
@@ -5056,7 +5036,7 @@ impl Skill {
 				let owner = ctx.get_owner(c);
 				let card = ctx.get(t, Stat::card);
 				if ctx.get(t, Flag::stackable) {
-					ctx.destroy(t, None);
+					ctx.destroy(t);
 					if kind == Kind::Shield {
 						let shield = ctx.get_shield(owner);
 						if shield != 0 && card == ctx.get(shield, Stat::card) {

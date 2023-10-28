@@ -123,6 +123,7 @@ pub fn deckgen_ai4(e1: i8, e2: i8, seed: i32) -> Vec<i16> {
 			deck.push(card.code);
 		}
 	}
+	deck.sort_unstable_by(|&x, &y| card::code_cmp_core(&card::OrigSet, x, y));
 	deck.push((e2 as i16) + 9010);
 	deck
 }
@@ -449,9 +450,19 @@ impl Builder {
 			}
 		}
 		for i in 1..=12 {
+			let mark = self.mark as usize;
+			if i != mark {
+				for j in (0..self.ecost[i].min(self.ecost[mark]) as i32).step_by(120) {
+					self.deck.push(self.up_code(5050 + i as i16 * 100));
+					self.ecost[mark] -= 5 * PREC / 2;
+					self.ecost[i] -= 5 * PREC / 2;
+				}
+			}
+		}
+		for i in 1..=12 {
 			if qc & (1 << i) != 0 {
 				for j in (0..self.ecost[i] as i32).step_by(60) {
-					self.deck.push(self.up_code(etg::PillarList[i]));
+					self.deck.push(self.up_code(if j % 120 == 0 { 5000 } else { 5050 } + i as i16 * 100));
 				}
 			}
 		}
@@ -487,6 +498,7 @@ impl Builder {
 	}
 
 	fn finish(mut self) -> Vec<i16> {
+		self.deck.sort_unstable_by(|&x, &y| card::code_cmp_core(&card::OpenSet, x, y));
 		self.deck.push(self.mark + 9010);
 		self.deck
 	}

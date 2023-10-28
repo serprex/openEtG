@@ -636,10 +636,14 @@ pub async fn handle_ws(
 									if let Ok(row) = trx.query_one("select a.won, a.loss from arena a where a.arena_id = $1 and a.user_id = $2 for update", &[&lv, &auserid]).await {
 											let awon = (row.get::<usize, i32>(0) + won as i32 + 1) as f64;
 											let mut aloss = (row.get::<usize, i32>(1) + (!won) as i32) as f64;
-											aloss *= aloss.ln_1p();
-											let decay = if lv == 0 { aloss } else { awon + aloss };
+											let decay = if lv == 0 {
+												aloss
+											} else {
+												aloss *= aloss.ln_1p();
+												awon + aloss
+											};
 											let newscore =
-												(wilson(awon, awon + aloss) * (1.0 - decay / (decay + if lv == 0 { 256.0 } else { 128.0 })) * 1000.0) as i32;
+												(wilson(awon, awon + aloss) * (1.0 - decay / (decay + if lv == 0 { 192.0 } else { 128.0 })) * 1000.0) as i32;
 											trx.execute(
 												if won {
 													"update arena set won = won+1, score = $3 where arena_id = $1 and user_id = $2"

@@ -302,9 +302,9 @@ mod test {
 		let pillars = ctx.get_player(p1).permanents[0];
 		assert!(ctx.get(pillars, Flag::pillar));
 		assert_eq!(ctx.get(pillars, Stat::charges), 5);
-		Skill::earthquake.proc(&mut ctx, p2, pillars, &mut ProcData::default());
+		Skill::earthquake(3).proc(&mut ctx, p2, pillars, &mut ProcData::default());
 		assert_eq!(ctx.get(pillars, Stat::charges), 2);
-		Skill::earthquake.proc(&mut ctx, p2, pillars, &mut ProcData::default());
+		Skill::earthquake(3).proc(&mut ctx, p2, pillars, &mut ProcData::default());
 		assert_eq!(ctx.get_player(p1).permanents[0], 0);
 	}
 

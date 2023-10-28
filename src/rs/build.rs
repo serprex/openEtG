@@ -149,8 +149,10 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 							("ownattack", sk)
 						};
 						let mut event = Vec::from(event.as_bytes());
-						let mut skill =
-							Vec::from(if skill == "static" { b"r#static" } else { skill.as_bytes() });
+						let mut skill = Vec::from(skill.as_bytes());
+						if skill.starts_with(b"static ") {
+							skill.splice(0..0, b"r#".iter().cloned());
+						}
 						event[0] -= b'a' - b'A';
 						if event.starts_with(b"Own") {
 							event[3] -= b'a' - b'A';
