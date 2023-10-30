@@ -12,9 +12,9 @@ import Text from './Text.jsx';
 function RaritySelector(props) {
 	return (
 		<>
-			{[0, 1, 2, 3, 4].map(i => (
+			{[1, 2, 3, 4].map(i => (
 				<IconBtn
-					e={(i ? 'r' : 't') + i}
+					e={'r' + i}
 					x={props.x}
 					y={props.y + i * 24}
 					click={() => props.onChange(i)}
@@ -194,7 +194,12 @@ export default function CardSelector(props) {
 					onClick={() => setOpt('toggleshiny', !opts.toggleshiny)}
 				/>
 			)}
-			<RaritySelector x={80} y={338} value={rarity()} onChange={setRarity} />
+			<RaritySelector
+				x={80}
+				y={338}
+				value={rarity()}
+				onChange={r => setRarity(cur => (cur === r ? 0 : r))}
+			/>
 			<ElementSelector x={4} y={316} value={element()} onChange={setElement} />
 			<CardSelectorCore
 				{...props}

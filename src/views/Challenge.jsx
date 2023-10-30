@@ -61,10 +61,13 @@ function PlayerEditor(props) {
 					value="Ok"
 					onClick={() => {
 						const data = {};
-						if (!Number.isNaN(+hp.value)) data.hp = hp.value | 0;
-						if (!Number.isNaN(+mark.value)) data.markpower = mark.value | 0;
-						if (!Number.isNaN(+draw.value)) data.drawpower = draw.value | 0;
-						if (!Number.isNaN(+deckpower)) data.deckpower = deckpower.value | 0;
+						if (hp.value && !Number.isNaN(+hp.value)) data.hp = hp.value | 0;
+						if (mark.value && !Number.isNaN(+mark.value))
+							data.markpower = mark.value | 0;
+						if (draw.value && !Number.isNaN(+draw.value))
+							data.drawpower = draw.value | 0;
+						if (deckpower.value && !Number.isNaN(+deckpower))
+							data.deckpower = deckpower.value | 0;
 						let newdeck;
 						switch (pdeckgen()) {
 							case 'mage':
@@ -127,7 +130,7 @@ function PlayerEditor(props) {
 						setpremade(false);
 						name.value = dname;
 						deck.value = dcode;
-						drawpower.value = '';
+						draw.value = '';
 						if (isdg) {
 							hp.value = 200;
 							draw.value = 2;

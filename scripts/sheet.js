@@ -29,7 +29,6 @@ const { json, image } = await spritesheet([
 	'assets/t2.png',
 	'assets/t3.png',
 	'assets/t4.png',
-	'assets/t5.png',
 	'assets/protection.png',
 	'assets/sacrifice.png',
 	'assets/s0.png',

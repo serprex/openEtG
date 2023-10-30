@@ -709,12 +709,15 @@ impl Game {
 			8
 		} else if (self.get(id, Stat::nova) >= 2 || self.get(id, Stat::nova2) >= 1)
 			&& (id != p1id
-				|| self
-					.get_player(id)
-					.hand
-					.into_iter()
-					.any(|x| x != 0 && matches!(self.get(x, Stat::card), 1107 | 3107 | 5107 | 7107)))
-		{
+				|| self.get_player(id).hand_iter().any(|x| {
+					[
+						card::v_Nova,
+						card::AsUpped(card::v_Nova, true),
+						card::Nova,
+						card::AsUpped(card::Nova, true),
+					]
+					.contains(&self.get(x, Stat::card))
+				})) {
 			1
 		} else {
 			0
