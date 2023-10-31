@@ -1791,15 +1791,17 @@ impl Skill {
 				ctx.set(t, Stat::castele, etg::Entropy);
 			}
 			Self::catapult => {
+				let is_open = ctx.cardset() == CardSet::Open;
 				let foe = ctx.get_foe(ctx.get_owner(c));
 				ctx.fx(t, Fx::Catapult);
 				ctx.fx(t, Fx::EndPos(foe));
+				let truehp = ctx.truehp(t).max(0);
+				let thing = ctx.get_thing(t);
+				let frozen = thing.status.get(Stat::frozen);
+				let poison = thing.status.get(Stat::poison) + (is_open && thing.flag.get(Flag::poisonous)) as i16;
 				ctx.die(t);
-				let truehp = ctx.truehp(t);
-				let frozen = ctx.get(t, Stat::frozen);
-				let is_open = ctx.cardset() == CardSet::Open;
 				ctx.dmg(foe, (truehp * (if frozen != 0 { 151 } else { 101 }) + 99) / (truehp + 100));
-				ctx.poison(foe, ctx.get(t, Stat::poison) + (is_open && ctx.get(t, Flag::poisonous)) as i16);
+				ctx.poison(foe, poison);
 				if frozen != 0 {
 					ctx.freeze(foe, if is_open { frozen } else { 3 })
 				}
@@ -4580,7 +4582,7 @@ impl Skill {
 			}
 			Self::v_dshield => {
 				ctx.set(c, Flag::immaterial, true);
-				ctx.addskills(t, Event::Turnstart, &[Skill::dshieldoff]);
+				ctx.addskills(c, Event::Turnstart, &[Skill::dshieldoff]);
 			}
 			Self::v_endow => {
 				ctx.fx(t, Fx::Endow);

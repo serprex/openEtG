@@ -864,7 +864,7 @@ impl Game {
 					format!("{} {}%", 2 + bolts, 35 + bolts * 5)
 				}
 				Skill::catapult => {
-					let truehp = self.truehp(t);
+					let truehp = self.truehp(t).max(0);
 					format!(
 						"{}",
 						(truehp * (if self.get(t, Stat::frozen) != 0 { 151 } else { 101 }) + 99)
