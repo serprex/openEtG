@@ -1587,14 +1587,11 @@ impl Game {
 	}
 
 	pub fn trueatk_adrenaline(&self, id: i16, adrenaline: i16) -> i16 {
-		let dmg = self.get(id, Stat::atk)
-			+ self.get(id, Stat::dive)
-			+ self.trigger_pure(Event::Buff, id, 0)
-			+ self.calcBonusAtk(id);
+		let dmg = self.get(id, Stat::atk).saturating_add(self.get(id, Stat::dive)).saturating_add(self.trigger_pure(Event::Buff, id, 0)).saturating_add(self.calcBonusAtk(id));
 		etg::calcAdrenaline(
 			adrenaline,
 			if self.get(id, Flag::burrowed) && self.cards.set != CardSet::Original {
-				(dmg + 1) / 2
+				(if dmg > 0 { dmg.saturating_add(1) } else { dmg }) / 2
 			} else {
 				dmg
 			},
