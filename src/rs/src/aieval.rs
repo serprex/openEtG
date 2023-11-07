@@ -354,7 +354,17 @@ fn eval_skill(
 			Skill::enchant => 6 * PREC,
 			Skill::endow | Skill::v_endow => 4 * PREC,
 			Skill::envenom => 3 * PREC,
-			Skill::epidemic => 4 * PREC,
+			Skill::epidemic => {
+				let pl = ctx.get_player(ctx.get_owner(c));
+				if pl.shield != 0 {
+					for &sk in ctx.getSkill(pl.shield, Event::Shield) {
+						if let Skill::thorn(x) = sk {
+							return 4 * PREC + ctx.count_creatures(pl.foe) as i32 * PREC * 100 / x as i32
+						}
+					}
+				}
+				4 * PREC
+			},
 			Skill::epoch => 2 * PREC,
 			Skill::evolve => 3 * PREC,
 			Skill::feed => 6 * PREC,
@@ -448,7 +458,7 @@ fn eval_skill(
 			Skill::loot => 2 * PREC,
 			Skill::luciferin => 3 * PREC,
 			Skill::lycanthropy => 4 * PREC,
-			Skill::mend => 3 * PREC,
+			Skill::mend => PREC,
 			Skill::metamorph => 2 * PREC,
 			Skill::midas => 6 * PREC,
 			Skill::mill => PREC,
@@ -559,7 +569,7 @@ fn eval_skill(
 			Skill::rewind | Skill::v_rewind => 6 * PREC,
 			Skill::ricochet => 2 * PREC,
 			Skill::sabbath => PREC,
-			Skill::sadism => 5 * PREC,
+			Skill::sadism => 2 * PREC,
 			Skill::salvage | Skill::v_salvage => 2 * PREC,
 			Skill::sanctify => 2 * PREC,
 			Skill::scramble | Skill::v_scramble => {
@@ -696,13 +706,13 @@ fn eval_skill(
 				let coq = ctx.get_player(ctx.get_owner(c)).quanta(etg::Light) as i32;
 				5 * PREC - (coq * 4 * PREC) / (4 + coq)
 			}
-			Skill::thorn(chance) => chance as i32 * (PREC / 16),
+			Skill::thorn(chance) => chance as i32 * (PREC / 8),
 			Skill::vend => PREC,
 			Skill::v_dessication => 8 * PREC,
 			Skill::v_freedom => ctx.get(c, Stat::charges) as i32 * 5 * PREC,
 			Skill::v_gratitude => ctx.get(c, Stat::charges) as i32 * 4 * PREC,
 			Skill::v_heal => 8 * PREC,
-			Skill::v_thorn => 5 * PREC,
+			Skill::v_thorn => 6 * PREC,
 			_ => 0,
 		})
 		.sum()

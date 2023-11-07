@@ -13,7 +13,7 @@ function App() {
 	const [cards, setCards] = createSignal(new Uint8Array(24));
 
 	const info = () => {
-		const deck = [9014, Shard(Earth) + 2000];
+		const deck = [9014, Shard(4) + 2000];
 		cards().forEach((count, idx) => {
 			for (let i = 0; i < count; i++)
 				deck.push(Shard((idx % 12) + 1) + (idx >= 12 ? 2000 : 0));
@@ -28,10 +28,11 @@ function App() {
 			};
 			const game = new Game(data);
 			game.nextCmd({ x: 'end' }, false);
+			game.nextCmd({ x: 'end' }, false);
 
 			let id = 0;
 			for (const handId of game.get_hand(1)) {
-				if (game.get(handId, 'card') === Shard(Earth) + 2000) {
+				if (game.get(handId, 'card') === Shard(4) + 2000) {
 					id = handId;
 					break;
 				}
@@ -39,7 +40,7 @@ function App() {
 			if (id) {
 				game.nextCmd({ x: 'cast', c: id }, false);
 				const golemId = game
-					.visible_instances(1)
+					.visible_instances(1, 2)
 					.find(id => game.get_kind(id) === Kind.Creature);
 				return golemId ? game.thingText(golemId) : 'No Shard Golem spawned';
 			} else return 'No Shard of Integrity to cast';

@@ -185,10 +185,10 @@ impl Skills {
 		None
 	}
 
-	pub fn get_mut(&mut self, needle: Event) -> Option<&mut Cow<'static, [Skill]>> {
+	pub fn get_mut(&mut self, needle: Event) -> Option<&mut Vec<Skill>> {
 		for &mut (k, ref mut v) in self.0.iter_mut() {
 			if k == needle {
-				return Some(v);
+				return Some(v.to_mut());
 			}
 		}
 		None
@@ -203,8 +203,8 @@ impl Skills {
 		}
 	}
 
-	pub fn iter(&self) -> impl Iterator<Item = (Event, &Cow<'static, [Skill]>)> {
-		self.0.iter().map(|&(k, ref v)| (k, v))
+	pub fn iter(&self) -> impl Iterator<Item = (Event, &[Skill])> {
+		self.0.iter().map(|&(k, ref v)| (k, v.as_ref()))
 	}
 
 	pub fn iter_mut(&mut self) -> impl Iterator<Item = (Event, &mut Cow<'static, [Skill]>)> {
@@ -1629,7 +1629,6 @@ impl Skill {
 				if t == ctx.get_owner(c) {
 					let thing = ctx.get_thing_mut(c);
 					if let Some(smap) = thing.skill.get_mut(Event::Turnstart) {
-						let smap = smap.to_mut();
 						if let Some(idx) = smap.iter().position(|&s| s == Skill::beguilestop) {
 							smap.remove(idx);
 						}
@@ -2320,7 +2319,6 @@ impl Skill {
 				ctx.addskills(t, Event::Shield, &[Skill::thorn(25)]);
 				let thing = ctx.get_thing_mut(t);
 				if let Some(hit) = thing.skill.get_mut(Event::Hit) {
-					let hit = hit.to_mut();
 					for sk in hit.iter_mut() {
 						match sk {
 							Skill::poison(ref mut x) => {

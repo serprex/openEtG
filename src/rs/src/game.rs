@@ -1824,7 +1824,7 @@ impl Game {
 		let realdmg = if sosa { -dmg } else { dmg };
 		let capdmg = if realdmg < 0 {
 			thing.status.get(Stat::hp).saturating_sub(thing.status.get(Stat::maxhp)).max(realdmg)
-		} else if kind != Kind::Player {
+		} else if !dontdie && kind != Kind::Player {
 			self.truehp(id).min(realdmg)
 		} else {
 			realdmg
@@ -1884,7 +1884,7 @@ impl Game {
 	pub fn addskills(&mut self, id: i16, k: Event, skills: &'static [Skill]) {
 		let thing = self.get_thing_mut(id);
 		if let Some(smap) = thing.skill.get_mut(k) {
-			smap.to_mut().extend(skills);
+			smap.extend(skills);
 		} else {
 			thing.skill.insert(k, Cow::from(skills));
 		}
@@ -1893,7 +1893,7 @@ impl Game {
 	pub fn rmskill(&mut self, id: i16, k: Event, skill: Skill) {
 		let thing = self.get_thing_mut(id);
 		if let Some(smap) = thing.skill.get_mut(k) {
-			smap.to_mut().retain(|&smaps| smaps != skill);
+			smap.retain(|&smaps| smaps != skill);
 		}
 	}
 
