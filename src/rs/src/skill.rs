@@ -150,8 +150,8 @@ pub struct SkillsOccupied<'a> {
 }
 
 impl<'a> SkillsOccupied<'a> {
-	pub fn into_mut(self) -> &'a mut Cow<'static, [Skill]> {
-		&mut self.skills.0[self.idx].1
+	pub fn into_mut(self) -> &'a mut Vec<Skill> {
+		self.skills.0[self.idx].1.to_mut()
 	}
 }
 
@@ -806,9 +806,15 @@ const fn legacy_banned(code: i16) -> bool {
 }
 
 enum Soya {
-	Flag(u64),
+	Flag(u8),
 	Stat(Stat, i16),
 	Skill(Event, [Skill; 1]),
+}
+
+impl Soya {
+	const fn flag(flag: u64) -> Self {
+		Soya::Flag(flag.trailing_zeros() as u8)
+	}
 }
 
 impl Skill {
@@ -2880,43 +2886,35 @@ impl Skill {
 						Skill::wisdom,
 					],
 				];
-				const ShardStats: [&[(u8, Soya)]; 12] = [
-					&[(3, Soya::Skill(Event::Hit, [Skill::scramble]))],
-					&[
-						(1, Soya::Skill(Event::Death, [Skill::growth(1, 1)])),
-						(1, Soya::Flag(Flag::nocturnal)),
-						(2, Soya::Skill(Event::Hit, [Skill::poison(1)])),
-					],
-					&[(2, Soya::Flag(Flag::momentum))],
-					&[],
-					&[
-						(1, Soya::Flag(Flag::poisonous)),
-						(2, Soya::Stat(Stat::adrenaline, 1)),
-						(4, Soya::Skill(Event::OwnAttack, [Skill::regenerate(5)])),
-					],
-					&[(1, Soya::Skill(Event::Buff, [Skill::fiery]))],
-					&[(1, Soya::Flag(Flag::aquatic)), (3, Soya::Skill(Event::Hit, [Skill::regen]))],
-					&[
-						(1, Soya::Skill(Event::OwnAttack, [Skill::quanta(etg::Light as i8)])),
-						(2, Soya::Skill(Event::Blocked, [Skill::virtue])),
-						(3, Soya::Skill(Event::OwnDmg, [Skill::martyr])),
-						(4, Soya::Skill(Event::OwnFreeze, [Skill::growth(2, 2)])),
-						(5, Soya::Skill(Event::Hit, [Skill::disarm])),
-						(6, Soya::Skill(Event::OwnAttack, [Skill::sanctify])),
-					],
-					&[(1, Soya::Flag(Flag::airborne))],
-					&[(2, Soya::Skill(Event::Hit, [Skill::neuro]))],
-					&[
-						(1, Soya::Flag(Flag::nocturnal)),
-						(1, Soya::Flag(Flag::voodoo)),
-						(2, Soya::Skill(Event::OwnAttack, [Skill::siphon])),
-						(3, Soya::Skill(Event::Hit, [Skill::vampire])),
-						(4, Soya::Skill(Event::Hit, [Skill::reducemaxhp])),
-						(5, Soya::Skill(Event::Destroy, [Skill::loot])),
-						(6, Soya::Skill(Event::OwnDeath, [Skill::catlife])),
-						(6, Soya::Stat(Stat::lives, 9000)),
-					],
-					&[(3, Soya::Flag(Flag::immaterial))],
+				const ShardStats: [(u8, u8, Soya); 28] = [
+					(0, 3, Soya::Skill(Event::Hit, [Skill::scramble])),
+					(1, 1, Soya::Skill(Event::Death, [Skill::growth(1, 1)])),
+					(1, 1, Soya::flag(Flag::nocturnal)),
+					(1, 2, Soya::Skill(Event::Hit, [Skill::poison(1)])),
+					(2, 2, Soya::flag(Flag::momentum)),
+					(4, 1, Soya::flag(Flag::poisonous)),
+					(4, 2, Soya::Stat(Stat::adrenaline, 1)),
+					(4, 4, Soya::Skill(Event::OwnAttack, [Skill::regenerate(5)])),
+					(5, 1, Soya::Skill(Event::Buff, [Skill::fiery])),
+					(6, 1, Soya::flag(Flag::aquatic)),
+					(6, 3, Soya::Skill(Event::Hit, [Skill::regen])),
+					(7, 1, Soya::Skill(Event::OwnAttack, [Skill::quanta(etg::Light as i8)])),
+					(7, 2, Soya::Skill(Event::Blocked, [Skill::virtue])),
+					(7, 3, Soya::Skill(Event::OwnDmg, [Skill::martyr])),
+					(7, 4, Soya::Skill(Event::OwnFreeze, [Skill::growth(2, 2)])),
+					(7, 5, Soya::Skill(Event::Hit, [Skill::disarm])),
+					(7, 6, Soya::Skill(Event::OwnAttack, [Skill::sanctify])),
+					(8, 1, Soya::flag(Flag::airborne)),
+					(9, 2, Soya::Skill(Event::Hit, [Skill::neuro])),
+					(10, 1, Soya::flag(Flag::nocturnal)),
+					(10, 1, Soya::flag(Flag::voodoo)),
+					(10, 2, Soya::Skill(Event::OwnAttack, [Skill::siphon])),
+					(10, 3, Soya::Skill(Event::Hit, [Skill::vampire])),
+					(10, 4, Soya::Skill(Event::Hit, [Skill::reducemaxhp])),
+					(10, 5, Soya::Skill(Event::Destroy, [Skill::loot])),
+					(10, 6, Soya::Skill(Event::OwnDeath, [Skill::catlife])),
+					(10, 6, Soya::Stat(Stat::lives, 9000)),
+					(11, 3, Soya::flag(Flag::immaterial)),
 				];
 				let mut tally = [0u8; 12];
 				tally[etg::Earth as usize - 1] = 1;
@@ -3008,29 +3006,24 @@ impl Skill {
 					_ => 0,
 				};
 				let mut shardgolem = ThingData::default();
-				shardgolem.flag.0 |= Flag::golem;
 				shardgolem.status.insert(Stat::atk, stat2 / 2);
 				shardgolem.status.insert(Stat::maxhp, stat2 / 2);
 				shardgolem.status.insert(Stat::hp, stat2 / 2);
 				shardgolem.status.insert(Stat::castele, etg::Earth);
 				shardgolem.status.insert(Stat::cast, activecost);
 				shardgolem.skill.insert(Event::Cast, active);
-				for idx in 0..ShardStats.len() {
-					let count = tally[idx];
-					for &(n, ref soya) in ShardStats[idx].iter() {
-						if count < n {
-							break;
-						}
+				for &(idx, n, ref soya) in ShardStats.iter() {
+					if tally[idx as usize] >= n {
 						match soya {
 							&Soya::Flag(flag) => {
-								shardgolem.flag.0 |= flag;
+								shardgolem.flag.0 |= 1 << flag;
 							}
 							&Soya::Stat(stat, val) => {
 								shardgolem.status.insert(stat, val);
 							}
 							&Soya::Skill(ev, ref sk) => match shardgolem.skill.entry(ev) {
 								SkillsEntry::Occupied(o) => {
-									o.into_mut().to_mut().extend_from_slice(sk);
+									o.into_mut().extend_from_slice(sk);
 								}
 								SkillsEntry::Vacant(v) => {
 									v.insert(Cow::from(&sk[..]));
@@ -3948,9 +3941,11 @@ impl Skill {
 					let golemid = ctx.get(ctx.get_owner(c), Stat::shardgolem);
 					if golemid != 0 {
 						let golem = ctx.get_thing(golemid);
+						let flag = golem.flag;
 						let status = golem.status.clone();
 						let skill = golem.skill.clone();
 						let thing = ctx.get_thing_mut(c);
+						thing.flag.0 |= flag.0;
 						thing.status = status;
 						thing.skill = skill;
 					}
@@ -4907,7 +4902,7 @@ impl Skill {
 				} else if tally[etg::Darkness as usize - 1] > 0 {
 					match shardgolem.skill.entry(Event::OwnAttack) {
 						SkillsEntry::Occupied(o) => {
-							o.into_mut().to_mut().push(Skill::siphon);
+							o.into_mut().push(Skill::siphon);
 						}
 						SkillsEntry::Vacant(v) => {
 							v.insert(Cow::from(&[Skill::siphon][..]));
