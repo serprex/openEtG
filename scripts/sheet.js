@@ -67,7 +67,11 @@ function addRule(rules, name, ...args) {
 
 const bgstrx = [];
 for (let i = 2; i < 5; i++) {
-	bgstrx.push(`background-size:${Math.round(json.meta.size.w / i)}px;`);
+	bgstrx.push(
+		`background-size:${(json.meta.size.w / i)
+			.toFixed(2)
+			.replace(/\.?0+$/, '')}px;`,
+	);
 }
 const out = fs.createWriteStream('assets/atlas.css');
 out.write(".ico{display:inline-block;background:url('/assets/atlas.webp')}");
@@ -82,8 +86,13 @@ for (const asset in atlasjson) {
 	);
 	if (asset.match(/e\d+|cback/)) {
 		for (let i = 0; i < 3; i++) {
-			const dati = data.map(x => +(x / (2 + i)).toFixed(2)),
-				name = (i === 2 ? 's' : i === 1 ? 't' : 'c') + asset;
+			const dati = data.map(
+					x => +(x / (2 + i)).toFixed(2).replace(/\.?0+$/, ''),
+				),
+				name =
+					(i === 2 ? 's'
+					: i === 1 ? 't'
+					: 'c') + asset;
 			addRule(
 				rules,
 				name,

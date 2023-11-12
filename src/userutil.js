@@ -6,17 +6,17 @@ export const pveCostReward = new Uint8Array([
 	0, 9, 1, 16, 15, 70, 30, 250, 20, 100, 30, 200,
 ]);
 function cardValue24(card) {
-	return ~card.rarity
-		? cardValues24[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1)
-		: 0;
+	return ~card.rarity ?
+			cardValues24[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1)
+		:	0;
 }
 export function cardValue(card) {
 	return cardValue24(card) / 24;
 }
 export function sellValue(card) {
-	return ~card.rarity
-		? sellValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1)
-		: 0;
+	return ~card.rarity ?
+			sellValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1)
+		:	0;
 }
 export function arenaCost(lv) {
 	return pveCostReward[lv ? 10 : 8];
@@ -40,9 +40,9 @@ export function calcWealth(Cards, cardpool, isDecoded) {
 		}
 	} else {
 		cardpool.forEach(
-			isDecoded
-				? code => wealthIter(code, 1)
-				: (count, code) => wealthIter(code, count),
+			isDecoded ?
+				code => wealthIter(code, 1)
+			:	(count, code) => wealthIter(code, count),
 		);
 	}
 	return wealth / 24;

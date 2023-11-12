@@ -35,9 +35,9 @@ function Qecks(props) {
 				type="button"
 				value={`${i + 1}`}
 				class={`editbtn${
-					props.user.selectedDeck === props.user.qecks[i]
-						? ' selectedbutton'
-						: ''
+					props.user.selectedDeck === props.user.qecks[i] ?
+						' selectedbutton'
+					:	''
 				}`}
 				onClick={() => {
 					if (setting()) {

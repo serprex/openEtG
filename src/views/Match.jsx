@@ -315,14 +315,19 @@ function SpellDisplayChild(props) {
 	const p1 = props.getIdTrack(props.spell.t);
 	const state = createMemo(() => {
 		const ms = time();
-		return ms < 50 * Math.PI
-			? {
+		return (
+			ms < 50 * Math.PI ?
+				{
 					yc: props.y * Math.sin(ms / 100),
 					opacity: 1 - Math.cos(ms / 100),
-			  }
-			: ms > 1984
-			? { yc: props.y + ms - 1980, opacity: 1 - (ms - 1980) / (600 - props.y) }
-			: { yc: props.y, opacity: 1 };
+				}
+			: ms > 1984 ?
+				{
+					yc: props.y + ms - 1980,
+					opacity: 1 - (ms - 1980) / (600 - props.y),
+				}
+			:	{ yc: props.y, opacity: 1 }
+		);
 	});
 	createEffect(() => {
 		if (state().yc > 600) {
@@ -435,13 +440,13 @@ function Thing(props) {
 				position: 'absolute',
 				left: `${props.pos.x - 32}px`,
 				top: `${props.pos.y - 32}px`,
-				opacity: faceDown()
-					? props.pos.opacity
-					: (props.game.material(props.id) ? 1 : 0.7) * props.pos.opacity,
-				color: faceDown()
-					? undefined
-					: props.game.getCard(props.id).upped
-					? '#000'
+				opacity:
+					faceDown() ?
+						props.pos.opacity
+					:	(props.game.material(props.id) ? 1 : 0.7) * props.pos.opacity,
+				color:
+					faceDown() ? undefined
+					: props.game.getCard(props.id).upped ? '#000'
 					: '#fff',
 				'z-index': '2',
 				'pointer-events': ~props.game.getIndex(props.id) ? undefined : 'none',
@@ -460,9 +465,9 @@ function Thing(props) {
 							class={props.game.getCard(props.id).shiny ? 'shiny' : ''}
 							src={`/Cards/${encodeCode(
 								props.game.get(props.id, 'card') +
-									(asShiny(props.game.get(props.id, 'card'), false) < 5000
-										? 4000
-										: 0),
+									(asShiny(props.game.get(props.id, 'card'), false) < 5000 ?
+										4000
+									:	0),
 							)}.webp`}
 							style="position:absolute;width:64px;height:64px;pointer-events:none"
 						/>
@@ -526,11 +531,11 @@ function Things(props) {
 	const birth = id =>
 		untrack(() => {
 			const start = props.startPos.get(id);
-			return start < 0
-				? { opacity: 0, x: 103, y: -start === props.p1id ? 551 : 258 }
-				: start
-				? { opacity: 0, x: -99, y: -99, ...props.getIdTrack(start) }
-				: { opacity: 0, ...props.game.tgtToPos(id, props.p1id) };
+			return (
+				start < 0 ? { opacity: 0, x: 103, y: -start === props.p1id ? 551 : 258 }
+				: start ? { opacity: 0, x: -99, y: -99, ...props.getIdTrack(start) }
+				: { opacity: 0, ...props.game.tgtToPos(id, props.p1id) }
+			);
 		});
 	const death = new Map(),
 		[getDeath, updateDeath] = createSignal(death, { equals: false }),
@@ -548,9 +553,9 @@ function Things(props) {
 				if (!newthings.has(id) && !banned.has(id) && props.game.has_id(id)) {
 					const endpos = props.endPos.get(id);
 					const pos =
-						endpos < 0
-							? { x: 103, y: -endpos === props.p1id ? 551 : 258 }
-							: props.getIdTrack(endpos || id);
+						endpos < 0 ?
+							{ x: 103, y: -endpos === props.p1id ? 551 : 258 }
+						:	props.getIdTrack(endpos || id);
 					if (pos) {
 						death.set(id, { opacity: 0, ...pos });
 						updated = true;
@@ -742,9 +747,9 @@ export default function Match(props) {
 	const idtrack = new Map(),
 		setIdTrack = (id, pos) => idtrack.set(id, pos),
 		getIdTrack = id =>
-			id === p1id() || id === p2id()
-				? game().tgtToPos(id, p1id())
-				: idtrack.get(id);
+			id === p1id() || id === p2id() ?
+				game().tgtToPos(id, p1id())
+			:	idtrack.get(id);
 	const [showFoeplays, setShowFoeplays] = createSignal(false);
 	const [resigning, setResigning] = createSignal(false);
 	const [hovercard, setHoverCard] = createSignal(null);
@@ -1057,7 +1062,10 @@ export default function Match(props) {
 				} else {
 					const { daily } = game.data;
 					userExec('donedaily', {
-						daily: daily === 4 ? 5 : daily === 3 ? 0 : daily,
+						daily:
+							daily === 4 ? 5
+							: daily === 3 ? 0
+							: daily,
 					});
 				}
 			}
@@ -1308,12 +1316,12 @@ export default function Match(props) {
 	};
 
 	const expectedDamages = createMemo(prev =>
-		prev && pgame().replay.length === prev.replaylength
-			? prev
-			: {
-					expectedDamage: pgame().expected_damage(expectedDamageSamples),
-					replaylength: pgame().replay.length,
-			  },
+		prev && pgame().replay.length === prev.replaylength ?
+			prev
+		:	{
+				expectedDamage: pgame().expected_damage(expectedDamageSamples),
+				replaylength: pgame().replay.length,
+			},
 	);
 	const cloaked = () => game().is_cloaked(p2id());
 
@@ -1321,22 +1329,19 @@ export default function Match(props) {
 		const g = game();
 		let turntell, endText, cancelText;
 		if (g.phase !== Phase.End) {
-			turntell = targeting()
-				? targeting().text
-				: `${g.turn === p1id() ? 'Your' : 'Their'} turn${
-						g.phase > Phase.Mulligan
-							? ''
-							: p1id() === 1
-							? "\nYou're first"
-							: "\nYou're second"
-				  }`;
+			turntell =
+				targeting() ?
+					targeting().text
+				:	`${g.turn === p1id() ? 'Your' : 'Their'} turn${
+						g.phase > Phase.Mulligan ? ''
+						: p1id() === 1 ? "\nYou're first"
+						: "\nYou're second"
+					}`;
 			if (g.turn === p1id()) {
-				endText = targeting()
-					? ''
-					: g.phase === Phase.Play
-					? 'End Turn'
-					: g.turn === p1id()
-					? 'Accept'
+				endText =
+					targeting() ? ''
+					: g.phase === Phase.Play ? 'End Turn'
+					: g.turn === p1id() ? 'Accept'
 					: '';
 				if (g.phase !== Phase.Play) {
 					cancelText = g.turn === p1id() ? 'Mulligan' : '';
@@ -1363,7 +1368,7 @@ export default function Match(props) {
 			{popup() && <PagedModal pages={popup()} onClose={() => setPopup(null)} />}
 			{svgbg}
 			<Show when={cloaked()}>{cloaksvg}</Show>
-			{showFoeplays() ? (
+			{showFoeplays() ?
 				<FoePlays
 					getIdTrack={getIdTrack}
 					foeplays={foeplays().get(p2id())}
@@ -1374,8 +1379,7 @@ export default function Match(props) {
 						setTempgame(game);
 					}}
 				/>
-			) : (
-				playByPlayMode !== 'disabled' && (
+			:	playByPlayMode !== 'disabled' && (
 					<SpellDisplay
 						playByPlayMode={playByPlayMode}
 						getIdTrack={getIdTrack}
@@ -1383,7 +1387,7 @@ export default function Match(props) {
 						setSpells={setSpells}
 					/>
 				)
-			)}
+			}
 			{[0, 1].map(j => {
 				const pl = j ? p2id : p1id,
 					plpos = () => game().tgtToPos(pl(), p1id()),
@@ -1489,11 +1493,9 @@ export default function Match(props) {
 										<div
 											style={`background-color:${
 												strcols[
-													expectedDamage() >= game().get(pl(), 'hp')
-														? Fire
-														: expectedDamage() > 0
-														? Time
-														: Water
+													expectedDamage() >= game().get(pl(), 'hp') ? Fire
+													: expectedDamage() > 0 ? Time
+													: Water
 												]
 											};position:absolute;left:${
 												3 + Math.min(state().x1, state().x2)
@@ -1547,12 +1549,12 @@ export default function Match(props) {
 						'Arena1\n',
 						'Arena2\n',
 					][game().data.level] ??
-					(game().data.players[p2id() - 1].leader !== undefined
-						? `${
-								game().playerDataByIdx(game().data.players[p2id() - 1].leader)
-									.name || game().data.players[p2id() - 1].leader
-						  }\n`
-						: '')
+					(game().data.players[p2id() - 1].leader !== undefined ?
+						`${
+							game().playerDataByIdx(game().data.players[p2id() - 1].leader)
+								.name || game().data.players[p2id() - 1].leader
+						}\n`
+					:	'')
 				}${game().data.players[p2id() - 1].name || '-'}`}
 			</div>
 			<span style="position:absolute;left:780px;top:560px;width:120px;text-align:center;pointer-events:none;white-space:pre">
@@ -1580,7 +1582,12 @@ export default function Match(props) {
 			)}
 			<input
 				type="button"
-				value={props.replay ? 'Exit' : resigning() ? 'Confirm' : 'Resign'}
+				value={
+					props.replay ? 'Exit'
+					: resigning() ?
+						'Confirm'
+					:	'Resign'
+				}
 				onClick={resignClick}
 				style="position:absolute;left:816px;top:15px;z-index:4"
 			/>

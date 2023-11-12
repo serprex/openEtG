@@ -82,15 +82,15 @@ export default function OriginalUpgrade(props) {
 				<span class="ico gold" />
 			</div>
 			<div style="position:absolute;left:200px;top:4px">
-				{canBuy() && rx.orig.electrum < buyCost()
-					? `Need ${buyCost() - rx.orig.electrum} more to afford card${
-							deck().length === 1 ? '' : 's'
-					  }`
-					: canUpgrade() && rx.orig.electrum < upgradeCost()
-					? `Need ${upgradeCost() - rx.orig.electrum} more to afford upgrade${
-							deck().length === 1 ? '' : 's'
-					  }`
-					: ''}
+				{canBuy() && rx.orig.electrum < buyCost() ?
+					`Need ${buyCost() - rx.orig.electrum} more to afford card${
+						deck().length === 1 ? '' : 's'
+					}`
+				: canUpgrade() && rx.orig.electrum < upgradeCost() ?
+					`Need ${upgradeCost() - rx.orig.electrum} more to afford upgrade${
+						deck().length === 1 ? '' : 's'
+					}`
+				:	''}
 			</div>
 			<div style="position:absolute;left:100px;top:235px">
 				<div style="display:inline;margin-right:4px">

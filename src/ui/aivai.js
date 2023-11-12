@@ -56,14 +56,14 @@ function fightItOut() {
 	}
 	const decks = deckeles.map(item => {
 		const deckstr = item.value.trim();
-		return deckstr.charAt(3) === ' '
-			? encodedeck(
+		return deckstr.charAt(3) === ' ' ?
+				encodedeck(
 					deckstr.split(' ').map(x => {
 						const code = parseInt(x, 32);
 						return ~fromTrueMark(code) ? code : code - 4000;
 					}),
-			  )
-			: deckstr;
+				)
+			:	deckstr;
 	});
 	const set =
 		parseInt(decks[0].slice(2, 5), 32) < 5000 ? 'Original' : undefined;
@@ -80,11 +80,11 @@ function fightItOut() {
 		},
 		cast(game, player, data) {
 			return `${player}\t${game.getCard(data.c).name}${
-				data.t
-					? ` targets ${
-							game.getCard(data.t) ? game.getCard(data.t).name : data.t
-					  }`
-					: ''
+				data.t ?
+					` targets ${
+						game.getCard(data.t) ? game.getCard(data.t).name : data.t
+					}`
+				:	''
 			}\n`;
 		},
 	};

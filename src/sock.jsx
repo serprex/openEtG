@@ -102,13 +102,12 @@ const sockEvents = {
 			() => (
 				<div
 					style={
-						data.guest
-							? 'overflow:auto;font-style:italic;color:#ccc'
-							: data.mode === 2
-							? 'overflow:auto;color:#69f'
-							: data.mode !== 1
-							? 'overflow:auto;color:#ddd'
-							: 'overflow:auto'
+						data.guest ? 'overflow:auto;font-style:italic;color:#ccc'
+						: data.mode === 2 ?
+							'overflow:auto;color:#69f'
+						: data.mode !== 1 ?
+							'overflow:auto;color:#ddd'
+						:	'overflow:auto'
 					}>
 					{`${h < 10 ? '0' : ''}${h}${m < 10 ? '0' : ''}${m} `}
 					{data.u && <b>{data.u + ' '}</b>}

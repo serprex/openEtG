@@ -82,9 +82,9 @@ export default function Library(props) {
 						top: `${64 + r * 32}px`,
 						'font-size': '12px',
 						'text-shadow':
-							memo().reprog[idx] === memo().reprogmax[idx]
-								? '1px 1px 2px #fff'
-								: undefined,
+							memo().reprog[idx] === memo().reprogmax[idx] ?
+								'1px 1px 2px #fff'
+							:	undefined,
 					}}>
 					{memo().reprog[idx] ?? 0} / {memo().reprogmax[idx] ?? 0}
 				</span>,

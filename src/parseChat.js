@@ -5,11 +5,9 @@ const guestname = `${(Math.random() * 89999 + 10000) | 0}`;
 function chatmute(state) {
 	store.chatMsg(
 		`${
-			state.opts.muteall
-				? 'You have chat muted. '
-				: state.opts.muteguest
-				? 'You have guests muted. '
-				: ''
+			state.opts.muteall ? 'You have chat muted. '
+			: state.opts.muteguest ? 'You have guests muted. '
+			: ''
 		}Muted: ${Array.from(state.muted).join(', ')}`,
 		'System',
 	);

@@ -153,7 +153,11 @@ export default function ElementSelect() {
 			{rx.user &&
 				[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(i => (
 					<span
-						class={`imgb ico e${i === 14 ? 13 : i === 13 ? 14 : i}`}
+						class={`imgb ico e${
+							i === 14 ? 13
+							: i === 13 ? 14
+							: i
+						}`}
 						style={`position:absolute;left:12px;top:${24 + (i - 1) * 40}px`}
 						onClick={() => {
 							userEmit('inituser', {

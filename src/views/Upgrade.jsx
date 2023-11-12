@@ -66,9 +66,8 @@ export default function Upgrade() {
 	}
 	function eventWrap(func) {
 		return () => {
-			const error = state().card1
-				? func(state().card1)
-				: 'Pick a card, any card.';
+			const error =
+				state().card1 ? func(state().card1) : 'Pick a card, any card.';
 			if (error) setError(error);
 		};
 	}
@@ -133,18 +132,18 @@ export default function Upgrade() {
 						canLish: true,
 					};
 					if (card.upped) {
-						newstate.info1 = card.isFree()
-							? ''
-							: card.rarity !== -1 && !(card.rarity === 4 && card.shiny)
-							? 'Convert into 6 downgraded copies.'
-							: 'Convert into a downgraded version.';
+						newstate.info1 =
+							card.isFree() ? ''
+							: card.rarity !== -1 && !(card.rarity === 4 && card.shiny) ?
+								'Convert into 6 downgraded copies.'
+							:	'Convert into a downgraded version.';
 						newstate.downgrade = true;
 					} else {
-						newstate.info1 = card.isFree()
-							? '50$ to upgrade'
-							: card.rarity !== -1 && !(card.rarity === 4 || card.shiny)
-							? 'Convert 6 into an upgraded version.'
-							: 'Convert into an upgraded version.';
+						newstate.info1 =
+							card.isFree() ? '50$ to upgrade'
+							: card.rarity !== -1 && !(card.rarity === 4 || card.shiny) ?
+								'Convert 6 into an upgraded version.'
+							:	'Convert into an upgraded version.';
 						newstate.downgrade = false;
 					}
 					if (card.rarity === 4) {
@@ -153,19 +152,16 @@ export default function Upgrade() {
 						} polished.`;
 						newstate.canLish = false;
 					} else if (card.shiny) {
-						newstate.info3 = card.isFree()
-							? ''
-							: card.rarity !== -1
-							? 'Convert into 6 non-shiny copies.'
+						newstate.info3 =
+							card.isFree() ? ''
+							: card.rarity !== -1 ? 'Convert into 6 non-shiny copies.'
 							: 'Convert into 2 non-shiny copies.';
 						newstate.downlish = true;
 					} else {
-						newstate.info3 = card.isFree()
-							? '50$ to polish'
-							: card.rarity === 4
-							? 'This card cannot be polished.'
-							: card.rarity !== -1
-							? 'Convert 6 into a shiny version.'
+						newstate.info3 =
+							card.isFree() ? '50$ to polish'
+							: card.rarity === 4 ? 'This card cannot be polished.'
+							: card.rarity !== -1 ? 'Convert 6 into a shiny version.'
 							: 'Convert 2 into a shiny version.';
 						newstate.downlish = false;
 					}

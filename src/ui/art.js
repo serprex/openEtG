@@ -39,11 +39,13 @@ for (const credit of [
 			'4ta',
 			'4te',
 			'4vr',
+			'53m',
 			'55k',
 			'55p',
 			'5ic',
 			'5m0',
 			'5m3',
+			'5m4',
 			'5ol',
 			'5rl',
 			'5vj',
@@ -159,6 +161,10 @@ for (const credit of [
 		['5ig'],
 	],
 	[['moomoose', 'http://elementscommunity.org/forum/profile/?u=40'], ['5i6']],
+	[
+		['Niharia', 'https://etg.dek.im/forum/index.php?action=profile;u=522'],
+		['5fq', '5j3', '5p6'],
+	],
 	[
 		['OdinVanguard', 'http://elementscommunity.org/forum/profile/?u=232'],
 		[
@@ -404,6 +410,7 @@ for (const credit of [
 			'622',
 			'62a',
 			'62h',
+			'62j',
 		],
 	],
 	[

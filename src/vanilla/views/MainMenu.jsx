@@ -24,9 +24,8 @@ export function parseDeck(dcode) {
 				i++;
 			}
 			dcode += etgutil.encodeCount(i - i0);
-			dcode += ~etgutil.fromTrueMark(dicode)
-				? di
-				: etgutil.encodeCode(dicode - 4000);
+			dcode +=
+				~etgutil.fromTrueMark(dicode) ? di : etgutil.encodeCode(dicode - 4000);
 		}
 	}
 	return dcode;
@@ -84,13 +83,12 @@ export default function OriginalMainMenu() {
 
 		const aiinfo = level === 'custom' && parseAiDeck(origfoename());
 		const ailevel = aiinfo ? aiinfo.level : level;
-		const [ainame, aideck] = aiinfo
-			? [aiinfo.name, aiinfo.deck]
-			: level === 'ai4'
-			? deckgenAi4()
-			: level === 'fg' && typeof rx.orig.fg === 'number'
-			? aiDecks.fg[rx.orig.fg]
-			: choose(aiDecks[level]);
+		const [ainame, aideck] =
+			aiinfo ? [aiinfo.name, aiinfo.deck]
+			: level === 'ai4' ? deckgenAi4()
+			: level === 'fg' && typeof rx.orig.fg === 'number' ?
+				aiDecks.fg[rx.orig.fg]
+			:	choose(aiDecks[level]);
 		if (level === 'fg' && typeof rx.orig.fg === 'number') {
 			userEmit('origadd', { fg: -1 });
 			store.addOrig({ fg: -1 });
@@ -102,7 +100,10 @@ export default function OriginalMainMenu() {
 			cost,
 			basereward,
 			hpreward,
-			spins: level === 'custom' ? 0 : level === 'ai2' ? 2 : 3,
+			spins:
+				level === 'custom' ? 0
+				: level === 'ai2' ? 2
+				: 3,
 			rematch: () => vsAi(level, cost, basereward, hpreward),
 			players: shuffle([
 				{ idx: 1, name: rx.user.name, user: rx.user.name, deck: rx.orig.deck },
@@ -111,7 +112,10 @@ export default function OriginalMainMenu() {
 					ai: 1,
 					name: ainame,
 					deck: aideck,
-					hp: ailevel === 'fg' ? 200 : ailevel === 'ai4' ? 150 : 100,
+					hp:
+						ailevel === 'fg' ? 200
+						: ailevel === 'ai4' ? 150
+						: 100,
 					drawpower: ailevel === 'ai4' || ailevel === 'fg' ? 2 : 1,
 					markpower: ailevel === 'ai4' || ailevel === 'fg' ? 3 : 1,
 				},

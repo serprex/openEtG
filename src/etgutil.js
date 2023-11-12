@@ -1,9 +1,9 @@
 export function encodeCount(count) {
-	return count <= 0
-		? '00'
-		: count >= 1023
-		? 'vv'
-		: (count < 32 ? '0' : '') + count.toString(32);
+	return (
+		count <= 0 ? '00'
+		: count >= 1023 ? 'vv'
+		: (count < 32 ? '0' : '') + count.toString(32)
+	);
 }
 export function encodeCode(code) {
 	let codestr = code.toString(32);
@@ -84,9 +84,9 @@ export function addcard(deck, card, x = 1) {
 				deck += `vv${encodeCode(card)}`;
 				count -= 1023;
 			}
-			return count <= 0
-				? deck.slice(0, i) + deck.slice(i + 5)
-				: deck.slice(0, i) + encodeCount(count) + deck.slice(i + 2);
+			return count <= 0 ?
+					deck.slice(0, i) + deck.slice(i + 5)
+				:	deck.slice(0, i) + encodeCount(count) + deck.slice(i + 2);
 		}
 	}
 	return x <= 0 ? deck : deck + encodeCount(x) + encodeCode(card);

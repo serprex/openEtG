@@ -68,15 +68,14 @@ function CardSelectorColumn(props) {
 			let opacity = undefined;
 			if (props.cardpool) {
 				const scode = asShiny(code, true);
-				const cardAmount = card.isFree()
-						? '-'
-						: code in props.cardpool
-						? poolCount(props, code)
+				const cardAmount =
+						card.isFree() ? '-'
+						: code in props.cardpool ? poolCount(props, code)
 						: 0,
 					shinyAmount =
-						props.filterboth && props.shiny && scode in props.cardpool
-							? poolCount(props, scode)
-							: 0;
+						props.filterboth && props.shiny && scode in props.cardpool ?
+							poolCount(props, scode)
+						:	0;
 				if (
 					cardAmount === 0 &&
 					shinyAmount === 0 &&
@@ -95,11 +94,11 @@ function CardSelectorColumn(props) {
 				countTexts.push(
 					<div
 						class={`selectortext${
-							props.maxedIndicator && !card.pillar && cardAmount >= 6
-								? cardAmount >= 12
-									? ' beigeback'
-									: ' lightback'
-								: ''
+							props.maxedIndicator && !card.pillar && cardAmount >= 6 ?
+								cardAmount >= 12 ?
+									' beigeback'
+								:	' lightback'
+							:	''
 						}`}>
 						{cardAmount + (shinyAmount ? '/' + shinyAmount : '')}
 					</div>,

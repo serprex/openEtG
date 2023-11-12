@@ -77,9 +77,9 @@ function OrderSummary(props) {
 				}
 			}
 			if (
-				props.showMine
-					? bzv.every(({ u }) => u !== props.username)
-					: bzv.some(({ u }) => u === props.username)
+				props.showMine ?
+					bzv.every(({ u }) => u !== props.username)
+				:	bzv.some(({ u }) => u === props.username)
 			) {
 				continue;
 			}

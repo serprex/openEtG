@@ -210,6 +210,7 @@ fn eval_skill(
 				ctx.get_player(foe).quanta.into_iter().map(|q| (q as i32).min(3)).sum::<i32>() * PREC / 24
 			}
 			Skill::bless => 4 * PREC,
+			Skill::blockhp => 2 * PREC,
 			Skill::bloodmoon => 9 * (PREC / 2),
 			Skill::boneyard => 3 * PREC,
 			Skill::bounce => PREC,
@@ -287,6 +288,10 @@ fn eval_skill(
 			Skill::deadalive => 2 * PREC,
 			Skill::deathwish => PREC,
 			Skill::deckblast => ctx.get_player(ctx.get_owner(c)).deck.len() as i32 * (PREC / 2),
+			Skill::deckblock => {
+				let owner = ctx.get_owner(c);
+				(ctx.get_player(owner).deck.len() as i32 - ctx.count_creatures(ctx.get_foe(owner)) as i32 * 4) * PREC
+			}
 			Skill::deepdive | Skill::deepdiveproc => {
 				if ctx.get_kind(c) == Kind::Spell {
 					ctx.get_card(ctx.get(c, Stat::card)).attack as i32 * PREC
@@ -325,6 +330,7 @@ fn eval_skill(
 				}
 			}
 			Skill::disfield => (3 + quantamap.get(ctx.get_owner(c), etg::Chroma) as i32) * PREC,
+			Skill::dispersion => 9 * PREC,
 			Skill::disshield => (2 + quantamap.get(ctx.get_owner(c), etg::Entropy) as i32) * PREC,
 			Skill::dive => {
 				if ctx.get_kind(c) == Kind::Spell {
@@ -335,6 +341,7 @@ fn eval_skill(
 			}
 			Skill::divinity | Skill::v_divinity => 3 * PREC,
 			Skill::drainlife | Skill::v_drainlife(_) => 10 * PREC,
+			Skill::doctor => PREC / 2,
 			Skill::draft => PREC,
 			Skill::drawcopy => PREC,
 			Skill::drawequip => 2 * PREC,
@@ -369,6 +376,7 @@ fn eval_skill(
 			Skill::foedraw => 8 * PREC,
 			Skill::forcedraw => -10 * PREC,
 			Skill::forceplay => 2 * PREC,
+			Skill::frail => 2 * PREC,
 			Skill::fractal => (20 - ctx.get_player(ctx.get_owner(c)).hand_len() as i32) * (PREC / 4),
 			Skill::freedom => 4 * PREC,
 			Skill::freeze(x) => x as i32 * PREC,
@@ -435,6 +443,7 @@ fn eval_skill(
 			}
 			Skill::holylight | Skill::v_holylight => 3 * PREC,
 			Skill::hope | Skill::v_hope => 2 * PREC,
+			Skill::hush => 3 * PREC,
 			Skill::icebolt | Skill::v_icebolt(_) => 10 * PREC,
 			Skill::ignite => 10 * PREC,
 			Skill::immolate(_) => 5 * PREC,
@@ -460,6 +469,7 @@ fn eval_skill(
 			Skill::millpillar => PREC,
 			Skill::mimic => 3 * PREC,
 			Skill::miracle => ctx.get(ctx.get_owner(c), Stat::maxhp) as i32 * (PREC / 8),
+			Skill::mist => ctx.get(c, Stat::charges) as i32 * 5,
 			Skill::mitosis => (4 + ctx.get_card(ctx.get(c, Stat::card)).cost) as i32 * PREC,
 			Skill::mitosisspell => 6 * PREC,
 			Skill::momentum => 2 * PREC,
@@ -488,8 +498,8 @@ fn eval_skill(
 				((24 - ctx.get_player(ctx.get_foe(owner)).hand_len()) >> n) as i32 * PREC
 			}
 			Skill::nightshade => 6 * PREC,
-			Skill::nova => 4 * PREC,
-			Skill::nova2 => 6 * PREC,
+			Skill::nova => PREC,
+			Skill::nova2 => 2 * PREC,
 			Skill::nullspell => 4 * PREC,
 			Skill::nymph | Skill::v_nymph => 7 * PREC,
 			Skill::ouija => 3 * PREC,
@@ -595,6 +605,7 @@ fn eval_skill(
 			Skill::steal | Skill::v_steal => 6 * PREC,
 			Skill::steam => 6 * PREC,
 			Skill::stoneform | Skill::v_stoneform => PREC,
+			Skill::stonewall => quantamap.get(ctx.get_owner(c), etg::Earth) as i32 * PREC,
 			Skill::storm(x) | Skill::v_storm(x) | Skill::firestorm(x) => x as i32 * (PREC * 4),
 			Skill::summon(FateEgg) => 3 * PREC,
 			Skill::summon(FateEggUp) => 4 * PREC,
@@ -638,7 +649,7 @@ fn eval_skill(
 				if ctx.get_kind(c) == Kind::Spell {
 					let foeshield = ctx.get_shield(ctx.get_foe(ctx.get_owner(c)));
 					if foeshield != 0 {
-						(ctx.truedr(foeshield) as i32)
+						(ctx.truedr(foeshield, c) as i32)
 							.min(ctx.get_card(ctx.get(c, Stat::card)).attack as i32)
 							* PREC
 					} else {
@@ -657,6 +668,7 @@ fn eval_skill(
 				}
 			}
 			Skill::web => PREC,
+			Skill::wicked => PREC,
 			Skill::wind => ctx.get(c, Stat::storedpower) as i32 * (PREC / 2),
 			Skill::wisdom => 4 * PREC,
 			Skill::yoink => 4 * PREC,
@@ -696,6 +708,7 @@ fn eval_skill(
 			}
 			Skill::chaos => 8 * PREC,
 			Skill::skull => 5 * PREC,
+			Skill::slime => 5 * PREC,
 			Skill::slow | Skill::v_slow => 6 * PREC,
 			Skill::solar => {
 				let coq = ctx.get_player(ctx.get_owner(c)).quanta(etg::Light) as i32;
@@ -730,9 +743,10 @@ enum WallShield {
 	Chargeblock(i16),
 	Disentro(i16),
 	Dischroma(i16),
-	Voidshell(i16),
 	Evade(i16),
 	Evade100,
+	Slime(i16),
+	Voidshell(i16),
 	Weight,
 	Wings,
 }
@@ -752,21 +766,28 @@ impl WallShield {
 					return 0;
 				}
 			}
-			WallShield::Evade(x) => return dmg as i32 * x as i32 >> PRECBITS,
 			WallShield::Dischroma(ref mut q) => {
 				if *q > 0 {
 					*q -= dmg;
 					return 0;
 				}
 			}
+			WallShield::Evade(x) => return dmg as i32 * x as i32 >> PRECBITS,
+			WallShield::Evade100 => {
+				return 0;
+			}
+			WallShield::Slime(ref mut dr) => {
+				let d = (dmg as i32 - *dr as i32).max(0) * PREC;
+				if d > 0 {
+					*dr = dr.saturating_add(1);
+				}
+				return d;
+			}
 			WallShield::Voidshell(ref mut maxhp) => {
 				if *maxhp > 1 {
 					*maxhp = (*maxhp - dmg).max(1);
 					return 0;
 				}
-			}
-			WallShield::Evade100 => {
-				return 0;
 			}
 			WallShield::Weight => {
 				if ctx.get_kind(id) == Kind::Creature && ctx.truehp(id) > 5 {
@@ -819,7 +840,7 @@ fn estimate_damage(ctx: &Game, id: i16, freedom: i32, wall: &mut Wall) -> i32 {
 		|| tatk <= 0
 		|| (ctx.get(id, Flag::burrowed)
 			&& ctx.get_player(owner).permanents.into_iter().any(|pr| pr != 0 && ctx.get(pr, Flag::tunnel)));
-	let dr = if !momentum && fsh != 0 { ctx.truedr(fsh) } else { 0 };
+	let dr = if !momentum && fsh != 0 { ctx.truedr(fsh, id) } else { 0 };
 	let mut atk = 0;
 	let mut momatk = 0;
 	for dmg in once(tatk).chain(
@@ -1042,7 +1063,7 @@ fn evalthing(
 		score = if ctx.material(id, None) { score * 5 / 4 } else { score * 7 / 2 };
 	}
 	if inhand {
-		score * 14 / 16
+		score * 3 / 4
 	} else {
 		score
 	}
@@ -1080,6 +1101,9 @@ pub fn eval(ctx: &Game) -> i32 {
 					Skill::blockwithcharge => {
 						wall.shield = Some(WallShield::Chargeblock(ctx.get(shield, Stat::charges)));
 					}
+					Skill::deckblock => {
+						wall.shield = Some(WallShield::Chargeblock(player.deck.len() as i16));
+					}
 					Skill::disshield => {
 						if ctx.cardset() == CardSet::Open || !ctx.get(pl, Flag::sanctuary) {
 							wall.shield = Some(WallShield::Disentro(player.quanta(etg::Entropy) as i16));
@@ -1092,16 +1116,24 @@ pub fn eval(ctx: &Game) -> i32 {
 							));
 						}
 					}
-					Skill::voidshell => {
-						wall.shield = Some(WallShield::Voidshell(ctx.get(pl, Stat::maxhp)));
+					Skill::evade(x) => {
+						wall.shield = Some(WallShield::Evade(PREC as i16 * (100 - x as i16) / 100));
 					}
 					Skill::evade100 => {
 						if ctx.get_owner(shield) != ctx.turn || ctx.get(shield, Stat::charges) > 0 {
 							wall.shield = Some(WallShield::Evade100);
 						}
 					}
-					Skill::evade(x) => {
-						wall.shield = Some(WallShield::Evade(PREC as i16 * (100 - x as i16) / 100));
+					Skill::mist => {
+						wall.shield = Some(WallShield::Evade(
+							PREC as i16 * (100 - ctx.get(shield, Stat::charges) * 4) / 100,
+						));
+					}
+					Skill::slime => {
+						wall.shield = Some(WallShield::Slime(ctx.get(shield, Stat::hp)));
+					}
+					Skill::voidshell => {
+						wall.shield = Some(WallShield::Voidshell(ctx.get(pl, Stat::maxhp)));
 					}
 					Skill::weight => wall.shield = Some(WallShield::Weight),
 					Skill::wings => wall.shield = Some(WallShield::Wings),

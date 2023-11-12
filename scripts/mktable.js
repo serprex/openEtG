@@ -22,9 +22,9 @@ if (process.argv.length < 3) {
 			comm = new Uint32Array(3),
 			last = 0;
 		for (const x of ofele) {
-			if (x.type <= 3) perms++;
-			else if (x.type === 5) creas++;
-			else if (x.type === 4) spels++;
+			if (x.type <= 2) perms++;
+			else if (x.type === 4) creas++;
+			else if (x.type === 3) spels++;
 			if (x.rarity > 0 && x.rarity < 4) {
 				comm[x.rarity - 1]++;
 				if (x.code > last) last = x.code;

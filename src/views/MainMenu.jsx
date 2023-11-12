@@ -290,10 +290,9 @@ export default function MainMenu(props) {
 						</div>
 					</div>
 				</div>
-				{showcard ? (
+				{showcard ?
 					<Card x={92} y={340} card={Cards.Codes[showcard]} />
-				) : (
-					!rx.opts.hideMainchat && (
+				:	!rx.opts.hideMainchat && (
 						<>
 							<Chat
 								channel="Main"
@@ -306,7 +305,7 @@ export default function MainMenu(props) {
 							/>
 						</>
 					)
-				)}
+				}
 				<div style="position:absolute;left:626px;top:420px;width:196px;height:120px">
 					<div class="maintitle">Leaderboards</div>
 					<input
@@ -488,7 +487,7 @@ export default function MainMenu(props) {
 					<div
 						class="bgbox"
 						style="position:absolute;left:580px;top:300px;width:300px;height:240px">
-						{changepass() ? (
+						{changepass() ?
 							<>
 								<input
 									placeholder="New Password"
@@ -523,14 +522,13 @@ export default function MainMenu(props) {
 									style="position:absolute;left:8px;top:32px;width:120px"
 								/>
 							</>
-						) : (
-							<input
+						:	<input
 								type="button"
 								value="Change Password"
 								onClick={() => setChangepass(true)}
 								style="position:absolute;left:8px;top:8px;width:120px"
 							/>
-						)}
+						}
 						<label style="position:absolute;left:136px;top:88px">
 							<input
 								type="checkbox"

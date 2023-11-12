@@ -6,5 +6,6 @@
 	"singleQuote": true,
 	"endOfLine": "lf",
 	"printWidth": 80,
-	"arrowParens": "avoid"
+	"arrowParens": "avoid",
+	"experimentalTernaries": true
 }

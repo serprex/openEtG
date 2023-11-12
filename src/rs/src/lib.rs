@@ -356,7 +356,7 @@ mod test {
 			let photon = ctx.new_thing(card::AsUpped(card::Photon, i != 0), p1);
 			ctx.addCrea(p1, photon);
 		}
-		assert_eq!(ctx.truedr(hope), 3);
+		assert_eq!(ctx.truedr(hope, 0), 3);
 	}
 
 	#[test]
@@ -560,7 +560,7 @@ mod test {
 		ctx.addCrea(p1, voodoo);
 		Skill::lightning.proc(&mut ctx, voodoo, voodoo, &mut ProcData::default());
 		Skill::poison(1).proc(&mut ctx, voodoo, voodoo, &mut ProcData::default());
-		Skill::holylight.proc(&mut ctx, voodoo, voodoo, &mut ProcData::default());
+		Skill::v_holylight.proc(&mut ctx, voodoo, voodoo, &mut ProcData::default());
 		assert_eq!(ctx.truehp(voodoo), 1);
 		assert_eq!(ctx.truehp(p2), 85);
 		assert_eq!(ctx.get(voodoo, Stat::poison), 1);

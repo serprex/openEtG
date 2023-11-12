@@ -62,27 +62,27 @@ export default function Trade(props) {
 					type="button"
 					value={confirm() === 0 ? 'Trade' : 'Confirm'}
 					onClick={
-						confirm() === 0
-							? () => {
-									sock.userEmit('offertrade', {
-										f: props.foe,
-										cards: etgutil.encodedeck(deck()),
-										g: gold(),
-										forcards: null,
-										forg: null,
-									});
-									setConfirm(1);
-							  }
-							: () => {
-									sock.userEmit('offertrade', {
-										f: props.foe,
-										cards: etgutil.encodedeck(deck()),
-										g: gold(),
-										forcards: etgutil.encodedeck(offer()),
-										forg: gopher(),
-									});
-									setConfirm(2);
-							  }
+						confirm() === 0 ?
+							() => {
+								sock.userEmit('offertrade', {
+									f: props.foe,
+									cards: etgutil.encodedeck(deck()),
+									g: gold(),
+									forcards: null,
+									forg: null,
+								});
+								setConfirm(1);
+							}
+						:	() => {
+								sock.userEmit('offertrade', {
+									f: props.foe,
+									cards: etgutil.encodedeck(deck()),
+									g: gold(),
+									forcards: etgutil.encodedeck(offer()),
+									forg: gopher(),
+								});
+								setConfirm(2);
+							}
 					}
 					style={{
 						position: 'absolute',

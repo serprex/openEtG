@@ -12,15 +12,15 @@ function QuestButton(props) {
 				left: `${props.x}px`,
 				top: `${props.y}px`,
 				color: `#${
-					typeof props.area === 'string' && !props.user.quests[props.area]
-						? 'f'
-						: 'a'
+					typeof props.area === 'string' && !props.user.quests[props.area] ?
+						'f'
+					:	'a'
 				}${props.sel ? 'ff' : 'aa'}`,
 			}}
 			onClick={props.onClick}>
-			{typeof props.area === 'string'
-				? Quest.quarks[props.area].name
-				: props.area.name}
+			{typeof props.area === 'string' ?
+				Quest.quarks[props.area].name
+			:	props.area.name}
 		</span>
 	);
 }

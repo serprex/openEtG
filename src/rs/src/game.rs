@@ -950,7 +950,7 @@ impl Game {
 					if charges != 0 {
 						write!(text, "\n\u{00d7}{}", charges);
 					} else {
-						write!(text, "\n{}", self.truedr(id));
+						write!(text, "\n{}", self.truedr(id, 0));
 					}
 				}
 				_ => (),
@@ -971,7 +971,7 @@ impl Game {
 			if instkind == Kind::Creature || instkind == Kind::Weapon {
 				write!(ret, "{}|{}/{}", self.trueatk(id), self.truehp(id), self.get(id, Stat::maxhp)).ok();
 			} else if instkind == Kind::Shield {
-				write!(ret, "{}", self.truedr(id)).ok();
+				write!(ret, "{}", self.truedr(id, 0)).ok();
 			}
 			let skills = SkillThing::Thing(self, id).info();
 			if ret.is_empty() {
@@ -1577,8 +1577,8 @@ impl Game {
 		}
 	}
 
-	pub fn truedr(&self, id: i16) -> i16 {
-		self.get(id, Stat::hp) + self.trigger_pure(Event::Buff, id, 0)
+	pub fn truedr(&self, id: i16, t: i16) -> i16 {
+		self.get(id, Stat::hp) + self.trigger_pure(Event::Buff, id, t)
 	}
 
 	pub fn truehp(&self, id: i16) -> i16 {
@@ -1667,7 +1667,7 @@ impl Game {
 						} else if gpull != 0 {
 							self.attackCreatureDmg(id, gpull, trueatk);
 						} else {
-							let truedr = if shield != 0 { self.truedr(shield).min(trueatk) } else { 0 };
+							let truedr = if shield != 0 { self.truedr(shield, id).min(trueatk) } else { 0 };
 							let mut hitdata = data.clone();
 							hitdata.dmg = trueatk - truedr;
 							hitdata.blocked = truedr;
@@ -1756,7 +1756,7 @@ impl Game {
 							}
 						} else {
 							let shield = self.get_shield(target);
-							let truedr = if shield != 0 { self.truedr(shield).min(trueatk) } else { 0 };
+							let truedr = if shield != 0 { self.truedr(shield, id).min(trueatk) } else { 0 };
 							let mut hitdata = data.clone();
 							let reducedmg = trueatk - truedr;
 							hitdata.dmg = reducedmg;

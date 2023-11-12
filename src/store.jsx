@@ -6,9 +6,9 @@ import { changeMusic, changeSound } from './audio.js';
 import { mergedecks, removedecks } from './etgutil.js';
 
 export const Login =
-	typeof kongregateAPI === 'undefined'
-		? import('./views/Login.jsx')
-		: import('./views/KongLogin.jsx');
+	typeof kongregateAPI === 'undefined' ?
+		import('./views/Login.jsx')
+	:	import('./views/KongLogin.jsx');
 
 const opts = { channel: 'Main' };
 let hasLocalStorage = true;
@@ -132,11 +132,9 @@ export function addOrig(update) {
 			pool,
 			oracle: update.oracle ?? state.orig.oracle,
 			fg:
-				typeof update.fg !== 'number'
-					? state.orig.fg
-					: update.fg === -1
-					? null
-					: update.fg,
+				typeof update.fg !== 'number' ? state.orig.fg
+				: update.fg === -1 ? null
+				: update.fg,
 		},
 	});
 }

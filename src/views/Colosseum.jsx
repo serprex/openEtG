@@ -13,18 +13,18 @@ function mkDaily(type) {
 	if (type < 3) {
 		game = mkAi(type === 1 ? 0 : 2, type, data => {
 			const dataNext =
-				type === 1
-					? {
-							goldreward: 200,
-							endurance: 2,
-							daily: 1,
-							noheal: true,
-					  }
-					: {
-							goldreward: 500,
-							endurance: 1,
-							daily: 2,
-					  };
+				type === 1 ?
+					{
+						goldreward: 200,
+						endurance: 2,
+						daily: 1,
+						noheal: true,
+					}
+				:	{
+						goldreward: 500,
+						endurance: 1,
+						daily: 2,
+					};
 			dataNext.cost = 0;
 			dataNext.cardreward = '';
 			dataNext.rematch = () => {
@@ -90,13 +90,13 @@ export default function Colosseum(props) {
 					/>
 				),
 				<span style={`position:absolute;left:130px;top:${100 + 30 * i}px`}>
-					{active
-						? events[i - 1]
-						: i > 2
-						? user.daily & (i === 3 ? 1 : 32)
-							? 'You defeated this already today.'
-							: 'You failed this today. Better luck tomorrow!'
-						: 'Completed.'}
+					{active ?
+						events[i - 1]
+					: i > 2 ?
+						user.daily & (i === 3 ? 1 : 32) ?
+							'You defeated this already today.'
+						:	'You failed this today. Better luck tomorrow!'
+					:	'Completed.'}
 				</span>,
 			);
 		}
@@ -106,7 +106,7 @@ export default function Colosseum(props) {
 		<>
 			<ExitBtn x={50} y={50} />
 			{eventui}
-			{user.daily === 191 ? (
+			{user.daily === 191 ?
 				<>
 					<input
 						type="button"
@@ -122,8 +122,7 @@ export default function Colosseum(props) {
 						You successfully completed all tasks.
 					</span>
 				</>
-			) : (
-				<div style="position:absolute;left:56px;top:300px">
+			:	<div style="position:absolute;left:56px;top:300px">
 					Completing any colosseum event contributes to a 5 day reward cycle.
 					<br />
 					At the end of the cycle, your streak is reset.
@@ -137,17 +136,17 @@ export default function Colosseum(props) {
 					<span class="ico gold" />
 					<br />
 					<br />
-					{user.ostreak
-						? `You currently have a ${user.ostreak} day colosseum streak.`
-						: "You'ven't begun a streak."}
+					{user.ostreak ?
+						`You currently have a ${user.ostreak} day colosseum streak.`
+					:	"You'ven't begun a streak."}
 					<br />
-					{user.ostreak && user.ostreakday
-						? `You've redeemed ${
-								[250, 15, 25, 77, 100][user.ostreak % 5]
-						  }$ today.`
-						: "You'ven't redeemed a colosseum streak today."}
+					{user.ostreak && user.ostreakday ?
+						`You've redeemed ${
+							[250, 15, 25, 77, 100][user.ostreak % 5]
+						}$ today.`
+					:	"You'ven't redeemed a colosseum streak today."}
 				</div>
-			)}
+			}
 		</>
 	);
 }

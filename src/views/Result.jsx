@@ -71,10 +71,12 @@ const BonusList = [
 		name: 'First past the post',
 		desc: 'Win with non-positive hp, or foe loses from damage with positive hp',
 		func: (game, p1, p2, stats) =>
-			game.deck_length(p2) &&
-			(game.get(p1, 'hp') <= 0 || game.get(p2, 'hp') > 0)
-				? 0.1
-				: 0,
+			(
+				game.deck_length(p2) &&
+				(game.get(p1, 'hp') <= 0 || game.get(p2, 'hp') > 0)
+			) ?
+				0.1
+			:	0,
 	},
 	{
 		name: 'Full Health',

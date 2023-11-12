@@ -92,7 +92,10 @@ export function mkAi(level, daily, datafn = null) {
 				ai: 1,
 				name: aiName,
 				deck: deck,
-				hp: level === 0 ? 100 : level === 1 ? 125 : 150,
+				hp:
+					level === 0 ? 100
+					: level === 1 ? 125
+					: 150,
 				drawpower: level > 1 ? 2 : 1,
 				markpower: level > 1 ? 2 : 1,
 			},

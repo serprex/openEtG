@@ -11,10 +11,9 @@ export default function CardImage(props) {
 			onContextMenu={props.onContextMenu}
 			style={{
 				'background-color': bgcol(),
-				'border-color': props.opacity
-					? '#f00'
-					: props.card.shiny
-					? '#daa520'
+				'border-color':
+					props.opacity ? '#f00'
+					: props.card.shiny ? '#daa520'
 					: '#222',
 				color: props.card.upped ? '#000' : '#fff',
 				...props.style,
