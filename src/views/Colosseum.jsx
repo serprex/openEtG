@@ -54,12 +54,12 @@ export default function Colosseum(props) {
 		[dgname, dgdeck] = Decks.demigod[user.dailydg];
 	const events = [
 		() =>
-			'Novice Endurance Fight 3 Commoners in a row without healing in between. May try until you win.',
+			'Novice Endurance\nFight 3 Commoners in a row without healing in between. May try until you win.',
 		() =>
-			'Expert Endurance: Fight 2 Champions in a row. May try until you win.',
+			'Expert Endurance\nFight 2 Champions in a row. May try until you win.',
 		() => (
 			<>
-				Novice Duel: Fight{' '}
+				Novice Duel{'\n'}Fight{' '}
 				<a href={`/deck/${magedeck}`} target="_blank">
 					{magename}
 				</a>
@@ -68,7 +68,7 @@ export default function Colosseum(props) {
 		),
 		() => (
 			<>
-				Expert Duel: Fight{' '}
+				Expert Duel{'\n'}Fight{' '}
 				<a href={`/deck/${dgdeck}`} target="_blank">
 					{dgname}
 				</a>
@@ -76,77 +76,67 @@ export default function Colosseum(props) {
 			</>
 		),
 	];
-	const eventui = () => {
-		const eventui = [];
-		for (let i = 1; i < 5; i++) {
-			const active = !(user.daily & (1 << i));
-			eventui.push(
-				active && (
-					<input
-						type="button"
-						value="Fight!"
-						style={`position:absolute;left:50px;top:${100 + 30 * i}px`}
-						onClick={[mkDaily, i]}
-					/>
-				),
-				<span style={`position:absolute;left:130px;top:${100 + 30 * i}px`}>
-					{active ?
-						events[i - 1]
-					: i > 2 ?
-						user.daily & (i === 3 ? 1 : 32) ?
-							'You defeated this already today.'
-						:	'You failed this today. Better luck tomorrow!'
-					:	'Completed.'}
-				</span>,
-			);
-		}
-		return eventui;
-	};
 	return (
-		<>
-			<ExitBtn x={50} y={50} />
-			{eventui}
+		<div style="margin-left:48px;margin-top:96px">
+			<ExitBtn x={48} y={24} />
+			{[1, 2, 3, 4].map(i => {
+				const active = !(user.daily & (1 << i));
+				return (
+					<div style="margin-bottom:24px;min-height:36px;display:flex">
+						<input
+							type="button"
+							value="Fight!"
+							style={`margin-right:12px${active ? '' : ';visibility:hidden'}`}
+							onClick={[mkDaily, i]}
+						/>
+						<div style="white-space:pre">
+							{active ?
+								events[i - 1]
+							: i > 2 ?
+								user.daily & (i === 3 ? 1 : 32) ?
+									'You defeated this already today.'
+								:	'You failed this today. Better luck tomorrow!'
+							:	'Completed.'}
+						</div>
+					</div>
+				);
+			})}
 			{user.daily === 191 ?
-				<>
+				<div>
 					<input
 						type="button"
 						value="Nymph!"
-						style="position:absolute;left:50px;top:280px"
+						style="margin-right:12px"
 						onClick={() => {
 							const nymph = NymphList[(Math.random() * 12 + 1) | 0];
 							sock.userExec('donedaily', { daily: 6, c: nymph });
 							store.doNav(import('./MainMenu.jsx'), { nymph });
 						}}
 					/>
-					<span style="position:absolute;left:130px;top:280px">
-						You successfully completed all tasks.
-					</span>
-				</>
-			:	<div style="position:absolute;left:56px;top:300px">
+					You successfully completed all tasks.
+				</div>
+			:	<div style="white-space:pre">
 					Completing any colosseum event contributes to a 5 day reward cycle.
-					<br />
+					{'\n'}
 					At the end of the cycle, your streak is reset.
-					<br />
-					<br />
+					{'\n\n'}
 					Reward Cycle: 15
 					<span class="ico gold" />, 25
 					<span class="ico gold" />, 77
 					<span class="ico gold" />, 100
 					<span class="ico gold" />, 250
 					<span class="ico gold" />
-					<br />
-					<br />
+					{'\n'}
 					{user.ostreak ?
-						`You currently have a ${user.ostreak} day colosseum streak.`
-					:	"You'ven't begun a streak."}
-					<br />
+						`\nYou currently have a ${user.ostreak} day colosseum streak.`
+					:	"\nYou'ven't begun a streak."}
 					{user.ostreak && user.ostreakday ?
-						`You've redeemed ${
+						`\nYou've redeemed ${
 							[250, 15, 25, 77, 100][user.ostreak % 5]
 						}$ today.`
-					:	"You'ven't redeemed a colosseum streak today."}
+					:	"\nYou'ven't redeemed a colosseum streak today."}
 				</div>
 			}
-		</>
+		</div>
 	);
 }
