@@ -9,16 +9,21 @@ mod starters;
 mod svg;
 mod users;
 
+use std::future::IntoFuture;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 
-use bb8_postgres::{bb8::Pool, tokio_postgres, PostgresConnectionManager};
-use httpdate::HttpDate;
-use warp::filters::header;
-use warp::ws::Ws;
-use warp::Filter;
+use axum::{
+	extract::{ws::WebSocketUpgrade, FromRequestParts, Request},
+	http,
+	response::Response,
+	routing::any_service,
+};
+use std::net::Ipv4Addr;
 
-use crate::handleget::{AcceptEncoding, AsyncCache};
+use bb8_postgres::{bb8::Pool, tokio_postgres, PostgresConnectionManager};
+
+use crate::handleget::AsyncCache;
 use crate::handlews::{AsyncSocks, AsyncUserSocks, AsyncUsers};
 
 pub type PgPool = Arc<Pool<PostgresConnectionManager<tokio_postgres::NoTls>>>;
@@ -80,14 +85,12 @@ async fn main() {
 		)
 	};
 
-	let (closetx, mut closerx) = tokio::sync::watch::channel(());
+	let (closetx, closerx) = tokio::sync::watch::channel(());
 
 	let users = AsyncUsers::default();
 	let usersocks = AsyncUserSocks::default();
 	let socks = AsyncSocks::default();
 	let cache = AsyncCache::default();
-	let wsusers = users.clone();
-	let wspgpool = pgpool.clone();
 	let gcusers = users.clone();
 	let gcusersocks = usersocks.clone();
 	let gcsocks = socks.clone();
@@ -123,24 +126,46 @@ async fn main() {
 		}
 	});
 
-	let ws = warp::path::path("ws").and(warp::path::end()).and(warp::ws()).map(move |ws: Ws| {
-		let pgpool = wspgpool.clone();
-		let users = wsusers.clone();
+	let service = tower::service_fn(move |req: Request| {
+		let pgpool = pgpool.clone();
+		let users = users.clone();
 		let usersocks = usersocks.clone();
 		let socks = socks.clone();
-		ws.on_upgrade(move |socket| handlews::handle_ws(socket, pgpool, users, usersocks, socks))
+		let cache = cache.clone();
+		let (mut parts, _) = req.into_parts();
+		async move {
+			Result::<Response, std::convert::Infallible>::Ok(if parts.method == http::Method::GET {
+				if let Ok(wsup) = WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
+					wsup.on_upgrade(move |socket| {
+						handlews::handle_ws(socket, pgpool, users, usersocks, socks)
+					})
+				} else {
+					handleget::handle_get(
+						parts.uri.path(),
+						parts
+							.headers
+							.get("if-modified-since")
+							.and_then(|hv| hv.to_str().ok())
+							.and_then(|hv| hv.parse().ok()),
+						parts
+							.headers
+							.get("accept-encoding")
+							.and_then(|hv| hv.to_str().ok())
+							.and_then(|hv| hv.parse().ok()),
+						pgpool,
+						users,
+						cache,
+					)
+					.await
+				}
+			} else {
+				http::Response::new(axum::body::Body::empty())
+			})
+		}
 	});
-	let full = warp::path::full()
-		.and(header::optional::<HttpDate>("if-modified-since"))
-		.and(header::optional::<AcceptEncoding>("accept-encoding"))
-		.and(warp::any().map(move || pgpool.clone()))
-		.and(warp::any().map(move || users.clone()))
-		.and(warp::any().map(move || cache.clone()))
-		.then(handleget::handle_get);
-	let (_, server) = warp::serve(ws.or(full))
-		.bind_with_graceful_shutdown(([0, 0, 0, 0], listenport), async move {
-			while closerx.changed().await.is_ok() {}
-		});
+
+	let listener = tokio::net::TcpListener::bind((Ipv4Addr::new(0, 0, 0, 0), listenport)).await.unwrap();
+	let server = axum::serve(listener, any_service(service)).into_future();
 	let serverloop = tokio::spawn(server);
 
 	use tokio::signal::unix::{signal, SignalKind};

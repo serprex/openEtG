@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
+use axum::extract::ws::{Message, WebSocket};
 use base64::engine::{general_purpose::STANDARD_NO_PAD, Engine};
 use bb8_postgres::tokio_postgres::{
 	types::{Json, ToSql},
@@ -17,7 +18,6 @@ use serde_json::{Map, Value};
 use tokio::join;
 use tokio::sync::{mpsc, Mutex, MutexGuard, RwLock};
 use tokio_stream::wrappers::UnboundedReceiverStream;
-use warp::ws::{Message, WebSocket};
 
 use crate::cardpool::Cardpool;
 use crate::etgutil::{decode_code, encode_code, encode_count, iterraw};
@@ -52,7 +52,7 @@ where
 	T: serde::Serialize,
 {
 	if let Ok(valstr) = serde_json::to_string(val) {
-		let msg = Message::text(valstr);
+		let msg = Message::Text(valstr);
 		for sock in socks.read().await.values() {
 			sock.tx.send(msg.clone()).ok();
 		}
@@ -76,7 +76,7 @@ where
 	T: serde::Serialize,
 {
 	if let Ok(valstr) = serde_json::to_string(val) {
-		tx.send(Message::text(valstr)).ok();
+		tx.send(Message::Text(valstr)).ok();
 	}
 }
 
@@ -176,7 +176,7 @@ async fn login_success(
 	}
 
 	if let Ok(userstr) = serde_json::to_string(&WsResponse::login(&*user)) {
-		if tx.send(Message::text(userstr)).is_ok() {
+		if tx.send(Message::Text(userstr)).is_ok() {
 			usersocks.write().await.insert(String::from(username), sockid);
 		}
 	}
@@ -337,8 +337,8 @@ pub async fn handle_ws(
 	socks.write().await.insert(sockid, Sock { tx: tx.clone(), afk: false, hide: false });
 
 	'msgloop: while let Some(Ok(result)) = user_ws_rx.next().await {
-		let Ok(msg) = result.to_str() else { continue };
-		if let Ok(msg) = serde_json::from_str::<UserMessage>(msg) {
+		let Message::Text(msg) = result else { continue };
+		if let Ok(msg) = serde_json::from_str::<UserMessage>(&msg) {
 			let mut client = pgpool.get().await.expect("Failed to acquire sql connection");
 
 			match msg {
@@ -1058,7 +1058,7 @@ pub async fn handle_ws(
 																	id: gameid,
 																	data: &gamedata,
 																}) {
-																	let pvpgive = Message::text(pvpgive);
+																	let pvpgive = Message::Text(pvpgive);
 																	tx.send(pvpgive.clone()).ok();
 																	foesock.tx.send(pvpgive).ok();
 																}
@@ -1144,7 +1144,7 @@ pub async fn handle_ws(
 														let name: &str = row.get(1);
 														if let Some(sockid) = rusersocks.get(name) {
 															if let Some(sock) = rsocks.get(sockid) {
-																sock.tx.send(Message::text(movejson.clone())).ok();
+																sock.tx.send(Message::Text(movejson.clone())).ok();
 															}
 														}
 													}
@@ -1440,7 +1440,7 @@ pub async fn handle_ws(
 											msg: &msg,
 										})
 										.ok()
-										.and_then(|msgstr| sock.tx.send(Message::text(msgstr)).ok())
+										.and_then(|msgstr| sock.tx.send(Message::Text(msgstr)).ok())
 										.is_some()
 										{
 											sent = true;
@@ -2217,7 +2217,6 @@ pub async fn handle_ws(
 					{
 						let key: &str = row.get(0);
 
-						use warp::hyper;
 						let https = hyper::Client::builder().build::<_, hyper::Body>(
 							hyper_rustls::HttpsConnectorBuilder::new()
 								.with_native_roots()

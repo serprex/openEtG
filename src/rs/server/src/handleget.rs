@@ -6,11 +6,10 @@ use std::fmt::Write;
 use std::sync::Arc;
 use std::time::SystemTime;
 
+use axum::body::{Body, Bytes};
+use axum::http::{self, header, response, HeaderValue, Response};
 use httpdate::HttpDate;
 use tokio::sync::RwLock;
-use warp::http::{self, header, response, HeaderValue, Response};
-use warp::hyper::body::Bytes;
-use warp::path::FullPath;
 
 use etg::card;
 
@@ -155,7 +154,7 @@ pub struct CachedResponse {
 }
 
 impl CachedResponse {
-	fn response(&self) -> Result<Response<Bytes>, http::Error> {
+	fn response(&self) -> Result<Response<Body>, http::Error> {
 		let mut builder = Response::builder()
 			.header(
 				header::CONTENT_ENCODING,
@@ -191,22 +190,21 @@ impl CachedResponse {
 		if let Some(ref mtimestring) = self.mtimestring {
 			builder = builder.header(header::LAST_MODIFIED, mtimestring);
 		}
-		builder.body(self.content.clone())
+		builder.body(Body::from(self.content.clone()))
 	}
 }
 
 async fn handle_get_core(
-	path: FullPath,
+	path: &str,
 	ims: Option<HttpDate>,
 	accept: Option<AcceptEncoding>,
 	pgpool: PgPool,
 	users: AsyncUsers,
 	cache: AsyncCache,
-) -> Result<Response<Bytes>, http::Error> {
-	let path = path.as_str();
+) -> Result<Response<Body>, http::Error> {
 	let path = if path == "/" { "/index.html" } else { path };
 	if path.contains("..") || !path.starts_with('/') {
-		return response::Builder::new().status(403).body(Bytes::new());
+		return response::Builder::new().status(403).body(Body::empty());
 	}
 	let accept = if path.ends_with(".webp") || path.ends_with(".ogg") {
 		Encoding::identity
@@ -232,7 +230,7 @@ async fn handle_get_core(
 					.map(|ims| cached.mtime <= ims.as_secs().saturating_add(12))
 					.unwrap_or(false)
 				{
-					response::Builder::new().status(304).body(Bytes::new())
+					response::Builder::new().status(304).body(Body::empty())
 				} else {
 					cached.response()
 				};
@@ -269,7 +267,7 @@ async fn handle_get_core(
 				return response::Builder::new()
 					.status(302)
 					.header(header::LOCATION, newpath)
-					.body(Bytes::new());
+					.body(Body::empty());
 			} else if card::Upped(code as i16) {
 				let mut newpath = b"/Cards/".to_vec();
 				newpath.extend_from_slice(&encode_code(card::AsUpped(code, false)));
@@ -278,12 +276,12 @@ async fn handle_get_core(
 				return response::Builder::new()
 					.status(302)
 					.header(header::LOCATION, newpath)
-					.body(Bytes::new());
+					.body(Body::empty());
 			} else {
-				return response::Builder::new().status(404).body(Bytes::new());
+				return response::Builder::new().status(404).body(Body::empty());
 			}
 		} else {
-			return response::Builder::new().status(404).body(Bytes::new());
+			return response::Builder::new().status(404).body(Body::empty());
 		}
 	} else if path.starts_with("/assets/") {
 		let mut uppath = String::from("../../..");
@@ -363,13 +361,13 @@ async fn handle_get_core(
 				file: None,
 			}
 		} else {
-			return response::Builder::new().status(400).body(Bytes::new());
+			return response::Builder::new().status(400).body(Body::empty());
 		}
 	} else if path.starts_with("/deck/") {
 		if path.ends_with(".svg") {
 			let deck = &path["/deck/".len()..path.len() - 4];
 			if deck.len() % 5 != 0 {
-				return response::Builder::new().status(400).body(Bytes::new());
+				return response::Builder::new().status(400).body(Body::empty());
 			}
 			PlainResponse {
 				cache: CacheControl::NoCache,
@@ -384,7 +382,7 @@ async fn handle_get_core(
 			return response::Builder::new()
 				.status(302)
 				.header(header::LOCATION, newpath)
-				.body(Bytes::new());
+				.body(Body::empty());
 		}
 	} else if path.starts_with("/collection/") {
 		let name = &path["/collection/".len()..];
@@ -434,10 +432,10 @@ async fn handle_get_core(
 					file: None,
 				}
 			} else {
-				return response::Builder::new().status(404).body(Bytes::new());
+				return response::Builder::new().status(404).body(Body::empty());
 			}
 		} else {
-			return response::Builder::new().status(503).body(Bytes::new());
+			return response::Builder::new().status(503).body(Body::empty());
 		}
 	} else if path.starts_with("/speed/") {
 		if let Ok(seed) = path["/speed/".len()..].parse() {
@@ -487,27 +485,27 @@ async fn handle_get_core(
 				file: None,
 			}
 		} else {
-			return response::Builder::new().status(400).body(Bytes::new());
+			return response::Builder::new().status(400).body(Body::empty());
 		}
 	} else if path == "/speed" {
 		use rand::RngCore;
 		return response::Builder::new()
 			.status(302)
 			.header(header::LOCATION, format!("/speed/{}", rand::thread_rng().next_u32()))
-			.body(Bytes::new());
+			.body(Body::empty());
 	} else {
-		return response::Builder::new().status(404).body(Bytes::new());
+		return response::Builder::new().status(404).body(Body::empty());
 	};
 	compress_and_cache(cache, accept, path.to_string(), res).await.response()
 }
 
 pub async fn handle_get(
-	path: FullPath,
+	path: &str,
 	ims: Option<HttpDate>,
 	accept: Option<AcceptEncoding>,
 	pgpool: PgPool,
 	users: AsyncUsers,
 	cache: AsyncCache,
-) -> Response<Bytes> {
+) -> Response<Body> {
 	handle_get_core(path, ims, accept, pgpool, users, cache).await.unwrap()
 }
