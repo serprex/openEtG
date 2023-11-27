@@ -9,17 +9,23 @@ mod starters;
 mod svg;
 mod users;
 
-use std::future::IntoFuture;
+use std::future::Future;
+use std::net::Ipv4Addr;
+use std::pin::Pin;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 
-use axum::{
-	extract::{ws::WebSocketUpgrade, FromRequestParts, Request},
-	http,
-	response::Response,
-	routing::any_service,
+use http_body_util::Full;
+use hyper_tungstenite::{
+	hyper::{
+		self,
+		body::{Bytes, Incoming},
+		Request, Response,
+	},
+	WebSocketStream,
 };
-use std::net::Ipv4Addr;
+use hyper_util::rt::TokioIo;
+use tokio::signal::unix::{signal, SignalKind};
 
 use bb8_postgres::{bb8::Pool, tokio_postgres, PostgresConnectionManager};
 
@@ -27,6 +33,7 @@ use crate::handleget::AsyncCache;
 use crate::handlews::{AsyncSocks, AsyncUserSocks, AsyncUsers};
 
 pub type PgPool = Arc<Pool<PostgresConnectionManager<tokio_postgres::NoTls>>>;
+pub type WsStream = WebSocketStream<TokioIo<hyper::upgrade::Upgraded>>;
 
 pub fn get_day() -> u32 {
 	match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
@@ -60,6 +67,62 @@ impl From<ConfigRaw> for Config {
 				.expect("Failed to parse connection config"),
 			certs: config.certs,
 		}
+	}
+}
+
+type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
+
+#[derive(Clone)]
+struct Server {
+	pub users: AsyncUsers,
+	pub usersocks: AsyncUserSocks,
+	pub socks: AsyncSocks,
+	pub cache: AsyncCache,
+	pub pgpool: PgPool,
+}
+
+impl hyper::service::Service<Request<Incoming>> for Server {
+	type Response = Response<Full<Bytes>>;
+	type Error = Error;
+	type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
+
+	fn call(&self, mut req: Request<Incoming>) -> Self::Future {
+		let pgpool = self.pgpool.clone();
+		let users = self.users.clone();
+		let usersocks = self.usersocks.clone();
+		let socks = self.socks.clone();
+		let cache = self.cache.clone();
+		Box::pin(async move {
+			if hyper_tungstenite::is_upgrade_request(&req) {
+				if let Ok((response, socket)) = hyper_tungstenite::upgrade(&mut req, None) {
+					tokio::spawn(async move {
+						if let Ok(ws) = socket.await {
+							handlews::handle_ws(ws, pgpool, users, usersocks, socks).await
+						}
+					});
+
+					Ok(response)
+				} else {
+					Ok(Default::default())
+				}
+			} else {
+				Ok(handleget::handle_get(
+					req.uri().path(),
+					req.headers()
+						.get("if-modified-since")
+						.and_then(|hv| hv.to_str().ok())
+						.and_then(|hv| hv.parse().ok()),
+					req.headers()
+						.get("accept-encoding")
+						.and_then(|hv| hv.to_str().ok())
+						.and_then(|hv| hv.parse().ok()),
+					pgpool,
+					users,
+					cache,
+				)
+				.await)
+			}
+		})
 	}
 }
 
@@ -103,7 +166,7 @@ async fn main() {
 	tokio::spawn(async move {
 		loop {
 			tokio::select! {
-				_ = interval.tick() => (),
+				biased;
 				msg = gccloserx.changed() => {
 					if msg.is_ok() {
 						continue;
@@ -111,6 +174,7 @@ async fn main() {
 						break;
 					}
 				}
+				_ = interval.tick() => (),
 			}
 			if let Ok(client) = gcpgpool.get().await {
 				let mut users = gcusers.write().await;
@@ -126,54 +190,31 @@ async fn main() {
 		}
 	});
 
-	let service = tower::service_fn(move |req: Request| {
-		let pgpool = pgpool.clone();
-		let users = users.clone();
-		let usersocks = usersocks.clone();
-		let socks = socks.clone();
-		let cache = cache.clone();
-		let (mut parts, _) = req.into_parts();
-		async move {
-			Result::<Response, std::convert::Infallible>::Ok(if parts.method == http::Method::GET {
-				if let Ok(wsup) = WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-					wsup.on_upgrade(move |socket| {
-						handlews::handle_ws(socket, pgpool, users, usersocks, socks)
-					})
-				} else {
-					handleget::handle_get(
-						parts.uri.path(),
-						parts
-							.headers
-							.get("if-modified-since")
-							.and_then(|hv| hv.to_str().ok())
-							.and_then(|hv| hv.parse().ok()),
-						parts
-							.headers
-							.get("accept-encoding")
-							.and_then(|hv| hv.to_str().ok())
-							.and_then(|hv| hv.parse().ok()),
-						pgpool,
-						users,
-						cache,
-					)
-					.await
-				}
-			} else {
-				http::Response::new(axum::body::Body::empty())
-			})
-		}
-	});
-
-	let listener = tokio::net::TcpListener::bind((Ipv4Addr::new(0, 0, 0, 0), listenport)).await.unwrap();
-	let server = axum::serve(listener, any_service(service)).into_future();
-	let serverloop = tokio::spawn(server);
-
-	use tokio::signal::unix::{signal, SignalKind};
 	let mut sigintstream = signal(SignalKind::interrupt()).expect("Failed to setup signal handler");
-	sigintstream.recv().await;
+	let listener = tokio::net::TcpListener::bind((Ipv4Addr::new(0, 0, 0, 0), listenport)).await.unwrap();
+	let server = Server { pgpool, users, usersocks, socks, cache };
+	let mut http = hyper::server::conn::http1::Builder::new();
+	http.keep_alive(true);
+
+	loop {
+		tokio::select! {
+			biased;
+			_ = sigintstream.recv() => break,
+			accepted = listener.accept() => {
+				if let Ok((stream, _)) = accepted {
+				let connection = http.serve_connection(TokioIo::new(stream), server.clone()).with_upgrades();
+				tokio::spawn(async move {
+					if let Err(err) = connection.await {
+						println!("Error serving HTTP connection: {err:?}");
+					}
+				});
+				}
+			}
+		}
+	}
+
 	drop(closetx);
 	println!("Shutting down");
-	serverloop.await.ok();
 	if let Ok(client) = sigintpgpool.get().await {
 		if !sigintusers.write().await.saveall(&client).await {
 			println!("Error while saving users");
