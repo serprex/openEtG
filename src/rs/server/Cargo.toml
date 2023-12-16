@@ -23,7 +23,7 @@ fxhash = "0.2"
 getrandom = "0.2"
 http-body-util = "0.1.0"
 hyper = { version = "1", features = ["http1", "server"] }
-hyper-tungstenite = "0.12"
+hyper-tungstenite = "0.13"
 hyper-util = { version = "0.1", default-features = false }
 tokio-native-tls = "0.3"
 postgres-types = { version = "0.2", features = ["derive"] }

@@ -67,7 +67,7 @@ for (const credit of [
 	],
 	[
 		['serprex', 'https://serprex.github.io'],
-		'50453al8t5cj5ctlfp5iv5j05p4lrl5rolrp5s0lsb5sc5sd5valvh5vl62262a62h62j',
+		'50453a53bl8t5cj5ctlfp5iv5j05p4lrl5rolrp5s0lsb5sc5sd5sf5valvh5vl62262a62h62j',
 	],
 	[
 		['Sovereign', 'https://soundcloud.com/the_sovereign'],
@@ -99,6 +99,13 @@ for (const credit of [
 		'4sb4vc4ve4vh52t55l55o55r5605625635915c05c15c95f15f25fa5fc5i55i75id5ij5ll5oc5of5rk5rs5rt5uk5ul5um5ut5uv5v361o61t62462562674a80g590',
 	],
 	[['NASA', 'https://nasa.gov'], '5p2'],
+	[
+		[
+			'Atlas/3',
+			'https://github.com/Render96/Render96Wiki/wiki/cobble_stone-%28The-Texture-of-Your-Childhood%29',
+		],
+		'59l',
+	],
 	[['freeSFX', 'https://freesfx.co.uk'], []],
 ]) {
 	let tr = document.createElement('tr');
