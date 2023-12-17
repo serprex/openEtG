@@ -3989,12 +3989,16 @@ impl Skill {
 					ctx.set(t, Flag::sabbath, true);
 				}
 				let owner = ctx.get_owner(c);
-				ctx.masscc(ctx.get_foe(owner), 0, |ctx, cr| {
-					ctx.set(cr, Stat::casts, 0);
-				});
-				ctx.masscc(owner, 0, |ctx, cr| {
-					ctx.dmg(cr, -10);
-				});
+				for cr in ctx.get_player(ctx.get_foe(owner)).creatures {
+					if cr != 0 {
+						ctx.set(cr, Stat::casts, 0);
+					}
+				}
+				for cr in ctx.get_player(owner).creatures {
+					if cr != 0 {
+						ctx.dmg(cr, -10);
+					}
+				}
 				ctx.set(t, Flag::protectdeck, true);
 			}
 			Self::sadism => {
