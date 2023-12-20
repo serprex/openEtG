@@ -502,6 +502,12 @@ mod test {
 		Skill::steal.proc(&mut ctx, p2, bw, &mut ProcData::default());
 		assert_eq!(ctx.get_shield(p1), 0);
 		assert_eq!(ctx.get(ctx.get_shield(p2), Stat::charges), 1);
+		// check against non-stacking duplicable permanent
+		let epi1 = ctx.new_thing(card::Epidemic, p1);
+		let epi2 = ctx.new_thing(card::Epidemic, p1);
+		Skill::steal.proc(&mut ctx, p2, epi2, &mut ProcData::default());
+		assert_eq!(ctx.get(epi2, p2), p2);
+		assert_eq!(ctx.get(epi1, p1), p1);
 	}
 
 	#[test]

@@ -4332,13 +4332,16 @@ impl Skill {
 					t
 				};
 				ctx.set(t, Stat::casts, 0);
-				let kind = ctx.get_kind(t);
-				if kind == Kind::Permanent {
-					ctx.addPerm(owner, t);
-				} else if kind == Kind::Weapon {
-					ctx.setWeapon(owner, t);
-				} else {
-					ctx.setShield(owner, t);
+				match ctx.get_kind(t) {
+					Kind::Permanent => {
+						ctx.addPerm(owner, t);
+					},
+					Kind::Weapon => {
+						ctx.setWeapon(owner, t);
+					},
+					_ => {
+						ctx.setShield(owner, t);
+					}
 				}
 			}
 			Self::steam => {
