@@ -506,8 +506,8 @@ mod test {
 		let epi1 = ctx.new_thing(card::Epidemic, p1);
 		let epi2 = ctx.new_thing(card::Epidemic, p1);
 		Skill::steal.proc(&mut ctx, p2, epi2, &mut ProcData::default());
-		assert_eq!(ctx.get(epi2, p2), p2);
-		assert_eq!(ctx.get(epi1, p1), p1);
+		assert_eq!(ctx.get_owner(epi2), p2);
+		assert_eq!(ctx.get_owner(epi1), p1);
 	}
 
 	#[test]
