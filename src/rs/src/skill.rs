@@ -1554,20 +1554,26 @@ impl Skill {
 				if ctx.get_kind(t) != Kind::Player {
 					Skill::destroy.proc(ctx, c, t, data);
 				}
-				let is_open = ctx.cardset() == CardSet::Open;
-				ctx.buffhp(c, 15);
-				if ctx.truehp(c) > 45 {
+				let mut hp_limit = 0;
+				match ctx.cardset() {
+					CardSet::Open => {
+						ctx.buffhp(c, 10);
+						hp_limit += 10*3;
+					},
+					_ => {
+						ctx.buffhp(c, 15);
+						hp_limit += 15*3;
+					}
+				}
+				if ctx.truehp(c) > hp_limit {
 					let owner = ctx.get_owner(c);
-					let card = ctx.get(c, Stat::card);
-					if is_open {
+					if ctx.cardset() == CardSet::Open {
 						ctx.remove(c);
 					} else {
 						ctx.die(c);
 					}
-					ctx.transform(
-						c,
-						card::As(card, if is_open { card::BlackHole } else { card::v_BlackHole }),
-					);
+					let card = ctx.get(c, Stat::card);
+					ctx.transform(c, card::As(card, if ctx.cardset() == CardSet::Open { card::BlackHole } else { card::v_BlackHole }));
 					ctx.addCard(owner, c);
 				}
 			}
