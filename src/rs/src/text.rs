@@ -346,10 +346,11 @@ impl<'a> SkillThing<'a> {
 				Cow::from("Until your next turn, the next spell any player casts is nullified. If this ability nullifies a spell, this creature gains 1|1"),
 			Skill::elf =>
 				Cow::from("If this card is targeted by Chaos Seed, it becomes a Fallen Elf"),
-			Skill::embezzle =>
-				Cow::from("Replaces target creature's skills with \"When this creature damages a player, that player draws a card. When this creature dies, destroy top card of opponent's deck"),
-			Skill::embezzledeath =>
-				Cow::from("When this creature dies, destroy top two cards of opponent's deck"),
+			Skill::embezzle(x) =>
+				Cow::from(format!("Replaces target creature's skills with \"When this creature damages a player, that player draws a card. When this creature dies, destroy top {} of opponent's deck",
+								  if x == 1 {"card"} else {"x card"})),
+			Skill::embezzledeath(x) =>
+				Cow::from(format!("When this creature dies, destroy top {} of opponent's deck", if x == 1 {"card"} else {"x card"})),
 			Skill::empathy =>
 				Cow::from(if (*self).set() == CardSet::Open {
 					"At the end of your turn, heal 1 for each creature you own. For every 8 creatures you own (rounded down), pay 1:0 at the end of your turn"

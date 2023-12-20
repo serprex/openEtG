@@ -331,8 +331,8 @@ pub enum Skill {
 	earthquake(u8),
 	eatspell,
 	elf,
-	embezzle,
-	embezzledeath,
+	embezzle(i16),
+	embezzledeath(i16),
 	empathy,
 	enchant,
 	endow,
@@ -943,8 +943,8 @@ impl<'a> Display for SkillName<'a> {
 			Skill::earthquake(x) => write!(f, "quake{x}"),
 			Skill::eatspell => f.write_str("eatspell"),
 			Skill::elf => Ok(()),
-			Skill::embezzle => f.write_str("embezzle"),
-			Skill::embezzledeath => f.write_str("embezzledeath"),
+			Skill::embezzle(x) => write!(f, "embezzle {x}"),
+			Skill::embezzledeath(x) => write!(f, "embezzledeath {x}"),
 			Skill::empathy => f.write_str("empathy"),
 			Skill::enchant => f.write_str("enchant"),
 			Skill::endow => f.write_str("endow"),
@@ -1342,7 +1342,7 @@ impl Skill {
 					Tgt::pill
 				}
 			}
-			Self::embezzle => Tgt::crea,
+			Self::embezzle(_) => Tgt::crea,
 			Self::enchant => Tgt::perm,
 			Self::endow => Tgt::weap,
 			Self::envenom => Tgt::weap.mix(Tgt::shie).or(),
@@ -2383,14 +2383,14 @@ impl Skill {
 					data.flags |= ProcData::evade;
 				}
 			}
-			Self::embezzle => {
+			Self::embezzle(amt) => {
 				ctx.fx(t, Fx::Embezzle);
 				ctx.lobo(t);
 				ctx.addskills(t, Event::Hit, &[Skill::forcedraw]);
-				ctx.addskills(t, Event::OwnDeath, &[Skill::embezzledeath]);
+				ctx.addskills(t, Event::OwnDeath, &[Skill::embezzledeath(amt)]);
 			}
-			Self::embezzledeath => {
-				ctx.mill(ctx.get_foe(ctx.get_owner(c)), 1);
+			Self::embezzledeath(amt) => {
+				ctx.mill(ctx.get_foe(ctx.get_owner(c)), amt);
 			}
 			Self::empathy => {
 				let owner = ctx.get_owner(c);
