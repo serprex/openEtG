@@ -202,12 +202,12 @@ async fn main() {
 			_ = sigintstream.recv() => break,
 			accepted = listener.accept() => {
 				if let Ok((stream, _)) = accepted {
-				let connection = http.serve_connection(TokioIo::new(stream), server.clone()).with_upgrades();
-				tokio::spawn(async move {
-					if let Err(err) = connection.await {
-						println!("Error serving HTTP connection: {err:?}");
-					}
-				});
+					let connection = http.serve_connection(TokioIo::new(stream), server.clone()).with_upgrades();
+					tokio::spawn(async move {
+						if let Err(err) = connection.await {
+							println!("Error serving HTTP connection: {err:?}");
+						}
+					});
 				}
 			}
 		}

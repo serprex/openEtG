@@ -18,6 +18,7 @@ _Note: following instructions have not been updated to include postgresql_
 1. node
 1. postgresql
 1. rustup
+1. `cargo install wasm-bindgen-cli`
 
 1. Clone the repository: `git clone https://github.com/serprex/openEtG && cd openEtG`
 1. Install atlas files: `curl --compressed 'https://etg.dek.im/assets/{atlas.json,atlas.webp,atlas.css}' -o 'assets/#1'`
