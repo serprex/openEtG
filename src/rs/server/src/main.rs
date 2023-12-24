@@ -26,6 +26,10 @@ use hyper_tungstenite::{
 };
 use hyper_util::rt::TokioIo;
 use tokio::signal::unix::{signal, SignalKind};
+use tokio_rustls::{
+	rustls::{ClientConfig, RootCertStore},
+	TlsConnector,
+};
 
 use bb8_postgres::{bb8::Pool, tokio_postgres, PostgresConnectionManager};
 
@@ -79,6 +83,7 @@ struct Server {
 	pub socks: AsyncSocks,
 	pub cache: AsyncCache,
 	pub pgpool: PgPool,
+	pub tls: TlsConnector,
 }
 
 impl hyper::service::Service<Request<Incoming>> for Server {
@@ -92,12 +97,13 @@ impl hyper::service::Service<Request<Incoming>> for Server {
 		let usersocks = self.usersocks.clone();
 		let socks = self.socks.clone();
 		let cache = self.cache.clone();
+		let tls = self.tls.clone();
 		Box::pin(async move {
 			if hyper_tungstenite::is_upgrade_request(&req) {
 				if let Ok((response, socket)) = hyper_tungstenite::upgrade(&mut req, None) {
 					tokio::spawn(async move {
 						if let Ok(ws) = socket.await {
-							handlews::handle_ws(ws, pgpool, users, usersocks, socks).await
+							handlews::handle_ws(ws, pgpool, users, usersocks, socks, tls).await
 						}
 					});
 
@@ -161,6 +167,12 @@ async fn main() {
 	let mut gccloserx = closerx.clone();
 	let sigintusers = users.clone();
 	let sigintpgpool = pgpool.clone();
+	let tlsconfig = ClientConfig::builder()
+		.with_root_certificates(RootCertStore {
+			roots: webpki_roots::TLS_SERVER_ROOTS.iter().cloned().collect(),
+		})
+		.with_no_client_auth();
+	let tls = TlsConnector::from(Arc::new(tlsconfig));
 
 	let mut interval = tokio::time::interval(Duration::new(300, 0));
 	tokio::spawn(async move {
@@ -192,7 +204,7 @@ async fn main() {
 
 	let mut sigintstream = signal(SignalKind::interrupt()).expect("Failed to setup signal handler");
 	let listener = tokio::net::TcpListener::bind((Ipv4Addr::new(0, 0, 0, 0), listenport)).await.unwrap();
-	let server = Server { pgpool, users, usersocks, socks, cache };
+	let server = Server { pgpool, users, usersocks, socks, cache, tls };
 	let mut http = hyper::server::conn::http1::Builder::new();
 	http.keep_alive(true);
 

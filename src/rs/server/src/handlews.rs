@@ -22,7 +22,7 @@ use tokio_stream::wrappers::UnboundedReceiverStream;
 use std::net::ToSocketAddrs;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
-use tokio_native_tls::native_tls::TlsConnector;
+use tokio_rustls::{rustls::pki_types::ServerName, TlsConnector};
 
 use crate::cardpool::Cardpool;
 use crate::etgutil::{decode_code, encode_code, encode_count, iterraw};
@@ -327,6 +327,7 @@ pub async fn handle_ws(
 	users: AsyncUsers,
 	usersocks: AsyncUserSocks,
 	socks: AsyncSocks,
+	tls: TlsConnector,
 ) {
 	let sockid = NEXT_SOCK_ID.fetch_add(1, Ordering::Relaxed);
 
@@ -2228,70 +2229,86 @@ pub async fn handle_ws(
 							.and_then(|mut addr| addr.next())
 						{
 							if let Ok(stream) = TcpStream::connect(&addr).await {
-								let cx = TlsConnector::builder().build().expect("failed to setup tls");
-								let cx = tokio_native_tls::TlsConnector::from(cx);
-								if let Ok(mut socket) = cx.connect("api.kongregate.com", stream).await {
-									socket.write_all(format!("GET /api/authenticate.json?user_id={}&game_auth_token={}&api_key={} HTTP/1.0\r\nHost: api.kongregate.com\r\n\r\n", u, g, key).as_bytes()).await.expect("failed write");
-									let mut output = Vec::<u8>::new();
-									if socket.read_to_end(&mut output).await.is_ok() {
-										if let Some(pos) = (1..output.len()).into_iter().rev().find(|&idx| output[idx - 1] == b'\n' && output[idx] == b'{') {
-											println!("{}", String::from_utf8_lossy(&output));
-											if let Ok(Value::Object(body)) =
-												serde_json::from_slice::<Value>(&output[pos..])
-											{
-												let success = body
-													.get("success")
-													.and_then(|v| v.as_bool())
-													.unwrap_or(false);
-												if success {
-													let mut name = String::from("Kong:");
-													name.push_str(
-														body.get("username")
-															.and_then(|v| v.as_str())
-															.unwrap_or(""),
-													);
-													let mut wusers = users.write().await;
-													if let Some(user) = wusers.load(&*client, &name).await {
-														let mut user = user.lock().await;
-														user.auth = g.clone();
-														login_success(
-															&usersocks,
-															&tx,
-															sockid,
-															&mut user,
-															&name,
-															&mut client,
-														)
-														.await;
+								if let Ok(kong) = ServerName::try_from("api.kongregate.com") {
+									if let Ok(mut socket) = tls.connect(kong, stream).await {
+										socket.write_all(format!("GET /api/authenticate.json?user_id={}&game_auth_token={}&api_key={} HTTP/1.0\r\nHost: api.kongregate.com\r\n\r\n", u, g, key).as_bytes()).await.expect("failed write");
+										let mut output = Vec::<u8>::new();
+										if socket.read_to_end(&mut output).await.is_ok() {
+											if let Some(pos) =
+												(1..output.len()).into_iter().rev().find(|&idx| {
+													output[idx - 1] == b'\n' && output[idx] == b'{'
+												}) {
+												println!("{}", String::from_utf8_lossy(&output));
+												if let Ok(Value::Object(body)) =
+													serde_json::from_slice::<Value>(&output[pos..])
+												{
+													let success = body
+														.get("success")
+														.and_then(|v| v.as_bool())
+														.unwrap_or(false);
+													if success {
+														let mut name = String::from("Kong:");
+														name.push_str(
+															body.get("username")
+																.and_then(|v| v.as_str())
+																.unwrap_or(""),
+														);
+														let mut wusers = users.write().await;
+														if let Some(user) =
+															wusers.load(&*client, &name).await
+														{
+															let mut user = user.lock().await;
+															user.auth = g.clone();
+															login_success(
+																&usersocks,
+																&tx,
+																sockid,
+																&mut user,
+																&name,
+																&mut client,
+															)
+															.await;
+														} else {
+															let mut newuser = UserObject {
+																name: name.clone(),
+																id: -1,
+																auth: g.clone(),
+																salt: Vec::new(),
+																iter: 0,
+																algo: HashAlgo::Sha512,
+																data: Default::default(),
+															};
+															login_success(
+																&usersocks,
+																&tx,
+																sockid,
+																&mut newuser,
+																&name,
+																&mut client,
+															)
+															.await;
+															wusers.insert(
+																name,
+																Arc::new(Mutex::new(newuser)),
+															);
+														}
 													} else {
-														let mut newuser = UserObject {
-															name: name.clone(),
-															id: -1,
-															auth: g.clone(),
-															salt: Vec::new(),
-															iter: 0,
-															algo: HashAlgo::Sha512,
-															data: Default::default(),
-														};
-														login_success(
-															&usersocks,
+														sendmsg(
 															&tx,
-															sockid,
-															&mut newuser,
-															&name,
-															&mut client,
-														)
-														.await;
-														wusers.insert(name, Arc::new(Mutex::new(newuser)));
+															&WsResponse::loginfail {
+																err: &format!(
+																	"{}: {}",
+																	body["error"],
+																	body["error_description"]
+																),
+															},
+														);
 													}
 												} else {
 													sendmsg(
 														&tx,
 														&WsResponse::loginfail {
-															err: &format!(
-																"{}: {}",
-																body["error"], body["error_description"]
-															),
+															err: "Failed to parse Kongregate's response",
 														},
 													);
 												}
@@ -2299,7 +2316,7 @@ pub async fn handle_ws(
 												sendmsg(
 													&tx,
 													&WsResponse::loginfail {
-														err: "Failed to parse Kongregate's response",
+														err: "Kongregate's response wasn't json",
 													},
 												);
 											}
@@ -2307,27 +2324,31 @@ pub async fn handle_ws(
 											sendmsg(
 												&tx,
 												&WsResponse::loginfail {
-													err: "Kongregate's response wasn't json",
+													err: "Kongregate refused request",
 												},
 											);
 										}
 									} else {
 										sendmsg(
 											&tx,
-											&WsResponse::loginfail { err: "Kongregate refused request" },
+											&WsResponse::loginfail {
+												err: "Kongregate failed tls handshake",
+											},
 										);
 									}
 								} else {
 									sendmsg(
 										&tx,
-										&WsResponse::loginfail { err: "Kongregate failed tls handshake" },
+										&WsResponse::loginfail {
+											err: "Failed to connect to api.kongregate.com",
+										},
 									);
 								}
 							} else {
 								sendmsg(
 									&tx,
 									&WsResponse::loginfail {
-										err: "Failed to connect to api.kongregate.com",
+										err: "Failed to resolve to api.kongregate.com",
 									},
 								);
 							}
