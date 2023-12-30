@@ -153,7 +153,7 @@ impl<'a> SkillThing<'a> {
 				Cow::from(s)
 			}
 			Skill::accretion => Cow::from(if self.set() == CardSet::Open {
-				"Destroy target permanent & gain 0|10. If using this ability leaves this creature at more than 30HP, transform into a black hole in your hand"
+				"Destroy target permanent & gain 0|15. If using this ability leaves this creature at more than 45HP, transform into a black hole in your hand"
 			} else {
 				"Destroy target permanent & gain 0|15. If using this ability leaves this creature at more than 45HP, destroy this creature & add a black hole to your hand"
 			}),
@@ -317,7 +317,7 @@ impl<'a> SkillThing<'a> {
 			Skill::embezzle =>
 				Cow::from("Replaces target creature's skills with \"When this creature damages a player, that player draws a card. When this creature dies, destroy top card of opponent's deck"),
 			Skill::embezzledeath =>
-				Cow::from("When this creature dies, destroy top two cards of opponent's deck"),
+				Cow::from("When this creature dies, destroy top card of opponent's deck"),
 			Skill::empathy =>
 				Cow::from(if self.set() == CardSet::Open {
 					"At the end of your turn, heal 1 for each creature you own. For every 8 creatures you own (rounded down), pay 1:0 at the end of your turn"

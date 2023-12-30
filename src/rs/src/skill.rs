@@ -1554,20 +1554,16 @@ impl Skill {
 				if ctx.get_kind(t) != Kind::Player {
 					Skill::destroy.proc(ctx, c, t, data);
 				}
-				let is_open = ctx.cardset() == CardSet::Open;
 				ctx.buffhp(c, 15);
 				if ctx.truehp(c) > 45 {
+					let is_open = ctx.cardset() == CardSet::Open;
 					let owner = ctx.get_owner(c);
-					let card = ctx.get(c, Stat::card);
 					if is_open {
 						ctx.remove(c);
 					} else {
 						ctx.die(c);
 					}
-					ctx.transform(
-						c,
-						card::As(card, if is_open { card::BlackHole } else { card::v_BlackHole }),
-					);
+					ctx.transform(c, card::As(ctx.get(c, Stat::card), if is_open { card::BlackHole } else { card::v_BlackHole }));
 					ctx.addCard(owner, c);
 				}
 			}
@@ -4330,13 +4326,10 @@ impl Skill {
 					t
 				};
 				ctx.set(t, Stat::casts, 0);
-				let kind = ctx.get_kind(t);
-				if kind == Kind::Permanent {
-					ctx.addPerm(owner, t);
-				} else if kind == Kind::Weapon {
-					ctx.setWeapon(owner, t);
-				} else {
-					ctx.setShield(owner, t);
+				match ctx.get_kind(t) {
+					Kind::Permanent => ctx.addPerm(owner, t),
+					Kind::Weapon => ctx.setWeapon(owner, t),
+					_ => ctx.setShield(owner, t),
 				}
 			}
 			Self::steam => {
