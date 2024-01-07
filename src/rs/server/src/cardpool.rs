@@ -1,11 +1,10 @@
-use std::collections::HashMap;
-
+use fxhash::FxHashMap;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::etgutil;
 
 #[derive(Clone, Default, Debug)]
-pub struct Cardpool(pub HashMap<i16, u16>);
+pub struct Cardpool(pub FxHashMap<i16, u16>);
 
 impl From<&Cardpool> for String {
 	fn from(pool: &Cardpool) -> String {
@@ -25,7 +24,7 @@ impl From<&Cardpool> for String {
 
 impl From<&str> for Cardpool {
 	fn from(code: &str) -> Cardpool {
-		let mut pool = HashMap::<i16, u16>::new();
+		let mut pool = FxHashMap::<i16, u16>::default();
 		for chunk in code.as_bytes().chunks_exact(5) {
 			let count = etgutil::decode_count(&chunk[..2]);
 			let code = etgutil::decode_code(&chunk[2..]);
