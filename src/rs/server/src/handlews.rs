@@ -72,9 +72,9 @@ pub struct Sock {
 	hide: bool,
 }
 
-pub type AsyncUsers = Arc<RwLock<Users>>;
-pub type AsyncSocks = Arc<RwLock<HashMap<usize, Sock>>>;
-pub type AsyncUserSocks = Arc<RwLock<HashMap<String, usize>>>;
+pub type AsyncUsers = RwLock<Users>;
+pub type AsyncSocks = RwLock<HashMap<usize, Sock>>;
+pub type AsyncUserSocks = RwLock<HashMap<String, usize>>;
 
 fn sendmsg<T>(tx: &WsSender, val: &T)
 where
@@ -323,11 +323,11 @@ async fn ordered_lock<'a, T>(
 
 pub async fn handle_ws(
 	ws: WsStream,
-	pgpool: PgPool,
-	users: AsyncUsers,
-	usersocks: AsyncUserSocks,
-	socks: AsyncSocks,
-	tls: TlsConnector,
+	pgpool: &PgPool,
+	users: &AsyncUsers,
+	usersocks: &AsyncUserSocks,
+	socks: &AsyncSocks,
+	tls: &TlsConnector,
 ) {
 	let sockid = NEXT_SOCK_ID.fetch_add(1, Ordering::Relaxed);
 
@@ -649,7 +649,7 @@ pub async fn handle_ws(
 												awon + aloss
 											};
 											let newscore =
-												(wilson(awon, awon + aloss) * (1.0 - decay / (decay + 96.0)) * 1000.0) as i32;
+												(wilson(awon, awon + aloss) * (1.0 - decay / (decay + 80.0)) * 1000.0) as i32;
 											trx.execute(
 												if won {
 													"update arena set won = won+1, score = $3 where arena_id = $1 and user_id = $2"
