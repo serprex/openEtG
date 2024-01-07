@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 use bb8_postgres::tokio_postgres::types::{FromSql, ToSql};
@@ -114,39 +115,37 @@ impl UserObject {
 pub type User = Arc<Mutex<UserObject>>;
 
 #[derive(Default)]
-pub struct Users(HashMap<String, (bool, User)>);
+pub struct Users(HashMap<String, (AtomicBool, User)>);
 
 impl Users {
 	pub async fn load<GC>(&mut self, client: &GC, name: &str) -> Option<User>
 	where
 		GC: GenericClient,
 	{
-		if let Some(&mut (ref mut gc, ref user)) = self.0.get_mut(name) {
-			*gc = false;
+		if let Some((ref gc, ref user)) = self.0.get(name) {
+			gc.store(false, Ordering::Release);
 			Some(user.clone())
+		} else if let Some(row) = client.query_opt("select u.id, u.auth, u.salt, u.iter, u.algo, ud.data from user_data ud join users u on u.id = ud.user_id where u.name = $1 and ud.type_id = 1", &[&name]).await.expect("Connection failed while loading user") {
+			let Json(userdata) = row.try_get::<usize, Json<UserData>>(5).expect("Invalid json for user");
+			let namestr = name.to_string();
+			let userarc = Arc::new(Mutex::new(UserObject {
+				name: namestr.clone(),
+				id: row.get::<usize, i64>(0),
+				auth: row.get::<usize, String>(1),
+				salt: row.get::<usize, Vec<u8>>(2),
+				iter: row.get::<usize, i32>(3) as u32,
+				algo: row.get::<usize, HashAlgo>(4),
+				data: userdata,
+			}));
+			self.insert(namestr, userarc.clone());
+			Some(userarc)
 		} else {
-			if let Some(row) = client.query_opt("select u.id, u.auth, u.salt, u.iter, u.algo, ud.data from user_data ud join users u on u.id = ud.user_id where u.name = $1 and ud.type_id = 1", &[&name]).await.expect("Connection failed while loading user") {
-				let Json(userdata) = row.try_get::<usize, Json<UserData>>(5).expect("Invalid json for user");
-				let namestr = name.to_string();
-				let userarc = Arc::new(Mutex::new(UserObject {
-					name: namestr.clone(),
-					id: row.get::<usize, i64>(0),
-					auth: row.get::<usize, String>(1),
-					salt: row.get::<usize, Vec<u8>>(2),
-					iter: row.get::<usize, i32>(3) as u32,
-					algo: row.get::<usize, HashAlgo>(4),
-					data: userdata,
-				}));
-				self.insert(namestr, userarc.clone());
-				Some(userarc)
-			} else {
-				None
-			}
+			None
 		}
 	}
 
 	pub fn insert(&mut self, name: String, user: User) {
-		self.0.insert(name, (false, user));
+		self.0.insert(name, (AtomicBool::new(false), user));
 	}
 
 	pub fn remove(&mut self, name: &str) {
@@ -166,7 +165,7 @@ impl Users {
 		}
 	}
 
-	pub async fn saveall(&mut self, client: &Client) -> bool {
+	pub async fn saveall(&self, client: &Client) -> bool {
 		let mut queries = Vec::new();
 		for &(_, ref user) in self.0.values() {
 			queries.push(async move {
@@ -182,19 +181,12 @@ impl Users {
 		futures::future::join_all(queries).await.into_iter().all(|x| x.is_ok())
 	}
 
-	pub async fn store(&mut self, client: &Client, usersocks: AsyncUserSocks, socks: AsyncSocks) {
+	pub async fn store(&mut self, client: &Client, usersocks: &AsyncUserSocks, socks: &AsyncSocks) {
 		if self.saveall(client).await {
 			let mut usersocks = usersocks.write().await;
 			let socks = socks.read().await;
 			usersocks.retain(|_, v| socks.contains_key(v));
-			self.0.retain(|_, &mut (ref mut gc, _)| {
-				if *gc {
-					false
-				} else {
-					*gc = true;
-					true
-				}
-			});
+			self.0.retain(|_, (ref gc, _)| gc.swap(false, Ordering::AcqRel));
 		}
 	}
 }

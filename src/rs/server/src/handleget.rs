@@ -3,7 +3,6 @@
 use std::collections::{BTreeMap, HashMap};
 use std::convert::Infallible;
 use std::fmt::Write;
-use std::sync::Arc;
 use std::time::SystemTime;
 
 use http_body_util::Full;
@@ -64,10 +63,10 @@ impl Cache {
 	}
 }
 
-pub type AsyncCache = Arc<RwLock<Cache>>;
+pub type AsyncCache = RwLock<Cache>;
 
 pub async fn compress_and_cache(
-	cache: AsyncCache,
+	cache: &AsyncCache,
 	encoding: Encoding,
 	path: String,
 	resp: PlainResponse,
@@ -199,9 +198,9 @@ async fn handle_get_core(
 	path: &str,
 	ims: Option<HttpDate>,
 	accept: Option<AcceptEncoding>,
-	pgpool: PgPool,
-	users: AsyncUsers,
-	cache: AsyncCache,
+	pgpool: &PgPool,
+	users: &AsyncUsers,
+	cache: &AsyncCache,
 ) -> Result<Response<Bytes>, http::Error> {
 	let path = if path == "/" { "/index.html" } else { path };
 	if path.contains("..") || !path.starts_with('/') {
@@ -504,9 +503,9 @@ pub async fn handle_get(
 	path: &str,
 	ims: Option<HttpDate>,
 	accept: Option<AcceptEncoding>,
-	pgpool: PgPool,
-	users: AsyncUsers,
-	cache: AsyncCache,
+	pgpool: &PgPool,
+	users: &AsyncUsers,
+	cache: &AsyncCache,
 ) -> Response<Full<Bytes>> {
 	let (head, body) = handle_get_core(path, ims, accept, pgpool, users, cache).await.unwrap().into_parts();
 	Response::from_parts(head, Full::<Bytes>::from(body))
