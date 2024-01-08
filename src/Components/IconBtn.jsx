@@ -1,4 +1,4 @@
-import { playSound } from '../audio.js';
+import { playSound } from '../audio.ts';
 
 export default function IconBtn(props) {
 	return (

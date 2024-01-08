@@ -42,7 +42,23 @@ export default {
 	module: {
 		rules: [
 			{
-				test: /\.m?js$/,
+				test: /\.ts$/,
+				exclude: /node_modules/,
+				use: {
+					loader: 'babel-loader',
+					options: {
+						presets: ['@babel/preset-typescript'],
+						plugins: [
+							[
+								'@babel/plugin-syntax-import-attributes',
+								{ deprecatedAssertSyntax: true },
+							],
+						],
+					},
+				},
+			},
+			{
+				test: /\.js$/,
 				exclude: /node_modules/,
 				type: 'javascript/auto',
 				resolve: {
@@ -50,7 +66,23 @@ export default {
 				},
 			},
 			{
-				test: /\.m?jsx$/,
+				test: /\.tsx$/,
+				exclude: /node_modules/,
+				use: {
+					loader: 'babel-loader',
+					options: {
+						presets: ['@babel/preset-typescript', 'solid'],
+						plugins: [
+							[
+								'@babel/plugin-syntax-import-attributes',
+								{ deprecatedAssertSyntax: true },
+							],
+						],
+					},
+				},
+			},
+			{
+				test: /\.jsx$/,
 				exclude: /node_modules/,
 				use: {
 					loader: 'babel-loader',

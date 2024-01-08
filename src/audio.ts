@@ -1,9 +1,9 @@
-const sounds = new Map(),
-	musics = new Map();
-let currentMusic,
+const sounds = new Map<string, HTMLAudioElement>(),
+	musics = new Map<string, HTMLAudioElement>();
+let currentMusic: string,
 	soundEnabled = false,
 	musicEnabled = false;
-export function playSound(name, mayreset = false) {
+export function playSound(name: string, mayreset = false) {
 	if (soundEnabled) {
 		let sound = sounds.get(name);
 		if (!sound) {
@@ -14,9 +14,9 @@ export function playSound(name, mayreset = false) {
 		sound.play();
 	}
 }
-export function playMusic(name) {
+export function playMusic(name: string) {
 	if (name === currentMusic) return;
-	let music;
+	let music: HTMLAudioElement;
 	if (musicEnabled && (music = musics.get(currentMusic))) music.pause();
 	currentMusic = name;
 	if (musicEnabled) {
@@ -29,7 +29,7 @@ export function playMusic(name) {
 		music.play();
 	}
 }
-export function changeSound(enabled) {
+export function changeSound(enabled: boolean) {
 	soundEnabled = enabled;
 	if (!soundEnabled) {
 		for (const sound of sounds.values()) {
@@ -37,7 +37,7 @@ export function changeSound(enabled) {
 		}
 	}
 }
-export function changeMusic(enabled) {
+export function changeMusic(enabled: boolean) {
 	musicEnabled = enabled;
 	if (!musicEnabled) {
 		const music = musics.get(currentMusic);

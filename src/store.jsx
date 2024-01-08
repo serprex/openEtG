@@ -2,7 +2,7 @@ import { onCleanup } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
 
 import * as usercmd from './usercmd.js';
-import { changeMusic, changeSound } from './audio.js';
+import { changeMusic, changeSound } from './audio.ts';
 import { mergedecks, removedecks } from './etgutil.js';
 
 export const Login =

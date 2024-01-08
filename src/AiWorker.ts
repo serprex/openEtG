@@ -1,8 +1,13 @@
 export default class AiWorker {
+	id: number;
+	worker: Promise<Worker>;
+	pending: Map<number, Function>;
+
 	constructor() {
 		this.id = 0;
+		this.pending = new Map();
 		this.worker = new Promise(resolve => {
-			const worker = new Worker(new URL('./ai.worker.js', import.meta.url), {
+			const worker = new Worker(new URL('./ai.worker.ts', import.meta.url), {
 				type: 'module',
 			});
 			worker.addEventListener('message', e => {
@@ -17,7 +22,6 @@ export default class AiWorker {
 				}
 			});
 		});
-		this.pending = new Map();
 	}
 
 	async terminate() {
@@ -27,7 +31,7 @@ export default class AiWorker {
 		return (await this.worker).terminate();
 	}
 
-	send(data) {
+	send(data: any) {
 		return new Promise(resolve => {
 			const id = this.id;
 			this.id = (this.id + 1) | 0;

@@ -2,7 +2,7 @@ import Game from '../Game.js';
 import * as wasm from '../rs/pkg/etg.js';
 import { encodedeck, fromTrueMark } from '../etgutil.js';
 import { randint } from '../util.js';
-import AiWorker from '../AiWorker.js';
+import AiWorker from '../AiWorker.ts';
 
 let aiWorker = null;
 
@@ -22,7 +22,7 @@ const seedput = document.getElementById('seed'),
 fight.addEventListener('click', fightItOut);
 fight1000.addEventListener('click', fightItOut);
 threadspan.textContent = threads.value;
-document.getElementById('threads').addEventListener('input', e => {
+document.getElementById('threads').addEventListener('input', _ => {
 	threadspan.textContent = threads.value;
 });
 function stopFight() {
@@ -70,7 +70,7 @@ function fightItOut() {
 	result.textContent = '';
 	replay.textContent = '';
 	const cmds = {
-		mulligan(game, player, data) {
+		mulligan(_game, player, _data) {
 			return `${player}\tMULLIGAN\n`;
 		},
 		end(game, player, data) {

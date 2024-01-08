@@ -1,0 +1,10 @@
+{
+	"compilerOptions": {
+		"target": "esnext",
+		"module": "esnext",
+		"moduleDetection": "force",
+		"jsx": "preserve",
+		"jsxImportSource": "solid-js"
+	}
+}
+

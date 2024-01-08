@@ -10,8 +10,8 @@ import {
 } from 'solid-js';
 import { Index, For, Show } from 'solid-js/web';
 
-import { playSound } from '../audio.js';
-import { eleNames, strcols, maybeLightenStr } from '../ui.js';
+import { playSound } from '../audio.ts';
+import { strcols, maybeLightenStr } from '../ui.js';
 import { encodeCode, asShiny } from '../etgutil.js';
 import { mkAi } from '../mkAi.js';
 import { userEmit, userExec, setCmds } from '../sock.jsx';
@@ -22,21 +22,12 @@ import * as store from '../store.jsx';
 import { mkQuestAi } from '../Quest.js';
 import enums from '../enum.json' assert { type: 'json' };
 import { Kind, Phase, Sfx } from '../rs/pkg/etg.js';
-import AiWorker from '../AiWorker.js';
+import AiWorker from '../AiWorker.ts';
 
-const Chroma = 0;
-const Entropy = 1;
-const Death = 2;
-const Gravity = 3;
-const Earth = 4;
 const Life = 5;
 const Fire = 6;
 const Water = 7;
-const Light = 8;
-const Air = 9;
 const Time = 10;
-const Darkness = 11;
-const Aether = 12;
 
 const aiWorker = new AiWorker();
 
@@ -1529,7 +1520,7 @@ export default function Match(props) {
 				endPos={effects().endPos}
 				getIdTrack={getIdTrack}
 				setIdTrack={setIdTrack}
-				lofiArt={props.lofiArt}
+				lofiArt={lofiArt}
 				game={game()}
 				p1id={p1id()}
 				setInfo={setInfo}

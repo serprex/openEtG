@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@babel/plugin-syntax-import-attributes": "^7.23.3",
+    "@babel/preset-typescript": "^7.23.3",
     "@pencil.js/spritesheet": "^1.5.1",
     "babel-loader": "^9.1.3",
     "babel-preset-solid": "^1.8.8",
@@ -25,7 +26,7 @@
     "build": "npm run build-wasm && webpack --mode=production --config webpack.config.js",
     "build-dev": "npm run build-wasm && webpack --mode=development --config webpack.config.js",
     "build-atlas": "node scripts/sheet.js && cwebp -m 6 -q 100 assets/atlas.png -o assets/atlas.webp",
-    "build-wasm": "cargo build --release --manifest-path src/rs/Cargo.toml --target wasm32-unknown-unknown && wasm-bindgen --no-typescript --weak-refs --out-dir ./src/rs/pkg ./src/rs/target/wasm32-unknown-unknown/release/etg.wasm"
+    "build-wasm": "cargo build --release --manifest-path src/rs/Cargo.toml --target wasm32-unknown-unknown && wasm-bindgen --weak-refs --out-dir ./src/rs/pkg ./src/rs/target/wasm32-unknown-unknown/release/etg.wasm"
   },
   "license": "MIT"
 }

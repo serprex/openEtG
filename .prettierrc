@@ -1,5 +1,5 @@
 {
-	"parser": "babel",
+	"parser": "babel-ts",
 	"useTabs": true,
 	"bracketSameLine": true,
 	"trailingComma": "all",

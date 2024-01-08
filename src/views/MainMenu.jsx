@@ -1,6 +1,6 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 
-import { changeMusic, changeSound } from '../audio.js';
+import { changeMusic, changeSound } from '../audio.ts';
 import Chat from '../Components/Chat.jsx';
 import * as sock from '../sock.jsx';
 import { mkAi, mkPremade } from '../mkAi.js';
