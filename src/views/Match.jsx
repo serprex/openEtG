@@ -11,7 +11,7 @@ import {
 import { Index, For, Show } from 'solid-js/web';
 
 import { playSound } from '../audio.js';
-import { eleNames, strcols, maybeLightenStr } from '../ui.js';
+import { strcols, maybeLightenStr } from '../ui.js';
 import { encodeCode, asShiny } from '../etgutil.js';
 import { mkAi } from '../mkAi.js';
 import { userEmit, userExec, setCmds } from '../sock.jsx';
@@ -1529,7 +1529,7 @@ export default function Match(props) {
 				endPos={effects().endPos}
 				getIdTrack={getIdTrack}
 				setIdTrack={setIdTrack}
-				lofiArt={props.lofiArt}
+				lofiArt={lofiArt}
 				game={game()}
 				p1id={p1id()}
 				setInfo={setInfo}
