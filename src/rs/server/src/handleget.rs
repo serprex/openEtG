@@ -4,12 +4,12 @@ use std::collections::{BTreeMap, HashMap};
 use std::convert::Infallible;
 use std::fmt::Write;
 use std::time::SystemTime;
+use std::sync::RwLock;
 
 use http_body_util::Full;
 use httpdate::HttpDate;
 use hyper::body::Bytes;
 use hyper::http::{self, header, response, HeaderValue, Response};
-use tokio::sync::RwLock;
 
 use etg::card;
 
@@ -95,8 +95,7 @@ pub async fn compress_and_cache(
 				content: Bytes::from(compressed),
 				file: resp.file,
 			};
-			let mut wcache = cache.write().await;
-			wcache.get_map_mut(encoding).insert(path, cached_resp.clone());
+			cache.write().unwrap_or_else(|e| e.into_inner()).get_map_mut(encoding).insert(path, cached_resp.clone());
 			cached_resp
 		}
 		Err(content) => CachedResponse {
@@ -212,7 +211,7 @@ async fn handle_get_core(
 		accept.map(|x| x.0).unwrap_or(Encoding::identity)
 	};
 	let invalidate = {
-		let rcache = cache.read().await;
+		let rcache = cache.read().unwrap_or_else(|e| e.into_inner());
 		if let Some(cached) = rcache.get_map(accept).get(path) {
 			if cached
 				.file
@@ -240,7 +239,7 @@ async fn handle_get_core(
 		}
 	};
 	if invalidate {
-		cache.write().await.remove(path);
+		cache.write().unwrap_or_else(|e| e.into_inner()).remove(path);
 	}
 	let res: PlainResponse = if path.len() == "/Cards/".len() + ".webp".len() + 3
 		&& path.starts_with("/Cards/")
