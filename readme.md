@@ -39,6 +39,16 @@ openEtG is an open source fork of the Flash ccg [Elements](http://elementsthegam
    ```bash
    cargo sweep ../openEtG/src/rs/server -i
 
+### Testing
+
+1. Add unit tests to `lib.rs` and tag them with `[#test]`. _When generating tests, apply the MVP philosophy to keep lib.rs small_
+2. To run unit tests:
+   ```bash
+   cargo test --lib --manifest-path=../openEtG/src/rs/Cargo.toml
+3. To run a fully test:
+   ```bash
+   cargo test --manifest-path==../openEtG/src/rs/Cargo.toml
+
 ## Dependencies
 
 1. git
