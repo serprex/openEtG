@@ -27,6 +27,9 @@ openEtG is an open source fork of the Flash ccg [Elements](http://elementsthegam
    - Specify the port number of your postgres server
    - Specify the database name you created on your postgres server
    - If certificates are required to access your instance, they can be included under the `certs` key
+6. Build with Rust's compiler/package manager
+   ```bash
+   cargo build --release --manifest-path ../openEtG/src/rs/server/Cargo.toml
 
 ### Dependencies
 
