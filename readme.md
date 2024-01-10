@@ -30,8 +30,11 @@ openEtG is an open source fork of the Flash ccg [Elements](http://elementsthegam
 6. Build with Rust's compiler/package manager
    ```bash
    cargo build --release --manifest-path ../openEtG/src/rs/server/Cargo.toml
+7. Clean up hanging build files
+   ```bash
+   cargo sweep ../openEtG/src/rs/server -i
 
-### Dependencies
+## Dependencies
 
 1. git
 1. nodejs
@@ -47,3 +50,9 @@ openEtG is an open source fork of the Flash ccg [Elements](http://elementsthegam
 1. rust's JavaScript type translation which allows JavaScript to call Rust APIs and Rust functions to catch JavaScript exceptions
    ```bash
    cargo install wasm-bindgen-cli
+
+### Optional
+
+1. cargo sweep helps to clean up caching issues between builds 
+   ```bash
+   cargo install cargo-sweep
