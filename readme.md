@@ -23,6 +23,11 @@ openEtG is an open source fork of the Flash ccg [Elements](http://elementsthegam
      - This should match your `wsconfig.json` `wsport`
    - Specify the user to connect your postgres server
      - Ensure that you created the user on your postgres server and provided proper permissions
+       	- `postgres` is default administrative account
+       	- `initdb.sql` script will generate a userrole `Codesmith` by default to enable special in-game commands
+       	- You can verify your specified DB was created with:
+       	  ```bash
+       	  psql -d postgres -c "select * from pg_database;"
    - Specify the host of your postgres server
    - Specify the port number of your postgres server
    - Specify the database name you created on your postgres server
