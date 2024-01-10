@@ -34,7 +34,7 @@ use tokio_rustls::{
 use bb8_postgres::{bb8::Pool, tokio_postgres, PostgresConnectionManager};
 
 use crate::handleget::AsyncCache;
-use crate::handlews::{AsyncSocks, AsyncUserSocks, AsyncUsers};
+use crate::handlews::{AsyncSocks, AsyncUsers};
 
 pub type PgPool = Pool<PostgresConnectionManager<tokio_postgres::NoTls>>;
 pub type WsStream = WebSocketStream<TokioIo<hyper::upgrade::Upgraded>>;
@@ -78,7 +78,6 @@ type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
 
 struct Server {
 	pub users: AsyncUsers,
-	pub usersocks: AsyncUserSocks,
 	pub socks: AsyncSocks,
 	pub cache: AsyncCache,
 	pub pgpool: PgPool,
@@ -103,7 +102,6 @@ impl hyper::service::Service<Request<Incoming>> for ServerService {
 								ws,
 								&server.pgpool,
 								&server.users,
-								&server.usersocks,
 								&server.socks,
 								&server.tls,
 							)
@@ -160,7 +158,6 @@ async fn main() {
 	let mut gccloserx = closerx.clone();
 
 	let users = AsyncUsers::default();
-	let usersocks = AsyncUserSocks::default();
 	let socks = AsyncSocks::default();
 	let cache = AsyncCache::default();
 	let tlsconfig = ClientConfig::builder()
@@ -169,7 +166,7 @@ async fn main() {
 		})
 		.with_no_client_auth();
 	let tls = TlsConnector::from(Arc::new(tlsconfig));
-	let server = Arc::new(Server { pgpool, users, usersocks, socks, cache, tls });
+	let server = Arc::new(Server { pgpool, users, socks, cache, tls });
 	let gc = server.clone();
 
 	let mut interval = tokio::time::interval(Duration::new(300, 0));
@@ -189,7 +186,7 @@ async fn main() {
 			if let Ok(client) = gc.pgpool.get().await {
 				let mut users = gc.users.write().await;
 				let _ = tokio::join!(users
-					.store(&client, &gc.usersocks, &gc.socks),
+					.store(&client, &gc.socks),
 					client.execute("delete from trade_request where expire_at < now()", &[]),
 					client.execute(
 						"with expiredids (id) as (select id from games where expire_at < now()) \
