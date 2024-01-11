@@ -37,8 +37,9 @@ openEtG is an open source fork of the Flash ccg [Elements](http://elementsthegam
      ```bash
      cargo build --release --manifest-path ../openEtG/src/rs/server/Cargo.toml --target wasm32-unknown-unknown
    - Generate JavaScript and TypeScript bindings to the output directories
-     ```bash
-     wasm-bindgen --no-typescript --weak-refs --out-dir ./src/rs/pkg ./src/rs/target/wasm32-unknown-unknown/release/etg.wasm
+     - This will generate `_bg` background files in `./pkg` and the primary `.wasm` file in the `./release` folder.
+       ```bash
+       wasm-bindgen --no-typescript --weak-refs --out-dir ./src/rs/pkg ./src/rs/target/wasm32-unknown-unknown/release/etg.wasm
    - Tell Webpack to build the Javascript and other assets specified in `webpack.config.js` for a specific distribution mode
      ```bash
      webpack --mode=production
