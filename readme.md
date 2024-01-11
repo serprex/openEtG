@@ -23,19 +23,26 @@ openEtG is an open source fork of the Flash ccg [Elements](http://elementsthegam
      - This should match your `wsconfig.json` `wsport`
    - Specify the user to connect your postgres server
      - Ensure that you created the user on your postgres server and provided proper permissions
-       	- `postgres` is default administrative account
-       	- `initdb.sql` script will generate a userrole `Codesmith` by default to enable special in-game commands
-       	- You can verify your specified DB was created with:
-       	  ```bash
-       	  psql -d postgres -c "select * from pg_database;"
+       - `postgres` is default administrative account
+       - `initdb.sql` script will generate a userrole `Codesmith` by default to enable special in-game commands
+       - You can verify your specified DB was created with:
+         ```bash
+         psql -d postgres -c "select * from pg_database;"
    - Specify the host of your postgres server
    - Specify the port number of your postgres server
    - Specify the database name you created on your postgres server
    - If certificates are required to access your instance, they can be included under the `certs` key
-6. Build with Rust's compiler/package manager
-   ```bash
-   cargo build --release --manifest-path ../openEtG/src/rs/server/Cargo.toml
-7. Clean up hanging build files
+6. Build
+   - Compile to WebAssembly using Rust's compiler/package manager
+     ```bash
+     cargo build --release --manifest-path ../openEtG/src/rs/server/Cargo.toml --target wasm32-unknown-unknown
+   - Generate JavaScript and TypeScript bindings to the output directories
+     ```bash
+     wasm-bindgen --no-typescript --weak-refs --out-dir ./src/rs/pkg ./src/rs/target/wasm32-unknown-unknown/release/etg.wasm
+   - Tell Webpack to build the Javascript and other assets specified in `webpack.config.js` for a specific distribution mode
+     ```bash
+     webpack --mode=production
+8. Clean up hanging build files to prevent build-caching issues (optional)
    ```bash
    cargo sweep ../openEtG/src/rs/server -i
 
