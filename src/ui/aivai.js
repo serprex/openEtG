@@ -47,7 +47,8 @@ function fightItOut() {
 	stop.style.visibility = 'visible';
 	replay.textContent = '';
 	let mode = this,
-		fc = new Uint16Array(4);
+		fc = new Uint16Array(4),
+		plysum = 0;
 	if (mode === fight1000) {
 		aiWorker = [];
 		for (let i = 0; i < threads.value; i++) aiWorker.push(new AiWorker());
@@ -132,18 +133,20 @@ function fightItOut() {
 				return stopFight();
 			} else {
 				fc[(game.winner !== realp1) | (players[0].user << 1)]++;
+				plysum += game.countPlies();
 				const p0 = fc[0] + fc[2],
-					p1 = fc[1] + fc[3];
-				result.textContent = `${p0} : ${p1} (${((p0 / (p0 + p1)) * 100).toFixed(
+					p1 = fc[1] + fc[3],
+					p01 = p0 + p1;
+				result.textContent = `${p0} : ${p1} (${((p0 / p01) * 100).toFixed(
 					2,
-				)}%)\nWith coin ${fc[0]} : ${fc[1]} (${(
+				)}%) ${(plysum / p01).toFixed(2)}ptw\nWith coin ${fc[0]} : ${fc[1]} (${(
 					(fc[0] / (fc[0] + fc[1])) *
 					100
 				).toFixed(2)}%)\nWithout ${fc[2]} : ${fc[3]} (${(
 					(fc[2] / (fc[2] + fc[3])) *
 					100
 				).toFixed(2)}%)`;
-				if (limit.value && limit.value <= p0 + p1) {
+				if (limit.value && limit.value <= p01) {
 					return stopFight();
 				}
 			}

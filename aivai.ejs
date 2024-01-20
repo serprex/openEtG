@@ -14,11 +14,14 @@
 	input[type="button"],input[type="number"] {
 		width:49%;
 	}
+	#threadspan:after{
+		content:" threads"
+	}
 	#controls {
 		width:420px;
 	}
 	#threads {
-		width:320px;
+		width:100%;
 		margin-top:12px;
 	}
 	#replay {
@@ -40,6 +43,7 @@
 <input id="stop" value="Stop" type="button" style="visibility:hidden">
 <input id="fight1000" value="Fight!!" type="button">
 <input id="limit" type="number" placeholder="Matches">
-<div>Threads <input id="threads" value="4" type="range" min="1" max="16"> <span id="threadspan"></span></div>
+<span id="threadspan"></span>
+<input id="threads" value="4" type="range" min="1" max="32">
 <div id="replay"></div>
 <div id="result"></div>

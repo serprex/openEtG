@@ -92,7 +92,7 @@ pub async fn compress_and_cache(
 				kind: resp.kind,
 				mtime: mtime.duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs(),
 				mtimestring: Some(HttpDate::from(mtime).to_string()),
-				content: Bytes::from(compressed),
+				content: Bytes::from(compressed.into_boxed_slice()),
 				file: resp.file,
 			};
 			cache.write().unwrap_or_else(|e| e.into_inner()).get_map_mut(encoding).insert(path, cached_resp.clone());
@@ -104,7 +104,7 @@ pub async fn compress_and_cache(
 			kind: resp.kind,
 			mtime: 0,
 			mtimestring: None,
-			content: Bytes::from(content),
+			content: Bytes::from(content.into_boxed_slice()),
 			file: resp.file,
 		},
 	}
@@ -189,7 +189,7 @@ impl CachedResponse {
 		if let Some(ref mtimestring) = self.mtimestring {
 			builder = builder.header(header::LAST_MODIFIED, mtimestring);
 		}
-		builder.body(Bytes::from(self.content.clone()))
+		builder.body(self.content.clone())
 	}
 }
 
