@@ -879,156 +879,160 @@ impl<'a> SkillThing<'a> {
 
 	pub fn info(&self) -> String {
 		let card = self.card();
-		if card.kind == Kind::Spell && matches!(self, &Self::Card(..)) {
-			card.skill
-				.iter()
-				.find(|&(k, _)| *k == Event::Cast)
-				.and_then(|&(_, sk)| sk.first())
-				.cloned()
-				.and_then(|sk| self.sktext(Event::Cast, sk))
-				.map(|s| {
-					let mut owned = s.into_owned();
-					owned.push('.');
-					owned
-				})
-				.unwrap_or(String::new())
-		} else {
-			let mut ret = String::new();
-			let mut stext = String::new();
-			for (k, v) in self.status().iter().cloned() {
-				if v == 0 {
-					continue;
+		let mut ret = String::new();
+		let mut stext = String::new();
+		for (k, v) in self.status().iter().cloned() {
+			if v == 0 {
+				continue;
+			}
+			match k {
+				Stat::cost => {
+					let card = self.card();
+					let costele = self.costele();
+					if v != card.cost as i16 || costele != card.costele as i16 {
+						write!(ret, "{v}:{}, ", costele).ok();
+					}
 				}
-				match k {
-					Stat::cost => {
-						let card = self.card();
-						let costele = self.costele();
-						if v != card.cost as i16 || costele != card.costele as i16 {
-							write!(ret, "{v}:{}, ", costele).ok();
-						}
+				Stat::adrenaline => {
+					if v != 1 {
+						write!(ret, "{v} ").ok();
 					}
-					Stat::adrenaline => {
-						if v != 1 {
-							write!(ret, "{v} ").ok();
-						}
-						ret.push_str("adrenaline, ");
-					}
-					Stat::casts => {
-						write!(ret, "{v} casts, ").ok();
-					}
-					Stat::charges if v != 1 => {
-						match *self {
-							Self::Card(cards, c) => {
-								if !c.skill.iter().any(|&(ev, sk)| ev == Event::OwnAttack && sk.iter().cloned().any(|s| s == Skill::losecharge)) {
-									write!(stext, "Enters play with {v} {}.\n", if self.get_flag(Flag::stackable) { "stacks" } else { "charges" }).ok();
-								}
+					ret.push_str("adrenaline, ");
+				}
+				Stat::casts => {
+					write!(ret, "{v} casts, ").ok();
+				}
+				Stat::charges if v != 1 => {
+					match *self {
+						Self::Card(cards, c) => {
+							if !c.skill.iter().any(|&(ev, sk)| ev == Event::OwnAttack && sk.iter().cloned().any(|s| s == Skill::losecharge)) {
+								write!(stext, "Enters play with {v} {}.\n", if self.get_flag(Flag::stackable) { "stacks" } else { "charges" }).ok();
 							}
-							_ => (),
 						}
+						_ => (),
 					}
-					Stat::delayed => {
-						write!(ret, "{v} delay, ").ok();
-					}
-					Stat::dive => {
-						write!(ret, "{v} dive, ").ok();
-					}
-					Stat::flooding =>
-						stext.push_str("Non aquatic creatures past first five (seven on first effective turn) creature slots die on turn end. Consumes 1:7"),
-					Stat::frozen => {
-						match *self {
-							Self::Thing(..) => write!(ret, "{v} frozen, "),
-							Self::Card(..) => write!(stext, "Enters play frozen for {} turn{}.\n", v, if v == 1 { "" } else { "s" }),
-						}.ok();
-					}
-					Stat::poison => {
-						match *self {
-							Self::Thing(..) => write!(ret, "{v} poison, "),
+				}
+				Stat::delayed => {
+					write!(ret, "{v} delay, ").ok();
+				}
+				Stat::dive => {
+					write!(ret, "{v} dive, ").ok();
+				}
+				Stat::flooding =>
+					stext.push_str("Non aquatic creatures past first five (seven on first effective turn) creature slots die on turn end. Consumes 1:7"),
+				Stat::frozen => {
+					match *self {
+						Self::Thing(..) => write!(ret, "{v} frozen, "),
+						Self::Card(..) => write!(stext, "Enters play frozen for {} turn{}.\n", v, if v == 1 { "" } else { "s" }),
+					}.ok();
+				}
+				Stat::poison => {
+					match *self {
+						Self::Thing(..) => write!(ret, "{v} poison, "),
 							Self::Card(..) => write!(stext, "Enters play with {v} poison.\n"),
 						}.ok();
 					}
-					Stat::lives => {
-						if v == 1 {
-							write!(ret, "last life, ").ok();
-						} else {
-							write!(ret, "{v} lives, ").ok();
-						}
-					}
-					Stat::steam => {
-						write!(ret, "{v} steam, ").ok();
-					}
-					Stat::storedpower => {
-						write!(ret, "{v} stored, ").ok();
-					}
-					_ => ()
-				}
-			}
-			for k in self.flags() {
-				match k {
-					Flag::cloak => ret.push_str("Cloaks your field. Opponent cannot see your actions or directly target your other cards.\n"),
-					Flag::tunnel => ret.push_str("Any of your creatures that are burrowed bypass shields.\n"),
-					Flag::patience =>
-						ret.push_str("Each turn delay own creatures. They gain 2|2. 5|5 if flooded. Unique.\n"),
-					Flag::voodoo =>
-						ret.push_str("Whenever this creature takes non-lethal damage or is affected by any status, that status or damage is also applied to opponent.\n"),
-					Flag::nightfall => ret.push_str(if self.upped() {
-						"Nocturnal creatures gain 2|1 while Eclipse is in play. Does not stack.\n"
+				Stat::lives => {
+					if v == 1 {
+						write!(ret, "last life, ").ok();
 					} else {
-						"Nocturnal creatures gain 1|1 while Nightfall is in play. Does not stack.\n"
-					}),
-					Flag::whetstone => ret.push_str(if self.upped() {
-						"Weapons & golems gain 1|2 while Whetstone is in play. Does not stack.\n"
-					} else {
-						"Weapons & golems gain 1|1 while Whetstone is in play. Does not stack.\n"
-					}),
-					Flag::additive => ret.push_str("additive, "),
-					Flag::aflatoxin => ret.push_str("aflatoxin, "),
-					Flag::airborne => ret.push_str("airborne, "),
-					Flag::appeased => ret.push_str("appeased, "),
-					Flag::aquatic => ret.push_str("aquatic, "),
-					Flag::burrowed => ret.push_str("burrowed, "),
-					Flag::golem => ret.push_str("golem, "),
-					Flag::immaterial => ret.push_str("immaterial, "),
-					Flag::momentum => ret.push_str("momentum, "),
-					Flag::mutant => ret.push_str("mutant, "),
-					Flag::neuro => ret.push_str("neuro, "),
-					Flag::nocturnal => ret.push_str("nocturnal, "),
-					Flag::poisonous => ret.push_str("poisonous, "),
-					Flag::psionic => ret.push_str("psionic, "),
-					Flag::ranged => ret.push_str("ranged, "),
-					Flag::ready => ret.push_str("ready, "),
-					Flag::reflective => ret.push_str("reflective, "),
-					Flag::vindicated => ret.push_str("vindicated, "),
-					_ => ()
-				}
-			}
-			let retlen = ret.len();
-			if retlen > 2 {
-				ret.truncate(retlen - 2);
-				ret.push_str(".\n");
-			}
-			ret.push_str(&stext);
-			drop(stext);
-
-			self.skills(|ev, sk| {
-				if ev != Event::Cast || self.kind() != Kind::Spell || self.card().kind != Kind::Spell {
-					for &s in sk {
-						if let Some(text) = self.sktext(ev, s) {
-							if ev == Event::Cast {
-								write!(ret, "{}:{} ", self.cast(), self.castele()).ok();
-							}
-							ret.push_str(&text);
-							ret.push_str(".\n");
-						}
+						write!(ret, "{v} lives, ").ok();
 					}
 				}
-			});
-
-			let retlen = ret.len();
-			if retlen > 1 {
-				ret.truncate(retlen - 1);
+				Stat::steam => {
+					write!(ret, "{v} steam, ").ok();
+				}
+				Stat::storedpower => {
+					write!(ret, "{v} stored, ").ok();
+				}
+				_ => ()
 			}
-			ret
 		}
+		for k in self.flags() {
+			match k {
+				Flag::cloak => ret.push_str("Cloaks your field. Opponent cannot see your actions or directly target your other cards.\n"),
+				Flag::tunnel => ret.push_str("Any of your creatures that are burrowed bypass shields.\n"),
+				Flag::patience =>
+					ret.push_str("Each turn delay own creatures. They gain 2|2. 5|5 if flooded. Unique.\n"),
+				Flag::voodoo =>
+					ret.push_str("Whenever this creature takes non-lethal damage or is affected by any status, that status or damage is also applied to opponent.\n"),
+				Flag::nightfall => ret.push_str(if self.upped() {
+					"Nocturnal creatures gain 2|1 while Eclipse is in play. Does not stack.\n"
+				} else {
+					"Nocturnal creatures gain 1|1 while Nightfall is in play. Does not stack.\n"
+				}),
+				Flag::whetstone => ret.push_str(if self.upped() {
+					"Weapons & golems gain 1|2 while Whetstone is in play. Does not stack.\n"
+				} else {
+					"Weapons & golems gain 1|1 while Whetstone is in play. Does not stack.\n"
+				}),
+				Flag::additive => ret.push_str("additive, "),
+				Flag::aflatoxin => ret.push_str("aflatoxin, "),
+				Flag::airborne => ret.push_str("airborne, "),
+				Flag::appeased => ret.push_str("appeased, "),
+				Flag::aquatic => ret.push_str("aquatic, "),
+				Flag::burrowed => ret.push_str("burrowed, "),
+				Flag::golem => ret.push_str("golem, "),
+				Flag::immaterial => ret.push_str("immaterial, "),
+				Flag::momentum => ret.push_str("momentum, "),
+				Flag::mutant => ret.push_str("mutant, "),
+				Flag::neuro => ret.push_str("neuro, "),
+				Flag::nocturnal => ret.push_str("nocturnal, "),
+				Flag::poisonous => ret.push_str("poisonous, "),
+				Flag::psionic => ret.push_str("psionic, "),
+				Flag::ranged => ret.push_str("ranged, "),
+				Flag::ready => ret.push_str("ready, "),
+				Flag::reflective => ret.push_str("reflective, "),
+				Flag::vindicated => ret.push_str("vindicated, "),
+				_ => ()
+			}
+		}
+		let retlen = ret.len();
+		if retlen > 2 {
+			ret.truncate(retlen - 2);
+			ret.push_str(".\n");
+		}
+		ret.push_str(&stext);
+		drop(stext);
+
+		self.skills(|ev, sk| {
+			enum RenderCast {
+				Yes,
+				NoCost,
+				No,
+			}
+			let renderCast = if ev == Event::Cast {
+				match *self {
+					Self::Card(_, c) if c.kind == Kind::Spell => RenderCast::NoCost,
+					Self::Thing(game, id)
+						if game.get_kind(id) == Kind::Spell
+							&& game.get_card(game.get(id, Stat::card)).kind == Kind::Spell =>
+					{
+						RenderCast::No
+					}
+					_ => RenderCast::Yes,
+				}
+			} else {
+				RenderCast::NoCost
+			};
+			if !matches!(renderCast, RenderCast::No) {
+				for &s in sk {
+					if let Some(text) = self.sktext(ev, s) {
+						if matches!(renderCast, RenderCast::Yes) {
+							write!(ret, "{}:{} ", self.cast(), self.castele()).ok();
+						}
+						ret.push_str(&text);
+						ret.push_str(".\n");
+					}
+				}
+			}
+		});
+
+		let retlen = ret.len();
+		if retlen > 1 {
+			ret.truncate(retlen - 1);
+		}
+		ret
 	}
 }
 

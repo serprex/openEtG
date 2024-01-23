@@ -290,7 +290,9 @@ fn eval_skill(
 			Skill::deckblast => ctx.get_player(ctx.get_owner(c)).deck.len() as i32 * (PREC / 2),
 			Skill::deckblock => {
 				let owner = ctx.get_owner(c);
-				(ctx.get_player(owner).deck.len() as i32 - ctx.count_creatures(ctx.get_foe(owner)) as i32 * 4) * PREC
+				(ctx.get_player(owner).deck.len() as i32
+					- ctx.count_creatures(ctx.get_foe(owner)) as i32 * 4)
+					* PREC
 			}
 			Skill::deepdive | Skill::deepdiveproc => {
 				if ctx.get_kind(c) == Kind::Spell {

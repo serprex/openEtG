@@ -743,8 +743,7 @@ impl Tgt {
 				Tgt::_play => ctx.get_kind(t) == Kind::Player,
 				Tgt::_notplay => ctx.get_kind(t) != Kind::Player,
 				Tgt::_sing => {
-					ctx.material(t, Some(Kind::Creature))
-						&& !ctx.hasskill(t, Event::Cast, Skill::sing)
+					ctx.material(t, Some(Kind::Creature)) && !ctx.hasskill(t, Event::Cast, Skill::sing)
 				}
 				Tgt::_butterfly => {
 					let tkind = ctx.get_kind(t);
@@ -1563,7 +1562,13 @@ impl Skill {
 					} else {
 						ctx.die(c);
 					}
-					ctx.transform(c, card::As(ctx.get(c, Stat::card), if is_open { card::BlackHole } else { card::v_BlackHole }));
+					ctx.transform(
+						c,
+						card::As(
+							ctx.get(c, Stat::card),
+							if is_open { card::BlackHole } else { card::v_BlackHole },
+						),
+					);
 					ctx.addCard(owner, c);
 				}
 			}
@@ -2194,7 +2199,7 @@ impl Skill {
 											.chain(pl.creatures.into_iter())
 											.chain(pl.permanents.into_iter())
 											.filter(|&id| id != 0)
-											.chain(pl.hand_iter())
+											.chain(pl.hand_iter()),
 									);
 								}
 								ctx.shuffle(&mut tgts[..]);

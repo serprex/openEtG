@@ -33,6 +33,3 @@ wasm-opt = false
 opt-level = "z"
 lto = "fat"
 codegen-units = 1
-
-[build]
-target = "wasm32-unknown-unknown"
