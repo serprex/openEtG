@@ -2826,6 +2826,7 @@ impl Skill {
 			}
 			Self::hush => {
 				if !ctx.get(t, Flag::ranged) {
+					ctx.fx(t, Fx::Silence);
 					ctx.set(t, Stat::casts, 0);
 				}
 			}
@@ -3992,6 +3993,7 @@ impl Skill {
 				let owner = ctx.get_owner(c);
 				for cr in ctx.get_player(ctx.get_foe(owner)).creatures {
 					if cr != 0 {
+						ctx.fx(cr, Fx::Silence);
 						ctx.set(cr, Stat::casts, 0);
 					}
 				}
@@ -4128,6 +4130,7 @@ impl Skill {
 			}
 			Self::silence => {
 				if !ctx.sanctified(t) {
+					ctx.fx(t, Fx::Silence);
 					ctx.set(t, Stat::casts, 0);
 				}
 			}
@@ -4413,6 +4416,7 @@ impl Skill {
 				}
 			}
 			Self::throwrock => {
+				ctx.fx(c, Fx::EndPos(t));
 				let card = ctx.get(c, Stat::card);
 				ctx.dmg(t, if card::Upped(card) { 4 } else { 3 });
 				let town = ctx.get_owner(t);

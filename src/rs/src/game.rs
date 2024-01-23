@@ -259,6 +259,7 @@ pub enum Fx {
 	Sfx(Sfx),
 	Shatter,
 	Shuffled,
+	Silence,
 	Sinkhole,
 	Siphon,
 	StartPos(i16),

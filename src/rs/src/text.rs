@@ -420,7 +420,7 @@ impl<'a> SkillThing<'a> {
 				"Remove statuses (positive & negative) from target creature or permanent. Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature"
 			}),
 			Skill::hope => Cow::from("Blocks one additional damage for each creature you control that gain 1:8 when attacking"),
-			Skill::hush => Cow::from("Silence attackers"),
+			Skill::hush => Cow::from("Silence non-ranged attackers"),
 			Skill::icebolt =>
 				Cow::from("Deal 2 spell damage plus one per 5:7 you have after playing this card. 25% plus 5% per point of damage chance to freeze target"),
 			Skill::ignite =>

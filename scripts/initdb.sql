@@ -16,10 +16,6 @@ create table user_data (
 	name text not null,
 	data json not null
 );
-create table roles (
-	id int not null primary key,
-	val text not null unique
-);
 create table user_role (
 	user_id bigint not null references users(id),
 	role_id userrole not null,
@@ -93,7 +89,6 @@ create table match_request (
 
 create index ix_users_wealth on users (wealth);
 create index ix_users_name on users using hash (name);
-create index ix_roles_val on roles using hash (val);
 create index ix_arena_score on arena (arena_id, score desc, day desc, "rank");
 create index ix_arena_user_id on arena using hash (user_id);
 create index ix_bazaar_user_id on bazaar using hash (user_id);

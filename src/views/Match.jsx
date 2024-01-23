@@ -268,6 +268,30 @@ function LightningFx(props) {
 	);
 }
 
+function SilenceFx(props) {
+	const time = useAnimation();
+	createEffect(() => {
+		if (time() > 512) props.setEffects(removeFx(props.self));
+	});
+	return (
+		<svg
+			height={time() / 4}
+			width={time() / 4}
+			viewBox="0 0 64 64"
+			style={`position:absolute;left:${props.pos.x}px;top:${
+				props.pos.y
+			}px;transform:translate(-50%,-50%);opacity:${(
+				1 -
+				time() ** 1.5 / 11584
+			).toFixed(2)};pointer-events:none;z-index:4`}>
+			<rect x="24" y="16" width="16" height="32" rx="8" fill="#048" />
+			<rect x="30" y="48" width="4" height="8" fill="#048" />
+			<rect x="26" y="56" width="12" height="2" rx="1" fill="#048" />
+			<line x1="20" y1="56" x2="44" y2="8" stroke="#048" />
+		</svg>
+	);
+}
+
 function BoltFx(props) {
 	const time = useAnimation();
 	createEffect(() => {
@@ -910,23 +934,25 @@ export default function Match(props) {
 							break;
 						case 'Bolt': {
 							newstate.effects ??= new Set(state.effects);
-							const pos = getIdTrack(id) ?? { x: -99, y: -99 },
-								color = strcols[param2],
-								upcolor = strcols[param2 + 13],
-								bolts = param + 1,
-								duration = 96 + bolts * 32;
-							const BoltEffect = () => (
-								<BoltFx
-									self={BoltEffect}
-									setEffects={setEffects}
-									duration={duration}
-									bolts={bolts}
-									color={color}
-									upcolor={upcolor}
-									pos={pos}
-								/>
-							);
-							newstate.effects.add(BoltEffect);
+							const pos = getIdTrack(id);
+							if (pos) {
+								const color = strcols[param2],
+									upcolor = strcols[param2 + 13],
+									bolts = param + 1,
+									duration = 96 + bolts * 32;
+								const BoltEffect = () => (
+									<BoltFx
+										self={BoltEffect}
+										setEffects={setEffects}
+										duration={duration}
+										bolts={bolts}
+										color={color}
+										upcolor={upcolor}
+										pos={pos}
+									/>
+								);
+								newstate.effects.add(BoltEffect);
+							}
 							break;
 						}
 						case 'Card':
@@ -967,15 +993,17 @@ export default function Match(props) {
 							break;
 						case 'Lightning': {
 							newstate.effects ??= new Set(state.effects);
-							const pos = getIdTrack(id) ?? { x: -99, y: -99 };
-							const LightningEffect = () => (
-								<LightningFx
-									pos={pos}
-									setEffects={setEffects}
-									self={LightningEffect}
-								/>
-							);
-							newstate.effects.add(LightningEffect);
+							const pos = getIdTrack(id);
+							if (pos) {
+								const LightningEffect = () => (
+									<LightningFx
+										pos={pos}
+										setEffects={setEffects}
+										self={LightningEffect}
+									/>
+								);
+								newstate.effects.add(LightningEffect);
+							}
 							break;
 						}
 						case 'Lives':
@@ -989,6 +1017,20 @@ export default function Match(props) {
 							newstate.effects.add(
 								mkText(state, newstate, id, `${param}:${param2}`),
 							);
+							break;
+						case 'Silence':
+							newstate.effects ??= new Set(state.effects);
+							const pos = getIdTrack(id);
+							if (pos) {
+								const SilenceEffect = () => (
+									<SilenceFx
+										pos={pos}
+										setEffects={setEffects}
+										self={SilenceEffect}
+									/>
+								);
+								newstate.effects.add(SilenceEffect);
+							}
 							break;
 						case 'Sfx':
 							playSound(Sfx[param]);
