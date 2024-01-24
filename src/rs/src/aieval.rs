@@ -864,8 +864,9 @@ fn estimate_damage(ctx: &Game, id: i16, freedom: i32, wall: &mut Wall) -> i32 {
 			}
 		}
 	}
+	momatk *= PREC;
 	if momentum {
-		atk = momatk * PREC;
+		atk = momatk;
 	}
 	if freedom != 0 && ctx.get(id, Flag::airborne) {
 		atk = atk * (PREC - freedom)
@@ -1161,10 +1162,10 @@ pub fn eval(ctx: &Game) -> i32 {
 				.into_iter()
 				.filter(|&pr| (pr != 0 && ctx.hasskill(pr, Event::Attack, Skill::freedom)))
 				.count();
-			[0, 15, 27, 36, 43, 48, 52, 55, 57, 59, 60, 61, 62, 63, 63, 63]
+			[0, 15, 27, 36, 43, 48, 52, 55, 57, 59, 60, 61, 62]
 				.get(sofrs)
 				.cloned()
-				.unwrap_or(64u8) as i32
+				.unwrap_or(63u8) as i32
 		} else {
 			player
 				.permanents
