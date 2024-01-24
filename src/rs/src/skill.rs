@@ -2165,6 +2165,7 @@ impl Skill {
 			}
 			Self::discping => {
 				ctx.attackCreature(c, t);
+				ctx.remove(c);
 				ctx.addCard(ctx.get_owner(c), c);
 			}
 			Self::disfield => {
