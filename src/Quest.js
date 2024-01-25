@@ -732,7 +732,7 @@ export function mkQuestAi(quest, datafn) {
 	const drawpower = quest.drawpower ?? 1;
 	const hp = quest.hp ?? 100;
 	const playerHPstart = quest.urhp ?? 100;
-	const { user } = store.state;
+	const { user, username } = store.state;
 	let urdeck = quest.urdeck;
 	if (!urdeck) {
 		urdeck = store.getDeck();
@@ -749,8 +749,8 @@ export function mkQuestAi(quest, datafn) {
 		players: [
 			{
 				idx: 1,
-				name: user.name,
-				user: user.name,
+				name: username,
+				user: username,
 				deck: urdeck,
 				hp: playerHPstart,
 			},

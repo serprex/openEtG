@@ -35,10 +35,9 @@ function PackDisplay(props) {
 	const [hoverCard, setHoverCard] = createSignal(null);
 	const DeckDisplaySetCard = (i, card) => setHoverCard(card);
 	const children = () => {
-		const deck = etgutil.decodedeck(props.cards),
-			dlen = etgutil.decklength(props.cards);
+		const deck = etgutil.decodedeck(props.cards);
 		const children = [{ x: 106, y: 0, deck: deck.slice(0, 50) }];
-		for (let start = 51; start < dlen; start += 70) {
+		for (let start = 51; start < deck.length; start += 70) {
 			children.push({
 				x: -92,
 				y: 244 + (((start - 51) / 70) | 0) * 200,
@@ -188,30 +187,33 @@ export default function Shop() {
 					style="position:absolute;left:775px;top:156px"
 				/>
 			)}
-			{buy() && !!~ele() && !!~rarity() && (
-				<>
-					{!hasFreePacks() && (
+			{buy() &&
+				!!~ele() &&
+				!!~rarity() &&
+				(!store.hasflag(rx.user, 'no-shop') || hasFreePacks()) && (
+					<>
+						{!hasFreePacks() && (
+							<input
+								type="button"
+								value="Max Buy"
+								onClick={() => {
+									const pack = packdata[rarity()];
+									store.setOptTemp(
+										'bulk',
+										Math.min((rx.user.gold / pack.cost) | 0, 255).toString(),
+									);
+								}}
+								style="position:absolute;left:775px;top:128px"
+							/>
+						)}
 						<input
 							type="button"
-							value="Max Buy"
-							onClick={() => {
-								const pack = packdata[rarity()];
-								store.setOptTemp(
-									'bulk',
-									Math.min((rx.user.gold / pack.cost) | 0, 255).toString(),
-								);
-							}}
-							style="position:absolute;left:775px;top:128px"
+							value="Buy Pack"
+							onClick={buyPack}
+							style="position:absolute;left:775px;top:156px"
 						/>
-					)}
-					<input
-						type="button"
-						value="Buy Pack"
-						onClick={buyPack}
-						style="position:absolute;left:775px;top:156px"
-					/>
-				</>
-			)}
+					</>
+				)}
 			<For each={packdata}>
 				{(pack, n) => (
 					<>
@@ -239,20 +241,23 @@ export default function Shop() {
 			</For>
 			{elebuttons}
 			{cards() && <PackDisplay cards={cards()} />}
-			{!hasFreePacks() && !!~ele() && !!~rarity() && (
-				<input
-					type="number"
-					placeholder="Bulk"
-					value={bulk()}
-					min="0"
-					max="255"
-					onChange={e => store.setOptTemp('bulk', e.target.value)}
-					onKeyPress={e => {
-						if (e.which === 13) buyPack();
-					}}
-					style="position:absolute;top:184px;left:777px;width:64px"
-				/>
-			)}
+			{!hasFreePacks() &&
+				!store.hasflag(rx.user, 'no-shop') &&
+				!!~ele() &&
+				!!~rarity() && (
+					<input
+						type="number"
+						placeholder="Bulk"
+						value={bulk()}
+						min="0"
+						max="255"
+						onChange={e => store.setOptTemp('bulk', e.target.value)}
+						onKeyPress={e => {
+							if (e.which === 13) buyPack();
+						}}
+						style="position:absolute;top:184px;left:777px;width:64px"
+					/>
+				)}
 			<Tutor.Tutor x={8} y={500} panels={Tutor.Shop} />
 		</>
 	);

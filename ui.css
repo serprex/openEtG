@@ -11,6 +11,7 @@ a{
 }
 a:hover{text-decoration:underline}
 tr,td{padding:0}
+.btnrow:hover{background-color:#567;cursor:pointer}
 input[type="button"]{
 	background:linear-gradient(to bottom,#def,#89a);
 	border-radius:4px;
@@ -19,8 +20,8 @@ input[type="button"]{
 	height:20px;
 	cursor:pointer;
 }
-input[type="button"]:hover{background:linear-gradient(to bottom,#cde,#567)}
-input[type="button"]:hover:active{background:linear-gradient(to bottom,#abc,#456)}
+input[type="button"]:hover,input[type="button"]:disabled{background:linear-gradient(to bottom,#cde,#567)}
+input[type="button"]:hover:active:not([disabled]){background:linear-gradient(to bottom,#abc,#456)}
 select,input[type="text"],input[type="password"],input[type="number"],input:not([type]){width:150px;border:2px solid rgba(0,0,0,.7777777);border-radius:4px;background-color:rgba(8,8,8,.5);color:#eee}
 select{
 	appearance:none;
@@ -45,7 +46,7 @@ select:hover:active{background-color:#9ab}
 .atop3{display:inline-block;width:48px}
 .atop4{display:inline-block;width:48px;text-align:right;margin-right:32px}
 .cardslot{font-size:11px;height:20px;width:100px;line-height:16px;padding:2px;border:1px solid;overflow:hidden;white-space:nowrap}
-.maintitle{font-size:20px;text-align:center}
+.maintitle{font-size:16px;text-align:center;font-weight:bold}
 .costcolumn{text-align:right;width:96px}
 .infobox{
 	opacity:.7;

@@ -23,6 +23,7 @@ export default function DeckDisplay(props) {
 						cardCounts,
 						cardMinus,
 						card,
+						props.autoup,
 					);
 					if (tooMany || notEnough) {
 						opacity = '.5';

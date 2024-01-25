@@ -8,14 +8,19 @@ import Card from '../Components/Card.jsx';
 import CardSelector from '../Components/CardSelector.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
 
+function loadAlt(user, alt) {
+	sock.emit({ x: 'librarywant', f: user, a: alt });
+}
+
 export default function Library(props) {
 	const [data, setData] = createSignal({});
 	const [card, setCard] = createSignal(null);
 	const [showBound, setShowBound] = createSignal(false);
+	let altname;
 
 	onMount(() => {
 		sock.setCmds({ librarygive: setData });
-		sock.emit({ x: 'librarywant', f: props.name });
+		sock.emit({ x: 'librarywant', f: props.name, a: props.alt });
 	});
 
 	const memo = createMemo(() => {
@@ -120,7 +125,29 @@ export default function Library(props) {
 				type="button"
 				value="Export"
 				style="position:absolute;left:5px;top:28px"
-				onClick={() => open('/collection/' + props.name, '_blank')}
+				onClick={() =>
+					open(
+						`/collection/${encodeURIComponent(props.name)}${
+							altname.value ? '?' + encodeURIComponent(altname.value) : ''
+						}`,
+						'_blank',
+					)
+				}
+			/>
+			<input
+				value={props.alt}
+				style="position:absolute;left:5px;top:246px"
+				placeholder="Alt"
+				ref={altname}
+				onKeyDown={e => {
+					if (e.key === 'Enter') loadAlt(props.name, e.target.value);
+				}}
+			/>
+			<input
+				type="button"
+				value="Load Alt"
+				style="position:absolute;left:160px;top:246px"
+				onClick={() => loadAlt(props.name, altname.value)}
 			/>
 			<CardSelector
 				cards={Cards}

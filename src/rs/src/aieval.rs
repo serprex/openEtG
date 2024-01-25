@@ -1162,10 +1162,7 @@ pub fn eval(ctx: &Game) -> i32 {
 				.into_iter()
 				.filter(|&pr| (pr != 0 && ctx.hasskill(pr, Event::Attack, Skill::freedom)))
 				.count();
-			[0, 15, 27, 36, 43, 48, 52, 55, 57, 59, 60, 61, 62]
-				.get(sofrs)
-				.cloned()
-				.unwrap_or(63u8) as i32
+			[0, 15, 27, 36, 43, 48, 52, 55, 57, 59, 60, 61, 62].get(sofrs).cloned().unwrap_or(63u8) as i32
 		} else {
 			player
 				.permanents

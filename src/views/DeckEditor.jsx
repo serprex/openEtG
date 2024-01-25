@@ -211,8 +211,9 @@ export default function DeckEditor() {
 	const [deckData, setDeckData] = createSignal(
 		processDeck(rx.user.decks[rx.user.selectedDeck] ?? ''),
 	);
+	const autoup = () => !store.hasflag(rx.user, 'no-up-merge');
 	const cardMinus = createMemo(() =>
-		Cards.filterDeck(deckData().deck, pool(), true),
+		Cards.filterDeck(deckData().deck, pool(), true, autoup()),
 	);
 
 	const saveDeck = (name, force) => {
@@ -263,6 +264,7 @@ export default function DeckEditor() {
 				mark={deckData().mark}
 				pool={pool()}
 				cardMinus={cardMinus()}
+				autoup={autoup()}
 				setDeck={deck =>
 					setDeckData({ deck: deck.sort(Cards.codeCmp), mark: deckData().mark })
 				}

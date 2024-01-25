@@ -12,7 +12,7 @@ import { Index, For, Show } from 'solid-js/web';
 
 import { playSound } from '../audio.js';
 import { strcols, maybeLightenStr } from '../ui.js';
-import { encodeCode, asShiny } from '../etgutil.js';
+import { encodeCode, asShiny, iterraw } from '../etgutil.js';
 import { mkAi } from '../mkAi.js';
 import { userEmit, userExec, setCmds } from '../sock.jsx';
 import Card from '../Components/Card.jsx';
@@ -751,7 +751,8 @@ export default function Match(props) {
 		playByPlayMode = rx.opts.playByPlayMode,
 		expectedDamageSamples = rx.opts.expectedDamageSamples | 0 || 4;
 	let aiDelay = 0,
-		streakback = 0;
+		streakback = 0,
+		hardcoreback = 0;
 	const [tempgame, setTempgame] = createSignal(null);
 	const [replayhistory, setReplayHistory] = createSignal([props.game]);
 	const [replayindex, setreplayindex] = createSignal(0);
@@ -764,7 +765,7 @@ export default function Match(props) {
 		props.replay ? replayhistory()[replayindex()] : tempgame() ?? pgame();
 
 	const [p1id, setPlayer1] = createSignal(
-		props.replay ? game().turn : game().userId(rx.user.name),
+		props.replay ? game().turn : game().userId(rx.username),
 	);
 	const [p2id, setPlayer2] = createSignal(game().get_foe(p1id()));
 
@@ -904,7 +905,7 @@ export default function Match(props) {
 			forceUpdate();
 			if (
 				!iscmd &&
-				game.data.players.some(pl => pl.user && pl.user !== rx.user.name)
+				game.data.players.some(pl => pl.user && pl.user !== rx.username)
 			) {
 				userEmit('move', {
 					id: props.gameid,
@@ -1045,7 +1046,7 @@ export default function Match(props) {
 			});
 			const newTurn = game.turn;
 			if (newTurn !== turn) {
-				if (game.data.players[newTurn - 1].user === rx.user.name) {
+				if (game.data.players[newTurn - 1].user === rx.username) {
 					setPlayer1(newTurn);
 				}
 				setFoeplays(foeplays => new Map(foeplays).set(newTurn, []));
@@ -1113,7 +1114,7 @@ export default function Match(props) {
 			}
 		}
 		if (game.Cards.cardSet === 'Open') {
-			store.doNav(import('./Result.jsx'), { game, streakback });
+			store.doNav(import('./Result.jsx'), { game, streakback, hardcoreback });
 		} else {
 			store.doNav(import('../vanilla/views/Result.jsx'), { game });
 		}
@@ -1233,7 +1234,7 @@ export default function Match(props) {
 	};
 
 	const isMultiplayer = game =>
-		game.data.players.some(pl => pl.user && pl.user !== rx.user.name);
+		game.data.players.some(pl => pl.user && pl.user !== rx.username);
 
 	const onkeydown = e => {
 		if (e.target.tagName === 'TEXTAREA') return;
@@ -1301,12 +1302,55 @@ export default function Match(props) {
 			game.Cards.cardSet === 'Open' &&
 			(game.data.level !== undefined || isMultiplayer(game))
 		) {
-			streakback = rx.user.streak[game.data.level];
-			userExec('addloss', {
-				pvp: isMultiplayer(game),
-				l: game.data.level,
-				g: -(game.data.cost | 0),
-			});
+			const msg = {};
+			if (isMultiplayer(game)) {
+				msg.pvp = true;
+			} else {
+				streakback = rx.user.streak[game.data.level];
+				msg.l = game.data.level;
+				msg.g = -(game.data.cost | 0);
+				if (store.hasflag(rx.user, 'hardcore')) {
+					const pl = game.data.players.find(p => p.user === rx.username);
+					if (pl) {
+						let sum = 0,
+							groups = [];
+						for (const [code, count] of iterraw(pl.deck)) {
+							const card = game.Cards.Codes[code];
+							if (card && !card.pillar) {
+								groups.push([sum, code]);
+								sum += count;
+							}
+						}
+						const pick = (Math.random() * sum) | 0;
+						const checkcard = gcode => {
+							let hascard = false;
+							for (const [code, _count] of iterraw(rx.user.pool)) {
+								if (code === gcode) {
+									hascard = true;
+									break;
+								}
+							}
+							if (hascard) {
+								msg.c = hardcoreback = gcode;
+								return true;
+							}
+						};
+						for (const [gsum, gcode] of groups) {
+							if (pick >= gsum && checkcard(gcode)) {
+								break;
+							}
+						}
+						if (!msg.c) {
+							for (const [_gsum, gcode] of groups) {
+								if (checkcard(gcode)) {
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			userExec('addloss', msg);
 		}
 		setCmds({
 			move: ({ cmd, hash }) => {

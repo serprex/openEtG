@@ -297,7 +297,7 @@ export default function Bazaar() {
 						<span class="ico g" />
 					</div>
 					<CardOrders
-						username={rx.user.name}
+						username={rx.username}
 						bc={bz()[bcard().code]}
 						onClickBuy={(sell, sellq) => {
 							setSell(sell);
@@ -333,7 +333,7 @@ export default function Bazaar() {
 			/>
 			{showOrders() && (
 				<OrderBook
-					username={rx.user.name}
+					username={rx.username}
 					deal={rx.opts.orderFilter_Deal ?? false}
 					buy={rx.opts.orderFilter_Buy ?? true}
 					sell={rx.opts.orderFilter_Sell ?? true}

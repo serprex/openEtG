@@ -4,7 +4,7 @@ import { emit, setCmds } from '../sock.jsx';
 import * as store from '../store.jsx';
 const MainMenu = import('./MainMenu.jsx');
 
-export default function Login(props) {
+export default function Login() {
 	const rx = store.useRx();
 	const [commit, setCommit] = createSignal(null);
 	let password;
@@ -27,12 +27,11 @@ export default function Login(props) {
 		setCmds({
 			login: data => {
 				if (!data.err) {
-					delete data.x;
-					store.setUser(data);
+					store.setUser(data.name, data.auth, data.data);
 					if (rx.opts.remember && typeof localStorage !== 'undefined') {
 						localStorage.auth = data.auth;
 					}
-					if (!data.accountbound && !data.pool) {
+					if (!data.data['']) {
 						store.doNav(import('./ElementSelect.jsx'));
 					} else {
 						store.setOptTemp('deck', store.getDeck());
@@ -98,7 +97,7 @@ export default function Login(props) {
 			<input
 				type="button"
 				value="New Account"
-				onClick={e => store.doNav(import('./ElementSelect.jsx'))}
+				onClick={() => store.doNav(import('./ElementSelect.jsx'))}
 				style="position:absolute;left:430px;top:380px;width:100px"
 			/>
 			<Show when={commit()}>
@@ -108,7 +107,7 @@ export default function Login(props) {
 						rel="noopener"
 						href={data().html_url}
 						style="max-width:670px;min-width:470px;position:absolute;left:220px;top:460px;height:140px;white-space:pre-wrap;overflow-y:auto">
-						{data().commit.message.replace('\n', '\n\n')}
+						{data().commit.message}
 					</a>
 				)}
 			</Show>

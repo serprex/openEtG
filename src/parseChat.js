@@ -43,14 +43,14 @@ export default function parseChat(e) {
 		} else if (msg === '/who') {
 			sock.emit({ x: 'who' });
 		} else if (msg === '/deleteme') {
-			if (storeState.opts.foename === user.name + 'yesdelete') {
+			if (storeState.opts.foename === storeState.username + 'yesdelete') {
 				sock.userEmit('delete');
-				store.setUser(null);
+				store.logout();
 				store.setOpt('remember', false);
 				store.doNav(store.Login);
 			} else {
 				store.chatMsg(
-					`Input '${user.name}yesdelete' into Player's Name to delete your account`,
+					`Input '${storeState.username}yesdelete' into Player's Name to delete your account`,
 					'System',
 				);
 			}

@@ -227,9 +227,8 @@ function computeBonuses(game, p1id, lefttext, streakrate, setTip, clearTip) {
 export default function Result(props) {
 	const rx = store.useRx();
 	const { game } = props,
-		p1id = game.userId(rx.user.name);
+		p1id = game.userId(rx.username);
 	const [tooltip, setTip] = createSignal(null);
-	const leftext = [];
 	let goldreward = game.data.goldreward,
 		cardreward = game.data.cardreward;
 
@@ -305,6 +304,10 @@ export default function Result(props) {
 					}),
 					cardwon = winnable.length ? choose(winnable) : 5009;
 				cardreward = '01' + etgutil.encodeCode(etgutil.asShiny(cardwon, false));
+			}
+			if (props.hardcoreback) {
+				cardreward =
+					'01' + etgutil.encodeCode(props.hardcoreback) + (cardreward ?? '');
 			}
 			if (goldreward === undefined) {
 				if (level !== undefined) {
@@ -394,7 +397,7 @@ export default function Result(props) {
 	const cards = () => {
 		const cards = [];
 		if (cardreward) {
-			let x0 = 470 - etgutil.decklength(cardreward) * 20 - 80;
+			let x0 = 390 - etgutil.decklength(cardreward) * 20;
 			for (const code of etgutil.iterdeck(cardreward)) {
 				cards.push(<Card x={x0} y={170} card={Cards.Codes[code]} />);
 				x0 += 40;
@@ -435,6 +438,11 @@ export default function Result(props) {
 						<Text text={game.data.wintext ?? 'You won!'} />
 					</div>
 				</>
+			)}
+			{game.winner !== p1id && props.hardcoreback && (
+				<div style="opacity:.3">
+					<Card x={370} y={170} card={Cards.Codes[props.hardcoreback]} />
+				</div>
 			)}
 			<span style="position:absolute;left:8px;top:290px">{lefttext}</span>
 			<div style="position:absolute;left:8px;top:258px">{tooltip()}</div>

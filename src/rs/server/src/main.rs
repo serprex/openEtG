@@ -115,7 +115,7 @@ impl hyper::service::Service<Request<Incoming>> for ServerService {
 				}
 			} else {
 				Ok(handleget::handle_get(
-					req.uri().path(),
+					req.uri(),
 					req.headers()
 						.get("if-modified-since")
 						.and_then(|hv| hv.to_str().ok())
@@ -139,9 +139,8 @@ async fn main() {
 	let _sigpipestream = signal(SignalKind::pipe()).expect("Failed to setup pipe handler");
 	let (listenport, pgpool) = {
 		let configjson = tokio::fs::read("../../../config.json").await.expect("Failed to load config.json");
-		let configraw =
-			serde_json::from_slice::<ConfigRaw>(&configjson).expect("Failed to parse config.json");
-		let Config { listen, pg, certs } = Config::from(configraw);
+		let Config { listen, pg, certs } =
+			serde_json::from_slice::<ConfigRaw>(&configjson).expect("Failed to parse config.json").into();
 		if certs.is_some() {
 			panic!("HTTPS cert support isn't implemented");
 		}

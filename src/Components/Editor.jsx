@@ -42,6 +42,7 @@ export default function Editor(props) {
 				}}
 				deck={props.deck}
 				pool={props.pool}
+				autoup={props.autoup}
 			/>
 			<CardSelector
 				cards={props.cards}
@@ -54,6 +55,7 @@ export default function Editor(props) {
 				cardminus={props.cardMinus}
 				noupped={props.noupped}
 				shiny={props.shiny}
+				autoup={props.autoup}
 			/>
 			<input
 				type="button"

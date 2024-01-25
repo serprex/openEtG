@@ -84,9 +84,15 @@ export function addcard(deck, card, x = 1) {
 				deck += `vv${encodeCode(card)}`;
 				count -= 1023;
 			}
-			return count <= 0 ?
-					deck.slice(0, i) + deck.slice(i + 5)
-				:	deck.slice(0, i) + encodeCount(count) + deck.slice(i + 2);
+			deck =
+				deck.slice(0, i) +
+				(count <= 0 ?
+					deck.slice(i + 5)
+				:	encodeCount(count) + deck.slice(i + 2));
+			if (count >= 0) {
+				return deck;
+			}
+			x = count;
 		}
 	}
 	return x <= 0 ? deck : deck + encodeCount(x) + encodeCode(card);

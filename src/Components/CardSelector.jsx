@@ -82,6 +82,7 @@ function CardSelectorColumn(props) {
 					!(
 						card.upped &&
 						card.Cards.cardSet === 'Open' &&
+						props.autoup &&
 						(poolCount(props, asUpped(code, false)) >=
 							(card.rarity === -1 ? 1 : 6) *
 								(card.upped && card.shiny ? 6 : 1) ||
@@ -207,6 +208,7 @@ export default function CardSelector(props) {
 				rarity={rarity()}
 				element={element()}
 				shiny={props.shiny ?? opts.toggleshiny}
+				autoup={props.autoup}
 			/>
 		</>
 	);

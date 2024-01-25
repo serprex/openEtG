@@ -19,7 +19,6 @@ function AttrUi(p) {
 			{['hp', 'mark', 'draw'].map((name, y) => {
 				const top = 128 + y * 20;
 				const { min = 0, incr = 1 } = artable[name];
-				const value = p.attr[name];
 				return (
 					<>
 						<div style={`position:absolute;left:4px;top:${top}px`}>{name}</div>
@@ -87,8 +86,9 @@ export default function ArenaEditor(props) {
 	}
 	const [deck, setDeck] = createSignal(adeck);
 	const [mark, setMark] = createSignal(amark);
+	const autoup = () => !store.hasflag(rx.user, 'no-up-merge');
 	const cardMinus = createMemo(() => {
-		const cardMinus = Cards.filterDeck(deck(), pool());
+		const cardMinus = Cards.filterDeck(deck(), pool(), false, autoup());
 		cardMinus[props.acard.code] = 5;
 		return cardMinus;
 	});
@@ -114,6 +114,7 @@ export default function ArenaEditor(props) {
 				deck={[acode, acode, acode, acode, acode].concat(deck())}
 				mark={mark()}
 				pool={pool()}
+				autoup={autoup()}
 				cardMinus={cardMinus()}
 				setDeck={deck => {
 					setDeck(deck.filter(x => x !== acode).sort(Cards.codeCmp));

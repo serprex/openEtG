@@ -7,6 +7,7 @@ import * as store from './store.jsx';
 import { arenaCost } from './userutil.js';
 import { shuffle } from './util.js';
 import OrigCards from './vanilla/Cards.js';
+import { presets } from './ui.js';
 
 const endpoint = `${location.protocol === 'http:' ? 'ws://' : 'wss://'}
 	${location.hostname}:${
@@ -19,6 +20,9 @@ let socket = new WebSocket(endpoint),
 	pvp = null,
 	cmds = {};
 const sockEvents = {
+	altadd(data) {
+		store.addAlt(data.name, data.data);
+	},
 	clear() {
 		store.clearChat('Main');
 	},
@@ -54,7 +58,7 @@ const sockEvents = {
 			typeof Notification !== 'undefined' &&
 			Notification.permission !== 'denied' &&
 			state.user &&
-			~data.msg.indexOf(state.user.name) &&
+			~data.msg.indexOf(state.username) &&
 			!document.hasFocus()
 		) {
 			Notification.requestPermission().then(result => {
@@ -118,13 +122,13 @@ const sockEvents = {
 		);
 	},
 	foearena(data) {
-		const { user } = store.state;
+		const { username } = store.state;
 		const game = new Game({
 			players: shuffle([
 				{
 					idx: 1,
-					name: user.name,
-					user: user.name,
+					name: username,
+					user: username,
 					deck: store.getDeck(),
 				},
 				{
@@ -183,13 +187,38 @@ const sockEvents = {
 		userEmit('challrecv', { f: data.f });
 	},
 	offertrade(data) {
+		let flagstr;
+		if (data.flags && data.flags.length) {
+			for (const p of presets) {
+				if (p[1].length === data.flags.length) {
+					if (data.flags.every(f => p[1].includes(f))) {
+						flagstr = p[0];
+						break;
+					}
+				}
+			}
+			flagstr ??= data.flag.sort().join(' ');
+		}
 		store.chat(() => (
 			<div
 				style="cursor:pointer;color:#69f"
-				onClick={() =>
-					store.doNav(import('./views/Trade.jsx'), { foe: data.f })
-				}>
-				{`${data.f} offers to trade with you!`}
+				onClick={() => {
+					const user = store.state.user;
+					const matches =
+						!data.flags ||
+						(!user.flags && !data.flags.length) ||
+						(user.flags &&
+							data.flags.length === user.flags.length &&
+							data.flags.every(f => user.flags.includes(f)));
+					if (matches) {
+						store.doNav(import('./views/Trade.jsx'), { foe: data.f });
+					} else {
+						store.chatMsg('Incorrect alt flags', 'System');
+					}
+				}}>
+				{`${data.f} offers to trade with you${
+					data.flags && data.flags.length ? ' using ' + flagstr : ''
+				}!`}
 			</div>
 		));
 		userEmit('challrecv', { f: data.f, trade: true });
@@ -252,11 +281,12 @@ export function emit(data) {
 	}
 }
 export function userEmit(x, data = {}) {
-	const { user } = store.state;
+	const { username, auth, uname } = store.state;
 	data.x = 'a';
 	data.z = x;
-	data.u = user.name;
-	data.a = user.auth;
+	data.u = username;
+	data.a = auth;
+	if (uname) data.uname = uname;
 	emit(data);
 }
 export function userExec(x, data = {}) {
@@ -282,7 +312,7 @@ export function sendChallenge(foe, orig = false, deckcheck = true) {
 		set: orig ? 'Original' : undefined,
 		deckcheck,
 	};
-	userEmit(orig ? 'foewant' : 'foewant', msg);
+	userEmit('foewant', msg);
 	pvp = foe;
 }
 export function setCmds(c) {

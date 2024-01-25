@@ -3,7 +3,7 @@ import { emit, setCmds } from '../sock.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
 import { doNav } from '../store.jsx';
 
-export default function WealthTop(props) {
+export default function WealthTop() {
 	const [getTop, setTop] = createSignal(null);
 
 	onMount(() => {

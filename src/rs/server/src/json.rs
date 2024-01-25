@@ -2,6 +2,7 @@
 #![allow(non_snake_case)]
 
 use std::borrow::Cow;
+use std::collections::HashSet;
 
 use fxhash::FxHashMap;
 
@@ -9,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::cardpool::Cardpool;
-use crate::users::UserObject;
+use crate::users::{UserData, UserObject};
 
 #[derive(Deserialize, Clone)]
 #[serde(tag = "z")]
@@ -49,6 +50,14 @@ pub enum AuthMessage {
 	},
 	logout,
 	delete,
+	altcreate {
+		e: u8,
+		name: String,
+		flags: HashSet<String>,
+	},
+	altdelete {
+		name: String,
+	},
 	setarena {
 		d: String,
 		#[serde(default)]
@@ -108,11 +117,13 @@ pub enum AuthMessage {
 	},
 	offertrade {
 		f: String,
-		forcards: Option<String>,
-		forg: Option<u16>,
 		cards: String,
 		g: u16,
+		foralt: Option<String>,
+		forcards: Option<String>,
+		forg: Option<u16>,
 	},
+	oracle,
 	passchange {
 		p: String,
 	},
@@ -186,9 +197,14 @@ pub enum AuthMessage {
 		g: i16,
 	},
 	addloss {
+		#[serde(default)]
 		pvp: bool,
+		#[serde(default)]
 		l: Option<u8>,
+		#[serde(default)]
 		g: Option<i16>,
+		#[serde(default)]
+		c: Option<i16>,
 	},
 	addwin {
 		pvp: bool,
@@ -230,6 +246,8 @@ pub enum UserMessage {
 	a {
 		u: String,
 		a: String,
+		#[serde(default)]
+		uname: String,
 		#[serde(flatten)]
 		msg: AuthMessage,
 	},
@@ -251,6 +269,8 @@ pub enum UserMessage {
 	codesmith,
 	librarywant {
 		f: String,
+		#[serde(default)]
+		a: String,
 	},
 	arenatop {
 		lv: u8,
@@ -279,8 +299,15 @@ pub struct ArenaInfo<'a> {
 }
 
 #[derive(Serialize, Clone)]
+pub struct Alt<'a> {
+	pub name: &'a str,
+	pub data: &'a UserData,
+}
+
+#[derive(Serialize, Clone)]
 #[serde(tag = "x")]
 pub enum WsResponse<'a> {
+	altadd(Alt<'a>),
 	arenainfo {
 		#[serde(rename = "A")]
 		a1: Option<ArenaInfo<'a>>,
@@ -383,12 +410,21 @@ pub enum WsResponse<'a> {
 	},
 	offertrade {
 		f: &'a str,
+		a: &'a str,
 		c: &'a str,
 		g: i32,
+		flags: Option<&'a HashSet<String>>,
 	},
 	originaldata(&'a LegacyUser),
 	#[serde(rename = "originaldata")]
 	originaldataempty,
+	oracle {
+		c: i16,
+		bound: bool,
+		mage: u8,
+		dg: u8,
+		day: u32,
+	},
 	passchange {
 		auth: &'a str,
 	},
@@ -411,6 +447,7 @@ pub enum WsResponse<'a> {
 		u: &'a str,
 	},
 	tradedone {
+		alt: &'a str,
 		oldcards: &'a str,
 		newcards: &'a str,
 		g: i32,

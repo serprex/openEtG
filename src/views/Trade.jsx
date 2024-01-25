@@ -12,21 +12,25 @@ import * as store from '../store.jsx';
 export default function Trade(props) {
 	const rx = store.useRx();
 	const [confirm, setConfirm] = createSignal(0);
-	const [canconfirm, setCanconfirm] = createSignal(false);
 	const [card, setCard] = createSignal(null);
 	const [deck, setDeck] = createSignal([]);
 	const [gold, setGold] = createSignal(0);
-	const [offer, setOffer] = createSignal([]);
-	const [gopher, setGopher] = createSignal(0);
+	const [offer, setOffer] = createSignal(null);
+	const offerDeck = createMemo(() =>
+		etgutil.decodedeck(offer()?.forcards ?? ''),
+	);
 
 	onMount(() => {
 		sock.setCmds({
 			offertrade: data => {
-				setOffer(etgutil.decodedeck(data.c));
-				setGopher(data.g | 0);
-				setCanconfirm(true);
+				setOffer({
+					foralt: data.a,
+					forcards: data.c,
+					forg: data.g,
+				});
 			},
 			tradedone: data => {
+				store.setAlt(data.alt || null);
 				store.updateUser({
 					pool: etgutil.mergedecks(
 						etgutil.removedecks(rx.user.pool, data.oldcards),
@@ -57,33 +61,31 @@ export default function Trade(props) {
 
 	return (
 		<>
-			{(confirm() === 0 || (confirm() === 1 && canconfirm())) && (
+			{(confirm() === 0 || (confirm() === 1 && offer() !== null)) && (
 				<input
 					type="button"
 					value={confirm() === 0 ? 'Trade' : 'Confirm'}
-					onClick={
-						confirm() === 0 ?
-							() => {
-								sock.userEmit('offertrade', {
-									f: props.foe,
-									cards: etgutil.encodedeck(deck()),
-									g: gold(),
-									forcards: null,
-									forg: null,
-								});
-								setConfirm(1);
-							}
-						:	() => {
-								sock.userEmit('offertrade', {
-									f: props.foe,
-									cards: etgutil.encodedeck(deck()),
-									g: gold(),
-									forcards: etgutil.encodedeck(offer()),
-									forg: gopher(),
-								});
-								setConfirm(2);
-							}
-					}
+					onClick={() => {
+						if (confirm() === 0) {
+							sock.userEmit('offertrade', {
+								f: props.foe,
+								cards: etgutil.encodedeck(deck()),
+								g: gold(),
+								foralt: null,
+								forcards: null,
+								forg: null,
+							});
+							setConfirm(1);
+						} else {
+							sock.userEmit('offertrade', {
+								f: props.foe,
+								cards: etgutil.encodedeck(deck()),
+								g: gold(),
+								...offer(),
+							});
+							setConfirm(2);
+						}
+					}}
 					style={{
 						position: 'absolute',
 						left: '10px',
@@ -94,7 +96,7 @@ export default function Trade(props) {
 			<DeckDisplay
 				cards={Cards}
 				deck={deck()}
-				onMouseOver={(i, card) => setCard(card)}
+				onMouseOver={(_i, card) => setCard(card)}
 				onClick={i => {
 					const newdeck = deck().slice();
 					newdeck.splice(i, 1);
@@ -103,9 +105,9 @@ export default function Trade(props) {
 			/>
 			<DeckDisplay
 				cards={Cards}
-				deck={offer()}
+				deck={offerDeck()}
 				x={450}
-				onMouseOver={(i, card) => setCard(card)}
+				onMouseOver={(_i, card) => setCard(card)}
 			/>
 			<div style="position:absolute;left:100px;top:235px">
 				{gold() + calcWealth(Cards, deck(), true)}
@@ -116,11 +118,11 @@ export default function Trade(props) {
 				<span class="ico gold" />)
 			</div>
 			<div style="position:absolute;left:350px;top:235px">
-				{gopher() + calcWealth(Cards, offer(), true)}
+				{(offer()?.forg ?? 0) + calcWealth(Cards, offerDeck(), true)}
 				<span class="ico gold" />
 			</div>
 			<div style="position:absolute;left:500px;top:235px">
-				({gopher()}
+				({offer()?.forg ?? 0}
 				<span class="ico gold" />)
 			</div>
 			<input

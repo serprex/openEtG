@@ -24,7 +24,7 @@ export default class Cards {
 		wasm.code_cmp(this.set, asShiny(x, false), asShiny(y, false)) ||
 		(x > y) - (x < y);
 
-	checkPool(pool, cardCount, cardMinus, card) {
+	checkPool(pool, cardCount, cardMinus, card, autoup) {
 		const uncode = asUpped(asShiny(card.code, false), false);
 
 		if ((cardMinus[card.code] ?? 0) + 1 <= pool[card.code]) {
@@ -47,40 +47,44 @@ export default class Cards {
 			return false;
 		}
 
-		const amount =
-			(card.rarity === -1 ? 1 : 6) * (card.upped && card.shiny ? 6 : 1);
-		if ((cardMinus[uncode] ?? 0) + amount <= pool[uncode]) {
-			cardMinus[uncode] = (cardMinus[uncode] ?? 0) + amount;
-			cardCount[uncode] = (cardCount[uncode] ?? 0) + 1;
-			return true;
+		if (autoup) {
+			const amount =
+				(card.rarity === -1 ? 1 : 6) * (card.upped && card.shiny ? 6 : 1);
+			if ((cardMinus[uncode] ?? 0) + amount <= pool[uncode]) {
+				cardMinus[uncode] = (cardMinus[uncode] ?? 0) + amount;
+				cardCount[uncode] = (cardCount[uncode] ?? 0) + 1;
+				return true;
+			}
 		}
 		return false;
 	}
 
-	filterDeck(deck, pool, preserve) {
+	filterDeck(deck, pool, preserve, autoup) {
 		const cardMinus = [],
 			cardCount = [];
 		for (let i = deck.length - 1; i >= 0; i--) {
 			let code = deck[i],
 				card = this.Codes[code];
-			if (!card.pillar) {
-				if (cardCount[asUpped(asShiny(code, false), false)] >= 6) {
-					deck.splice(i, 1);
-					continue;
-				}
+			if (
+				!card.pillar &&
+				cardCount[asUpped(asShiny(code, false), false)] >= 6
+			) {
+				deck.splice(i, 1);
+				continue;
 			}
-			if (!card.isFree()) {
-				if (!this.checkPool(pool, cardCount, cardMinus, card)) {
-					code = asShiny(code, !card.shiny);
-					card = this.Codes[code];
-					if (
-						card.isFree() ||
-						this.checkPool(pool, cardCount, cardMinus, card)
-					) {
-						deck[i] = code;
-					} else if (!preserve) {
-						deck.splice(i, 1);
-					}
+			if (
+				!card.isFree() &&
+				!this.checkPool(pool, cardCount, cardMinus, card, autoup)
+			) {
+				code = asShiny(code, !card.shiny);
+				card = this.Codes[code];
+				if (
+					card.isFree() ||
+					this.checkPool(pool, cardCount, cardMinus, card, autoup)
+				) {
+					deck[i] = code;
+				} else if (!preserve) {
+					deck.splice(i, 1);
 				}
 			}
 		}
@@ -107,7 +111,13 @@ export default class Cards {
 			if (
 				!card.isFree() &&
 				pool &&
-				!this.checkPool(pool, cardCount, cardMinus, card)
+				!this.checkPool(
+					pool,
+					cardCount,
+					cardMinus,
+					card,
+					!user?.flags?.includes?.('no-up-merge'),
+				)
 			) {
 				return false;
 			}

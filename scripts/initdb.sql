@@ -14,7 +14,8 @@ create table user_data (
 	user_id bigint not null references users(id),
 	type_id int not null,
 	name text not null,
-	data json not null
+	data json not null,
+	unique (user_id, type_id, name)
 );
 create table user_role (
 	user_id bigint not null references users(id),
@@ -78,6 +79,8 @@ create table trade_request (
 	forcards text,
 	forg int,
 	expire_at timestamp not null,
+	alt text not null,
+	foralt text,
 	unique (user_id, for_user_id)
 );
 create table match_request (
@@ -89,6 +92,7 @@ create table match_request (
 
 create index ix_users_wealth on users (wealth);
 create index ix_users_name on users using hash (name);
+create index ix_user_data_user_id on user_data using hash (user_id);
 create index ix_arena_score on arena (arena_id, score desc, day desc, "rank");
 create index ix_arena_user_id on arena using hash (user_id);
 create index ix_bazaar_user_id on bazaar using hash (user_id);

@@ -1,5 +1,5 @@
 import { onCleanup } from 'solid-js';
-import { createStore, reconcile } from 'solid-js/store';
+import { createStore } from 'solid-js/store';
 
 import * as usercmd from './usercmd.js';
 import { changeMusic, changeSound } from './audio.js';
@@ -25,6 +25,7 @@ const listeners = new Set();
 export let state = {
 	nav: { view: () => null, props: undefined, key: 0 },
 	opts,
+	alts: {},
 	chat: new Map(),
 	muted: new Set(),
 };
@@ -102,8 +103,40 @@ export function requiresGold(gold) {
 		'System',
 	);
 }
-export function setUser(user) {
-	dispatch({ ...state, user });
+export function setAlt(uname) {
+	const newalts = {
+		...state.alts,
+		[state.uname ?? '']: state.user,
+	};
+	dispatch({ ...state, alts: newalts, user: newalts[uname ?? ''], uname });
+}
+export function addAlt(uname, data) {
+	dispatch({ ...state, alts: { ...state.alts, [uname]: data } });
+}
+export function rmAlt(uname) {
+	const alts = { ...state.alts };
+	delete alts[uname];
+	dispatch({ ...state, alts });
+}
+export function setUser(username, auth, alts) {
+	dispatch({
+		...state,
+		user: alts[''] ?? {},
+		alts,
+		username,
+		auth,
+		uname: null,
+	});
+}
+export function logout() {
+	dispatch({
+		...state,
+		user: null,
+		alts: {},
+		username: null,
+		auth: null,
+		uname: null,
+	});
 }
 export function userCmd(cmd, data) {
 	dispatch({
@@ -137,6 +170,10 @@ export function addOrig(update) {
 				: update.fg,
 		},
 	});
+}
+
+export function hasflag(user, flag) {
+	return user?.flags?.includes?.(flag);
 }
 
 export function useRx(cb = x => x) {

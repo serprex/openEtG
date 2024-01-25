@@ -31,7 +31,7 @@ export default function OriginalEditor(props) {
 			}
 		}
 		deck.sort(Cards.codeCmp).splice(60);
-		const cardMinus = Cards.filterDeck(deck, pool(), true),
+		const cardMinus = Cards.filterDeck(deck, pool(), true, false),
 			deckCode = etgutil.encodedeck(deck) + etgutil.toTrueMarkSuffix(mark);
 
 		return { mark, deck, cardMinus, deckCode };

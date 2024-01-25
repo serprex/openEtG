@@ -11,6 +11,7 @@ import Card from '../Components/Card.jsx';
 import { arenaCost, pveCostReward } from '../userutil.js';
 import parseChat from '../parseChat.js';
 
+const hasflag = store.hasflag;
 const tipjar = [
 	'Clicking on play by play rectangles will show the game state at that point of history',
 	'Each card in your booster pack has a 50% chance of being from the chosen element',
@@ -38,7 +39,7 @@ const tipjar = [
 	'Wealth T99 is a leaderboard for player wealth. Wealth is a combination of current gold & cardpool',
 ];
 
-function AiButton({ name, onClick, onMouseOver, y, lv }) {
+function AiButton({ name, onClick, onMouseOver, lv }) {
 	return (
 		<div style="display:flex;font-size:14px;padding-top:4px">
 			<input
@@ -63,9 +64,9 @@ function setPbpSetting(e) {
 	store.setOpt('playByPlayMode', e.target.value);
 }
 
-function logout(cmd) {
+function logout() {
 	sock.userEmit('logout');
-	store.setUser(null);
+	store.logout();
 	store.setOpt('remember', false);
 	store.doNav(store.Login);
 }
@@ -74,8 +75,8 @@ export default function MainMenu(props) {
 	const rx = store.useRx();
 	const foename = () => (rx.opts.foename ?? '').trim(),
 		expectedDamageSamples = () => rx.opts.expectedDamageSamples || '4';
-	const showcard = props.nymph ?? (rx.user?.daily === 0 && rx.user.ocard);
 
+	const [ocard, setocard] = createSignal(props.nymph);
 	const [settings, setSettings] = createSignal(false);
 	const [changepass, setChangepass] = createSignal(false);
 	let newpass, newpass2;
@@ -92,11 +93,32 @@ export default function MainMenu(props) {
 	};
 
 	onMount(() => {
-		if (rx.user.daily === 0 && rx.user.ocard) {
-			store.updateUser({ daily: 128 });
+		if (
+			!hasflag(rx.user, 'no-oracle') &&
+			((Date.now() / 86400000) | 0) > rx.user.oracle
+		) {
+			sock.userEmit('oracle', {});
 		}
 		document.addEventListener('mousemove', resetTip);
 		sock.setCmds({
+			oracle: data => {
+				setocard(data.c);
+				const update = {
+					daily: 128,
+					pool: addcard(rx.user.pool, data.c),
+					dailymage: data.mage,
+					dailydg: data.dg,
+					oracle: data.day,
+					ostreakday: 0,
+					ostreakday2: data.day,
+				};
+				if (data.bound) {
+					update.accountbound = addcard(rx.user.accountbound, data.c);
+				} else {
+					update.pool = addcard(rx.user.pool, data.c);
+				}
+				store.updateUser(update);
+			},
 			codecard: data => {
 				store.doNav(import('./Reward.jsx'), {
 					type: data.type,
@@ -214,9 +236,10 @@ export default function MainMenu(props) {
 						if (newpass2) newpass2.value = '';
 					}}
 				/>
-				<div style="position:absolute;left:86px;top:92px;width:196px;height:120px">
+				<div style="position:absolute;left:96px;top:92px;width:188px;height:120px">
 					<div class="maintitle">Stats</div>
-					<div>{rx.user?.name}</div>
+					<div>{rx.username}</div>
+					{rx.uname && <div>{rx.uname}</div>}
 					<div>
 						{rx.user?.gold}
 						<span class="ico gold" />
@@ -231,25 +254,29 @@ export default function MainMenu(props) {
 				<div style="position:absolute;left:304px;top:380px;width:292px;height:130px">
 					<div class="maintitle">Miscellaneous</div>
 					<div>
-						<div style="display:inline-block;width:49%;text-align:center">
-							<input
-								type="button"
-								value="Colosseum"
-								onClick={() => store.doNav(import('./Colosseum.jsx'))}
-								onMouseOver={[
-									setTip,
-									'Try some daily challenges in the Colosseum',
-								]}
-							/>
-						</div>
-						<div style="display:inline-block;width:49%;text-align:center">
-							<input
-								type="button"
-								value="Quests"
-								onClick={() => store.doNav(import('./Quest.jsx'))}
-								onMouseOver={[setTip, 'Go on an adventure']}
-							/>
-						</div>
+						{!hasflag(rx.user, 'no-oracle') && (
+							<div style="display:inline-block;width:49%;text-align:center">
+								<input
+									type="button"
+									value="Colosseum"
+									onClick={() => store.doNav(import('./Colosseum.jsx'))}
+									onMouseOver={[
+										setTip,
+										'Try some daily challenges in the Colosseum',
+									]}
+								/>
+							</div>
+						)}
+						{!hasflag(rx.user, 'no-quest') && (
+							<div style="display:inline-block;width:49%;text-align:center">
+								<input
+									type="button"
+									value="Quests"
+									onClick={() => store.doNav(import('./Quest.jsx'))}
+									onMouseOver={[setTip, 'Go on an adventure']}
+								/>
+							</div>
+						)}
 					</div>
 					<div style="margin-top:4px">
 						<div style="display:inline-block;width:49%;text-align:center">
@@ -284,14 +311,22 @@ export default function MainMenu(props) {
 								}
 								onMouseOver={[
 									setTip,
-									'A mode attempting to imitate the original EtG',
+									'A mode attempting to imitate original EtG',
 								]}
+							/>
+						</div>
+						<div style="display:inline-block;width:49%;text-align:center">
+							<input
+								type="button"
+								value="Alts"
+								onClick={() => store.doNav(import('./Alts.jsx'))}
+								onMouseOver={[setTip, 'Manage subaccounts']}
 							/>
 						</div>
 					</div>
 				</div>
-				{showcard ?
-					<Card x={92} y={340} card={Cards.Codes[showcard]} />
+				{ocard() ?
+					<Card x={92} y={340} card={Cards.Codes[ocard()]} />
 				:	!rx.opts.hideMainchat && (
 						<>
 							<Chat
@@ -317,70 +352,66 @@ export default function MainMenu(props) {
 					/>
 					<div style="margin-top:4px">{leadc}</div>
 				</div>
-				<div style="position:absolute;left:308px;top:120px;width:288px;height:240px">
-					<div class="maintitle">Battle</div>
-					<div style="display:flex;padding-left:80px">
-						<div class="costcolumn">Cost</div>
-						<div class="costcolumn">Reward</div>
+				{!hasflag(rx.user, 'no-battle') && (
+					<div style="position:absolute;left:308px;top:120px;width:288px;height:240px">
+						<div class="maintitle">Battle</div>
+						<div style="display:flex;padding-left:80px">
+							<div class="costcolumn">Cost</div>
+							<div class="costcolumn">Reward</div>
+						</div>
+						<AiButton
+							name="Commoner"
+							lv={0}
+							onClick={() => store.navGame(mkAi(0))}
+							onMouseOver={[
+								setTip,
+								'Commoners have no upgraded cards & mostly common cards',
+							]}
+						/>
+						<AiButton
+							name="Mage"
+							lv={1}
+							onClick={() => store.navGame(mkPremade(1))}
+							onMouseOver={[
+								setTip,
+								'Mages have preconstructed decks with a couple rares',
+							]}
+						/>
+						<AiButton
+							name="Champion"
+							lv={2}
+							onClick={() => store.navGame(mkAi(2))}
+							onMouseOver={[setTip, 'Champions have some upgraded cards']}
+						/>
+						<AiButton
+							name="Demigod"
+							lv={3}
+							onClick={() => store.navGame(mkPremade(3))}
+							onMouseOver={[
+								setTip,
+								'Demigods are extremely powerful. Come prepared',
+							]}
+						/>
+						<AiButton
+							name="Arena 1"
+							onClick={arenaAi(0)}
+							onMouseOver={[
+								setTip,
+								'In the arena you will face decks from other players',
+							]}
+							lv={4}
+						/>
+						<AiButton
+							name="Arena 2"
+							onClick={arenaAi(1)}
+							onMouseOver={[
+								setTip,
+								'In the arena you will face upgraded decks from other players',
+							]}
+							lv={5}
+						/>
 					</div>
-					<AiButton
-						name="Commoner"
-						y={48}
-						lv={0}
-						onClick={() => store.navGame(mkAi(0))}
-						onMouseOver={[
-							setTip,
-							'Commoners have no upgraded cards & mostly common cards',
-						]}
-					/>
-					<AiButton
-						name="Mage"
-						y={72}
-						lv={1}
-						onClick={() => store.navGame(mkPremade(1))}
-						onMouseOver={[
-							setTip,
-							'Mages have preconstructed decks with a couple rares',
-						]}
-					/>
-					<AiButton
-						name="Champion"
-						y={96}
-						lv={2}
-						onClick={() => store.navGame(mkAi(2))}
-						onMouseOver={[setTip, 'Champions have some upgraded cards']}
-					/>
-					<AiButton
-						name="Demigod"
-						y={120}
-						lv={3}
-						onClick={() => store.navGame(mkPremade(3))}
-						onMouseOver={[
-							setTip,
-							'Demigods are extremely powerful. Come prepared',
-						]}
-					/>
-					<AiButton
-						name="Arena 1"
-						onClick={arenaAi(0)}
-						onMouseOver={[
-							setTip,
-							'In the arena you will face decks from other players',
-						]}
-						y={144}
-						lv={4}
-					/>
-					<AiButton
-						name="Arena 2"
-						onClick={arenaAi(1)}
-						onMouseOver={[
-							setTip,
-							'In the arena you will face upgraded decks from other players',
-						]}
-						y={168}
-						lv={5}
-					/>
-				</div>
+				)}
 				<div style="position:absolute;left:620px;top:92px;width:196px;height:176px">
 					<div class="maintitle">Cards</div>
 					<input
@@ -394,33 +425,42 @@ export default function MainMenu(props) {
 						{`Deck: ${rx.user?.selectedDeck}`}
 					</div>
 					<div style="text-align:center">{quickslots}</div>
-					<input
-						type="button"
-						value="Shop"
-						onClick={() => store.doNav(import('./Shop.jsx'))}
-						onMouseOver={[
-							setTip,
-							'Buy booster packs which contain cards from the elements you choose',
-						]}
-						style="position:absolute;left:14px;top:132px"
-					/>
-					<input
-						type="button"
-						value="Upgrade"
-						onClick={() => store.doNav(import('./Upgrade.jsx'))}
-						onMouseOver={[setTip, 'Upgrade or sell cards']}
-						style="position:absolute;left:102px;top:108px"
-					/>
-					<input
-						type="button"
-						value="Bazaar"
-						onClick={() => store.doNav(import('./Bazaar.jsx'))}
-						onMouseOver={[
-							setTip,
-							"Put up cards for sale & review other players' offers",
-						]}
-						style="position:absolute;left:102px;top:132px"
-					/>
+					{(!hasflag(rx.user, 'no-shop') ||
+						(rx.user.freepacks && rx.user.freepacks.some(x => x))) && (
+						<input
+							type="button"
+							value="Shop"
+							onClick={() => store.doNav(import('./Shop.jsx'))}
+							onMouseOver={[
+								setTip,
+								'Buy booster packs which contain cards from the elements you choose',
+							]}
+							style="position:absolute;left:14px;top:132px"
+						/>
+					)}
+					{!(
+						hasflag(rx.user, 'no-up-pillar') && hasflag(rx.user, 'no-up-merge')
+					) && (
+						<input
+							type="button"
+							value="Upgrade"
+							onClick={() => store.doNav(import('./Upgrade.jsx'))}
+							onMouseOver={[setTip, 'Upgrade or sell cards']}
+							style="position:absolute;left:102px;top:108px"
+						/>
+					)}
+					{!rx.uname && (
+						<input
+							type="button"
+							value="Bazaar"
+							onClick={() => store.doNav(import('./Bazaar.jsx'))}
+							onMouseOver={[
+								setTip,
+								"Put up cards for sale & review other players' offers",
+							]}
+							style="position:absolute;left:102px;top:132px"
+						/>
+					)}
 				</div>
 				<div style="position:absolute;left:616px;top:300px;width:206px;height:130px">
 					<div class="maintitle">Players</div>
@@ -434,8 +474,12 @@ export default function MainMenu(props) {
 						type="button"
 						value="Library"
 						onClick={() => {
-							const name = foename() || rx.user.name;
-							if (name) store.doNav(import('./Library.jsx'), { name });
+							const name = foename() || rx.username;
+							if (name) {
+								const props = { name };
+								if (!foename()) props.alt = rx.uname;
+								store.doNav(import('./Library.jsx'), props);
+							}
 						}}
 						onMouseOver={[setTip, 'See exactly what cards you or others own']}
 						style="position:absolute;left:112px;top:64px"
@@ -446,22 +490,24 @@ export default function MainMenu(props) {
 						onClick={() => sock.sendChallenge(foename())}
 						style="position:absolute;left:10px;top:88px"
 					/>
-					<input
-						type="button"
-						value="Trade"
-						onClick={() => {
-							sock.userEmit('offertrade', {
-								f: foename(),
-								cards: '',
-								g: 0,
-								forcards: null,
-								forg: null,
-							});
-							store.doNav(import('./Trade.jsx'), { foe: foename() });
-						}}
-						onMouseOver={[setTip, 'Trade cards/$ with another player']}
-						style="position:absolute;left:10px;top:64px"
-					/>
+					{!hasflag(rx.user, 'no-trade') && (
+						<input
+							type="button"
+							value="Trade"
+							onClick={() => {
+								sock.userEmit('offertrade', {
+									f: foename(),
+									cards: '',
+									g: 0,
+									forcards: null,
+									forg: null,
+								});
+								store.doNav(import('./Trade.jsx'), { foe: foename() });
+							}}
+							onMouseOver={[setTip, 'Trade cards/$ with another player']}
+							style="position:absolute;left:10px;top:64px"
+						/>
+					)}
 					<input
 						type="button"
 						value="Reward"

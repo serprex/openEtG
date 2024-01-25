@@ -58,12 +58,10 @@ export default function ElementSelect() {
 					setErr(
 						`Failed to register. Try a different username. Server response: ${data.err}`,
 					);
-				} else if (!data.accountbound && !data.pool) {
-					delete data.x;
-					store.setUser(data);
+				} else if (!data.data['']) {
+					store.setUser(data.name, data.auth, data.data);
 				} else if (rx.user) {
-					delete data.x;
-					store.setUser(data);
+					store.setUser(data.name, data.auth, data.data);
 					if (skiptut.checked) {
 						store.doNav(import('./MainMenu.jsx'));
 					} else {
@@ -108,7 +106,7 @@ export default function ElementSelect() {
 						type="button"
 						value="Register"
 						style="display:block"
-						onClick={e => {
+						onClick={() => {
 							let errmsg = '';
 							username.value = username.value.trim();
 							if (!username.value) {
@@ -135,7 +133,7 @@ export default function ElementSelect() {
 				onClick={() => {
 					if (rx.user) {
 						userEmit('delete');
-						store.setUser(null);
+						store.logout();
 					}
 					store.setOpt('remember', false);
 					store.doNav(store.Login);

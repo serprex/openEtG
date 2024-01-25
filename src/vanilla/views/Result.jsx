@@ -12,7 +12,7 @@ function exitFunc() {
 }
 
 export default function OriginalResult({ game }) {
-	const p1id = game.userId(store.state.user.name);
+	const p1id = game.userId(store.state.username);
 	const cardswon = [];
 	let electrumwon = null;
 

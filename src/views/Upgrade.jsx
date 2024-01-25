@@ -1,7 +1,7 @@
 import { createMemo, createSignal } from 'solid-js';
 
 import * as sock from '../sock.jsx';
-import { useRx } from '../store.jsx';
+import { useRx, hasflag } from '../store.jsx';
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
 import Card from '../Components/Card.jsx';
@@ -93,12 +93,14 @@ export default function Upgrade() {
 					style="position:absolute;left:150px;top:95px"
 				/>
 			)}
-			<input
-				type="button"
-				value="Autoconvert"
-				onClick={autoCards}
-				style="position:absolute;left:5px;top:138px"
-			/>
+			{!hasflag(user, 'no-up-merge') && (
+				<input
+					type="button"
+					value="Autoconvert"
+					onClick={autoCards}
+					style="position:absolute;left:5px;top:138px"
+				/>
+			)}
 			<div style="position:absolute;left:5px;top:240px">
 				<Text text={user.gold + '$'} />
 			</div>
@@ -128,7 +130,10 @@ export default function Upgrade() {
 					const newstate = {
 						card1: card,
 						card2: card.asUpped(true),
-						canGrade: true,
+						canGrade: !hasflag(
+							user,
+							card.pillar ? 'no-up-pillar' : 'no-up-merge',
+						),
 						canLish: true,
 					};
 					if (card.upped) {

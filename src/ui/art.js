@@ -1,4 +1,4 @@
-import { card_index, card_name, card_set, CardSet } from '../rs/pkg/etg.js';
+import { card_index, card_name, CardSet } from '../rs/pkg/etg.js';
 
 function trMouseOver(e) {
 	let i = 1;
@@ -36,7 +36,7 @@ for (const credit of [
 	],
 	[
 		['kae', 'https://kaeillustrates.art'],
-		'4sd4sg4sh4tc50650750152l52q53553655u56756b56d58s59859b59c59d59e59j5bs5bu5c25c45c65c75cu5f55fb5fk5fl5fm5fo5ib5il5io5iq5j15ld5lg5lj5ls5lt5m15m35od5oe5og5ok5om5oo5oq5os5ov5p05rg5rj5rr5s45s85uo5v25v85vf5vj62b62e62i6rs7ae7ak77c7gr7h57k0',
+		'4sd4sg4sh4tc50650750152l52q53553655u56756b56d58s59859b59c59d59e59j5bs5bu5c25c45c65c75cu5cv5f55fb5fk5fl5fm5fo5ib5il5io5iq5j15ld5lg5lj5ls5lt5m15m35od5oe5og5ok5om5oo5oq5os5ov5p05rg5rj5rr5s45s85uo5v25v85vf5vj62b62e62i6rs7ae7ak77c7gr7h57k0lcv',
 	],
 	[
 		['Lost in Nowhere', '/forum/index.php?action=profile;u=38'],

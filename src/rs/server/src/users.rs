@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::num::NonZeroUsize;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -12,6 +12,7 @@ use tokio::sync::{Mutex, RwLock};
 
 use crate::cardpool::Cardpool;
 use crate::handlews::AsyncSocks;
+use crate::starters::STARTERS;
 
 #[derive(Clone, Copy, Debug, ToSql, FromSql)]
 #[postgres(name = "userrole")]
@@ -38,7 +39,7 @@ impl From<HashAlgo> for pbkdf2::Algorithm {
 	}
 }
 
-#[derive(Serialize, Deserialize, Default, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct UserData {
 	#[serde(default)]
 	pub accountbound: Cardpool,
@@ -77,12 +78,59 @@ pub struct UserData {
 	#[serde(default)]
 	pub quests: HashMap<String, u8>,
 	#[serde(default)]
+	pub flags: HashSet<String>,
+	#[serde(default)]
 	#[serde(rename = "selectedDeck")]
 	pub selecteddeck: String,
 	#[serde(default)]
-	pub streak: Vec<Option<u16>>,
+	pub streak: Vec<u16>,
 	#[serde(default)]
 	pub freepacks: Option<[u8; 3]>,
+}
+
+impl UserData {
+	pub fn new(e: usize) -> UserData {
+		let sid = STARTERS[(e - 1) as usize];
+		let mut decks: HashMap<String, String> = Default::default();
+		decks.insert(String::from("1"), String::from(sid.1));
+		decks.insert(String::from("2"), String::from(sid.2));
+		decks.insert(String::from("3"), String::from(sid.3));
+		UserData {
+			accountbound: Cardpool::from(sid.0),
+			oracle: 0,
+			daily: 0,
+			dailydg: 0,
+			dailymage: 0,
+			freepacks: Some([sid.4, sid.5, 1]),
+			selecteddeck: String::from("1"),
+			decks,
+			qecks: [
+				String::from("1"),
+				String::from("2"),
+				String::from("3"),
+				String::from("4"),
+				String::from("5"),
+				String::from("6"),
+				String::from("7"),
+				String::from("8"),
+				String::from("9"),
+				String::from("10"),
+			],
+			ailosses: 0,
+			aiwins: 0,
+			pvplosses: 0,
+			pvpwins: 0,
+			gold: 0,
+			ocard: 0,
+			ostreak: 0,
+			ostreakday: 0,
+			ostreakday2: 0,
+			flags: Default::default(),
+			quests: Default::default(),
+			pool: Default::default(),
+			streak: Default::default(),
+		}
+	}
 }
 
 #[derive(Serialize)]
@@ -97,8 +145,7 @@ pub struct UserObject {
 	pub iter: u32,
 	#[serde(skip)]
 	pub algo: HashAlgo,
-	#[serde(flatten)]
-	pub data: UserData,
+	pub data: HashMap<String, UserData>,
 }
 
 pub const HASH_ITER: u32 = 99999;
@@ -120,6 +167,28 @@ pub type User = Arc<Mutex<UserObject>>;
 pub struct Users(HashMap<String, (AtomicBool, AtomicUsize, User)>);
 
 impl Users {
+	pub async fn load_data<GC>(client: &GC, userid: i64) -> Option<HashMap<String, UserData>>
+	where
+		GC: GenericClient,
+	{
+		if let Ok(urows) = client
+			.query("select name, data from user_data where user_id = $1 and type_id = 1", &[&userid])
+			.await
+		{
+			let mut data = HashMap::with_capacity(urows.len());
+			for urow in urows {
+				let name = urow.get::<usize, String>(0);
+				let Ok(Json(userdata)) = urow.try_get::<usize, Json<UserData>>(1) else {
+					panic!("Invalid json for user {}", name);
+				};
+				data.insert(name, userdata);
+			}
+			Some(data)
+		} else {
+			None
+		}
+	}
+
 	pub async fn load_with_auth<GC>(
 		users: &RwLock<Users>,
 		client: &GC,
@@ -153,13 +222,7 @@ impl Users {
 				let userid = row.get::<usize, i64>(0);
 				let mut wuserslock = users.write().await;
 				let Users(ref mut wusers) = *wuserslock;
-				if let Ok(urow) = client
-					.query_one("select data from user_data where user_id = $1 and type_id = 1", &[&userid])
-					.await
-				{
-					let Ok(Json(userdata)) = urow.try_get::<usize, Json<UserData>>(0) else {
-						panic!("Invalid json for user {}", name);
-					};
+				if let Some(data) = Users::load_data(client, userid).await {
 					let userarc = Arc::new(Mutex::new(UserObject {
 						name: String::from(name),
 						id: row.get::<usize, i64>(0),
@@ -167,7 +230,7 @@ impl Users {
 						salt: row.get::<usize, Vec<u8>>(2),
 						iter: row.get::<usize, i32>(3) as u32,
 						algo: row.get::<usize, HashAlgo>(4),
-						data: userdata,
+						data,
 					}));
 					wusers.insert(
 						String::from(name),
@@ -192,20 +255,31 @@ impl Users {
 		if let Some((ref gc, _, ref user)) = self.0.get(name) {
 			gc.store(false, Ordering::Release);
 			Some(user.clone())
-		} else if let Some(row) = client.query_opt("select u.id, u.auth, u.salt, u.iter, u.algo, ud.data from user_data ud join users u on u.id = ud.user_id where u.name = $1 and ud.type_id = 1", &[&name]).await.expect("Connection failed while loading user") {
-			let Json(userdata) = row.try_get::<usize, Json<UserData>>(5).expect("Invalid json for user");
-			let namestr = name.to_string();
-			let userarc = Arc::new(Mutex::new(UserObject {
-				name: namestr.clone(),
-				id: row.get::<usize, i64>(0),
-				auth: row.get::<usize, String>(1),
-				salt: row.get::<usize, Vec<u8>>(2),
-				iter: row.get::<usize, i32>(3) as u32,
-				algo: row.get::<usize, HashAlgo>(4),
-				data: userdata,
-			}));
-			self.insert(namestr, 0, userarc.clone());
-			Some(userarc)
+		} else if let Some(row) = client
+			.query_opt(
+				"select u.id, u.auth, u.salt, u.iter, u.algo from users u where u.name = $1",
+				&[&name],
+			)
+			.await
+			.expect("Connection failed while loading user")
+		{
+			let userid = row.get::<usize, i64>(0);
+			if let Some(data) = Users::load_data(client, userid).await {
+				let namestr = name.to_string();
+				let userarc = Arc::new(Mutex::new(UserObject {
+					name: namestr.clone(),
+					id: userid,
+					auth: row.get::<usize, String>(1),
+					salt: row.get::<usize, Vec<u8>>(2),
+					iter: row.get::<usize, i32>(3) as u32,
+					algo: row.get::<usize, HashAlgo>(4),
+					data,
+				}));
+				self.insert(namestr, 0, userarc.clone());
+				Some(userarc)
+			} else {
+				None
+			}
 		} else {
 			None
 		}
@@ -244,30 +318,35 @@ impl Users {
 	pub async fn evict(&mut self, client: &Client, name: &str) {
 		if let Some((_, _, user)) = self.0.remove(name) {
 			let user = user.lock().await;
-			client
-				.query(
-					"update user_data set data = $2 where user_id = $1 and type_id = 1",
-					&[&user.id, &Json(&user.data)],
-				)
-				.await
-				.ok();
+			for (name, data) in user.data.iter() {
+				client
+					.execute(
+						"update user_data set data = $3 where user_id = $1 and type_id = 1 and name = $2",
+						&[&user.id, name, &Json(data)],
+					)
+					.await
+					.ok();
+			}
 		}
 	}
 
 	pub async fn saveall(&self, client: &Client) -> bool {
-		let mut queries = Vec::new();
 		for &(_, _, ref user) in self.0.values() {
-			queries.push(async move {
-				let user = user.lock().await;
-				client
+			let user = user.lock().await;
+			for (name, data) in user.data.iter() {
+				if !client
 					.execute(
-						"update user_data set data = $2 where user_id = $1 and type_id = 1",
-						&[&user.id, &Json(&user.data)],
+						"update user_data set data = $3 where user_id = $1 and type_id = 1 and name = $2",
+						&[&user.id, name, &Json(data)],
 					)
 					.await
-			});
+					.is_ok()
+				{
+					return false;
+				}
+			}
 		}
-		futures::future::join_all(queries).await.into_iter().all(|x| x.is_ok())
+		true
 	}
 
 	pub async fn store(&mut self, client: &Client, socks: &AsyncSocks) {

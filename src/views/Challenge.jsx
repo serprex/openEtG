@@ -1,5 +1,4 @@
 import { createMemo, createSignal } from 'solid-js';
-import { Index } from 'solid-js/web';
 
 import Cards from '../Cards.js';
 import { choose, randint, shuffle } from '../util.js';
@@ -221,7 +220,7 @@ export default function Challenge(props) {
 
 	const [groups, setGroups] = createSignal(
 		props.groups ?? [
-			[{ user: rx.user.name, name: rx.user.name, idx: 1, pending: 1 }],
+			[{ user: rx.username, name: rx.username, idx: 1, pending: 1 }],
 			[],
 		],
 	);
@@ -330,7 +329,7 @@ export default function Challenge(props) {
 	const mydata = createMemo(() => {
 		for (const group of groups()) {
 			for (const player of group) {
-				if (player.user === rx.user.name) {
+				if (player.user === rx.username) {
 					return player;
 				}
 			}
@@ -338,9 +337,9 @@ export default function Challenge(props) {
 		return null;
 	});
 
-	const amhost = () => rx.user.name === groups()[0][0].user;
+	const amhost = () => rx.username === groups()[0][0].user;
 	const isMultiplayer = () =>
-		groups().some(g => g.some(p => p.user && p.user !== rx.user.name));
+		groups().some(g => g.some(p => p.user && p.user !== rx.username));
 	const allReady = () =>
 		amhost() &&
 		(!isMultiplayer() || groups().every(g => g.every(p => !p.pending)));
@@ -380,7 +379,7 @@ export default function Challenge(props) {
 				{(players, i) => (
 					<Group
 						players={players}
-						host={rx.user.name}
+						host={rx.username}
 						hasUserAsPlayer={name =>
 							groups().some(g => g.some(p => p.user === name))
 						}

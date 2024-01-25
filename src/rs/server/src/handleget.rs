@@ -3,8 +3,8 @@
 use std::collections::{BTreeMap, HashMap};
 use std::convert::Infallible;
 use std::fmt::Write;
-use std::time::SystemTime;
 use std::sync::RwLock;
+use std::time::SystemTime;
 
 use http_body_util::Full;
 use httpdate::HttpDate;
@@ -95,7 +95,11 @@ pub async fn compress_and_cache(
 				content: Bytes::from(compressed.into_boxed_slice()),
 				file: resp.file,
 			};
-			cache.write().unwrap_or_else(|e| e.into_inner()).get_map_mut(encoding).insert(path, cached_resp.clone());
+			cache
+				.write()
+				.unwrap_or_else(|e| e.into_inner())
+				.get_map_mut(encoding)
+				.insert(path, cached_resp.clone());
 			cached_resp
 		}
 		Err(content) => CachedResponse {
@@ -194,13 +198,14 @@ impl CachedResponse {
 }
 
 async fn handle_get_core(
-	path: &str,
+	uri: &http::Uri,
 	ims: Option<HttpDate>,
 	accept: Option<AcceptEncoding>,
 	pgpool: &PgPool,
 	users: &AsyncUsers,
 	cache: &AsyncCache,
 ) -> Result<Response<Bytes>, http::Error> {
+	let path = uri.path();
 	let path = if path == "/" { "/index.html" } else { path };
 	if path.contains("..") || !path.starts_with('/') {
 		return response::Builder::new().status(403).body(Bytes::new());
@@ -385,11 +390,15 @@ async fn handle_get_core(
 		}
 	} else if path.starts_with("/collection/") {
 		let name = &path["/collection/".len()..];
+		let alt = uri.query().unwrap_or("");
 		if let Ok(client) = pgpool.get().await {
 			if let Some(user) = users.write().await.load(&*client, name).await {
 				let user = user.lock().await;
-				let pool = &user.data.pool;
-				let bound = &user.data.accountbound;
+				let Some(userdata) = user.data.get(alt) else {
+					return response::Builder::new().status(404).body(Bytes::new());
+				};
+				let pool = &userdata.pool;
+				let bound = &userdata.accountbound;
 				let mut cards: BTreeMap<i16, [u16; 8]> = BTreeMap::new();
 				for i in 0..2 {
 					let (cards0, counts) = if i == 0 { (0, pool) } else { (4, bound) };
@@ -499,13 +508,13 @@ async fn handle_get_core(
 }
 
 pub async fn handle_get(
-	path: &str,
+	uri: &http::Uri,
 	ims: Option<HttpDate>,
 	accept: Option<AcceptEncoding>,
 	pgpool: &PgPool,
 	users: &AsyncUsers,
 	cache: &AsyncCache,
 ) -> Response<Full<Bytes>> {
-	let (head, body) = handle_get_core(path, ims, accept, pgpool, users, cache).await.unwrap().into_parts();
+	let (head, body) = handle_get_core(uri, ims, accept, pgpool, users, cache).await.unwrap().into_parts();
 	Response::from_parts(head, Full::<Bytes>::from(body))
 }
