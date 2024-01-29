@@ -118,6 +118,7 @@ export default function MainMenu(props) {
 					update.pool = addcard(rx.user.pool, data.c);
 				}
 				store.updateUser(update);
+				store.chatMsg('Daily Reward: ' + Cards.Codes[data.c].name, 'System');
 			},
 			codecard: data => {
 				store.doNav(import('./Reward.jsx'), {
@@ -326,7 +327,12 @@ export default function MainMenu(props) {
 					</div>
 				</div>
 				{ocard() ?
-					<Card x={92} y={340} card={Cards.Codes[ocard()]} />
+					<>
+						<div style="font-size:16px;user-select:none;position:absolute;pointer-events:none;left:95px;top:315px">
+							Daily Login Reward
+						</div>
+						<Card x={92} y={340} card={Cards.Codes[ocard()]} />
+					</>
 				:	!rx.opts.hideMainchat && (
 						<>
 							<Chat
