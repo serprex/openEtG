@@ -230,6 +230,21 @@ export default function Shop() {
 								top: '278px',
 							}}
 						/>
+						{(rx.user.freepacks[n()] > 0) &&
+                                                        <span style={`
+                                                                width: 20px;
+                                                                padding-right: 5px;
+                                                                border-radius: 50%;
+                                                                background: red;
+                                                                color: white;
+                                                                position: absolute;
+                                                                font-weight: bold;
+                                                                top: ${278-5}px;
+                                                                left: ${(48+176*n()) + 160 - 15}px;
+                                                        `}>
+                                                                {rx.user.freepacks[n()]}
+                                                        </span>
+                                                }
 						<div
 							style={`position:absolute;left:${
 								48 + 176 * n()
