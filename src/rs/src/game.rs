@@ -1906,7 +1906,7 @@ impl Game {
 	}
 
 	pub fn iter_skills(&self, id: i16) -> impl Iterator<Item = (Event, &[Skill])> {
-		self.get_thing(id).skill.iter().map(|(k, v)| (k, v.as_ref()))
+		self.get_thing(id).skill.iter()
 	}
 
 	pub fn new_thing(&mut self, code: i16, owner: i16) -> i16 {

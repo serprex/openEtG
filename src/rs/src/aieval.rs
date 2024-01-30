@@ -577,7 +577,7 @@ fn eval_skill(
 			Skill::ricochet => 2 * PREC,
 			Skill::sabbath => PREC,
 			Skill::sadism => 2 * PREC,
-			Skill::salvage => 2 * PREC,
+			Skill::salvage => 3 * PREC,
 			Skill::sanctify => 2 * PREC,
 			Skill::scramble | Skill::v_scramble => {
 				(13 - ctx
@@ -905,11 +905,12 @@ fn evalthing(
 	if id == 0 {
 		return 0;
 	}
-	let card = ctx.get(id, Stat::card);
+	let thing = ctx.get_thing(id);
+	let card = thing.status.get(Stat::card);
 	let cdata = ctx.get_card(card);
-	let owner = ctx.get_owner(id);
+	let owner = thing.owner;
 	if inhand {
-		if !caneventuallyactive(ctx, owner, ctx.get(id, Stat::cost), ctx.get(id, Stat::costele), quantamap)
+		if !caneventuallyactive(ctx, owner, thing.status.get(Stat::cost), thing.status.get(Stat::costele), quantamap)
 		{
 			return if ctx.hasskill(id, Event::OwnDiscard, Skill::obsession)
 				|| ctx.hasskill(id, Event::OwnDiscard, Skill::v_obsession)
@@ -923,14 +924,14 @@ fn evalthing(
 			return eval_skill(ctx, id, cdata.skill[0].1, 0, damage, quantamap);
 		}
 	}
-	let kind = if inhand { cdata.kind } else { ctx.get_kind(id) };
+	let kind = if inhand { cdata.kind } else { thing.kind };
 	let iscrea = kind == Kind::Creature;
 	let mut score = 0;
-	let mut delaymix = ctx.get(id, Stat::frozen).max(ctx.get(id, Stat::delayed)) as i32 * PREC;
+	let mut delaymix = thing.status.get(Stat::frozen).max(thing.status.get(Stat::delayed)) as i32 * PREC;
 	let (ttatk, adrenaline, delayfactor) = if iscrea || kind == Kind::Weapon {
 		let ttatk = damage[id];
 		let ctrueatk = ctx.trueatk(id);
-		let adrenaline = if ctx.get(id, Stat::adrenaline) == 0 {
+		let adrenaline = if thing.status.get(Stat::adrenaline) == 0 {
 			1
 		} else {
 			let adrenaline = etg::countAdrenaline(ctrueatk) as i32;
@@ -947,7 +948,7 @@ fn evalthing(
 	let mut hp = 0;
 	if iscrea {
 		if inhand
-			|| !flooded || ctx.get(id, Flag::aquatic)
+			|| !flooded || thing.flag.get(Flag::aquatic)
 			|| !ctx.material(id, None)
 			|| ctx.getIndex(id) <= 4
 		{
@@ -955,7 +956,7 @@ fn evalthing(
 			if patience {
 				hp += 2;
 			}
-			let mut poison = ctx.get(id, Stat::poison);
+			let mut poison = thing.status.get(Stat::poison);
 			for &sk in ctx.getSkill(id, Event::OwnAttack).iter() {
 				match sk {
 					Skill::growth(_, ghp) => poison = poison.saturating_sub(ghp as i16),
@@ -964,11 +965,11 @@ fn evalthing(
 			}
 			if poison > 0 {
 				hp = hp.saturating_sub(poison.saturating_mul(2));
-				if ctx.get(id, Flag::aflatoxin) {
+				if thing.flag.get(Flag::aflatoxin) {
 					score -= 2 * PREC;
 				}
 			} else if poison < 0 {
-				hp = hp.saturating_sub(poison).min(ctx.get(id, Stat::maxhp));
+				hp = hp.saturating_sub(poison).min(thing.status.get(Stat::maxhp));
 			}
 			if hp < 0 {
 				hp = 0;
@@ -989,10 +990,10 @@ fn evalthing(
 		}
 	}
 	let throttle = if adrenaline < 3 || nothrottle { adrenaline } else { 2 };
-	for (ev, sk) in ctx.iter_skills(id) {
+	for (ev, sk) in thing.skill.iter() {
 		match ev {
 			Event::Hit => {
-				if ttatk != 0 || !ctx.get(id, Flag::immaterial) {
+				if ttatk != 0 || !thing.flag.get(Flag::immaterial) {
 					let value = (eval_skill(ctx, id, sk, ttatk, damage, quantamap)
 						* if sk.iter().cloned().any(throttled) { throttle } else { adrenaline }
 						* delayfactor) >> PRECBITS;
@@ -1003,7 +1004,7 @@ fn evalthing(
 				let mut autoscore = eval_skill(ctx, id, sk, ttatk, damage, quantamap)
 					* if sk.iter().cloned().any(throttled) { throttle } else { adrenaline };
 				if ctx.cardset() == CardSet::Original
-					&& ctx.get(id, Stat::frozen) != 0
+					&& thing.status.get(Stat::frozen) != 0
 					&& sk.iter().cloned().any(|sk| matches!(sk, Skill::growth(_, _) | Skill::siphon))
 				{
 					autoscore = (autoscore * delayfactor) >> PRECBITS;
@@ -1014,8 +1015,8 @@ fn evalthing(
 				if caneventuallyactive(
 					ctx,
 					owner,
-					ctx.get(id, Stat::cast),
-					ctx.get(id, Stat::castele),
+					thing.status.get(Stat::cast),
+					thing.status.get(Stat::castele),
 					quantamap,
 				) {
 					score += eval_skill(ctx, id, sk, ttatk, damage, quantamap) * delayfactor >> PRECBITS;
@@ -1028,48 +1029,39 @@ fn evalthing(
 			}
 		}
 	}
-	let flag = ctx.get_thing(id).flag;
-	if flag.get(Flag::airborne | Flag::ranged | Flag::whetstone) {
+	if thing.flag.get(Flag::airborne | Flag::ranged | Flag::whetstone) {
 		score += PREC / 5;
-	} else if flag.get(Flag::nightfall) {
+	} else if thing.flag.get(Flag::nightfall) {
 		score += PREC / 2;
-	} else if flag.get(Flag::patience) {
+	} else if thing.flag.get(Flag::patience) {
 		score += 2 * PREC;
-	} else if flag.get(Flag::reflective | Flag::tunnel | Flag::voodoo) {
+	} else if thing.flag.get(Flag::reflective | Flag::tunnel | Flag::voodoo) {
 		score += PREC;
 	}
 	if iscrea {
-		let voodoo = ctx.get(id, Flag::voodoo);
+		let voodoo = thing.flag.get(Flag::voodoo);
 		if voodoo && ctx.material(id, None) {
 			score += hp as i32 * (PREC / 8);
 		}
-		if hp != 0 && ctx.get(owner, Stat::gpull) == id {
-			score = (score + hp as i32 * if voodoo { PREC * 5 } else { PREC }) / 4;
-			if delaymix != 0 {
-				score += eval_skill(ctx, id, ctx.getSkill(id, Event::Shield), ttatk, damage, quantamap);
+		if hp != 0 {
+			if ctx.get(owner, Stat::gpull) == id {
+				score = (score + hp as i32 * if voodoo { PREC * 5 } else { PREC }) / 4;
+				if delaymix != 0 {
+					score += eval_skill(ctx, id, ctx.getSkill(id, Event::Shield), ttatk, damage, quantamap);
+				}
+			} else if ctx.material(id, None) {
+				let hpsqrt = sqrt(hp as i32 * PREC);
+				score += score * hpsqrt / (hpsqrt * 2 + 4 * PREC)
+			} else {
+				score += score / 2
 			}
 		} else {
-			score = if hp != 0 {
-				if ctx.material(id, None) {
-					let hpsqrt = sqrt(hp as i32 * PREC);
-					score + score * hpsqrt / (hpsqrt * 2 + 4 * PREC)
-				} else {
-					score * 3 / 2
-				}
-			} else if inhand {
-				score * 14 / 16
-			} else {
-				score / 5
-			}
+			return if inhand { score * 4 } else { score / 2 }
 		}
 	} else {
 		score = if ctx.material(id, None) { score * 5 / 4 } else { score * 7 / 2 };
 	}
-	if inhand {
-		score * 3 / 4
-	} else {
-		score
-	}
+	score * if inhand { 2 } else { 3 }
 }
 
 pub fn eval(ctx: &Game) -> i32 {
