@@ -214,46 +214,30 @@ export default function Shop() {
 						/>
 					</>
 				)}
-			<For each={packdata}>
-				{(pack, n) => (
-					<>
-						<img
-							src={`/assets/pack${n()}.webp`}
-							class="imgb"
-							onClick={() => {
-								setRarity(n());
-								setInfo2(`${pack.type} Pack: ${pack.info}`);
-							}}
-							style={{
-								position: 'absolute',
-								left: `${48 + 176 * n()}px`,
-								top: '278px',
-							}}
-						/>
-						{(rx.user.freepacks[n()] > 0) &&
-                                                        <span style={`
-                                                                width: 20px;
-                                                                padding-right: 5px;
-                                                                border-radius: 50%;
-                                                                background: red;
-                                                                color: white;
-                                                                position: absolute;
-                                                                font-weight: bold;
-                                                                top: ${278-5}px;
-                                                                left: ${(48+176*n()) + 160 - 15}px;
-                                                        `}>
-                                                                {rx.user.freepacks[n()]}
-                                                        </span>
-                                                }
-						<div
-							style={`position:absolute;left:${
-								48 + 176 * n()
-							}px;top:542px;width:160px;text-align:center`}>
-							<Text text={pack.cost + '$'} />
+			<div style="display:flex;column-gap:12px;position:absolute;top:278px;left:48px">
+				<For each={packdata}>
+					{(pack, n) => (
+						<div style="width:160px;position:relative">
+							<img
+								src={`/assets/pack${n()}.webp`}
+								class="imgb"
+								onClick={() => {
+									setRarity(n());
+									setInfo2(`${pack.type} Pack: ${pack.info}`);
+								}}
+							/>
+							{rx.user.freepacks && rx.user.freepacks[n()] > 0 && (
+								<span style="text-align:center;width:20px;border-radius:50%;background:#a31;position:absolute;font-weight:bold;top:-5px;left: 145px">
+									{rx.user.freepacks[n()]}
+								</span>
+							)}
+							<div style="text-align:center">
+								<Text text={pack.cost + '$'} />
+							</div>
 						</div>
-					</>
-				)}
-			</For>
+					)}
+				</For>
+			</div>
 			{elebuttons}
 			{cards() && <PackDisplay cards={cards()} />}
 			{!hasFreePacks() &&
