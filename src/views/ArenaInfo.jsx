@@ -148,17 +148,17 @@ export default function ArenaInfo() {
 			<Show when={AB().B}>
 				<RenderInfo info={AB().B} y={300} name={rx.username} />
 			</Show>
-			{!!user.ocard && (
+			{!!rx.user.ocard && (
 				<>
 					<ArenaCard
 						info={AB().A}
 						y={8}
-						card={Cards.Codes[asUpped(user.ocard, false)]}
+						card={Cards.Codes[asUpped(rx.user.ocard, false)]}
 					/>
 					<ArenaCard
 						info={AB().B}
 						y={300}
-						card={Cards.Codes[asUpped(user.ocard, true)]}
+						card={Cards.Codes[asUpped(rx.user.ocard, true)]}
 					/>
 				</>
 			)}

@@ -60,10 +60,10 @@ export const Shop = [
 	],
 	[
 		'position:absolute;left:45px;top:275px;width:610px;height:158px',
-		'2) Select the type of pack you want\nYou see the amount of cards & rarity of each pack in the upper box',
+		'2) Select the type of pack you want\nYou see the amount of cards & rarity of each pack in the upper box\nA red circle at the top right of the pack indicates how many free packs you have available',
 	],
 	[
 		'position:absolute;left:590px;top:97px;width:260px;height:158px',
-		'3) Buy the pack you selected!\nIf you want to buy many packs at once, type in the Bulk box how many you want\nA red circle at the top right of the pack indicates how many free packs you have available',
+		'3) Buy the pack you selected!\nIf you want to buy many packs at once, type in the Bulk box how many you want',
 	],
 ];
