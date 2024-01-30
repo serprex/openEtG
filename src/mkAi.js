@@ -83,7 +83,7 @@ export function mkAi(level, daily, datafn = null) {
 		players: [
 			{
 				idx: 1,
-				name: user?.name,
+				name: store.state.username,
 				user: store.state.username ?? '',
 				deck: urdeck,
 			},

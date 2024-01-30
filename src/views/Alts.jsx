@@ -149,6 +149,11 @@ function AltCreator(props) {
 	);
 }
 
+function chooseAlt(alt) {
+	store.setAlt(alt);
+	store.doNav(import('../views/MainMenu.jsx'));
+}
+
 export default function Alts() {
 	const rx = store.useRx();
 	let yesdelete;
@@ -164,10 +169,7 @@ export default function Alts() {
 					type="button"
 					value="Select"
 					style="position:absolute;left:5px;top:578px"
-					onClick={() => {
-						store.setAlt(selected());
-						store.doNav(import('../views/MainMenu.jsx'));
-					}}
+					onClick={[chooseAlt, selected()]}
 				/>
 			)}
 			{selected() && selected() !== rx.uname && (
@@ -197,7 +199,8 @@ export default function Alts() {
 						<tr
 							class="btnrow"
 							style={selected() ? '' : 'background-color:#456'}
-							onClick={[setSelected, null]}>
+							onClick={[setSelected, null]}
+							onDblClick={[chooseAlt, null]}>
 							<td>{rx.username}</td>
 							<td style={`color:#${rx.uname ? 'ccb' : 'ed8'}`}>Main</td>
 						</tr>
@@ -208,7 +211,8 @@ export default function Alts() {
 									<tr
 										class="btnrow"
 										style={selected() === name ? 'background-color:#456' : ''}
-										onClick={[setSelected, name]}>
+										onClick={[setSelected, name]}
+										onDblClick={[chooseAlt, name]}>
 										<td
 											style={`padding-top:4px;color:#${
 												name === rx.uname ? 'ed8' : 'ccb'

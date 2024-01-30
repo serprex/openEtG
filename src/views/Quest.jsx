@@ -25,7 +25,7 @@ function QuestButton(props) {
 	);
 }
 
-export default function QuestView(props) {
+export default function QuestView() {
 	const rx = store.useRx();
 	const questInfo = createMemo(() => {
 		const questAreas = [],
