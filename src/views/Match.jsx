@@ -752,7 +752,8 @@ export default function Match(props) {
 		expectedDamageSamples = rx.opts.expectedDamageSamples | 0 || 4;
 	let aiDelay = 0,
 		streakback = 0,
-		hardcoreback = 0;
+		hardcoreback = 0,
+		hardcorebound = 0;
 	const [tempgame, setTempgame] = createSignal(null);
 	const [replayhistory, setReplayHistory] = createSignal([props.game]);
 	const [replayindex, setreplayindex] = createSignal(0);
@@ -1114,7 +1115,12 @@ export default function Match(props) {
 			}
 		}
 		if (game.Cards.cardSet === 'Open') {
-			store.doNav(import('./Result.jsx'), { game, streakback, hardcoreback });
+			store.doNav(import('./Result.jsx'), {
+				game,
+				streakback,
+				hardcoreback,
+				hardcorebound,
+			});
 		} else {
 			store.doNav(import('../vanilla/views/Result.jsx'), { game });
 		}
@@ -1336,13 +1342,17 @@ export default function Match(props) {
 							}
 						};
 						for (const [gsum, gcode] of groups) {
-							if (pick >= gsum && checkcard(gcode)) {
-								break;
-							}
-						}
-						if (!msg.c) {
-							for (const [_gsum, gcode] of groups) {
-								if (checkcard(gcode)) {
+							if (pick >= gsum) {
+								for (const [code, _count] of iterraw(rx.user.accountbound)) {
+									if (code === gcode) {
+										msg.c = hardcoreback = gcode;
+										msg.bound = hardcorebound = true;
+										break;
+									}
+								}
+								if (!msg.c) {
+									msg.c = hardcoreback = gcode;
+									msg.bound = hardcorebound = false;
 									break;
 								}
 							}

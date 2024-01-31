@@ -20,7 +20,7 @@ export default function Library(props) {
 
 	onMount(() => {
 		sock.setCmds({ librarygive: setData });
-		sock.emit({ x: 'librarywant', f: props.name, a: props.alt });
+		sock.emit({ x: 'librarywant', f: props.name, a: props.alt ?? '' });
 	});
 
 	const memo = createMemo(() => {

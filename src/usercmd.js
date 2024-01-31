@@ -140,7 +140,10 @@ export function addloss(data, user) {
 		result.streak[data.l] = 0;
 	}
 	if (data.g) result.gold = user.gold + (data.g | 0);
-	if (data.c) result.pool = etgutil.addcard(user.pool, data.c, -1);
+	if (data.c) {
+		const key = data.bound ? 'accountbound' : 'pool';
+		result[key] = etgutil.addcard(user[key], data.c, -1);
+	}
 	return result;
 }
 export function addwin(data, user) {

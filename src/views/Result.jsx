@@ -230,7 +230,9 @@ export default function Result(props) {
 		p1id = game.userId(rx.username);
 	const [tooltip, setTip] = createSignal(null);
 	let goldreward = game.data.goldreward,
-		cardreward = game.data.cardreward;
+		boundreward = game.data.cardreward ?? '',
+		poolreward = '',
+		spinreward = '';
 
 	const canRematch = () =>
 		game.data.rematch &&
@@ -295,7 +297,7 @@ export default function Result(props) {
 		if (level !== undefined) {
 			const foedecks = game.data.players.filter(pd => !pd.user),
 				foedeck = choose(foedecks);
-			if (cardreward === undefined && foedeck) {
+			if (foedeck) {
 				const foeDeck = etgutil.decodedeck(foedeck.deck);
 				// Chromatic Butterfly if nothing winnable
 				let winnable = foeDeck.filter(code => {
@@ -303,11 +305,16 @@ export default function Result(props) {
 						return card && card.rarity > 0 && card.rarity < 4;
 					}),
 					cardwon = winnable.length ? choose(winnable) : 5009;
-				cardreward = '01' + etgutil.encodeCode(etgutil.asShiny(cardwon, false));
+				poolreward = spinreward =
+					'01' + etgutil.encodeCode(etgutil.asShiny(cardwon, false));
 			}
 			if (props.hardcoreback) {
-				cardreward =
-					'01' + etgutil.encodeCode(props.hardcoreback) + (cardreward ?? '');
+				const hardreward = '01' + etgutil.encodeCode(props.hardcoreback);
+				if (props.hardcorebound) {
+					boundreward = hardreward + boundreward;
+				} else {
+					poolreward = hardreward + poolreward;
+				}
 			}
 			if (goldreward === undefined) {
 				if (level !== undefined) {
@@ -348,10 +355,11 @@ export default function Result(props) {
 		if (goldreward) {
 			sock.userExec('addgold', { g: goldreward });
 		}
-		if (cardreward) {
-			sock.userExec(`add${game.data.quest ? 'bound' : ''}cards`, {
-				c: cardreward,
-			});
+		if (boundreward) {
+			sock.userExec('addboundcards', { c: boundreward });
+		}
+		if (poolreward) {
+			sock.userExec('addcards', { c: poolreward });
 		}
 	}
 	if (
@@ -371,8 +379,8 @@ export default function Result(props) {
 			game.get(p1id, 'hp'),
 			game.get(p1id, 'maxhp'),
 			(goldreward | 0) - (game.data.cost | 0),
-			cardreward || '-',
-			calcWealth(Cards, cardreward),
+			spinreward || '-',
+			calcWealth(Cards, spinreward),
 			winner ? (props.streakback ?? 0) + 1 : 0,
 			streakrate,
 		];
@@ -395,7 +403,8 @@ export default function Result(props) {
 	}
 
 	const cards = () => {
-		const cards = [];
+		const cards = [],
+			cardreward = boundreward + poolreward;
 		if (cardreward) {
 			let x0 = 390 - etgutil.decklength(cardreward) * 20;
 			for (const code of etgutil.iterdeck(cardreward)) {
@@ -431,10 +440,7 @@ export default function Result(props) {
 						</div>
 					)}
 					{cards}
-					<div
-						style={`text-align:center;width:700px;position:absolute;left:100px;bottom:${
-							cardreward ? 444 : 180
-						}px`}>
+					<div style="text-align:center;width:700px;position:absolute;left:100px;bottom:444px">
 						<Text text={game.data.wintext ?? 'You won!'} />
 					</div>
 				</>

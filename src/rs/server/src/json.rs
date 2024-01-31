@@ -205,6 +205,8 @@ pub enum AuthMessage {
 		g: Option<i16>,
 		#[serde(default)]
 		c: Option<i16>,
+		#[serde(default)]
+		bound: bool,
 	},
 	addwin {
 		pvp: bool,

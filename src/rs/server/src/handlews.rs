@@ -1928,7 +1928,7 @@ pub async fn handle_ws(
 								userdata.gold = userdata.gold.saturating_add(g as i32);
 							}
 						}
-						AuthMessage::addloss { pvp, l, g, c } => {
+						AuthMessage::addloss { pvp, l, g, c, bound } => {
 							let mut user = user.lock().await;
 							if let Some(userdata) = user.data.get_mut(&uname) {
 								if pvp {
@@ -1944,7 +1944,7 @@ pub async fn handle_ws(
 								if let Some(g) = g {
 									userdata.gold = userdata.gold.saturating_add(g as i32);
 								}
-								if let Some(q) = c.and_then(|c| userdata.pool.0.get_mut(&c)) {
+								if let Some(q) = c.and_then(|c| if bound { &mut userdata.accountbound } else { &mut userdata.pool }.0.get_mut(&c)) {
 									*q = q.saturating_sub(1);
 								}
 							}
