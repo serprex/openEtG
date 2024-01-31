@@ -727,6 +727,22 @@ export const root = {
 		},
 	],
 };
+
+export function extractRewards(obj) {
+	for (const key in obj) {
+		console.log(typeof obj[key])
+		if (typeof obj[key] === 'object' && obj[key] !== null) {
+			extractRewards(obj[key]);
+		} else if (key === 'cardreward' || key === 'choicerewards') {
+			return '+Card'
+				//TODO: break down card reward options into onHover
+				// obj[key].cardreward ? '+Cards' : '+'+obj[key].goldreward+'$';
+		} else if (key === 'goldreward') {
+			return '+'+obj[key];
+		}
+	}
+}
+
 export function mkQuestAi(quest, datafn) {
 	const markpower = quest.markpower ?? 1;
 	const drawpower = quest.drawpower ?? 1;
