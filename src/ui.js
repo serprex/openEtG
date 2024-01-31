@@ -59,12 +59,12 @@ export const presets = [
 	],
 	[
 		'Spins-only Hard',
-		['no-shop', 'no-up-pillar', 'hardcore'],
-		'Just like Spins-only, but everytime you lose, you permanently lost a card form your deck. Trading is allowed, but only with other Spins-only Hardcore alts.',
+		['no-shop', 'no-up-pillar', 'no-up-merge', 'hardcore'],
+		'Like Spins-only, but no upgrading cards (can still spin upgraded cards), and everytime you lose, you permanently lost a card form your deck. Trading is allowed, but only with other Spins-only Hardcore alts.',
 	],
 	[
 		'Spins-only Self-found Hard',
-		['no-shop', 'no-up-pillar', 'no-trade', 'hardcore'],
-		'Just like Spins-only Self-found, but everytime you lose, you permanently lose a card from your deck. Roguelike mode!',
+		['no-shop', 'no-up-pillar', 'no-up-merge', 'no-trade', 'hardcore'],
+		'Like Spins-only Self-found, but no upgrading cards (can still spin upgraded cards), and everytime you lose, you permanently lose a card from your deck. Roguelike mode!',
 	],
 ];
