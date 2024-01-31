@@ -1,6 +1,7 @@
 import * as store from './store.jsx';
+import * as sock from './sock.jsx';
 import { randint, shuffle } from './util.js';
-import { decodedeck } from './etgutil.js';
+import { decodedeck, encodeCode } from './etgutil.js';
 import Cards from './Cards.js';
 import Game from './Game.js';
 
@@ -770,6 +771,15 @@ export function mkQuestAi(quest, datafn) {
 		data.goldreward = quest.goldreward;
 		data.choicerewards = quest.choicerewards;
 		data.rewardamount = quest.rewardamount;
+		if (!quest.urdeck && store.hasflag(user, 'hardcore')) {
+			const ante = store.hardcoreante(Cards, urdeck);
+			if (ante) {
+				data.ante = ante;
+				sock.userExec('rmcard', ante);
+				const key = ante.bound ? 'cardreward' : 'poolreward';
+				data[key] = '01' + encodeCode(ante.c) + (data[key] ?? '');
+			}
+		}
 	}
 	shuffle(data.players);
 	return new Game(datafn ? datafn(data) : data);

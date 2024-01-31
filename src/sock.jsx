@@ -228,8 +228,8 @@ const sockEvents = {
 		store.chatMsg(data.msg, 'System');
 	},
 	addpools(data) {
-		store.userCmd('addcards', { c: data.c });
-		store.userCmd('addboundcards', { c: data.b });
+		if (data.c) store.userCmd('addcards', { c: data.c });
+		if (data.b) store.userCmd('addcards', { c: data.b, bound: true });
 		store.chatMsg(data.msg, 'System');
 	},
 };

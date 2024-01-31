@@ -231,7 +231,7 @@ export default function Result(props) {
 	const [tooltip, setTip] = createSignal(null);
 	let goldreward = game.data.goldreward,
 		boundreward = game.data.cardreward ?? '',
-		poolreward = '',
+		poolreward = game.data.poolreward ?? '',
 		spinreward = '';
 
 	const canRematch = () =>
@@ -305,8 +305,8 @@ export default function Result(props) {
 						return card && card.rarity > 0 && card.rarity < 4;
 					}),
 					cardwon = winnable.length ? choose(winnable) : 5009;
-				poolreward = spinreward =
-					'01' + etgutil.encodeCode(etgutil.asShiny(cardwon, false));
+				spinreward = '01' + etgutil.encodeCode(etgutil.asShiny(cardwon, false));
+				poolreward += spinreward;
 			}
 			if (props.hardcoreback) {
 				const hardreward = '01' + etgutil.encodeCode(props.hardcoreback);
@@ -356,7 +356,7 @@ export default function Result(props) {
 			sock.userExec('addgold', { g: goldreward });
 		}
 		if (boundreward) {
-			sock.userExec('addboundcards', { c: boundreward });
+			sock.userExec('addcards', { c: boundreward, bound: true });
 		}
 		if (poolreward) {
 			sock.userExec('addcards', { c: poolreward });

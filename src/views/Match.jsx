@@ -12,7 +12,7 @@ import { Index, For, Show } from 'solid-js/web';
 
 import { playSound } from '../audio.js';
 import { strcols, maybeLightenStr } from '../ui.js';
-import { encodeCode, asShiny, iterraw } from '../etgutil.js';
+import { encodeCode, asShiny } from '../etgutil.js';
 import { mkAi } from '../mkAi.js';
 import { userEmit, userExec, setCmds } from '../sock.jsx';
 import Card from '../Components/Card.jsx';
@@ -752,8 +752,12 @@ export default function Match(props) {
 		expectedDamageSamples = rx.opts.expectedDamageSamples | 0 || 4;
 	let aiDelay = 0,
 		streakback = 0,
-		hardcoreback = 0,
-		hardcorebound = 0;
+		hardcoreback = null,
+		hardcorebound = false;
+	if (props.game.data.ante) {
+		hardcoreback = props.game.data.ante.c;
+		hardcorebound = props.game.data.ante.bound;
+	}
 	const [tempgame, setTempgame] = createSignal(null);
 	const [replayhistory, setReplayHistory] = createSignal([props.game]);
 	const [replayindex, setreplayindex] = createSignal(0);
@@ -1318,44 +1322,11 @@ export default function Match(props) {
 				if (store.hasflag(rx.user, 'hardcore')) {
 					const pl = game.data.players.find(p => p.user === rx.username);
 					if (pl) {
-						let sum = 0,
-							groups = [];
-						for (const [code, count] of iterraw(pl.deck)) {
-							const card = game.Cards.Codes[code];
-							if (card && !card.pillar) {
-								groups.push([sum, code]);
-								sum += count;
-							}
-						}
-						const pick = (Math.random() * sum) | 0;
-						const checkcard = gcode => {
-							let hascard = false;
-							for (const [code, _count] of iterraw(rx.user.pool)) {
-								if (code === gcode) {
-									hascard = true;
-									break;
-								}
-							}
-							if (hascard) {
-								msg.c = hardcoreback = gcode;
-								return true;
-							}
-						};
-						for (const [gsum, gcode] of groups) {
-							if (pick >= gsum) {
-								for (const [code, _count] of iterraw(rx.user.accountbound)) {
-									if (code === gcode) {
-										msg.c = hardcoreback = gcode;
-										msg.bound = hardcorebound = true;
-										break;
-									}
-								}
-								if (!msg.c) {
-									msg.c = hardcoreback = gcode;
-									msg.bound = hardcorebound = false;
-									break;
-								}
-							}
+						const ante = store.hardcoreante(game.Cards, pl.deck);
+						Object.assign(msg, ante);
+						if (ante) {
+							hardcoreback = msg.c;
+							hardcorebound = msg.bound;
 						}
 					}
 				}

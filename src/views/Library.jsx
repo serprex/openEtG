@@ -135,7 +135,7 @@ export default function Library(props) {
 				}
 			/>
 			<input
-				value={props.alt}
+				value={props.alt ?? ''}
 				style="position:absolute;left:5px;top:246px"
 				placeholder="Alt"
 				ref={altname}

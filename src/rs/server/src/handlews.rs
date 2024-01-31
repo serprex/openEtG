@@ -1971,22 +1971,20 @@ pub async fn handle_ws(
 								userdata.streak[l as usize] = n;
 							}
 						}
-						AuthMessage::addcards { c } => {
+						AuthMessage::addcards { c, bound } => {
 							let mut user = user.lock().await;
 							if let Some(userdata) = user.data.get_mut(&uname) {
 								for (code, count) in iterraw(c.as_bytes()) {
-									let q = userdata.pool.0.entry(code).or_default();
+									let q = if bound { &mut userdata.accountbound } else { &mut userdata.pool }.0.entry(code).or_default();
 									*q = q.saturating_add(count);
 								}
 							}
 						}
-						AuthMessage::addboundcards { c } => {
+						AuthMessage::rmcard { c, bound } => {
 							let mut user = user.lock().await;
 							if let Some(userdata) = user.data.get_mut(&uname) {
-								for (code, count) in iterraw(c.as_bytes()) {
-									let q = userdata.accountbound.0.entry(code).or_default();
-									*q = q.saturating_add(count);
-								}
+								let q = if bound { &mut userdata.accountbound } else { &mut userdata.pool }.0.entry(c).or_default();
+								*q = q.saturating_sub(1);
 							}
 						}
 						AuthMessage::donedaily { daily, c } => {

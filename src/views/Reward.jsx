@@ -74,8 +74,9 @@ export default function Reward(props) {
 					onClick={() => {
 						if (chosenReward()) {
 							if (props.code === undefined) {
-								userExec('addboundcards', {
+								userExec('addcards', {
 									c: encodeCount(numberofcopies) + chosenReward().toString(32),
+									bound: true,
 								});
 								store.doNav(import('./MainMenu.jsx'));
 							} else {

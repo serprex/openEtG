@@ -3,7 +3,7 @@ import { createStore } from 'solid-js/store';
 
 import * as usercmd from './usercmd.js';
 import { changeMusic, changeSound } from './audio.js';
-import { mergedecks, removedecks } from './etgutil.js';
+import { iterraw, mergedecks, removedecks } from './etgutil.js';
 
 export const Login =
 	typeof kongregateAPI === 'undefined' ?
@@ -174,6 +174,31 @@ export function addOrig(update) {
 
 export function hasflag(user, flag) {
 	return user?.flags?.includes?.(flag);
+}
+
+export function hardcoreante(Cards, deck) {
+	let sum = 0;
+	const groups = [];
+	for (const [code, count] of iterraw(deck)) {
+		const card = Cards.Codes[code];
+		if (card && !card.pillar) {
+			groups.push([sum, code]);
+			sum += count;
+		}
+	}
+	const pick = (Math.random() * sum) | 0;
+	for (const [gsum, gcode] of groups) {
+		if (pick < gsum) {
+			for (const [code, _count] of iterraw(state.user.accountbound)) {
+				if (code === gcode) {
+					return { c: gcode, bound: true };
+				}
+			}
+			return { c: gcode, bound: false };
+		}
+	}
+
+	return null;
 }
 
 export function useRx(cb = x => x) {

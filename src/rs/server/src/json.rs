@@ -217,9 +217,13 @@ pub enum AuthMessage {
 	},
 	addcards {
 		c: String,
+		#[serde(default)]
+		bound: bool
 	},
-	addboundcards {
-		c: String,
+	rmcard {
+		c: i16,
+		#[serde(default)]
+		bound: bool
 	},
 	donedaily {
 		#[serde(default)]
