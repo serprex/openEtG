@@ -401,19 +401,19 @@ export const quarks = {
 			'You have proved your worth for the Master of Arms, and he gives you one of his rare weapons.',
 		/* prettier-ignore */
 		choicerewards: [
-		5109, 5124,
-		5210, 5222,
-		5308, 5324,
-		5407, 5423,
-		5509, 5523,
-		5607, 5621,
-		5708, 5723,
-		5809, 5822,
-		5909, 5924,
-		6008, 6025,
-		6107, 6126,
-		6206, 6223,
-	],
+			5109, 5124,
+			5210, 5222,
+			5308, 5324,
+			5407, 5423,
+			5509, 5523,
+			5607, 5621,
+			5708, 5723,
+			5809, 5822,
+			5909, 5924,
+			6008, 6025,
+			6107, 6126,
+			6206, 6223,
+		],
 		info: 'Fight the Master of Arms at the Proving Grounds!',
 	},
 	pgshard: {
@@ -638,7 +638,7 @@ export const quarks = {
 		hp: 400,
 		markpower: 3,
 		drawpower: 2,
-		cardreward: '0171r01785017bf017ea017hj017nm017qv01813018pi',
+		cardreward: '0171r01785017bf017ea017hj017nm017qv01813',
 		info: 'The AI has taken control of Serprex’s account and gone berserk. It has a power beyond a demigod!',
 		wintext:
 			'You defeat the AI menace and restore Serprex’s account to their rightful place. Phew!',
@@ -727,21 +727,6 @@ export const root = {
 		},
 	],
 };
-
-export function extractRewards(obj) {
-	for (const key in obj) {
-		console.log(typeof obj[key])
-		if (typeof obj[key] === 'object' && obj[key] !== null) {
-			extractRewards(obj[key]);
-		} else if (key === 'cardreward' || key === 'choicerewards') {
-			return '+Card'
-				//TODO: break down card reward options into onHover
-				// obj[key].cardreward ? '+Cards' : '+'+obj[key].goldreward+'$';
-		} else if (key === 'goldreward') {
-			return '+'+obj[key];
-		}
-	}
-}
 
 export function mkQuestAi(quest, datafn) {
 	const markpower = quest.markpower ?? 1;
