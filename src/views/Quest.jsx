@@ -23,7 +23,7 @@ function QuestButton(props) {
 					Quest.quarks[props.area].name
 					: props.area.name}
 			</span>
-			{Quest.extractRewards(Quest.quarks[props.area]) && (
+			{Quest.extractRewards(Quest.quarks[props.area]) && !props.user.quests[props.area] && (
 				<span
 					style={{
 						position: 'absolute',
