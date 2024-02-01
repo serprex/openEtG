@@ -346,7 +346,7 @@ impl<'a> SkillThing<'a> {
 				} else {
 					"Transform this card into an unburrowed 8|3 Shrieker"
 				}),
-			Skill::feed => Cow::from("Poison other target creature, gain 3|3, & lose immaterial"),
+			Skill::feed => Cow::from("Poison other target creature, gain 3|3 & lose immaterial"),
 			Skill::fickle =>
 				Cow::from("Swap target card in either player's hand with a random card from their deck that they have enough quanta to play"),
 			Skill::fiery => Cow::from("Gains 1 strength for every 5:6 in your quanta pool"),
@@ -371,9 +371,9 @@ impl<'a> SkillThing<'a> {
 			Skill::freeevade =>
 				Cow::from("If your opponent has a shield, your airborne creatures have a 25% chance to bypass the shield. Otherwise, your creatures have a 25% chance to deal 50% more damage. Your creatures have 20% chance to evade opponent's targeted spells & skills"),
 			Skill::freeze(x) =>
-				Cow::from(format!("Freeze target creature or weapon for {} turns. Frozen cards cannot attack or use active skills, & do not activate per-turn skills", x)),
+				Cow::from(format!("Freeze target creature or weapon for {} turns. Frozen cards cannot attack or use active skills & do not activate per-turn skills", x)),
 			Skill::freezeperm => Cow::from(
-				format!("Freeze target non-stacking permanent for {} turns. Frozen cards cannot attack or use active skills, & do not activate per-turn skills", if self.upped() { '4' } else { '3' }),
+				format!("Freeze target non-stacking permanent for {} turns. Frozen cards cannot attack or use active skills & do not activate per-turn skills", if self.upped() { '4' } else { '3' }),
 			),
 			Skill::fungusrebirth => Cow::from(if self.upped() {
 				"Transform this card into a Toxic Fungus"
@@ -407,7 +407,7 @@ impl<'a> SkillThing<'a> {
 			Skill::hasten if ev == Event::OwnDiscard => Cow::from("When discarded, you draw a card"),
 			Skill::hatch =>
 				Cow::from("Transform this creature into a random creature. Caster can be reactivated"),
-			Skill::heal => Cow::from("Heal target creature or player 20"),
+			Skill::heal => Cow::from("Target creature or player heals 20 HP"),
 			Skill::heatmirror => Cow::from(if self.upped() {
 				"When your opponent plays a creature from their hand, summon a Ball Lightning"
 			} else {
@@ -415,9 +415,9 @@ impl<'a> SkillThing<'a> {
 			}),
 			Skill::hitownertwice => Cow::from("When this creature attacks, it also attacks its owner twice"),
 			Skill::holylight => Cow::from(if self.upped() {
-				"Remove statuses (positive & negative) from target creature or permanent. Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature.\nGain 1:8 when played"
+				"Remove all statuses from target creature or permanent. Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature.\nGain 1:8 when played"
 			} else {
-				"Remove statuses (positive & negative) from target creature or permanent. Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature"
+				"Remove all statuses from target creature or permanent. Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature"
 			}),
 			Skill::hope => Cow::from("Blocks one additional damage for each creature you control that gain 1:8 when attacking"),
 			Skill::hush => Cow::from("Silence non-ranged attackers"),
