@@ -182,8 +182,8 @@ export function hardcoreante(Cards, deck) {
 	for (const [code, count] of iterraw(deck)) {
 		const card = Cards.Codes[code];
 		if (card && !card.pillar) {
-			groups.push([sum, code]);
 			sum += count;
+			groups.push([sum, code]);
 		}
 	}
 	const pick = (Math.random() * sum) | 0;
