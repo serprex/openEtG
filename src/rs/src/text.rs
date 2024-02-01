@@ -466,16 +466,16 @@ impl<'a> SkillThing<'a> {
 			Skill::luciferin =>
 				Cow::from("Your creatures without skills gain \"Gain 1:8 when it attacks.\"\nHeal yourself 10.\nRemoves cloak"),
 			Skill::lycanthropy => Cow::from(if self.set() == CardSet::Open {
-				"Remove this ability, gain 5|5, & become nocturnal"
+				"Remove this ability, gain 5|5 & become nocturnal"
 			} else {
 				"Remove this ability & gain 5|5"
 			}),
 			Skill::martyr =>
 				Cow::from("Gains 1|0 for every point of damage this card receives. Heals its owner when healed"),
 			Skill::mend => Cow::from(if self.set() == CardSet::Open {
-				"Heal target creature 10"
+				"Heal target creature 10 HP"
 			} else {
-				"Heal target creature 5"
+				"Heal target creature 5 HP"
 			}),
 			Skill::metamorph =>
 				Cow::from("Change your mark to target's element.\nIncrease your mark power by 1"),
