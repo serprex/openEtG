@@ -445,9 +445,9 @@ impl<'a> SkillThing<'a> {
 			Skill::liquid =>
 				Cow::from("Poison target creature. Target creature's skills are replaced with \"Heal yourself equal to the damage dealt by this card.\""),
 			Skill::livingweapon => Cow::from(if self.upped() {
-				"Equip target creature as a weapon. If target creature's owner already had a weapon equipped, return it to their hand. Heal yourself equal to target creature's HP. Gain quanta equivalent to target card's cost"
+				"Target creature is equipped as target owner's weapon. If card already exists in weapon slot, return it to owners hand as base card. Heal yourself equal to target creature's HP. Gain quanta equivalent to target creature's cost"
 			} else {
-				"Equip target creature as a weapon. If target creature's owner already had a weapon equipped, return it to their hand. Heal yourself equal to target creature's HP"
+				"Target creature is equipped as target owner's weapon. If card already exists in weapon slot, return it to owners hand as base card. Heal yourself equal to target creature's HP"
 			}),
 			Skill::lobotomize => Cow::from("Remove target creature's skills. Also remove psionism"),
 			Skill::locket =>
