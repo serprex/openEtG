@@ -215,7 +215,7 @@ impl<'a> SkillThing<'a> {
 				s.push_str("|1 Phantom");
 				Cow::from(s)
 			}
-			Skill::bubbleclear => Cow::from("Strip target creature or permanent of all statuses. If target is a creature, heal it by 1.\nTarget gains Bubble, protecting it from 1 spell or ability"),
+			Skill::bubbleclear => Cow::from("Remove all statuses from target creature or permanent. If target is a creature, heal it by 1 HP.\nTarget gains Bubble, protecting it the next time it is targeted by opponent, or receives spell damage from any source"),
 			Skill::butterfly => Cow::from(if self.set() == CardSet::Open {
 				"Target creature or weapon with strength or HP less than 3 has its skills replaced with \"3:1 Destroy target permanent.\""
 			} else {
@@ -226,7 +226,7 @@ impl<'a> SkillThing<'a> {
 			} else {
 				"Burrow this creature. Strength is halved while burrowed"
 			}),
-			Skill::catapult => Cow::from("Target a creature to sacrifice. Damage opponent based on target creature's HP†. Frozen creatures deal 1.5x damage. Poisoned creatures transfer poisons to opponent.\n\n† (100 * Creature's HP) / (100 + Creature's HP)"),
+			Skill::catapult => Cow::from("Sacrifice your own target creature. Damage opponent based on target creature's HP†. Frozen creatures deal 50% more damage. Poisoned creatures transfer poisons to opponent.\n\n† (100 * Creature's HP) / (100 + Creature's HP)"),
 			Skill::catlife => {
 				let card = self.card();
 				Cow::from(format!("Has {} lives. When it dies, this creature loses a life & revives with {}|{} stats",
@@ -330,7 +330,7 @@ impl<'a> SkillThing<'a> {
 			Skill::envenom =>
 				Cow::from("Target equipment gains \"Give 1 poison on hit. Throttled (only triggers twice from Adrenaline)\" & \"25% chance to poison non-ranged attackers.\""),
 			Skill::epidemic =>
-				Cow::from("When any creature dies, cardholder poisons opponent equal to dying creature's poison"),
+				Cow::from("When any creature dies, card owner poisons opponent equal to dying creature's poison"),
 			Skill::epoch =>
 				Cow::from("On each player's turn, silence that player after they play two cards"),
 			Skill::equalize =>
@@ -371,7 +371,7 @@ impl<'a> SkillThing<'a> {
 			Skill::freeevade =>
 				Cow::from("If your opponent has a shield, your airborne creatures have a 25% chance to bypass the shield. Otherwise, your creatures have a 25% chance to deal 50% more damage. Your creatures have 20% chance to evade opponent's targeted spells & skills"),
 			Skill::freeze(x) =>
-				Cow::from(format!("Freeze target creature or weapon for {} turns. Frozen cards cannot attack or use active skills & do not activate per-turn skills", x)),
+				Cow::from(format!("Freeze target creature or weapon for {} turns. Frozen cards cannot attack, use active skills, or activate per-turn skills", x)),
 			Skill::freezeperm => Cow::from(
 				format!("Freeze target non-stacking permanent for {} turns. Frozen cards cannot attack or use active skills & do not activate per-turn skills", if self.upped() { '4' } else { '3' }),
 			),
@@ -607,7 +607,7 @@ impl<'a> SkillThing<'a> {
 			Skill::quint =>
 				Cow::from("Target creature gains immaterial and loses frozen status"),
 			Skill::quinttog =>
-				Cow::from("If target creature isn't immaterial, it gains immaterial and loses frozen status. If target creature is immaterial, it loses immaterial status"),
+				Cow::from("If target creature isn't immaterial, it gains immaterial, & loses frozen status. If target creature is immaterial, it loses immaterial status"),
 			Skill::rage => {
 				let mut s = String::from("Target creature gains +");
 				s.push_str(if self.upped() { "6|-6" } else { "5|-5" });
