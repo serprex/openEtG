@@ -215,14 +215,14 @@ impl<'a> SkillThing<'a> {
 				s.push_str("|1 Phantom");
 				Cow::from(s)
 			}
-			Skill::bubbleclear => Cow::from("Remove statuses (positive & negative) from target creature or permanent, & heal target creature 1.\nTarget gains a bubble. Bubbles nullify the next spell, ability, or spell damage used by opponent that targets or damages affected card"),
+			Skill::bubbleclear => Cow::from("Strip target creature or permanent of all statuses. If target is a creature, heal it by 1.\nTarget gains Bubble, protecting it from 1 spell or ability"),
 			Skill::butterfly => Cow::from(if self.set() == CardSet::Open {
-				"Target creature or weapon with either strength or HP less than 3 has its skills replaced with \"3:1 Destroy target permanent.\""
+				"Target creature or weapon with strength or HP less than 3 has its skills replaced with \"3:1 Destroy target permanent.\""
 			} else {
-				"Target creature with less attack than 3. Replace target's skills with \"3:1 Destroy target permanent\""
+				"Target creature with less attack than 3 has its skills replaced with \"3:1 Destroy target permanent\""
 			}),
 			Skill::burrow => Cow::from(if self.get_flag(Flag::burrowed) {
-				"Unburrow"
+				"Unburrow this creatue, doubling its strength"
 			} else {
 				"Burrow this creature. Strength is halved while burrowed"
 			}),
