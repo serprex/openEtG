@@ -330,7 +330,7 @@ impl<'a> SkillThing<'a> {
 			Skill::envenom =>
 				Cow::from("Target equipment gains \"Give 1 poison on hit. Throttled (only triggers twice from Adrenaline)\" & \"25% chance to poison non-ranged attackers.\""),
 			Skill::epidemic =>
-				Cow::from("When any creature dies, poison opponent equal to dying creature's poison"),
+				Cow::from("When any creature dies, cardholder poisons opponent equal to dying creature's poison"),
 			Skill::epoch =>
 				Cow::from("On each player's turn, silence that player after they play two cards"),
 			Skill::equalize =>
