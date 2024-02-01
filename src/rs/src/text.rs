@@ -605,9 +605,9 @@ impl<'a> SkillThing<'a> {
 			Skill::quanta(x) if ev == Event::OwnPlay =>
 				Cow::from(format!("Gain 1:{x} when played")),
 			Skill::quint =>
-				Cow::from("Target creature becomes immaterial. If target creature is frozen, it loses frozen status"),
+				Cow::from("Target creature gains immaterial and loses frozen status"),
 			Skill::quinttog =>
-				Cow::from("If target creature isn't immaterial, it gains immaterial status, & if it is also frozen, it loses frozen status. If target creature is immaterial, it loses immaterial status"),
+				Cow::from("If target creature isn't immaterial, it gains immaterial and loses frozen status. If target creature is immaterial, it loses immaterial status"),
 			Skill::rage => {
 				let mut s = String::from("Target creature gains +");
 				s.push_str(if self.upped() { "6|-6" } else { "5|-5" });
