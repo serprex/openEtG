@@ -531,11 +531,11 @@ impl<'a> SkillThing<'a> {
 			Skill::paleomagnetism =>
 				Cow::from(format!("Summon a {} or pendulum every turn. \u{2154} chance it matches your mark, otherwise it matches your opponent's mark", if self.upped() { "tower" } else { "pillar" } )),
 			Skill::pandemonium =>
-				Cow::from("Inflict a random effect on every creature. Possible effects include damage, lobotomize, parallel universe, gravity pull, rewind, & freeze. Removes cloak"),
+				Cow::from("Apply a random effect on every creature. Possible effects include damage, lobotomize, parallel universe, gravity pull, rewind, & freeze. Removes cloak"),
 			Skill::pandemonium2 =>
-				Cow::from("Inflict a random effect on each of target player's creatures. Possible effects include damage, lobotomize, parallel universe, gravity pull, rewind, & freeze. Removes cloak"),
+				Cow::from("Apply a random effect on each of target player's creatures. Possible effects include damage, lobotomize, parallel universe, gravity pull, rewind, & freeze. Removes cloak"),
 			Skill::pandemonium3 =>
-				Cow::from("Inflict a random effect on every card in play or any hand. All existing effects are possible. Removes cloak"),
+				Cow::from("Apply a random effect on every card in play or any hand. All existing effects are possible. Removes cloak"),
 			Skill::paradox => Cow::from("Target creature with more strength than HP dies"),
 			Skill::parallel => Cow::from("Summon an exact copy of target creature on your side"),
 			Skill::patience =>
