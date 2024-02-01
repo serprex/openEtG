@@ -255,8 +255,8 @@ export default function MainMenu(props) {
 				<div style="position:absolute;left:304px;top:380px;width:292px;height:130px">
 					<div class="maintitle">Miscellaneous</div>
 					<div>
-						{!hasflag(rx.user, 'no-oracle') && (
-							<div style="display:inline-block;width:49%;text-align:center">
+						<div style="display:inline-block;width:49%;text-align:center">
+							{!hasflag(rx.user, 'no-oracle') && (
 								<input
 									type="button"
 									value="Colosseum"
@@ -266,27 +266,29 @@ export default function MainMenu(props) {
 										'Try some daily challenges in the Colosseum',
 									]}
 								/>
-							</div>
-						)}
-						{!hasflag(rx.user, 'no-quest') && (
-							<div style="display:inline-block;width:49%;text-align:center">
+							)}
+						</div>
+						<div style="display:inline-block;width:49%;text-align:center">
+							{!hasflag(rx.user, 'no-quest') && (
 								<input
 									type="button"
 									value="Quests"
 									onClick={() => store.doNav(import('./Quest.jsx'))}
 									onMouseOver={[setTip, 'Go on an adventure']}
 								/>
-							</div>
-						)}
+							)}
+						</div>
 					</div>
 					<div style="margin-top:4px">
 						<div style="display:inline-block;width:49%;text-align:center">
-							<input
-								type="button"
-								value="Arena Deck"
-								onClick={() => store.doNav(import('./ArenaInfo.jsx'))}
-								onMouseOver={[setTip, 'Check how your arena decks are doing']}
-							/>
+							{!rx.uname && (
+								<input
+									type="button"
+									value="Arena Deck"
+									onClick={() => store.doNav(import('./ArenaInfo.jsx'))}
+									onMouseOver={[setTip, 'Check how your arena decks are doing']}
+								/>
+							)}
 						</div>
 						<div style="display:inline-block;width:49%;text-align:center">
 							<input
