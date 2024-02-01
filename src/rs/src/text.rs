@@ -249,7 +249,7 @@ impl<'a> SkillThing<'a> {
 			Skill::counter =>
 				Cow::from("When this creature is attacked by another creature, if this creature is able to attack, it deals its damage to the attacking creature"),
 			Skill::countimmbur => Cow::from("Gains 1|0 for every immaterial or burrowed card in play"),
-			Skill::cpower => Cow::from("Target randomly gains between 1 to 5 strength & HP"),
+			Skill::cpower => Cow::from("Target gains 1-5 strength & 1-5 HP. Stats roll separately"),
 			Skill::creatureupkeep =>
 				Cow::from("Whenever a creature attacks, its owner must pay one quanta of the creature's element or the creature is destroyed"),
 			Skill::cseed =>
