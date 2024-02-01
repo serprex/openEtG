@@ -226,7 +226,7 @@ impl<'a> SkillThing<'a> {
 			} else {
 				"Burrow this creature. Strength is halved while burrowed"
 			}),
-			Skill::catapult => Cow::from("Sacrifice target creature you control to damage opponent for 100 * Creature's HP / (100 + Creature's HP). Frozen creautres deal 1.5x more. Poisoned creatures transfer their poison to opponent"),
+			Skill::catapult => Cow::from("Target a creature to sacrifice. Damage opponent based on target creature's HP†. Frozen creatures deal 1.5x damage. Poisoned creatures transfer poisons to opponent.\n\n† (100 * Creature's HP) / (100 + Creature's HP)"),
 			Skill::catlife => {
 				let card = self.card();
 				Cow::from(format!("Has {} lives. When it dies, this creature loses a life & revives with {}|{} stats",
