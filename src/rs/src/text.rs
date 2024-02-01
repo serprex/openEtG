@@ -639,7 +639,7 @@ impl<'a> SkillThing<'a> {
 				Cow::from("Combine with target creature, causing it to gain strength & HP equal to this creature's strength & HP"),
 			Skill::ren => Cow::from("Target creature gains: \"When dying instead return to owner's hand. Modified state besides this effect remains when played again.\""),
 			Skill::resetdr => Cow::from("Zero damage reduction at start of your turn"),
-			Skill::resummon => Cow::from("Target creature is summoned again as is"),
+			Skill::resummon => Cow::from("Target creature is summoned again, as is"),
 			Skill::rewind =>
 				Cow::from("Put target creature on top of its owner's deck. Removes all bonuses & modifiers on target creature"),
 			Skill::reveal if ev == Event::OwnPlay => Cow::from("Reveal opponent's hand when played & on attack"),
