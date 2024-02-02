@@ -26,13 +26,18 @@ function mkDaily(type) {
 						daily: 2,
 					};
 			dataNext.cost = 0;
-			dataNext.cardreward = '';
 			dataNext.rematch = () => {
 				const { user } = store.state;
 				return !(user.daily & (1 << type)) && mkDaily(type);
 			};
 			dataNext.rematchFilter = (game, p1id) => game.winner !== p1id;
 			dataNext.dataNext = dataNext;
+			if (store.hasflag('hardcore')) {
+				dataNext.ante = ante;
+				sock.userExec('rmcard', ante);
+				const key = ante.bound ? 'cardreward' : 'poolreward';
+				dataNext[key] = '01' + encodeCode(ante.c) + (dataNext[key] ?? '');
+			}
 			return Object.assign(data, dataNext);
 		});
 		if (!game) return;
@@ -48,7 +53,7 @@ function mkDaily(type) {
 	}
 	store.navGame(game);
 }
-export default function Colosseum(props) {
+export default function Colosseum() {
 	const user = store.useRx(state => state.user);
 	const [magename, magedeck] = Decks.mage[user.dailymage],
 		[dgname, dgdeck] = Decks.demigod[user.dailydg];
