@@ -305,26 +305,37 @@ export default function MainMenu(props) {
 						</div>
 					</div>
 					<div style="margin-top:4px">
-						<div style="display:inline-block;width:49%;text-align:center">
-							<input
-								type="button"
-								value="Legacy"
-								onClick={() =>
-									store.doNav(import('../vanilla/views/Login.jsx'))
-								}
-								onMouseOver={[
-									setTip,
-									'A mode attempting to imitate original EtG',
-								]}
-							/>
-						</div>
-						<div style="display:inline-block;width:49%;text-align:center">
-							<input
-								type="button"
-								value="Alts"
-								onClick={() => store.doNav(import('./Alts.jsx'))}
-								onMouseOver={[setTip, 'Manage subaccounts']}
-							/>
+						<div style="margin-top:4px">
+							<div style="display:inline-block;width:49%;text-align:center">
+								{!(hasflag(rx.user, 'no-oracle') ||
+									hasflag(rx.user, 'no-quest') ||
+									hasflag(rx.user, 'no-shop') ||
+									hasflag(rx.user, 'no-up-pillar') ||
+									hasflag(rx.user, 'no-up-merge') ||
+									hasflag(rx.user, 'no-trade') ||
+									hasflag(rx.user, 'no-battle') ||
+									hasflag(rx.user, 'hardcore')) && (
+								<input
+									type="button"
+									value="Legacy"
+									onClick={() =>
+										store.doNav(import('../vanilla/views/Login.jsx'))
+									}
+									onMouseOver={[
+										setTip,
+										'A mode attempting to imitate original EtG',
+									]}
+								/>
+								)}
+							</div>
+							<div style="display:inline-block;width:49%;text-align:center">
+								<input
+									type="button"
+									value="Alts"
+									onClick={() => store.doNav(import('./Alts.jsx'))}
+									onMouseOver={[setTip, 'Manage subaccounts']}
+								/>
+							</div>
 						</div>
 					</div>
 				</div>
