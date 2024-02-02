@@ -306,17 +306,19 @@ export default function MainMenu(props) {
 					</div>
 					<div style="margin-top:4px">
 						<div style="display:inline-block;width:49%;text-align:center">
-							<input
-								type="button"
-								value="Legacy"
-								onClick={() =>
-									store.doNav(import('../vanilla/views/Login.jsx'))
-								}
-								onMouseOver={[
-									setTip,
-									'A mode attempting to imitate original EtG',
-								]}
-							/>
+							{!rx.user.flags.length > 0 && (
+								<input
+									type="button"
+									value="Legacy"
+									onClick={() =>
+										store.doNav(import('../vanilla/views/Login.jsx'))
+									}
+									onMouseOver={[
+										setTip,
+										'A mode attempting to imitate original EtG',
+									]}
+								/>
+							)}
 						</div>
 						<div style="display:inline-block;width:49%;text-align:center">
 							<input
