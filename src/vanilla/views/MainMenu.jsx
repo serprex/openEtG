@@ -54,13 +54,14 @@ export default function OriginalMainMenu() {
 	const origfoename = () => rx.opts.origfoename ?? '';
 
 	let ocard = null;
-	if (rx.orig.oracle !== rx.user.oracle) {
+	const user_oracle = (rx.uname ? rx.alts[''] : rx.user).oracle;
+	if (rx.orig.oracle !== user_oracle) {
 		const fg = upto(aiDecks.fg.length);
 		const ocode = original_oracle(randint());
 		ocard = Cards.Codes[ocode];
 		const update = {
 			pool: '01' + etgutil.encodeCode(ocode),
-			oracle: rx.user.oracle,
+			oracle: user_oracle,
 			fg,
 		};
 		userEmit('origadd', update);
