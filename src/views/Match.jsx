@@ -475,7 +475,19 @@ function Thing(props) {
 				'z-index': '2',
 				'pointer-events': ~props.game.getIndex(props.id) ? undefined : 'none',
 			}}
-			onMouseMove={setInfo}
+			onMouseMove={e => {
+				e.preventDefault();
+				if (
+					e.buttons & 1 &&
+					!props.targeting &&
+					(props.opts.shiftDrag || e.shiftKey) &&
+					props.game.get_kind(props.id) !== Kind.Spell
+				) {
+					props.onClick(props.id);
+				} else {
+					setInfo(e);
+				}
+			}}
 			onMouseOver={setInfo}
 			onMouseLeave={props.onMouseOut}
 			onClick={[props.onClick, props.id]}>
@@ -484,7 +496,7 @@ function Thing(props) {
 				fallback={<div class="ico cback" style="left:2px;top:2px" />}>
 				<div
 					style={`width:64px;height:64px;pointer-events:none;background-color:${bgcolor()}`}>
-					<Show when={!props.lofiArt}>
+					<Show when={!props.opts.lofiArt}>
 						<img
 							class={props.game.getCard(props.id).shiny ? 'shiny' : ''}
 							src={`/Cards/${encodeCode(
@@ -630,7 +642,7 @@ function Things(props) {
 						}}>
 						{pos => (
 							<Thing
-								lofiArt={props.lofiArt}
+								opts={props.opts}
 								game={props.game}
 								p1id={props.p1id}
 								setInfo={props.setInfo}
@@ -747,8 +759,7 @@ function removeFx(fx) {
 
 export default function Match(props) {
 	const rx = store.useRx();
-	const lofiArt = rx.opts.lofiArt ?? false,
-		playByPlayMode = rx.opts.playByPlayMode,
+	const playByPlayMode = rx.opts.playByPlayMode,
 		expectedDamageSamples = rx.opts.expectedDamageSamples | 0 || 4;
 	let aiDelay = 0,
 		streakback = 0,
@@ -1141,10 +1152,7 @@ export default function Match(props) {
 				setTargeting({
 					filter: id =>
 						game.get_kind(id) === Kind.Spell && game.get_owner(id) === p1id(),
-					cb: tgt => {
-						endClick(tgt);
-						setTargeting(null);
-					},
+					cb: endClick,
 					text: 'Discard',
 					src: null,
 				});
@@ -1188,31 +1196,27 @@ export default function Match(props) {
 		const { game } = props;
 		clearCard();
 		if (props.replay || game.phase !== Phase.Play) return;
-		if (targeting()) {
-			if (targeting().filter(id)) {
-				targeting().cb(id);
+		const tgting = targeting();
+		if (tgting) {
+			if (tgting.filter(id)) {
+				tgting.cb(id);
+				setTargeting(null);
 			}
 		} else if (game.get_owner(id) === p1id() && game.canactive(id)) {
 			const cb = tgt => applyNext({ x: 'cast', c: id, t: tgt });
 			if (
-				game.get_kind(id) === Kind.Spell &&
-				game.getCard(id).type !== Kind.Spell
+				(game.get_kind(id) === Kind.Spell &&
+					game.getCard(id).type !== Kind.Spell) ||
+				!game.requires_target(id)
 			) {
 				cb();
 			} else {
-				if (!game.requires_target(id)) {
-					cb();
-				} else {
-					setTargeting({
-						filter: tgt => game.can_target(id, tgt),
-						cb: tgt => {
-							cb(tgt);
-							setTargeting(null);
-						},
-						text: game.get_cast_skill(id),
-						src: id,
-					});
-				}
+				setTargeting({
+					filter: tgt => game.can_target(id, tgt),
+					cb,
+					text: game.get_cast_skill(id),
+					src: id,
+				});
 			}
 		}
 	};
@@ -1596,7 +1600,7 @@ export default function Match(props) {
 				endPos={effects().endPos}
 				getIdTrack={getIdTrack}
 				setIdTrack={setIdTrack}
-				lofiArt={lofiArt}
+				opts={rx.opts}
 				game={game()}
 				p1id={p1id()}
 				setInfo={setInfo}

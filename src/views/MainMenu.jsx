@@ -540,7 +540,7 @@ export default function MainMenu(props) {
 				{settings() && (
 					<div
 						class="bgbox"
-						style="position:absolute;left:580px;top:300px;width:300px;height:240px">
+						style="position:absolute;left:580px;top:270px;width:300px;height:280px">
 						{changepass() ?
 							<>
 								<input
@@ -637,7 +637,15 @@ export default function MainMenu(props) {
 							/>
 							Lofi Art
 						</label>
-						<span style="position:absolute;left:8px;top:158px">
+						<label style="position:absolute;left:8px;top:158px">
+							<input
+								type="checkbox"
+								checked={!!rx.opts.shiftDrag}
+								onChange={e => store.setOpt('shiftDrag', !e.target.checked)}
+							/>
+							Shift Drag
+						</label>
+						<span style="position:absolute;left:8px;top:200px">
 							Play by play
 							<label>
 								<input
@@ -670,7 +678,7 @@ export default function MainMenu(props) {
 								Off
 							</label>
 						</span>
-						<label style="position:absolute;left:8px;top:193px">
+						<label style="position:absolute;left:8px;top:240px">
 							Expected Damage Samples {expectedDamageSamples()}
 							<input
 								type="range"
