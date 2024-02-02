@@ -257,11 +257,8 @@ export default function Result(props) {
 
 	const onkeydown = e => {
 		if (e.target.tagName === 'TEXTAREA') return;
-		const kc = e.which;
-		if (kc === 32 || kc === 13) exitFunc();
-		else if ((kc === 87 || e.key === 'w') && canRematch()) {
-			game.data.rematch();
-		}
+		if (e.key === ' ' || e.key === 'Enter') exitFunc();
+		else if (e.key === 'w' && canRematch()) game.data.rematch();
 	};
 
 	const clearTip = () => setTip(null);

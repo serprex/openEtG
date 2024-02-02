@@ -546,16 +546,16 @@ export default function MainMenu(props) {
 								<input
 									placeholder="New Password"
 									ref={newpass}
-									onKeyPress={e => {
-										if (e.which === 13) changeFunc();
+									onKeyDown={e => {
+										if (e.key === 'Enter') changeFunc();
 									}}
 									style="position:absolute;left:136px;top:4px;width:128px"
 								/>
 								<input
 									placeholder="Confirm New"
 									ref={newpass2}
-									onKeyPress={e => {
-										if (e.which === 13) changeFunc();
+									onKeyDown={e => {
+										if (e.key === 'Enter') changeFunc();
 									}}
 									style="position:absolute;left:136px;top:32px;width:128px"
 								/>

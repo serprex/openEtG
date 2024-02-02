@@ -67,7 +67,7 @@ export default function Rightpane(props) {
 					<ChannelTab channel="Replay" />
 				</div>
 				<Chat channel={opts.channel} />
-				<textarea class="chatinput" placeholder="Chat" onKeyPress={parseChat} />
+				<textarea class="chatinput" placeholder="Chat" onKeyDown={parseChat} />
 			</>
 		)
 	);

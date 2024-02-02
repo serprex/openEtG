@@ -251,8 +251,8 @@ export default function Shop() {
 						min="0"
 						max="255"
 						onChange={e => store.setOptTemp('bulk', e.target.value)}
-						onKeyPress={e => {
-							if (e.which === 13) buyPack();
+						onKeyDown={e => {
+							if (e.key === 'Enter') buyPack();
 						}}
 						style="position:absolute;top:184px;left:777px;width:64px"
 					/>

@@ -14,14 +14,13 @@ function chatmute(state) {
 }
 export default function parseChat(e) {
 	e.cancelBubble = true;
-	const kc = e.which || e.keyCode;
-	if (kc === 13) {
+	if (e.key === 'Enter') {
 		e.preventDefault();
-		let chatinput = e.target,
-			msg = chatinput.value.trim();
-		chatinput.value = '';
-		const storeState = store.state,
+		const chatinput = e.target,
+			msg = chatinput.value.trim(),
+			storeState = store.state,
 			{ user } = storeState;
+		chatinput.value = '';
 		if (msg === '/help') {
 			const cmds = {
 				clear: 'Clear chat',

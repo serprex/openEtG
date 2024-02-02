@@ -1252,33 +1252,31 @@ export default function Match(props) {
 
 	const onkeydown = e => {
 		if (e.target.tagName === 'TEXTAREA') return;
-		const kc = e.which,
-			ch = e.key ?? String.fromCharCode(kc);
 		let chi;
-		if (kc === 27) {
+		if (e.key === 'Escape') {
 			resignClick();
-		} else if (ch === ' ' || kc === 13) {
+		} else if (e.key === ' ' || e.key === 'Enter') {
 			endClick();
-		} else if (ch === '\b' || ch === '0') {
+		} else if (e.key === 'Backspace' || e.key === '0') {
 			cancelClick();
-		} else if (~(chi = 'sw'.indexOf(ch))) {
+		} else if (~(chi = 'sw'.indexOf(e.key))) {
 			thingClick(chi ? p2id() : p1id());
-		} else if (~(chi = 'qa'.indexOf(ch))) {
+		} else if (~(chi = 'qa'.indexOf(e.key))) {
 			const shieldId = pgame().get_shield(chi ? p2id() : p1id());
 			if (shieldId !== 0) thingClick(shieldId);
-		} else if (~(chi = 'ed'.indexOf(ch))) {
+		} else if (~(chi = 'ed'.indexOf(e.key))) {
 			const weaponId = pgame().get_weapon(chi ? p2id() : p1id());
 			if (weaponId !== 0) thingClick(weaponId);
-		} else if (~(chi = '12345678'.indexOf(ch))) {
+		} else if (~(chi = '12345678'.indexOf(e.key))) {
 			const card = pgame().get_hand(p1id())[chi];
 			if (card) thingClick(card);
-		} else if (ch === 'p') {
+		} else if (e.key === 'p') {
 			if (pgame().turn === p1id() && p2id() !== pgame().get_foe(p1id())) {
 				applyNext({ x: 'foe', t: p2id() });
 			}
-		} else if (ch === 'l' && props.gameid) {
+		} else if (e.key === 'l' && props.gameid) {
 			userEmit('reloadmoves', { id: props.gameid });
-		} else if (~(chi = '[]'.indexOf(ch))) {
+		} else if (~(chi = '[]'.indexOf(e.key))) {
 			const { players } = pgame(),
 				dir = chi ? players.length + 1 : 1;
 			let nextId,

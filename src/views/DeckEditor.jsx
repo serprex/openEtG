@@ -146,8 +146,8 @@ function DeckSelector(props) {
 				placeholder="Name"
 				value={name()}
 				onInput={e => setName(e.target.value)}
-				onKeyPress={e => {
-					if (e.which === 13 && (e.target.value || props.user.decks[''])) {
+				onKeyDown={e => {
+					if (e.key === 'Enter' && (e.target.value || props.user.decks[''])) {
 						props.loadDeck(e.target.value);
 					}
 				}}
@@ -237,12 +237,8 @@ export default function DeckEditor() {
 
 	const onkeydown = e => {
 		if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
-		const kc = e.which,
-			ch = e.key ?? String.fromCharCode(kc),
-			chi = '1234567890'.indexOf(ch);
-		if (~chi) {
-			loadDeck(rx.user.qecks[chi]);
-		}
+		const chi = '1234567890'.indexOf(e.key);
+		if (~chi) loadDeck(rx.user.qecks[chi]);
 	};
 
 	onMount(() => {

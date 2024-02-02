@@ -11,7 +11,7 @@ export default function Login() {
 
 	const loginClick = auth => {
 		if (rx.opts.username) {
-			store.setOpt('username', rx.opts.username.trim());
+			store.setOpt('username', rx.opts.username);
 			const data = { x: 'login', u: rx.opts.username };
 			if (auth) data.a = auth;
 			else data.p = password.value;
@@ -20,7 +20,7 @@ export default function Login() {
 	};
 
 	const maybeLogin = e => {
-		if (e.which === 13) loginClick();
+		if (e.key === 'Enter') loginClick();
 	};
 
 	onMount(() => {
@@ -62,9 +62,9 @@ export default function Login() {
 				placeholder="Username"
 				autoFocus
 				tabIndex="1"
-				onKeyPress={maybeLogin}
+				onKeyDown={maybeLogin}
 				value={rx.opts.username ?? ''}
-				onInput={e => store.setOpt('username', e.target.value)}
+				onInput={e => store.setOpt('username', e.target.value.trim())}
 				style="position:absolute;left:270px;top:350px"
 			/>
 			<input
@@ -72,7 +72,7 @@ export default function Login() {
 				type="password"
 				placeholder="Password"
 				tabIndex="2"
-				onKeyPress={maybeLogin}
+				onKeyDown={maybeLogin}
 				style="position:absolute;left:270px;top:380px"
 			/>
 			<label style="position:absolute;left:270px;top:410px">
