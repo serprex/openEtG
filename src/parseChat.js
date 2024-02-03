@@ -32,6 +32,7 @@ export default function parseChat(e) {
 				muteguest: 'Mute all guests',
 				unmuteguest: 'Unmute all guests',
 				importdeck: 'Save deckcode under deckname: /importdeck "deckname" deckcode',
+				loaddeck: 'Set the deck to be used to a Saved deck: /loaddeck "deckname"',
 				deleteme: 'Delete account',
 				w: 'Whisper',
 			};
@@ -130,14 +131,18 @@ export default function parseChat(e) {
 					});
 				}
 			}
-		} else if (msg.match(/^\/importdeck "([^"]+)" ([a-zA-Z0-9]+)$/)) {
-			const [deckname, deckcode] = msg.slice(13).split('" ');
+		} else if (msg.match(/^(\/importdeck|\/idk) "([^"]+)" ([a-zA-Z0-9]+)$/)) {
+			const [deckname, deckcode] = msg.slice(msg.indexOf(" ")+2).split('" ');
 			if (deckname === user.decks[deckname]) {
 				store.chatMsg('Deck ' + deckname + ' already exists!', 'System');
 				return
 			}
 			sock.userExec('setdeck', { d: deckcode, name: deckname });
 			store.chatMsg('Saved ' + deckname + ': ' + deckcode, 'System');
+		} else if (msg.match(/^\/loaddeck "([^"]+)"$/)) {
+			const deckname = msg.slice(11, msg.length-1);
+			sock.userExec('setdeck', { name: deckname });
+			store.chatMsg(deckname + ' selected', 'System');
 		} else store.chatMsg('Not a command: ' + msg);
 	}
 }
