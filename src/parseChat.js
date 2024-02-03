@@ -31,6 +31,7 @@ export default function parseChat(e) {
 				unmute: 'If no user specified, unmute chat entirely',
 				muteguest: 'Mute all guests',
 				unmuteguest: 'Unmute all guests',
+				importdeck: 'Save deckcode under deckname: /importdeck "deckname" deckcode',
 				deleteme: 'Delete account',
 				w: 'Whisper',
 			};
@@ -129,6 +130,14 @@ export default function parseChat(e) {
 					});
 				}
 			}
+		} else if (msg.match(/^\/importdeck "([^"]+)" ([a-zA-Z0-9]+)$/)) {
+			const [deckname, deckcode] = msg.slice(13).split('" ');
+			if (deckname === user.decks[deckname]) {
+				store.chatMsg('Deck ' + deckname + ' already exists!', 'System');
+				return
+			}
+			sock.userExec('setdeck', { d: deckcode, name: deckname });
+			store.chatMsg('Saved ' + deckname + ': ' + deckcode, 'System');
 		} else store.chatMsg('Not a command: ' + msg);
 	}
 }
