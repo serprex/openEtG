@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
+use std::hash::{Hash, Hasher};
 use std::num::NonZeroUsize;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -10,10 +11,10 @@ use bb8_postgres::tokio_postgres::{
 	Client, GenericClient,
 };
 use futures::{SinkExt, StreamExt, TryFutureExt};
-use fxhash::FxHashMap;
+use fxhash::{FxHashMap, FxHasher64};
 use hyper_tungstenite::tungstenite::Message;
 use rand::distributions::{Distribution, Uniform};
-use rand::Rng;
+use rand::{Rng, RngCore};
 use ring::pbkdf2;
 use serde_json::{Map, Value};
 use tokio::join;
@@ -33,7 +34,7 @@ use crate::json::{
 	WsResponse,
 };
 use crate::starters::ORIGINAL_STARTERS;
-use crate::users::{self, HashAlgo, UserData, UserObject, UserRole, Users};
+use crate::users::{self, HashAlgo, Leaderboard, UserData, UserObject, UserRole, Users};
 use crate::{get_day, PgPool, WsStream};
 
 static NEXT_SOCK_ID: AtomicUsize = AtomicUsize::new(1);
@@ -145,55 +146,17 @@ where
 }
 
 async fn login_success(tx: &WsSender, user: &mut UserObject, client: &mut Client) {
-	if let Ok(userstr) = serde_json::to_string(&WsResponse::login(&*user)) {
+	if let Ok(userstr) = serde_json::to_string(&WsResponse::login(user)) {
 		tx.send(Message::Text(userstr)).ok();
 	}
 
-	if let Ok(trx) = client.transaction().await {
-		if user.id != -1 {
-			if let Ok(bids) =
-				trx.query("select code, q, p from bazaar where user_id = $1", &[&user.id]).await
-			{
-				let gold = if let Some(userdata) = user.data.get("") {
-					let mut wealth: i32 = 0;
-					let mut wealth24: u32 = 0;
-					for bid in bids.iter() {
-						let code = bid.get::<usize, i32>(0) as i16;
-						let q: i32 = bid.get(1);
-						let p: i32 = bid.get(2);
-						if p < 0 {
-							if let Some(card) = etg::card::OpenSet.try_get(code) {
-								let upped = etg::card::Upped(code);
-								let shiny = etg::card::Shiny(code);
-								wealth24 += card_val24(card.rarity, upped, shiny) * q as u32;
-							}
-						} else {
-							wealth += p * q;
-						}
-					}
-					for (&code, &count) in userdata.pool.0.iter() {
-						if let Some(card) = etg::card::OpenSet.try_get(code) {
-							let upped = etg::card::Upped(code);
-							let shiny = etg::card::Shiny(code);
-							wealth24 += card_val24(card.rarity, upped, shiny) * count as u32;
-						}
-					}
-					userdata.gold.saturating_add(wealth).saturating_add((wealth24 / 24) as i32)
-				} else {
-					0
-				};
-				trx.execute("update users set wealth = $2, auth = $3, salt = $4, iter = $5, algo = $6 where id = $1",
-					&[
-						&user.id,
-						&gold,
-						&user.auth,
-						&user.salt,
-						&(user.iter as i32),
-						&user.algo,
-					]).await.ok();
-				trx.commit().await.ok();
-			}
-		}
+	if user.id != -1 {
+		client.execute(
+			"update users set auth = $2, salt = $3, iter = $4, algo = $5 where id = $1",
+			&[&user.id, &user.auth, &user.salt, &(user.iter as i32), &user.algo],
+		)
+		.await
+		.ok();
 	}
 }
 
@@ -273,10 +236,26 @@ fn flagname(flags: &HashSet<String>) -> String {
 	return flagvec.join("|");
 }
 
-async fn ordered_lock<'a, T>(
-	m1: &'a Mutex<T>,
-	m2: &'a Mutex<T>,
-) -> (MutexGuard<'a, T>, MutexGuard<'a, T>) {
+fn logerr<T, E>(x: Result<T, E>) -> Result<T, E> where E: std::fmt::Display {
+	if let Err(ref e) = x {
+		println!("Error: {e}");
+	}
+	x
+}
+
+fn leagueid(flags: &HashSet<String>) -> i64 {
+	if flags.is_empty() {
+		0
+	} else {
+		let mut flagvec = flags.iter().map(String::as_str).collect::<Vec<_>>();
+		flagvec.sort_unstable();
+		let mut hasher: FxHasher64 = Default::default();
+		flagvec.hash(&mut hasher);
+		hasher.finish() as i64
+	}
+}
+
+async fn ordered_lock<'a, T>(m1: &'a Mutex<T>, m2: &'a Mutex<T>) -> (MutexGuard<'a, T>, MutexGuard<'a, T>) {
 	let l1;
 	let l2;
 	if m1 as *const _ > m2 as *const _ {
@@ -387,9 +366,9 @@ pub async fn handle_ws(
 								};
 								if let Ok(id) = digits.parse::<i32>() {
 									(if motd.is_empty() {
-										client.query("delete from motd where id = $1", &[&id]).await
+										client.execute("delete from motd where id = $1", &[&id]).await
 									} else {
-										client.query("insert into motd (id, val) values ($1, $2) on conflict (id) do update set val = $2", &[&id, &motd]).await
+										client.execute("insert into motd (id, val) values ($1, $2) on conflict (id) do update set val = $2", &[&id, &motd]).await
 									}).ok();
 								} else {
 									sendmsg(
@@ -407,29 +386,20 @@ pub async fn handle_ws(
 								let data = UserData::new(e as usize);
 								let mut user = user.lock().await;
 								if let Ok(trx) = client.transaction().await {
-									if let Ok(new_row) = trx.query_one(
-										"insert into users (name, auth, salt, iter, algo, wealth) values ($1, $2, $3, $4, $5, 0) returning id",
-										&[
-										&u,
-										&user.auth,
-										&user.salt,
-										&(user.iter as i32),
-										&user.algo
-										]).await
+									if let Ok(new_row) = logerr(trx.query_one(
+										"insert into users (name, auth, salt, iter, algo) values ($1, $2, $3, $4, $5) returning id",
+										&[&u, &user.auth, &user.salt, &(user.iter as i32), &user.algo ]).await)
 									{
 										user.id = new_row.get(0);
-									}
-									if trx.execute(
-										"insert into user_data (user_id, type_id, name, data) values ($1, 1, $2, $3)",
-										&[&user.id, &"", &Json(&data)]).await.is_ok()
-										&& trx.commit().await.is_ok()
-									{
-										user.data.insert(String::new(), data);
-										if let Ok(userstr) = serde_json::to_string(&WsResponse::login(&*user)) {
-											tx.send(Message::Text(userstr)).ok();
-										}
-										if let Some(userdata) = user.data.get_mut("") {
-											userdata.daily = 128;
+										if logerr(trx.execute(
+											"insert into user_data (user_id, type_id, name, data) values ($1, 1, $2, $3)",
+											&[&user.id, &"", &Json(&data)]).await).is_ok()
+											&& trx.commit().await.is_ok()
+										{
+											user.data.insert(String::new(), data);
+											if let Ok(userstr) = serde_json::to_string(&WsResponse::login(&user)) {
+												tx.send(Message::Text(userstr)).ok();
+											}
 										}
 									}
 								}
@@ -461,7 +431,7 @@ pub async fn handle_ws(
 									oracle: 0,
 									fg: None,
 								};
-								if client.query("insert into user_data (user_id, type_id, name, data) values ($1, 2, $2, $3)", &[&userid, &name, &Json(&userdata)]).await.is_ok() {
+								if client.execute("insert into user_data (user_id, type_id, name, data) values ($1, 2, $2, $3)", &[&userid, &name, &Json(&userdata)]).await.is_ok() {
 									sendmsg(&tx, &WsResponse::originaldata(&userdata));
 								}
 							}
@@ -472,18 +442,21 @@ pub async fn handle_ws(
 						AuthMessage::delete => {
 							let params: &[&(dyn ToSql + Sync)] = &[&userid];
 							if let Ok(trx) = client.transaction().await {
-								if let (Ok(_), Ok(_), Ok(_), Ok(_)) = join!(
-									trx.query("delete from arena where user_id = $1", params),
-									trx.query("delete from bazaar where user_id = $1", params),
-									trx.query("delete from stats where user_id = $1", params),
-									trx.query("delete from user_data where user_id = $1", params),
+								if let (Ok(_), Ok(_), Ok(_), true) = join!(
+									trx.execute("delete from arena where user_id = $1", params),
+									trx.execute("delete from bazaar where user_id = $1", params),
+									trx.execute("delete from stats where user_id = $1", params),
+									async {
+										trx.execute("delete from leaderboard using user_data ud where data_id = ud.id and ud.user_id = $1", &[&userid]).await.is_ok() &&
+										trx.execute("delete from user_data where user_id = $1", params).await.is_ok()
+									}
 								) {
 									if trx
 										.execute("delete from users where id = $1", params)
 										.await
-										.is_ok()
+										.is_ok() &&
+										trx.commit().await.is_ok()
 									{
-										trx.commit().await.ok();
 										users.write().await.remove(&u);
 									}
 								}
@@ -512,9 +485,12 @@ pub async fn handle_ws(
 						AuthMessage::altdelete {
 							name
 						} => {
-							let mut user = user.lock().await;
-							if client.execute("delete from user_data where user_id = $1 and name = $2", &[&userid, &name]).await.is_ok() {
-								user.data.remove(&name);
+							if let Ok(trx) = client.transaction().await {
+								if trx.execute("delete from leaderboard using user_data ud where data_id = ud.id and ud.user_id = $1 and ud.name = $2", &[&userid, &name]).await.is_ok() &&
+									trx.execute("delete from user_data where user_id = $1 and name = $2", &[&userid, &name]).await.is_ok() &&
+									trx.commit().await.is_ok() {
+									user.lock().await.data.remove(&name);
+								}
 							}
 						}
 						AuthMessage::setarena {
@@ -1405,33 +1381,67 @@ pub async fn handle_ws(
 									userdata.ostreakday = 0;
 									userdata.ostreakday2 = today;
 									userdata.oracle = today;
-									let mut rng = rand::thread_rng();
-									let ocardnymph = rng.gen_range(0..100) < 3;
-									if let Some(card) = etg::card::OpenSet.random_card(&mut rng, false, |card| {
-										(card.rarity != 4) ^ ocardnymph && (card.flag & etg::game::Flag::pillar) == 0
-									}) {
-										let ccode =
-											if card.rarity == 4 { etg::card::AsShiny(card.code, true) } else { card.code };
-										let bound = card.rarity > 2;
-										let curpool =
-											if bound { &mut userdata.accountbound } else { &mut userdata.pool };
-										let c = curpool.0.entry(ccode).or_default();
-										*c = c.saturating_add(1);
-										userdata.ocard = ccode;
-										userdata.daily = 128;
+									let card = {
+										let mut rng = rand::thread_rng();
+										let ocardnymph = (rng.next_u32() & 31) == 0;
+										let Some(card) = etg::card::OpenSet.random_card(&mut rng, false, |card| {
+											(card.rarity != 4) ^ ocardnymph && (card.flag & etg::game::Flag::pillar) == 0
+										}) else { continue };
 										userdata.dailymage = rng.gen_range(0..MAGE_COUNT);
 										userdata.dailydg = rng.gen_range(0..DG_COUNT);
-										sendmsg(
-											&tx,
-											&WsResponse::oracle {
-												c: ccode,
-												bound,
-												mage: userdata.dailymage,
-												dg: userdata.dailydg,
-												day: today,
-											},
-										);
+										card
+									};
+									let ccode =
+										if card.rarity == 4 { etg::card::AsShiny(card.code, true) } else { card.code };
+									let bound = card.rarity > 2;
+									let curpool =
+										if bound { &mut userdata.accountbound } else { &mut userdata.pool };
+									let c = curpool.0.entry(ccode).or_default();
+									*c = c.saturating_add(1);
+									userdata.ocard = ccode;
+									userdata.daily = 128;
+									sendmsg(
+										&tx,
+										&WsResponse::oracle {
+											c: ccode,
+											bound,
+											mage: userdata.dailymage,
+											dg: userdata.dailydg,
+											day: today,
+										},
+									);
+
+									let mut wealth: i32 = userdata.gold;
+									let mut wealth24: u32 = 0;
+									if let Ok(bids) =
+										client.query("select code, q, p from bazaar where user_id = $1", &[&userid]).await
+									{
+										for bid in bids.iter() {
+											let code = bid.get::<usize, i32>(0) as i16;
+											let q: i32 = bid.get(1);
+											let p: i32 = bid.get(2);
+											if p < 0 {
+												if let Some(card) = etg::card::OpenSet.try_get(code) {
+													let upped = etg::card::Upped(code);
+													let shiny = etg::card::Shiny(code);
+													wealth24 += card_val24(card.rarity, upped, shiny) * q as u32;
+												}
+											} else {
+												wealth += p * q;
+											}
+										}
 									}
+									for (&code, &count) in userdata.pool.0.iter() {
+										if let Some(card) = etg::card::OpenSet.try_get(code) {
+											wealth24 += card_val24(card.rarity, etg::card::Upped(code), etg::card::Shiny(code)) * count as u32;
+										}
+									}
+									let wealth = wealth.saturating_add((wealth24 / 24) as i32);
+									let leagueid = leagueid(&userdata.flags);
+									client.execute(
+										concat!(
+											"insert into leaderboard (data_id, league_id, category, val) values ((select id from user_data where user_id = $1 and name = $2), $3, 'Wealth', $4) ",
+											"on conflict (data_id, league_id, category) do update set val = greatest($4, excluded.val)"), &[&userid, &uname, &leagueid, &wealth]).await.ok();
 								}
 							}
 						}
@@ -1962,13 +1972,24 @@ pub async fn handle_ws(
 							}
 						}
 						AuthMessage::setstreak { l, n } => {
-							if l > 5 {
-								continue
-							}
+							let category = match l {
+								0 => Leaderboard::Streak0,
+								1 => Leaderboard::Streak1,
+								2 => Leaderboard::Streak2,
+								3 => Leaderboard::Streak3,
+								4 => Leaderboard::Streak4,
+								5 => Leaderboard::Streak5,
+								_ => continue,
+							};
 							let mut user = user.lock().await;
 							if let Some(userdata) = user.data.get_mut(&uname) {
 								userdata.streak.resize(l as usize + 1, 0);
 								userdata.streak[l as usize] = n;
+								let leagueid = leagueid(&userdata.flags);
+								client.execute(
+									concat!(
+										"insert into leaderboard (data_id, league_id, category, val) values ((select id from user_data where user_id = $1 and name = $2), $3, $4, $5) ",
+										"on conflict (data_id, league_id, category) do update set val = greatest($5, excluded.val)"), &[&userid, &uname, &leagueid, &category, &(n as i32)]).await.ok();
 							}
 						}
 						AuthMessage::addcards { c, bound } => {
@@ -2007,6 +2028,11 @@ pub async fn handle_ws(
 								if daily == 6 && (userdata.daily & 64) == 0 && c != 0 {
 									let c = userdata.pool.0.entry(c).or_default();
 									*c = c.saturating_add(1);
+									let leagueid = leagueid(&userdata.flags);
+									client.execute(
+										concat!(
+											"insert into leaderboard (data_id, league_id, category, val) values ((select id from user_data where user_id = $1 and name = $2), $3, 'Colosseum', 1) ",
+											"on conflict (data_id, league_id, category) do update set val = leaderboard.val + 1"), &[&userid, &uname, &leagueid]).await.ok();
 								}
 								userdata.daily |= 1 << daily;
 							}
@@ -2289,7 +2315,7 @@ pub async fn handle_ws(
 							user.auth.is_empty()
 						} {
 							wusers.set_sockid(&u, sockid.get());
-							login_success(&tx, &mut *user, &mut client).await;
+							login_success(&tx, &mut user, &mut client).await;
 						} else {
 							sendmsg(&tx, &WsResponse::loginfail { err: "Authentication failed" });
 						}
@@ -2501,8 +2527,8 @@ pub async fn handle_ws(
 					}
 				}
 				UserMessage::arenatop { lv } => {
-					let today = get_day();
 					if let Ok(rows) = client.query("select u.name, a.score, a.won, a.loss, a.day, a.code, a.deck from arena a join users u on u.id = a.user_id where a.arena_id = $1 order by a.\"rank\" limit 30", &[if lv == 0 { &1i32 } else { &2i32 }]).await {
+						let today = get_day();
 						let mut top = Vec::with_capacity(rows.len());
 						for row in rows {
 							top.push((row.get::<usize, String>(0), row.get::<usize, i32>(1), row.get::<usize, i32>(2), row.get::<usize, i32>(3), today.saturating_sub(row.get::<usize, i32>(4) as u32), row.get::<usize, i32>(5), row.get::<usize, String>(6)));
@@ -2510,17 +2536,23 @@ pub async fn handle_ws(
 						sendmsg(&tx, &WsResponse::arenatop { lv, top: &top });
 					}
 				}
-				UserMessage::wealthtop => {
+				UserMessage::leaderboard { flags, category } => {
+					let leagueid = leagueid(&flags);
 					if let Ok(rows) = client
-						.query("select name, wealth from users order by wealth desc limit 99", &[])
+						.query(concat!(
+								"select u.name, ud.name, val ",
+								"from leaderboard l ",
+								"join user_data ud on l.data_id = ud.id ",
+								"join users u on ud.user_id = u.id ",
+								"where league_id = $1 and category = $2 ",
+								"order by val desc limit 99"), &[&leagueid, &category])
 						.await
 					{
-						let mut top = Vec::with_capacity(rows.len() * 2);
-						for row in rows {
-							top.push(Value::from(row.get::<usize, String>(0)));
-							top.push(Value::from(row.get::<usize, i32>(1)));
+						let mut top = Vec::with_capacity(rows.len());
+						for row in rows.iter() {
+							top.push((row.get::<usize, &str>(0), row.get::<usize, &str>(1), row.get::<usize, i32>(2)));
 						}
-						sendmsg(&tx, &WsResponse::wealthtop { top: &top });
+						sendmsg(&tx, &WsResponse::leaderboard { flags, category, top: &top });
 					}
 				}
 				UserMessage::bzread => {

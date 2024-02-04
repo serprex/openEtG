@@ -21,6 +21,19 @@ pub enum UserRole {
 	Mod,
 }
 
+#[derive(Serialize, Deserialize, Clone, Copy, Debug, ToSql, FromSql)]
+#[postgres(name = "leaderboard_category")]
+pub enum Leaderboard {
+	Wealth,
+	Streak0,
+	Streak1,
+	Streak2,
+	Streak3,
+	Streak4,
+	Streak5,
+	Colosseum,
+}
+
 #[derive(Clone, Copy, Debug, ToSql, FromSql)]
 #[postgres(name = "pbkdf2algo")]
 pub enum HashAlgo {
