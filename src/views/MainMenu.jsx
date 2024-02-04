@@ -36,7 +36,7 @@ const tipjar = [
 	'A ply is half a turn',
 	'Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm',
 	"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
-	'Wealth T99 is a leaderboard for player wealth. Wealth is a combination of current gold & cardpool',
+	'Wealth used by leaderboards is a combination of current gold & cardpool',
 ];
 
 function AiButton({ name, onClick, onMouseOver, lv }) {
@@ -354,9 +354,12 @@ export default function MainMenu(props) {
 					<div class="maintitle">Leaderboards</div>
 					<input
 						type="button"
-						value="Wealth T99"
-						onClick={() => store.doNav(import('./WealthTop.jsx'))}
-						onMouseOver={[setTip, "See who's collected the most wealth"]}
+						value="View"
+						onClick={() => store.doNav(import('./Leaderboards.jsx'))}
+						onMouseOver={[
+							setTip,
+							"Leaderboards to see data such as who's collected the most wealth",
+						]}
 						style="margin-left:25%"
 					/>
 					<div style="margin-top:4px">{leadc}</div>

@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::cardpool::Cardpool;
-use crate::users::{UserData, UserObject};
+use crate::users::{Leaderboard, UserData, UserObject};
 
 #[derive(Deserialize, Clone)]
 #[serde(tag = "z")]
@@ -218,12 +218,12 @@ pub enum AuthMessage {
 	addcards {
 		c: String,
 		#[serde(default)]
-		bound: bool
+		bound: bool,
 	},
 	rmcard {
 		c: i16,
 		#[serde(default)]
-		bound: bool
+		bound: bool,
 	},
 	donedaily {
 		#[serde(default)]
@@ -281,7 +281,10 @@ pub enum UserMessage {
 	arenatop {
 		lv: u8,
 	},
-	wealthtop,
+	leaderboard {
+		flags: HashSet<String>,
+		category: Leaderboard,
+	},
 	chatus {
 		hide: Option<bool>,
 		afk: Option<bool>,
@@ -458,8 +461,10 @@ pub enum WsResponse<'a> {
 		newcards: &'a str,
 		g: i32,
 	},
-	wealthtop {
-		top: &'a [Value],
+	leaderboard {
+		flags: HashSet<String>,
+		category: Leaderboard,
+		top: &'a [(&'a str, &'a str, i32)],
 	},
 }
 
