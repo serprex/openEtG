@@ -1,4 +1,10 @@
-import { createMemo, createSignal, onCleanup, onMount } from 'solid-js';
+import {
+	createMemo,
+	createSignal,
+	createEffect,
+	onCleanup,
+	onMount,
+} from 'solid-js';
 import { Index } from 'solid-js/web';
 
 import Cards from '../Cards.js';
@@ -204,16 +210,16 @@ export default function DeckEditor() {
 		return pool;
 	});
 	let deckref;
-	onMount(() => {
-		deckref.setSelectionRange(0, 999);
-	});
+	onMount(() => deckref.setSelectionRange(0, 999));
 
-	const [deckData, setDeckData] = createSignal(
-		processDeck(rx.user.decks[rx.user.selectedDeck] ?? ''),
-	);
+	const [deckData, setDeckData] = createSignal({ mark: 0, deck: [] });
 	const autoup = () => !store.hasflag(rx.user, 'no-up-merge');
 	const cardMinus = createMemo(() =>
 		Cards.filterDeck(deckData().deck, pool(), true, autoup()),
+	);
+
+	createEffect(() =>
+		setDeckData(processDeck(rx.user.decks[rx.user.selectedDeck] ?? '')),
 	);
 
 	const saveDeck = (name, force) => {

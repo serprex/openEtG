@@ -22,22 +22,22 @@ export default function parseChat(e) {
 			{ user } = storeState;
 		chatinput.value = '';
 		if (msg === '/help') {
-			const cmds = {
-				clear: 'Clear chat',
-				who: 'List users online',
-				roll: 'Server rolls XdY publicly',
-				mod: 'List mods',
-				mute: 'If no user specified, mute chat entirely',
-				unmute: 'If no user specified, unmute chat entirely',
-				muteguest: 'Mute all guests',
-				unmuteguest: 'Unmute all guests',
-				importdeck: 'Save deckcode under deckname: /importdeck "deckname" deckcode',
-				loaddeck: 'Set the deck to be used to a Saved deck: /loaddeck "deckname"',
-				deleteme: 'Delete account',
-				w: 'Whisper',
-			};
-			for (const cmd in cmds) {
-				store.chatMsg(`${cmd} ${cmds[cmd]}`);
+			const cmds = [
+				'/clear: Clear chat',
+				'/who: list users online',
+				'/roll XdY: server rolls publicly',
+				'/mod: list mods',
+				'/mute user: if no user specified, mute chat entirely',
+				'/unmute user: if no user specified, unmute chat entirely',
+				'/muteguest: mute all guests',
+				'/unmuteguest: unmute all guests',
+				'/importdeck name code: imports deck code',
+				'/setdeck name: sets selected deck',
+				'/deleteme: delete account',
+				'/w"user"msg or /w user msg: whisper user',
+			];
+			for (const cmd of cmds) {
+				store.chatMsg(cmd);
 			}
 		} else if (msg === '/clear') {
 			store.clearChat(storeState.opts.channel);
@@ -78,10 +78,10 @@ export default function parseChat(e) {
 		} else if (msg === '/unmuteguest') {
 			store.setOptTemp('muteguest', false);
 			chatmute(storeState);
-		} else if (msg.match(/^\/mute /)) {
+		} else if (msg.startsWith('/mute ')) {
 			store.mute(msg.slice(6));
 			chatmute(storeState);
-		} else if (msg.match(/^\/unmute /)) {
+		} else if (msg.startsWith('/unmute')) {
 			store.unmute(msg.slice(8));
 			chatmute(storeState);
 		} else if (msg.match(/^\/(motd|mod|codesmith)$/)) {
@@ -94,21 +94,30 @@ export default function parseChat(e) {
 		) {
 			const sp = msg.indexOf(' ');
 			sock.userEmit(msg.slice(1, sp), { m: msg.slice(sp + 1) });
-		} else if (msg.match(/^\/code /)) {
+		} else if (msg.startsWith('/code ')) {
 			sock.userEmit('codecreate', { t: msg.slice(6) });
-		} else if (msg.match(/^\/setgold /)) {
+		} else if (msg.startsWith('/setgold ')) {
 			const [t, g] = msg.slice(9).split(' ');
 			sock.userEmit('setgold', { t, g: g | 0 });
-		} else if (msg.match(/^\/addbound /)) {
+		} else if (msg.startsWith('/addbound ')) {
 			const [t, pool] = msg.slice(10).split(' ');
 			sock.userEmit('addpool', { t, pool, bound: true });
-		} else if (msg.match(/^\/addpool /)) {
+		} else if (msg.startsWith('/addpool ')) {
 			const [t, pool] = msg.slice(9).split(' ');
 			sock.userEmit('addpool', { t, pool, bound: false });
-		} else if (msg.match(/^\/runcount /)) {
+		} else if (msg.startsWith('/runcount ')) {
 			store.setOptTemp('runcount', msg.slice(10) | 0);
 			store.setOptTemp('runcountcur', 1);
 			store.chatMsg(msg.slice(1), 'System');
+		} else if (msg.startsWith('/setdeck ')) {
+			const name = msg.slice(9);
+			sock.userExec('setdeck', { name });
+		} else if (msg.match(/^\/importdeck .+ ([a-v0-9]{5}){1,61}$/)) {
+			const lastIndexSpace = msg.lastIndexOf(' '),
+				name = msg.slice(12, lastIndexSpace),
+				code = msg.slice(lastIndexSpace + 1);
+			sock.userExec('setdeck', { d: code, name });
+			store.chatMsg(`Saved ${name} as ${code}`, 'System');
 		} else if (!msg.match(/^\/[^/]/) || (user && msg.match(/^\/w( |")/))) {
 			if (!msg.match(/^\s*$/)) {
 				const escapedmsg = msg.replace(/^\/\//, '/');
@@ -131,18 +140,6 @@ export default function parseChat(e) {
 					});
 				}
 			}
-		} else if (msg.match(/^(\/importdeck|\/idk) "([^"]+)" ([a-zA-Z0-9]+)$/)) {
-			const [deckname, deckcode] = msg.slice(msg.indexOf(" ")+2).split('" ');
-			if (deckname === user.decks[deckname]) {
-				store.chatMsg('Deck ' + deckname + ' already exists!', 'System');
-				return
-			}
-			sock.userExec('setdeck', { d: deckcode, name: deckname });
-			store.chatMsg('Saved ' + deckname + ': ' + deckcode, 'System');
-		} else if (msg.match(/^\/loaddeck "([^"]+)"$/)) {
-			const deckname = msg.slice(11, msg.length-1);
-			sock.userExec('setdeck', { name: deckname });
-			store.chatMsg(deckname + ' selected', 'System');
 		} else store.chatMsg('Not a command: ' + msg);
 	}
 }
