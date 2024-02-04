@@ -1,7 +1,7 @@
 import {
 	createMemo,
 	createSignal,
-	createEffect,
+	createComputed,
 	onCleanup,
 	onMount,
 } from 'solid-js';
@@ -177,8 +177,9 @@ function DeckSelector(props) {
 						value="Rename"
 						style="position:absolute;left:258px;top:4px"
 						onClick={() => {
-							userExec('rmdeck', { name: props.user.selectedDeck });
+							const del = props.user.selectedDeck;
 							props.saveDeck(name(), true);
+							userExec('rmdeck', { name: del });
 							props.onClose();
 						}}
 					/>
@@ -212,14 +213,14 @@ export default function DeckEditor() {
 	let deckref;
 	onMount(() => deckref.setSelectionRange(0, 999));
 
-	const [deckData, setDeckData] = createSignal({ mark: 0, deck: [] });
+	const [deckData, setDeckData] = createSignal(null);
+	createComputed(() =>
+		setDeckData(processDeck(rx.user.decks[rx.user.selectedDeck] ?? '')),
+	);
+
 	const autoup = () => !store.hasflag(rx.user, 'no-up-merge');
 	const cardMinus = createMemo(() =>
 		Cards.filterDeck(deckData().deck, pool(), true, autoup()),
-	);
-
-	createEffect(() =>
-		setDeckData(processDeck(rx.user.decks[rx.user.selectedDeck] ?? '')),
 	);
 
 	const saveDeck = (name, force) => {
@@ -268,9 +269,9 @@ export default function DeckEditor() {
 				cardMinus={cardMinus()}
 				autoup={autoup()}
 				setDeck={deck =>
-					setDeckData({ deck: deck.sort(Cards.codeCmp), mark: deckData().mark })
+					setDeckData(data => ({ ...data, deck: deck.sort(Cards.codeCmp) }))
 				}
-				setMark={mark => setDeckData({ deck: deckData().deck, mark })}
+				setMark={mark => setDeckData(data => ({ ...data, mark }))}
 			/>
 			<Tutor.Tutor x={4} y={220} panels={Tutor.Editor} />
 			<label style="position:absolute;left:536px;top:238px">
