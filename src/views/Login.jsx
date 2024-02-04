@@ -10,9 +10,10 @@ export default function Login() {
 	let password;
 
 	const loginClick = auth => {
-		if (rx.opts.username) {
-			store.setOpt('username', rx.opts.username);
-			const data = { x: 'login', u: rx.opts.username };
+		const username = rx.opts.username && rx.opts.username.trim();
+		if (username) {
+			store.setOpt('username', username);
+			const data = { x: 'login', u: username };
 			if (auth) data.a = auth;
 			else data.p = password.value;
 			emit(data);
@@ -64,7 +65,7 @@ export default function Login() {
 				tabIndex="1"
 				onKeyDown={maybeLogin}
 				value={rx.opts.username ?? ''}
-				onInput={e => store.setOpt('username', e.target.value.trim())}
+				onInput={e => store.setOpt('username', e.target.value)}
 				style="position:absolute;left:270px;top:350px"
 			/>
 			<input

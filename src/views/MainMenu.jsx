@@ -111,6 +111,7 @@ export default function MainMenu(props) {
 					oracle: data.day,
 					ostreakday: 0,
 					ostreakday2: data.day,
+					ocard: data.c,
 				};
 				if (data.bound) {
 					update.accountbound = addcard(rx.user.accountbound, data.c);
