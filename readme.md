@@ -45,7 +45,7 @@ openEtG is an open source fork of the Flash ccg [Elements the Game](http://eleme
 10. Run server
    ```sh
    cd ./src/rs/server
-   cargo run --manifest-path=./Cargo.toml
+   cargo run
    ```
 ### Testing
 
