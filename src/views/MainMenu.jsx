@@ -645,7 +645,7 @@ export default function MainMenu(props) {
 							<input
 								type="checkbox"
 								checked={!!rx.opts.shiftDrag}
-								onChange={e => store.setOpt('shiftDrag', !e.target.checked)}
+								onChange={e => store.setOpt('shiftDrag', e.target.checked)}
 							/>
 							Shift Drag
 						</label>
