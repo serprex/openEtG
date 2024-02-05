@@ -394,7 +394,7 @@ impl<'a> SkillThing<'a> {
 			Skill::gpull =>
 				Cow::from("Creatures attacking this creature's owner instead attack this creature"),
 			Skill::gpullspell =>
-				Cow::from("Creatures attacking target creature's owner instead attack target creature.\nIf target is a player, creatures attack that player when attacking that player"),
+				Cow::from("If target is a creature, creatures attack target creature's owner instead of player.\nIf target is a player, creatures attack that player when that player's creatures would be attacked"),
 			Skill::growth(atk, hp) if ev == Event::Death => Cow::from(format!("When any creature dies, gain {atk}|{hp}")),
 			Skill::growth(atk, hp) if ev == Event::Cast => Cow::from(format!("Gain {atk}|{hp}")),
 			Skill::growth(atk, hp) if ev == Event::OwnAttack => Cow::from(format!("This creature gains {}|{} when it attacks", atk, hp)),
