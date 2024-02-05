@@ -146,20 +146,17 @@ where
 }
 
 async fn login_success(tx: &WsSender, user: &mut UserObject, client: &mut Client) {
-	if let Ok(userstr) = serde_json::to_string(&WsResponse::login(&*user)) {
+	if let Ok(userstr) = serde_json::to_string(&WsResponse::login(user)) {
 		tx.send(Message::Text(userstr)).ok();
 	}
 
 	if user.id != -1 {
-		if let Ok(trx) = client.transaction().await {
-			trx.execute(
-				"update users set auth = $2, salt = $3, iter = $4, algo = $5 where id = $1",
-				&[&user.id, &user.auth, &user.salt, &(user.iter as i32), &user.algo],
-			)
-			.await
-			.ok();
-			trx.commit().await.ok();
-		}
+		client.execute(
+			"update users set auth = $2, salt = $3, iter = $4, algo = $5 where id = $1",
+			&[&user.id, &user.auth, &user.salt, &(user.iter as i32), &user.algo],
+		)
+		.await
+		.ok();
 	}
 }
 
@@ -237,6 +234,13 @@ fn flagname(flags: &HashSet<String>) -> String {
 	let mut flagvec = flags.iter().map(String::as_str).collect::<Vec<_>>();
 	flagvec.sort_unstable();
 	return flagvec.join("|");
+}
+
+fn logerr<T, E>(x: Result<T, E>) -> Result<T, E> where E: std::fmt::Display {
+	if let Err(ref e) = x {
+		println!("Error: {e}");
+	}
+	x
 }
 
 fn leagueid(flags: &HashSet<String>) -> i64 {
@@ -382,29 +386,20 @@ pub async fn handle_ws(
 								let data = UserData::new(e as usize);
 								let mut user = user.lock().await;
 								if let Ok(trx) = client.transaction().await {
-									if let Ok(new_row) = trx.query_one(
-										"insert into users (name, auth, salt, iter, algo, wealth) values ($1, $2, $3, $4, $5, 0) returning id",
-										&[
-										&u,
-										&user.auth,
-										&user.salt,
-										&(user.iter as i32),
-										&user.algo
-										]).await
+									if let Ok(new_row) = logerr(trx.query_one(
+										"insert into users (name, auth, salt, iter, algo) values ($1, $2, $3, $4, $5) returning id",
+										&[&u, &user.auth, &user.salt, &(user.iter as i32), &user.algo ]).await)
 									{
 										user.id = new_row.get(0);
-									}
-									if trx.execute(
-										"insert into user_data (user_id, type_id, name, data) values ($1, 1, $2, $3)",
-										&[&user.id, &"", &Json(&data)]).await.is_ok()
-										&& trx.commit().await.is_ok()
-									{
-										user.data.insert(String::new(), data);
-										if let Ok(userstr) = serde_json::to_string(&WsResponse::login(&*user)) {
-											tx.send(Message::Text(userstr)).ok();
-										}
-										if let Some(userdata) = user.data.get_mut("") {
-											userdata.daily = 128;
+										if logerr(trx.execute(
+											"insert into user_data (user_id, type_id, name, data) values ($1, 1, $2, $3)",
+											&[&user.id, &"", &Json(&data)]).await).is_ok()
+											&& trx.commit().await.is_ok()
+										{
+											user.data.insert(String::new(), data);
+											if let Ok(userstr) = serde_json::to_string(&WsResponse::login(&user)) {
+												tx.send(Message::Text(userstr)).ok();
+											}
 										}
 									}
 								}
@@ -2320,7 +2315,7 @@ pub async fn handle_ws(
 							user.auth.is_empty()
 						} {
 							wusers.set_sockid(&u, sockid.get());
-							login_success(&tx, &mut *user, &mut client).await;
+							login_success(&tx, &mut user, &mut client).await;
 						} else {
 							sendmsg(&tx, &WsResponse::loginfail { err: "Authentication failed" });
 						}
