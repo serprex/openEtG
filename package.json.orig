@@ -1,0 +1,35 @@
+{
+  "name": "openetg",
+  "type": "module",
+  "description": "openEtG",
+  "readme": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/serprex/openEtG"
+  },
+  "devDependencies": {
+    "@babel/plugin-syntax-import-attributes": "^7.23.3",
+    "@pencil.js/spritesheet": "^1.5.1",
+    "babel-loader": "^9.1.3",
+    "babel-preset-solid": "^1.8.12",
+    "copy-webpack-plugin": "^12.0.2",
+    "html-webpack-plugin": "^5.6.0",
+    "prettier": "^3.2.5",
+<<<<<<< HEAD
+    "solid-js": "^1.8.14",
+=======
+    "solid-js": "^1.8.12",
+>>>>>>> 994a1c0c (Frailty: unupped costs 1, upped reduces charges to 1)
+    "webpack": "^5.90.1",
+    "webpack-cli": "^5.1.4"
+  },
+  "scripts": {
+    "test": "cargo test --manifest-path=./src/rs/Cargo.toml",
+    "dev": "webpack --mode=development --watch --config webpack.config.js",
+    "build": "npm run build-wasm && webpack --mode=production --config webpack.config.js",
+    "build-dev": "npm run build-wasm && webpack --mode=development --config webpack.config.js",
+    "build-atlas": "node scripts/sheet.js && cwebp -m 6 -q 100 assets/atlas.png -o assets/atlas.webp",
+    "build-wasm": "cargo build --release --manifest-path src/rs/Cargo.toml --target wasm32-unknown-unknown && wasm-bindgen --no-typescript --out-dir ./src/rs/pkg ./src/rs/target/wasm32-unknown-unknown/release/etg.wasm"
+  },
+  "license": "MIT"
+}
