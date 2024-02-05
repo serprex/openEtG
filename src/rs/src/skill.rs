@@ -645,6 +645,7 @@ impl Tgt {
 	pub const quinttog: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(28 << 1) });
 	pub const locket: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(29 << 1) });
 	pub const poisoned: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(30 << 1) });
+	pub const permcharge: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(31 << 1) });
 	pub const _own: u32 = 1 << 1;
 	pub const _foe: u32 = 2 << 1;
 	pub const _notself: u32 = 3 << 1;
@@ -675,6 +676,7 @@ impl Tgt {
 	pub const _quinttog: u32 = 28 << 1;
 	pub const _locket: u32 = 29 << 1;
 	pub const _poisoned: u32 = 30 << 1;
+	pub const _permcharge: u32 = 31 << 1;
 
 	const fn or(self) -> Tgt {
 		Tgt(unsafe { NonZeroU32::new_unchecked(3 | self.0.get() << 2) })
@@ -786,6 +788,7 @@ impl Tgt {
 					}
 				}
 				Tgt::_poisoned => ctx.get(t, Stat::poison) > 0,
+				Tgt::_permcharge => ctx.material(t, Some(Kind::Permanent)) && ctx.get(t, Stat::charges) > 0,
 				_ => false,
 			}
 		} else {
@@ -1353,7 +1356,7 @@ impl Skill {
 			Self::flyingweapon => Tgt::playerweap,
 			Self::forceplay => Tgt::forceplay,
 			Self::fractal => Tgt::crea,
-			Self::frail => Tgt::crea.mix(Tgt::perm).or(),
+			Self::frail => Tgt::crea.mix(Tgt::permstack).or(),
 			Self::freeze(_) => {
 				if set == CardSet::Open {
 					Tgt::crea.mix(Tgt::weap).or()
@@ -1458,7 +1461,7 @@ impl Skill {
 			Self::trick => Tgt::crea,
 			Self::tutordraw => Tgt::card,
 			Self::unsummon => Tgt::crea,
-			Self::upload => Tgt::crea.mix(Tgt::weap).or(),
+			Self::upload => Tgt::notself.mix(Tgt::crea.mix(Tgt::weap).or()).and(),
 			Self::virusinfect => Tgt::crea,
 			Self::virusplague => Tgt::play,
 			Self::web => {
@@ -1926,7 +1929,7 @@ impl Skill {
 				}
 			}
 			Self::cold => {
-				if !ctx.get(t, Flag::ranged) && ctx.rng_range(0..10) < 3 {
+				if !ctx.get(t, Flag::ranged) && ctx.rng_range(0..3) == 0 {
 					ctx.freeze(t, 3);
 				}
 			}
@@ -2052,16 +2055,19 @@ impl Skill {
 			}
 			Self::deckblock => {
 				let owner = ctx.get_owner(c);
-				let pl = ctx.get_player_mut(owner);
+				let pl = ctx.get_player(owner);
 				if !pl.thing.flag.get(Flag::protectdeck) {
-					let deck = pl.deck_mut();
-					let dlen = deck.len();
-					if deck.pop().is_some() {
-						data.dmg = 0;
+					let mut idx = usize::MAX;
+					for (index, &id) in pl.deck.iter().enumerate().rev() {
+						if ctx.get(id, Flag::pillar) {
+							idx = index;
+						}
 					}
-					if dlen < 2 {
-						ctx.remove(c);
-						if dlen == 1 {
+					if idx != usize::MAX {
+						data.dmg = 0;
+						let pl = ctx.get_player_mut(owner);
+						pl.deck_mut().remove(idx);
+						if pl.deck.len() == 0 {
 							ctx.fx(owner, Fx::LastCard);
 						}
 					}
@@ -2659,8 +2665,15 @@ impl Skill {
 				if thing.kind == Kind::Creature {
 					thing.status.insert(Stat::hp, 1);
 					thing.status.insert(Stat::maxhp, 1);
-				} else if let Some(charges) = thing.status.get_mut(Stat::charges) {
-					*charges -= (*charges > 1) as i16;
+				} else {
+					let upped = card::Upped(thing.status.get(Stat::card));
+					if let Some(charges) = thing.status.get_mut(Stat::charges) {
+						if upped {
+							*charges = 1;
+						} else {
+							*charges -= (*charges > 1) as i16;
+						}
+					}
 				}
 			}
 			Self::freedom => {
@@ -2774,7 +2787,8 @@ impl Skill {
 			}
 			Self::halvedr => {
 				if t == ctx.get_owner(c) {
-					*ctx.get_mut(c, Stat::hp) /= 2;
+					let hp = ctx.get_mut(c, Stat::hp);
+					*hp = hp.saturating_add(1) / 2;
 				}
 			}
 			Self::hasten => {
@@ -3186,8 +3200,8 @@ impl Skill {
 				ctx.set(t, Stat::castele, card.element as i16);
 				ctx.set(t, Stat::cast, if card.element == etg::Chroma as i8 { 12 } else { 4 });
 				ctx.set(t, Stat::atk, 7);
-				ctx.set(t, Stat::maxhp, 4);
-				ctx.set(t, Stat::hp, 4);
+				ctx.set(t, Stat::maxhp, 2);
+				ctx.set(t, Stat::hp, 2);
 			}
 			Self::jetstream => {
 				if ctx.get(t, Flag::airborne) {
@@ -4006,8 +4020,8 @@ impl Skill {
 				ctx.set(t, Flag::protectdeck, true);
 			}
 			Self::sadism => {
-				if ctx.get_kind(t) != Kind::Player && data.dmg > 0 {
-					ctx.dmg(ctx.get_owner(c), -data.dmg);
+				if ctx.get_kind(t) != Kind::Player && data.amt > 0 {
+					ctx.dmg(ctx.get_owner(c), -data.amt);
 				}
 			}
 			Self::salvage => {
@@ -4179,7 +4193,6 @@ impl Skill {
 				ctx.setSkill(t, Event::Cast, &[Skill::burrow]);
 				ctx.set(t, Stat::cast, if card::Upped(ctx.get(c, Stat::card)) { 2 } else { 1 });
 				ctx.set(t, Stat::castele, etg::Earth);
-				ctx.set(t, Stat::casts, 0);
 			}
 			Self::siphon => {
 				if throttle(ctx, data, c) {
@@ -4319,8 +4332,13 @@ impl Skill {
 				}
 			}
 			Self::stasisdraw => {
-				ctx.set(t, Flag::drawlock, true);
-				ctx.set(t, Flag::protectdeck, true);
+				let dlen = {
+					let pl = ctx.get_player_mut(t);
+					pl.thing.flag.0 |= Flag::drawlock | Flag::protectdeck;
+					pl.hand_len() as i16
+				};
+				let own = ctx.get_owner(c);
+				ctx.dmg(own, dlen * if card::Upped(ctx.get(c, Stat::card)) { -2 } else { -1 });
 			}
 			Self::steal => {
 				let owner = ctx.get_owner(c);
@@ -4428,7 +4446,7 @@ impl Skill {
 			}
 			Self::tick => {
 				let upped = card::Upped(ctx.get(c, Stat::card));
-				ctx.dmg(c, if upped { 3 } else { 1 });
+				ctx.dmg(c, if upped { 2 } else { 1 });
 				if ctx.get(c, Stat::hp) <= 0 {
 					let foe = ctx.get_foe(ctx.get_owner(c));
 					if upped {

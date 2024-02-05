@@ -770,7 +770,7 @@ export default function Match(props) {
 		hardcorebound = props.game.data.ante.bound;
 	}
 	const [tempgame, setTempgame] = createSignal(null);
-	const [replayhistory, setReplayHistory] = createSignal([props.game]);
+	const [replayhistory, setReplayHistory] = createSignal([props.game.clone()]);
 	const [replayindex, setreplayindex] = createSignal(0);
 	const [depend, forceUpdate] = createSignal(undefined, { equals: false });
 	const pgame = () => {
@@ -1086,6 +1086,7 @@ export default function Match(props) {
 			setreplayindex(idx);
 			setPlayer1(game.turn);
 			setPlayer2(game.get_foe(game.turn));
+			console.log(idx, game.turn);
 		});
 
 	const gotoResult = () => {
@@ -1395,32 +1396,33 @@ export default function Match(props) {
 	const cloaked = () => game().is_cloaked(p2id());
 
 	const texts = createMemo(() => {
-		const g = game();
+		const g = game(),
+			p1 = p1id();
 		let turntell, endText, cancelText;
 		if (g.phase !== Phase.End) {
 			turntell =
 				targeting() ?
 					targeting().text
-				:	`${g.turn === p1id() ? 'Your' : 'Their'} turn${
+				:	`${g.turn === p1 ? 'Your' : 'Their'} turn${
 						g.phase > Phase.Mulligan ? ''
-						: p1id() === 1 ? "\nYou're first"
+						: p1 === 1 ? "\nYou're first"
 						: "\nYou're second"
 					}`;
-			if (g.turn === p1id()) {
+			if (g.turn === p1) {
 				endText =
 					targeting() ? ''
 					: g.phase === Phase.Play ? 'End Turn'
-					: g.turn === p1id() ? 'Accept'
+					: g.turn === p1 ? 'Accept'
 					: '';
 				if (g.phase !== Phase.Play) {
-					cancelText = g.turn === p1id() ? 'Mulligan' : '';
+					cancelText = g.turn === p1 ? 'Mulligan' : '';
 				} else {
 					cancelText = targeting() || resigning() ? 'Cancel' : '';
 				}
 			} else cancelText = endText = '';
 		} else {
-			turntell = `${g.turn === p1id() ? 'Your' : 'Their'} Turn\n${
-				g.winner === p1id() ? 'Won' : 'Lost'
+			turntell = `${g.turn === p1 ? 'Your' : 'Their'} Turn\n${
+				g.winner === p1 ? 'Won' : 'Lost'
 			}`;
 			endText = 'Continue';
 			cancelText = '';
@@ -1738,7 +1740,7 @@ export default function Match(props) {
 									const { x } = props.replay.moves[idx];
 									if (x === 'end' || x === 'mulligan') break;
 								}
-								setReplayIndex(Math.min(idx, len));
+								setReplayIndex(idx);
 							}}
 							style="position:absolute;left:830px;top:540px;width:20px"
 						/>

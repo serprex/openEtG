@@ -1218,13 +1218,18 @@ impl Game {
 				let mut gclone = self.clone();
 				gclone.rng = Pcg32::from_rng(&mut seedrng).unwrap();
 				for pl in 1..=gclone.players_len() {
-					for pr in gclone.get_player(pl).permanents {
+					let player = gclone.get_player(pl);
+					let sh = player.shield;
+					for pr in player.permanents {
 						if pr != 0
 							&& (gclone.hasskill(pr, Event::Attack, Skill::patience)
 								|| gclone.get(pr, Flag::patience))
 						{
 							gclone.remove(pr);
 						}
+					}
+					if sh != 0 && gclone.hasskill(sh, Event::Shield, Skill::deckblock) {
+						gclone.remove(sh);
 					}
 				}
 				gclone.r#move(GameMove::End(0));
@@ -1830,17 +1835,17 @@ impl Game {
 		}
 		let sosa = thing.status.get(Stat::sosa) != 0;
 		let realdmg = if sosa { -dmg } else { dmg };
-		let capdmg = if realdmg < 0 {
-			thing.status.get(Stat::hp).saturating_sub(thing.status.get(Stat::maxhp)).max(realdmg)
-		} else if !dontdie && kind != Kind::Player {
-			self.truehp(id).min(realdmg)
+		let (realdmg, capdmg) = if realdmg < 0 {
+			let dmg = thing.status.get(Stat::hp).saturating_sub(thing.status.get(Stat::maxhp)).max(realdmg);
+			(dmg, dmg)
 		} else {
-			realdmg
+			let dmg = if kind == Kind::Player { realdmg } else { self.truehp(id).min(realdmg) };
+			(if dontdie { realdmg } else { dmg }, dmg)
 		};
 		let hp = self.get_mut(id, Stat::hp);
-		*hp = hp.saturating_sub(capdmg);
+		*hp = hp.saturating_sub(realdmg);
 		if kind != Kind::Player {
-			self.fx(id, Fx::Dmg(capdmg));
+			self.fx(id, Fx::Dmg(realdmg));
 		}
 		let mut dmgdata = ProcData::default();
 		dmgdata.dmg = dmg;

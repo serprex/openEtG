@@ -288,12 +288,7 @@ fn eval_skill(
 			Skill::deadalive => 2 * PREC,
 			Skill::deathwish => PREC,
 			Skill::deckblast => ctx.get_player(ctx.get_owner(c)).deck.len() as i32 * (PREC / 2),
-			Skill::deckblock => {
-				let owner = ctx.get_owner(c);
-				(ctx.get_player(owner).deck.len() as i32
-					- ctx.count_creatures(ctx.get_foe(owner)) as i32 * 4)
-					* PREC
-			}
+			Skill::deckblock => PREC,
 			Skill::deepdive | Skill::deepdiveproc => {
 				if ctx.get_kind(c) == Kind::Spell {
 					ctx.get_card(ctx.get(c, Stat::card)).attack as i32 * PREC
@@ -910,8 +905,13 @@ fn evalthing(
 	let cdata = ctx.get_card(card);
 	let owner = thing.owner;
 	if inhand {
-		if !caneventuallyactive(ctx, owner, thing.status.get(Stat::cost), thing.status.get(Stat::costele), quantamap)
-		{
+		if !caneventuallyactive(
+			ctx,
+			owner,
+			thing.status.get(Stat::cost),
+			thing.status.get(Stat::costele),
+			quantamap,
+		) {
 			return if ctx.hasskill(id, Event::OwnDiscard, Skill::obsession)
 				|| ctx.hasskill(id, Event::OwnDiscard, Skill::v_obsession)
 			{
@@ -1056,7 +1056,7 @@ fn evalthing(
 				score += score / 2
 			}
 		} else {
-			return if inhand { score * 4 } else { score / 2 }
+			return if inhand { score * 4 } else { score / 2 };
 		}
 	} else {
 		score = if ctx.material(id, None) { score * 5 / 4 } else { score * 7 / 2 };
@@ -1097,7 +1097,7 @@ pub fn eval(ctx: &Game) -> i32 {
 						wall.shield = Some(WallShield::Chargeblock(ctx.get(shield, Stat::charges)));
 					}
 					Skill::deckblock => {
-						wall.shield = Some(WallShield::Chargeblock(player.deck.len() as i16));
+						wall.shield = Some(WallShield::Chargeblock(player.deck.iter().map(|&id| ctx.get(id, Flag::pillar) as i16).sum::<i16>()));
 					}
 					Skill::disshield => {
 						if ctx.cardset() == CardSet::Open || !ctx.get(pl, Flag::sanctuary) {
@@ -1259,7 +1259,7 @@ pub fn eval(ctx: &Game) -> i32 {
 			if pl != turn {
 				let handlen = player.hand_len();
 				for draw in 1..=player.drawpower as usize {
-					if player.hand_len() + draw <= 8 && player.deck.len() >= draw {
+					if handlen + draw <= 8 && player.deck.len() >= draw {
 						pscore += evalthing(
 							ctx,
 							&damage,
@@ -1276,8 +1276,14 @@ pub fn eval(ctx: &Game) -> i32 {
 		} else {
 			pscore -= PREC / 2;
 		}
-		pscore += sqrt(plhp as i32 * PREC) * 4 - ctx.get(pl, Stat::poison) as i32 * (PREC / 2)
-			+ player.deck.len() as i32;
+		pscore += sqrt(plhp as i32 * PREC) * 4 - ctx.get(pl, Stat::poison) as i32 * (PREC / 2);
+		for &id in player.deck.iter() {
+			let cost = ctx.get(id, Stat::cost);
+			let costele = ctx.get(id, Stat::costele);
+			if caneventuallyactive(ctx, pl, cost, costele, &quantamap) {
+				pscore += 1;
+			}
+		}
 		if ctx.get(pl, Flag::precognition) {
 			pscore += PREC / 10;
 		}
