@@ -10,16 +10,20 @@ openEtG is an open source fork of the Flash ccg [Elements the Game](http://eleme
    ```sh
    git clone https://github.com/serprex/openEtG && cd openEtG
    ```
-3. Generate asset atlas:
+3. Install packages:
+   ```sh
+   npm install
+   ```
+4. Generate asset atlas:
    ```sh
    npm run build-atlas
    ```
-4. Copy sample configuration files:
+5. Copy sample configuration files:
    ```sh
    cp config-sample.json config.json
    cp wsconfig-sample.json wsconfig.json
    ```
-5. Configure `config.json` to connect your instance of postgresql
+6. Configure `config.json` to connect your instance of postgresql
    - Specify the http port you will listen on for web service requests
      - This should match your `wsconfig.json` `wsport`
    - Specify the user to connect your postgres server
@@ -28,15 +32,20 @@ openEtG is an open source fork of the Flash ccg [Elements the Game](http://eleme
    - Specify the port number of your postgres server
    - Specify the database name you created on your postgres server
    - If certificates are required to access your instance, they can be included under the `certs` key
-6.
+7.
    - `psql -f scripts/initdb.sql` will generate initial schema
-7. Build
+8. Install WASM rust target
+   ```sh
+   rustup target add wasm32-unknown-unknown
+   ```
+9. Build
    ```sh
    npm run build
    ```
-8. Run server
+10. Run server
    ```sh
-   cargo run --manifest-path=./src/rs/server/Cargo.toml
+   cd ./src/rs/server
+   cargo run --manifest-path=./Cargo.toml
    ```
 ### Testing
 
@@ -53,3 +62,4 @@ openEtG is an open source fork of the Flash ccg [Elements the Game](http://eleme
 1. [postgresql](https://www.postgresql.org/)
 1. [rustup](https://rustup.rs)
 1. [wasm-bindgen-cli](https://rustwasm.github.io/wasm-bindgen/reference/cli.html)
+1. [cwebp](https://developers.google.com/speed/webp/docs/cwebp)
