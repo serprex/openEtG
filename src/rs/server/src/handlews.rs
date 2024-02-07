@@ -1441,7 +1441,7 @@ pub async fn handle_ws(
 									client.execute(
 										concat!(
 											"insert into leaderboard (data_id, league_id, category, val) values ((select id from user_data where user_id = $1 and name = $2), $3, 'Wealth', $4) ",
-											"on conflict (data_id, league_id, category) do update set val = greatest($4, excluded.val)"), &[&userid, &uname, &leagueid, &wealth]).await.ok();
+											"on conflict (data_id, league_id, category) do update set val = greatest(excluded.val, leaderboard.val)"), &[&userid, &uname, &leagueid, &wealth]).await.ok();
 								}
 							}
 						}
@@ -1981,16 +1981,17 @@ pub async fn handle_ws(
 								5 => Leaderboard::Streak5,
 								_ => continue,
 							};
-							let mut user = user.lock().await;
-							if let Some(userdata) = user.data.get_mut(&uname) {
+							let leagueid = {
+								let mut user = user.lock().await;
+								let Some(userdata) = user.data.get_mut(&uname) else { continue };
 								userdata.streak.resize(l as usize + 1, 0);
 								userdata.streak[l as usize] = n;
-								let leagueid = leagueid(&userdata.flags);
-								client.execute(
-									concat!(
-										"insert into leaderboard (data_id, league_id, category, val) values ((select id from user_data where user_id = $1 and name = $2), $3, $4, $5) ",
-										"on conflict (data_id, league_id, category) do update set val = greatest($5, excluded.val)"), &[&userid, &uname, &leagueid, &category, &(n as i32)]).await.ok();
-							}
+								leagueid(&userdata.flags)
+							};
+							client.execute(
+								concat!(
+									"insert into leaderboard (data_id, league_id, category, val) values ((select id from user_data where user_id = $1 and name = $2), $3, $4, $5) ",
+									"on conflict (data_id, league_id, category) do update set val = greatest(excluded.val, leaderboard.val)"), &[&userid, &uname, &leagueid, &category, &(n as i32)]).await.ok();
 						}
 						AuthMessage::addcards { c, bound } => {
 							let mut user = user.lock().await;
