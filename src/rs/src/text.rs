@@ -364,11 +364,8 @@ impl<'a> SkillThing<'a> {
 			Skill::forcedraw => Cow::from("When this creature damages a player, that player draws a card"),
 			Skill::forceplay =>
 				Cow::from("The owner of target card in hand plays that card on a random target if they are able, or the owner of target card in play without this ability activates that card's ability on a random target if they are able"),
-			Skill::frail => Cow::from(if self.upped() {
-				"Target creature's hp/maxhp becomes 1 without receiving damage, or target permanent with more than 1 charge/stack is reduced to 1 charge/stack"
-			} else {
-				"Target creature's hp/maxhp becomes 1 without receiving damage, or target permanent with more than 1 charge/stack has one charge/stack removed"
-			}),
+			Skill::frail => Cow::from("Target creature's hp/maxhp becomes 1 without receiving damage, or target permanent with more than 1 charge/stack has one charge/stack removed"),
+			Skill::frail2 => Cow::from("Target creature's hp/maxhp becomes 1 without receiving damage, or target permanent with more than 1 charge/stack is reduced to 1 charge/stack"),
 			Skill::fractal =>
 				Cow::from("Fill your hand with copies of target creature. Consumes all 1:12. If this spell costs 1:0, consumes all quanta"),
 			Skill::freeevade =>

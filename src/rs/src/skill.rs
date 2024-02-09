@@ -362,6 +362,7 @@ pub enum Skill {
 	forceplay,
 	fractal,
 	frail,
+	frail2,
 	freedom,
 	freeevade,
 	freeze(u8),
@@ -976,6 +977,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::forceplay => f.write_str("forceplay"),
 			Skill::fractal => Ok(()),
 			Skill::frail => Ok(()),
+			Skill::frail2 => Ok(()),
 			Skill::freedom => f.write_str("freedom"),
 			Skill::freeevade => Ok(()),
 			Skill::freeze(x) => write!(f, "freeze{x}"),
@@ -1357,6 +1359,7 @@ impl Skill {
 			Self::forceplay => Tgt::forceplay,
 			Self::fractal => Tgt::crea,
 			Self::frail => Tgt::crea.mix(Tgt::permstack).or(),
+			Self::frail2 => Tgt::crea.mix(Tgt::permstack).or(),
 			Self::freeze(_) => {
 				if set == CardSet::Open {
 					Tgt::crea.mix(Tgt::weap).or()
@@ -2665,15 +2668,17 @@ impl Skill {
 				if thing.kind == Kind::Creature {
 					thing.status.insert(Stat::hp, 1);
 					thing.status.insert(Stat::maxhp, 1);
-				} else {
-					let upped = card::Upped(thing.status.get(Stat::card));
-					if let Some(charges) = thing.status.get_mut(Stat::charges) {
-						if upped {
-							*charges = 1;
-						} else {
-							*charges -= (*charges > 1) as i16;
-						}
-					}
+				} else if let Some(charges) = thing.status.get_mut(Stat::charges) {
+					*charges -= (*charges > 1) as i16;
+				}
+			}
+			Self::frail2 => {
+				let mut thing = ctx.get_thing_mut(t);
+				if thing.kind == Kind::Creature {
+					thing.status.insert(Stat::hp, 1);
+					thing.status.insert(Stat::maxhp, 1);
+				} else if let Some(charges) = thing.status.get_mut(Stat::charges) {
+					*charges = 1;
 				}
 			}
 			Self::freedom => {

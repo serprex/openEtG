@@ -374,6 +374,7 @@ fn eval_skill(
 			Skill::forcedraw => -10 * PREC,
 			Skill::forceplay => 2 * PREC,
 			Skill::frail => 2 * PREC,
+			Skill::frail2 => 3 * PREC,
 			Skill::fractal => (20 - ctx.get_player(ctx.get_owner(c)).hand_len() as i32) * (PREC / 4),
 			Skill::freedom => 4 * PREC,
 			Skill::freeze(x) => x as i32 * PREC,
