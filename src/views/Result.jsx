@@ -437,7 +437,10 @@ export default function Result(props) {
 						</div>
 					)}
 					{cards}
-					<div style="text-align:center;width:700px;position:absolute;left:100px;bottom:444px">
+					<div
+						style={`text-align:center;width:700px;position:absolute;left:100px;bottom:${
+							boundreward || poolreward ? 444 : 180
+						}px`}>
 						<Text text={game.data.wintext ?? 'You won!'} />
 					</div>
 				</>

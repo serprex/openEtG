@@ -48,23 +48,23 @@ export function maybeLightenStr(card) {
 }
 export const presets = [
 	[
-		'Spins-only',
-		['no-shop', 'no-up-pillar'].sort(),
-		'Spending money is not allowed other than battle entry fees. That means no buying packs, & no upgrading pillars! Trading is allowed, but only with other Spins-Only alts.',
+		'No Shop',
+		['no-shop'].sort(),
+		'Shop is disabled, so no buying packs! Trading is allowed, but only with other No Shop alts.',
 	],
 	[
-		'Spins-only Self-found',
-		['no-shop', 'no-up-pillar', 'no-trade'].sort(),
-		"Just like Spins-only, but trading is also disabled. You're truly limited to what you can win from the AI.",
+		'No Shop Self-found',
+		['no-shop', 'no-trade'].sort(),
+		"Just like No Shop, but trading is also disabled. You're truly limited to what you can win from the AI.",
 	],
 	[
 		'Spins-only Hard',
-		['no-shop', 'no-up-pillar', 'no-up-merge', 'hardcore'].sort(),
-		'Like Spins-only, but no upgrading cards (can still spin upgraded cards), and everytime you lose, you permanently lost a card form your deck. Trading is allowed, but only with other Spins-only Hardcore alts.',
+		['no-shop', 'no-up-merge', 'hardcore'].sort(),
+		'Shop is disabled, as is upgrading non-pillars. Everytime you lose, you permanently lost a card form your deck. Trading is allowed, but only with other Spins-only Hardcore alts.',
 	],
 	[
 		'Spins-only Self-found Hard',
-		['no-shop', 'no-up-pillar', 'no-up-merge', 'no-trade', 'hardcore'].sort(),
-		'Like Spins-only Self-found, but no upgrading cards (can still spin upgraded cards), and everytime you lose, you permanently lose a card from your deck. Roguelike mode!',
+		['no-shop', 'no-up-merge', 'no-trade', 'hardcore'].sort(),
+		'Like Spins-only Hard, but trading is also disabled.',
 	],
 ];
