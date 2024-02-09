@@ -1702,11 +1702,7 @@ impl Skill {
 			}
 			Self::blockwithcharge => {
 				if ctx.maybeDecrStatus(c, Stat::charges) < 2 {
-					if ctx.cardset() == CardSet::Open {
-						ctx.die(c);
-					} else {
-						ctx.remove(c);
-					}
+					ctx.remove(c);
 				}
 				data.dmg = 0;
 			}
