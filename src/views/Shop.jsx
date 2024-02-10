@@ -1,6 +1,7 @@
 import { createSignal, onMount } from 'solid-js';
 import { For } from 'solid-js/web';
 
+import { playSound } from '../audio.js';
 import * as sock from '../sock.jsx';
 import Cards from '../Cards.js';
 import * as Tutor from '../Components/Tutor.jsx';
@@ -8,7 +9,6 @@ import * as etgutil from '../etgutil.js';
 import Card from '../Components/Card.jsx';
 import DeckDisplay from '../Components/DeckDisplay.jsx';
 import ExitBtn from '../Components/ExitBtn.jsx';
-import IconBtn from '../Components/IconBtn.jsx';
 import Text from '../Components/Text.jsx';
 import * as store from '../store.jsx';
 
@@ -33,7 +33,7 @@ const packdata = [
 
 function PackDisplay(props) {
 	const [hoverCard, setHoverCard] = createSignal(null);
-	const DeckDisplaySetCard = (i, card) => setHoverCard(card);
+	const DeckDisplaySetCard = (_i, card) => setHoverCard(card);
 	const children = () => {
 		const deck = etgutil.decodedeck(props.cards);
 		const children = [{ x: 106, y: 0, deck: deck.slice(0, 50) }];
@@ -46,10 +46,13 @@ function PackDisplay(props) {
 		}
 		return children;
 	};
+
 	return (
 		<div
 			class="bgbox"
-			style="position:absolute;left:0px;top:12px;width:756px;height:588px;z-index:1;overflow-y:auto">
+			style={`position:absolute;left:0px;top:12px;width:756px;height:588px;z-index:1;overflow-y:auto${
+				props.cards ? '' : ';display:none'
+			}`}>
 			<Card card={hoverCard()} x={8} y={8} />
 			<For each={children()}>
 				{p => (
@@ -132,51 +135,48 @@ export default function Shop() {
 
 	const hasFreePacks = () =>
 		!!(rx.user.freepacks && rx.user.freepacks[rarity()]);
-	const elebuttons = [];
-	for (let i = 0; i < 14; i++) {
-		elebuttons.push(
-			<IconBtn
-				e={'e' + i}
-				x={75 + (i >> 1) * 64}
-				y={117 + (i & 1) * 75}
-				click={() => {
-					setEle(i);
-					setInfo1(`Selected Element: ${i === 13 ? 'Random' : '1:' + i}`);
-				}}
-			/>,
-		);
-	}
 	return (
 		<>
 			<div
 				class="bgbox"
-				style="position:absolute;left:40px;top:16px;width:820px;height:60px"
-			/>
+				style="position:absolute;left:40px;top:16px;width:820px;height:60px;padding-left:12px;display:flex;flex-direction:column;justify-content:space-between">
+				<div style="display:flex;justify-content:space-between">
+					<span>
+						<Text text={info1()} />
+					</span>
+					{hasFreePacks() && (
+						<span>
+							{!!rx.user.freepacks[rarity()] &&
+								`Free ${packdata[rarity()].type} packs left: ${
+									rx.user.freepacks[rarity()]
+								}`}
+						</span>
+					)}
+				</div>
+				{info2()}
+			</div>
 			<div
 				class="bgbox"
-				style="position:absolute;left:40px;top:89px;width:494px;height:168px"
-			/>
+				style="position:absolute;left:40px;top:89px;width:494px;height:168px;display:flex;flex-wrap:wrap;justify-content:space-evenly">
+				{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(i => (
+					<div style="margin:18px">
+						<span
+							class={'imgb ico e' + i}
+							onClick={() => {
+								playSound('click');
+								setEle(i);
+								setInfo1(`Selected Element: ${i === 13 ? 'Random' : '1:' + i}`);
+							}}
+						/>
+					</div>
+				))}
+			</div>
 			<div
 				class="bgbox"
-				style="position:absolute;left:768px;top:90px;width:94px;height:184px"
-			/>
-			<div style="position:absolute;left:775px;top:101px">
-				<Text text={rx.user.gold + '$'} />
-			</div>
-			<div style="position:absolute;left:50px;top:25px">
-				<Text text={info1()} />
-			</div>
-			<span style="position:absolute;left:50px;top:50px">{info2()}</span>
-			<ExitBtn x={775} y={246} />
-			{hasFreePacks() && (
-				<span style="position:absolute;left:350px;top:26px">
-					{!!rx.user.freepacks[rarity()] &&
-						`Free ${packdata[rarity()].type} packs left: ${
-							rx.user.freepacks[rarity()]
-						}`}
-				</span>
-			)}
-			{cards() && (
+				style="position:absolute;left:768px;top:90px;width:94px;height:184px">
+				<div style="position:absolute;left:7px;top:11px">
+					<Text text={rx.user.gold + '$'} />
+				</div>
 				<input
 					type="button"
 					value="Take Cards"
@@ -184,36 +184,56 @@ export default function Shop() {
 						setBuy(true);
 						setCards('');
 					}}
-					style="position:absolute;left:775px;top:156px"
+					style={`position:absolute;left:7px;top:66px${
+						cards() ? '' : ';display:none'
+					}`}
 				/>
-			)}
-			{buy() &&
-				!!~ele() &&
-				!!~rarity() &&
-				(!store.hasflag(rx.user, 'no-shop') || hasFreePacks()) && (
-					<>
-						{!hasFreePacks() && (
+				{buy() &&
+					!!~ele() &&
+					!!~rarity() &&
+					(!store.hasflag(rx.user, 'no-shop') || hasFreePacks()) && (
+						<>
+							{!hasFreePacks() && (
+								<input
+									type="button"
+									value="Max Buy"
+									onClick={() => {
+										const pack = packdata[rarity()];
+										store.setOptTemp(
+											'bulk',
+											Math.min((rx.user.gold / pack.cost) | 0, 255).toString(),
+										);
+									}}
+									style="position:absolute;left:7px;top:38px"
+								/>
+							)}
 							<input
 								type="button"
-								value="Max Buy"
-								onClick={() => {
-									const pack = packdata[rarity()];
-									store.setOptTemp(
-										'bulk',
-										Math.min((rx.user.gold / pack.cost) | 0, 255).toString(),
-									);
-								}}
-								style="position:absolute;left:775px;top:128px"
+								value="Buy Pack"
+								onClick={buyPack}
+								style="position:absolute;left:7px;top:66px"
 							/>
-						)}
+						</>
+					)}
+				{!hasFreePacks() &&
+					!store.hasflag(rx.user, 'no-shop') &&
+					!!~ele() &&
+					!!~rarity() && (
 						<input
-							type="button"
-							value="Buy Pack"
-							onClick={buyPack}
-							style="position:absolute;left:775px;top:156px"
+							type="number"
+							placeholder="Bulk"
+							value={bulk()}
+							min="0"
+							max="255"
+							onChange={e => store.setOptTemp('bulk', e.target.value)}
+							onKeyDown={e => {
+								if (e.key === 'Enter') buyPack();
+							}}
+							style="position:absolute;top:94px;left:11px;width:64px"
 						/>
-					</>
-				)}
+					)}
+				<ExitBtn x={7} y={156} />
+			</div>
 			<div style="display:flex;column-gap:12px;position:absolute;top:278px;left:48px">
 				<For each={packdata}>
 					{(pack, n) => (
@@ -238,25 +258,7 @@ export default function Shop() {
 					)}
 				</For>
 			</div>
-			{elebuttons}
-			{cards() && <PackDisplay cards={cards()} />}
-			{!hasFreePacks() &&
-				!store.hasflag(rx.user, 'no-shop') &&
-				!!~ele() &&
-				!!~rarity() && (
-					<input
-						type="number"
-						placeholder="Bulk"
-						value={bulk()}
-						min="0"
-						max="255"
-						onChange={e => store.setOptTemp('bulk', e.target.value)}
-						onKeyDown={e => {
-							if (e.key === 'Enter') buyPack();
-						}}
-						style="position:absolute;top:184px;left:777px;width:64px"
-					/>
-				)}
+			<PackDisplay cards={cards()} />
 			<Tutor.Tutor x={8} y={500} panels={Tutor.Shop} />
 		</>
 	);
