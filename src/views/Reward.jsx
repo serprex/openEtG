@@ -97,19 +97,14 @@ export default function Reward(props) {
 					</div>
 				)}
 				{!!props.code && <ExitBtn x={10} y={10} />}
-				<Index each={rewardList}>
-					{(reward, i) => (
+				<div style="position:absolute;left:100px;top:272px;display:grid;grid-template-rows:repeat(10,auto);grid-auto-flow:column;gap:1px">
+					{rewardList.map(reward => (
 						<CardImage
-							style={{
-								position: 'absolute',
-								left: `${100 + ((i / 12) | 0) * 108}px`,
-								top: `${272 + (i % 12) * 20}px`,
-							}}
-							card={Cards.Codes[reward()]}
-							onClick={[setChosenReward, reward()]}
+							card={Cards.Codes[reward]}
+							onClick={[setChosenReward, reward]}
 						/>
-					)}
-				</Index>
+					))}
+				</div>
 				<Card x={233} y={10} card={Cards.Codes[chosenReward()]} />
 			</>
 		)

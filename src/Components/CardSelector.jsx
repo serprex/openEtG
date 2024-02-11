@@ -1,13 +1,11 @@
-import { createMemo, createSignal } from 'solid-js';
+import { createSignal } from 'solid-js';
 import { Index } from 'solid-js/web';
 
 import { selector_filter } from '../rs/pkg/etg.js';
 import { asShiny, asUpped } from '../etgutil.js';
 import { useRx, setOpt } from '../store.jsx';
-import Card from './Card.jsx';
 import CardImage from './CardImage.jsx';
 import IconBtn from './IconBtn.jsx';
-import Text from './Text.jsx';
 
 function RaritySelector(props) {
 	return (
@@ -58,14 +56,13 @@ function poolCount(props, code) {
 	);
 }
 function CardSelectorColumn(props) {
-	const memo = createMemo(() => {
-		const children = [],
-			countTexts = [];
+	const result = () => {
+		const children = [];
 		for (let j = 0; j < props.cards.length; j++) {
-			const y = props.y + j * 19,
-				card = props.cards[j],
+			let countText = null;
+			const card = props.cards[j],
 				code = card.code;
-			let opacity = undefined;
+			let style = '';
 			if (props.cardpool) {
 				const scode = asShiny(code, true);
 				const cardAmount =
@@ -90,10 +87,10 @@ function CardSelectorColumn(props) {
 								poolCount(props, asUpped(scode, false)) >= 1))
 					)
 				) {
-					opacity = '.5';
+					style = 'opacity:.5';
 				}
-				countTexts.push(
-					<div
+				countText = (
+					<span
 						class={`selectortext${
 							props.maxedIndicator && !card.pillar && cardAmount >= 6 ?
 								cardAmount >= 12 ?
@@ -102,45 +99,33 @@ function CardSelectorColumn(props) {
 							:	''
 						}`}>
 						{cardAmount + (shinyAmount ? '/' + shinyAmount : '')}
-					</div>,
+					</span>
 				);
 			}
 			children.push(
-				<CardImage
-					style={{
-						position: 'absolute',
-						left: `${props.x}px`,
-						top: `${y}px`,
-						opacity,
-					}}
-					card={card}
-					onClick={props.onClick && [props.onClick, maybeShiny(props, card)]}
-					onContextMenu={
-						props.onContextMenu &&
-						(e => {
-							e.preventDefault();
-							props.onContextMenu(code);
-						})
-					}
-					onMouseOver={
-						props.onMouseOver && [props.onMouseOver, maybeShiny(props, card)]
-					}
-				/>,
+				<>
+					<CardImage
+						style={style}
+						card={card}
+						onClick={props.onClick && [props.onClick, maybeShiny(props, card)]}
+						onContextMenu={
+							props.onContextMenu &&
+							(e => {
+								e.preventDefault();
+								props.onContextMenu(code);
+							})
+						}
+						onMouseOver={
+							props.onMouseOver && [props.onMouseOver, maybeShiny(props, card)]
+						}
+					/>
+					{countText}
+				</>,
 			);
 		}
-		return { children, countTexts };
-	});
-	return (
-		<>
-			<div
-				style={`position:absolute;left:${props.x + 100}px;top:${
-					props.y
-				}px;text-height:0`}>
-				{memo().countTexts}
-			</div>
-			{memo().children}
-		</>
-	);
+		return children;
+	};
+	return <>{result}</>;
 }
 
 function CardSelectorCore(props) {
@@ -168,12 +153,13 @@ function CardSelectorCore(props) {
 	return (
 		<Index each={columns()}>
 			{(cards, i) => (
-				<CardSelectorColumn
-					{...props}
-					cards={cards()}
-					x={props.x + i * 133}
-					y={props.y}
-				/>
+				<div
+					class="cardselector"
+					style={`position:absolute;left:${props.x + i * 133}px;top:${
+						props.y
+					}px`}>
+					<CardSelectorColumn {...props} cards={cards()} />
+				</div>
 			)}
 		</Index>
 	);

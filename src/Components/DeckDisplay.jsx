@@ -13,7 +13,7 @@ export default function DeckDisplay(props) {
 				card = props.cards.Codes[code];
 			if (card) {
 				j++;
-				let opacity;
+				let style = null;
 				if (props.pool && !card.isFree()) {
 					const tooMany =
 						!card.pillar &&
@@ -26,7 +26,7 @@ export default function DeckDisplay(props) {
 						props.autoup,
 					);
 					if (tooMany || notEnough) {
-						opacity = '.5';
+						style = 'opacity:.5';
 					}
 				}
 				children.push(
@@ -36,12 +36,7 @@ export default function DeckDisplay(props) {
 							props.onMouseOver && (() => props.onMouseOver(i, card))
 						}
 						onClick={props.onClick && (() => props.onClick(i, card))}
-						style={{
-							position: 'absolute',
-							left: `${(props.x ?? 0) + 100 + ((j / 10) | 0) * 99}px`,
-							top: `${(props.y ?? 0) + 32 + (j % 10) * 19}px`,
-							opacity,
-						}}
+						style={style}
 					/>,
 				);
 			} else {
@@ -63,5 +58,13 @@ export default function DeckDisplay(props) {
 		}
 		return children;
 	};
-	return <>{children}</>;
+	return (
+		<div
+			class="deckdisplay"
+			style={`position:absolute;left:${(props.x ?? 0) + 100}px;top:${
+				(props.y ?? 0) + 32
+			}px`}>
+			{children}
+		</div>
+	);
 }

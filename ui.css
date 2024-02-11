@@ -45,7 +45,7 @@ select:hover:active{background-color:#9ab}
 .atop2{display:inline-block;width:48px;text-align:right}
 .atop3{display:inline-block;width:48px}
 .atop4{display:inline-block;width:48px;text-align:right;margin-right:32px}
-.cardslot{font-size:11px;height:20px;width:100px;line-height:16px;padding:2px;border:1px solid;overflow:hidden;white-space:nowrap}
+.cardslot{display:inline-flex;font-size:11px;height:18px;width:100px;padding:2px;overflow:hidden;white-space:nowrap;justify-content:space-between}
 .maintitle{font-size:16px;text-align:center;font-weight:bold}
 .costcolumn{text-align:right;width:96px}
 .infobox{
@@ -58,9 +58,10 @@ select:hover:active{background-color:#9ab}
 	position:absolute;
 }
 .selectortext{
+	display:inline-block;
 	width:33px;
-	height:19px;
-	font-size:12px;
+	height:100%;
+	font-size:11px;
 	pointer-events:none;
 }
 .lightback{background-color:#aaa;color:#000}
@@ -102,6 +103,17 @@ select:hover:active{background-color:#9ab}
 .imgb:active{
 	filter:brightness(0.4);
 	cursor:pointer;
+}
+.deckdisplay{
+	display:grid;
+	grid-template-rows:repeat(10,auto);
+	grid-auto-flow:column;
+	gap:1px;
+}
+.cardselector{
+	display:grid;
+	grid-template-columns:auto 32px;
+	row-gap:1px;
 }
 #leftpane{
 	background-image:url(assets/bg_default.webp);
