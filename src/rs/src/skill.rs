@@ -4393,7 +4393,7 @@ impl Skill {
 						let weapon = ctx.get_weapon(t);
 						if weapon != 0 && ctx.get(weapon, Stat::frozen) != 0 {
 							ctx.fx(weapon, Fx::Shatter);
-							ctx.destroy(weapon);
+							ctx.die(weapon);
 						}
 					}
 					ctx.spelldmg(t, 4);
