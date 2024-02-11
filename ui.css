@@ -172,6 +172,7 @@ select:hover:active{background-color:#9ab}
 	0%{filter:hue-rotate(90deg)}
 	100%{filter:hue-rotate(270deg)}
 }
+.quantapool{font-size:16px;pointer-events:none;padding-left:16px}
 .inst{
 	width:68px;
 	height:68px;

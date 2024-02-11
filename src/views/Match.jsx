@@ -454,7 +454,7 @@ function Thing(props) {
 
 	return (
 		<div
-			class={`${isSpell() ? 'inst handinst ' : 'inst '}${tgtclass(
+			class={`${isSpell() ? 'inst handinst' : 'inst'}${tgtclass(
 				props.game,
 				props.p1id,
 				props.id,
@@ -686,9 +686,9 @@ function addNoHealData(game, newdata) {
 
 function tgtclass(game, p1id, id, targeting) {
 	if (targeting) {
-		if (targeting.filter(id)) return 'cantarget';
+		if (targeting.filter(id)) return ' cantarget';
 	} else if (game.get_owner(id) === p1id && game.canactive(id))
-		return 'canactive';
+		return ' canactive';
 	return '';
 }
 
@@ -1532,16 +1532,17 @@ export default function Match(props) {
 								};opacity:.3;border-radius:4px;pointer-events:none`}
 							/>
 						</Show>
-						{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(k => (
-							<span
-								class={'ico ce' + k}
-								style={`position:absolute;left:${k & 1 ? 2 : 48}px;top:${
-									(j ? 106 : 308) + (((k - 1) / 2) | 0) * 18
-								}px;font-size:16px;pointer-events:none;padding-left:16px`}>
-								&nbsp;
-								{game().get_quanta(pl(), k) || ''}
-							</span>
-						))}
+						<div
+							style={`display:grid;grid-template-columns:48px 48px;position:absolute;left:2;top:${
+								j ? 106 : 308
+							}px`}>
+							{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(k => (
+								<span class={'quantapool ico ce' + k}>
+									&nbsp;
+									{game().get_quanta(pl(), k) || ''}
+								</span>
+							))}
+						</div>
 						<div
 							style={`background-color:#000;position:absolute;left:2px;top:${
 								j ? 36 : 531
