@@ -105,10 +105,10 @@ function AltCreator(props) {
 						i === 14 ? 13
 						: i === 13 ? 14
 						: i
-					}`}
+					}${ele() === i ? ' selected' : ''}`}
 					style={`position:absolute;left:${600 + (idx & 1) * 180}px;top:${
 						40 + (idx >> 1) * 40
-					}px;${ele() == i ? 'filter:brightness(0.3)' : ''}`}
+					}px`}
 					onClick={[setEle, i]}>
 					<span style="position:absolute;left:40px;top:6px;width:144px">
 						{eleNames[i]}

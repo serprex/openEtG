@@ -100,17 +100,6 @@ export default function Shop() {
 				store.updateUser(userdelta);
 				setCards(data.cards);
 				setBuy(false);
-				store.chat(
-					() => (
-						<a
-							style="display:block"
-							href={`deck/${data.cards}`}
-							target="_blank">
-							{data.cards}
-						</a>
-					),
-					'Packs',
-				);
 			},
 		});
 	});

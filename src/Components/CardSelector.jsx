@@ -1,41 +1,11 @@
 import { createSignal } from 'solid-js';
 import { Index } from 'solid-js/web';
 
+import { playSound } from '../audio.js';
 import { selector_filter } from '../rs/pkg/etg.js';
 import { asShiny, asUpped } from '../etgutil.js';
 import { useRx, setOpt } from '../store.jsx';
 import CardImage from './CardImage.jsx';
-import IconBtn from './IconBtn.jsx';
-
-function RaritySelector(props) {
-	return (
-		<>
-			{[1, 2, 3, 4].map(i => (
-				<IconBtn
-					e={'r' + i}
-					x={props.x}
-					y={props.y + i * 24}
-					click={() => props.onChange(i)}
-				/>
-			))}
-		</>
-	);
-}
-
-function ElementSelector(props) {
-	return (
-		<>
-			{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => (
-				<IconBtn
-					e={'e' + i}
-					x={props.x + (!i || i & 1) * 36}
-					y={286 + (((i + 1) / 2) | 0) * 32}
-					click={() => props.onChange(i)}
-				/>
-			))}
-		</>
-	);
-}
 
 function maybeShiny(props, card) {
 	if (props.filterboth && props.shiny) {
@@ -180,13 +150,32 @@ export default function CardSelector(props) {
 					onClick={() => setOpt('toggleshiny', !opts.toggleshiny)}
 				/>
 			)}
-			<RaritySelector
-				x={80}
-				y={338}
-				value={rarity()}
-				onChange={r => setRarity(cur => (cur === r ? 0 : r))}
-			/>
-			<ElementSelector x={4} y={316} value={element()} onChange={setElement} />
+			<div style="position:absolute;left:78px;top:338px">
+				{[1, 2, 3, 4].map(i => (
+					<div
+						class={`imgb ico r${i}${rarity() === i ? ' selected' : ''}`}
+						style="display:block;margin-top:18px"
+						onClick={() => {
+							playSound('click');
+							setRarity(cur => (cur === i ? 0 : i));
+						}}
+					/>
+				))}
+			</div>
+			<div
+				class="selectorelements"
+				style="position:absolute;left:4px;top:288px">
+				{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => (
+					<span
+						class={`imgb ico e${i}${element() === i ? ' selected' : ''}`}
+						style={i ? undefined : 'grid-column:2'}
+						onClick={() => {
+							playSound('click');
+							setElement(i);
+						}}
+					/>
+				))}
+			</div>
 			<CardSelectorCore
 				{...props}
 				x={100}

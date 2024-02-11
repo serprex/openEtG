@@ -1,9 +1,9 @@
 import { createSignal } from 'solid-js';
 
+import { playSound } from '../audio.js';
 import Card from './Card.jsx';
 import CardSelector from './CardSelector.jsx';
 import DeckDisplay from './DeckDisplay.jsx';
-import IconBtn from './IconBtn.jsx';
 import { asShiny } from '../etgutil.js';
 
 export default function Editor(props) {
@@ -67,14 +67,18 @@ export default function Editor(props) {
 				class={'ico e' + props.mark}
 				style="position:absolute;left:66px;top:200px"
 			/>
-			{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => (
-				<IconBtn
-					e={'e' + i}
-					x={100 + i * 32}
-					y={234}
-					click={() => props.setMark(i)}
-				/>
-			))}
+			<div style="position:absolute;left:100px;top:234px">
+				{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => (
+					<span
+						class={`imgb ico e${i}${props.mark === i ? ' selected' : ''}`}
+						onClick={() => {
+							playSound('click');
+							props.setMark(i);
+						}}
+						onMouseOver={props.onMouseOver}
+					/>
+				))}
+			</div>
 			<Card x={734} y={8} card={card()} />
 		</>
 	);

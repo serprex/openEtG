@@ -1,3 +1,5 @@
+import { Show } from 'solid-js';
+
 import Chat from '../Components/Chat.jsx';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
@@ -8,35 +10,35 @@ function ChannelTab(props) {
 
 	return (
 		<span
-			class={opts.channel === props.channel ? 'tabsel' : 'tab'}
-			onClick={e => store.setOptTemp('channel', props.channel)}>
+			class={opts.channel === props.channel ? 'tab selected' : 'tab'}
+			onClick={_e => store.setOptTemp('channel', props.channel)}>
 			{props.channel}
 		</span>
 	);
 }
 
-export default function Rightpane(props) {
+export default function Rightpane() {
 	const opts = store.useRx(state => state.opts);
 
 	return (
-		!opts.hideRightpane && (
-			<>
-				<div style="margin-bottom:8px">
-					<a href="artcredit.htm" target="_blank">
-						Art credits
-					</a>
-					&emsp;&emsp;
-					<a href="forum" target="_blank">
-						Forum
-					</a>
-					&emsp;&emsp;
-					<a
-						href="https://discordapp.com/invite/qAmfB8T"
-						target="_blank"
-						rel="noopener">
-						Discord
-					</a>
-				</div>
+		<Show when={!opts.hideRightpane}>
+			<div style="display:flex;margin-bottom:4px;justify-content:space-evenly">
+				<a href="artcredit.htm" target="_blank">
+					Art credits
+				</a>
+				&emsp;&emsp;
+				<a href="forum" target="_blank">
+					Forum
+				</a>
+				&emsp;&emsp;
+				<a
+					href="https://discordapp.com/invite/qAmfB8T"
+					target="_blank"
+					rel="noopener">
+					Discord
+				</a>
+			</div>
+			<div style="display:flex;margin-bottom:4px;justify-content:space-evenly">
 				<label>
 					<input
 						type="checkbox"
@@ -47,7 +49,7 @@ export default function Rightpane(props) {
 						}}
 					/>
 					Appear Offline
-				</label>{' '}
+				</label>
 				<label>
 					<input
 						type="checkbox"
@@ -59,16 +61,15 @@ export default function Rightpane(props) {
 					/>
 					Afk
 				</label>
-				<div>
-					<ChannelTab channel="Main" />
-					<ChannelTab channel="System" />
-					<ChannelTab channel="Stats" />
-					<ChannelTab channel="Packs" />
-					<ChannelTab channel="Replay" />
-				</div>
-				<Chat channel={opts.channel} />
-				<textarea class="chatinput" placeholder="Chat" onKeyDown={parseChat} />
-			</>
-		)
+			</div>
+			<div style="display:flex;justify-content:space-evenly">
+				<ChannelTab channel="Main" />
+				<ChannelTab channel="System" />
+				<ChannelTab channel="Stats" />
+				<ChannelTab channel="Replay" />
+			</div>
+			<Chat channel={opts.channel} />
+			<textarea class="chatinput" placeholder="Chat" onKeyDown={parseChat} />
+		</Show>
 	);
 }
