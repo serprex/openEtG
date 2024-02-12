@@ -26,7 +26,7 @@ export default function DeckDisplay(props) {
 						props.autoup,
 					);
 					if (tooMany || notEnough) {
-						style = 'opacity:.5';
+						style = { opacity: '.5' };
 					}
 				}
 				children.push(

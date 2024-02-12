@@ -60,7 +60,7 @@ export default class Game {
 		const obj = Object.create(Game.prototype);
 		obj.game = this.clonegame();
 		obj.data = this.data;
-		obj.replay = this.replay.slice();
+		obj.replay = null;
 		return obj;
 	}
 
@@ -101,8 +101,12 @@ export default class Game {
 		}
 		return plies;
 	}
+	nextClone(cmd, fx = true) {
+		const game = this.clone();
+		if (this.replay) game.replay = [...this.replay, cmd];
+		return [game, game.nextCmd(cmd, fx)];
+	}
 	nextCmd(cmd, fx = true) {
-		if (this.replay) this.replay.push(cmd);
 		return this.next(GameMoveType.indexOf(cmd.x), cmd.c | 0, cmd.t | 0, fx);
 	}
 	withMoves(moves) {

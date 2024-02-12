@@ -199,7 +199,7 @@ function computeBonuses(game, p1id, lefttext, streakrate, setTip, clearTip) {
 				if (replayGame.get(move.c, 'pillar')) replayStats.pillarsPlayed++;
 			}
 		}
-		replayGame.nextCmd(move);
+		replayGame.nextCmd(move, false);
 	}
 	replayStats.creaturesDied = replayGame.get(p1id, 'lives');
 

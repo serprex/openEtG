@@ -118,7 +118,7 @@ function fightItOut() {
 						cmd,
 					);
 				}
-				game.nextCmd(cmd);
+				game.nextCmd(cmd, false);
 			}
 
 			if (mode === fight) {

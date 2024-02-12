@@ -769,14 +769,10 @@ export default function Match(props) {
 		hardcoreback = props.game.data.ante.c;
 		hardcorebound = props.game.data.ante.bound;
 	}
+	const [pgame, setGame] = createSignal(props.game);
 	const [tempgame, setTempgame] = createSignal(null);
-	const [replayhistory, setReplayHistory] = createSignal([props.game.clone()]);
+	const [replayhistory, setReplayHistory] = createSignal([props.game]);
 	const [replayindex, setreplayindex] = createSignal(0);
-	const [depend, forceUpdate] = createSignal(undefined, { equals: false });
-	const pgame = () => {
-		depend();
-		return props.game;
-	};
 	const game = () =>
 		props.replay ? replayhistory()[replayindex()] : tempgame() ?? pgame();
 
@@ -865,7 +861,7 @@ export default function Match(props) {
 
 	const applyNext = (cmd, iscmd) =>
 		batch(() => {
-			const { game } = props,
+			const game = pgame(),
 				{ turn } = game,
 				prehash = iscmd || game.hash();
 			if (cmd.x === 'cast' || cmd.x === 'end') {
@@ -884,7 +880,7 @@ export default function Match(props) {
 						shiny: card.shiny,
 						c: id,
 						t: cmd.t,
-						game: game.clone(),
+						game,
 					};
 				} else {
 					play = {
@@ -897,7 +893,7 @@ export default function Match(props) {
 						shiny: false,
 						c: 0,
 						t: 0,
-						game: game.clone(),
+						game,
 					};
 				}
 				const c = cmd.x === 'cast' && cmd.c;
@@ -917,20 +913,20 @@ export default function Match(props) {
 					}
 				}
 			}
-			const effects = game.nextCmd(cmd);
-			forceUpdate();
+			const [ng, effects] = game.nextClone(cmd);
+			setGame(ng);
 			if (
 				!iscmd &&
-				game.data.players.some(pl => pl.user && pl.user !== rx.username)
+				ng.data.players.some(pl => pl.user && pl.user !== rx.username)
 			) {
 				userEmit('move', {
 					id: props.gameid,
 					prehash,
-					hash: game.hash(),
+					hash: ng.hash(),
 					cmd,
 				});
 			}
-			gameStep(game);
+			gameStep(ng);
 			setEffects(state => {
 				const newstate = {};
 				for (let idx = 0; idx < effects.length; idx += 4) {
@@ -975,7 +971,7 @@ export default function Match(props) {
 						case 'Card':
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(
-								mkText(state, newstate, id, game.Cards.Codes[param].name),
+								mkText(state, newstate, id, ng.Cards.Codes[param].name),
 							);
 							break;
 						case 'Delay':
@@ -994,7 +990,7 @@ export default function Match(props) {
 							break;
 						case 'LastCard':
 							newstate.effects ??= new Set(state.effects);
-							const playerName = game.data.players[id - 1].name;
+							const playerName = ng.data.players[id - 1].name;
 							const LastCardEffect = () => (
 								<LastCardFx
 									self={LastCardEffect}
@@ -1060,9 +1056,9 @@ export default function Match(props) {
 				}
 				return { ...state, ...newstate };
 			});
-			const newTurn = game.turn;
+			const newTurn = ng.turn;
 			if (newTurn !== turn) {
-				if (game.data.players[newTurn - 1].user === rx.username) {
+				if (ng.data.players[newTurn - 1].user === rx.username) {
 					setPlayer1(newTurn);
 				}
 				setFoeplays(foeplays => new Map(foeplays).set(newTurn, []));
@@ -1076,9 +1072,12 @@ export default function Match(props) {
 			if (idx >= history.length) {
 				history = history.slice();
 				while (idx >= history.length) {
-					const gclone = history[history.length - 1].clone();
-					gclone.nextCmd(props.replay.moves[history.length - 1], false);
-					history.push(gclone);
+					const g = history[history.length - 1];
+					const [gnext, _] = g.nextClone(
+						props.replay.moves[history.length - 1],
+						false,
+					);
+					history.push(gnext);
 				}
 				setReplayHistory(history);
 			}
@@ -1090,7 +1089,7 @@ export default function Match(props) {
 		});
 
 	const gotoResult = () => {
-		const { game } = props;
+		const game = pgame();
 		if (game.data.arena) {
 			userEmit('modarena', {
 				aname: game.data.arena,
@@ -1143,7 +1142,7 @@ export default function Match(props) {
 	};
 
 	const endClick = (discard = 0) => {
-		const { game } = props;
+		const game = pgame();
 		if (game.turn === p1id() && game.phase === Phase.Mulligan) {
 			applyNext({ x: 'accept' });
 		} else if (game.winner) {
@@ -1158,17 +1157,17 @@ export default function Match(props) {
 					src: null,
 				});
 			} else {
+				setTargeting(null);
 				applyNext({
 					x: 'end',
 					t: discard || undefined,
 				});
-				setTargeting(null);
 			}
 		}
 	};
 
 	const cancelClick = () => {
-		const { game } = props;
+		const game = pgame();
 		if (resigning()) {
 			setResigning(false);
 		} else if (game.turn === p1id()) {
@@ -1194,14 +1193,14 @@ export default function Match(props) {
 	};
 
 	const thingClick = id => {
-		const { game } = props;
+		const game = pgame();
 		clearCard();
 		if (props.replay || game.phase !== Phase.Play) return;
 		const tgting = targeting();
 		if (tgting) {
 			if (tgting.filter(id)) {
-				tgting.cb(id);
 				setTargeting(null);
+				tgting.cb(id);
 			}
 		} else if (game.get_owner(id) === p1id() && game.canactive(id)) {
 			const cb = tgt => applyNext({ x: 'cast', c: id, t: tgt });
@@ -1303,7 +1302,8 @@ export default function Match(props) {
 	};
 
 	onMount(() => {
-		if (!props.replay && !pgame().data.spectate) {
+		if (props.replay) return;
+		if (!props.game.data.spectate) {
 			document.addEventListener('keydown', onkeydown);
 			window.addEventListener('beforeunload', onbeforeunload);
 		}
@@ -1338,7 +1338,7 @@ export default function Match(props) {
 		}
 		setCmds({
 			move: ({ cmd, hash }) => {
-				const { game } = props;
+				const game = pgame();
 				if ((!cmd.c || game.has_id(cmd.c)) && (!cmd.t || game.has_id(cmd.t))) {
 					applyNext(cmd, true);
 					if (game.hash() === hash) return;

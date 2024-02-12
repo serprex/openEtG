@@ -32,7 +32,7 @@ function CardSelectorColumn(props) {
 			let countText = null;
 			const card = props.cards[j],
 				code = card.code;
-			let style = '';
+			let style = null;
 			if (props.cardpool) {
 				const scode = asShiny(code, true);
 				const cardAmount =
@@ -57,7 +57,7 @@ function CardSelectorColumn(props) {
 								poolCount(props, asUpped(scode, false)) >= 1))
 					)
 				) {
-					style = 'opacity:.5';
+					style = { opacity: '.5' };
 				}
 				countText = (
 					<span
