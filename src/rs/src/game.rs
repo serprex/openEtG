@@ -27,7 +27,7 @@ use crate::etg;
 use crate::generated;
 use crate::skill::{Event, ProcData, Skill, SkillName, Skills};
 use crate::text::SkillThing;
-use crate::{now, set_panic_hook};
+use crate::set_panic_hook;
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[derive(Clone, Copy, Hash, Eq, PartialEq)]
@@ -550,8 +550,6 @@ pub struct Game {
 	pub turn: i16,
 	pub winner: i16,
 	pub phase: Phase,
-	pub time: f64,
-	pub duration: f64,
 	plprops: Vec<Rc<PlayerData>>,
 	props: Vec<Rc<ThingData>>,
 	attacks: Vec<(i16, i16)>,
@@ -566,8 +564,6 @@ impl Clone for Game {
 			turn: self.turn,
 			winner: self.winner,
 			phase: self.phase,
-			time: 0.0,
-			duration: 0.0,
 			plprops: self.plprops.clone(),
 			props: self.props.clone(),
 			attacks: self.attacks.clone(),
@@ -580,7 +576,7 @@ impl Clone for Game {
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl Game {
 	#[cfg_attr(target_arch = "wasm32", wasm_bindgen(constructor))]
-	pub fn new(seed: u32, set: CardSet, players: u8) -> Game {
+	pub fn new(seed: u32, set: CardSet, players: u8, now: u32) -> Game {
 		set_panic_hook();
 		let mut plprops = Vec::with_capacity(players as usize);
 		for id in 1..=players as i16 {
@@ -596,8 +592,6 @@ impl Game {
 			turn: 1,
 			winner: 0,
 			phase: if set == CardSet::Original { Phase::Play } else { Phase::Mulligan },
-			time: now(),
-			duration: 0.0,
 			plprops,
 			props: Vec::new(),
 			attacks: Vec::new(),
@@ -2333,7 +2327,6 @@ impl Game {
 				if winners != 0 {
 					self.winner = winners;
 					self.phase = Phase::End;
-					self.duration = now() - self.time;
 				} else if self.turn == id {
 					self.nextTurn();
 				}

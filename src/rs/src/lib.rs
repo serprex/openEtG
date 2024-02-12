@@ -24,19 +24,11 @@ use wasm_bindgen::prelude::*;
 extern "C" {
 	#[wasm_bindgen(js_namespace = console)]
 	fn log(s: &str);
-
-	#[wasm_bindgen(js_namespace = Date)]
-	fn now() -> f64;
 }
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn log(s: &str) {
 	println!("{}", s);
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn now() -> f64 {
-	0.0
 }
 
 pub fn set_panic_hook() {
@@ -66,7 +58,7 @@ mod test {
 	}
 
 	fn setup(set: CardSet) -> (Game, i16, i16) {
-		let mut ctx = Game::new(1728, set, 2);
+		let mut ctx = Game::new(1728, set, 2, 0);
 		let players = [1, 2];
 		for p in players {
 			ctx.set_leader(p, p);
