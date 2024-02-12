@@ -46,14 +46,7 @@ export default function DeckDisplay(props) {
 		}
 		if (mark !== -1 && props.renderMark) {
 			children.push(
-				<span
-					class={'ico e' + mark}
-					style={{
-						position: 'absolute',
-						left: `${(props.x ?? 0) + 66}px`,
-						top: `${(props.y ?? 0) + 188}px`,
-					}}
-				/>,
+				<span class={'ico e' + mark} style="position:absolute;left:-36px" />,
 			);
 		}
 		return children;

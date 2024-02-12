@@ -21,7 +21,7 @@ function App() {
 			<DeckDisplay
 				cards={Cards}
 				renderMark
-				x={-64}
+				x={-60}
 				y={-24}
 				deck={deck()}
 				onMouseOver={(i, card) => setCard(card)}
