@@ -920,10 +920,7 @@ export default function Match(props) {
 			}
 			const [ng, effects] = game.nextClone(cmd);
 			setGame(ng);
-			if (
-				!iscmd &&
-				ng.data.players.some(pl => pl.user && pl.user !== rx.username)
-			) {
+			if (!iscmd && isMultiplayer(ng)) {
 				userEmit('move', {
 					id: props.gameid,
 					prehash,
@@ -1068,6 +1065,7 @@ export default function Match(props) {
 				}
 				setFoeplays(foeplays => new Map(foeplays).set(newTurn, []));
 			}
+			return ng;
 		});
 
 	const setReplayIndex = idx =>
@@ -1190,9 +1188,8 @@ export default function Match(props) {
 			gotoResult();
 		} else if (!resigning()) {
 			setResigning(true);
-		} else {
-			applyNext({ x: 'resign', c: p1id() });
-			if (pgame().winner) gotoResult();
+		} else if (applyNext({ x: 'resign', c: p1id() }).winner) {
+			gotoResult();
 		}
 	};
 
@@ -1344,8 +1341,7 @@ export default function Match(props) {
 			move: ({ cmd, hash }) => {
 				const game = pgame();
 				if ((!cmd.c || game.has_id(cmd.c)) && (!cmd.t || game.has_id(cmd.t))) {
-					applyNext(cmd, true);
-					if (game.hash() === hash) return;
+					if (applyNext(cmd, true).hash() === hash) return;
 				}
 				userEmit('reloadmoves', { id: props.gameid });
 			},
