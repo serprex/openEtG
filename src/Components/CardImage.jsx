@@ -1,15 +1,21 @@
-import { maybeLightenStr } from '../ui.js';
+import { maybeLightenStr, strcols } from '../ui.js';
 
 export default function CardImage(props) {
+	const bgcol = () => maybeLightenStr(props.card);
 	return (
 		<div
-			class={`cardslot${props.card.shiny ? ' shiny' : ''}`}
+			class="cardslot"
 			onMouseOver={props.onMouseOver}
 			onMouseLeave={props.onMouseOut}
 			onClick={props.onClick}
 			onContextMenu={props.onContextMenu}
 			style={{
-				'background-color': maybeLightenStr(props.card),
+				background:
+					props.card.shiny ?
+						`linear-gradient(90deg,${bgcol()},${bgcol()} 66%,${
+							strcols[props.card.element + !props.card.upped * 13]
+						})`
+					:	bgcol(),
 				color: props.card.upped ? '#000' : '#fff',
 				...props.style,
 			}}>
