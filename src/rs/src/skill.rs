@@ -3964,7 +3964,7 @@ impl Skill {
 				let town = ctx.get_owner(t);
 				if !ctx.get(town, Flag::protectdeck) {
 					ctx.fx(t, Fx::Rewind);
-					ctx.fx(t, Fx::EndPos(-town));
+					ctx.fx(t, Fx::EndPos(!town));
 					ctx.remove(t);
 					let card = ctx.get(t, Stat::card);
 					let inst = ctx.new_thing(card, town);
@@ -4525,7 +4525,7 @@ impl Skill {
 					pl.deck_mut()[pick as usize] = t;
 					ctx.setCrea(town, tidx, pickid);
 					ctx.fx(pickid, Fx::StartPos(-town));
-					ctx.fx(t, Fx::EndPos(-town));
+					ctx.fx(t, Fx::EndPos(!town));
 				}
 			}
 			Self::tutordraw => {

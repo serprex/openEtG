@@ -573,40 +573,45 @@ function Things(props) {
 				: { opacity: 0, ...props.game.tgtToPos(id, props.p1id) }
 			);
 		});
-	const death = new Map(),
-		[getDeath, updateDeath] = createSignal(death, { equals: false }),
+	const [getDeath, setDeath] = createSignal(new Map()),
+		[allthings, setAll] = createSignal([]),
 		banned = new Set();
-	const [allthings, setAll] = createSignal(props.things);
 	createComputed(oldthings => {
 		untrack(() => {
-			const newthings = new Set(props.things);
-			let updated = false;
-			for (const id of newthings) {
-				if (death.has(id)) death.delete(id);
-				else if (banned.has(id)) banned.delete(id);
+			const death = getDeath();
+			let newDeath = null;
+			for (const id of props.things) {
+				if (death.has(id)) {
+					newDeath = newDeath ?? new Map(death);
+					newDeath.delete(id);
+				} else if (banned.has(id)) banned.delete(id);
 			}
+			const newthings = new Set(props.things);
 			for (const id of oldthings) {
 				if (!newthings.has(id) && !banned.has(id) && props.game.has_id(id)) {
-					const endpos = props.endPos.get(id);
+					const endpos = props.endPos.get(id) ?? id;
 					const pos =
 						endpos < 0 ?
-							{ x: 103, y: -endpos === props.p1id ? 551 : 258 }
-						:	props.getIdTrack(endpos || id);
+							{ x: 103, y: ~endpos === props.p1id ? 551 : 258 }
+						:	props.getIdTrack(endpos);
 					if (pos) {
-						death.set(id, { opacity: 0, ...pos });
-						updated = true;
+						newDeath = newDeath ?? new Map(death);
+						newDeath.set(id, { opacity: 0, ...pos });
 					}
 				}
 			}
-			setAll(props.things.concat(Array.from(death.keys())));
-			if (updated) updateDeath(death);
+			if (newDeath) setDeath(newDeath);
 		});
+		setAll(props.things.concat(Array.from(getDeath().keys())));
 		return props.things;
 	}, props.things);
 	const unregister = id => {
+		const death = getDeath();
 		if (death.has(id)) {
 			banned.add(id);
-			death.delete(id);
+			const newdeath = new Map(death);
+			newdeath.delete(id);
+			setDeath(newdeath);
 		}
 	};
 	return (
@@ -1085,7 +1090,6 @@ export default function Match(props) {
 			setreplayindex(idx);
 			setPlayer1(game.turn);
 			setPlayer2(game.get_foe(game.turn));
-			console.log(idx, game.turn);
 		});
 
 	const gotoResult = () => {
