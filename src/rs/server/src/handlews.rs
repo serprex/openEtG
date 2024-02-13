@@ -607,7 +607,7 @@ pub async fn handle_ws(
 											let awon = (row.get::<usize, i32>(0) + won as i32 + 1) as f64;
 											let mut aloss = (row.get::<usize, i32>(1) + (!won) as i32) as f64;
 											if lv != 0 {
-												aloss *= aloss.ln_1p();
+												aloss *= (aloss / 2.0).ln_1p();
 											}
 											let decay = awon + aloss;
 											let newscore =
