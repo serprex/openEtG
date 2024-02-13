@@ -230,7 +230,7 @@ export default function Bazaar() {
 			<ExitBtn x={8} y={56} />
 			<input
 				type="button"
-				value="Orders"
+				value="All Offers"
 				onClick={() => setShowOrders(showOrders => !showOrders)}
 				style="position:absolute;top:96px;left:8px;"
 			/>
@@ -249,13 +249,13 @@ export default function Bazaar() {
 						style="position:absolute;left:100px;top:8px"
 					/>
 					<input
-						placeholder="Price"
+						placeholder="Sell Price"
 						value={sell() || ''}
 						onInput={e => setSell(Math.min(e.target.value | 0, 999))}
 						style="position:absolute;left:200px;top:8px"
 					/>
 					<input
-						placeholder="Quantity"
+						placeholder="Sell Quantity"
 						value={sellq() || ''}
 						onInput={e => setSellq(Math.min(e.target.value | 0, 999))}
 						style="position:absolute;left:360px;top:8px"
@@ -275,13 +275,13 @@ export default function Bazaar() {
 						/>
 					)}
 					<input
-						placeholder="Price"
+						placeholder="Buy Price"
 						value={buy() || ''}
 						onInput={e => setBuy(Math.min(e.target.value | 0, 999))}
 						style="position:absolute;left:200px;top:40px"
 					/>
 					<input
-						placeholder="Quantity"
+						placeholder="Buy Quantity"
 						value={buyq() || ''}
 						onInput={e => setBuyq(Math.min(e.target.value | 0, 999))}
 						style="position:absolute;left:360px;top:40px"
@@ -314,6 +314,31 @@ export default function Bazaar() {
 						}
 					/>
 				</>
+			)}
+			{(!bcard() || !bz()) && (
+				<div style="position:absolute;left:250px;top:20px">
+					<h3>This area will show you available orders</h3>
+					<div style="padding-bottom:15px">
+						<ol>
+							<li>Select a card which you wish to buy or sell</li>
+							<li>
+								Orders are formatted:
+								<ul>
+									<li>
+										Buy <span style="color:#4f8">(# Cards) @ (price each)</span>
+									</li>
+									<li>
+										Sell{' '}
+										<span style="color:#f84">(# Cards) @ (price each)</span>
+									</li>
+								</ul>
+							</li>
+							<li>Click an order and the Order Form will autofill for you</li>
+							<li>You can manually adjust the quantity in the Order Form</li>
+							<li>To view all transactions in one view, click All Offers</li>
+						</ol>
+					</div>
+				</div>
 			)}
 			<div style="position:absolute;left:5px;top:240px">
 				{rx.user.gold}

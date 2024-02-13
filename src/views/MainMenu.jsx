@@ -39,14 +39,15 @@ const tipjar = [
 	'Wealth used by leaderboards is a combination of current gold & cardpool',
 ];
 
-function AiButton({ name, onClick, onMouseOver, lv }) {
+function AiButton({ name, onClick, onMouseOver, lv, disabled }) {
 	return (
-		<div style="display:flex;font-size:14px;padding-top:4px">
+		<div style="display:flex;font-size:14px;align-items:center">
 			<input
 				type="button"
 				value={name}
 				onClick={onClick}
 				onMouseOver={onMouseOver}
+				disabled={disabled}
 			/>
 			<div class="costcolumn">
 				{pveCostReward[lv * 2]}
@@ -181,10 +182,6 @@ export default function MainMenu(props) {
 				value={`Arena${i + 1} T30`}
 				onClick={() => store.doNav(import('./ArenaTop.jsx'), { lv: i })}
 				onMouseOver={[setTip, 'See who the top players in arena are right now']}
-				style={{
-					position: 'absolute',
-					left: i ? '92px' : '10px',
-				}}
 			/>,
 		);
 	}
@@ -227,106 +224,91 @@ export default function MainMenu(props) {
 						style="position:absolute;right:2px;bottom:2px"
 					/>
 				</div>
-				<input
-					type="button"
-					value="Settings"
-					style="position:absolute;left:620px;top:558px"
-					onClick={() => {
-						setSettings(settings => !settings);
-						setChangepass(false);
-						if (newpass) newpass.value = '';
-						if (newpass2) newpass2.value = '';
-					}}
-				/>
-				<div style="position:absolute;left:96px;top:92px;width:188px;height:120px">
-					<div class="maintitle">Stats</div>
+				<div style="position:absolute;left:100px;top:92px;width:170px;height:120px;font-size:14px;display:grid;align-content:stretch">
 					<div>{rx.username}</div>
-					{rx.uname && <div>{rx.uname}</div>}
+					{rx.uname && <div>↪{rx.uname}</div>}
 					<div>
 						{rx.user?.gold}
 						<span class="ico gold" />
 					</div>
-					<div>
-						PvE {rx.user?.aiwins} - {rx.user?.ailosses}
-					</div>
-					<div>
-						PvP {rx.user?.pvpwins} - {rx.user?.pvplosses}
+					<div style="display:grid;grid-template-columns:auto 1fr auto 1fr">
+						PvE
+						<span style="text-align:right">{rx.user?.aiwins}</span>&ndash;
+						<span>{rx.user?.ailosses}</span>
+						PvP
+						<span style="text-align:right">{rx.user?.pvpwins}</span>&ndash;
+						<span>{rx.user?.pvplosses}</span>
 					</div>
 				</div>
-				<div style="position:absolute;left:304px;top:380px;width:292px;height:130px">
+				<div style="position:absolute;left:317px;top:383px;width:264px;height:110px;display:grid;justify-items:center">
 					<div class="maintitle">Miscellaneous</div>
-					<div>
-						<div style="display:inline-block;width:49%;text-align:center">
-							{!hasflag(rx.user, 'no-oracle') && (
-								<input
-									type="button"
-									value="Colosseum"
-									onClick={() => store.doNav(import('./Colosseum.jsx'))}
-									onMouseOver={[
-										setTip,
-										'Try some daily challenges in the Colosseum',
-									]}
-								/>
-							)}
-						</div>
-						<div style="display:inline-block;width:49%;text-align:center">
-							{!hasflag(rx.user, 'no-quest') && (
-								<input
-									type="button"
-									value="Quests"
-									onClick={() => store.doNav(import('./Quest.jsx'))}
-									onMouseOver={[setTip, 'Go on an adventure']}
-								/>
-							)}
-						</div>
-					</div>
-					<div style="margin-top:4px">
-						<div style="display:inline-block;width:49%;text-align:center">
-							{!rx.uname && (
-								<input
-									type="button"
-									value="Arena Deck"
-									onClick={() => store.doNav(import('./ArenaInfo.jsx'))}
-									onMouseOver={[setTip, 'Check how your arena decks are doing']}
-								/>
-							)}
-						</div>
-						<div style="display:inline-block;width:49%;text-align:center">
-							<input
-								type="button"
-								value="Custom"
-								onClick={() =>
-									store.doNav(import('./Challenge.jsx'), { pvp: false })
+					<div style="display:flex;font-size:14px;width:100%;align-items:center;justify-content:space-between">
+						<input
+							type="button"
+							value="Colosseum"
+							onClick={() => {
+								if (!hasflag(rx.user, 'no-oracle')) {
+									store.doNav(import('./Colosseum.jsx'));
 								}
-								onMouseOver={[
-									setTip,
-									'Setup custom games vs AI or other players',
-								]}
-							/>
-						</div>
-					</div>
-					<div style="margin-top:4px">
-						<div style="display:inline-block;width:49%;text-align:center">
-							<input
-								type="button"
-								value="Legacy"
-								onClick={() =>
-									store.doNav(import('../vanilla/views/Login.jsx'))
+							}}
+							onMouseOver={[
+								setTip,
+								'Try some daily challenges in the Colosseum',
+							]}
+							disabled={hasflag(rx.user, 'no-oracle')}
+						/>
+						<input
+							type="button"
+							value="Quests"
+							onClick={() => {
+								if (!hasflag(rx.user, 'no-quest')) {
+									store.doNav(import('./Quest.jsx'));
 								}
-								onMouseOver={[
-									setTip,
-									'A mode attempting to imitate original EtG',
-								]}
-							/>
-						</div>
-						<div style="display:inline-block;width:49%;text-align:center">
-							<input
-								type="button"
-								value="Alts"
-								onClick={() => store.doNav(import('./Alts.jsx'))}
-								onMouseOver={[setTip, 'Manage subaccounts']}
-							/>
-						</div>
+							}}
+							onMouseOver={[setTip, 'Go on an adventure']}
+							disabled={hasflag(rx.user, 'no-quest')}
+						/>
+					</div>
+					<div style="display:flex;font-size:14px;width:100%;align-items:center;justify-content:space-between">
+						<input
+							type="button"
+							value="Custom"
+							onClick={() =>
+								store.doNav(import('./Challenge.jsx'), { pvp: false })
+							}
+							onMouseOver={[
+								setTip,
+								'Setup custom games vs AI or other players',
+							]}
+						/>
+						<input
+							type="button"
+							value="Arena Deck"
+							onClick={() => {
+								if (!rx.uname) {
+									store.doNav(import('./ArenaInfo.jsx'));
+								}
+							}}
+							onMouseOver={[setTip, 'Check how your arena decks are doing']}
+							disabled={rx.uname}
+						/>
+					</div>
+					<div style="display:flex;font-size:14px;width:100%;align-items:center;justify-content:space-between">
+						<input
+							type="button"
+							value="Legacy"
+							onClick={() => store.doNav(import('../vanilla/views/Login.jsx'))}
+							onMouseOver={[
+								setTip,
+								'A mode attempting to imitate original EtG',
+							]}
+						/>
+						<input
+							type="button"
+							value="Alts"
+							onClick={() => store.doNav(import('./Alts.jsx'))}
+							onMouseOver={[setTip, 'Manage subaccounts']}
+						/>
 					</div>
 				</div>
 				{ocard() ?
@@ -350,306 +332,376 @@ export default function MainMenu(props) {
 						</>
 					)
 				}
-				<div style="position:absolute;left:626px;top:420px;width:196px;height:120px">
-					<div class="maintitle">Leaderboards</div>
-					<input
-						type="button"
-						value="View"
-						onClick={() => store.doNav(import('./Leaderboards.jsx'))}
+				<div style="position:absolute;left:302px;top:120px;width:294px;height:210px;display:grid;justify-items:center">
+					<div class="maintitle">Battle</div>
+					<div style="display:flex;padding-left:82px;align-items:center">
+						<div class="costcolumn">Cost</div>
+						<div class="costcolumn">Reward</div>
+					</div>
+					<AiButton
+						name="Commoner"
+						lv={0}
+						onClick={() => store.navGame(mkAi(0))}
 						onMouseOver={[
 							setTip,
-							"Leaderboards to see data such as who's collected the most wealth",
+							'Commoners have no upgraded cards & mostly common cards',
 						]}
-						style="margin-left:25%"
+						disabled={hasflag(rx.user, 'no-battle')}
 					/>
-					<div style="margin-top:4px">{leadc}</div>
+					<AiButton
+						name="Mage"
+						lv={1}
+						onClick={() => store.navGame(mkPremade(1))}
+						onMouseOver={[
+							setTip,
+							'Mages have preconstructed decks with a couple rares',
+						]}
+						disabled={hasflag(rx.user, 'no-battle')}
+					/>
+					<AiButton
+						name="Champion"
+						lv={2}
+						onClick={() => store.navGame(mkAi(2))}
+						onMouseOver={[setTip, 'Champions have some upgraded cards']}
+						disabled={hasflag(rx.user, 'no-battle')}
+					/>
+					<AiButton
+						name="Demigod"
+						lv={3}
+						onClick={() => store.navGame(mkPremade(3))}
+						onMouseOver={[
+							setTip,
+							'Demigods are extremely powerful. Come prepared',
+						]}
+						disabled={hasflag(rx.user, 'no-battle')}
+					/>
+					<AiButton
+						name="Arena 1"
+						onClick={arenaAi(0)}
+						onMouseOver={[
+							setTip,
+							'In the arena you will face decks from other players',
+						]}
+						lv={4}
+						disabled={hasflag(rx.user, 'no-battle')}
+					/>
+					<AiButton
+						name="Arena 2"
+						onClick={arenaAi(1)}
+						onMouseOver={[
+							setTip,
+							'In the arena you will face upgraded decks from other players',
+						]}
+						lv={5}
+						disabled={hasflag(rx.user, 'no-battle')}
+					/>
 				</div>
-				{!hasflag(rx.user, 'no-battle') && (
-					<div style="position:absolute;left:308px;top:120px;width:288px;height:240px">
-						<div class="maintitle">Battle</div>
-						<div style="display:flex;padding-left:80px">
-							<div class="costcolumn">Cost</div>
-							<div class="costcolumn">Reward</div>
-						</div>
-						<AiButton
-							name="Commoner"
-							lv={0}
-							onClick={() => store.navGame(mkAi(0))}
-							onMouseOver={[
-								setTip,
-								'Commoners have no upgraded cards & mostly common cards',
-							]}
-						/>
-						<AiButton
-							name="Mage"
-							lv={1}
-							onClick={() => store.navGame(mkPremade(1))}
-							onMouseOver={[
-								setTip,
-								'Mages have preconstructed decks with a couple rares',
-							]}
-						/>
-						<AiButton
-							name="Champion"
-							lv={2}
-							onClick={() => store.navGame(mkAi(2))}
-							onMouseOver={[setTip, 'Champions have some upgraded cards']}
-						/>
-						<AiButton
-							name="Demigod"
-							lv={3}
-							onClick={() => store.navGame(mkPremade(3))}
-							onMouseOver={[
-								setTip,
-								'Demigods are extremely powerful. Come prepared',
-							]}
-						/>
-						<AiButton
-							name="Arena 1"
-							onClick={arenaAi(0)}
-							onMouseOver={[
-								setTip,
-								'In the arena you will face decks from other players',
-							]}
-							lv={4}
-						/>
-						<AiButton
-							name="Arena 2"
-							onClick={arenaAi(1)}
-							onMouseOver={[
-								setTip,
-								'In the arena you will face upgraded decks from other players',
-							]}
-							lv={5}
-						/>
-					</div>
-				)}
-				<div style="position:absolute;left:620px;top:92px;width:196px;height:176px">
+				<div style="position:absolute;left:620px;top:92px;width:196px;height:150px;display:grid;align-content:space-between">
 					<div class="maintitle">Cards</div>
-					<input
-						type="button"
-						value="Editor"
-						onClick={() => store.doNav(import('./DeckEditor.jsx'))}
-						onMouseOver={[setTip, 'Edit & manage your decks']}
-						style="position:absolute;left:14px;top:108px"
-					/>
-					<div style="font-size:14px;pointer-events:none;width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:16px;margin-top:12px">
-						{`Deck: ${rx.user?.selectedDeck}`}
+					<div>
+						<div style="font-size:14px;pointer-events:none;width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:16px;margin-top:12px">
+							{`Deck: ${rx.user?.selectedDeck}`}
+						</div>
+						<div style="text-align:center">{quickslots}</div>
 					</div>
-					<div style="text-align:center">{quickslots}</div>
-					{(!hasflag(rx.user, 'no-shop') ||
-						(rx.user.freepacks && rx.user.freepacks.some(x => x))) && (
-						<input
-							type="button"
-							value="Shop"
-							onClick={() => store.doNav(import('./Shop.jsx'))}
-							onMouseOver={[
-								setTip,
-								'Buy booster packs which contain cards from the elements you choose',
-							]}
-							style="position:absolute;left:14px;top:132px"
-						/>
-					)}
-					{!(
-						hasflag(rx.user, 'no-up-pillar') && hasflag(rx.user, 'no-up-merge')
-					) && (
-						<input
-							type="button"
-							value="Upgrade"
-							onClick={() => store.doNav(import('./Upgrade.jsx'))}
-							onMouseOver={[setTip, 'Upgrade or sell cards']}
-							style="position:absolute;left:102px;top:108px"
-						/>
-					)}
-					{!rx.uname && (
-						<input
-							type="button"
-							value="Bazaar"
-							onClick={() => store.doNav(import('./Bazaar.jsx'))}
-							onMouseOver={[
-								setTip,
-								"Put up cards for sale & review other players' offers",
-							]}
-							style="position:absolute;left:102px;top:132px"
-						/>
-					)}
+					<div>
+						<div style="display:flex;justify-content:center">
+							<input
+								type="button"
+								value="Editor"
+								onClick={() => store.doNav(import('./DeckEditor.jsx'))}
+								onMouseOver={[setTip, 'Edit & manage your decks']}
+							/>
+							<input
+								type="button"
+								value="Shop"
+								onClick={() => {
+									if (
+										!hasflag(rx.user, 'no-shop') ||
+										(rx.user.freepacks && rx.user.freepacks.some(x => x))
+									) {
+										store.doNav(import('./Shop.jsx'));
+									}
+								}}
+								onMouseOver={[
+									setTip,
+									'Buy booster packs which contain cards from the elements you choose',
+								]}
+								disabled={
+									hasflag(rx.user, 'no-shop') &&
+									!rx.user.freepacks?.some(x => x)
+								}
+							/>
+						</div>
+						<div style="display:flex;justify-content:center">
+							<input
+								type="button"
+								value="Upgrade"
+								onClick={() => {
+									if (
+										!(
+											hasflag(rx.user, 'no-up-pillar') &&
+											hasflag(rx.user, 'no-up-merge')
+										)
+									) {
+										store.doNav(import('./Upgrade.jsx'));
+									}
+								}}
+								onMouseOver={[setTip, 'Upgrade or sell cards']}
+								disabled={
+									hasflag(rx.user, 'no-up-pillar') &&
+									hasflag(rx.user, 'no-up-merge')
+								}
+							/>
+							<input
+								type="button"
+								value="Bazaar"
+								onClick={() => {
+									if (!rx.uname) {
+										store.doNav(import('./Bazaar.jsx'));
+									}
+								}}
+								onMouseOver={[
+									setTip,
+									"Put up cards for sale & review other players' offers",
+								]}
+								disabled={rx.uname}
+							/>
+						</div>
+					</div>
 				</div>
-				<div style="position:absolute;left:616px;top:300px;width:206px;height:130px">
-					<div class="maintitle">Players</div>
-					<input
-						placeholder="Player's Name"
-						value={rx.opts.foename ?? ''}
-						onInput={e => store.setOptTemp('foename', e.target.value)}
-						style="margin-left:24px"
-					/>
-					<input
-						type="button"
-						value="Library"
-						onClick={() => {
-							const name = foename() || rx.username;
-							if (name) {
-								const props = { name };
-								if (!foename()) props.alt = rx.uname;
-								store.doNav(import('./Library.jsx'), props);
-							}
-						}}
-						onMouseOver={[setTip, 'See exactly what cards you or others own']}
-						style="position:absolute;left:112px;top:64px"
-					/>
-					<input
-						type="button"
-						value="PvP"
-						onClick={() => sock.sendChallenge(foename())}
-						style="position:absolute;left:10px;top:88px"
-					/>
-					{!hasflag(rx.user, 'no-trade') && (
+				<div style="position:absolute;left:619px;top:292px;width:195px;height:240px;display:grid">
+					<div style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:center;align-items:center;padding-bottom:5px">
+						<div class="maintitle">Social</div>
+						<div style="display:flex;flex-direction:row;justify-content:center;flex-wrap:wrap">
+							<input
+								placeholder="Player's Name"
+								value={rx.opts.foename ?? ''}
+								onInput={e => store.setOptTemp('foename', e.target.value)}
+							/>
+							<div style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:space-evenly;align-items:center">
+								<input
+									type="button"
+									value="Library"
+									onClick={() => {
+										const name = foename() || rx.username;
+										if (name) {
+											const props = { name };
+											if (!foename()) props.alt = rx.uname;
+											store.doNav(import('./Library.jsx'), props);
+										}
+									}}
+									onMouseOver={[
+										setTip,
+										'See exactly what cards you or others own',
+									]}
+								/>
+								<input
+									type="button"
+									value="PvP"
+									onClick={() => sock.sendChallenge(foename())}
+								/>
+							</div>
+							<div style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:space-evenly;align-items:center">
+								<input
+									type="button"
+									value="Trade"
+									onClick={() => {
+										if (hasflag(rx.user, 'no-trade')) {
+											sock.userEmit('offertrade', {
+												f: foename(),
+												cards: '',
+												g: 0,
+												forcards: null,
+												forg: null,
+											});
+											store.doNav(import('./Trade.jsx'), { foe: foename() });
+										}
+									}}
+									onMouseOver={[setTip, 'Trade cards/$ with another player']}
+									disabled={hasflag(rx.user, 'no-trade')}
+								/>
+							</div>
+						</div>
+					</div>
+					<div style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:center;align-items:center;padding-bottom:5px">
+						<div class="maintitle">Reward</div>
+						<div style="display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;align-content:center">
+							<input
+								placeholder="Promocode"
+								value={rx.opts.foename ?? ''}
+								onInput={e => store.setOptTemp('foename', e.target.value)}
+							/>
+							<input
+								type="button"
+								value="Redeem"
+								onClick={() => {
+									sock.userEmit('codesubmit', {
+										code: foename(),
+									});
+								}}
+								onMouseOver={[setTip, 'Redeem a reward code']}
+							/>
+						</div>
+					</div>
+					<div style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:center;align-items:center;padding-bottom:5px">
+						<div class="maintitle">Leaderboards</div>
+						<div style="display:flex;flex-direction:column;align-items:center;">
+							<div>{leadc}</div>
+							<input
+								type="button"
+								value="View"
+								onClick={() => store.doNav(import('./Leaderboards.jsx'))}
+								onMouseOver={[
+									setTip,
+									"Leaderboards to see data such as who's collected the most wealth",
+								]}
+							/>
+						</div>
+					</div>
+				</div>
+				{changepass() && (
+					<div
+						class="bgbox"
+						style="position:relative;left:302px;top:286px;width:290px;height:60px;z-index:1">
 						<input
-							type="button"
-							value="Trade"
-							onClick={() => {
-								sock.userEmit('offertrade', {
-									f: foename(),
-									cards: '',
-									g: 0,
-									forcards: null,
-									forg: null,
-								});
-								store.doNav(import('./Trade.jsx'), { foe: foename() });
+							placeholder="New Password"
+							ref={newpass}
+							onKeyDown={e => {
+								if (e.key === 'Enter') changeFunc();
 							}}
-							onMouseOver={[setTip, 'Trade cards/$ with another player']}
-							style="position:absolute;left:10px;top:64px"
+							style="position:absolute;left:136px;top:4px;width:128px"
+						/>
+						<input
+							placeholder="Confirm New"
+							ref={newpass2}
+							onKeyDown={e => {
+								if (e.key === 'Enter') changeFunc();
+							}}
+							style="position:absolute;left:136px;top:32px;width:128px"
+						/>
+						<input
+							type="button"
+							value="Change Password"
+							onClick={changeFunc}
+							style="position:absolute;left:8px;top:8px;width:120px"
+						/>
+						<input
+							type="button"
+							value="Cancel Change"
+							onClick={() => {
+								setChangepass(false);
+								newpass.value = '';
+								newpass2.value = '';
+							}}
+							style="position:absolute;left:8px;top:32px;width:120px"
+						/>
+					</div>
+				)}
+				<div style="position:absolute;left:317px;top:517px;width:263px;display:flex;flex-direction:row;flex-wrap:nowrap;align-content:center;justify-content:space-between;align-items:center;">
+					<input
+						type="button"
+						value="Settings"
+						onClick={() => {
+							setSettings(settings => !settings);
+							setChangepass(false);
+							if (newpass) newpass.value = '';
+							if (newpass2) newpass2.value = '';
+						}}
+						onMouseOver={[setTip, 'Change password and user interface']}
+					/>
+					{typeof kongregateAPI === 'undefined' && (
+						<input
+							type="button"
+							value="Logout"
+							onClick={logout}
+							onMouseOver={[setTip, 'Click here to log out']}
 						/>
 					)}
-					<input
-						type="button"
-						value="Reward"
-						onClick={() => {
-							sock.userEmit('codesubmit', {
-								code: foename(),
-							});
-						}}
-						onMouseOver={[setTip, 'Redeem a reward code']}
-						style="position:absolute;left:112px;top:88px"
-					/>
 				</div>
-				{typeof kongregateAPI === 'undefined' && (
-					<input
-						type="button"
-						value="Logout"
-						onClick={logout}
-						onMouseOver={[setTip, 'Click here to log out']}
-						style="position:absolute;left:744px;top:558px"
-					/>
-				)}
 				{settings() && (
 					<div
 						class="bgbox"
-						style="position:absolute;left:580px;top:270px;width:300px;height:280px">
-						{changepass() ?
-							<>
-								<input
-									placeholder="New Password"
-									ref={newpass}
-									onKeyDown={e => {
-										if (e.key === 'Enter') changeFunc();
-									}}
-									style="position:absolute;left:136px;top:4px;width:128px"
-								/>
-								<input
-									placeholder="Confirm New"
-									ref={newpass2}
-									onKeyDown={e => {
-										if (e.key === 'Enter') changeFunc();
-									}}
-									style="position:absolute;left:136px;top:32px;width:128px"
-								/>
-								<input
-									type="button"
-									value="Change Password"
-									onClick={changeFunc}
-									style="position:absolute;left:8px;top:8px;width:120px"
-								/>
-								<input
-									type="button"
-									value="Cancel Change"
-									onClick={() => {
-										setChangepass(false);
-										newpass.value = '';
-										newpass2.value = '';
-									}}
-									style="position:absolute;left:8px;top:32px;width:120px"
-								/>
-							</>
-						:	<input
-								type="button"
-								value="Change Password"
-								onClick={() => setChangepass(true)}
-								style="position:absolute;left:8px;top:8px;width:120px"
-							/>
-						}
-						<label style="position:absolute;left:136px;top:88px">
-							<input
-								type="checkbox"
-								checked={!!rx.opts.enableSound}
-								onChange={e => {
-									changeSound(e.target.checked);
-									store.setOpt('enableSound', e.target.checked);
-								}}
-							/>
-							Enable sound
-						</label>
-						<label style="position:absolute;left:136px;top:53px">
-							<input
-								type="checkbox"
-								checked={!!rx.opts.enableMusic}
-								onChange={e => {
-									changeMusic(e.target.checked);
-									store.setOpt('enableMusic', e.target.checked);
-								}}
-							/>
-							Enable music
-						</label>
-						<label style="position:absolute;left:8px;top:53px">
-							<input
-								type="checkbox"
-								checked={!!rx.opts.hideMainchat}
-								onChange={e => store.setOpt('hideMainchat', e.target.checked)}
-							/>
-							Hide mainchat
-						</label>
-						<label style="position:absolute;left:8px;top:88px">
-							<input
-								type="checkbox"
-								checked={!!rx.opts.hideRightpane}
-								onChange={e => store.setOpt('hideRightpane', e.target.checked)}
-							/>
-							Hide rightpane
-						</label>
-						<label style="position:absolute;left:8px;top:123px">
-							<input
-								type="checkbox"
-								checked={!!rx.opts.disableTut}
-								onChange={e => store.setOpt('disableTut', e.target.checked)}
-							/>
-							Hide help
-						</label>
-						<label style="position:absolute;left:136px;top:123px">
-							<input
-								type="checkbox"
-								checked={!!rx.opts.lofiArt}
-								onChange={e => store.setOpt('lofiArt', e.target.checked)}
-							/>
-							Lofi Art
-						</label>
-						<label style="position:absolute;left:8px;top:158px">
-							<input
-								type="checkbox"
-								checked={!!rx.opts.shiftDrag}
-								onChange={e => store.setOpt('shiftDrag', e.target.checked)}
-							/>
-							Shift Drag
-						</label>
-						<span style="position:absolute;left:8px;top:200px">
+						style="position:absolute;left:302px;top:310px;width:min-content;height:200px;display:flex;flex-direction:column;align-content:space-between;justify-content:space-between;">
+						<input
+							type="button"
+							value="Change Password"
+							onClick={() => setChangepass(true)}
+							style="width:fit-content"
+						/>
+						<div style="display:flex;flex-wrap:nowrap;flex-direction:row;justify-content:space-between;align-items:flex-start">
+							<div style="display:flex;flex-direction:column;align-content:center;justify-content:space-between;flex-wrap:wrap;align-items:flex-start;">
+								<label>
+									<input
+										type="checkbox"
+										checked={!!rx.opts.enableSound}
+										onChange={e => {
+											changeSound(e.target.checked);
+											store.setOpt('enableSound', e.target.checked);
+										}}
+									/>
+									Enable sound
+								</label>
+								<label>
+									<input
+										type="checkbox"
+										checked={!!rx.opts.enableMusic}
+										onChange={e => {
+											changeMusic(e.target.checked);
+											store.setOpt('enableMusic', e.target.checked);
+										}}
+									/>
+									Enable music
+								</label>
+								<label>
+									<input
+										type="checkbox"
+										checked={!!rx.opts.hideMainchat}
+										onChange={e =>
+											store.setOpt('hideMainchat', e.target.checked)
+										}
+									/>
+									Hide mainchat
+								</label>
+								<label>
+									<input
+										type="checkbox"
+										checked={!!rx.opts.hideRightpane}
+										onChange={e =>
+											store.setOpt('hideRightpane', e.target.checked)
+										}
+									/>
+									Hide rightpane
+								</label>
+							</div>
+							<div style="display:flex;flex-direction:column;align-content:center;justify-content:space-between;flex-wrap:wrap;align-items:flex-start">
+								<label>
+									<input
+										type="checkbox"
+										checked={!!rx.opts.disableTut}
+										onChange={e => store.setOpt('disableTut', e.target.checked)}
+									/>
+									Hide help
+								</label>
+								<label>
+									<input
+										type="checkbox"
+										checked={!!rx.opts.lofiArt}
+										onChange={e => store.setOpt('lofiArt', e.target.checked)}
+									/>
+									Lofi Art
+								</label>
+								<label>
+									<input
+										type="checkbox"
+										checked={!!rx.opts.shiftDrag}
+										onChange={e => store.setOpt('shiftDrag', e.target.checked)}
+									/>
+									Shift Drag
+								</label>
+							</div>
+						</div>
+						<span>
 							Play by play
 							<label>
 								<input
@@ -682,7 +734,7 @@ export default function MainMenu(props) {
 								Off
 							</label>
 						</span>
-						<label style="position:absolute;left:8px;top:240px">
+						<label>
 							Expected Damage Samples {expectedDamageSamples()}
 							<input
 								type="range"
