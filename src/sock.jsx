@@ -27,7 +27,7 @@ const sockEvents = {
 		store.clearChat('Main');
 	},
 	passchange(data) {
-		store.updateUser({ auth: data.auth });
+		store.setAuth(data.auth);
 		store.chatMsg('Password updated', 'System');
 	},
 	mute(data) {

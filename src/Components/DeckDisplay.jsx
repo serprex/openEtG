@@ -15,14 +15,14 @@ export default function DeckDisplay(props) {
 				j++;
 				let style = null;
 				if (props.pool && !card.isFree()) {
-					const tooMany =
-						!card.pillar &&
-						cardCounts[asUpped(asShiny(code, false), false)] >= 6;
+					const uncode = asUpped(asShiny(code, false), false);
+					const tooMany = !card.pillar && cardCounts[uncode] >= 6;
+					if (!card.pillar) cardCounts[uncode] = (cardCounts[uncode] ?? 0) + 1;
 					const notEnough = !props.cards.checkPool(
 						props.pool,
-						cardCounts,
 						cardMinus,
 						card,
+						uncode,
 						props.autoup,
 					);
 					if (tooMany || notEnough) {

@@ -151,12 +151,13 @@ async fn login_success(tx: &WsSender, user: &mut UserObject, client: &mut Client
 	}
 
 	if user.id != -1 {
-		client.execute(
-			"update users set auth = $2, salt = $3, iter = $4, algo = $5 where id = $1",
-			&[&user.id, &user.auth, &user.salt, &(user.iter as i32), &user.algo],
-		)
-		.await
-		.ok();
+		client
+			.execute(
+				"update users set auth = $2, salt = $3, iter = $4, algo = $5 where id = $1",
+				&[&user.id, &user.auth, &user.salt, &(user.iter as i32), &user.algo],
+			)
+			.await
+			.ok();
 	}
 }
 
@@ -236,7 +237,10 @@ fn flagname(flags: &HashSet<String>) -> String {
 	return flagvec.join("|");
 }
 
-fn logerr<T, E>(x: Result<T, E>) -> Result<T, E> where E: std::fmt::Display {
+fn logerr<T, E>(x: Result<T, E>) -> Result<T, E>
+where
+	E: std::fmt::Display,
+{
 	if let Err(ref e) = x {
 		println!("Error: {e}");
 	}
@@ -1461,7 +1465,12 @@ pub async fn handle_ws(
 								);
 								user.auth = STANDARD_NO_PAD.encode(&mut keybuf[..]);
 							}
-							sendmsg(&tx, &WsResponse::passchange { auth: &user.auth });
+							if client.execute(
+								"update users set auth = $2, salt = $3, iter = $4, algo = $5 where id = $1",
+								&[&userid, &user.auth, &user.salt, &(user.iter as i32), &user.algo],
+							).await.is_ok() {
+								sendmsg(&tx, &WsResponse::passchange { auth: &user.auth });
+							}
 						}
 						AuthMessage::challrecv { f, trade } => {
 							if let Some(foesockid) = users.read().await.get_sockid(&f) {

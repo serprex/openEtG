@@ -1098,7 +1098,9 @@ pub fn eval(ctx: &Game) -> i32 {
 						wall.shield = Some(WallShield::Chargeblock(ctx.get(shield, Stat::charges)));
 					}
 					Skill::deckblock => {
-						wall.shield = Some(WallShield::Chargeblock(player.deck.iter().map(|&id| ctx.get(id, Flag::pillar) as i16).sum::<i16>()));
+						wall.shield = Some(WallShield::Chargeblock(
+							player.deck.iter().map(|&id| ctx.get(id, Flag::pillar) as i16).sum::<i16>(),
+						));
 					}
 					Skill::disshield => {
 						if ctx.cardset() == CardSet::Open || !ctx.get(pl, Flag::sanctuary) {

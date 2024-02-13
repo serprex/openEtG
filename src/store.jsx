@@ -144,6 +144,9 @@ export function userCmd(cmd, data) {
 		user: { ...state.user, ...usercmd[cmd](data, state.user) },
 	});
 }
+export function setAuth(auth) {
+	dispatch({ ...state, auth });
+}
 export function updateUser(data) {
 	dispatch({ ...state, user: { ...state.user, ...data } });
 }

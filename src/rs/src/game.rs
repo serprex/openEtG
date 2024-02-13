@@ -25,9 +25,9 @@ use wasm_bindgen::prelude::*;
 use crate::card::{self, Card, Cards};
 use crate::etg;
 use crate::generated;
+use crate::set_panic_hook;
 use crate::skill::{Event, ProcData, Skill, SkillName, Skills};
 use crate::text::SkillThing;
-use crate::set_panic_hook;
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[derive(Clone, Copy, Hash, Eq, PartialEq)]

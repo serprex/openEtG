@@ -24,16 +24,17 @@ export default class Cards {
 		wasm.code_cmp(this.set, asShiny(x, false), asShiny(y, false)) ||
 		(x > y) - (x < y);
 
-	checkPool(pool, cardCount, cardMinus, card, autoup) {
-		const uncode = asUpped(asShiny(card.code, false), false);
-
+	checkPool(pool, cardMinus, card, uncode, autoup) {
 		if ((cardMinus[card.code] ?? 0) + 1 <= pool[card.code]) {
 			cardMinus[card.code] = (cardMinus[card.code] ?? 0) + 1;
-			cardCount[uncode] = (cardCount[uncode] ?? 0) + 1;
 			return true;
 		}
 
-		if ((!card.upped && !card.shiny) || this.cardSet === 'Original') {
+		if (
+			!autoup ||
+			(!card.upped && !card.shiny) ||
+			this.cardSet === 'Original'
+		) {
 			return false;
 		}
 
@@ -41,21 +42,17 @@ export default class Cards {
 			const scode = asShiny(uncode, true);
 			if ((cardMinus[scode] ?? 0) + 1 <= pool[scode]) {
 				cardMinus[scode] = (cardMinus[scode] ?? 0) + 1;
-				cardCount[scode] = (cardCount[scode] ?? 0) + 1;
 				return true;
 			}
-			return false;
-		}
-
-		if (autoup) {
+		} else {
 			const amount =
 				(card.rarity === -1 ? 1 : 6) * (card.upped && card.shiny ? 6 : 1);
 			if ((cardMinus[uncode] ?? 0) + amount <= pool[uncode]) {
 				cardMinus[uncode] = (cardMinus[uncode] ?? 0) + amount;
-				cardCount[uncode] = (cardCount[uncode] ?? 0) + 1;
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -64,23 +61,23 @@ export default class Cards {
 			cardCount = [];
 		for (let i = deck.length - 1; i >= 0; i--) {
 			let code = deck[i],
-				card = this.Codes[code];
-			if (
-				!card.pillar &&
-				cardCount[asUpped(asShiny(code, false), false)] >= 6
-			) {
-				deck.splice(i, 1);
-				continue;
+				card = this.Codes[code],
+				uncode = asUpped(asShiny(code, false), false);
+			if (!card.pillar) {
+				if (cardCount[uncode] >= 6) {
+					deck.splice(i, 1);
+					continue;
+				} else cardCount[uncode] = (cardCount[uncode] ?? 0) + 1;
 			}
 			if (
 				!card.isFree() &&
-				!this.checkPool(pool, cardCount, cardMinus, card, autoup)
+				!this.checkPool(pool, cardMinus, card, uncode, autoup)
 			) {
 				code = asShiny(code, !card.shiny);
 				card = this.Codes[code];
 				if (
 					card.isFree() ||
-					this.checkPool(pool, cardCount, cardMinus, card, autoup)
+					this.checkPool(pool, cardMinus, card, uncode, autoup)
 				) {
 					deck[i] = code;
 				} else if (!preserve) {
@@ -102,27 +99,26 @@ export default class Cards {
 			if (~fromTrueMark(code)) continue;
 			dlen++;
 			const card = this.Codes[code];
-			if (
-				!card ||
-				(!card.pillar && cardCount[asUpped(asShiny(code, false), false)] >= 6)
-			) {
-				return false;
+			if (!card) return false;
+			const uncode = asUpped(asShiny(code, false), false);
+			if (!card.pillar) {
+				if (cardCount[uncode] >= 6) {
+					return false;
+				} else cardCount[uncode] = (cardCount[uncode] ?? 0) + 1;
 			}
 			if (
 				!card.isFree() &&
-				pool &&
 				!this.checkPool(
 					pool,
-					cardCount,
 					cardMinus,
 					card,
+					uncode,
 					!user?.flags?.includes?.('no-up-merge'),
 				)
 			) {
 				return false;
 			}
 		}
-		if (dlen < minsize || dlen > 60) return false;
-		return true;
+		return dlen >= minsize && dlen < 60;
 	}
 }
