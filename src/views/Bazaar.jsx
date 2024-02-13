@@ -317,19 +317,25 @@ export default function Bazaar() {
 			)}
 			{(!bcard() || !bz()) && (
 				<div style="position:absolute;left:250px;top:20px">
-					<h3>This area will show you what orders are available</h3>
+					<h3>This area will show you available orders</h3>
 					<div style="padding-bottom:15px">
 						<ol>
 							<li>Select a card which you wish to buy or sell</li>
-							<li>Orders are formatted:
+							<li>
+								Orders are formatted:
 								<ul>
-									<li>Buy <span style="color:#4f8">{"<# Cards> @ <price each>"}</span></li>
-									<li>Sell <span style="color:#f84">{"<# Cards> @ <price each>"}</span></li>
+									<li>
+										Buy <span style="color:#4f8">(# Cards) @ (price each)</span>
+									</li>
+									<li>
+										Sell{' '}
+										<span style="color:#f84">(# Cards) @ (price each)</span>
+									</li>
 								</ul>
 							</li>
 							<li>Click an order and the Order Form will autofill for you</li>
 							<li>You can manually adjust the quantity in the Order Form</li>
-							<li>To view all transactions in one view, click the All Offers button</li>
+							<li>To view all transactions in one view, click All Offers</li>
 						</ol>
 					</div>
 				</div>

@@ -210,7 +210,7 @@ export default function MainMenu(props) {
 
 	return (
 		rx.user && (
-			<div className="bg_main">
+			<div class="bg_main">
 				<div style="position:absolute;left:196px;top:4px;width:504px;height:48px">
 					{tip()}
 					<input
@@ -224,33 +224,31 @@ export default function MainMenu(props) {
 						style="position:absolute;right:2px;bottom:2px"
 					/>
 				</div>
-				<div
-					style="position:absolute;left:100px;top:92px;width:170px;height:120px;font-size:14px;display:grid;align-content:stretch">
-					<div className="maintitle">Account</div>
-					<div>User: {rx.username}</div>
+				<div style="position:absolute;left:100px;top:92px;width:170px;height:120px;font-size:14px;display:grid;align-content:stretch">
+					<div>{rx.username}</div>
 					{rx.uname && <div>↪{rx.uname}</div>}
 					<div>
-						Gold: {rx.user?.gold}
-						<span class="ico gold"/>
+						{rx.user?.gold}
+						<span class="ico gold" />
 					</div>
-					<div>
-						PvE: {rx.user?.aiwins} - {rx.user?.ailosses}
-					</div>
-					<div>
-						PvP: {rx.user?.pvpwins} - {rx.user?.pvplosses}
+					<div style="display:grid;grid-template-columns:auto 1fr auto 1fr">
+						PvE
+						<span style="text-align:right">{rx.user?.aiwins}</span>&ndash;
+						<span>{rx.user?.ailosses}</span>
+						PvP
+						<span style="text-align:right">{rx.user?.pvpwins}</span>&ndash;
+						<span>{rx.user?.pvplosses}</span>
 					</div>
 				</div>
-				<div
-					style="position:absolute;left: 317px;top: 383px;width: 264px;height: 110px;display: grid;justify-items: center">
-					<div className="maintitle">Miscellaneous</div>
-					<div
-						style="display:flex;font-size:14px;width: 100%;align-items: center;justify-content: space-between">
+				<div style="position:absolute;left:317px;top:383px;width:264px;height:110px;display:grid;justify-items:center">
+					<div class="maintitle">Miscellaneous</div>
+					<div style="display:flex;font-size:14px;width:100%;align-items:center;justify-content:space-between">
 						<input
 							type="button"
 							value="Colosseum"
 							onClick={() => {
 								if (!hasflag(rx.user, 'no-oracle')) {
-									store.doNav(import('./Colosseum.jsx'))
+									store.doNav(import('./Colosseum.jsx'));
 								}
 							}}
 							onMouseOver={[
@@ -264,20 +262,19 @@ export default function MainMenu(props) {
 							value="Quests"
 							onClick={() => {
 								if (!hasflag(rx.user, 'no-quest')) {
-									store.doNav(import('./Quest.jsx'))
+									store.doNav(import('./Quest.jsx'));
 								}
 							}}
 							onMouseOver={[setTip, 'Go on an adventure']}
 							disabled={hasflag(rx.user, 'no-quest')}
 						/>
 					</div>
-					<div
-						style="display:flex;font-size:14px;width: 100%;align-items: center;justify-content: space-between">
+					<div style="display:flex;font-size:14px;width:100%;align-items:center;justify-content:space-between">
 						<input
 							type="button"
 							value="Custom"
 							onClick={() =>
-								store.doNav(import('./Challenge.jsx'), {pvp: false})
+								store.doNav(import('./Challenge.jsx'), { pvp: false })
 							}
 							onMouseOver={[
 								setTip,
@@ -289,21 +286,18 @@ export default function MainMenu(props) {
 							value="Arena Deck"
 							onClick={() => {
 								if (!rx.uname) {
-									store.doNav(import('./ArenaInfo.jsx'))
+									store.doNav(import('./ArenaInfo.jsx'));
 								}
 							}}
 							onMouseOver={[setTip, 'Check how your arena decks are doing']}
 							disabled={rx.uname}
 						/>
 					</div>
-					<div
-						style="display:flex;font-size:14px;width: 100%;align-items: center;justify-content: space-between">
+					<div style="display:flex;font-size:14px;width:100%;align-items:center;justify-content:space-between">
 						<input
 							type="button"
 							value="Legacy"
-							onClick={() =>
-								store.doNav(import('../vanilla/views/Login.jsx'))
-							}
+							onClick={() => store.doNav(import('../vanilla/views/Login.jsx'))}
 							onMouseOver={[
 								setTip,
 								'A mode attempting to imitate original EtG',
@@ -319,32 +313,30 @@ export default function MainMenu(props) {
 				</div>
 				{ocard() ?
 					<>
-						<div
-							style="font-size:16px;user-select:none;position:absolute;pointer-events:none;left:95px;top:315px">
+						<div style="font-size:16px;user-select:none;position:absolute;pointer-events:none;left:95px;top:315px">
 							Daily Login Reward
 						</div>
-						<Card x={92} y={340} card={Cards.Codes[ocard()]}/>
+						<Card x={92} y={340} card={Cards.Codes[ocard()]} />
 					</>
-					: !rx.opts.hideMainchat && (
-					<>
-						<Chat
-							channel="Main"
-							style="position:absolute;left:72px;top:228px;width:226px;height:300px;background:transparent;font-size:14px;opacity:0.6"
-						/>
-						<input
-							placeholder="Chat"
-							onKeyDown={parseChat}
-							style="position:absolute;left:99px;top:532px"
-						/>
-					</>
-				)
+				:	!rx.opts.hideMainchat && (
+						<>
+							<Chat
+								channel="Main"
+								style="position:absolute;left:72px;top:228px;width:226px;height:300px;background:transparent;font-size:14px;opacity:0.6"
+							/>
+							<input
+								placeholder="Chat"
+								onKeyDown={parseChat}
+								style="position:absolute;left:99px;top:532px"
+							/>
+						</>
+					)
 				}
-				<div
-					style="position:absolute;left: 302px;top:120px;width: 294px;height: 210px;display: grid;justify-items: center">
-					<div className="maintitle">Battle</div>
+				<div style="position:absolute;left:302px;top:120px;width:294px;height:210px;display:grid;justify-items:center">
+					<div class="maintitle">Battle</div>
 					<div style="display:flex;padding-left:82px;align-items:center">
-						<div className="costcolumn">Cost</div>
-						<div className="costcolumn">Reward</div>
+						<div class="costcolumn">Cost</div>
+						<div class="costcolumn">Reward</div>
 					</div>
 					<AiButton
 						name="Commoner"
@@ -404,20 +396,16 @@ export default function MainMenu(props) {
 						disabled={hasflag(rx.user, 'no-battle')}
 					/>
 				</div>
-				<div
-					style="position:absolute;left:620px;top:92px;width:196px;height: 150px;display: grid;align-content: space-between">
-					<div className="maintitle">Cards</div>
+				<div style="position:absolute;left:620px;top:92px;width:196px;height:150px;display:grid;align-content:space-between">
+					<div class="maintitle">Cards</div>
 					<div>
-						<div
-							style="font-size:14px;pointer-events:none;width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:16px;margin-top:12px">
+						<div style="font-size:14px;pointer-events:none;width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:16px;margin-top:12px">
 							{`Deck: ${rx.user?.selectedDeck}`}
 						</div>
-						<div style="text-align:center">
-							{quickslots}
-						</div>
+						<div style="text-align:center">{quickslots}</div>
 					</div>
 					<div>
-						<div style="display:flex;justify-content: center">
+						<div style="display:flex;justify-content:center">
 							<input
 								type="button"
 								value="Editor"
@@ -428,81 +416,85 @@ export default function MainMenu(props) {
 								type="button"
 								value="Shop"
 								onClick={() => {
-									if (!hasflag(rx.user, 'no-shop') ||
-										(rx.user.freepacks && rx.user.freepacks.some(x => x))) {
-										store.doNav(import('./Shop.jsx'))
+									if (
+										!hasflag(rx.user, 'no-shop') ||
+										(rx.user.freepacks && rx.user.freepacks.some(x => x))
+									) {
+										store.doNav(import('./Shop.jsx'));
 									}
-								}
-								}
+								}}
 								onMouseOver={[
 									setTip,
 									'Buy booster packs which contain cards from the elements you choose',
 								]}
 								disabled={
-									(hasflag(rx.user, 'no-shop') && !(rx.user.freepacks?.some(x => x)))
+									hasflag(rx.user, 'no-shop') &&
+									!rx.user.freepacks?.some(x => x)
 								}
 							/>
 						</div>
-						<div style="display:flex;justify-content: center">
+						<div style="display:flex;justify-content:center">
 							<input
 								type="button"
 								value="Upgrade"
 								onClick={() => {
-									if (!(hasflag(rx.user, 'no-up-pillar') && hasflag(rx.user, 'no-up-merge'))) {
-										store.doNav(import('./Upgrade.jsx'))
+									if (
+										!(
+											hasflag(rx.user, 'no-up-pillar') &&
+											hasflag(rx.user, 'no-up-merge')
+										)
+									) {
+										store.doNav(import('./Upgrade.jsx'));
 									}
-								}
-								}
+								}}
 								onMouseOver={[setTip, 'Upgrade or sell cards']}
-								disabled={(
-									hasflag(rx.user, 'no-up-pillar') && hasflag(rx.user, 'no-up-merge')
-								)}
+								disabled={
+									hasflag(rx.user, 'no-up-pillar') &&
+									hasflag(rx.user, 'no-up-merge')
+								}
 							/>
 							<input
 								type="button"
 								value="Bazaar"
 								onClick={() => {
 									if (!rx.uname) {
-										store.doNav(import('./Bazaar.jsx'))
+										store.doNav(import('./Bazaar.jsx'));
 									}
-								}
-								}
+								}}
 								onMouseOver={[
 									setTip,
 									"Put up cards for sale & review other players' offers",
 								]}
-								disabled={(
-									rx.uname
-								)}
+								disabled={rx.uname}
 							/>
 						</div>
 					</div>
 				</div>
 				<div style="position:absolute;left:619px;top:292px;width:195px;height:240px;display:grid">
-					<div
-						style="display: flex;flex-direction: row;flex-wrap: wrap;align-content: center;justify-content: center;align-items: center;padding-bottom: 5px">
-						<div className="maintitle">Social</div>
-						<div
-							style="display:flex;flex-direction:row;justify-content: center;flex-wrap: wrap">
+					<div style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:center;align-items:center;padding-bottom:5px">
+						<div class="maintitle">Social</div>
+						<div style="display:flex;flex-direction:row;justify-content:center;flex-wrap:wrap">
 							<input
 								placeholder="Player's Name"
 								value={rx.opts.foename ?? ''}
 								onInput={e => store.setOptTemp('foename', e.target.value)}
 							/>
-							<div
-								style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:space-evenly;align-items:center">
+							<div style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:space-evenly;align-items:center">
 								<input
 									type="button"
 									value="Library"
 									onClick={() => {
 										const name = foename() || rx.username;
 										if (name) {
-											const props = {name};
+											const props = { name };
 											if (!foename()) props.alt = rx.uname;
 											store.doNav(import('./Library.jsx'), props);
 										}
 									}}
-									onMouseOver={[setTip, 'See exactly what cards you or others own']}
+									onMouseOver={[
+										setTip,
+										'See exactly what cards you or others own',
+									]}
 								/>
 								<input
 									type="button"
@@ -510,8 +502,7 @@ export default function MainMenu(props) {
 									onClick={() => sock.sendChallenge(foename())}
 								/>
 							</div>
-							<div
-								style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:space-evenly;align-items:center">
+							<div style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:space-evenly;align-items:center">
 								<input
 									type="button"
 									value="Trade"
@@ -524,29 +515,18 @@ export default function MainMenu(props) {
 												forcards: null,
 												forg: null,
 											});
-											store.doNav(import('./Trade.jsx'), {foe: foename()});
+											store.doNav(import('./Trade.jsx'), { foe: foename() });
 										}
 									}}
 									onMouseOver={[setTip, 'Trade cards/$ with another player']}
-									disabled={(
-										hasflag(rx.user, 'no-trade')
-									)}
-								/>
-								<input
-									type="button"
-									value="Leagues"
-									onClick={() => {
-									}}
-									onMouseOver={[setTip, 'View on-going events']}
+									disabled={hasflag(rx.user, 'no-trade')}
 								/>
 							</div>
 						</div>
 					</div>
-					<div
-						style="display: flex;flex-direction: row;flex-wrap: wrap;align-content: center;justify-content: center;align-items: center;padding-bottom: 5px">
-						<div className="maintitle">Reward</div>
-						<div
-							style="display: flex;flex-direction: row;flex-wrap: wrap;justify-content: center;align-items: center;align-content: center">
+					<div style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:center;align-items:center;padding-bottom:5px">
+						<div class="maintitle">Reward</div>
+						<div style="display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;align-content:center">
 							<input
 								placeholder="Promocode"
 								value={rx.opts.foename ?? ''}
@@ -564,13 +544,10 @@ export default function MainMenu(props) {
 							/>
 						</div>
 					</div>
-					<div
-						style="display: flex;flex-direction: row;flex-wrap: wrap;align-content: center;justify-content: center;align-items: center;padding-bottom: 5px">
-						<div className="maintitle">Leaderboards</div>
-						<div style="display:flex;flex-direction: column;align-items: center;">
-							<div>
-								{leadc}
-							</div>
+					<div style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:center;align-items:center;padding-bottom:5px">
+						<div class="maintitle">Leaderboards</div>
+						<div style="display:flex;flex-direction:column;align-items:center;">
+							<div>{leadc}</div>
 							<input
 								type="button"
 								value="View"
@@ -585,8 +562,8 @@ export default function MainMenu(props) {
 				</div>
 				{changepass() && (
 					<div
-						className="bgbox"
-						style="position:relative;left: 302px;top: 286px;width: 290px;height: 60px;z-index:1">
+						class="bgbox"
+						style="position:relative;left:302px;top:286px;width:290px;height:60px;z-index:1">
 						<input
 							placeholder="New Password"
 							ref={newpass}
@@ -621,8 +598,7 @@ export default function MainMenu(props) {
 						/>
 					</div>
 				)}
-				<div
-					style="position:absolute;left: 317px;top: 517px;width: 263px;display: flex;flex-direction: row;flex-wrap: nowrap;align-content: center;justify-content: space-between;align-items: center;">
+				<div style="position:absolute;left:317px;top:517px;width:263px;display:flex;flex-direction:row;flex-wrap:nowrap;align-content:center;justify-content:space-between;align-items:center;">
 					<input
 						type="button"
 						value="Settings"
@@ -645,18 +621,16 @@ export default function MainMenu(props) {
 				</div>
 				{settings() && (
 					<div
-						className="bgbox"
-						style="position:absolute;left: 302px;top: 310px;width: min-content;height: 200px;display: flex;flex-direction: column;align-content: space-between;justify-content: space-between;">
+						class="bgbox"
+						style="position:absolute;left:302px;top:310px;width:min-content;height:200px;display:flex;flex-direction:column;align-content:space-between;justify-content:space-between;">
 						<input
 							type="button"
 							value="Change Password"
 							onClick={() => setChangepass(true)}
 							style="width:fit-content"
 						/>
-						<div
-							style="display: flex;flex-wrap: nowrap;flex-direction: row;justify-content: space-between;align-items: flex-start">
-							<div
-								style="display: flex;flex-direction: column;align-content: center;justify-content: space-between;flex-wrap: wrap;align-items: flex-start;">
+						<div style="display:flex;flex-wrap:nowrap;flex-direction:row;justify-content:space-between;align-items:flex-start">
+							<div style="display:flex;flex-direction:column;align-content:center;justify-content:space-between;flex-wrap:wrap;align-items:flex-start;">
 								<label>
 									<input
 										type="checkbox"
@@ -683,7 +657,9 @@ export default function MainMenu(props) {
 									<input
 										type="checkbox"
 										checked={!!rx.opts.hideMainchat}
-										onChange={e => store.setOpt('hideMainchat', e.target.checked)}
+										onChange={e =>
+											store.setOpt('hideMainchat', e.target.checked)
+										}
 									/>
 									Hide mainchat
 								</label>
@@ -691,13 +667,14 @@ export default function MainMenu(props) {
 									<input
 										type="checkbox"
 										checked={!!rx.opts.hideRightpane}
-										onChange={e => store.setOpt('hideRightpane', e.target.checked)}
+										onChange={e =>
+											store.setOpt('hideRightpane', e.target.checked)
+										}
 									/>
 									Hide rightpane
 								</label>
 							</div>
-							<div
-								style="display: flex;flex-direction: column;align-content: center;justify-content: space-between;flex-wrap: wrap;align-items: flex-start">
+							<div style="display:flex;flex-direction:column;align-content:center;justify-content:space-between;flex-wrap:wrap;align-items:flex-start">
 								<label>
 									<input
 										type="checkbox"
