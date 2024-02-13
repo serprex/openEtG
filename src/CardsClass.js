@@ -119,6 +119,6 @@ export default class Cards {
 				return false;
 			}
 		}
-		return dlen >= minsize && dlen < 60;
+		return dlen >= minsize && dlen < 61;
 	}
 }

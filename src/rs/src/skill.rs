@@ -2191,8 +2191,9 @@ impl Skill {
 				if !ctx.sanctified(owner) {
 					let cost = thing.status.get(Stat::cost);
 					let costele = thing.status.get(Stat::costele);
+					let kind = ctx.get_card(thing.status.get(Stat::card)).kind;
 					ctx.die(t);
-					if ctx.get_kind(t) == Kind::Spell {
+					if kind == Kind::Spell {
 						if let Some(sk) = ctx.getSkill(t, Event::Cast).first().cloned() {
 							if let Some(tgting) = sk.targeting(ctx.cardset()) {
 								let mut tgts = Vec::with_capacity(50 * ctx.players().len());
