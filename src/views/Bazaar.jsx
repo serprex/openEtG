@@ -2,7 +2,7 @@ import { createMemo, createSignal, onMount } from 'solid-js';
 import { For, Show } from 'solid-js/web';
 
 import Cards from '../Cards.js';
-import { deck2pool, encodeCode, encodeCount } from '../etgutil.js';
+import { deck2pool } from '../etgutil.js';
 import { cardValue, sellValue } from '../userutil.js';
 import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
@@ -125,38 +125,48 @@ function OrderBook(p) {
 		<div
 			class="bgbox"
 			style="position:absolute;top:270px;width:900px;height:330px;overflow-y:auto">
-			<label style="display:inline-block;width:200px">
-				<input
-					type="checkbox"
-					checked={p.deal}
-					onChange={e => store.setOptTemp('orderFilter_Deal', e.target.checked)}
-				/>{' '}
-				Deals
-			</label>
-			<label style="display:inline-block;width:200px">
-				<input
-					type="checkbox"
-					checked={p.buy}
-					onChange={e => store.setOptTemp('orderFilter_Buy', e.target.checked)}
-				/>{' '}
-				Buys
-			</label>
-			<label style="display:inline-block;width:200px">
-				<input
-					type="checkbox"
-					checked={p.sell}
-					onChange={e => store.setOptTemp('orderFilter_Sell', e.target.checked)}
-				/>{' '}
-				Sells
-			</label>
-			<label style="display:inline-block;width:200px">
-				<input
-					type="checkbox"
-					checked={p.mine}
-					onChange={e => store.setOptTemp('orderFilter_Mine', e.target.checked)}
-				/>{' '}
-				Mine
-			</label>
+			<div style="display:flex;justify-content:space-between">
+				<label style="flex:1">
+					<input
+						type="checkbox"
+						checked={p.deal}
+						onChange={e =>
+							store.setOptTemp('orderFilter_Deal', e.target.checked)
+						}
+					/>{' '}
+					Deals
+				</label>
+				<label style="flex:1">
+					<input
+						type="checkbox"
+						checked={p.buy}
+						onChange={e =>
+							store.setOptTemp('orderFilter_Buy', e.target.checked)
+						}
+					/>{' '}
+					Buys
+				</label>
+				<label style="flex:1">
+					<input
+						type="checkbox"
+						checked={p.sell}
+						onChange={e =>
+							store.setOptTemp('orderFilter_Sell', e.target.checked)
+						}
+					/>{' '}
+					Sells
+				</label>
+				<label style="flex:1">
+					<input
+						type="checkbox"
+						checked={p.mine}
+						onChange={e =>
+							store.setOptTemp('orderFilter_Mine', e.target.checked)
+						}
+					/>{' '}
+					Mine
+				</label>
+			</div>
 			{p.bz && (
 				<div style="column-count:3;width:890px">
 					<OrderSummary

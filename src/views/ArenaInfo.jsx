@@ -43,61 +43,53 @@ function RenderInfo(props) {
 	const adeck = card && '05' + encodeCode(card) + props.info.deck;
 	return (
 		<>
-			{adeck && (
-				<DeckDisplay
-					cards={Cards}
-					deck={decodedeck(adeck)}
-					renderMark
-					y={props.y}
+			<DeckDisplay
+				cards={Cards}
+				deck={decodedeck(adeck)}
+				renderMark
+				y={props.y}
+			/>
+			<div
+				style={`position:absolute;left:100px;top:${
+					4 + props.y
+				}px;width:600px;display:flex;justify-content:space-between`}>
+				<span>
+					{props.info.win ?? 0}&ndash;{props.info.loss ?? 0}
+				</span>
+				<span>Rank: {props.info.rank ?? 'Inactive'}</span>
+				<span>
+					{(props.info.win ?? 0) * 15 + (props.info.loss ?? 0) * 5}{' '}
+					<span class="ico gold" />
+				</span>
+				<input
+					readOnly
+					style="width:190px"
+					onClick={e => e.target.setSelectionRange(0, 999)}
+					value={adeck ?? ''}
 				/>
-			)}
-			<div style={`position:absolute;left:100px;top:${4 + props.y}px`}>
-				{`W-L: ${props.info.win ?? 0} - ${props.info.loss ?? 0}, Rank: ${
-					props.info.rank ?? 'Inactive'
-				}, ${(props.info.win ?? 0) * 15 + (props.info.loss ?? 0) * 5}`}
-				<span class="ico gold" />
+				<span>Best Rank: {props.info.bestrank}</span>
 			</div>
-			<input
-				readOnly
-				style={`position:absolute;left:330px;top:${4 + props.y}px;width:190px`}
-				onClick={e => e.target.setSelectionRange(0, 999)}
-				value={adeck ?? ''}
-			/>
-			<span style={`position:absolute;left:600px;top:${4 + props.y}px`}>
-				Best Rank: {props.info.bestrank}
-			</span>
-			<span style={`position:absolute;left:400px;top:${224 + props.y}px`}>
-				Age: {props.info.day}
-			</span>
-			<span style={`position:absolute;left:100px;top:${224 + props.y}px`}>
-				HP: {props.info.hp}
-			</span>
-			<span style={`position:absolute;left:200px;top:${224 + props.y}px`}>
-				Mark: {props.info.mark}
-			</span>
-			<span style={`position:absolute;left:300px;top:${224 + props.y}px`}>
-				Draw: {props.info.draw}
-			</span>
-			<input
-				type="button"
-				value="Modify"
-				style={`position:absolute;left:500px;top:${224 + props.y}px`}
-				onClick={() => {
-					store.doNav(import('./ArenaEditor.jsx'), {
-						adeck: props.info.deck,
-						acard: Cards.Codes[card],
-						ainfo: props.info,
-					});
-				}}
-			/>
-			{adeck && (
+			<div
+				style={`position:absolute;left:100px;top:${
+					224 + props.y
+				}px;width:600px;display:flex;justify-content:space-between`}>
+				<span>HP: {props.info.hp}</span>
+				<span>Mark: {props.info.mark}</span>
+				<span>Draw: {props.info.draw}</span>
+				<span>Age: {props.info.day}</span>
 				<input
 					type="button"
-					value="Test"
-					style={`position:absolute;left:600px;top:${224 + props.y}px`}
-					onClick={testDeck}
+					value="Modify"
+					onClick={() => {
+						store.doNav(import('./ArenaEditor.jsx'), {
+							adeck: props.info.deck,
+							acard: Cards.Codes[card],
+							ainfo: props.info,
+						});
+					}}
 				/>
-			)}
+				<input type="button" value="Test" onClick={testDeck} />
+			</div>
 		</>
 	);
 }
@@ -143,10 +135,10 @@ export default function ArenaInfo() {
 			</div>
 			<ExitBtn x={8} y={300} />
 			<Show when={AB().A}>
-				<RenderInfo info={AB().A} y={0} name={rx.username} />
+				{x => <RenderInfo info={x()} y={0} name={rx.username} />}
 			</Show>
 			<Show when={AB().B}>
-				<RenderInfo info={AB().B} y={300} name={rx.username} />
+				{x => <RenderInfo info={x()} y={300} name={rx.username} />}
 			</Show>
 			{!!rx.user.ocard && (
 				<>

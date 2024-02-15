@@ -2,11 +2,11 @@ import { createMemo, createSignal, onMount } from 'solid-js';
 
 import Cards from '../Cards.js';
 import * as sock from '../sock.jsx';
+import { doNav } from '../store.jsx';
 import { deck2pool, asShiny, asUpped } from '../etgutil.js';
 import { calcWealth } from '../userutil.js';
 import Card from '../Components/Card.jsx';
 import CardSelector from '../Components/CardSelector.jsx';
-import ExitBtn from '../Components/ExitBtn.jsx';
 
 function loadAlt(user, alt) {
 	sock.emit({ x: 'librarywant', f: user, a: alt });
@@ -41,7 +41,13 @@ export default function Library(props) {
 				);
 			};
 		Cards.Codes.forEach((card, code) => {
-			if (!card.upped && !card.shiny && card.type && !card.token) {
+			if (
+				!card.upped &&
+				!card.shiny &&
+				card.type &&
+				!card.token &&
+				~card.rarity
+			) {
 				progressmax += 42;
 				const prog = codeprog(code);
 				const idx = card.rarity * 13 + card.element;
@@ -61,78 +67,86 @@ export default function Library(props) {
 			boundpool,
 		};
 	});
-	const children = [];
-	for (let e = 0; e < 13; e++) {
-		children.push(
-			<span
-				class={`ico e${e}`}
-				style={`position:absolute;left:${36 + e * 53}px;top:54px`}
-			/>,
-		);
-	}
-	for (let r = 1; r < 4; r++) {
-		children.push(
-			<span
-				class={`ico r${r}`}
-				style={`position:absolute;left:8px;top:${64 + r * 32}px`}
-			/>,
-		);
-		for (let e = 0; e < 13; e++) {
-			const idx = r * 13 + e;
-			children.push(
-				<span
-					style={{
-						position: 'absolute',
-						left: `${36 + e * 53}px`,
-						top: `${64 + r * 32}px`,
-						'font-size': '12px',
-						'text-shadow':
-							memo().reprog[idx] === memo().reprogmax[idx] ?
-								'1px 1px 2px #fff'
-							:	undefined,
-					}}>
-					{memo().reprog[idx] ?? 0} / {memo().reprogmax[idx] ?? 0}
-				</span>,
-			);
-		}
-	}
+
 	return (
 		<>
-			<span style="position:absolute;left:100px;top:8px;white-space:pre">
-				{`Wealth ${
-					data().gold + Math.round(calcWealth(Cards, memo().cardpool))
-				}\nGold ${data().gold}`}
-			</span>
-			<span style="position:absolute;left:320px;top:8px;white-space:pre">
-				ZE Progress {memo().progress} / {memo().progressmax}
-				{'\nSZE Progress '}
-				{memo().shinyprogress} / {memo().progressmax}
-			</span>
-			<span style="position:absolute;left:540px;top:8px;white-space:pre">
-				{`PvE ${data().aiwins} - ${data().ailosses}\nPvP ${data().pvpwins} - ${
-					data().pvplosses
-				}`}
-			</span>
+			<div style="display:grid;column-gap:8px;grid-template-rows:auto auto;grid-template-columns:auto auto auto 1fr auto auto auto minmax(0,1fr) 1fr auto auto auto minmax(0,1fr);grid-auto-flow:column;width:730px">
+				<input
+					type="button"
+					value="Exit"
+					onClick={() => doNav(import('../views/MainMenu.jsx'))}
+				/>
+				<input
+					type="button"
+					value="Export"
+					onClick={() =>
+						open(
+							`/collection/${encodeURIComponent(props.name)}${
+								altname.value ? '?' + encodeURIComponent(altname.value) : ''
+							}`,
+							'_blank',
+						)
+					}
+				/>
+				<div style="text-align:right">Wealth</div>
+				<div style="text-align:right">Gold</div>
+				<div style="text-align:right">
+					{data().gold + Math.round(calcWealth(Cards, memo().cardpool))}
+				</div>
+				<div style="text-align:right">{data().gold}</div>
+				<div></div>
+				<div></div>
+				<div style="text-align:right">ZE Progress</div>
+				<div style="text-align:right">SZE Progress</div>
+				<div style="text-align:right">{memo().progress}</div>
+				<div style="text-align:right">{memo().shinyprogress}</div>
+				<div>/</div>
+				<div>/</div>
+				<div>{memo().progressmax}</div>
+				<div>{memo().progressmax}</div>
+				<div></div>
+				<div></div>
+				<div style="text-align:right">PvE</div>
+				<div style="text-align:right">PvP</div>
+				<div style="text-align:right">{data().aiwins}</div>
+				<div style="text-align:right">{data().pvpwins}</div>
+				<div>&ndash;</div>
+				<div>&ndash;</div>
+				<div>{data().ailosses}</div>
+				<div>{data().pvpwins}</div>
+			</div>
+			<div style="margin-top:18px;row-gap:4px;display:grid;grid-template-rows:36px auto auto auto;grid-template-columns:24px repeat(13, 1fr);width:730px">
+				<div></div>
+				{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(e => (
+					<span class={`ico e${e}`} />
+				))}
+				{[1, 2, 3, 4].map(r => (
+					<>
+						<span class={`ico r${r}`} />
+						{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(e => {
+							const idx = r * 13 + e;
+							return (
+								<span
+									style={{
+										'font-size': '11px',
+										'text-shadow':
+											memo().reprog[idx] === memo().reprogmax[idx] ?
+												'1px 1px 2px #fff'
+											:	undefined,
+									}}>
+									{memo().reprog[idx] ?? 0}/{memo().reprogmax[idx] ?? 0}
+								</span>
+							);
+						})}
+					</>
+				))}
+			</div>
 			<Card x={734} y={8} card={card()} />
 			<input
 				type="button"
 				value="Toggle Bound"
 				style="position:absolute;left:5px;top:554px"
 				onClick={() => setShowBound(showBound => !showBound)}
-			/>
-			<ExitBtn x={5} y={8} />
-			<input
-				type="button"
-				value="Export"
-				style="position:absolute;left:5px;top:28px"
-				onClick={() =>
-					open(
-						`/collection/${encodeURIComponent(props.name)}${
-							altname.value ? '?' + encodeURIComponent(altname.value) : ''
-						}`,
-						'_blank',
-					)
-				}
 			/>
 			<input
 				value={props.alt ?? ''}
@@ -155,7 +169,6 @@ export default function Library(props) {
 				filterboth
 				onMouseOver={setCard}
 			/>
-			{children}
 		</>
 	);
 }

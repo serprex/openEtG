@@ -28,7 +28,7 @@ function App() {
 			/>
 			<Card x={36} y={206} card={card()} />
 			<span style="position:absolute;left:204px;top:206px">
-				{calcWealth(Cards, deck(), true)}
+				{calcWealth(Cards, deck(), true)} <span class="ico gold" />
 			</span>
 		</>
 	);
