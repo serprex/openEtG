@@ -528,7 +528,7 @@ export default function MainMenu(props) {
 						<div class="maintitle">Reward</div>
 						<div style="display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;align-content:center">
 							<input
-								placeholder="Promocode"
+								placeholder="Code"
 								value={rx.opts.foename ?? ''}
 								onInput={e => store.setOptTemp('foename', e.target.value)}
 							/>
