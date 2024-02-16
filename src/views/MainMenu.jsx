@@ -75,6 +75,7 @@ function logout() {
 export default function MainMenu(props) {
 	const rx = store.useRx();
 	const foename = () => (rx.opts.foename ?? '').trim(),
+		rewardcode = () => (rx.opts.rewardcode ?? '').trim(),
 		expectedDamageSamples = () => rx.opts.expectedDamageSamples || '4';
 
 	const [ocard, setocard] = createSignal(props.nymph);
@@ -126,7 +127,7 @@ export default function MainMenu(props) {
 				store.doNav(import('./Reward.jsx'), {
 					type: data.type,
 					amount: data.num,
-					code: foename(),
+					code: rewardcode(),
 				});
 			},
 			codegold: data => {
@@ -529,15 +530,15 @@ export default function MainMenu(props) {
 						<div style="display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;align-content:center">
 							<input
 								placeholder="Code"
-								value={rx.opts.foename ?? ''}
-								onInput={e => store.setOptTemp('foename', e.target.value)}
+								value={rx.opts.rewardcode ?? ''}
+								onInput={e => store.setOptTemp('rewardcode', e.target.value)}
 							/>
 							<input
 								type="button"
 								value="Redeem"
 								onClick={() => {
 									sock.userEmit('codesubmit', {
-										code: foename(),
+										code: rewardcode(),
 									});
 								}}
 								onMouseOver={[setTip, 'Redeem a reward code']}
