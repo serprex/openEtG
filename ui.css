@@ -158,7 +158,7 @@ select:hover:active{background-color:#9ab}
 }
 .chatBox div:not(:first-child){margin-top:4px}
 .chatinput{
-	height:40px;
+	min-height:36px;
 	border-radius:0 0 4px 4px;
 	resize:none;
 	border:0;
