@@ -6,26 +6,41 @@ import * as store from '../store.jsx';
 
 function QuestButton(props) {
 	return (
-		<span
-			style={{
-				position: 'absolute',
-				left: `${props.x}px`,
-				top: `${props.y}px`,
-				color: `#${
-					typeof props.area === 'string' && !props.user.quests[props.area] ?
-						'f'
-					:	'a'
-				}${props.sel ? 'ff' : 'aa'}`,
-			}}
-			onClick={props.onClick}>
-			{typeof props.area === 'string' ?
-				Quest.quarks[props.area].name
-			:	props.area.name}
-		</span>
+		<>
+			<span
+				style={{
+					position: 'absolute',
+					left: `${props.x}px`,
+					top: `${props.y}px`,
+					color: `#${
+						typeof props.area === 'string' && !props.user.quests[props.area] ?
+							'f'
+							: 'a'
+					}${props.sel ? 'ff' : 'aa'}`,
+				}}
+				onClick={props.onClick}>
+				{typeof props.area === 'string' ?
+					Quest.quarks[props.area].name
+					: props.area.name}
+			</span>
+			{Quest.extractRewards(Quest.quarks[props.area]) && !props.user.quests[props.area] && (
+				<span
+					style={{
+						position: 'absolute',
+						left: `${props.x + 200}px`,
+						top: `${props.y}px`,
+					}}>
+					{Quest.extractRewards(Quest.quarks[props.area])}
+					{Quest.extractRewards(Quest.quarks[props.area]) !== '+Card' && (
+						<span className="ico gold" />
+					)}
+				</span>
+			)}
+		</>
 	);
 }
 
-export default function QuestView() {
+export default function QuestView(props) {
 	const rx = store.useRx();
 	const questInfo = createMemo(() => {
 		const questAreas = [],
