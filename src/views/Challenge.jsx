@@ -373,7 +373,7 @@ export default function Challenge(props) {
 				placeholder="Replay"
 				value={replay()}
 				onChange={e => setReplay(e.target.value)}
-				style="position:absolute;left:540px;top:32px"
+				style="position:absolute;left:540px;top:32px;width:350px"
 			/>
 			<For each={groups()}>
 				{(players, i) => (
