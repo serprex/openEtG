@@ -1,11 +1,9 @@
 import { createSignal, onMount } from 'solid-js';
-import { Index } from 'solid-js/web';
 
 import Cards from '../Cards.js';
 import { addcard, encodeCount } from '../etgutil.js';
 import Card from '../Components/Card.jsx';
 import CardImage from '../Components/CardImage.jsx';
-import ExitBtn from '../Components/ExitBtn.jsx';
 import { setCmds, userEmit, userExec } from '../sock.jsx';
 import * as store from '../store.jsx';
 
@@ -96,7 +94,14 @@ export default function Reward(props) {
 						You will get {numberofcopies} copies of the card you choose
 					</div>
 				)}
-				{!!props.code && <ExitBtn x={10} y={10} />}
+				{!!props.code && (
+					<input
+						type="button"
+						value="Exit"
+						onClick={() => store.doNav(import('../views/MainMenu.jsx'))}
+						style="position:absolute;left:10px;top:10px"
+					/>
+				)}
 				<div style="position:absolute;left:100px;top:272px;display:grid;grid-template-rows:repeat(10,auto);grid-auto-flow:column;gap:1px">
 					{rewardList.map(reward => (
 						<CardImage

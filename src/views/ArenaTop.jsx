@@ -4,7 +4,7 @@ import { For } from 'solid-js/web';
 import { encodeCode } from '../etgutil.js';
 import Cards from '../Cards.js';
 import Card from '../Components/Card.jsx';
-import ExitBtn from '../Components/ExitBtn.jsx';
+import { doNav } from '../store.jsx';
 import { emit, setCmds } from '../sock.jsx';
 
 export default function ArenaTop({ lv }) {
@@ -48,7 +48,12 @@ export default function ArenaTop({ lv }) {
 					}}
 				</For>
 			</ol>
-			<ExitBtn x={8} y={300} />
+			<input
+				type="button"
+				value="Exit"
+				onClick={() => doNav(import('../views/MainMenu.jsx'))}
+				style="position:absolute;left:8px;top:300px"
+			/>
 			<Card {...card()} />
 		</>
 	);

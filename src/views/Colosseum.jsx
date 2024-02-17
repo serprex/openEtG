@@ -1,7 +1,6 @@
 import { mkAi, mkPremade } from '../mkAi.js';
 import * as sock from '../sock.jsx';
 import Decks from '../Decks.json' assert { type: 'json' };
-import ExitBtn from '../Components/ExitBtn.jsx';
 import * as store from '../store.jsx';
 
 const NymphList = new Uint16Array([
@@ -83,7 +82,12 @@ export default function Colosseum() {
 	];
 	return (
 		<div style="margin-left:48px;margin-top:96px">
-			<ExitBtn x={48} y={24} />
+			<input
+				type="button"
+				value="Exit"
+				onClick={() => store.doNav(import('../views/MainMenu.jsx'))}
+				style="position:absolute;left:48px;top:24px"
+			/>
 			{[1, 2, 3, 4].map(i => {
 				const active = !(user.daily & (1 << i));
 				return (

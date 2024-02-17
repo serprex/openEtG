@@ -4,7 +4,6 @@ import Game from '../../Game.js';
 import { choose, randint, shuffle, upto } from '../../util.js';
 import * as store from '../../store.jsx';
 import Card from '../../Components/Card.jsx';
-import ExitBtn from '../../Components/ExitBtn.jsx';
 import Cards from '../Cards.js';
 import { userEmit, sendChallenge } from '../../sock.jsx';
 import { deckgen_ai4, original_oracle } from '../../rs/pkg/etg.js';
@@ -184,7 +183,12 @@ export default function OriginalMainMenu() {
 				onInput={e => store.setOptTemp('origfoename', e.target.value)}
 				style="position:absolute;left:300px;top:140px"
 			/>
-			<ExitBtn x={9} y={140} />
+			<input
+				type="button"
+				value="Exit"
+				onClick={() => store.doNav(import('../../views/MainMenu.jsx'))}
+				style="position:absolute;left:9px;top:140px"
+			/>
 			<div style="font-size:14px;pointer-events:none;position:absolute;left:8px;top:160px">
 				{rx.orig.electrum}
 				<span class="ico gold" />

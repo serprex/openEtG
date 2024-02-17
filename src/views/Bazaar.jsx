@@ -8,7 +8,6 @@ import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 import Card from '../Components/Card.jsx';
 import CardSelector from '../Components/CardSelector.jsx';
-import ExitBtn from '../Components/ExitBtn.jsx';
 
 function Order(p) {
 	return (
@@ -237,7 +236,12 @@ export default function Bazaar() {
 
 	return (
 		<>
-			<ExitBtn x={8} y={56} />
+			<input
+				type="button"
+				value="Exit"
+				onClick={() => store.doNav(import('../views/MainMenu.jsx'))}
+				style="position:absolute;left:8px;top:56px"
+			/>
 			<input
 				type="button"
 				value="All Offers"

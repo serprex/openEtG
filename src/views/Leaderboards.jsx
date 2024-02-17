@@ -1,9 +1,7 @@
 import { createComputed, createSignal, onMount, Index } from 'solid-js';
 import { emit, setCmds } from '../sock.jsx';
-import ExitBtn from '../Components/ExitBtn.jsx';
-import { doNav } from '../store.jsx';
+import { doNav, state } from '../store.jsx';
 import { presets } from '../ui.js';
-import { state } from '../store.jsx';
 
 const categories = [
 	'Wealth',
@@ -88,7 +86,12 @@ export default function Leaderboards() {
 					/>
 				))}
 			</div>
-			<ExitBtn x={4} y={578} />
+			<input
+				type="button"
+				value="Exit"
+				onClick={() => doNav(import('../views/MainMenu.jsx'))}
+				style="position:absolute;left:4px;top:578px"
+			/>
 		</>
 	);
 }

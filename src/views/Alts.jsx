@@ -2,7 +2,6 @@ import { createSignal, createMemo } from 'solid-js';
 
 import { eleNames, presets } from '../ui.js';
 import { userEmit } from '../sock.jsx';
-import ExitBtn from '../Components/ExitBtn.jsx';
 import * as store from '../store.jsx';
 
 const flagNames = [
@@ -163,7 +162,12 @@ export default function Alts() {
 
 	return (
 		<>
-			<ExitBtn x={800} y={578} />
+			<input
+				type="button"
+				value="Exit"
+				onClick={() => store.doNav(import('../views/MainMenu.jsx'))}
+				style="position:absolute;left:800px;top:578px"
+			/>
 			{selected() !== rx.uname && (
 				<input
 					type="button"

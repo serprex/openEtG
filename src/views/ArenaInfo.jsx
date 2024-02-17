@@ -9,7 +9,6 @@ import { decklength, decodedeck, encodeCode, asUpped } from '../etgutil.js';
 import { randint, shuffle } from '../util.js';
 import Card from '../Components/Card.jsx';
 import DeckDisplay from '../Components/DeckDisplay.jsx';
-import ExitBtn from '../Components/ExitBtn.jsx';
 
 function RenderInfo(props) {
 	const testDeck = () => {
@@ -133,7 +132,12 @@ export default function ArenaInfo() {
 				to 350
 				<span class="ico gold" />
 			</div>
-			<ExitBtn x={8} y={300} />
+			<input
+				type="button"
+				value="Exit"
+				onClick={() => store.doNav(import('../views/MainMenu.jsx'))}
+				style="position:absolute;left:8px;top:300px"
+			/>
 			<Show when={AB().A}>
 				{x => <RenderInfo info={x()} y={0} name={rx.username} />}
 			</Show>

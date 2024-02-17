@@ -8,7 +8,6 @@ import * as Tutor from '../Components/Tutor.jsx';
 import * as etgutil from '../etgutil.js';
 import Card from '../Components/Card.jsx';
 import DeckDisplay from '../Components/DeckDisplay.jsx';
-import ExitBtn from '../Components/ExitBtn.jsx';
 import Text from '../Components/Text.jsx';
 import * as store from '../store.jsx';
 
@@ -221,7 +220,12 @@ export default function Shop() {
 							style="position:absolute;top:94px;left:11px;width:64px"
 						/>
 					)}
-				<ExitBtn x={7} y={156} />
+				<input
+					type="button"
+					value="Exit"
+					onClick={() => store.doNav(import('../views/MainMenu.jsx'))}
+					style="position:absolute;left:7px;top:156px"
+				/>
 			</div>
 			<div style="display:flex;column-gap:12px;position:absolute;top:278px;left:48px">
 				<For each={packdata}>

@@ -1,12 +1,11 @@
 import { createMemo, createSignal } from 'solid-js';
 
 import * as sock from '../sock.jsx';
-import { useRx, hasflag } from '../store.jsx';
+import { doNav, useRx, hasflag } from '../store.jsx';
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
 import Card from '../Components/Card.jsx';
 import CardSelector from '../Components/CardSelector.jsx';
-import ExitBtn from '../Components/ExitBtn.jsx';
 import Text from '../Components/Text.jsx';
 
 export default function Upgrade() {
@@ -76,7 +75,12 @@ export default function Upgrade() {
 	}
 	return (
 		<>
-			<ExitBtn x={5} y={50} />
+			<input
+				type="button"
+				value="Exit"
+				onClick={() => doNav(import('../views/MainMenu.jsx'))}
+				style="position:absolute;left:5px;top:50px"
+			/>
 			{state().canGrade && (
 				<input
 					type="button"
