@@ -5,10 +5,7 @@ body{
 	margin:0;
 	font:16px sans-serif;
 }
-a{
-	color:#69f;
-	text-decoration:none;
-}
+a{color:#69f;text-decoration:none}
 a:hover{text-decoration:underline}
 tr,td{padding:0}
 .btnrow:hover{background-color:#567;cursor:pointer}
@@ -38,6 +35,33 @@ select{
 }
 select:hover{background-color:#bcd}
 select:hover:active{background-color:#9ab}
+#panes{display:flex;justify-content:center;height:100vh;min-width:1200px}
+#leftpane{
+	position:relative;
+	background-image:url(assets/bg_default.webp);
+	background-repeat:no-repeat;
+	width:900px;
+	min-height:600px;
+	height:100%;
+}
+#rightpane{
+	display:flex;
+	flex-direction:column;
+	justify-content:space-between;
+	width:calc(100% - 900px);
+	min-width:300px;
+	max-width:543px;
+	min-height:400px;
+	max-height:600px;
+}
+#rightlinks{display:flex;flex-direction:column}
+#rightlinks div{flex-grow:1}
+@media (orientation: portrait) and (max-width:1200px) {
+	#panes{flex-direction:column;align-items:center;min-width:900px}
+	#leftpane{height:600px}
+	#rightpane{margin-top:36px;width:100%}
+	#rightlinks{flex-direction:row;justify-content:space-between;flex-wrap:wrap}
+}
 .bg_main{background-image:url(assets/bg_main.webp);width:900px;height:600px}
 .floatRight{float:right}
 .atopol{width:900px;margin:0}
@@ -89,17 +113,9 @@ select:hover:active{background-color:#9ab}
 	width:900px;
 }
 .numput{width:32px!important}
-.imgb:hover{
-	filter:brightness(0.6);
-	cursor:pointer;
-}
-.imgb:active{
-	filter:brightness(0.4);
-	cursor:pointer;
-}
-.imgb.selected{
-	filter:brightness(0.3);
-}
+.imgb:hover{filter:brightness(0.6);cursor:pointer}
+.imgb:active{filter:brightness(0.4);cursor:pointer}
+.imgb.selected{filter:brightness(0.3)}
 .deckdisplay{
 	display:grid;
 	grid-template-rows:repeat(10,auto);
@@ -124,28 +140,6 @@ select:hover:active{background-color:#9ab}
 	display:grid;
 	grid-template-columns:36px 36px;
 	grid-template-rows:repeat(7,36px);
-}
-#leftpane{
-	background-image:url(assets/bg_default.webp);
-	background-repeat:no-repeat;
-	width:900px;
-	min-height:600px;
-	height:100%;
-	position:absolute;
-	user-select:none;
-	z-index:-9;
-}
-#rightpane{
-	position:absolute;
-	left:900px;
-	top:0px;
-	height:600px;
-	display:flex;
-	flex-direction:column;
-	justify-content:space-between;
-	width:calc(100% - 900px);
-	min-width:300px;
-	max-width:543px;
 }
 .chatBox{
 	overflow-y:auto;

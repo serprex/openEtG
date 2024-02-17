@@ -22,45 +22,47 @@ export default function Rightpane() {
 
 	return (
 		<Show when={!opts.hideRightpane}>
-			<div style="display:flex;margin-bottom:4px;justify-content:space-evenly">
-				<a href="artcredit.htm" target="_blank">
-					Art credits
-				</a>
-				&emsp;&emsp;
-				<a href="forum" target="_blank">
-					Forum
-				</a>
-				&emsp;&emsp;
-				<a
-					href="https://discordapp.com/invite/qAmfB8T"
-					target="_blank"
-					rel="noopener">
-					Discord
-				</a>
-			</div>
-			<div style="display:flex;margin-bottom:4px;justify-content:space-evenly">
-				<label>
-					<input
-						type="checkbox"
-						checked={opts.offline}
-						onChange={e => {
-							sock.emit({ x: 'chatus', hide: e.target.checked });
-							store.setOpt('offline', e.target.checked);
-						}}
-					/>
-					Appear Offline
-				</label>
-				<label>
-					<input
-						type="checkbox"
-						checked={opts.afk}
-						onChange={e => {
-							sock.emit({ x: 'chatus', afk: e.target.checked });
-							store.setOptTemp('afk', e.target.checked);
-						}}
-					/>
-					Afk
-				</label>
+			<div id="rightlinks">
+				<div style="display:flex;margin-bottom:4px;justify-content:space-evenly">
+					<a href="artcredit.htm" target="_blank">
+						Art credits
+					</a>
+					&emsp;&emsp;
+					<a href="forum" target="_blank">
+						Forum
+					</a>
+					&emsp;&emsp;
+					<a
+						href="https://discordapp.com/invite/qAmfB8T"
+						target="_blank"
+						rel="noopener">
+						Discord
+					</a>
+				</div>
+				<div style="display:flex;margin-bottom:4px;justify-content:space-evenly">
+					<label>
+						<input
+							type="checkbox"
+							checked={opts.offline}
+							onChange={e => {
+								sock.emit({ x: 'chatus', hide: e.target.checked });
+								store.setOpt('offline', e.target.checked);
+							}}
+						/>
+						Appear Offline
+					</label>
+					<label>
+						<input
+							type="checkbox"
+							checked={opts.afk}
+							onChange={e => {
+								sock.emit({ x: 'chatus', afk: e.target.checked });
+								store.setOptTemp('afk', e.target.checked);
+							}}
+						/>
+						Afk
+					</label>
+				</div>
 			</div>
 			<div style="display:flex;justify-content:space-evenly">
 				<ChannelTab channel="Main" />
