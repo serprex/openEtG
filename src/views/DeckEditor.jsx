@@ -34,45 +34,8 @@ function processDeck(dcode) {
 function Qecks(props) {
 	const [setting, setSetting] = createSignal(false);
 
-	const buttons = [];
-	for (let i = 0; i < 10; i++) {
-		buttons.push(
-			<input
-				type="button"
-				value={`${i + 1}`}
-				class={`editbtn${
-					props.user.selectedDeck === props.user.qecks[i] ?
-						' selectedbutton'
-					:	''
-				}`}
-				onClick={() => {
-					if (setting()) {
-						let swap = -1;
-						for (let i = 0; i < 10; i++) {
-							if (props.user.qecks[i] === props.user.selectedDeck) {
-								swap = i;
-							}
-						}
-						if (~swap) {
-							userExec('changeqeck', {
-								number: swap,
-								name: props.user.qecks[i],
-							});
-						}
-						userExec('changeqeck', {
-							number: i,
-							name: props.user.selectedDeck,
-						});
-						setSetting(false);
-					} else if (props.onClick) {
-						props.onClick(props.user.qecks[i]);
-					}
-				}}
-			/>,
-		);
-	}
 	return (
-		<div style="position:absolute;left:200px;top:8px;width:450px;display:flex;justify-content:space-between">
+		<>
 			<input
 				type="button"
 				style="margin-right:18px"
@@ -80,24 +43,49 @@ function Qecks(props) {
 				class={setting() ? 'selectedbutton' : undefined}
 				onClick={() => setSetting(value => !value)}
 			/>
-			{buttons}
-		</div>
+			{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => (
+				<input
+					type="button"
+					value={`${i + 1}`}
+					class={`editbtn${
+						props.user.selectedDeck === props.user.qecks[i] ?
+							' selectedbutton'
+						:	''
+					}`}
+					onClick={() => {
+						if (setting()) {
+							let swap = -1;
+							for (let i = 0; i < 10; i++) {
+								if (props.user.qecks[i] === props.user.selectedDeck) {
+									swap = i;
+								}
+							}
+							if (~swap) {
+								userExec('changeqeck', {
+									number: swap,
+									name: props.user.qecks[i],
+								});
+							}
+							userExec('changeqeck', {
+								number: i,
+								name: props.user.selectedDeck,
+							});
+							setSetting(false);
+						} else if (props.onClick) {
+							props.onClick(props.user.qecks[i]);
+						}
+					}}
+				/>
+			))}
+		</>
 	);
 }
 
 function DeckName(props) {
 	return (
 		<div
-			style={{
-				position: 'absolute',
-				left: `${4 + (props.i % 6) * 150}px`,
-				top: `${32 + ((props.i / 6) | 0) * 21}px`,
-				width: '142px',
-				height: '21px',
-				overflow: 'hidden',
-				'text-overflow': 'ellipsis',
-				'white-space': 'nowrap',
-			}}>
+			style="height:21px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+			onClick={[props.onClick, props.name]}>
 			<a
 				href={`deck/${props.deck}`}
 				target="_blank"
@@ -105,93 +93,89 @@ function DeckName(props) {
 					'ico ce' + etgutil.fromTrueMark(parseInt(props.deck.slice(-3), 32))
 				}
 			/>
-			<span onClick={() => props.onClick(props.name)}>{props.name}</span>
+			{props.name}
 		</div>
-	);
-}
-
-function DeckNames(props) {
-	const names = () => {
-		let names = Object.keys(props.user.decks);
-		try {
-			const rx = props.name && new RegExp(props.name);
-			if (rx) {
-				names = names.filter(name => name.match(rx));
-			}
-		} catch {
-			names = names.filter(name => ~name.indexOf(name));
-		}
-		return names.sort();
-	};
-	return (
-		<Index each={names()}>
-			{(name, i) => (
-				<DeckName
-					deck={props.user.decks[name()]}
-					name={name()}
-					i={i}
-					onClick={props.onClick}
-				/>
-			)}
-		</Index>
 	);
 }
 
 function DeckSelector(props) {
 	let deckput;
-	const [name, setName] = createSignal('');
 	onMount(() => deckput.focus());
+	const [name, setName] = createSignal('');
+	const decks = createMemo(() => Object.keys(props.user.decks).sort());
+	const names = () => {
+		const names = decks(),
+			filter = name();
+		if (filter) {
+			try {
+				const regex = new RegExp(filter);
+				return names.filter(x => x.match(regex));
+			} catch {
+				return names.filter(x => ~x.includes(filter));
+			}
+		}
+		return names;
+	};
 
 	return (
 		<div
 			class="bgbox"
-			style="position:absolute;top:270px;width:900px;height:330px;overflow-y:auto">
-			<input
-				ref={deckput}
-				autoFocus
-				placeholder="Name"
-				value={name()}
-				onInput={e => setName(e.target.value)}
-				onKeyDown={e => {
-					if (e.key === 'Enter' && (e.target.value || props.user.decks[''])) {
-						props.loadDeck(e.target.value);
-					}
-				}}
-				onClick={e => e.target.setSelectionRange(0, 999)}
-				style="position:absolute;left:4px;top:4px"
-			/>
-			{name() && (
-				<>
-					<input
-						type="button"
-						value="Create"
-						style="position:absolute;left:158px;top:4px"
-						onClick={() => {
-							props.saveDeck(props.user.selectedDeck);
-							props.saveDeck(name(), true);
-							props.onClose();
-						}}
-					/>
-					<input
-						type="button"
-						value="Rename"
-						style="position:absolute;left:258px;top:4px"
-						onClick={() => {
-							const del = props.user.selectedDeck;
-							props.saveDeck(name(), true);
-							userExec('rmdeck', { name: del });
-							props.onClose();
-						}}
-					/>
-				</>
-			)}
-			<input
-				type="button"
-				value="Exit"
-				style="position:absolute;left:794px;top:4px"
-				onClick={props.onClose}
-			/>
-			<DeckNames user={props.user} name={name()} onClick={props.loadDeck} />
+			style="position:absolute;top:270px;width:900px;min-height:330px;height:calc(100% - 270px);overflow-y:auto">
+			<div style="display:flex;gap:18px;margin-bottom:8px">
+				<input
+					ref={deckput}
+					autoFocus
+					placeholder="Name"
+					value={name()}
+					onInput={e => setName(e.target.value)}
+					onKeyDown={e => {
+						if (e.key === 'Enter' && (e.target.value || props.user.decks[''])) {
+							props.loadDeck(e.target.value);
+						}
+					}}
+					onClick={e => e.target.setSelectionRange(0, 999)}
+				/>
+				{name() && (
+					<>
+						<input
+							type="button"
+							value="Create"
+							onClick={() => {
+								props.saveDeck(props.user.selectedDeck);
+								props.saveDeck(name(), true);
+								props.onClose();
+							}}
+						/>
+						<input
+							type="button"
+							value="Rename"
+							onClick={() => {
+								const del = props.user.selectedDeck;
+								props.saveDeck(name(), true);
+								userExec('rmdeck', { name: del });
+								props.onClose();
+							}}
+						/>
+					</>
+				)}
+				<input
+					type="button"
+					value="Close"
+					style="margin-left:auto"
+					onClick={props.onClose}
+				/>
+			</div>
+			<div style="display:grid;grid-template-columns:repeat(6,1fr)">
+				<Index each={names()}>
+					{name => (
+						<DeckName
+							deck={props.user.decks[name()]}
+							name={name()}
+							onClick={props.loadDeck}
+						/>
+					)}
+				</Index>
+			</div>
 		</div>
 	);
 }
@@ -307,20 +291,11 @@ export default function DeckEditor() {
 					}}
 				/>
 			</label>
-			<div style="position:absolute;top:8px;left:8px">
-				{rx.user.selectedDeck ?? ''}
-			</div>
 			<input
 				type="button"
 				value="Decks"
 				onClick={deckModeToggle}
 				style="position:absolute;left:8px;top:58px"
-			/>
-			<input
-				type="button"
-				value="Revert"
-				onClick={() => setDeckData(processDeck(store.getDeck()))}
-				style="position:absolute;left:8px;top:162px"
 			/>
 			<input
 				type="button"
@@ -331,7 +306,18 @@ export default function DeckEditor() {
 				}}
 				style="position:absolute;left:8px;top:110px"
 			/>
-			<Qecks onClick={loadDeck} user={rx.user} />
+			<input
+				type="button"
+				value="Revert"
+				onClick={() => setDeckData(processDeck(store.getDeck()))}
+				style="position:absolute;left:8px;top:162px"
+			/>
+			<div style="position:absolute;left:8px;top:8px;width:720px;display:flex;justify-content:space-between">
+				<div style="overflow:hidden;text-overflow:ellipsis;width:192px">
+					{rx.user.selectedDeck ?? ''}
+				</div>
+				<Qecks onClick={loadDeck} user={rx.user} />
+			</div>
 			{viewDecks() && (
 				<DeckSelector
 					user={rx.user}

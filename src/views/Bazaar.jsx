@@ -124,7 +124,7 @@ function OrderBook(p) {
 	return (
 		<div
 			class="bgbox"
-			style="position:absolute;top:270px;width:900px;height:330px;overflow-y:auto">
+			style="position:absolute;top:270px;width:900px;min-height:330px;height:calc(100% - 270px);overflow-y:auto">
 			<div style="display:flex;justify-content:space-between">
 				<label style="flex:1">
 					<input

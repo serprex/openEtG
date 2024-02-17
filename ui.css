@@ -129,7 +129,8 @@ select:hover:active{background-color:#9ab}
 	background-image:url(assets/bg_default.webp);
 	background-repeat:no-repeat;
 	width:900px;
-	height:600px;
+	min-height:600px;
+	height:100%;
 	position:absolute;
 	user-select:none;
 	z-index:-9;
