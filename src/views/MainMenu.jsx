@@ -174,18 +174,6 @@ export default function MainMenu(props) {
 		newpass2.value = '';
 	};
 
-	const leadc = [];
-	for (let i = 0; i < 2; i++) {
-		leadc.push(
-			<input
-				type="button"
-				value={`Arena${i + 1} T30`}
-				onClick={() => store.doNav(import('./ArenaTop.jsx'), { lv: i })}
-				onMouseOver={[setTip, 'See who the top players in arena are right now']}
-			/>,
-		);
-	}
-
 	const quickslots = () => {
 		const slots = [];
 		if (rx.user) {
@@ -398,133 +386,119 @@ export default function MainMenu(props) {
 				</div>
 				<div style="position:absolute;left:620px;top:92px;width:196px;height:150px;display:grid;align-content:space-between">
 					<div class="maintitle">Cards</div>
-					<div>
-						<div style="font-size:14px;pointer-events:none;width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:16px;margin-top:12px">
-							{`Deck: ${rx.user?.selectedDeck}`}
-						</div>
-						<div style="text-align:center">{quickslots}</div>
+					<div style="font-size:14px;pointer-events:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:16px;margin-top:12px">
+						{`Deck: ${rx.user?.selectedDeck}`}
 					</div>
-					<div>
-						<div style="display:flex;justify-content:center">
-							<input
-								type="button"
-								value="Editor"
-								onClick={() => store.doNav(import('./DeckEditor.jsx'))}
-								onMouseOver={[setTip, 'Edit & manage your decks']}
-							/>
-							<input
-								type="button"
-								value="Shop"
-								onClick={() => {
-									if (
-										!hasflag(rx.user, 'no-shop') ||
-										(rx.user.freepacks && rx.user.freepacks.some(x => x))
-									) {
-										store.doNav(import('./Shop.jsx'));
-									}
-								}}
-								onMouseOver={[
-									setTip,
-									'Buy booster packs which contain cards from the elements you choose',
-								]}
-								disabled={
-									hasflag(rx.user, 'no-shop') &&
-									!rx.user.freepacks?.some(x => x)
+					<div style="display:flex;flex-wrap:wrap;justify-content:space-evenly;gap:2px">
+						{quickslots}
+					</div>
+					<div style="display:flex;flex-wrap:wrap;justify-content:space-evenly;gap:2px">
+						<input
+							type="button"
+							value="Editor"
+							onClick={() => store.doNav(import('./DeckEditor.jsx'))}
+							onMouseOver={[setTip, 'Edit & manage your decks']}
+						/>
+						<input
+							type="button"
+							value="Shop"
+							onClick={() => {
+								if (
+									!hasflag(rx.user, 'no-shop') ||
+									(rx.user.freepacks && rx.user.freepacks.some(x => x))
+								) {
+									store.doNav(import('./Shop.jsx'));
 								}
-							/>
-						</div>
-						<div style="display:flex;justify-content:center">
-							<input
-								type="button"
-								value="Upgrade"
-								onClick={() => {
-									if (
-										!(
-											hasflag(rx.user, 'no-up-pillar') &&
-											hasflag(rx.user, 'no-up-merge')
-										)
-									) {
-										store.doNav(import('./Upgrade.jsx'));
-									}
-								}}
-								onMouseOver={[setTip, 'Upgrade or sell cards']}
-								disabled={
-									hasflag(rx.user, 'no-up-pillar') &&
-									hasflag(rx.user, 'no-up-merge')
+							}}
+							onMouseOver={[
+								setTip,
+								'Buy booster packs which contain cards from the elements you choose',
+							]}
+							disabled={
+								hasflag(rx.user, 'no-shop') && !rx.user.freepacks?.some(x => x)
+							}
+						/>
+						<input
+							type="button"
+							value="Upgrade"
+							onClick={() => {
+								if (
+									!(
+										hasflag(rx.user, 'no-up-pillar') &&
+										hasflag(rx.user, 'no-up-merge')
+									)
+								) {
+									store.doNav(import('./Upgrade.jsx'));
 								}
-							/>
-							<input
-								type="button"
-								value="Bazaar"
-								onClick={() => {
-									if (!rx.uname) {
-										store.doNav(import('./Bazaar.jsx'));
-									}
-								}}
-								onMouseOver={[
-									setTip,
-									"Put up cards for sale & review other players' offers",
-								]}
-								disabled={rx.uname}
-							/>
-						</div>
+							}}
+							onMouseOver={[setTip, 'Upgrade or sell cards']}
+							disabled={
+								hasflag(rx.user, 'no-up-pillar') &&
+								hasflag(rx.user, 'no-up-merge')
+							}
+						/>
+						<input
+							type="button"
+							value="Bazaar"
+							onClick={() => {
+								if (!rx.uname) {
+									store.doNav(import('./Bazaar.jsx'));
+								}
+							}}
+							onMouseOver={[
+								setTip,
+								"Put up cards for sale & review other players' offers",
+							]}
+							disabled={rx.uname}
+						/>
 					</div>
 				</div>
 				<div style="position:absolute;left:619px;top:292px;width:195px;height:240px;display:grid">
-					<div style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:center;align-items:center;padding-bottom:5px">
+					<div style="display:flex;flex-wrap:wrap;justify-content:space-evenly;align-items:center;padding-bottom:5px">
 						<div class="maintitle">Social</div>
-						<div style="display:flex;flex-direction:row;justify-content:center;flex-wrap:wrap">
-							<input
-								placeholder="Player's Name"
-								value={rx.opts.foename ?? ''}
-								onInput={e => store.setOptTemp('foename', e.target.value)}
-							/>
-							<div style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:space-evenly;align-items:center">
-								<input
-									type="button"
-									value="Library"
-									onClick={() => {
-										const name = foename() || rx.username;
-										if (name) {
-											const props = { name };
-											if (!foename()) props.alt = rx.uname;
-											store.doNav(import('./Library.jsx'), props);
-										}
-									}}
-									onMouseOver={[
-										setTip,
-										'See exactly what cards you or others own',
-									]}
-								/>
-								<input
-									type="button"
-									value="PvP"
-									onClick={() => sock.sendChallenge(foename())}
-								/>
-							</div>
-							<div style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:space-evenly;align-items:center">
-								<input
-									type="button"
-									value="Trade"
-									onClick={() => {
-										if (hasflag(rx.user, 'no-trade')) {
-											sock.userEmit('offertrade', {
-												f: foename(),
-												cards: '',
-												g: 0,
-												forcards: null,
-												forg: null,
-											});
-											store.doNav(import('./Trade.jsx'), { foe: foename() });
-										}
-									}}
-									onMouseOver={[setTip, 'Trade cards/$ with another player']}
-									disabled={hasflag(rx.user, 'no-trade')}
-								/>
-							</div>
-						</div>
+						<input
+							placeholder="Player's Name"
+							value={rx.opts.foename ?? ''}
+							onInput={e => store.setOptTemp('foename', e.target.value)}
+						/>
+						<input
+							type="button"
+							value="Library"
+							onClick={() => {
+								const name = foename() || rx.username;
+								if (name) {
+									const props = { name };
+									if (!foename()) props.alt = rx.uname;
+									store.doNav(import('./Library.jsx'), props);
+								}
+							}}
+							onMouseOver={[setTip, 'See exactly what cards you or others own']}
+						/>
+						<input
+							type="button"
+							value="PvP"
+							onClick={() => sock.sendChallenge(foename())}
+						/>
+						<input
+							type="button"
+							value="Trade"
+							onClick={() => {
+								if (hasflag(rx.user, 'no-trade')) {
+									sock.userEmit('offertrade', {
+										f: foename(),
+										cards: '',
+										g: 0,
+										forcards: null,
+										forg: null,
+									});
+									store.doNav(import('./Trade.jsx'), { foe: foename() });
+								}
+							}}
+							onMouseOver={[setTip, 'Trade cards/$ with another player']}
+							disabled={hasflag(rx.user, 'no-trade')}
+						/>
 					</div>
-					<div style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:center;align-items:center;padding-bottom:5px">
+					<div style="display:flex;flex-wrap:wrap;align-content:center;justify-content:center;align-items:center">
 						<div class="maintitle">Reward</div>
 						<div style="display:flex;justify-content:space-evenly;width:100%">
 							<input placeholder="Code" style="width:80px" ref={rewardcode} />
@@ -540,20 +514,28 @@ export default function MainMenu(props) {
 							/>
 						</div>
 					</div>
-					<div style="display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:center;align-items:center;padding-bottom:5px">
+					<div style="display:flex;flex-wrap:wrap;justify-content:space-evenly;align-items:center;padding:8px">
 						<div class="maintitle">Leaderboards</div>
-						<div style="display:flex;flex-direction:column;align-items:center;">
-							<div>{leadc}</div>
+						{[0, 1].map(i => (
 							<input
 								type="button"
-								value="View"
-								onClick={() => store.doNav(import('./Leaderboards.jsx'))}
+								value={`Arena${i + 1} T30`}
+								onClick={() => store.doNav(import('./ArenaTop.jsx'), { lv: i })}
 								onMouseOver={[
 									setTip,
-									"Leaderboards to see data such as who's collected the most wealth",
+									'See who the top players in arena are right now',
 								]}
 							/>
-						</div>
+						))}
+						<input
+							type="button"
+							value="View"
+							onClick={() => store.doNav(import('./Leaderboards.jsx'))}
+							onMouseOver={[
+								setTip,
+								"Leaderboards to see data such as who's collected the most wealth",
+							]}
+						/>
 					</div>
 				</div>
 				{changepass() && (
@@ -594,7 +576,7 @@ export default function MainMenu(props) {
 						/>
 					</div>
 				)}
-				<div style="position:absolute;left:317px;top:517px;width:263px;display:flex;flex-direction:row;flex-wrap:nowrap;align-content:center;justify-content:space-between;align-items:center;">
+				<div style="position:absolute;left:317px;top:517px;width:263px;display:flex;flex-wrap:nowrap;align-content:center;justify-content:space-between;align-items:center;">
 					<input
 						type="button"
 						value="Settings"
@@ -625,7 +607,7 @@ export default function MainMenu(props) {
 							onClick={() => setChangepass(true)}
 							style="width:fit-content"
 						/>
-						<div style="display:flex;flex-wrap:nowrap;flex-direction:row;justify-content:space-between;align-items:flex-start">
+						<div style="display:flex;flex-wrap:nowrap;justify-content:space-between;align-items:flex-start">
 							<div style="display:flex;flex-direction:column;align-content:center;justify-content:space-between;flex-wrap:wrap;align-items:flex-start;">
 								<label>
 									<input

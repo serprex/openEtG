@@ -72,16 +72,16 @@ function Qecks(props) {
 		);
 	}
 	return (
-		<>
+		<div style="position:absolute;left:200px;top:8px;width:450px;display:flex;justify-content:space-between">
 			<input
 				type="button"
+				style="margin-right:18px"
 				value="Bind to #"
 				class={setting() ? 'selectedbutton' : undefined}
 				onClick={() => setSetting(value => !value)}
-				style="position:absolute;left:200px;top:8px"
 			/>
-			<div style="position:absolute;left:300px;top:8px">{buttons}</div>
-		</>
+			{buttons}
+		</div>
 	);
 }
 
