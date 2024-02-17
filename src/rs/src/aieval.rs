@@ -603,7 +603,7 @@ fn eval_skill(
 			Skill::steal | Skill::v_steal => 6 * PREC,
 			Skill::steam => 6 * PREC,
 			Skill::stoneform | Skill::v_stoneform => PREC,
-			Skill::stonewall => quantamap.get(ctx.get_owner(c), etg::Earth) as i32 * PREC,
+			Skill::stonewall => quantamap.get(ctx.get_owner(c), etg::Earth) as i32,
 			Skill::storm(x) | Skill::v_storm(x) | Skill::firestorm(x) => x as i32 * (PREC * 4),
 			Skill::summon(FateEgg) => 3 * PREC,
 			Skill::summon(FateEggUp) => 4 * PREC,
