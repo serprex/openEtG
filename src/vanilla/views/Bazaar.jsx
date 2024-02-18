@@ -9,7 +9,7 @@ import Card from '../../Components/Card.jsx';
 import CardSelector from '../../Components/CardSelector.jsx';
 import DeckDisplay from '../../Components/DeckDisplay.jsx';
 
-export default function OriginalUpgrade(props) {
+export default function OriginalUpgrade() {
 	const rx = store.useRx();
 	const [deck, setDeck] = createSignal([]);
 	const [card, setCard] = createSignal(null);

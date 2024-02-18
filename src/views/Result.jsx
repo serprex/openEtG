@@ -422,7 +422,7 @@ export default function Result(props) {
 
 	return (
 		<>
-			<div style="display:flex;justify-content:space-between;position:absolute;left:350px;width:200px;top:490px">
+			<div style="display:flex;justify-content:space-evenly;position:absolute;left:350px;width:200px;top:490px">
 				<input type="button" value="Exit" onClick={exitFunc} />
 				{canRematch() && (
 					<input type="button" value="Rematch" onClick={game.data.rematch} />

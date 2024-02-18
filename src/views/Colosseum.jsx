@@ -81,7 +81,7 @@ export default function Colosseum() {
 		),
 	];
 	return (
-		<div style="margin-left:48px;height:600px;display:flex;justify-content:space-evenly">
+		<div style="margin-left:48px;height:600px;display:flex;flex-direction:column;justify-content:space-evenly">
 			<input
 				type="button"
 				value="Exit"
