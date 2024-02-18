@@ -43,6 +43,7 @@ select:hover:active{background-color:#9ab}
 	width:900px;
 	min-height:600px;
 	height:100%;
+	user-select:none;
 }
 #rightpane{
 	display:flex;

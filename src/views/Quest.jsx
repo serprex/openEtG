@@ -70,9 +70,7 @@ export default function QuestView() {
 						<input
 							type="button"
 							value="Fight!"
-							onClick={() =>
-								store.navGame(Quest.mkQuestAi(selectedQuest().key))
-							}
+							onClick={() => store.navGame(Quest.mkQuestAi(selectedQuest()))}
 						/>
 					)}
 				</Show>
