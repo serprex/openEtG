@@ -1246,39 +1246,71 @@ impl Game {
 		self.setSkill(1, Event::Death, &[Skill::_tracedeath]);
 	}
 
-	pub fn tgt_to_pos(&self, id: i16, p1id: i16) -> u32 {
+	pub fn tgt_to_pos(&self, id: i16, p1id: i16, landscape: bool) -> u32 {
 		let owner = self.get_owner(id);
-		let (x, y) = match self.get_kind(id) {
-			Kind::Player => (50, 560),
-			Kind::Weapon => (207, 492),
-			Kind::Shield => (207, 562),
-			kind => {
-				let i = self.getIndex(id);
-				if i == -1 {
-					return 0;
-				}
-				let i = i as u32;
-				match kind {
-					Kind::Creature => {
-						let row = if i < 8 {
-							0
-						} else if i < 15 {
-							1
-						} else {
-							2
-						};
-						let column = if row == 2 { i + 1 } else { i } % 8;
-						(204 + column * 90 + if row == 1 { 45 } else { 0 }, 334 + row * 44)
+		if landscape {
+			let (x, y) = match self.get_kind(id) {
+				Kind::Player => (50, 560),
+				Kind::Weapon => (207, 492),
+				Kind::Shield => (207, 562),
+				kind => {
+					let i = self.getIndex(id);
+					if i == -1 {
+						return 0;
 					}
-					Kind::Permanent => (280 + (i % 9) * 70, 492 + (i / 9) * 70),
-					Kind::Spell => {
-						return 132 | (if owner != p1id { 36 } else { 336 } + 28 * i as u32) << 12
+					let i = i as u32;
+					match kind {
+						Kind::Creature => {
+							let row = if i < 8 {
+								0
+							} else if i < 15 {
+								1
+							} else {
+								2
+							};
+							let column = if row == 2 { i + 1 } else { i } % 8;
+							(column * 90 + if row == 1 { 249 } else { 204 }, 334 + row * 44)
+						}
+						Kind::Permanent => (280 + (i % 9) * 70, 492 + (i / 9) * 70),
+						Kind::Spell => {
+							return 132 | (if owner != p1id { 36 } else { 336 } + i * 28) << 12
+						}
+						_ => return 0,
 					}
-					_ => return 0,
 				}
-			}
-		};
-		x | if owner != p1id { 594 - y } else { y } << 12
+			};
+			return x | if owner != p1id { 594 - y } else { y } << 12
+		} else {
+			let (x, y) = match self.get_kind(id) {
+				Kind::Player => (50, 828),
+				Kind::Weapon => (183, 671),
+				Kind::Shield => (183, 741),
+				kind => {
+					let i = self.getIndex(id);
+					if i == -1 {
+						return 0;
+					}
+					let i = i as u32;
+					match kind {
+						Kind::Creature => {
+							let row = if i < 8 {
+								0
+							} else if i < 15 {
+								1
+							} else {
+								2
+							};
+							let column = if row == 2 { i + 1 } else { i } % 8;
+							(column * 91 + if row == 1 { 92 } else { 47 }, 484 + row * 44)
+						}
+						Kind::Permanent => (250 + (i % 8) * 66, 671 + (i / 8) * 70),
+						Kind::Spell => (190 + i * 69, 832),
+						_ => return 0,
+					}
+				}
+			};
+			return x | if owner != p1id { 894 - y } else { y } << 12
+		}
 	}
 }
 

@@ -1,5 +1,4 @@
 bundle/*
 node_modules/*
 *.min.js
-*.css
 *.json

@@ -23,7 +23,7 @@ export default function CardImage(props) {
 				{props.card.name}
 			</span>
 			{!!props.card.cost && (
-				<span style="flex-shrink:0">
+				<span style="flex-shrink:0;pointer-events:none">
 					{props.card.cost}
 					<span class={'ico te' + props.card.costele} />
 				</span>

@@ -44,52 +44,69 @@ function updateMap(map, k, f) {
 	return new Map(map).set(k, f(map.get(k)));
 }
 
-const redhor = new Uint16Array([140, 172, 900, 300, 172, 900, 460, 172, 900]),
-	redver = new Uint16Array([170, 0, 600, 246, 0, 139, 246, 459, 600]),
-	redren = [];
-for (let j = 0; j < 2; j++) {
-	let path = '';
-	for (let i = 0; i < redhor.length; i += 3) {
-		path += `M${redhor[i + 1]} ${redhor[i] - j}L${redhor[i + 2]} ${
-			redhor[i] - j
-		}`;
+function gridLinePaths(hor, ver) {
+	const ren = [];
+	for (let j = 0; j < 2; j++) {
+		let path = '';
+		for (let i = 0; i < hor.length; i += 3) {
+			path += `M${hor[i + 1]} ${hor[i] - j}L${hor[i + 2]} ${hor[i] - j}`;
+		}
+		for (let i = 0; i < ver.length; i += 3) {
+			path += `M${ver[i] + j} ${ver[i + 1]}L${ver[i] + j} ${ver[i + 2]}`;
+		}
+		ren.push(path, ['#421', '#842'][j]);
 	}
-	for (let i = 0; i < redver.length; i += 3) {
-		path += `M${redver[i] + j} ${redver[i + 1]}L${redver[i] + j} ${
-			redver[i + 2]
-		}`;
-	}
-	redren.push([path, ['#421', '#842'][j]]);
+	return ren;
 }
-function svgbg() {
+
+const landscapeGrid = gridLinePaths(
+		new Uint16Array([140, 172, 900, 300, 172, 900, 460, 172, 900]),
+		new Uint16Array([170, 0, 600, 246, 0, 139, 246, 459, 600]),
+	),
+	portraitGrid = gridLinePaths(
+		new Uint16Array([
+			260, 0, 750, 450, 0, 750, 640, 0, 750, 120, 150, 750, 780, 150, 750,
+		]),
+		new Uint16Array([150, 0, 260, 150, 640, 900, 218, 120, 260, 218, 640, 780]),
+	);
+function SvgBg(props) {
+	const ren = x => (props.landscape ? landscapeGrid : portraitGrid)[x];
 	return (
 		<svg
-			width="900"
-			height="600"
+			width={props.landscape ? '900' : '750'}
+			height={props.landscape ? '600' : '900'}
 			style="position:absolute;left:0;top:0;z-index:-8;pointer-events:none">
-			<path d={redren[0][0]} stroke={redren[0][1]} strokeWidth="1" />
-			<path d={redren[1][0]} stroke={redren[1][1]} strokeWidth="1" />
+			<path d={ren(0)} stroke={ren(1)} strokeWidth="1" />
+			<path d={ren(2)} stroke={ren(3)} strokeWidth="1" />
 		</svg>
 	);
 }
 
-function floodsvg() {
+function FloodSvg(props) {
 	return (
 		<svg
-			width="900"
-			height="600"
+			width={props.landscape ? '900' : '750'}
+			height={props.landscape ? '600' : '900'}
 			style="position:absolute;left:0;top:0;z-index:1;pointer-events:none;opacity:.4">
 			<path
-				d="M900 141v317h-700Q162 416 200 375h395Q615 300 595 226h-395Q162 191 200 141"
+				d={
+					props.landscape ?
+						'M900 141v317h-700q-38 -35 0 -85h395q38 -72.5 0 -145h-395q-38 -35 0 -85'
+					:	'M750 261v377h-720q-38 -58 0 -116h395q38 -72.5 0 -145h-395q-38 -58 0 -116'
+				}
 				fill="#048"
 			/>
 		</svg>
 	);
 }
 
-function cloaksvg() {
+function CloakSvg(props) {
 	return (
-		<div style="position:absolute;left:0;top:0;width:900px;height:299px;background-color:#000;z-index:1;pointer-events:none" />
+		<div
+			style={`position:absolute;left:0;top:0;width:900px;height:${
+				props.landscape ? 299 : 449
+			}px;background-color:#000;z-index:1;pointer-events:none`}
+		/>
 	);
 }
 
@@ -339,22 +356,23 @@ function SpellDisplayChild(props) {
 	const p1 = props.getIdTrack(props.spell.t);
 	const state = createMemo(() => {
 		const ms = time();
+		const offset = props.landscape ? 0 : 300;
 		return (
 			ms < 50 * Math.PI ?
 				{
-					yc: props.y * Math.sin(ms / 100),
+					yc: props.y * Math.sin(ms / 100) + offset,
 					opacity: 1 - Math.cos(ms / 100),
 				}
 			: ms > 1984 ?
 				{
-					yc: props.y + ms - 1980,
+					yc: props.y + ms - 1980 + offset,
 					opacity: 1 - (ms - 1980) / (600 - props.y),
 				}
-			:	{ yc: props.y, opacity: 1 }
+			:	{ yc: props.y + offset, opacity: 1 }
 		);
 	});
 	createEffect(() => {
-		if (state().yc > 600) {
+		if (state().yc > (props.landscape ? 600 : 900)) {
 			props.setSpells(spells => spells.filter(x => x !== props.spell));
 		}
 	});
@@ -364,7 +382,7 @@ function SpellDisplayChild(props) {
 				card={props.spell}
 				style={{
 					position: 'absolute',
-					left: '800px',
+					right: '2px',
 					top: `${state().yc}px`,
 					opacity: state().opacity,
 					'z-index': '3',
@@ -564,13 +582,22 @@ function thingTweenCompare(prev, next) {
 }
 
 function Things(props) {
+	const portraitoffset = () => (props.landscape ? 0 : 333);
 	const birth = id =>
 		untrack(() => {
 			const start = props.startPos.get(id);
 			return (
-				start < 0 ? { opacity: 0, x: 103, y: -start === props.p1id ? 551 : 258 }
+				start < 0 ?
+					{
+						opacity: 0,
+						x: 103,
+						y: -start === props.p1id ? 551 + portraitoffset() : 258,
+					}
 				: start ? { opacity: 0, x: -99, y: -99, ...props.getIdTrack(start) }
-				: { opacity: 0, ...props.game.tgtToPos(id, props.p1id) }
+				: {
+						opacity: 0,
+						...props.game.tgtToPos(id, props.p1id, props.landscape),
+					}
 			);
 		});
 	const [getDeath, setDeath] = createSignal(new Map()),
@@ -592,7 +619,10 @@ function Things(props) {
 					const endpos = props.endPos.get(id) ?? id;
 					const pos =
 						endpos < 0 ?
-							{ x: 103, y: ~endpos === props.p1id ? 551 : 258 }
+							{
+								x: 103,
+								y: ~endpos === props.p1id ? 551 + portraitoffset() : 258,
+							}
 						:	props.getIdTrack(endpos);
 					if (pos) {
 						newDeath = newDeath ?? new Map(death);
@@ -623,7 +653,7 @@ function Things(props) {
 						state={
 							getDeath().get(id) ?? {
 								opacity: 1,
-								...props.game.tgtToPos(id, props.p1id),
+								...props.game.tgtToPos(id, props.p1id, props.landscape),
 							}
 						}
 						compare={thingTweenCompare}
@@ -702,9 +732,9 @@ function FoePlays(props) {
 	return (
 		<Show when={props.foeplays}>
 			<div
-				style={`position:absolute;left:800px;top:${
-					540 - props.foeplays.length * 20
-				}px;z-index:6`}>
+				style={`position:absolute;right:2px;top:${
+					(props.landscape ? 540 : 840) - props.foeplays.length * 20
+				}px;z-index:6;width:100px`}>
 				<For each={props.foeplays}>
 					{play => (
 						<CardImage
@@ -774,6 +804,9 @@ export default function Match(props) {
 		hardcoreback = props.game.data.ante.c;
 		hardcorebound = props.game.data.ante.bound;
 	}
+	const [landscape, setLandscape] = createSignal(
+		!screen.orientation.type.startsWith('portrait'),
+	);
 	const [pgame, setGame] = createSignal(props.game);
 	const [tempgame, setTempgame] = createSignal(null);
 	const [replayhistory, setReplayHistory] = createSignal([props.game]);
@@ -790,7 +823,7 @@ export default function Match(props) {
 		setIdTrack = (id, pos) => idtrack.set(id, pos),
 		getIdTrack = id =>
 			id === p1id() || id === p2id() ?
-				game().tgtToPos(id, p1id())
+				game().tgtToPos(id, p1id(), landscape())
 			:	idtrack.get(id);
 	const [showFoeplays, setShowFoeplays] = createSignal(false);
 	const [resigning, setResigning] = createSignal(false);
@@ -1301,8 +1334,9 @@ export default function Match(props) {
 			e.returnValue = '';
 		}
 	};
-
+	const setlandscape = e => setLandscape(!e.target.type.startsWith('portrait'));
 	onMount(() => {
+		screen.orientation.addEventListener('change', setlandscape);
 		if (props.replay) return;
 		if (!props.game.data.spectate) {
 			document.addEventListener('keydown', onkeydown);
@@ -1358,6 +1392,7 @@ export default function Match(props) {
 
 	onCleanup(() => {
 		setCmds({});
+		screen.orientation.removeEventListener('change', setlandscape);
 		document.removeEventListener('keydown', onkeydown);
 		window.removeEventListener('beforeunload', onbeforeunload);
 	});
@@ -1437,8 +1472,10 @@ export default function Match(props) {
 	return (
 		<>
 			{popup() && <PagedModal pages={popup()} onClose={() => setPopup(null)} />}
-			{svgbg}
-			<Show when={cloaked()}>{cloaksvg}</Show>
+			<SvgBg landscape={landscape()} />
+			<Show when={cloaked()}>
+				<CloakSvg landscape={landscape()} />
+			</Show>
 			{showFoeplays() ?
 				<FoePlays
 					getIdTrack={getIdTrack}
@@ -1449,6 +1486,7 @@ export default function Match(props) {
 						setTargeting(null);
 						setTempgame(game);
 					}}
+					landscape={landscape()}
 				/>
 			:	playByPlayMode !== 'disabled' && (
 					<SpellDisplay
@@ -1456,12 +1494,13 @@ export default function Match(props) {
 						getIdTrack={getIdTrack}
 						spells={spells()}
 						setSpells={setSpells}
+						landscape={landscape()}
 					/>
 				)
 			}
 			{[0, 1].map(j => {
 				const pl = j ? p2id : p1id,
-					plpos = () => game().tgtToPos(pl(), p1id()),
+					plpos = () => game().tgtToPos(pl(), p1id(), landscape()),
 					handOverlay = () => game().hand_overlay(pl(), p1id());
 				const expectedDamage = () => expectedDamages().expectedDamage[pl() - 1];
 				const x1 = () =>
@@ -1479,6 +1518,7 @@ export default function Match(props) {
 						);
 				const hptext = () =>
 					game().hp_text(pl(), p1id(), p2id(), expectedDamage());
+				const quantaoffset = () => (landscape() || j ? 0 : 333);
 				return (
 					<>
 						<div
@@ -1488,20 +1528,52 @@ export default function Match(props) {
 							}px;width:96px;height:80px;border:transparent 2px solid;z-index:4`}
 							onClick={[thingClick, pl()]}
 							onMouseOver={e => setInfo(e, pl())}
-							onMouseMove={e => setInfo(e, pl())}
-						/>
-						<span
-							class={'ico e' + game().get_mark(pl())}
-							style={`position:absolute;left:32px;top:${
-								j ? 228 : 430
-							}px;transform:translate(-50%,-50%);text-align:center;pointer-events:none;font-size:18px;text-shadow:2px 2px 1px #000,2px 2px 2px #000`}>
-							{game().get_markpower(pl()) !== 1 && game().get_markpower(pl())}
-						</span>
+							onMouseMove={e => setInfo(e, pl())}>
+							<div style="background-color:#000;position:absolute;left:0px;top:19px;padding:1px;width:98px;height:22px;pointer-events:none">
+								<Tween
+									state={{ x1: x1(), x2: x2() }}
+									proc={hpTweenProc}
+									compare={hpTweenCompare}>
+									{state => (
+										<>
+											<div
+												style={`background-color:${
+													strcols[Life]
+												};position:absolute;width:${
+													state().x1
+												}px;height:20px;pointer-events:none;z-index:2`}
+											/>
+											<Show when={!cloaked() && expectedDamage() !== 0}>
+												<div
+													style={`background-color:${
+														strcols[
+															expectedDamage() >= game().get(pl(), 'hp') ? Fire
+															: expectedDamage() > 0 ? Time
+															: Water
+														]
+													};position:absolute;left:${Math.min(
+														state().x1,
+														state().x2,
+													)}px;right:${
+														97 - Math.max(state().x1, state().x2)
+													}px;height:20px;pointer-events:none;z-index:2`}
+												/>
+											</Show>
+										</>
+									)}
+								</Tween>
+							</div>
+							<div style="text-align:center;width:100px;pointer-events:none;font-size:12px;line-height:1.1;position:absolute;left:0;top:23px;text-shadow:1px 1px 1px #000,2px 2px 2px #000;z-index:2">
+								<Text text={hptext()} />
+							</div>
+						</div>
 						<Show when={game().get(pl(), 'sosa')}>
 							<div
 								class="ico sacrifice"
 								style={`position:absolute;left:0;top:${
-									j ? 7 : 502
+									j ? 7
+									: landscape() ? 777
+									: 502
 								}px;pointer-events:none`}
 							/>
 						</Show>
@@ -1525,16 +1597,18 @@ export default function Match(props) {
 						</Show>
 						<Show when={handOverlay()}>
 							<span
-								style={`z-index:1;position:absolute;left:101px;top:${
-									j ? 0 : 300
-								}px;width:66px;height:263px;background-color:${
+								style={`z-index:1;position:absolute;left:${
+									landscape() ?
+										`101px;top:${j ? 0 : 300}px;width:66px;height:263`
+									:	`152px;top:${j ? 21 : 796}px;width:563px;height:84`
+								}px;background-color:${
 									strcols[handOverlay()]
 								};opacity:.3;border-radius:4px;pointer-events:none`}
 							/>
 						</Show>
 						<div
 							style={`display:grid;grid-template-columns:48px 48px;position:absolute;left:2;top:${
-								j ? 106 : 308
+								(j ? 106 : 308) + quantaoffset()
 							}px`}>
 							{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(k => (
 								<span class={'quantapool ico ce' + k}>
@@ -1542,56 +1616,15 @@ export default function Match(props) {
 									{game().get_quanta(pl(), k) || ''}
 								</span>
 							))}
-						</div>
-						<div
-							style={`background-color:#000;position:absolute;left:2px;top:${
-								j ? 36 : 531
-							}px;width:98px;height:22px;pointer-events:none`}
-						/>
-						<Tween
-							state={{ x1: x1(), x2: x2() }}
-							proc={hpTweenProc}
-							compare={hpTweenCompare}>
-							{state => (
-								<>
-									<div
-										style={`background-color:${
-											strcols[Life]
-										};position:absolute;left:3px;top:${j ? 37 : 532}px;width:${
-											state().x1
-										}px;height:20px;pointer-events:none;z-index:2`}
-									/>
-									<Show when={!cloaked() && expectedDamage() !== 0}>
-										<div
-											style={`background-color:${
-												strcols[
-													expectedDamage() >= game().get(pl(), 'hp') ? Fire
-													: expectedDamage() > 0 ? Time
-													: Water
-												]
-											};position:absolute;left:${
-												3 + Math.min(state().x1, state().x2)
-											}px;top:${j ? 37 : 532}px;width:${
-												Math.max(state().x1, state().x2) -
-												Math.min(state().x1, state().x2)
-											}px;height:20px;pointer-events:none;z-index:2`}
-										/>
-									</Show>
-								</>
-							)}
-						</Tween>
-						<div
-							style={`text-align:center;width:100px;pointer-events:none;font-size:12px;line-height:1.1;position:absolute;left:0;top:${
-								j ? 40 : 535
-							}px;text-shadow:1px 1px 1px #000,2px 2px 2px #000;z-index:2`}>
-							<Text text={hptext()} />
-						</div>
-						<div
-							class={game().deck_length(pl()) ? 'ico ccback' : ''}
-							style={`position:absolute;left:103px;top:${
-								j ? 258 : 551
-							}px;text-align:center;padding-top:7px;pointer-events:none;font-size:18px;text-shadow:2px 2px 1px #000,2px 2px 2px #000;z-index:3`}>
-							{game().deck_length(pl()) || '0!!'}
+							<span class={'quantamark ico e' + game().get_mark(pl())}>
+								{game().get_markpower(pl()) !== 1 && game().get_markpower(pl())}
+							</span>
+							<span
+								class={`deckpool${
+									game().deck_length(pl()) ? ' ico ccback' : ''
+								}`}>
+								{game().deck_length(pl()) || '0!!'}
+							</span>
 						</div>
 					</>
 				);
@@ -1609,9 +1642,10 @@ export default function Match(props) {
 				onClick={thingClick}
 				targeting={targeting()}
 				things={things()}
+				landscape={landscape()}
 			/>
-			{game().has_flooding() && floodsvg}
-			<div style="white-space:pre-wrap;text-align:center;position:absolute;left:780px;top:40px;width:120px;z-index:3;overflow:hidden;text-overflow:ellipsis">
+			{game().has_flooding() && <FloodSvg landscape={landscape()} />}
+			<div style="white-space:pre-wrap;text-align:center;position:absolute;right:0px;top:30px;width:120px;z-index:3;overflow:hidden;text-overflow:ellipsis">
 				{`${
 					[
 						'Commoner\n',
@@ -1629,12 +1663,10 @@ export default function Match(props) {
 					:	'')
 				}${game().data.players[p2id() - 1].name || '-'}`}
 			</div>
-			<span style="position:absolute;left:780px;top:560px;width:120px;text-align:center;pointer-events:none;white-space:pre">
-				{texts().turntell}
-			</span>
+			<span id="turntell">{texts().turntell}</span>
 			<For each={Array.from(effects().effects)}>{fx => untrack(fx)}</For>
 			<Card
-				style={`position:absolute;left:734px;top:${hovery()}px`}
+				style={`position:absolute;right:2px;top:${hovery()}px`}
 				card={hovercard()}
 			/>
 			<Show when={tooltip()}>
@@ -1644,17 +1676,23 @@ export default function Match(props) {
 					</div>
 				)}
 			</Show>
-			{!!foeplays().get(p2id())?.length && (
-				<input
-					type="button"
-					value={`History ${foeplays().get(p2id()).length}`}
-					style="position:absolute;left:2px;top:270px;z-index:2"
-					onClick={() => {
-						setTempgame(null);
-						setShowFoeplays(showFoeplays => !showFoeplays);
-					}}
-				/>
-			)}
+			<Show when={foeplays().get(p2id())?.length}>
+				{plays => (
+					<input
+						type="button"
+						value={`History ${plays()}`}
+						style={
+							landscape() ?
+								'position:absolute;left:2px;top:270px;z-index:2'
+							:	'position:absolute;left:500px;top:4px;z-index:2'
+						}
+						onClick={() => {
+							setTempgame(null);
+							setShowFoeplays(showFoeplays => !showFoeplays);
+						}}
+					/>
+				)}
+			</Show>
 			<input
 				type="button"
 				value={
@@ -1664,29 +1702,34 @@ export default function Match(props) {
 					:	'Resign'
 				}
 				onClick={resignClick}
-				style="position:absolute;left:816px;top:15px;z-index:4"
+				style="position:absolute;right:4px;top:4px;z-index:4"
 			/>
 			{!props.replay &&
 				!game().data.spectate &&
 				(game().turn === p1id() || !!game().winner) && (
-					<>
+					<div
+						style={
+							landscape() ?
+								'position:absolute;left:10px;top:460px;display:flex;flex-direction:column;gaps:10px'
+							:	'position:absolute;left:400px;top:876px;width:200px;display:flex;gaps:18px;justify-content:space-between'
+						}>
 						{texts().endText && (
 							<input
 								type="button"
 								value={texts().endText}
+								style={texts().endText ? '' : 'visibility:hidden'}
 								onClick={() => endClick()}
-								style="position:absolute;left:10px;top:460px"
 							/>
 						)}
 						{texts().cancelText && (
 							<input
 								type="button"
 								value={texts().cancelText}
+								style={texts().cancelText ? '' : 'visibility:hidden'}
 								onClick={cancelClick}
-								style="position:absolute;left:10px;top:490px"
 							/>
 						)}
-					</>
+					</div>
 				)}
 			{props.replay && (
 				<>

@@ -47,7 +47,7 @@ input[type='password'],
 input[type='number'],
 input:not([type]) {
 	width: 150px;
-	border: 2px solid rgba(0, 0, 0, 0.7777777);
+	border: 2px solid rgba(0, 0, 0, 0.8);
 	border-radius: 4px;
 	background-color: rgba(8, 8, 8, 0.5);
 	color: #eee;
@@ -72,17 +72,19 @@ select:hover:active {
 #panes {
 	display: flex;
 	justify-content: center;
-	height: 100vh;
+	min-height: 100vh;
 	min-width: 1200px;
 }
 #leftpane {
 	position: relative;
 	background-image: url(assets/bg_default.webp);
 	background-repeat: no-repeat;
+	background-size: cover;
 	width: 900px;
 	min-height: 600px;
 	height: 100%;
 	user-select: none;
+	z-index: 0;
 }
 #rightpane {
 	display: flex;
@@ -100,25 +102,6 @@ select:hover:active {
 }
 #rightlinks div {
 	flex-grow: 1;
-}
-@media (orientation: portrait) and (max-width: 1200px) {
-	#panes {
-		flex-direction: column;
-		align-items: center;
-		min-width: 900px;
-	}
-	#leftpane {
-		height: 600px;
-	}
-	#rightpane {
-		margin-top: 36px;
-		width: 100%;
-	}
-	#rightlinks {
-		flex-direction: row;
-		justify-content: space-between;
-		flex-wrap: wrap;
-	}
 }
 .bg_main {
 	background-image: url(assets/bg_main.webp);
@@ -331,6 +314,34 @@ select:hover:active {
 	pointer-events: none;
 	padding-left: 16px;
 }
+.quantamark {
+	margin-top: 8px;
+	text-align: center;
+	pointer-events: none;
+	font-size: 18px;
+	text-shadow:
+		2px 2px 1px #000,
+		2px 2px 2px #000;
+}
+.deckpool {
+	margin-top: 8px;
+	text-align: center;
+	padding-top: 7px;
+	pointer-events: none;
+	font-size: 18px;
+	text-shadow:
+		2px 2px 1px #000,
+		2px 2px 2px #000;
+	z-index: 3;
+}
+#turntell {
+	position: absolute;
+	right: 0;
+	top: 560px;
+	width: 120px;
+	text-align: center;
+	white-space: pre;
+}
 .inst {
 	width: 68px;
 	height: 68px;
@@ -340,18 +351,10 @@ select:hover:active {
 .handinst {
 	transition: transform 0.5s;
 }
-.handinst.canactive {
-	transform: translate(-4px);
-}
-.handinst.cantarget {
-	transform: translate(-4px);
-}
-.handinst:hover {
-	transform: translate(-8px);
-}
 .cantarget {
 	border: 2px #f00 solid !important;
 	box-shadow: 0 0 5px #f00;
+	cursor: pointer;
 }
 .cantarget:hover {
 	border: 2px #ff0 solid !important;
@@ -360,6 +363,7 @@ select:hover:active {
 .canactive {
 	border: 2px #000 solid !important;
 	box-shadow: 0 0 5px #fff;
+	cursor: pointer;
 }
 .canactive:hover {
 	border: 2px #00f solid !important;
@@ -367,4 +371,40 @@ select:hover:active {
 }
 .shiny {
 	animation: animatedShiny 8s linear infinite alternate-reverse;
+}
+@media (orientation: portrait) {
+	#panes {
+		flex-direction: column;
+		align-items: center;
+		min-width: 900px;
+	}
+	#leftpane {
+		height: 600px;
+	}
+	#leftpane:has(svg) {
+		width: 750px;
+		min-height: 900px;
+		margin-bottom: 36px;
+	}
+	#rightpane {
+		margin-top: 36px;
+		width: 100%;
+	}
+	#rightlinks {
+		flex-direction: row;
+		justify-content: space-between;
+		flex-wrap: wrap;
+	}
+	#turntell {
+		top: 860px;
+	}
+}
+@media (not(orientation: portrait)) {
+	.handinst.canactive,
+	.handinst.cantarget {
+		transform: translate(-4px);
+	}
+	.handinst:hover {
+		transform: translate(-8px);
+	}
 }

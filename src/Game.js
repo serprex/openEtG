@@ -140,8 +140,8 @@ export default class Game {
 			})
 		);
 	}
-	tgtToPos(id, p1id) {
-		const pos = this.tgt_to_pos(id, p1id);
+	tgtToPos(id, p1id, landscape) {
+		const pos = this.tgt_to_pos(id, p1id, landscape);
 		return pos === 0 ? null : { x: pos & 4095, y: pos >> 12 };
 	}
 }
