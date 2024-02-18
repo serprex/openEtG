@@ -1,4 +1,4 @@
-import { createSignal, onMount } from 'solid-js';
+import { createSignal, onMount, Show } from 'solid-js';
 import { For } from 'solid-js/web';
 
 import { encodeCode } from '../etgutil.js';
@@ -37,7 +37,7 @@ export default function ArenaTop({ lv }) {
 								<span class="atop4">{data[4]}</span>
 								<span
 									class="atoptext"
-									onMouseEnter={e =>
+									onMouseMove={e =>
 										setCard({ card, x: e.pageX + 4, y: e.pageY + 4 })
 									}
 									onMouseLeave={[setCard, null]}>
@@ -54,7 +54,14 @@ export default function ArenaTop({ lv }) {
 				onClick={() => doNav(import('../views/MainMenu.jsx'))}
 				style="position:absolute;left:8px;top:300px"
 			/>
-			<Card {...card()} />
+			<Show when={card()}>
+				{card => (
+					<Card
+						style={`position:fixed;left:${card().x}px;top:${card().y}px`}
+						card={card().card}
+					/>
+				)}
+			</Show>
 		</>
 	);
 }

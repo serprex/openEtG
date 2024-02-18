@@ -26,7 +26,7 @@ function App() {
 				deck={deck()}
 				onMouseOver={(i, card) => setCard(card)}
 			/>
-			<Card x={36} y={206} card={card()} />
+			<Card style="position:absolute;left:36px;top:206px" card={card()} />
 			<span style="position:absolute;left:204px;top:206px">
 				{calcWealth(Cards, deck(), true)} <span class="ico gold" />
 			</span>

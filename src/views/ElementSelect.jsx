@@ -10,12 +10,30 @@ import Cards from '../Cards.js';
 function Preview(props) {
 	return (
 		<>
-			<Card x={168} y={48} card={Cards.Codes[props.codes[0]]} />
-			<Card x={332} y={48} card={Cards.Codes[props.codes[1]]} />
-			<Card x={168} y={324} card={Cards.Codes[props.codes[2]]} />
-			<Card x={332} y={324} card={Cards.Codes[props.codes[3]]} />
-			<Card x={496} y={324} card={Cards.Codes[props.codes[4]]} />
-			<Card x={660} y={324} card={Cards.Codes[props.codes[5]]} />
+			<Card
+				style="position:absolute;left:168;top:48px"
+				card={Cards.Codes[props.codes[0]]}
+			/>
+			<Card
+				style="position:absolute;left:332;top:48px"
+				card={Cards.Codes[props.codes[1]]}
+			/>
+			<Card
+				style="position:absolute;left:168;top:324px"
+				card={Cards.Codes[props.codes[2]]}
+			/>
+			<Card
+				style="position:absolute;left:332;top:324px"
+				card={Cards.Codes[props.codes[3]]}
+			/>
+			<Card
+				style="position:absolute;left:496;top:324px"
+				card={Cards.Codes[props.codes[4]]}
+			/>
+			<Card
+				style="position:absolute;left:660;top:324px"
+				card={Cards.Codes[props.codes[5]]}
+			/>
 		</>
 	);
 }

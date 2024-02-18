@@ -301,10 +301,10 @@ export default function MainMenu(props) {
 				</div>
 				{ocard() ?
 					<>
-						<div style="font-size:16px;user-select:none;position:absolute;pointer-events:none;left:95px;top:315px">
-							Daily Login Reward
+						<div style="font-size:16px;user-select:none;position:absolute;left:95px;top:300px">
+							<div style="text-align:center">Daily Login Reward</div>
+							<Card card={Cards.Codes[ocard()]} />
 						</div>
-						<Card x={92} y={340} card={Cards.Codes[ocard()]} />
 					</>
 				:	!rx.opts.hideMainchat && (
 						<>
@@ -386,7 +386,7 @@ export default function MainMenu(props) {
 				</div>
 				<div style="position:absolute;left:620px;top:92px;width:196px;height:150px;display:grid;align-content:space-between">
 					<div class="maintitle">Cards</div>
-					<div style="font-size:14px;pointer-events:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:16px;margin-top:12px">
+					<div style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:16px;margin-top:12px">
 						{`Deck: ${rx.user?.selectedDeck}`}
 					</div>
 					<div style="display:flex;flex-wrap:wrap;justify-content:space-evenly;gap:2px">

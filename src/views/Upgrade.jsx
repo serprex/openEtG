@@ -72,7 +72,7 @@ export default function Upgrade() {
 	}
 	return (
 		<>
-			<div style="display:flex;justify-content:space-between;width:540px">
+			<div style="display:flex;justify-content:space-between;margin-right:8px">
 				<div style="display:flex;flex-direction:column;height:300px;justify-content:space-evenly">
 					<input
 						type="button"
@@ -102,7 +102,7 @@ export default function Upgrade() {
 								)}
 							/>
 						)}
-						&embsp;
+						&emsp;
 						<Text text={state().info1} />
 					</div>
 					<div>
@@ -126,8 +126,8 @@ export default function Upgrade() {
 						)}
 					</Show>
 				</div>
-				<Card x={544} y={8} card={state().card1} />
-				<Card x={734} y={8} card={state().card2} />
+				<Card card={state().card1} />
+				<Card card={state().card2} />
 			</div>
 			<input
 				type="button"

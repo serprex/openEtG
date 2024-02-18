@@ -110,7 +110,10 @@ export default function Reward(props) {
 						/>
 					))}
 				</div>
-				<Card x={233} y={10} card={Cards.Codes[chosenReward()]} />
+				<Card
+					style="position:absolute;left:233px;top:10px"
+					card={Cards.Codes[chosenReward()]}
+				/>
 			</>
 		)
 	);

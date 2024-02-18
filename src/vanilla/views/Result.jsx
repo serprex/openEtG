@@ -105,7 +105,12 @@ export default function OriginalResult({ game }) {
 					<div
 						style={c()[0] === c()[1] && c()[1] === c()[2] ? '' : 'opacity:.3'}>
 						{c().map((card, ci) => (
-							<Card x={16 + ci * 32 + i * 300} y={16 + ci * 32} card={card} />
+							<Card
+								style={`position:absolute;left:${16 + ci * 32 + i * 300};top:${
+									16 + ci * 32
+								}px`}
+								card={card}
+							/>
 						))}
 					</div>
 				)}

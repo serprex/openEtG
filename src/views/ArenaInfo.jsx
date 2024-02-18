@@ -95,10 +95,10 @@ function RenderInfo(props) {
 function ArenaCard(props) {
 	return (
 		<>
+			<Card card={props.card} />
 			<input
 				type="button"
 				value="Create"
-				style={`position:absolute;left:734px;top:${260 + props.y}px`}
 				onClick={() => {
 					store.doNav(import('./ArenaEditor.jsx'), {
 						adeck: '',
@@ -108,7 +108,6 @@ function ArenaCard(props) {
 					});
 				}}
 			/>
-			<Card x={734} y={props.y} card={props.card} />
 		</>
 	);
 }
@@ -145,18 +144,14 @@ export default function ArenaInfo() {
 				{x => <RenderInfo info={x()} y={300} name={rx.username} />}
 			</Show>
 			{!!rx.user.ocard && (
-				<>
-					<ArenaCard
-						info={AB().A}
-						y={8}
-						card={Cards.Codes[asUpped(rx.user.ocard, false)]}
-					/>
-					<ArenaCard
-						info={AB().B}
-						y={300}
-						card={Cards.Codes[asUpped(rx.user.ocard, true)]}
-					/>
-				</>
+				<div style="position:absolute;left:734px;height:600px;display:flex;flex-direction:column;justify-content:space-evenly">
+					{['A', 'B'].map(key => (
+						<ArenaCard
+							info={AB()[key]}
+							card={Cards.Codes[asUpped(rx.user.ocard, key === 'B')]}
+						/>
+					))}
+				</div>
 			)}
 		</>
 	);

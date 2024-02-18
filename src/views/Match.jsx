@@ -1633,7 +1633,10 @@ export default function Match(props) {
 				{texts().turntell}
 			</span>
 			<For each={Array.from(effects().effects)}>{fx => untrack(fx)}</For>
-			<Card x={734} y={hovery()} card={hovercard()} />
+			<Card
+				style={`position:absolute;left:734px;top:${hovery()}px`}
+				card={hovercard()}
+			/>
 			<Show when={tooltip()}>
 				{tooltip => (
 					<div class="infobox" style={tooltip().style}>

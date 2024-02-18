@@ -407,7 +407,12 @@ export default function Result(props) {
 			let x = 390 - len * 24,
 				y = 170 - len * 12;
 			for (const code of etgutil.iterdeck(cardreward)) {
-				cards.push(<Card x={x} y={y} card={Cards.Codes[code]} />);
+				cards.push(
+					<Card
+						style={`position:absolute;left:${x}px;top:${y}px`}
+						card={Cards.Codes[code]}
+					/>,
+				);
 				x += 40;
 				y += 12;
 			}
@@ -441,9 +446,10 @@ export default function Result(props) {
 				</>
 			)}
 			{game.winner !== p1id && props.hardcoreback && (
-				<div style="opacity:.3">
-					<Card x={370} y={170} card={Cards.Codes[props.hardcoreback]} />
-				</div>
+				<Card
+					style="opacity:.3;position:absolute;left:370px;top:170px"
+					card={Cards.Codes[props.hardcoreback]}
+				/>
 			)}
 			<div style="position:absolute;left:8px;top:258px">
 				<div>{tooltip() || ' '}</div>

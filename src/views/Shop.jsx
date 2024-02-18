@@ -52,7 +52,7 @@ function PackDisplay(props) {
 			style={`position:absolute;left:0px;top:12px;width:756px;height:588px;z-index:1;overflow-y:auto${
 				props.cards ? '' : ';display:none'
 			}`}>
-			<Card card={hoverCard()} x={8} y={8} />
+			<Card card={hoverCard()} />
 			<For each={children()}>
 				{p => (
 					<DeckDisplay

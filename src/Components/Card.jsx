@@ -8,21 +8,10 @@ export default function Card(props) {
 		<Show when={props.card}>
 			{card => (
 				<div
-					style={{
-						position: 'absolute',
-						left: props.x + 'px',
-						top: props.y + 'px',
-						width: '160px',
-						height: '256px',
-						'pointer-events': 'none',
-						'z-index': '5',
-						color: card().upped ? '#000' : '',
-						overflow: 'hidden',
-						'background-color': maybeLightenStr(card()),
-						'border-radius': '4px',
-						'border-width': '3px',
-						'border-style': 'double',
-					}}>
+					class="card"
+					style={`${
+						card().upped ? 'color:#000;' : ''
+					}background-color:${maybeLightenStr(card())};${props.style ?? ''}`}>
 					<span style="position:absolute;left:2px;top:2px;font-size:12px">
 						{card().name}
 					</span>

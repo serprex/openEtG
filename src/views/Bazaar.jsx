@@ -358,7 +358,7 @@ export default function Bazaar() {
 				{rx.user.gold}
 				<span class="ico gold" />
 			</div>
-			<Card x={732} y={8} card={bcard()} />
+			<Card style="position:absolute;left:732px;top:8px" card={bcard()} />
 			<CardSelector
 				cards={Cards}
 				cardpool={cardpool()}

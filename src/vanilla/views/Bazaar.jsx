@@ -182,7 +182,7 @@ export default function OriginalUpgrade(props) {
 					}
 				}}
 			/>
-			<Card x={734} y={8} card={card()} />
+			<Card style="position:absolute;left:734px;top:8px" card={card()} />
 		</>
 	);
 }
