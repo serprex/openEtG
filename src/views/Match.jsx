@@ -1611,7 +1611,7 @@ export default function Match(props) {
 				things={things()}
 			/>
 			{game().has_flooding() && floodsvg}
-			<div style="white-space:pre-wrap;text-align:center;position:absolute;left:780px;top:40px;width:120px;z-index:3">
+			<div style="white-space:pre-wrap;text-align:center;position:absolute;left:780px;top:40px;width:120px;z-index:3;overflow:hidden;text-overflow:ellipsis">
 				{`${
 					[
 						'Commoner\n',
