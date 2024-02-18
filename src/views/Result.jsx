@@ -403,10 +403,13 @@ export default function Result(props) {
 		const cards = [],
 			cardreward = boundreward + poolreward;
 		if (cardreward) {
-			let x0 = 390 - etgutil.decklength(cardreward) * 20;
+			const len = etgutil.decklength(cardreward);
+			let x = 390 - len * 24,
+				y = 170 - len * 12;
 			for (const code of etgutil.iterdeck(cardreward)) {
-				cards.push(<Card x={x0} y={170} card={Cards.Codes[code]} />);
-				x0 += 40;
+				cards.push(<Card x={x} y={y} card={Cards.Codes[code]} />);
+				x += 40;
+				y += 12;
 			}
 		}
 		return cards;
@@ -414,20 +417,12 @@ export default function Result(props) {
 
 	return (
 		<>
-			<input
-				type="button"
-				value="Exit"
-				onClick={exitFunc}
-				style="position:absolute;left:412px;top:440px"
-			/>
-			{canRematch() && (
-				<input
-					type="button"
-					value="Rematch"
-					onClick={game.data.rematch}
-					style="position:absolute;left:412px;top:490px"
-				/>
-			)}
+			<div style="display:flex;justify-content:space-between;position:absolute;left:350px;width:200px;top:490px">
+				<input type="button" value="Exit" onClick={exitFunc} />
+				{canRematch() && (
+					<input type="button" value="Rematch" onClick={game.data.rematch} />
+				)}
+			</div>
 			{game.winner === p1id && (
 				<>
 					{goldreward > 0 && (
@@ -438,8 +433,8 @@ export default function Result(props) {
 					)}
 					{cards}
 					<div
-						style={`text-align:center;width:700px;position:absolute;left:100px;bottom:${
-							boundreward || poolreward ? 444 : 180
+						style={`text-align:center;width:700px;position:absolute;left:100px;top:${
+							boundreward || poolreward ? 100 : 200
 						}px`}>
 						<Text text={game.data.wintext ?? 'You won!'} />
 					</div>
@@ -450,8 +445,10 @@ export default function Result(props) {
 					<Card x={370} y={170} card={Cards.Codes[props.hardcoreback]} />
 				</div>
 			)}
-			<span style="position:absolute;left:8px;top:290px">{lefttext}</span>
-			<div style="position:absolute;left:8px;top:258px">{tooltip()}</div>
+			<div style="position:absolute;left:8px;top:258px">
+				<div>{tooltip() || ' '}</div>
+				{lefttext}
+			</div>
 		</>
 	);
 }
