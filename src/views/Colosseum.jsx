@@ -81,12 +81,11 @@ export default function Colosseum() {
 		),
 	];
 	return (
-		<div style="margin-left:48px;margin-top:96px">
+		<div style="margin-left:48px;height:600px;display:flex;justify-content:space-evenly">
 			<input
 				type="button"
 				value="Exit"
 				onClick={() => store.doNav(import('../views/MainMenu.jsx'))}
-				style="position:absolute;left:48px;top:24px"
 			/>
 			{[1, 2, 3, 4].map(i => {
 				const active = !(user.daily & (1 << i));

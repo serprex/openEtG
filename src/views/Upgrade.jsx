@@ -1,4 +1,4 @@
-import { createMemo, createSignal } from 'solid-js';
+import { createMemo, createSignal, Show } from 'solid-js';
 
 import * as sock from '../sock.jsx';
 import { doNav, useRx, hasflag } from '../store.jsx';
@@ -70,55 +70,65 @@ export default function Upgrade() {
 			if (error) setError(error);
 		};
 	}
-	function autoCards() {
-		sock.userExec('upshall');
-	}
 	return (
 		<>
-			<input
-				type="button"
-				value="Exit"
-				onClick={() => doNav(import('../views/MainMenu.jsx'))}
-				style="position:absolute;left:5px;top:50px"
-			/>
-			{state().canGrade && (
-				<input
-					type="button"
-					value={state().downgrade ? 'Downgrade' : 'Upgrade'}
-					onClick={eventWrap(state().downgrade ? downgradeCard : upgradeCard)}
-					style="position:absolute;left:150px;top:50px"
-				/>
-			)}
-			{state().canLish && (
-				<input
-					type="button"
-					value={state().downlish ? 'Unpolish' : 'Polish'}
-					onClick={eventWrap(state().downlish ? unpolishCard : polishCard)}
-					style="position:absolute;left:150px;top:95px"
-				/>
-			)}
-			{!hasflag(user, 'no-up-merge') && (
-				<input
-					type="button"
-					value="Autoconvert"
-					onClick={autoCards}
-					style="position:absolute;left:5px;top:138px"
-				/>
-			)}
-			<div style="position:absolute;left:5px;top:240px">
-				<Text text={user.gold + '$'} />
+			<div style="display:flex;justify-content:space-between;width:540px">
+				<div style="display:flex;flex-direction:column;height:300px;justify-content:space-evenly">
+					<input
+						type="button"
+						value="Exit"
+						onClick={() => doNav(import('../views/MainMenu.jsx'))}
+					/>
+					{!hasflag(user, 'no-up-merge') && (
+						<input
+							type="button"
+							value="Autoconvert"
+							onClick={() => sock.userExec('upshall')}
+						/>
+					)}
+					<div>
+						{user.gold}
+						<span class="ico gold" />
+					</div>
+				</div>
+				<div style="display:flex;flex-direction:column;height:300px;width:420px;justify-content:space-evenly">
+					<div>
+						{state().canGrade && (
+							<input
+								type="button"
+								value={state().downgrade ? 'Downgrade' : 'Upgrade'}
+								onClick={eventWrap(
+									state().downgrade ? downgradeCard : upgradeCard,
+								)}
+							/>
+						)}
+						&embsp;
+						<Text text={state().info1} />
+					</div>
+					<div>
+						{state().canLish && (
+							<input
+								type="button"
+								value={state().downlish ? 'Unpolish' : 'Polish'}
+								onClick={eventWrap(
+									state().downlish ? unpolishCard : polishCard,
+								)}
+							/>
+						)}
+						&emsp;
+						<Text text={state().info3} />
+					</div>
+					<Show when={error()}>
+						{error => (
+							<div>
+								<Text text={error()} />
+							</div>
+						)}
+					</Show>
+				</div>
+				<Card x={544} y={8} card={state().card1} />
+				<Card x={734} y={8} card={state().card2} />
 			</div>
-			<div style="position:absolute;left:250px;top:50px">
-				<Text text={state().info1} />
-			</div>
-			<div style="position:absolute;left:250px;top:95px">
-				<Text text={state().info3} />
-			</div>
-			<div style="position:absolute;left:100px;top:170px">
-				<Text text={error()} />
-			</div>
-			<Card x={534} y={8} card={state().card1} />
-			<Card x={734} y={8} card={state().card2} />
 			<input
 				type="button"
 				value="Toggle Bound"

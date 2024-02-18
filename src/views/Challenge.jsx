@@ -225,7 +225,7 @@ export default function Challenge(props) {
 		],
 	);
 	const [editing, setEditing] = createSignal([new Set(), new Set()]);
-	const [replay, setReplay] = createSignal('');
+	let replay;
 	const [mydeck, setMyDeck] = createSignal(store.getDeck());
 
 	let nextIdx = 2;
@@ -275,7 +275,7 @@ export default function Challenge(props) {
 	const replayClick = () => {
 		let play;
 		try {
-			play = JSON.parse(replay());
+			play = JSON.parse(replay.value);
 			if (!play || typeof play !== 'object') {
 				return console.log('Invalid object');
 			}
@@ -362,19 +362,18 @@ export default function Challenge(props) {
 				deck={mydata()?.deck || etgutil.decodedeck(mydeck())}
 				renderMark
 			/>
-			<input
-				type="button"
-				value="Replay"
-				onClick={replayClick}
-				style="position:absolute;left:540px;top:8px"
-			/>
-			<textarea
-				class="chatinput"
-				placeholder="Replay"
-				value={replay()}
-				onChange={e => setReplay(e.target.value)}
-				style="position:absolute;left:540px;top:32px;width:350px"
-			/>
+			<div style="position:absolute;left:540px;top:8px;width:360px">
+				<div style="display:flex;justify-content:space-between">
+					<input type="button" value="Replay" onClick={replayClick} />
+					<input type="button" value="Exit" onClick={toMainMenu} />
+				</div>
+				<textarea
+					class="chatinput"
+					placeholder="Replay"
+					ref={replay}
+					style="width:100%"
+				/>
+			</div>
 			<For each={groups()}>
 				{(players, i) => (
 					<Group
@@ -433,12 +432,6 @@ export default function Challenge(props) {
 						/>
 					)}
 			</div>
-			<input
-				style="position:absolute;left:800px;top:8px"
-				type="button"
-				value="Exit"
-				onClick={toMainMenu}
-			/>
 		</>
 	);
 }

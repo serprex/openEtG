@@ -39,8 +39,42 @@ export default function Leaderboards() {
 	});
 
 	return (
-		<>
-			<div style="position:absolute;left:90px;width:810px;display:grid;grid-template-rows:repeat(33,18px);column-gap:18px;grid-auto-flow:column;grid-auto-columns:257px;white-space:nowrap">
+		<div style="display:flex">
+			<div style="display:flex;flex-direction:column;justify-content:space-between">
+				<div style="display:flex;flex-direction:column;row-gap:4px;flex-grow:1">
+					{categories.map(category => (
+						<input
+							type="button"
+							class={getCategory() === category ? 'selectedbutton' : ''}
+							value={category}
+							onClick={[setCategory, category]}
+						/>
+					))}
+				</div>
+				<div style="display:flex;flex-direction:column;row-gap:4px;flex-grow:1">
+					<input
+						type="button"
+						class={getFlags().length === 0 ? 'selectedbutton' : ''}
+						value="Main"
+						onClick={[setFlags, []]}
+					/>
+					{presets.map(preset => (
+						<input
+							type="button"
+							class={getFlags() === preset[1] ? 'selectedbutton' : ''}
+							value={preset[0]}
+							onClick={[setFlags, preset[1]]}
+						/>
+					))}
+				</div>
+				<input
+					type="button"
+					value="Exit"
+					onClick={() => doNav(import('../views/MainMenu.jsx'))}
+					style="margin-top:auto"
+				/>
+			</div>
+			<div style="width:810px;display:grid;grid-template-rows:repeat(33,18px);column-gap:18px;grid-auto-flow:column;grid-auto-columns:257px;white-space:nowrap">
 				<Index
 					each={getTop()?.[getCategory() + ':' + getFlags().join(' ')] ?? []}>
 					{(item, i) => (
@@ -60,38 +94,6 @@ export default function Leaderboards() {
 					)}
 				</Index>
 			</div>
-			<div style="display:flex;position:absolute;left:0;top:0;flex-direction:column;row-gap:4px">
-				{categories.map(category => (
-					<input
-						type="button"
-						class={getCategory() === category ? 'selectedbutton' : ''}
-						value={category}
-						onClick={[setCategory, category]}
-					/>
-				))}
-			</div>
-			<div style="display:flex;position:absolute;left:0;top:200px;flex-direction:column;height:180px;row-gap:4px">
-				<input
-					type="button"
-					class={getFlags().length === 0 ? 'selectedbutton' : ''}
-					value="Main"
-					onClick={[setFlags, []]}
-				/>
-				{presets.map(preset => (
-					<input
-						type="button"
-						class={getFlags() === preset[1] ? 'selectedbutton' : ''}
-						value={preset[0]}
-						onClick={[setFlags, preset[1]]}
-					/>
-				))}
-			</div>
-			<input
-				type="button"
-				value="Exit"
-				onClick={() => doNav(import('../views/MainMenu.jsx'))}
-				style="position:absolute;left:4px;top:578px"
-			/>
-		</>
+		</div>
 	);
 }
