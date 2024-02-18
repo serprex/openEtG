@@ -85,7 +85,7 @@ function DeckName(props) {
 	return (
 		<div
 			style="height:21px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-			onClick={[props.onClick, props.name]}>
+			onClick={() => props.onClick(props.name)}>
 			<a
 				href={`deck/${props.deck}`}
 				target="_blank"

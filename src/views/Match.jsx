@@ -490,7 +490,7 @@ function Thing(props) {
 			}}
 			onMouseOver={setInfo}
 			onMouseLeave={props.onMouseOut}
-			onClick={[props.onClick, props.id]}>
+			onClick={() => props.onClick(props.id)}>
 			<Show
 				when={!faceDown()}
 				fallback={<div class="ico cback" style="left:2px;top:2px" />}>
