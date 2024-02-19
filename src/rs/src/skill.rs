@@ -4520,13 +4520,15 @@ impl Skill {
 					.map(|(idx, id)| idx as i16)
 					.collect::<Vec<_>>();
 				if let Some(&pick) = ctx.choose(&candidates) {
-					let tidx = ctx.getIndex(t) as usize;
-					let pl = ctx.get_player_mut(town);
-					let pickid = pl.deck[pick as usize];
-					pl.deck_mut()[pick as usize] = t;
-					ctx.setCrea(town, tidx, pickid);
-					ctx.fx(pickid, Fx::StartPos(-town));
-					ctx.fx(t, Fx::EndPos(!town));
+					let tidx = ctx.remove(t);
+					if tidx != -1 {
+						let pl = ctx.get_player_mut(town);
+						let pickid = pl.deck[pick as usize];
+						pl.deck_mut()[pick as usize] = t;
+						ctx.setCrea(town, tidx as usize, pickid);
+						ctx.fx(pickid, Fx::StartPos(-town));
+						ctx.fx(t, Fx::EndPos(!town));
+					}
 				}
 			}
 			Self::tutordraw => {

@@ -38,7 +38,7 @@ export default function ArenaTop({ lv }) {
 								<span
 									class="atoptext"
 									onMouseMove={e =>
-										setCard({ card, x: e.pageX + 4, y: e.pageY + 4 })
+										setCard({ card, x: e.clientX + 4, y: e.clientY + 4 })
 									}
 									onMouseLeave={[setCard, null]}>
 									{card.name}

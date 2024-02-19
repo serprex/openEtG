@@ -85,42 +85,40 @@ export default function OriginalResult({ game }) {
 	}
 
 	return (
-		<>
-			<input
-				type="button"
-				value="Exit"
-				style="position:absolute;left:412px;top:440px"
-				onClick={exitFunc}
-			/>
-			{canRematch() && (
-				<input
-					type="button"
-					value="Rematch"
-					onClick={game.data.rematch}
-					style="position:absolute;left:412px;top:490px"
-				/>
-			)}
-			<Index each={cardswon}>
-				{(c, i) => (
-					<div
-						style={c()[0] === c()[1] && c()[1] === c()[2] ? '' : 'opacity:.3'}>
-						{c().map((card, ci) => (
-							<Card
-								style={`position:absolute;left:${16 + ci * 32 + i * 300};top:${
-									16 + ci * 32
-								}px`}
-								card={card}
-							/>
-						))}
-					</div>
+		<div style="display:flex;flex-direction:column;justify-content:space-evenly;align-items:center;height:600px">
+			<div style="display:flex;justify-content:space-evenly;position:relative;top:16px;width:100%;height:300px">
+				<Index each={cardswon}>
+					{c => (
+						<div
+							style={`position:relative${
+								c()[0] === c()[1] && c()[1] === c()[2] ? '' : ';opacity:.3'
+							}`}>
+							{c().map((card, ci) => (
+								<Card
+									style={
+										ci ?
+											`position:absolute;left:${ci * 32}px;top:${ci * 32}px`
+										:	''
+									}
+									card={card}
+								/>
+							))}
+						</div>
+					)}
+				</Index>
+			</div>
+			<div style="display:flex;justify-content:space-evenly;width:200px">
+				<input type="button" value="Exit" onClick={exitFunc} />
+				{canRematch() && (
+					<input type="button" value="Rematch" onClick={game.data.rematch} />
 				)}
-			</Index>
+			</div>
 			{electrumwon > 0 && (
-				<div style="text-align:center;width:900px;position:absolute;left:0px;top:550px">
+				<div style="text-align:center;width:900px">
 					{electrumwon}
 					<span class="ico gold" />
 				</div>
 			)}
-		</>
+		</div>
 	);
 }

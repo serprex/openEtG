@@ -375,6 +375,7 @@ select:hover:active {
 @media (orientation: portrait) {
 	#panes {
 		flex-direction: column;
+		justify-content: start;
 		align-items: center;
 		min-width: 900px;
 	}
