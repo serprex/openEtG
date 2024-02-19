@@ -125,134 +125,141 @@ export default function Shop() {
 		!!(rx.user.freepacks && rx.user.freepacks[rarity()]);
 	return (
 		<>
-			<div
-				class="bgbox"
-				style="position:absolute;left:40px;top:16px;width:820px;height:60px;padding-left:12px;display:flex;flex-direction:column;justify-content:space-between">
-				<div style="display:flex;justify-content:space-between">
-					<span>
-						<Text text={info1()} />
-					</span>
-					{hasFreePacks() && (
+			<Tutor.Tutor x={8} y={500} panels={Tutor.Shop} />
+			<div style="display:flex;justify-content:space-evenly;flex-direction:column;height:600px;margin-left:36px;margin-right:36px">
+				<div
+					class="bgbox"
+					style="display:flex;flex-direction:column;justify-content:space-between;padding-left:12px;min-height:60px">
+					<div style="display:flex;justify-content:space-between">
 						<span>
-							{!!rx.user.freepacks[rarity()] &&
-								`Free ${packdata[rarity()].type} packs left: ${
-									rx.user.freepacks[rarity()]
-								}`}
+							<Text text={info1()} />
 						</span>
-					)}
-				</div>
-				{info2()}
-			</div>
-			<div
-				class="bgbox"
-				style="position:absolute;left:40px;top:89px;width:494px;height:168px;display:flex;flex-wrap:wrap;justify-content:space-evenly">
-				{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(i => (
-					<div style="margin:18px">
-						<span
-							class={'imgb ico e' + i}
-							onClick={() => {
-								playSound('click');
-								setEle(i);
-								setInfo1(`Selected Element: ${i === 13 ? 'Random' : '1:' + i}`);
-							}}
-						/>
+						{hasFreePacks() && (
+							<span>
+								{!!rx.user.freepacks[rarity()] &&
+									`Free ${packdata[rarity()].type} packs left: ${
+										rx.user.freepacks[rarity()]
+									}`}
+							</span>
+						)}
 					</div>
-				))}
-			</div>
-			<div
-				class="bgbox"
-				style="position:absolute;left:768px;top:90px;width:94px;height:184px">
-				<div style="position:absolute;left:7px;top:11px">
-					<Text text={rx.user.gold + '$'} />
+					{info2()}
 				</div>
-				<input
-					type="button"
-					value="Take Cards"
-					onClick={() => {
-						setBuy(true);
-						setCards('');
-					}}
-					style={`position:absolute;left:7px;top:66px${
-						cards() ? '' : ';display:none'
-					}`}
-				/>
-				{buy() &&
-					!!~ele() &&
-					!!~rarity() &&
-					(!store.hasflag(rx.user, 'no-shop') || hasFreePacks()) && (
-						<>
-							{!hasFreePacks() && (
-								<input
-									type="button"
-									value="Max Buy"
+				<div style="display:flex;justify-content:space-between;width:100%">
+					<div
+						class="bgbox"
+						style="width:494px;height:184px;display:flex;flex-wrap:wrap;justify-content:space-evenly;align-items:center">
+						{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(i => (
+							<div style="margin:18px">
+								<span
+									class={'imgb ico e' + i}
 									onClick={() => {
-										const pack = packdata[rarity()];
-										store.setOptTemp(
-											'bulk',
-											Math.min((rx.user.gold / pack.cost) | 0, 255).toString(),
+										playSound('click');
+										setEle(i);
+										setInfo1(
+											`Selected Element: ${i === 13 ? 'Random' : '1:' + i}`,
 										);
 									}}
-									style="position:absolute;left:7px;top:38px"
+								/>
+							</div>
+						))}
+					</div>
+					<div class="bgbox" style="width:94px;height:184px;position:relative">
+						<div style="position:absolute;left:7px;top:11px">
+							<Text text={rx.user.gold + '$'} />
+						</div>
+						<input
+							type="button"
+							value="Take Cards"
+							onClick={() => {
+								setBuy(true);
+								setCards('');
+							}}
+							style={`position:absolute;left:7px;top:66px${
+								cards() ? '' : ';display:none'
+							}`}
+						/>
+						{buy() &&
+							!!~ele() &&
+							!!~rarity() &&
+							(!store.hasflag(rx.user, 'no-shop') || hasFreePacks()) && (
+								<>
+									{!hasFreePacks() && (
+										<input
+											type="button"
+											value="Max Buy"
+											onClick={() => {
+												const pack = packdata[rarity()];
+												store.setOptTemp(
+													'bulk',
+													Math.min(
+														(rx.user.gold / pack.cost) | 0,
+														255,
+													).toString(),
+												);
+											}}
+											style="position:absolute;left:7px;top:38px"
+										/>
+									)}
+									<input
+										type="button"
+										value="Buy Pack"
+										onClick={buyPack}
+										style="position:absolute;left:7px;top:66px"
+									/>
+								</>
+							)}
+						{!hasFreePacks() &&
+							!store.hasflag(rx.user, 'no-shop') &&
+							!!~ele() &&
+							!!~rarity() && (
+								<input
+									type="number"
+									placeholder="Bulk"
+									value={bulk()}
+									min="0"
+									max="255"
+									onChange={e => store.setOptTemp('bulk', e.target.value)}
+									onKeyDown={e => {
+										if (e.key === 'Enter') buyPack();
+									}}
+									style="position:absolute;top:94px;left:11px;width:64px"
 								/>
 							)}
-							<input
-								type="button"
-								value="Buy Pack"
-								onClick={buyPack}
-								style="position:absolute;left:7px;top:66px"
-							/>
-						</>
-					)}
-				{!hasFreePacks() &&
-					!store.hasflag(rx.user, 'no-shop') &&
-					!!~ele() &&
-					!!~rarity() && (
 						<input
-							type="number"
-							placeholder="Bulk"
-							value={bulk()}
-							min="0"
-							max="255"
-							onChange={e => store.setOptTemp('bulk', e.target.value)}
-							onKeyDown={e => {
-								if (e.key === 'Enter') buyPack();
-							}}
-							style="position:absolute;top:94px;left:11px;width:64px"
+							type="button"
+							value="Exit"
+							onClick={() => store.doNav(import('../views/MainMenu.jsx'))}
+							style="position:absolute;left:7px;top:156px"
 						/>
-					)}
-				<input
-					type="button"
-					value="Exit"
-					onClick={() => store.doNav(import('../views/MainMenu.jsx'))}
-					style="position:absolute;left:7px;top:156px"
-				/>
-			</div>
-			<div style="display:flex;column-gap:12px;position:absolute;top:278px;left:48px">
-				<For each={packdata}>
-					{(pack, n) => (
-						<div style="width:160px;position:relative">
-							<img
-								src={`/assets/pack${n()}.webp`}
-								class="imgb"
-								onClick={() => {
-									setRarity(n());
-									setInfo2(`${pack.type} Pack: ${pack.info}`);
-								}}
-							/>
-							{rx.user.freepacks && rx.user.freepacks[n()] > 0 && (
-								<span style="text-align:center;width:20px;border-radius:50%;background:#a31;position:absolute;font-weight:bold;top:-5px;left: 145px">
-									{rx.user.freepacks[n()]}
-								</span>
-							)}
-							<div style="text-align:center">
-								<Text text={pack.cost + '$'} />
+					</div>
+				</div>
+				<div style="display:flex;justify-content:space-evenly;gaps:12px;width:100%">
+					<For each={packdata}>
+						{(pack, n) => (
+							<div style="width:160px;position:relative">
+								<img
+									src={`/assets/pack${n()}.webp`}
+									class="imgb"
+									onClick={() => {
+										setRarity(n());
+										setInfo2(`${pack.type} Pack: ${pack.info}`);
+									}}
+								/>
+								{rx.user.freepacks && rx.user.freepacks[n()] > 0 && (
+									<span style="text-align:center;width:20px;border-radius:50%;background:#a31;position:absolute;font-weight:bold;top:-5px;left: 145px">
+										{rx.user.freepacks[n()]}
+									</span>
+								)}
+								<div style="text-align:center">
+									<Text text={pack.cost + '$'} />
+								</div>
 							</div>
-						</div>
-					)}
-				</For>
+						)}
+					</For>
+				</div>
 			</div>
 			<PackDisplay cards={cards()} />
-			<Tutor.Tutor x={8} y={500} panels={Tutor.Shop} />
 		</>
 	);
 }
