@@ -113,7 +113,7 @@ export default function Library(props) {
 				<div>&ndash;</div>
 				<div>&ndash;</div>
 				<div>{data().ailosses}</div>
-				<div>{data().pvpwins}</div>
+				<div>{data().pvplosses}</div>
 			</div>
 			<div style="margin-top:18px;row-gap:4px;display:grid;grid-template-rows:36px auto auto auto;grid-template-columns:24px repeat(13, 1fr);width:730px">
 				<div></div>
