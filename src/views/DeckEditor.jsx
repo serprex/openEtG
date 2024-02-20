@@ -40,7 +40,7 @@ function Qecks(props) {
 				type="button"
 				style="margin-right:18px"
 				value="Bind to #"
-				class={setting() ? 'selectedbutton' : undefined}
+				class={setting() ? 'selected' : undefined}
 				onClick={() => setSetting(value => !value)}
 			/>
 			{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => (
@@ -48,9 +48,7 @@ function Qecks(props) {
 					type="button"
 					value={`${i + 1}`}
 					class={`editbtn${
-						props.user.selectedDeck === props.user.qecks[i] ?
-							' selectedbutton'
-						:	''
+						props.user.selectedDeck === props.user.qecks[i] ? ' selected' : ''
 					}`}
 					onClick={() => {
 						if (setting()) {
@@ -294,8 +292,9 @@ export default function DeckEditor() {
 			<input
 				type="button"
 				value="Decks"
-				onClick={deckModeToggle}
+				class={viewDecks() ? 'selected' : ''}
 				style="position:absolute;left:8px;top:58px"
+				onClick={deckModeToggle}
 			/>
 			<input
 				type="button"

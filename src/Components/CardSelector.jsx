@@ -145,7 +145,8 @@ export default function CardSelector(props) {
 			{props.shiny === undefined && (
 				<input
 					type="button"
-					value="Toggle Shiny"
+					value="Shiny"
+					class={opts.toggleshiny ? 'selected' : ''}
 					style="position:absolute;left:4px;top:578px"
 					onClick={() => setOpt('toggleshiny', !opts.toggleshiny)}
 				/>

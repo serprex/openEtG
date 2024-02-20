@@ -22,8 +22,8 @@ td {
 	background-color: #567;
 	cursor: pointer;
 }
-input[type='button'] {
-	background: linear-gradient(to bottom, #def, #89a);
+input[type="button"]{
+	background-image:linear-gradient(to bottom,#def,#89a);
 	border-radius: 4px;
 	border: solid #000 1px;
 	width: 80px;
@@ -33,10 +33,10 @@ input[type='button'] {
 }
 input[type='button']:hover,
 input[type='button']:disabled {
-	background: linear-gradient(to bottom, #cde, #567);
+	background-image linear-gradient(to bottom, #cde, #567);
 }
 input[type='button']:hover:active:not([disabled]) {
-	background: linear-gradient(to bottom, #abc, #456);
+	background-image: linear-gradient(to bottom, #abc, #456);
 }
 input[type='button']:hover:disabled {
 	cursor: not-allowed;
@@ -183,8 +183,8 @@ select:hover:active {
 	max-width: 196px;
 	position: absolute;
 }
-.selectedbutton {
-	background: linear-gradient(to bottom, #344, #89f) !important;
+input[type="button"].selected {
+	background-image: linear-gradient(to bottom, #344, #89f) !important;
 }
 .editbtn {
 	width: 32px !important;

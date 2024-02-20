@@ -28,7 +28,7 @@ function Preset(props) {
 			<input
 				type="button"
 				value={props.name}
-				class={selected() ? 'selectedbutton' : ''}
+				class={selected() ? 'selected' : ''}
 				style="width:192px;margin-right:8px"
 				onClick={[props.setChecked, chked]}
 			/>
@@ -72,8 +72,8 @@ function AltCreator(props) {
 					<input
 						type="button"
 						value="Custom"
+						class={showCustom() ? 'selected' : ''}
 						style="width:192px;margin-right:8px"
-						class={showCustom() ? 'selectedbutton' : ''}
 						onClick={() => setShowCustom(x => !x)}
 					/>
 					Configure custom restrictions. Trade limited to matching restrictions.

@@ -183,7 +183,7 @@ export default function MainMenu(props) {
 						type="button"
 						value={i + 1}
 						class={`editbtn ${
-							rx.user.selectedDeck === rx.user.qecks[i] ? ' selectedbutton' : ''
+							rx.user.selectedDeck === rx.user.qecks[i] ? ' selected' : ''
 						}`}
 						onMouseOver={() => setTip(rx.user.qecks[i] ?? '')}
 						onClick={() => {
