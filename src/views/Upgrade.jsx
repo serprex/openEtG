@@ -131,9 +131,10 @@ export default function Upgrade() {
 			</div>
 			<input
 				type="button"
-				value="Toggle Bound"
+				value="Bound"
 				style="position:absolute;left:5px;top:554px"
-				onClick={() => setShowBound(showBound => !showBound)}
+				onClick={() => setShowBound(!showBound())}
+				classList={{ 'toggle-btn': true, active: showBound() }}
 			/>
 			<CardSelector
 				cards={Cards}

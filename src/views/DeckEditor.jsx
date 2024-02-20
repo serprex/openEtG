@@ -296,6 +296,7 @@ export default function DeckEditor() {
 				value="Decks"
 				onClick={deckModeToggle}
 				style="position:absolute;left:8px;top:58px"
+				classList={{ 'toggle-btn': true, active: viewDecks() }}
 			/>
 			<input
 				type="button"
