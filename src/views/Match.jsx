@@ -805,7 +805,8 @@ export default function Match(props) {
 		hardcorebound = props.game.data.ante.bound;
 	}
 	const [landscape, setLandscape] = createSignal(
-		!screen.orientation.type.startsWith('portrait'),
+		typeof screen === 'undefined' ||
+			!screen.orientation?.type?.startsWith?.('portrait'),
 	);
 	const [pgame, setGame] = createSignal(props.game);
 	const [tempgame, setTempgame] = createSignal(null);
@@ -1336,7 +1337,8 @@ export default function Match(props) {
 	};
 	const setlandscape = e => setLandscape(!e.target.type.startsWith('portrait'));
 	onMount(() => {
-		screen.orientation.addEventListener('change', setlandscape);
+		if (typeof screen !== 'undefined' && screen.orientation)
+			screen.orientation.addEventListener('change', setlandscape);
 		if (props.replay) return;
 		if (!props.game.data.spectate) {
 			document.addEventListener('keydown', onkeydown);
@@ -1392,7 +1394,8 @@ export default function Match(props) {
 
 	onCleanup(() => {
 		setCmds({});
-		screen.orientation.removeEventListener('change', setlandscape);
+		if (typeof screen !== 'undefined' && screen.orientation)
+			screen.orientation.removeEventListener('change', setlandscape);
 		document.removeEventListener('keydown', onkeydown);
 		window.removeEventListener('beforeunload', onbeforeunload);
 	});

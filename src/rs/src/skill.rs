@@ -1945,7 +1945,7 @@ impl Skill {
 					}
 				});
 				ctx.spelldmg(foe, dmg);
-				ctx.poison(foe, ctx.get(t, Stat::poison) + ctx.get(t, Flag::poisonous) as i16);
+				ctx.poison(foe, poison);
 			}
 			Self::counter => {
 				if ctx.get(c, Stat::frozen) == 0
