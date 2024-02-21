@@ -204,53 +204,34 @@ function PagedModal(props) {
 }
 
 function LastCardFx(props) {
-	const ms = useAnimation();
-	let div;
-	createEffect(() => {
-		div.style.opacity = Math.sin(ms() / 864) * 1.25;
-		if (ms() > 864 * Math.PI) props.setEffects(removeFx(props.self));
-	});
 	return (
 		<div
-			ref={div}
-			style="position:absolute;left:450px;top:300px;transform:translate(-50%,-50%);font-size:16px;color:#fff;background-color:#000;padding:18px;opacity:0;z-index:8;pointer-events:none">
+			class="lastcard"
+			onAnimationEnd={() => props.setEffects(removeFx(props.self))}>
 			{`Last card for ${props.name}`}
 		</div>
 	);
 }
 
 function TextFx(props) {
-	const ms = useAnimation();
-	createEffect(() => {
-		if (ms() > 360) {
-			batch(() => {
-				props.setEffects(removeFx(props.self));
-				props.setEffects(state => ({
-					...state,
-					fxTextPos: updateMap(
-						state.fxTextPos,
-						props.id,
-						pos => pos && pos - 16,
-					),
-				}));
-				if (props.onRest) props.setEffects(props.onRest);
-			});
-		}
-	});
-	const y = () => props.y0 + ms() / 5;
-	const fade = () => 1 - Math.tan(ms() / 451);
 	return (
 		<div
-			style={{
-				position: 'absolute',
-				left: `${props.pos.x}px`,
-				top: `${y()}px`,
-				opacity: `${fade()}`,
-				'z-index': '5',
-				transform: 'translate(-50%,-50%)',
-				'text-align': 'center',
-				'pointer-events': 'none',
-				'text-shadow': '1px 1px 2px #000',
+			class="textfx"
+			style={`position:absolute;left:${props.x}px;top:${props.y}px`}
+			onAnimationEnd={e => {
+				if (e.animationName === 'textfx') {
+					props.setEffects(state => {
+						const newstate = {
+							...removeFx(props.self)(state),
+							fxTextPos: updateMap(
+								state.fxTextPos,
+								props.id,
+								pos => pos && pos - 16,
+							),
+						};
+						return props.onRest ? props.onRest(newstate) : newstate;
+					});
+				}
 			}}>
 			<Text text={props.text} />
 		</div>
@@ -770,16 +751,6 @@ function FoePlays(props) {
 		</Show>
 	);
 }
-function hpTweenProc(ms, prev, next) {
-	if (ms > 96 * Math.PI) return next;
-	return {
-		x1: prev.x1 + (next.x1 - prev.x1) * Math.sin(ms / 192),
-		x2: prev.x2 + (next.x2 - prev.x2) * Math.sin(ms / 192),
-	};
-}
-function hpTweenCompare(prev, next) {
-	return prev.x1 === next.x1 && prev.x2 === next.x2;
-}
 
 function removeFx(fx) {
 	return state => {
@@ -848,53 +819,61 @@ export default function Match(props) {
 		newstate.fxTextPos = updateMap(
 			newstate.fxTextPos ?? state.fxTextPos,
 			id,
-			(pos = 0) => (offset = pos) + 16,
+			pos => (offset = pos ?? 0) + 16,
 		);
 		const pos = getIdTrack(id) ?? { x: -99, y: -99 };
-		const y0 = pos.y + offset;
-		const TextEffect = () =>
-			pos && (
-				<TextFx
-					setEffects={setEffects}
-					id={id}
-					y0={y0}
-					pos={pos}
-					text={text}
-					onRest={onRest}
-					self={TextEffect}
-				/>
-			);
+		const TextEffect = () => (
+			<TextFx
+				setEffects={setEffects}
+				id={id}
+				y={pos.y + offset}
+				x={pos.x}
+				text={text}
+				onRest={onRest}
+				self={TextEffect}
+			/>
+		);
 		return TextEffect;
 	};
 
 	const StatChange = (state, newstate, id, hp, atk) => {
-		newstate.fxStatChange ??= state.fxStatChange;
 		let oldentry, newentry;
-		newstate.fxStatChange = updateMap(newstate.fxStatChange, id, e => {
-			oldentry = e;
-			newentry = e ? { ...e } : { atk: 0, hp: 0, dom: null };
-			newentry.hp += hp;
-			newentry.atk += atk;
-			newentry.dom = mkText(
-				state,
-				newstate,
-				id,
-				`${newentry.atk > 0 ? '+' : ''}${newentry.atk}|${
-					newentry.hp > 0 ? '+' : ''
-				}${newentry.hp}`,
-				state => {
-					const fxStatChange = new Map(state.fxStatChange);
-					fxStatChange.delete(id);
-					return {
-						...state,
-						fxStatChange,
-					};
-				},
-			);
-			return newentry;
-		});
+		newstate.fxStatChange = updateMap(
+			newstate.fxStatChange ?? state.fxStatChange,
+			id,
+			e => {
+				oldentry = e;
+				newentry = e ? { ...e } : { atk: 0, hp: 0, dom: null };
+				newentry.hp += hp;
+				newentry.atk += atk;
+				newentry.dom = mkText(
+					state,
+					newstate,
+					id,
+					`${newentry.atk > 0 ? '+' : ''}${newentry.atk}|${
+						newentry.hp > 0 ? '+' : ''
+					}${newentry.hp}`,
+					state => {
+						const fxStatChange = new Map(state.fxStatChange);
+						fxStatChange.delete(id);
+						return {
+							...state,
+							fxStatChange,
+						};
+					},
+				);
+				return newentry;
+			},
+		);
 		newstate.effects ??= new Set(state.effects);
-		if (oldentry) newstate.effects.delete(oldentry.dom);
+		if (oldentry) {
+			newstate.fxTextPos = updateMap(
+				newstate.fxTextPos ?? state.fxTextPos,
+				id,
+				pos => pos && pos - 16,
+			);
+			newstate.effects.delete(oldentry.dom);
+		}
 		newstate.effects.add(newentry.dom);
 	};
 
@@ -1532,41 +1511,24 @@ export default function Match(props) {
 							onClick={[thingClick, pl()]}
 							onMouseOver={e => setInfo(e, pl())}
 							onMouseMove={e => setInfo(e, pl())}>
-							<div style="background-color:#000;position:absolute;left:0px;top:19px;padding:1px;width:98px;height:22px;pointer-events:none">
-								<Tween
-									state={{ x1: x1(), x2: x2() }}
-									proc={hpTweenProc}
-									compare={hpTweenCompare}>
-									{state => (
-										<>
-											<div
-												style={`background-color:${
-													strcols[Life]
-												};position:absolute;width:${
-													state().x1
-												}px;height:20px;pointer-events:none;z-index:2`}
-											/>
-											<Show when={!cloaked() && expectedDamage() !== 0}>
-												<div
-													style={`background-color:${
-														strcols[
-															expectedDamage() >= game().get(pl(), 'hp') ? Fire
-															: expectedDamage() > 0 ? Time
-															: Water
-														]
-													};position:absolute;left:${Math.min(
-														state().x1,
-														state().x2,
-													)}px;right:${
-														97 - Math.max(state().x1, state().x2)
-													}px;height:20px;pointer-events:none;z-index:2`}
-												/>
-											</Show>
-										</>
-									)}
-								</Tween>
+							<div class="hpbar">
+								<div class="hpval life" style={`width:${x1()}px`} />
+								<Show when={!cloaked()}>
+									<div
+										class="hpval"
+										style={`background-color:${
+											strcols[
+												expectedDamage() >= game().get(pl(), 'hp') ? Fire
+												: expectedDamage() > 0 ? Time
+												: Water
+											]
+										};width:1px;transform:scaleX(${
+											Math.min(x1(), x2()) - Math.max(x1(), x2())
+										})`}
+									/>
+								</Show>
 							</div>
-							<div style="text-align:center;width:100px;pointer-events:none;font-size:12px;line-height:1.1;position:absolute;left:0;top:23px;text-shadow:1px 1px 1px #000,2px 2px 2px #000;z-index:2">
+							<div class="hptext">
 								<Text text={hptext()} />
 							</div>
 						</div>
@@ -1575,27 +1537,9 @@ export default function Match(props) {
 								class="ico sacrifice"
 								style={`position:absolute;left:0;top:${
 									j ? 7
-									: landscape() ? 777
-									: 502
+									: landscape() ? 502
+									: 777
 								}px;pointer-events:none`}
-							/>
-						</Show>
-						<Show when={game().get(pl(), 'sabbath')}>
-							<span
-								class="ico sabbath"
-								style={`position:absolute;left:0;top:${j ? 96 : 300}px`}
-							/>
-						</Show>
-						<Show
-							when={
-								game().get(pl(), 'drawlock') || game().get(pl(), 'protectdeck')
-							}>
-							<span
-								style={`position:absolute;left:95px;top:${
-									j ? 250 : 543
-								}px;width:48px;height:48px;background-color:#${
-									game().get(pl(), 'drawlock') ? '931' : 'ede'
-								}`}
 							/>
 						</Show>
 						<Show when={handOverlay()}>
@@ -1613,6 +1557,9 @@ export default function Match(props) {
 							style={`display:grid;grid-template-columns:48px 48px;position:absolute;left:2;top:${
 								(j ? 106 : 308) + quantaoffset()
 							}px`}>
+							<Show when={game().get(pl(), 'sabbath')}>
+								<span class="ico sabbath" style="position:absolute" />
+							</Show>
 							{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(k => (
 								<span class={'quantapool ico ce' + k}>
 									&nbsp;
@@ -1625,6 +1572,16 @@ export default function Match(props) {
 							<span
 								class={`deckpool${
 									game().deck_length(pl()) ? ' ico ccback' : ''
+								}${
+									(
+										game().get(pl(), 'drawlock') ||
+										game().get(pl(), 'protectdeck')
+									) ?
+										' deckfx'
+									:	''
+								}`}
+								style={`border-color:#${
+									game().get(pl(), 'drawlock') ? '931' : 'ede'
 								}`}>
 								{game().deck_length(pl()) || '0!!'}
 							</span>

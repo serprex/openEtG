@@ -37,12 +37,10 @@ input[type='button']:hover {
 input[type='button']:disabled {
 	color: #888;
 	background-image: linear-gradient(to bottom, #cde, #888);
+	cursor: not-allowed;
 }
 input[type='button']:hover:active:not([disabled]) {
 	background-image: linear-gradient(to bottom, #abc, #456);
-}
-input[type='button']:hover:disabled {
-	cursor: not-allowed;
 }
 select,
 input[type='text'],
@@ -306,14 +304,6 @@ input[type='button'].selected {
 .tab.selected {
 	background-color: #222;
 }
-@keyframes animatedShiny {
-	0% {
-		filter: hue-rotate(90deg);
-	}
-	100% {
-		filter: hue-rotate(270deg);
-	}
-}
 .quantapool {
 	font-size: 16px;
 	pointer-events: none;
@@ -329,7 +319,6 @@ input[type='button'].selected {
 		2px 2px 2px #000;
 }
 .deckpool {
-	margin-top: 8px;
 	text-align: center;
 	padding-top: 7px;
 	pointer-events: none;
@@ -338,6 +327,15 @@ input[type='button'].selected {
 		2px 2px 1px #000,
 		2px 2px 2px #000;
 	z-index: 3;
+}
+.deckpool:not(.deckfx) {
+	margin: 12px 8px 8px 8px;
+}
+.deckpool.deckfx {
+	margin-top: 4px;
+	width: 48px;
+	height: 48px;
+	border: 8px solid;
 }
 #turntell {
 	position: absolute;
@@ -356,6 +354,44 @@ input[type='button'].selected {
 .handinst {
 	transition: transform 0.5s;
 }
+.hptext {
+	text-align: center;
+	width: 100px;
+	pointer-events: none;
+	font-size: 12px;
+	line-height: 1.1;
+	position: absolute;
+	left: 0;
+	top: 23px;
+	text-shadow:
+		1px 1px 1px #000,
+		2px 2px 2px #000;
+	z-index: 2;
+}
+.hpbar {
+	background-color: #000;
+	position: absolute;
+	display: flex;
+	left: 0px;
+	top: 19px;
+	padding: 1px;
+	width: 98px;
+	height: 22px;
+	pointer-events: none;
+}
+.hpval {
+	height: 20px;
+	pointer-events: none;
+	z-index: 2;
+	transform-origin: left;
+	transition:
+		width 250ms ease-in-out,
+		transform 250ms ease-in-out,
+		background-color 99ms linear;
+}
+.hpval.life {
+	background-color: #480;
+}
 .cantarget {
 	border: 2px #f00 solid !important;
 	box-shadow: 0 0 5px #f00;
@@ -373,6 +409,52 @@ input[type='button'].selected {
 .canactive:hover {
 	border: 2px #00f solid !important;
 	box-shadow: 0 0 5px #fff;
+}
+@keyframes fadeout {
+	0% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+@keyframes textfx {
+	0% {
+		transform: translate(-50%, -50%);
+	}
+	100% {
+		transform: translate(-50%, 99px);
+	}
+}
+.textfx {
+	text-align: center;
+	z-index: 5;
+	pointer-events: none;
+	text-shadow: 1px 1px 2px #000;
+	animation:
+		textfx 333ms linear,
+		fadeout 333ms ease-in-out;
+}
+.lastcard {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 16px;
+	color: #fff;
+	background-color: #000;
+	padding: 18px;
+	z-index: 8;
+	pointer-events: none;
+	animation: fadeout 3s ease-out;
+}
+@keyframes animatedShiny {
+	0% {
+		filter: hue-rotate(90deg);
+	}
+	100% {
+		filter: hue-rotate(270deg);
+	}
 }
 .shiny {
 	animation: animatedShiny 8s linear infinite alternate-reverse;
