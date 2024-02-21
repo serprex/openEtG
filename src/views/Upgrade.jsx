@@ -132,9 +132,9 @@ export default function Upgrade() {
 			<input
 				type="button"
 				value="Bound"
+				class={showBound() ? 'selected' : ''}
 				style="position:absolute;left:5px;top:554px"
 				onClick={() => setShowBound(!showBound())}
-				classList={{ 'toggle-btn': true, active: showBound() }}
 			/>
 			<CardSelector
 				cards={Cards}

@@ -45,7 +45,7 @@ export default function Leaderboards() {
 					{categories.map(category => (
 						<input
 							type="button"
-							class={getCategory() === category ? 'selectedbutton' : ''}
+							class={getCategory() === category ? 'selected' : ''}
 							value={category}
 							onClick={[setCategory, category]}
 						/>
@@ -54,14 +54,14 @@ export default function Leaderboards() {
 				<div style="display:flex;flex-direction:column;row-gap:4px;flex-grow:1">
 					<input
 						type="button"
-						class={getFlags().length === 0 ? 'selectedbutton' : ''}
+						class={getFlags().length === 0 ? 'selected' : ''}
 						value="Main"
 						onClick={[setFlags, []]}
 					/>
 					{presets.map(preset => (
 						<input
 							type="button"
-							class={getFlags() === preset[1] ? 'selectedbutton' : ''}
+							class={getFlags() === preset[1] ? 'selected' : ''}
 							value={preset[0]}
 							onClick={[setFlags, preset[1]]}
 						/>

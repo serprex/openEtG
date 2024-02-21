@@ -22,33 +22,6 @@ td {
 	background-color: #567;
 	cursor: pointer;
 }
-input[type="button"].toggle-btn {
-	color:#000;
-	background-color:#888;
-	background-position:100% 0;
-	background-size:200%;
-	background-image: none;
-	transition:background-position 1.3s ease;
-}
-input[type="button"].toggle-btn.active {
-	background-color:#4CAF50;
-	background-position: 0 0;
-	background-image: none;
-	border-style:inset;
-	border-width:2px;
-}
-input[type="button"].toggle-btn:not(.active):hover {
-	background-position:0% 0;
-	background-image:linear-gradient(to right, #4CAF50 30%, #888 50%);
-	border-style:inset;
-	border-width:2px;
-}
-input[type="button"].toggle-btn.active:hover {
-	background-position:100% 0;
-	background-image:linear-gradient(to left, #4CAF50 30%, #888 50%);
-	border-style:inset;
-	border-width:2px;
-}
 input[type="button"]{
 	background-image:linear-gradient(to bottom,#def,#89a);
 	border-radius: 4px;
@@ -130,12 +103,6 @@ select:hover:active {
 #rightlinks div {
 	flex-grow: 1;
 }
-@media (orientation: portrait) and (max-width:1200px) {
-	#panes{flex-direction:column;align-items:center;min-width:900px}
-	#leftpane{height:600px}
-	#rightpane{margin-top:36px;width:100%}
-	#rightlinks{flex-direction:row;justify-content:space-between;flex-wrap:wrap}
-}
 .bg_main {
 	background-image: url(assets/bg_main.webp);
 	width: 900px;
@@ -216,7 +183,7 @@ select:hover:active {
 	max-width: 196px;
 	position: absolute;
 }
-.selectedbutton {
+input[type="button"].selected {
 	background-image: linear-gradient(to bottom, #344, #89f) !important;
 }
 .editbtn {

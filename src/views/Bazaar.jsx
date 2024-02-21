@@ -245,9 +245,9 @@ export default function Bazaar() {
 			<input
 				type="button"
 				value="All Offers"
-				onClick={() => setShowOrders(showOrders => !showOrders)}
+				class={showOrders() ? 'selected' : ''}
 				style="position:absolute;top:96px;left:8px;"
-				classList={{ 'toggle-btn': true, active: showOrders() }}
+				onClick={() => setShowOrders(showOrders => !showOrders)}
 			/>
 			{!!bcard() && bz() && (
 				<>

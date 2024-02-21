@@ -146,9 +146,9 @@ export default function CardSelector(props) {
 				<input
 					type="button"
 					value="Shiny"
+					class={opts.toggleshiny ? 'selected' : ''}
 					style="position:absolute;left:4px;top:578px"
 					onClick={() => setOpt('toggleshiny', !opts.toggleshiny)}
-					classList={{ 'toggle-btn': true, active: opts.toggleshiny }}
 				/>
 			)}
 			<div style="position:absolute;left:78px;top:338px">
