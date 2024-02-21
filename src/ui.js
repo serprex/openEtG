@@ -46,6 +46,24 @@ export const strcols = [
 export function maybeLightenStr(card) {
 	return strcols[card.element + card.upped * 13];
 }
+const avgcols = [];
+for (let i = 0; i < 13; i++) {
+	const s1 = strcols[i],
+		s2 = strcols[i + 13];
+	let c = '#';
+	for (let j = 1; j <= 3; j++) {
+		c += Math.round(
+			Math.sqrt((parseInt(s1[j], 16) ** 2 + parseInt(s2[j], 16) ** 2) / 2),
+		).toString(16);
+	}
+	avgcols.push(c);
+}
+export function gradientStr(card) {
+	return card.shiny ?
+			strcols[card.element + !card.upped * 13]
+		:	avgcols[card.element];
+}
+
 export const presets = [
 	[
 		'No Shop',

@@ -1937,7 +1937,7 @@ impl Skill {
 				ctx.die(t);
 				let owner = ctx.get_owner(c);
 				let foe = ctx.get_foe(owner);
-				let poison = ctx.get(t, Stat::poison) + ctx.get(t, Flag::poisonous) as i16;
+				let poison = ctx.get(t, Flag::poisonous) as i16 + (ctx.get(t, Stat::poison) > 0) as i16;
 				ctx.masscc(foe, if card::Upped(ctx.get(c, Stat::card)) { 0 } else { owner }, |ctx, cr| {
 					if cr != t {
 						ctx.spelldmg(cr, dmg);

@@ -1877,7 +1877,7 @@ impl Game {
 		dmgdata.dmg = dmg;
 		dmgdata.amt = capdmg;
 		self.proc_data(Event::Dmg, id, &mut dmgdata);
-		if realdmg > 0 {
+		if dmg > 0 {
 			if (!dontdie || kind == Kind::Player) && self.truehp(id) <= 0 {
 				self.die(id);
 			} else if self.get(id, Flag::voodoo) {
@@ -2155,20 +2155,19 @@ impl Game {
 	}
 
 	pub fn poison(&mut self, mut id: i16, amt: i16) {
-		if self.get_kind(id) == Kind::Weapon {
-			id = self.get_owner(id);
-		}
-		let ownpoison = self.getSkill(id, Event::OwnPoison);
-		let mut data = ProcData::default();
-		data.amt = amt;
-		self.trigger_data(Event::OwnPoison, id, 0, &mut data);
-		let amt = data.amt;
-		if data.amt != 0 {
-			self.incrStatus(id, Stat::poison, amt);
-			if amt > 0 {
+		if amt != 0 {
+			if self.get_kind(id) == Kind::Weapon {
+				id = self.get_owner(id);
+			}
+			let ownpoison = self.getSkill(id, Event::OwnPoison);
+			let mut data = ProcData::default();
+			data.amt = amt;
+			self.trigger_data(Event::OwnPoison, id, 0, &mut data);
+			if data.amt > 0 {
+				self.incrStatus(id, Stat::poison, data.amt);
 				self.fx(id, Fx::Sfx(Sfx::poison));
 				if self.get(id, Flag::voodoo) {
-					self.poison(self.get_foe(self.get_owner(id)), amt);
+					self.poison(self.get_foe(self.get_owner(id)), data.amt);
 				}
 			}
 		}

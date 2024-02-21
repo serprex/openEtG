@@ -247,7 +247,7 @@ export default function Shop() {
 									}}
 								/>
 								{rx.user.freepacks && rx.user.freepacks[n()] > 0 && (
-									<span style="text-align:center;width:20px;border-radius:50%;background:#a31;position:absolute;font-weight:bold;top:-5px;left: 145px">
+									<span style="text-align:center;width:20px;border-radius:50%;background-color:#a31;position:absolute;font-weight:bold;top:-5px;left: 145px">
 										{rx.user.freepacks[n()]}
 									</span>
 								)}

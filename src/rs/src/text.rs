@@ -241,9 +241,9 @@ impl<'a> SkillThing<'a> {
 				Cow::from("Remove statuses (positive & negative) from target creature or permanent, & heal target creature 1"),
 			Skill::cold => Cow::from("\u{2153} chance to freeze non-ranged attackers for 3 turns"),
 			Skill::corpseexplosion => Cow::from(if self.upped() {
-				"Sacrifice one of your creatures to deal 1 spell damage to all enemy creatures. Increase damage by 1 for every 8HP of the sacrifice. Poisonous sacrifices poison. Also affect opponent"
+				"Sacrifice one of your creatures to deal 1 spell damage to all enemy creatures. Increase damage by 1 for every 8HP of the sacrifice. Poisonous sacrifices poison. Poisoned sacrifices poison. Also affect opponent"
 			} else {
-				"Sacrifice one of your creatures to deal 1 spell damage to all other creatures. Increase damage by 1 for every 8HP of the sacrifice. Poisonous sacrifices poison. Also affect opponent"
+				"Sacrifice one of your creatures to deal 1 spell damage to all other creatures. Increase damage by 1 for every 8HP of the sacrifice. Poisonous sacrifices poison. Poisoned sacrifices poison. Also affect opponent"
 			}),
 			Skill::counter =>
 				Cow::from("When this creature is attacked by another creature, if this creature is able to attack, it deals its damage to the attacking creature"),
