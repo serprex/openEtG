@@ -1,5 +1,4 @@
-import { createSignal } from 'solid-js';
-import { For } from 'solid-js/web';
+import { createSignal, For } from 'solid-js';
 import { useRx } from '../store.jsx';
 import Text from './Text.jsx';
 
@@ -45,13 +44,13 @@ export const Editor = [
 	['position:absolute;left:520px;top:236px', 'This is your deck code'],
 	[
 		'position:absolute;left:2px;top:350px;width:250px;height:100px',
-		'Click these elements to show cards of that element\nThe rarity filters only show cards of that rarity, except pillar filter which shows all cards',
+		'Click these elements to show cards of that element\nThe rarity filters only show cards of that rarity',
 	],
 	[
 		'position:absolute;left:300px;top:350px;width:320px',
 		'Clicking a card adds it to your deck',
 	],
-	['position:absolute;left:88px;top:575px', ": Don't show shiny cards"],
+	['position:absolute;left:8px;top:575px', "Don't show shiny cards"],
 ];
 export const Shop = [
 	[

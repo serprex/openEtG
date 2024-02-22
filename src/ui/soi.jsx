@@ -51,7 +51,6 @@ function App() {
 		const cs = cards();
 		const form = [];
 		for (let idx = 0; idx < 12; idx++) {
-			const count = cs[idx];
 			form.push(
 				<div>
 					<div class={`ico e${idx + 1}`} />

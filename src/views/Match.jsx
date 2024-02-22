@@ -72,10 +72,7 @@ const landscapeGrid = gridLinePaths(
 function SvgBg(props) {
 	const ren = x => (props.landscape ? landscapeGrid : portraitGrid)[x];
 	return (
-		<svg
-			width={props.landscape ? '900' : '750'}
-			height={props.landscape ? '600' : '900'}
-			style="position:absolute;left:0;top:0;z-index:-8;pointer-events:none">
+		<svg style="position:absolute;width:100%;height:100%;z-index:-8;pointer-events:none">
 			<path d={ren(0)} stroke={ren(1)} strokeWidth="1" />
 			<path d={ren(2)} stroke={ren(3)} strokeWidth="1" />
 		</svg>
@@ -84,10 +81,7 @@ function SvgBg(props) {
 
 function FloodSvg(props) {
 	return (
-		<svg
-			width={props.landscape ? '900' : '750'}
-			height={props.landscape ? '600' : '900'}
-			style="position:absolute;left:0;top:0;z-index:1;pointer-events:none;opacity:.4">
+		<svg style="position:absolute;width:100%;height:100%;z-index:1;pointer-events:none;opacity:.4">
 			<path
 				d={
 					props.landscape ?
@@ -400,9 +394,7 @@ function SpellDisplay(props) {
 function ArrowLine(props) {
 	return (
 		<svg
-			width="900"
-			height="600"
-			style={`position:absolute;left:0;top:0;z-index:4;pointer-events:none;opacity:${props.opacity}`}>
+			style={`position:absolute;width:100%;height:100%;z-index:4;pointer-events:none;opacity:${props.opacity}`}>
 			<defs>
 				<marker
 					id="h"
