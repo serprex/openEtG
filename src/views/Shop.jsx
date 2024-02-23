@@ -234,10 +234,10 @@ export default function Shop() {
 						/>
 					</div>
 				</div>
-				<div style="display:flex;justify-content:space-evenly;gaps:12px;width:100%">
+				<div class="shop-packs">
 					<For each={packdata}>
 						{(pack, n) => (
-							<div style="width:160px;position:relative">
+							<div class="shop-pack">
 								<img
 									src={`/assets/pack${n()}.webp`}
 									class="imgb"
@@ -247,13 +247,10 @@ export default function Shop() {
 									}}
 								/>
 								{rx.user.freepacks && rx.user.freepacks[n()] > 0 && (
-									<span style="text-align:center;width:20px;border-radius:50%;background-color:#a31;position:absolute;font-weight:bold;top:-5px;left: 145px">
-										{rx.user.freepacks[n()]}
-									</span>
+									<span class="free-pack">{rx.user.freepacks[n()]}</span>
 								)}
-								<div style="text-align:center">
-									<Text text={pack.cost + '$'} />
-								</div>
+								{pack.cost}
+								<span class="ico gold" />
 							</div>
 						)}
 					</For>

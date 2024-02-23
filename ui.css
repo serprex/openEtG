@@ -201,7 +201,7 @@ input[type='button'].selected {
 		inset -3px -3px 3px #666,
 		inset 0px 16px 20px -8px rgba(0, 0, 0, 0.85),
 		inset 0px -16px 20px -12px rgba(255, 255, 255, 0.3);
-	border-radius: 0 0 16px 16px;
+	border-radius: 2px 2px 12px 12px;
 }
 .tutorialbox {
 	background-color: rgba(255, 255, 255, 0.7);
@@ -265,6 +265,28 @@ input[type='button'].selected {
 	display: grid;
 	grid-template-columns: 36px 36px;
 	grid-template-rows: repeat(7, 36px);
+}
+.shop-packs {
+	display: flex;
+	justify-content: space-evenly;
+	width: 100%;
+	text-align: center;
+}
+.shop-pack {
+	width: 160px;
+	position: relative;
+}
+.shop-pack > .imgb {
+	border-radius: 8px;
+}
+.free-pack {
+	width: 20px;
+	border-radius: 50%;
+	background-color: #a31;
+	position: absolute;
+	font-weight: bold;
+	top: -5px;
+	left: 145px;
 }
 .chatBox {
 	overflow-y: auto;
