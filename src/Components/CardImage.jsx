@@ -16,11 +16,9 @@ export default function CardImage(props) {
 				color: props.card.upped ? '#000' : '#fff',
 				...props.style,
 			}}>
-			<span style="overflow:hidden;text-overflow:ellipsis">
-				{props.card.name}
-			</span>
+			<span class="name">{props.card.name}</span>
 			{!!props.card.cost && (
-				<span style="flex-shrink:0;pointer-events:none">
+				<span class="cost">
 					{props.card.cost}
 					<span class={'ico te' + props.card.costele} />
 				</span>

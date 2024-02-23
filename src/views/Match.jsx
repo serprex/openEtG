@@ -482,9 +482,7 @@ function Thing(props) {
 			onMouseOver={setInfo}
 			onMouseLeave={props.onMouseOut}
 			onClick={() => props.onClick(props.id)}>
-			<Show
-				when={!faceDown()}
-				fallback={<div class="ico cback" style="left:2px;top:2px" />}>
+			<Show when={!faceDown()} fallback={<div class="ico cback" />}>
 				<div
 					style={`width:64px;height:64px;pointer-events:none;background-color:${bgcolor()}`}>
 					<Show when={!props.opts.lofiArt}>
@@ -532,12 +530,13 @@ function Thing(props) {
 							style={`width:64px;white-space:nowrap;overflow:hidden;background-color:${bgcolor()}`}>
 							<Text text={memo().topText} icoprefix="se" />
 						</div>
-						<div style={`float:right;background-color:${bgcolor()}`}>
+						<div
+							style={`display:flex;align-items:center;border-radius:0 0 3px 3px;float:right;background-color:${bgcolor()}`}>
 							<Text text={memo().statText} icoprefix="se" />
 						</div>
 						<Show when={!isSpell()}>
 							<div
-								style={`position:absolute;top:54px;height:10px;width:64px;overflow:hidden;white-space:nowrap;background-color:${bgcolor()}`}>
+								style={`position:absolute;top:54px;height:10px;width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background-color:${bgcolor()}`}>
 								{props.game.getCard(props.id).name}
 							</div>
 						</Show>

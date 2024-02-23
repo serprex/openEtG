@@ -145,6 +145,11 @@ select:hover:active {
 	text-align: right;
 	margin-right: 32px;
 }
+.cost {
+	display: flex;
+	align-items: center;
+	gap: 1px;
+}
 .card {
 	position: relative;
 	width: 160px;
@@ -156,15 +161,64 @@ select:hover:active {
 	border-style: double;
 	z-index: 5;
 }
+.card > .name {
+	position: absolute;
+	left: 2px;
+	top: 2px;
+	font-size: 12px;
+}
+.card > .text {
+	position: absolute;
+	padding: 1px;
+	bottom: 0;
+	font-size: 9px;
+	min-height: 102px;
+	border-radius: 0 0 4px 4px;
+}
+.card > .cost {
+	position: absolute;
+	right: 0;
+	padding-right: 2px;
+	padding-top: 2px;
+	font-size: 12px;
+}
+.card > .rarity {
+	position: absolute;
+	right: 2px;
+	top: 40px;
+}
+.card > .kind {
+	position: absolute;
+	right: 2px;
+	top: 22px;
+}
+.card > img {
+	position: absolute;
+	top: 20px;
+	left: 6px;
+	width: 128px;
+	height: 128px;
+	border: 1px #000 solid;
+	border-radius: 2px;
+}
 .cardslot {
 	display: inline-flex;
 	font-size: 11px;
 	height: 18px;
 	width: 100px;
-	padding: 2px;
+	padding: 1px;
 	overflow: hidden;
 	white-space: nowrap;
 	justify-content: space-between;
+	align-items: center;
+}
+.cardslot > .name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.cardslot > .cost {
+	flex-shrink: 0;
+	pointer-events: none;
 }
 .maintitle {
 	font-size: 16px;
@@ -416,6 +470,7 @@ input[type='button'].selected {
 }
 .cantarget {
 	border: 2px #f00 solid !important;
+	border-radius: 2px;
 	box-shadow: 0 0 5px #f00;
 	cursor: pointer;
 }
@@ -425,6 +480,7 @@ input[type='button'].selected {
 }
 .canactive {
 	border: 2px #000 solid !important;
+	border-radius: 2px;
 	box-shadow: 0 0 5px #fff;
 	cursor: pointer;
 }
