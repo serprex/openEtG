@@ -139,9 +139,10 @@ export default function Colosseum() {
 						`\nYou currently have a ${user.ostreak} day colosseum streak.`
 					:	"\nYou'ven't begun a streak."}
 					{user.ostreak && user.ostreakday ?
-						`\nYou've redeemed ${
-							[250, 15, 25, 77, 100][user.ostreak % 5]
-						}$ today.`
+						<>
+							{`\nYou've redeemed ${[250, 15, 25, 77, 100][user.ostreak % 5]}`}
+							<span ico="ico gold" /> today.
+						</>
 					:	"\nYou'ven't redeemed a colosseum streak today."}
 				</div>
 			}

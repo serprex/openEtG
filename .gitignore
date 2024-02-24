@@ -19,6 +19,7 @@ config.json
 wsconfig.json
 private/*
 
+package-lock.json
 aivai.htm
 artcredit.htm
 deck.htm
