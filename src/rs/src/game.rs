@@ -1250,7 +1250,7 @@ impl Game {
 		let owner = self.get_owner(id);
 		if landscape {
 			let (x, y) = match self.get_kind(id) {
-				Kind::Player => (50, 560),
+				Kind::Player => return if id == p1id { 49|551<<12 } else { 49|49<<12 },
 				Kind::Weapon => (207, 492),
 				Kind::Shield => (207, 562),
 				kind => {
@@ -1282,7 +1282,7 @@ impl Game {
 			return x | if owner != p1id { 594 - y } else { y } << 12
 		} else {
 			let (x, y) = match self.get_kind(id) {
-				Kind::Player => (50, 828),
+				Kind::Player => return if id == p1id { 49|851<<12 } else { 49|49<<12 },
 				Kind::Weapon => (183, 671),
 				Kind::Shield => (183, 741),
 				kind => {

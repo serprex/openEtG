@@ -1479,14 +1479,14 @@ export default function Match(props) {
 				const x1 = () =>
 						Math.max(
 							Math.round(
-								(96 * game().get(pl(), 'hp')) / game().get(pl(), 'maxhp'),
+								(90 * game().get(pl(), 'hp')) / game().get(pl(), 'maxhp'),
 							),
 							0,
 						),
 					x2 = () =>
 						Math.max(
 							x1() -
-								Math.round((96 * expectedDamage()) / game().get(pl(), 'maxhp')),
+								Math.round((90 * expectedDamage()) / game().get(pl(), 'maxhp')),
 							0,
 						);
 				const hptext = () =>
@@ -1497,8 +1497,8 @@ export default function Match(props) {
 						<div
 							class={tgtclass(game(), p1id(), pl(), targeting())}
 							style={`position:absolute;left:${plpos().x - 48}px;top:${
-								plpos().y - 40
-							}px;width:96px;height:80px;border:transparent 2px solid;z-index:4`}
+								plpos().y - 48
+							}px;width:96px;height:96px;border:transparent 2px solid;z-index:4`}
 							onClick={[thingClick, pl()]}
 							onMouseOver={e => setInfo(e, pl())}
 							onMouseMove={e => setInfo(e, pl())}>
@@ -1513,9 +1513,7 @@ export default function Match(props) {
 												: expectedDamage() > 0 ? Time
 												: Water
 											]
-										};width:1px;transform:scaleX(${
-											Math.min(x1(), x2()) - Math.max(x1(), x2())
-										})`}
+										};width:1px;transform:scaleX(${x2() - x1()})`}
 									/>
 								</Show>
 							</div>
