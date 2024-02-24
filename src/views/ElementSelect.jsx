@@ -10,30 +10,16 @@ import Cards from '../Cards.js';
 function Preview(props) {
 	return (
 		<>
-			<Card
-				style="position:absolute;left:168;top:48px"
-				card={Cards.Codes[props.codes[0]]}
-			/>
-			<Card
-				style="position:absolute;left:332;top:48px"
-				card={Cards.Codes[props.codes[1]]}
-			/>
-			<Card
-				style="position:absolute;left:168;top:324px"
-				card={Cards.Codes[props.codes[2]]}
-			/>
-			<Card
-				style="position:absolute;left:332;top:324px"
-				card={Cards.Codes[props.codes[3]]}
-			/>
-			<Card
-				style="position:absolute;left:496;top:324px"
-				card={Cards.Codes[props.codes[4]]}
-			/>
-			<Card
-				style="position:absolute;left:660;top:324px"
-				card={Cards.Codes[props.codes[5]]}
-			/>
+			<div style="position:absolute;left:200px;top:48px;display:flex;gap:12px">
+				<Card card={Cards.Codes[props.codes[0]]} />
+				<Card card={Cards.Codes[props.codes[1]]} />
+			</div>
+			<div style="position:absolute;left:200px;top:324px;display:flex;gap:12px">
+				<Card card={Cards.Codes[props.codes[2]]} />
+				<Card card={Cards.Codes[props.codes[3]]} />
+				<Card card={Cards.Codes[props.codes[4]]} />
+				<Card card={Cards.Codes[props.codes[5]]} />
+			</div>
 		</>
 	);
 }
@@ -99,31 +85,22 @@ export default function ElementSelect() {
 		<>
 			{rx.user && (
 				<>
-					<span style="position:absolute;left:200px;top:8px">
+					<span
+						class="maintitle"
+						style="position:absolute;left:200px;top:8px;width:350px">
 						Select your starter element
 					</span>
 					{eledesc() !== -1 && descriptions[eledesc()]()}
 				</>
 			)}
 			{!rx.user && (
-				<div style="position:absolute;left:30px;top:30px;width:200px">
-					<input ref={username} placeholder="Username" style="display:block" />
-					<input
-						ref={password}
-						type="password"
-						placeholder="Password"
-						style="display:block"
-					/>
-					<input
-						ref={confirmpass}
-						type="password"
-						placeholder="Confirm"
-						style="display:block"
-					/>
+				<div style="position:absolute;left:30px;top:30px;width:200px;display:flex;flex-direction:column;gap:8px">
+					<input ref={username} placeholder="Username" />
+					<input ref={password} type="password" placeholder="Password" />
+					<input ref={confirmpass} type="password" placeholder="Confirm" />
 					<input
 						type="button"
 						value="Register"
-						style="display:block"
 						onClick={() => {
 							let errmsg = '';
 							username.value = username.value.trim();
@@ -145,27 +122,32 @@ export default function ElementSelect() {
 					{err}
 				</div>
 			)}
-			<input
-				type="button"
-				value="Exit"
-				onClick={() => {
-					if (rx.user) {
-						userEmit('delete');
-						store.logout();
-					}
-					store.setOpt('remember', false);
-					store.doNav(store.Login);
-				}}
-				style="position:absolute;left:800px;top:200px"
-			/>
-			<label style="position:absolute;top:30px;left:500px;width:396px">
-				<i style="display:block;margin-bottom:24px;white-space:pre-line">
+			<div style="position:absolute;top:30px;left:550px;width:342px">
+				<label
+					for="skiptut"
+					style="display:block;margin-bottom:24px;font-style:italic">
 					You will be taken to the tutorial after creating your account. You can
 					exit the tutorial at any time. You can access the tutorial through
 					Quests at any time.
-				</i>
-				<input type="checkbox" ref={skiptut} /> Skip Tutorial
-			</label>
+				</label>
+				<div style="display:flex;justify-content:space-between;width:100%">
+					<div>
+						<input id="skiptut" type="checkbox" ref={skiptut} /> Skip Tutorial
+					</div>
+					<input
+						type="button"
+						value="Exit"
+						onClick={() => {
+							if (rx.user) {
+								userEmit('delete');
+								store.logout();
+							}
+							store.setOpt('remember', false);
+							store.doNav(store.Login);
+						}}
+					/>
+				</div>
+			</div>
 			{rx.user &&
 				[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(i => (
 					<span

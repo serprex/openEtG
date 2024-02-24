@@ -320,6 +320,40 @@ input[type='button'].selected {
 	grid-template-columns: 36px 36px;
 	grid-template-rows: repeat(7, 36px);
 }
+.shop {
+	display: flex;
+	justify-content: space-evenly;
+	flex-direction: column;
+	height: 600px;
+	margin-left: 36px;
+	margin-right: 36px;
+}
+.shop-info {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	padding-left: 12px;
+	min-height: 60px;
+}
+.shop-info1 {
+	display: flex;
+	justify-content: space-between;
+}
+.shop-info1-text {
+	display: flex;
+	align-items: center;
+}
+.shop-ele {
+	width: 494px;
+	height: 184px;
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	align-items: center;
+	justify-items: center;
+}
+.shop-ele > .imgb {
+	transform: scale(1.5);
+}
 .shop-packs {
 	display: flex;
 	justify-content: space-evenly;

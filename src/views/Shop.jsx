@@ -126,12 +126,10 @@ export default function Shop() {
 	return (
 		<>
 			<Tutor.Tutor x={8} y={500} panels={Tutor.Shop} />
-			<div style="display:flex;justify-content:space-evenly;flex-direction:column;height:600px;margin-left:36px;margin-right:36px">
-				<div
-					class="bgbox"
-					style="display:flex;flex-direction:column;justify-content:space-between;padding-left:12px;min-height:60px">
-					<div style="display:flex;justify-content:space-between">
-						<span>
+			<div class="shop">
+				<div class="bgbox shop-info">
+					<div class="shop-info1">
+						<span class="shop-info1-text">
 							<Text text={info1()} />
 						</span>
 						{hasFreePacks() && (
@@ -146,39 +144,36 @@ export default function Shop() {
 					{info2()}
 				</div>
 				<div style="display:flex;justify-content:space-between;width:100%">
-					<div
-						class="bgbox"
-						style="width:494px;height:184px;display:flex;flex-wrap:wrap;justify-content:space-evenly;align-items:center">
+					<div class="bgbox shop-ele">
 						{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(i => (
-							<div style="margin:18px">
-								<span
-									class={'imgb ico e' + i}
-									onClick={() => {
-										playSound('click');
-										setEle(i);
-										setInfo1(
-											`Selected Element: ${i === 13 ? 'Random' : '1:' + i}`,
-										);
-									}}
-								/>
-							</div>
+							<span
+								class={`imgb ico e${i}${ele() === i ? ' selected' : ''}`}
+								onClick={() => {
+									playSound('click');
+									setEle(i);
+									setInfo1(
+										`Selected Element: ${i === 13 ? 'Random' : '1:' + i}`,
+									);
+								}}
+							/>
 						))}
 					</div>
 					<div class="bgbox" style="width:94px;height:184px;position:relative">
-						<div style="position:absolute;left:7px;top:11px">
-							<Text text={rx.user.gold + '$'} />
+						<div style="position:absolute;right:8px;top:11px">
+							{rx.user.gold}
+							<span class="ico gold" />
 						</div>
-						<input
-							type="button"
-							value="Take Cards"
-							onClick={() => {
-								setBuy(true);
-								setCards('');
-							}}
-							style={`position:absolute;left:7px;top:66px${
-								cards() ? '' : ';display:none'
-							}`}
-						/>
+						{cards() && (
+							<input
+								type="button"
+								value="Take Cards"
+								onClick={() => {
+									setBuy(true);
+									setCards('');
+								}}
+								style="position:absolute;left:7px;top:66px"
+							/>
+						)}
 						{buy() &&
 							!!~ele() &&
 							!!~rarity() &&
@@ -240,7 +235,7 @@ export default function Shop() {
 							<div class="shop-pack">
 								<img
 									src={`/assets/pack${n()}.webp`}
-									class="imgb"
+									class={`imgb${rarity() === n() ? ' selected' : ''}`}
 									onClick={() => {
 										setRarity(n());
 										setInfo2(`${pack.type} Pack: ${pack.info}`);
