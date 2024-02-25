@@ -294,14 +294,11 @@ export function userExec(x, data = {}) {
 	store.userCmd(x, data);
 }
 export function sendChallenge(foe, orig = false, deckcheck = true) {
-	const deck = orig ? store.state.orig.deck : store.getDeck(),
+	const deck = orig ? store.state.user.deck : store.getDeck(),
 		state = store.state;
 	if (
 		deckcheck &&
-		!(orig ? OrigCards : Cards).isDeckLegal(
-			decodedeck(deck),
-			orig ? state.orig : state.user,
-		)
+		!(orig ? OrigCards : Cards).isDeckLegal(decodedeck(deck), state.user)
 	) {
 		store.chatMsg('Invalid deck', 'System');
 		return;

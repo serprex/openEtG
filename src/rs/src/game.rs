@@ -1250,7 +1250,7 @@ impl Game {
 		let owner = self.get_owner(id);
 		if landscape {
 			let (x, y) = match self.get_kind(id) {
-				Kind::Player => return if id == p1id { 49|551<<12 } else { 49|49<<12 },
+				Kind::Player => return if id == p1id { 49 | 551 << 12 } else { 49 | 49 << 12 },
 				Kind::Weapon => (207, 492),
 				Kind::Shield => (207, 562),
 				kind => {
@@ -1272,17 +1272,15 @@ impl Game {
 							(column * 90 + if row == 1 { 249 } else { 204 }, 334 + row * 44)
 						}
 						Kind::Permanent => (280 + (i % 9) * 70, 492 + (i / 9) * 70),
-						Kind::Spell => {
-							return 132 | (if owner != p1id { 36 } else { 336 } + i * 28) << 12
-						}
+						Kind::Spell => return 132 | (if owner != p1id { 36 } else { 336 } + i * 28) << 12,
 						_ => return 0,
 					}
 				}
 			};
-			return x | if owner != p1id { 594 - y } else { y } << 12
+			return x | if owner != p1id { 594 - y } else { y } << 12;
 		} else {
 			let (x, y) = match self.get_kind(id) {
-				Kind::Player => return if id == p1id { 49|851<<12 } else { 49|49<<12 },
+				Kind::Player => return if id == p1id { 49 | 851 << 12 } else { 49 | 49 << 12 },
 				Kind::Weapon => (183, 671),
 				Kind::Shield => (183, 741),
 				kind => {
@@ -1309,7 +1307,7 @@ impl Game {
 					}
 				}
 			};
-			return x | if owner != p1id { 894 - y } else { y } << 12
+			return x | if owner != p1id { 894 - y } else { y } << 12;
 		}
 	}
 }

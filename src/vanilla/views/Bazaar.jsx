@@ -21,7 +21,7 @@ export default function OriginalUpgrade() {
 		}
 		return cardminus;
 	});
-	const cardpool = createMemo(() => etgutil.deck2pool(rx.orig.pool));
+	const cardpool = createMemo(() => etgutil.deck2pool(rx.user.pool));
 
 	const buyCost = createMemo(() => {
 		let cost = 0;
@@ -78,16 +78,16 @@ export default function OriginalUpgrade() {
 				}}
 			/>
 			<div style="position:absolute;left:4px;top:235px">
-				{rx.orig.electrum}
+				{rx.user.electrum}
 				<span class="ico gold" />
 			</div>
 			<div style="position:absolute;left:200px;top:4px">
-				{canBuy() && rx.orig.electrum < buyCost() ?
-					`Need ${buyCost() - rx.orig.electrum} more to afford card${
+				{canBuy() && rx.user.electrum < buyCost() ?
+					`Need ${buyCost() - rx.user.electrum} more to afford card${
 						deck().length === 1 ? '' : 's'
 					}`
-				: canUpgrade() && rx.orig.electrum < upgradeCost() ?
-					`Need ${upgradeCost() - rx.orig.electrum} more to afford upgrade${
+				: canUpgrade() && rx.user.electrum < upgradeCost() ?
+					`Need ${upgradeCost() - rx.user.electrum} more to afford upgrade${
 						deck().length === 1 ? '' : 's'
 					}`
 				:	''}
@@ -97,7 +97,7 @@ export default function OriginalUpgrade() {
 					{buyCost()}
 					<span class="ico gold" />
 				</div>
-				<Show when={canBuy() && rx.orig.electrum >= buyCost()}>
+				<Show when={canBuy() && rx.user.electrum >= buyCost()}>
 					<input
 						type="button"
 						value="Buy"
@@ -139,7 +139,7 @@ export default function OriginalUpgrade() {
 					{upgradeCost()}
 					<span class="ico gold" />
 				</span>
-				<Show when={canUpgrade() && rx.orig.electrum >= upgradeCost()}>
+				<Show when={canUpgrade() && rx.user.electrum >= upgradeCost()}>
 					<input
 						type="button"
 						value="Upgrade"

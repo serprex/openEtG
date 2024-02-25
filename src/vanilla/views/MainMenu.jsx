@@ -53,8 +53,8 @@ export default function OriginalMainMenu() {
 	const origfoename = () => rx.opts.origfoename ?? '';
 
 	let ocard = null;
-	const user_oracle = (rx.uname ? rx.alts[''] : rx.user).oracle;
-	if (rx.orig.oracle !== user_oracle) {
+	const user_oracle = rx.alts[''].oracle;
+	if (rx.user.oracle !== user_oracle) {
 		const fg = upto(aiDecks.fg.length);
 		const ocode = original_oracle(randint());
 		ocard = Cards.Codes[ocode];
@@ -70,7 +70,7 @@ export default function OriginalMainMenu() {
 	const vsAi = (level, cost, basereward, hpreward) => {
 		if (
 			hpreward > 0 &&
-			!Cards.isDeckLegal(etgutil.decodedeck(rx.orig.deck), rx.orig)
+			!Cards.isDeckLegal(etgutil.decodedeck(rx.user.deck), rx.user)
 		) {
 			store.chatMsg('Invalid deck', 'System');
 			return;
@@ -86,10 +86,10 @@ export default function OriginalMainMenu() {
 		const [ainame, aideck] =
 			aiinfo ? [aiinfo.name, aiinfo.deck]
 			: level === 'ai4' ? deckgenAi4()
-			: level === 'fg' && typeof rx.orig.fg === 'number' ?
-				aiDecks.fg[rx.orig.fg]
+			: level === 'fg' && typeof rx.user.fg === 'number' ?
+				aiDecks.fg[rx.user.fg]
 			:	choose(aiDecks[level]);
-		if (level === 'fg' && typeof rx.orig.fg === 'number') {
+		if (level === 'fg' && typeof rx.user.fg === 'number') {
 			userEmit('origadd', { fg: -1 });
 			store.addOrig({ fg: -1 });
 		}
@@ -106,7 +106,7 @@ export default function OriginalMainMenu() {
 				: 3,
 			rematch: () => vsAi(level, cost, basereward, hpreward),
 			players: shuffle([
-				{ idx: 1, name: rx.username, user: rx.username, deck: rx.orig.deck },
+				{ idx: 1, name: rx.username, user: rx.username, deck: rx.user.deck },
 				{
 					idx: 2,
 					ai: 1,
@@ -141,7 +141,7 @@ export default function OriginalMainMenu() {
 				<input
 					type="button"
 					value={
-						typeof rx.orig.fg === 'number' ? aiDecks.fg[rx.orig.fg][0] : 'FG'
+						typeof rx.user.fg === 'number' ? aiDecks.fg[rx.user.fg][0] : 'FG'
 					}
 					onClick={() => vsAi('fg', 30, 30, 30)}
 				/>
@@ -186,14 +186,17 @@ export default function OriginalMainMenu() {
 			<input
 				type="button"
 				value="Exit"
-				onClick={() => store.doNav(import('../../views/MainMenu.jsx'))}
+				onClick={() => {
+					store.stopLegacy();
+					store.doNav(import('../../views/MainMenu.jsx'));
+				}}
 				style="position:absolute;left:9px;top:140px"
 			/>
 			<div style="font-size:14px;pointer-events:none;position:absolute;left:8px;top:160px">
-				{rx.orig.electrum}
+				{rx.user.electrum}
 				<span class="ico gold" />
 			</div>
-			{ocard && <Card y={300} card={ocard} />}
+			<Card style="position:absolute;top:300px" card={ocard} />
 		</div>
 	);
 }

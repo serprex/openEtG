@@ -63,9 +63,9 @@ export default function ElementSelect() {
 						`Failed to register. Try a different username. Server response: ${data.err}`,
 					);
 				} else if (!data.data['']) {
-					store.setUser(data.name, data.auth, data.data);
+					store.setUser(data);
 				} else if (rx.user) {
-					store.setUser(data.name, data.auth, data.data);
+					store.setUser(data);
 					if (skiptut.checked) {
 						store.doNav(import('./MainMenu.jsx'));
 					} else {

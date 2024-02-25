@@ -28,7 +28,7 @@ export default function Login() {
 		setCmds({
 			login: data => {
 				if (!data.err) {
-					store.setUser(data.name, data.auth, data.data);
+					store.setUser(data);
 					if (rx.opts.remember && typeof localStorage !== 'undefined') {
 						localStorage.auth = data.auth;
 					}

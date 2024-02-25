@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::cardpool::Cardpool;
-use crate::users::{Leaderboard, UserData, UserObject};
+use crate::users::{Leaderboard, LegacyData, OpenData, UserObject};
 
 #[derive(Deserialize, Clone)]
 #[serde(tag = "z")]
@@ -43,7 +43,6 @@ pub enum AuthMessage {
 	inituser {
 		e: u8,
 	},
-	loginoriginal,
 	initoriginal {
 		e: u8,
 		name: String,
@@ -159,7 +158,7 @@ pub enum AuthMessage {
 		id: i64,
 	},
 	updateorig {
-		deck: Option<String>,
+		deck: String,
 	},
 	origadd {
 		pool: Option<String>,
@@ -310,7 +309,7 @@ pub struct ArenaInfo<'a> {
 #[derive(Serialize, Clone)]
 pub struct Alt<'a> {
 	pub name: &'a str,
-	pub data: &'a UserData,
+	pub data: &'a OpenData,
 }
 
 #[derive(Serialize, Clone)]
@@ -424,9 +423,10 @@ pub enum WsResponse<'a> {
 		g: i32,
 		flags: Option<&'a HashSet<String>>,
 	},
-	originaldata(&'a LegacyUser),
-	#[serde(rename = "originaldata")]
-	originaldataempty,
+	originaldata {
+		name: &'a str,
+		data: &'a LegacyData,
+	},
 	oracle {
 		c: i16,
 		bound: bool,
@@ -473,17 +473,6 @@ pub struct BzBid<'a> {
 	pub u: Cow<'a, str>,
 	pub q: u16,
 	pub p: i16,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct LegacyUser {
-	pub pool: Cardpool,
-	pub deck: String,
-	pub electrum: i32,
-	#[serde(default)]
-	pub oracle: u32,
-	#[serde(default)]
-	pub fg: Option<u16>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

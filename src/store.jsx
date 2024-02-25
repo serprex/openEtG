@@ -26,6 +26,8 @@ export let state = {
 	nav: { view: () => null, props: undefined, key: 0 },
 	opts,
 	alts: {},
+	legacy: {},
+	islegacy: false,
 	chat: new Map(),
 	muted: new Set(),
 };
@@ -118,12 +120,49 @@ export function rmAlt(uname) {
 	delete alts[uname];
 	dispatch({ ...state, alts });
 }
-export function setUser(username, auth, alts) {
+export function stopLegacy() {
+	if (!state.islegacy) return;
 	dispatch({
 		...state,
-		user: alts[''] ?? {},
-		alts,
-		username,
+		user: state.alts[''],
+		legacy: {
+			...state.legacy,
+			[state.uname]: state.user,
+		},
+		islegacy: false,
+		uname: null,
+	});
+}
+export function setLegacy(uname) {
+	if (state.islegacy) return;
+	const newalts = {
+		...state.alts,
+		[state.uname ?? '']: state.user,
+	};
+	dispatch({
+		...state,
+		alts: newalts,
+		user: state.legacy[uname ?? ''],
+		islegacy: true,
+		uname,
+	});
+}
+export function addLegacy(name, data) {
+	dispatch({
+		...state,
+		legacy: {
+			...state.legacy,
+			[name]: data,
+		},
+	});
+}
+export function setUser({ name, auth, data, legacy }) {
+	dispatch({
+		...state,
+		user: data[''] ?? {},
+		alts: data,
+		legacy: legacy,
+		username: name,
 		auth,
 		uname: null,
 	});
@@ -154,21 +193,21 @@ export function setOrig(orig) {
 	dispatch({ ...state, orig });
 }
 export function updateOrig(data) {
-	dispatch({ ...state, orig: { ...state.orig, ...data } });
+	dispatch({ ...state, user: { ...state.user, ...data } });
 }
 export function addOrig(update) {
-	let pool = state.orig.pool;
+	let pool = state.user.pool;
 	if (update.pool) pool = mergedecks(pool, update.pool);
 	if (update.rmpool) pool = removedecks(pool, update.rmpool);
 	dispatch({
 		...state,
-		orig: {
-			...state.orig,
-			electrum: state.orig.electrum + (update.electrum | 0),
+		user: {
+			...state.user,
+			electrum: state.user.electrum + (update.electrum | 0),
 			pool,
-			oracle: update.oracle ?? state.orig.oracle,
+			oracle: update.oracle ?? state.user.oracle,
 			fg:
-				typeof update.fg !== 'number' ? state.orig.fg
+				typeof update.fg !== 'number' ? state.user.fg
 				: update.fg === -1 ? null
 				: update.fg,
 		},

@@ -16,7 +16,7 @@ use hyper_tungstenite::tungstenite::Message;
 use rand::distributions::{Distribution, Uniform};
 use rand::{Rng, RngCore};
 use ring::pbkdf2;
-use serde_json::{Map, Value};
+use serde_json::Value;
 use tokio::join;
 use tokio::sync::{mpsc, Mutex, MutexGuard, RwLock};
 use tokio_stream::wrappers::UnboundedReceiverStream;
@@ -30,11 +30,10 @@ use crate::cardpool::Cardpool;
 use crate::etgutil::{decode_code, encode_code, encode_count, iterraw};
 use crate::generated::{DG_COUNT, MAGE_COUNT};
 use crate::json::{
-	Alt, ArenaInfo, AuthMessage, BzBid, GamesData, GamesDataPlayer, GamesMove, LegacyUser, UserMessage,
-	WsResponse,
+	Alt, ArenaInfo, AuthMessage, BzBid, GamesData, GamesDataPlayer, GamesMove, UserMessage, WsResponse,
 };
 use crate::starters::ORIGINAL_STARTERS;
-use crate::users::{self, HashAlgo, Leaderboard, UserData, UserObject, UserRole, Users};
+use crate::users::{self, HashAlgo, Leaderboard, LegacyData, OpenData, UserObject, UserRole, Users};
 use crate::{get_day, PgPool, WsStream};
 
 static NEXT_SOCK_ID: AtomicUsize = AtomicUsize::new(1);
@@ -180,7 +179,7 @@ fn card_val24(rarity: i8, upped: bool, shiny: bool) -> u32 {
 	}
 }
 
-fn upshpi<F>(user: &mut UserData, code: i16, f: F)
+fn upshpi<F>(user: &mut OpenData, code: i16, f: F)
 where
 	F: FnOnce(i16) -> i16,
 {
@@ -207,7 +206,7 @@ fn transmute_core(pool: &mut Cardpool, oldcode: i16, newcode: i16, oldcopies: u1
 	false
 }
 
-fn transmute(user: &mut UserData, oldcode: i16, newcode: i16, oldcopies: u16, newcopies: u16) {
+fn transmute(user: &mut OpenData, oldcode: i16, newcode: i16, oldcopies: u16, newcopies: u16) {
 	if oldcode != newcode {
 		if !transmute_core(&mut user.pool, oldcode, newcode, oldcopies, newcopies) {
 			transmute_core(&mut user.accountbound, oldcode, newcode, oldcopies, newcopies);
@@ -387,7 +386,7 @@ pub async fn handle_ws(
 						}
 						AuthMessage::inituser { e } => {
 							if userid == -1 && e > 0 && e < 14 {
-								let data = UserData::new(e as usize);
+								let data = OpenData::new(e as usize);
 								let mut user = user.lock().await;
 								if let Ok(trx) = client.transaction().await {
 									if let Ok(new_row) = logerr(trx.query_one(
@@ -409,26 +408,10 @@ pub async fn handle_ws(
 								}
 							}
 						}
-						AuthMessage::loginoriginal => {
-							if let Ok(row) = client
-								.query_opt(
-									"select data from user_data where user_id = $1 and type_id = 2",
-									&[&userid],
-								)
-								.await
-							{
-								if let Some(row) = row {
-									let userdata = row.get::<usize, Json<LegacyUser>>(0);
-									sendmsg(&tx, &WsResponse::originaldata(&userdata.0));
-								} else {
-									sendmsg(&tx, &WsResponse::originaldataempty);
-								}
-							}
-						}
 						AuthMessage::initoriginal { e, name } => {
 							if e > 0 && e < 14 {
 								let sid = ORIGINAL_STARTERS[e as usize - 1];
-								let userdata = LegacyUser {
+								let userdata = LegacyData {
 									pool: Cardpool::from(sid.0),
 									deck: String::from(sid.1),
 									electrum: 0,
@@ -436,7 +419,7 @@ pub async fn handle_ws(
 									fg: None,
 								};
 								if client.execute("insert into user_data (user_id, type_id, name, data) values ($1, 2, $2, $3)", &[&userid, &name, &Json(&userdata)]).await.is_ok() {
-									sendmsg(&tx, &WsResponse::originaldata(&userdata));
+									sendmsg(&tx, &WsResponse::originaldata{ name: &name, data: &userdata });
 								}
 							}
 						}
@@ -475,7 +458,7 @@ pub async fn handle_ws(
 									sendmsg(&tx, &WsResponse::chat { mode: 1, msg: "Alt already exists" });
 									continue
 								}
-								let mut data = UserData::new(e as usize);
+								let mut data = OpenData::new(e as usize);
 								data.flags = flags;
 								if client.execute(
 									"insert into user_data (user_id, type_id, name, data) values ($1, 1, $2, $3)",
@@ -1134,16 +1117,9 @@ pub async fn handle_ws(
 							}
 						}
 						AuthMessage::updateorig { deck } => {
-							if let Ok(trx) = client.transaction().await {
-								if let Ok(row) = trx.query_one("select data from user_data where user_id = $1 and type_id = 2 for update", &[&userid]).await {
-									let Json(mut data) = row.get::<usize, Json<Map<String, Value>>>(0);
-									if let Some(deck) = deck {
-										data.insert(String::from("deck"), Value::from(deck));
-									}
-									if trx.execute("update user_data set data = $2 where user_id = $1 and type_id = 2", &[&userid, &Json(data)]).await.is_ok() {
-										trx.commit().await.ok();
-									}
-								}
+							let mut wuser = user.lock().await;
+							if let Some(data) = wuser.legacy.get_mut(&uname) {
+								data.deck = deck;
 							}
 						}
 						AuthMessage::origadd {
@@ -1153,38 +1129,32 @@ pub async fn handle_ws(
 							oracle,
 							fg,
 						} => {
-							if let Ok(trx) = client.transaction().await {
-								if let Ok(row) = trx.query_one("select id, data from user_data where user_id = $1 and type_id = 2 for update", &[&userid]).await {
-									let rowid: i64 = row.get(0);
-									let Json(mut data) = row.get::<usize, Json<LegacyUser>>(1);
-									if let Some(electrum) = electrum {
-										data.electrum = data.electrum.saturating_add(electrum);
+							let mut wuser = user.lock().await;
+							if let Some(data) = wuser.legacy.get_mut(&uname) {
+								if let Some(electrum) = electrum {
+									data.electrum = data.electrum.saturating_add(electrum);
+								}
+								if let Some(pool) = pool {
+									for (code, count) in iterraw(pool.as_bytes()) {
+										let c = data.pool.0.entry(code).or_default();
+										*c = c.saturating_add(count);
 									}
-									if let Some(pool) = pool {
-										for (code, count) in iterraw(pool.as_bytes()) {
-											let c = data.pool.0.entry(code).or_default();
-											*c = c.saturating_add(count);
-										}
+								}
+								if let Some(rmpool) = rmpool {
+									for (code, count) in iterraw(rmpool.as_bytes()) {
+										let c = data.pool.0.entry(code).or_default();
+										*c = c.saturating_sub(count);
 									}
-									if let Some(rmpool) = rmpool {
-										for (code, count) in iterraw(rmpool.as_bytes()) {
-											let c = data.pool.0.entry(code).or_default();
-											*c = c.saturating_sub(count);
-										}
+								}
+								if let Some(fg) = fg {
+									if fg == -1 {
+										data.fg = None;
+									} else {
+										data.fg = Some(fg as u16);
 									}
-									if let Some(fg) = fg {
-										if fg == -1 {
-											data.fg = None;
-										} else {
-											data.fg = Some(fg as u16);
-										}
-									}
-									if let Some(oracle) = oracle {
-										data.oracle = oracle;
-									}
-									if trx.execute("update user_data set data = $2 where id = $1", &[&rowid, &Json(data)]).await.is_ok() {
-										trx.commit().await.ok();
-									}
+								}
+								if let Some(oracle) = oracle {
+									data.oracle = oracle;
 								}
 							}
 						}
@@ -2163,94 +2133,93 @@ pub async fn handle_ws(
 						AuthMessage::upshall => {
 							let mut user = user.lock().await;
 							if let Some(userdata) = user.data.get_mut(&uname) {
-							let mut base = userdata
-								.pool
-								.0
-								.keys()
-								.map(|&code| etg::card::AsShiny(
-										etg::card::AsUpped(code, false),
-										false,
-									))
-								.collect::<Vec<i16>>();
-							base.sort_unstable();
-							base.dedup();
-							let convert =
-								|pool: &mut Cardpool, oldcode: i16, oldamt: u16, newcode: i16| {
-									if pool.0.get(&newcode).cloned() == Some(u16::max_value())
-										|| pool
-											.0
-											.get(&oldcode)
-											.cloned()
-											.map(|oldc| oldc < oldamt)
-											.unwrap_or(true)
-									{
-										false
-									} else {
-										*pool.0.entry(newcode).or_default() += 1;
-										*pool.0.get_mut(&oldcode).unwrap() -= oldamt;
-										true
-									}
-								};
-							for &code in base.iter() {
-								if let Some(card) = etg::card::OpenSet.try_get(code) {
-									if card.rarity > 0 {
-										let upcode = etg::card::AsUpped(code, true);
-										let shcode = etg::card::AsShiny(code, true);
-										let uhcode = etg::card::AsShiny(upcode, true);
-										let mut un =
-											userdata.pool.0.get(&code).cloned().unwrap_or(0)
-												as i32 + userdata
-												.accountbound
+								let mut base = userdata
+									.pool
+									.0
+									.keys()
+									.map(|&code| etg::card::AsShiny(
+											etg::card::AsUpped(code, false),
+											false,
+										))
+									.collect::<Vec<i16>>();
+								base.sort_unstable();
+								base.dedup();
+								let convert =
+									|pool: &mut Cardpool, oldcode: i16, oldamt: u16, newcode: i16| {
+										if pool.0.get(&newcode).cloned() == Some(u16::max_value())
+											|| pool
 												.0
-												.get(&code)
+												.get(&oldcode)
 												.cloned()
-												.unwrap_or(0) as i32;
-										let mut up =
-											userdata.pool.0.get(&upcode).cloned().unwrap_or(0)
-												as i32 + userdata
-												.accountbound
-												.0
-												.get(&upcode)
-												.cloned()
-												.unwrap_or(0) as i32;
-										let mut sh =
-											userdata.pool.0.get(&shcode).cloned().unwrap_or(0)
-												as i32 + userdata
-												.accountbound
-												.0
-												.get(&shcode)
-												.cloned()
-												.unwrap_or(0) as i32;
-										while un >= 12
-											&& up < 6 && convert(
-											&mut userdata.pool,
-											code,
-											6,
-											upcode,
-										) {
-											un -= 6;
-											up += 1;
+												.map(|oldc| oldc < oldamt)
+												.unwrap_or(true)
+										{
+											false
+										} else {
+											*pool.0.entry(newcode).or_default() += 1;
+											*pool.0.get_mut(&oldcode).unwrap() -= oldamt;
+											true
 										}
-										if card.rarity < 4 {
+									};
+								for &code in base.iter() {
+									if let Some(card) = etg::card::OpenSet.try_get(code) {
+										if card.rarity > 0 {
+											let upcode = etg::card::AsUpped(code, true);
+											let shcode = etg::card::AsShiny(code, true);
+											let uhcode = etg::card::AsShiny(upcode, true);
+											let mut un =
+												userdata.pool.0.get(&code).cloned().unwrap_or(0)
+													as i32 + userdata
+													.accountbound
+													.0
+													.get(&code)
+													.cloned()
+													.unwrap_or(0) as i32;
+											let mut up =
+												userdata.pool.0.get(&upcode).cloned().unwrap_or(0)
+													as i32 + userdata
+													.accountbound
+													.0
+													.get(&upcode)
+													.cloned()
+													.unwrap_or(0) as i32;
+											let mut sh =
+												userdata.pool.0.get(&shcode).cloned().unwrap_or(0)
+													as i32 + userdata
+													.accountbound
+													.0
+													.get(&shcode)
+													.cloned()
+													.unwrap_or(0) as i32;
 											while un >= 12
-												&& sh < 6 && convert(
+												&& up < 6 && convert(
 												&mut userdata.pool,
 												code,
 												6,
-												shcode,
+												upcode,
 											) {
 												un -= 6;
-												sh += 1;
+												up += 1;
 											}
-											while un >= 42
-												&& convert(&mut userdata.pool, code, 36, uhcode)
-											{
-												un -= 36;
+											if card.rarity < 4 {
+												while un >= 12
+													&& sh < 6 && convert(
+													&mut userdata.pool,
+													code,
+													6,
+													shcode,
+												) {
+													un -= 6;
+													sh += 1;
+												}
+												while un >= 42 && convert(&mut userdata.pool, code, 36, uhcode)
+												{
+													un -= 36;
+												}
 											}
 										}
 									}
 								}
-							}
 							}
 						}
 					}
@@ -2288,6 +2257,7 @@ pub async fn handle_ws(
 								iter: 0,
 								algo: users::HASH_ALGO,
 								data: Default::default(),
+								legacy: Default::default(),
 							}));
 							wusers.insert(u.clone(), sockid.get(), user.clone());
 							user
@@ -2384,6 +2354,7 @@ pub async fn handle_ws(
 																iter: 0,
 																algo: HashAlgo::Sha512,
 																data: Default::default(),
+																legacy: Default::default(),
 															};
 															login_success(&tx, &mut newuser, &mut client)
 																.await;

@@ -15,7 +15,7 @@ create table user_data (
 	type_id int not null,
 	name text not null,
 	data json not null,
-	unique (user_id, type_id, name)
+	unique (user_id, name)
 );
 create table user_role (
 	user_id bigint not null references users(id),

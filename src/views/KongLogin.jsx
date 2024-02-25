@@ -16,7 +16,7 @@ export default function KongLogin() {
 				setCmds({
 					login: data => {
 						if (!data.err) {
-							setUser(data.name, data.auth, data.data);
+							setUser(data);
 							if (!data.data['']) {
 								doNav(import('./ElementSelect.jsx'));
 							} else {

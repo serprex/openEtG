@@ -53,7 +53,7 @@ impl From<HashAlgo> for pbkdf2::Algorithm {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct UserData {
+pub struct OpenData {
 	#[serde(default)]
 	pub accountbound: Cardpool,
 	#[serde(default)]
@@ -101,14 +101,14 @@ pub struct UserData {
 	pub freepacks: Option<[u8; 3]>,
 }
 
-impl UserData {
-	pub fn new(e: usize) -> UserData {
+impl OpenData {
+	pub fn new(e: usize) -> OpenData {
 		let sid = STARTERS[(e - 1) as usize];
 		let mut decks: HashMap<String, String> = Default::default();
 		decks.insert(String::from("1"), String::from(sid.1));
 		decks.insert(String::from("2"), String::from(sid.2));
 		decks.insert(String::from("3"), String::from(sid.3));
-		UserData {
+		OpenData {
 			accountbound: Cardpool::from(sid.0),
 			oracle: 0,
 			daily: 0,
@@ -146,6 +146,17 @@ impl UserData {
 	}
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct LegacyData {
+	pub pool: Cardpool,
+	pub deck: String,
+	pub electrum: i32,
+	#[serde(default)]
+	pub oracle: u32,
+	#[serde(default)]
+	pub fg: Option<u16>,
+}
+
 #[derive(Serialize)]
 pub struct UserObject {
 	pub name: String,
@@ -158,7 +169,8 @@ pub struct UserObject {
 	pub iter: u32,
 	#[serde(skip)]
 	pub algo: HashAlgo,
-	pub data: HashMap<String, UserData>,
+	pub data: HashMap<String, OpenData>,
+	pub legacy: HashMap<String, LegacyData>,
 }
 
 pub const HASH_ITER: u32 = 99999;
@@ -180,23 +192,34 @@ pub type User = Arc<Mutex<UserObject>>;
 pub struct Users(HashMap<String, (AtomicBool, AtomicUsize, User)>);
 
 impl Users {
-	pub async fn load_data<GC>(client: &GC, userid: i64) -> Option<HashMap<String, UserData>>
+	pub async fn load_data<GC>(
+		client: &GC,
+		userid: i64,
+	) -> Option<(HashMap<String, OpenData>, HashMap<String, LegacyData>)>
 	where
 		GC: GenericClient,
 	{
-		if let Ok(urows) = client
-			.query("select name, data from user_data where user_id = $1 and type_id = 1", &[&userid])
-			.await
+		if let Ok(urows) =
+			client.query("select name, type_id, data from user_data where user_id = $1", &[&userid]).await
 		{
-			let mut data = HashMap::with_capacity(urows.len());
+			let mut data = HashMap::new();
+			let mut legacy = HashMap::new();
 			for urow in urows {
 				let name = urow.get::<usize, String>(0);
-				let Ok(Json(userdata)) = urow.try_get::<usize, Json<UserData>>(1) else {
-					panic!("Invalid json for user {}", name);
-				};
-				data.insert(name, userdata);
+				let type_id = urow.get::<usize, i32>(1);
+				if type_id == 1 {
+					let Ok(Json(userdata)) = urow.try_get::<usize, Json<OpenData>>(2) else {
+						panic!("Invalid json for user {}", name);
+					};
+					data.insert(name, userdata);
+				} else {
+					let Ok(Json(userdata)) = urow.try_get::<usize, Json<LegacyData>>(2) else {
+						panic!("Invalid json for legacy {}", name);
+					};
+					legacy.insert(name, userdata);
+				}
 			}
-			Some(data)
+			Some((data, legacy))
 		} else {
 			None
 		}
@@ -235,7 +258,7 @@ impl Users {
 				let userid = row.get::<usize, i64>(0);
 				let mut wuserslock = users.write().await;
 				let Users(ref mut wusers) = *wuserslock;
-				if let Some(data) = Users::load_data(client, userid).await {
+				if let Some((data, legacy)) = Users::load_data(client, userid).await {
 					let userarc = Arc::new(Mutex::new(UserObject {
 						name: String::from(name),
 						id: row.get::<usize, i64>(0),
@@ -244,6 +267,7 @@ impl Users {
 						iter: row.get::<usize, i32>(3) as u32,
 						algo: row.get::<usize, HashAlgo>(4),
 						data,
+						legacy,
 					}));
 					wusers.insert(
 						String::from(name),
@@ -277,7 +301,7 @@ impl Users {
 			.expect("Connection failed while loading user")
 		{
 			let userid = row.get::<usize, i64>(0);
-			if let Some(data) = Users::load_data(client, userid).await {
+			if let Some((data, legacy)) = Users::load_data(client, userid).await {
 				let namestr = name.to_string();
 				let userarc = Arc::new(Mutex::new(UserObject {
 					name: namestr.clone(),
@@ -287,6 +311,7 @@ impl Users {
 					iter: row.get::<usize, i32>(3) as u32,
 					algo: row.get::<usize, HashAlgo>(4),
 					data,
+					legacy,
 				}));
 				self.insert(namestr, 0, userarc.clone());
 				Some(userarc)
@@ -335,6 +360,15 @@ impl Users {
 				client
 					.execute(
 						"update user_data set data = $3 where user_id = $1 and type_id = 1 and name = $2",
+						&[&user.id, name, &Json(data)],
+					)
+					.await
+					.ok();
+			}
+			for (name, data) in user.legacy.iter() {
+				client
+					.execute(
+						"update user_data set data = $3 where user_id = $1 and type_id = 2 and name = $2",
 						&[&user.id, name, &Json(data)],
 					)
 					.await
