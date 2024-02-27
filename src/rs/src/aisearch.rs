@@ -215,6 +215,9 @@ fn scancore(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32, cmd:
 				| &[Skill::mutation]
 				| &[Skill::improve]
 				| &[Skill::hatch]
+				| &[Skill::fickle]
+				| &[Skill::tornado]
+				| &[Skill::trick]
 		) || ctx.hasskill(id, Event::Shield, Skill::randomdr)
 			|| ctx.hasskill(id, Event::OwnPlay, Skill::mutant)
 		{

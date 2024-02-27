@@ -452,7 +452,7 @@ export default function Result(props) {
 				/>
 			)}
 			<div style="position:absolute;left:8px;top:258px">
-				<div>{tooltip() || ' '}</div>
+				<div style="white-space:pre">{tooltip}</div>
 				{lefttext}
 			</div>
 		</>
