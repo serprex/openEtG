@@ -125,7 +125,7 @@ export default function OriginalMainMenu() {
 	};
 
 	return (
-		<div style="position:absolute;width:900px;height:600px">
+		<>
 			<div style="display:flex;height:120px;justify-content:space-evenly;align-items:center">
 				<input type="button" value="AI2" onClick={() => vsAi('ai2', 5, 5, 5)} />
 				<input
@@ -156,47 +156,52 @@ export default function OriginalMainMenu() {
 					onClick={() => store.doNav(import('./Bazaar.jsx'))}
 				/>
 			</div>
-			<input
-				type="button"
-				value="PvP"
-				onClick={() => sendChallenge(origfoename(), true)}
-				style="position:absolute;left:200px;top:140px"
-			/>
-			<input
-				type="button"
-				value="Sandbox PvP"
-				onClick={() => sendChallenge(origfoename(), true, false)}
-				style="position:absolute;left:200px;top:170px;width:96px"
-			/>
-			<input
-				type="button"
-				value="vs AI"
-				onClick={() => vsAi('custom', 0, 0, 0)}
-				style="position:absolute;left:200px;top:200px"
-			/>
-			<span style="position:absolute;left:300px;top:200px">
-				Enter deck as Name to play against it
-			</span>
-			<input
-				placeholder="Name"
-				value={origfoename()}
-				onInput={e => store.setOptTemp('origfoename', e.target.value)}
-				style="position:absolute;left:300px;top:140px"
-			/>
-			<input
-				type="button"
-				value="Exit"
-				onClick={() => {
-					store.stopLegacy();
-					store.doNav(import('../../views/MainMenu.jsx'));
-				}}
-				style="position:absolute;left:9px;top:140px"
-			/>
-			<div style="font-size:14px;pointer-events:none;position:absolute;left:8px;top:160px">
-				{rx.user.electrum}
-				<span class="ico gold" />
+			<div style="display:flex;height:120px;justify-content:space-evenly">
+				<div style="display:flex;flex-direction:column;justify-content:space-evenly">
+					<input
+						type="button"
+						value="Exit"
+						onClick={() => {
+							store.stopLegacy();
+							store.doNav(import('../../views/MainMenu.jsx'));
+						}}
+					/>
+					<div>
+						{rx.user.electrum}
+						<span class="ico gold" />
+					</div>
+				</div>
+				<div style="display:grid;grid-template-columns:auto auto;column-gap:4px;align-items:center">
+					<input
+						type="button"
+						value="PvP"
+						onClick={() => sendChallenge(origfoename(), true)}
+					/>
+					<input
+						placeholder="Name"
+						value={origfoename()}
+						onInput={e => store.setOptTemp('origfoename', e.target.value)}
+					/>
+					<input
+						type="button"
+						value="Sandbox PvP"
+						style="grid-column:span 2"
+						onClick={() => sendChallenge(origfoename(), true, false)}
+					/>
+					<input
+						type="button"
+						value="vs AI"
+						onClick={() => vsAi('custom', 0, 0, 0)}
+					/>
+					<span>Enter deck as Name to play against it</span>
+				</div>
+				<input
+					type="button"
+					value="Electrum T99"
+					onClick={() => store.doNav(import('./Wealth.jsx'))}
+				/>
 			</div>
-			<Card style="position:absolute;top:300px" card={ocard} />
-		</div>
+			<Card card={ocard} />
+		</>
 	);
 }

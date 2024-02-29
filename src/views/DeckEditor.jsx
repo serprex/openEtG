@@ -301,7 +301,7 @@ export default function DeckEditor() {
 				value="Exit"
 				onClick={() => {
 					saveDeck(rx.user.selectedDeck, true);
-					store.doNav(import('../views/MainMenu.jsx'));
+					store.doNav(import('./MainMenu.jsx'));
 				}}
 				style="position:absolute;left:8px;top:110px"
 			/>

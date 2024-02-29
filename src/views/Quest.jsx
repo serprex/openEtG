@@ -78,7 +78,7 @@ export default function QuestView() {
 					type="button"
 					style="margin-left:auto"
 					value="Exit"
-					onClick={() => store.doNav(import('../views/MainMenu.jsx'))}
+					onClick={() => store.doNav(import('./MainMenu.jsx'))}
 				/>
 			</div>
 			<div style="display:flex;margin:8px">

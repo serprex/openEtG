@@ -284,6 +284,7 @@ pub enum UserMessage {
 		flags: HashSet<String>,
 		category: Leaderboard,
 	},
+	legacyboard,
 	chatus {
 		hide: Option<bool>,
 		afk: Option<bool>,
@@ -466,6 +467,9 @@ pub enum WsResponse<'a> {
 		category: Leaderboard,
 		top: &'a [(&'a str, &'a str, i32)],
 	},
+	legacyboard {
+		top: &'a [(&'a str, &'a str, i32)],
+	}
 }
 
 #[derive(Serialize, Clone)]

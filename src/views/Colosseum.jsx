@@ -85,7 +85,7 @@ export default function Colosseum() {
 			<input
 				type="button"
 				value="Exit"
-				onClick={() => store.doNav(import('../views/MainMenu.jsx'))}
+				onClick={() => store.doNav(import('./MainMenu.jsx'))}
 			/>
 			{[1, 2, 3, 4].map(i => {
 				const active = !(user.daily & (1 << i));

@@ -392,6 +392,18 @@ impl Users {
 					return false;
 				}
 			}
+			for (name, data) in user.legacy.iter() {
+				if !client
+					.execute(
+						"update user_data set data = $3 where user_id = $1 and type_id = 2 and name = $2",
+						&[&user.id, name, &Json(data)],
+					)
+					.await
+					.is_ok()
+				{
+					return false;
+				}
+			}
 		}
 		true
 	}

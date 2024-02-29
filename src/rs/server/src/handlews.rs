@@ -1133,6 +1133,12 @@ pub async fn handle_ws(
 							if let Some(data) = wuser.legacy.get_mut(&uname) {
 								if let Some(electrum) = electrum {
 									data.electrum = data.electrum.saturating_add(electrum);
+									if electrum > 0 {
+										logerr(client.execute(
+											concat!(
+												"insert into leaderboard (data_id, league_id, category, val) values ((select id from user_data where user_id = $1 and name = $2), 1, 'Wealth', $3) ",
+												"on conflict (data_id, league_id, category) do update set val = greatest(excluded.val, leaderboard.val)"), &[&userid, &uname, &(data.electrum as i32)]).await).ok();
+									}
 								}
 								if let Some(pool) = pool {
 									for (code, count) in iterraw(pool.as_bytes()) {
@@ -2534,6 +2540,24 @@ pub async fn handle_ws(
 							top.push((row.get::<usize, &str>(0), row.get::<usize, &str>(1), row.get::<usize, i32>(2)));
 						}
 						sendmsg(&tx, &WsResponse::leaderboard { flags, category, top: &top });
+					}
+				}
+				UserMessage::legacyboard => {
+					if let Ok(rows) = logerr(client
+						.query(concat!(
+								"select u.name, ud.name, val ",
+								"from leaderboard l ",
+								"join user_data ud on l.data_id = ud.id ",
+								"join users u on ud.user_id = u.id ",
+								"where league_id = 1 and category = 'Wealth' ",
+								"order by val desc limit 99"), &[])
+						.await)
+					{
+						let mut top = Vec::with_capacity(rows.len());
+						for row in rows.iter() {
+							top.push((row.get::<usize, &str>(0), row.get::<usize, &str>(1), row.get::<usize, i32>(2)));
+						}
+						sendmsg(&tx, &WsResponse::legacyboard { top: &top });
 					}
 				}
 				UserMessage::bzread => {

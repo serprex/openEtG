@@ -77,7 +77,7 @@ export default function Upgrade() {
 					<input
 						type="button"
 						value="Exit"
-						onClick={() => doNav(import('../views/MainMenu.jsx'))}
+						onClick={() => doNav(import('./MainMenu.jsx'))}
 					/>
 					{!hasflag(user, 'no-up-merge') && (
 						<input

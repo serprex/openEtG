@@ -74,7 +74,7 @@ export default function Library(props) {
 				<input
 					type="button"
 					value="Exit"
-					onClick={() => doNav(import('../views/MainMenu.jsx'))}
+					onClick={() => doNav(import('./MainMenu.jsx'))}
 				/>
 				<input
 					type="button"

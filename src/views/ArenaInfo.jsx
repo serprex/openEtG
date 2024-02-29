@@ -134,7 +134,7 @@ export default function ArenaInfo() {
 			<input
 				type="button"
 				value="Exit"
-				onClick={() => store.doNav(import('../views/MainMenu.jsx'))}
+				onClick={() => store.doNav(import('./MainMenu.jsx'))}
 				style="position:absolute;left:8px;top:300px"
 			/>
 			<Show when={AB().A}>

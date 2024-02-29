@@ -150,7 +150,7 @@ export default function ArenaEditor(props) {
 							});
 						}
 						store.chatMsg('Arena deck submitted', 'System');
-						store.doNav(import('../views/MainMenu.jsx'));
+						store.doNav(import('./MainMenu.jsx'));
 					}}
 				/>
 				<input

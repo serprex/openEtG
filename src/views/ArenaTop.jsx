@@ -51,7 +51,7 @@ export default function ArenaTop({ lv }) {
 			<input
 				type="button"
 				value="Exit"
-				onClick={() => doNav(import('../views/MainMenu.jsx'))}
+				onClick={() => doNav(import('./MainMenu.jsx'))}
 				style="position:absolute;left:8px;top:300px"
 			/>
 			<Show when={card()}>

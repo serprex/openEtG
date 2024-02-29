@@ -150,7 +150,7 @@ function AltCreator(props) {
 
 function chooseAlt(alt) {
 	store.setAlt(alt);
-	store.doNav(import('../views/MainMenu.jsx'));
+	store.doNav(import('./MainMenu.jsx'));
 }
 
 export default function Alts() {
@@ -165,7 +165,7 @@ export default function Alts() {
 			<input
 				type="button"
 				value="Exit"
-				onClick={() => store.doNav(import('../views/MainMenu.jsx'))}
+				onClick={() => store.doNav(import('./MainMenu.jsx'))}
 				style="position:absolute;left:800px;top:578px"
 			/>
 			{selected() !== rx.uname && (

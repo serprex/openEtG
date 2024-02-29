@@ -70,7 +70,7 @@ export default function Leaderboards() {
 				<input
 					type="button"
 					value="Exit"
-					onClick={() => doNav(import('../views/MainMenu.jsx'))}
+					onClick={() => doNav(import('./MainMenu.jsx'))}
 					style="margin-top:auto"
 				/>
 			</div>

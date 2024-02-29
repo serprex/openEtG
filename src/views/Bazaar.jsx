@@ -239,7 +239,7 @@ export default function Bazaar() {
 			<input
 				type="button"
 				value="Exit"
-				onClick={() => store.doNav(import('../views/MainMenu.jsx'))}
+				onClick={() => store.doNav(import('./MainMenu.jsx'))}
 				style="position:absolute;left:8px;top:56px"
 			/>
 			<input
