@@ -420,8 +420,11 @@ input[type='button'].selected {
 	padding-left: 16px;
 }
 .quantamark {
-	margin-top: 8px;
-	text-align: center;
+	display: flex !important;
+	align-items: center;
+	justify-content: center;
+	align-self: center;
+	justify-self: center;
 	pointer-events: none;
 	font-size: 18px;
 	text-shadow:
@@ -429,8 +432,12 @@ input[type='button'].selected {
 		2px 2px 2px #000;
 }
 .deckpool {
+	display: flex !important;
+	align-items: center;
+	justify-content: center;
+	align-self: center;
+	justify-self: center;
 	text-align: center;
-	padding-top: 7px;
 	pointer-events: none;
 	font-size: 18px;
 	text-shadow:
@@ -439,10 +446,9 @@ input[type='button'].selected {
 	z-index: 3;
 }
 .deckpool:not(.deckfx) {
-	margin: 12px 8px 8px 8px;
+	margin: 8px;
 }
 .deckpool.deckfx {
-	margin-top: 4px;
 	width: 48px;
 	height: 48px;
 	border: 8px solid;
