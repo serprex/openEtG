@@ -26,6 +26,10 @@ extern "C" {
 	fn log(s: &str);
 }
 
+#[cfg(target_arch = "wasm32")]
+#[global_allocator]
+static ALLOCATOR: talc::TalckWasm = unsafe { talc::TalckWasm::new_global() };
+
 #[cfg(not(target_arch = "wasm32"))]
 pub fn log(s: &str) {
 	println!("{}", s);
