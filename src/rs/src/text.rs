@@ -280,10 +280,10 @@ impl<'a> SkillThing<'a> {
 			Skill::discping =>
 				Cow::from("Attack target creature & return this card to your hand. Modified stats & statuses remain on the card when it's played again"),
 			Skill::disfield => Cow::from("Block all damage from attackers. Consumes 1:0 per damage blocked"),
-			Skill::dispersion => Cow::from("Discard target card in your hand. If card is a spell with targeting, cast on all available targets in random order. Each cast costs cost of card"),
+			Skill::dispersion => Cow::from("Target a spell with targeting in your hand, cast spell on all available targets in random order. Each cast costs cost of target card"),
 			Skill::disshield =>
 				Cow::from("Block all damage from attackers. Consume 1:1 per 3 damage blocked"),
-			Skill::divinity => Cow::from("Add 24 to maximum health & heal yourself 16"),
+			Skill::divinity => Cow::from("Add 24 to maximum HP & heal yourself 16"),
 			Skill::dive =>
 				Cow::from(if self.set() == CardSet::Open {
 					"Double this creature's strength for next attack. Does not stack"
@@ -521,9 +521,9 @@ impl<'a> SkillThing<'a> {
 			} else {
 				"When discarded, its owner receives 10 spell damage"
 			}),
-			Skill::ouija => Cow::from("Whenever a creature dies, add an Ouija Essence to opponent's hand"),
-			Skill::ouijadestroy => Cow::from("When destroyed, add 1 to opponent's maximum health"),
-			Skill::ouijagrowth => Cow::from("Summon an Ouija Essence on opponent's side of the field"),
+			Skill::ouija => Cow::from("Whenever a creature dies, add an Ouija Essence to opponent's hand, add 1 to your maximum HP if their hand was already full"),
+			Skill::ouijadestroy => Cow::from("When destroyed, add 1 to opponent's maximum HP"),
+			Skill::ouijagrowth => Cow::from("Summon an Ouija Essence on opponent's field"),
 			Skill::pacify => Cow::from("Set target creature or weapon's strength to 0"),
 			Skill::pairproduce => Cow::from("Your pillars, pendulums, & towers trigger as if end of turn"),
 			Skill::paleomagnetism =>
@@ -810,7 +810,7 @@ impl<'a> SkillThing<'a> {
 			Skill::v_cseed => Cow::from("A random effect is inflicted to target creature"),
 			Skill::v_dessication =>
 				Cow::from("Deal 2 damage to opponent's creatures. Gain 1:7 per damage dealt. Removes cloak"),
-			Skill::v_divinity => Cow::from("Add 24 to maximum health if mark 1:8, otherwise 16 & heal same"),
+			Skill::v_divinity => Cow::from("Add 24 to maximum HP if mark 1:8, otherwise 16 & heal same"),
 			Skill::v_drainlife(..) => Cow::from("Drain 2HP from target, plus an extra 2HP per 10:11 remaining"),
 			Skill::v_dshield => Cow::from("Become immaterial until next turn"),
 			Skill::v_endow => Cow::from("Replicate attributes of target weapon"),

@@ -615,81 +615,55 @@ pub enum Skill {
 #[derive(Clone, Copy)]
 pub struct Tgt(NonZeroU32);
 
+macro_rules! deftgt {
+	($x:ident, $y:ident, $v:expr) => {
+		pub const $y: u32 = $v;
+		pub const $x: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked($v << 1) });
+	};
+}
+
+macro_rules! tgt {
+	($($xs:ident) +) => (Tgt(unsafe { NonZeroU32::new_unchecked(tgtcore!($($xs) +)) }));
+}
+
+macro_rules! tgtcore {
+	($x:ident) => (Tgt::$x.0.get());
+	(and $($xs:ident) +) => (1 | (tgtcore!($($xs) +)) << 2);
+	(or $($xs:ident) +) => (3 | (tgtcore!($($xs) +)) << 2);
+	($x:ident $($xs:ident) +) => (Tgt::$x.0.get() | (tgtcore!($($xs) +) << 6));
+}
+
 impl Tgt {
-	pub const own: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(1 << 1) });
-	pub const foe: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(2 << 1) });
-	pub const notself: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(3 << 1) });
-	pub const all: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(4 << 1) });
-	pub const card: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(5 << 1) });
-	pub const pill: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(6 << 1) });
-	pub const weap: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(7 << 1) });
-	pub const shie: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(8 << 1) });
-	pub const playerweap: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(9 << 1) });
-	pub const perm: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(10 << 1) });
-	pub const nonstack: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(11 << 1) });
-	pub const permstack: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(12 << 1) });
-	pub const crea: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(13 << 1) });
-	pub const creacrea: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(14 << 1) });
-	pub const play: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(15 << 1) });
-	pub const notplay: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(16 << 1) });
-	pub const sing: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(17 << 1) });
-	pub const butterfly: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(18 << 1) });
-	pub const v_butterfly: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(19 << 1) });
-	pub const devour: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(20 << 1) });
-	pub const paradox: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(21 << 1) });
-	pub const notskele: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(22 << 1) });
-	pub const forceplay: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(23 << 1) });
-	pub const airbornecrea: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(24 << 1) });
-	pub const golem: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(25 << 1) });
-	pub const groundcrea: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(26 << 1) });
-	pub const wisdom: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(27 << 1) });
-	pub const quinttog: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(28 << 1) });
-	pub const locket: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(29 << 1) });
-	pub const poisoned: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(30 << 1) });
-	pub const permcharge: Tgt = Tgt(unsafe { NonZeroU32::new_unchecked(31 << 1) });
-	pub const _own: u32 = 1 << 1;
-	pub const _foe: u32 = 2 << 1;
-	pub const _notself: u32 = 3 << 1;
-	pub const _all: u32 = 4 << 1;
-	pub const _card: u32 = 5 << 1;
-	pub const _pill: u32 = 6 << 1;
-	pub const _weap: u32 = 7 << 1;
-	pub const _shie: u32 = 8 << 1;
-	pub const _playerweap: u32 = 9 << 1;
-	pub const _perm: u32 = 10 << 1;
-	pub const _nonstack: u32 = 11 << 1;
-	pub const _permstack: u32 = 12 << 1;
-	pub const _crea: u32 = 13 << 1;
-	pub const _creacrea: u32 = 14 << 1;
-	pub const _play: u32 = 15 << 1;
-	pub const _notplay: u32 = 16 << 1;
-	pub const _sing: u32 = 17 << 1;
-	pub const _butterfly: u32 = 18 << 1;
-	pub const _v_butterfly: u32 = 19 << 1;
-	pub const _devour: u32 = 20 << 1;
-	pub const _paradox: u32 = 21 << 1;
-	pub const _notskele: u32 = 22 << 1;
-	pub const _forceplay: u32 = 23 << 1;
-	pub const _airbornecrea: u32 = 24 << 1;
-	pub const _golem: u32 = 25 << 1;
-	pub const _groundcrea: u32 = 26 << 1;
-	pub const _wisdom: u32 = 27 << 1;
-	pub const _quinttog: u32 = 28 << 1;
-	pub const _locket: u32 = 29 << 1;
-	pub const _poisoned: u32 = 30 << 1;
-	pub const _permcharge: u32 = 31 << 1;
-
-	const fn or(self) -> Tgt {
-		Tgt(unsafe { NonZeroU32::new_unchecked(3 | self.0.get() << 2) })
-	}
-
-	const fn and(self) -> Tgt {
-		Tgt(unsafe { NonZeroU32::new_unchecked(1 | self.0.get() << 2) })
-	}
-
-	const fn mix(self, tgt: Tgt) -> Tgt {
-		Tgt(unsafe { NonZeroU32::new_unchecked(self.0.get() | tgt.0.get() << 6) })
-	}
+	deftgt!(not, _not, 1);
+	deftgt!(own, _own, 2);
+	deftgt!(notself, _notself, 3);
+	deftgt!(all, _all, 4);
+	deftgt!(card, _card, 5);
+	deftgt!(pill, _pill, 6);
+	deftgt!(weap, _weap, 7);
+	deftgt!(shie, _shie, 8);
+	deftgt!(playerweap, _playerweap, 9);
+	deftgt!(perm, _perm, 10);
+	deftgt!(nonstack, _nonstack, 11);
+	deftgt!(permstack, _permstack, 12);
+	deftgt!(crea, _crea, 13);
+	deftgt!(creacrea, _creacrea, 14);
+	deftgt!(play, _play, 15);
+	deftgt!(sing, _sing, 16);
+	deftgt!(butterfly, _butterfly, 17);
+	deftgt!(devour, _devour, 18);
+	deftgt!(paradox, _paradox, 19);
+	deftgt!(notskele, _notskele, 20);
+	deftgt!(forceplay, _forceplay, 21);
+	deftgt!(airbornecrea, _airbornecrea, 22);
+	deftgt!(golem, _golem, 23);
+	deftgt!(groundcrea, _groundcrea, 24);
+	deftgt!(wisdom, _wisdom, 25);
+	deftgt!(quinttog, _quinttog, 26);
+	deftgt!(locket, _locket, 27);
+	deftgt!(poisoned, _poisoned, 28);
+	deftgt!(permcharge, _permcharge, 29);
+	deftgt!(target, _target, 30);
 
 	pub fn full_check(self, ctx: &Game, c: i16, t: i16) -> bool {
 		let kind = ctx.get_kind(t);
@@ -710,9 +684,12 @@ impl Tgt {
 		let val = self.0.get() >> *idx;
 		if (val & 1) == 0 {
 			*idx += 6;
-			match val & 63 {
+			match (val & 63) >> 1 {
+				Tgt::_not => {
+					*idx += 6;
+					return !self.check_core(ctx, c, t, idx)
+				}
 				Tgt::_own => ctx.get_owner(c) == ctx.get_owner(t),
-				Tgt::_foe => ctx.get_owner(c) != ctx.get_owner(t),
 				Tgt::_notself => c != t,
 				Tgt::_all => true,
 				Tgt::_card => c != t && ctx.get_kind(t) == Kind::Spell,
@@ -744,17 +721,19 @@ impl Tgt {
 					ctx.material(t, Some(Kind::Creature)) && ctx.get_kind(t) == Kind::Creature
 				}
 				Tgt::_play => ctx.get_kind(t) == Kind::Player,
-				Tgt::_notplay => ctx.get_kind(t) != Kind::Player,
 				Tgt::_sing => {
 					ctx.material(t, Some(Kind::Creature)) && !ctx.hasskill(t, Event::Cast, Skill::sing)
 				}
 				Tgt::_butterfly => {
-					let tkind = ctx.get_kind(t);
-					(tkind == Kind::Creature || tkind == Kind::Weapon)
-						&& !ctx.get(t, Flag::immaterial | Flag::burrowed)
-						&& (ctx.trueatk(t) < 3 || (tkind == Kind::Creature && ctx.truehp(t) < 3))
+					if ctx.cardset() == CardSet::Open {
+						let tkind = ctx.get_kind(t);
+						(tkind == Kind::Creature || tkind == Kind::Weapon)
+							&& !ctx.get(t, Flag::immaterial | Flag::burrowed)
+							&& (ctx.trueatk(t) < 3 || (tkind == Kind::Creature && ctx.truehp(t) < 3))
+					} else {
+						ctx.material(t, Some(Kind::Creature)) && ctx.trueatk(t) < 3
+					}
 				}
-				Tgt::_v_butterfly => ctx.material(t, Some(Kind::Creature)) && ctx.trueatk(t) < 3,
 				Tgt::_devour => ctx.material(t, Some(Kind::Creature)) && ctx.truehp(t) < ctx.truehp(c),
 				Tgt::_paradox => ctx.material(t, Some(Kind::Creature)) && ctx.truehp(t) < ctx.trueatk(t),
 				Tgt::_notskele => {
@@ -790,6 +769,9 @@ impl Tgt {
 				}
 				Tgt::_poisoned => ctx.get(t, Stat::poison) > 0,
 				Tgt::_permcharge => ctx.material(t, Some(Kind::Permanent)) && ctx.get(t, Stat::charges) > 0,
+				Tgt::_target => {
+					return ctx.get_card(ctx.get(c, Stat::card)).kind == Kind::Spell && ctx.getSkill(t, Event::Cast).first().and_then(|&sk| sk.targeting(ctx.cardset())).is_some();
+				}
 				_ => false,
 			}
 		} else {
@@ -1278,13 +1260,13 @@ impl Skill {
 				if set == CardSet::Open {
 					Tgt::perm
 				} else {
-					Tgt::perm.mix(Tgt::play).or()
+					tgt!(or perm play)
 				}
 			}
 			Self::adrenaline => Tgt::crea,
 			Self::aflatoxin => {
 				if set == CardSet::Open {
-					Tgt::crea.mix(Tgt::play).or()
+					tgt!(or crea play)
 				} else {
 					Tgt::crea
 				}
@@ -1292,38 +1274,32 @@ impl Skill {
 			Self::aggroskele => Tgt::crea,
 			Self::antimatter => {
 				if set == CardSet::Open {
-					Tgt::crea.mix(Tgt::weap).or()
+					tgt!(or crea weap)
 				} else {
 					Tgt::crea
 				}
 			}
-			Self::appease => Tgt::own.mix(Tgt::notself.mix(Tgt::crea).and()).and(),
+			Self::appease => tgt!(and and crea notself own),
 			Self::bblood => Tgt::crea,
 			Self::beguile => Tgt::crea,
 			Self::bellweb => Tgt::crea,
 			Self::blackhole => Tgt::play,
 			Self::bless => {
 				if set == CardSet::Open {
-					Tgt::crea.mix(Tgt::weap).or()
+					tgt!(or crea weap)
 				} else {
 					Tgt::crea
 				}
 			}
 			Self::bolsterintodeck => Tgt::crea,
-			Self::bubbleclear => Tgt::crea.mix(Tgt::perm).or(),
-			Self::butterfly => {
-				if set == CardSet::Open {
-					Tgt::butterfly
-				} else {
-					Tgt::v_butterfly
-				}
-			}
-			Self::catapult => Tgt::own.mix(Tgt::crea).and(),
-			Self::clear => Tgt::crea.mix(Tgt::perm).or(),
-			Self::corpseexplosion => Tgt::own.mix(Tgt::crea).and(),
+			Self::bubbleclear => tgt!(or crea perm),
+			Self::butterfly => Tgt::butterfly,
+			Self::catapult => tgt!(and crea own),
+			Self::clear => tgt!(or crea perm),
+			Self::corpseexplosion => tgt!(and crea own),
 			Self::cpower => {
 				if set == CardSet::Open {
-					Tgt::crea.mix(Tgt::weap).or()
+					tgt!(or crea weap)
 				} else {
 					Tgt::crea
 				}
@@ -1331,13 +1307,14 @@ impl Skill {
 			Self::cseed => Tgt::crea,
 			Self::cseed2 => Tgt::all,
 			Self::destroy => Tgt::perm,
-			Self::destroycard => Tgt::card.mix(Tgt::play).or(),
-			Self::detain | Skill::devour => Tgt::devour,
+			Self::destroycard => tgt!(or card play),
+			Self::detain => Tgt::devour,
+			Skill::devour => Tgt::devour,
 			Self::discping => Tgt::crea,
-			Self::dispersion => Tgt::own.mix(Tgt::card).and(),
-			Self::doctor => Tgt::poisoned.mix(Tgt::crea.mix(Tgt::play).or()).and(),
+			Self::dispersion => tgt!(and card target),
+			Self::doctor => tgt!(and poisoned or crea play),
 			Self::draft => Tgt::crea,
-			Self::drainlife => Tgt::crea.mix(Tgt::play).or(),
+			Self::drainlife => tgt!(or crea play),
 			Self::dshield => Tgt::crea,
 			Self::earthquake(_) => {
 				if set == CardSet::Open {
@@ -1349,48 +1326,48 @@ impl Skill {
 			Self::embezzle => Tgt::crea,
 			Self::enchant => Tgt::perm,
 			Self::endow => Tgt::weap,
-			Self::envenom => Tgt::weap.mix(Tgt::shie).or(),
-			Self::equalize => Tgt::crea.mix(Tgt::card.mix(Tgt::notself).and()).or(),
-			Self::feed => Tgt::notself.mix(Tgt::crea).and(),
+			Self::envenom => tgt!(or weap shie),
+			Self::equalize => tgt!(or crea card),
+			Self::feed => tgt!(and crea notself),
 			Self::fickle => Tgt::card,
-			Self::firebolt => Tgt::crea.mix(Tgt::play).or(),
+			Self::firebolt => tgt!(or crea play),
 			Self::firestorm(_) => Tgt::play,
 			Self::flyingweapon => Tgt::playerweap,
 			Self::forceplay => Tgt::forceplay,
 			Self::fractal => Tgt::crea,
-			Self::frail => Tgt::crea.mix(Tgt::permstack).or(),
-			Self::frail2 => Tgt::crea.mix(Tgt::permstack).or(),
+			Self::frail => tgt!(or crea permstack),
+			Self::frail2 => tgt!(or crea permstack),
 			Self::freeze(_) => {
 				if set == CardSet::Open {
-					Tgt::crea.mix(Tgt::weap).or()
+					tgt!(or crea weap)
 				} else {
 					Tgt::crea
 				}
 			}
-			Self::freezeperm => Tgt::perm.mix(Tgt::nonstack).and(),
-			Self::give => Tgt::notself.mix(Tgt::own.mix(Tgt::notplay).and()).and(),
-			Self::golemhit => Tgt::notself.mix(Tgt::golem).and(),
+			Self::freezeperm => tgt!(and perm nonstack),
+			Self::give => tgt!(and and own not play notself),
+			Self::golemhit => tgt!(and golem notself),
 			Self::gpullspell => {
 				if set == CardSet::Open {
-					Tgt::crea.mix(Tgt::play).or()
+					tgt!(or crea play)
 				} else {
 					Tgt::crea
 				}
 			}
 			Self::guard => Tgt::crea,
-			Self::heal => Tgt::crea.mix(Tgt::play).or(),
-			Self::holylight => Tgt::crea.mix(Tgt::play).or(),
-			Self::icebolt => Tgt::crea.mix(Tgt::play).or(),
-			Self::immolate(_) => Tgt::own.mix(Tgt::crea).and(),
+			Self::heal => tgt!(or crea play),
+			Self::holylight => tgt!(or crea play),
+			Self::icebolt => tgt!(or crea play),
+			Self::immolate(_) => tgt!(and crea own),
 			Self::improve => Tgt::crea,
 			Self::innovation => Tgt::card,
 			Self::jelly => Tgt::crea,
 			Self::jetstream => Tgt::crea,
-			Self::lightning => Tgt::crea.mix(Tgt::play).or(),
+			Self::lightning => tgt!(or crea play),
 			Self::liquid => Tgt::crea,
 			Self::livingweapon => Tgt::crea,
 			Self::lobotomize => Tgt::crea,
-			Self::locketshift => Tgt::own.mix(Tgt::locket).and(),
+			Self::locketshift => tgt!(and locket own),
 			Self::mend => Tgt::crea,
 			Self::metamorph => Tgt::all,
 			Self::midas => Tgt::perm,
@@ -1405,66 +1382,64 @@ impl Skill {
 			}
 			Self::momentum => {
 				if set == CardSet::Open {
-					Tgt::crea.mix(Tgt::weap).or()
+					tgt!(or crea weap)
 				} else {
 					Tgt::crea
 				}
 			}
 			Self::mutation => Tgt::crea,
-			Self::neuroify => Tgt::crea.mix(Tgt::play).or(),
+			Self::neuroify => tgt!(or crea play),
 			Self::nightmare => Tgt::crea,
 			Self::nightshade => Tgt::crea,
 			Self::nymph => Tgt::pill,
-			Self::pacify => Tgt::crea.mix(Tgt::weap).or(),
+			Self::pacify => tgt!(or crea weap),
 			Self::pandemonium2 => Tgt::play,
 			Self::paradox => Tgt::paradox,
 			Self::parallel => Tgt::crea,
 			Self::plague => Tgt::play,
 			Self::platearmor(_) => {
 				if set == CardSet::Open {
-					Tgt::crea.mix(Tgt::play).or()
+					tgt!(or crea play)
 				} else {
 					Tgt::crea
 				}
 			}
 			Self::poison(_) => Tgt::crea,
 			Self::powerdrain => Tgt::crea,
-			Self::purify => Tgt::crea.mix(Tgt::play).or(),
+			Self::purify => tgt!(or crea play),
 			Self::quint => Tgt::crea,
 			Self::quinttog => Tgt::quinttog,
 			Self::rage => Tgt::crea,
 			Self::readiness | Self::v_readiness => Tgt::crea,
 			Self::reap => Tgt::notskele,
-			Self::regeneratespell => Tgt::crea.mix(Tgt::perm.mix(Tgt::nonstack).and()).or(),
-			Self::regrade => {
-				Tgt::notself.mix(Tgt::notplay.mix(Tgt::card.mix(Tgt::nonstack).or()).and()).and()
-			}
+			Self::regeneratespell => tgt!(or crea and perm nonstack),
+			Self::regrade => tgt!(and or card nonstack not play),
 			Self::reinforce => Tgt::crea,
 			Self::ren => Tgt::crea,
 			Self::resummon => Tgt::crea,
 			Self::rewind | Self::v_rewind => Tgt::crea,
 			Self::sabbath => Tgt::play,
-			Self::scatter => Tgt::play.mix(Tgt::card.mix(Tgt::notself).and()).or(),
+			Self::scatter => tgt!(or card play),
 			Self::scramble => Tgt::play,
 			Self::scramblespam => Tgt::play,
 			Self::shuffle3 => Tgt::crea,
-			Self::silence => Tgt::crea.mix(Tgt::play).or(),
-			Self::silence => Tgt::crea.mix(Tgt::perm).or(),
+			Self::silence => tgt!(or crea play),
+			Self::silence => tgt!(or crea perm),
 			Self::sing => Tgt::sing,
 			Self::sinkhole => Tgt::crea,
-			Self::siphonactive => Tgt::notself.mix(Tgt::crea.mix(Tgt::weap).or()).and(),
-			Self::siphonstrength => Tgt::notself.mix(Tgt::crea).and(),
+			Self::siphonactive => tgt!(and or crea weap notself),
+			Self::siphonstrength => tgt!(and crea notself),
 			Self::snipe => Tgt::crea,
 			Self::stasisdraw => Tgt::play,
-			Self::steal | Self::v_steal => Tgt::foe.mix(Tgt::perm).and(),
+			Self::steal | Self::v_steal => tgt!(and perm not own),
 			Self::storm(_) => Tgt::play,
-			Self::swave => Tgt::crea.mix(Tgt::play).or(),
+			Self::swave => tgt!(or crea play),
 			Self::tempering(i16) => Tgt::weap,
 			Self::throwrock => Tgt::crea,
 			Self::trick => Tgt::crea,
 			Self::tutordraw => Tgt::card,
 			Self::unsummon => Tgt::crea,
-			Self::upload => Tgt::notself.mix(Tgt::crea.mix(Tgt::weap).or()).and(),
+			Self::upload => tgt!(and or crea weap notself),
 			Self::virusinfect => Tgt::crea,
 			Self::virusplague => Tgt::play,
 			Self::web => {
@@ -1474,7 +1449,7 @@ impl Skill {
 					Tgt::crea
 				}
 			}
-			Self::wicked => Tgt::own.mix(Tgt::crea).and(),
+			Self::wicked => tgt!(and crea own),
 			Self::wisdom => {
 				if set == CardSet::Open {
 					Tgt::wisdom
@@ -1482,14 +1457,14 @@ impl Skill {
 					Tgt::quinttog
 				}
 			}
-			Self::yoink => Tgt::foe.mix(Tgt::play.mix(Tgt::card).or()).and(),
+			Self::yoink => tgt!(and or card play not own),
 			Self::v_bblood => Tgt::crea,
 			Self::v_cseed => Tgt::crea,
-			Self::v_drainlife(_) => Tgt::crea.mix(Tgt::play).or(),
+			Self::v_drainlife(_) => tgt!(or crea play),
 			Self::v_endow => Tgt::weap,
-			Self::v_firebolt(_) => Tgt::crea.mix(Tgt::play).or(),
-			Self::v_holylight => Tgt::crea.mix(Tgt::play).or(),
-			Self::v_icebolt(_) => Tgt::crea.mix(Tgt::play).or(),
+			Self::v_firebolt(_) => tgt!(or crea play),
+			Self::v_holylight => tgt!(or crea play),
+			Self::v_icebolt(_) => tgt!(or crea play),
 			Self::v_improve => Tgt::crea,
 			Self::v_mutation => Tgt::crea,
 			Self::v_nymph => Tgt::pill,
@@ -1933,7 +1908,7 @@ impl Skill {
 				}
 			}
 			Self::corpseexplosion => {
-				let dmg = 1 + ctx.truehp(t) / 8;
+				let dmg = 1 + ctx.truehp(t) / 5;
 				ctx.die(t);
 				let owner = ctx.get_owner(c);
 				let foe = ctx.get_foe(owner);
@@ -3545,8 +3520,12 @@ impl Skill {
 				ctx.spelldmg(ctx.get_owner(c), if card::Upped(ctx.get(c, Stat::card)) { 13 } else { 10 });
 			}
 			Self::ouija => {
-				let foe = ctx.get_foe(ctx.get_owner(c));
-				if !ctx.sanctified(foe) && !ctx.get_player(foe).hand_full() {
+				let owner = ctx.get_owner(c);
+				let foe = ctx.get_foe(owner);
+				if ctx.get_player(foe).hand_full() {
+					let maxhp = ctx.get_mut(owner, Stat::maxhp);
+					*maxhp += (*maxhp < 500) as i16;
+				} else if !ctx.sanctified(foe) {
 					let inst = ctx.new_thing(card::OuijaEssence, foe);
 					ctx.fx(inst, Fx::StartPos(c));
 					ctx.addCard(foe, inst);

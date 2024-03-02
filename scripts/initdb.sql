@@ -103,6 +103,5 @@ create index ix_arena_score on arena (arena_id, score desc, day desc, "rank");
 create index ix_arena_user_id on arena using hash (user_id);
 create index ix_bazaar_user_id on bazaar using hash (user_id);
 create index ix_bazaar_code on bazaar using hash (code);
-create index ix_stats_user_id on stats using hash (user_id);
 create index ix_stats_when on stats ("when");
 create index ix_leaderboard_val on leaderboard (league_id, category, val desc);
