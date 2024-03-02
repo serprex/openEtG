@@ -461,6 +461,18 @@ mod test {
 	}
 
 	#[test]
+	fn regrade_targeting() {
+		let tgting = Skill::regrade.targeting(CardSet::Open).unwrap();
+		let (mut ctx, p1, p2) = setup(CardSet::Open);
+		assert!(!tgting.check(&ctx, p1, p2));
+		let pillar = ctx.get_player(p1).hand_last().unwrap();
+		assert!(!tgting.check(&ctx, pillar, pillar));
+		assert!(tgting.check(&ctx, p1, pillar));
+		ctx.play(pillar, 0, true);
+		assert!(!tgting.check(&ctx, p1, pillar));
+	}
+
+	#[test]
 	fn rustler() {
 		let (mut ctx, p1, p2) = setup(CardSet::Open);
 		ctx.set_quanta(p1, etg::Light, 2);
@@ -585,5 +597,13 @@ mod test {
 		ctx.useactive(whim, tstorm);
 		assert_eq!(ctx.get_player(p1).deck.first(), Some(&tstorm));
 		assert_eq!(ctx.get_player(p1).hand_last(), Some(dfly));
+	}
+
+	#[test]
+	fn yoink_targeting() {
+		let tgting = Skill::yoink.targeting(CardSet::Open).unwrap();
+		let (ctx, p1, p2) = setup(CardSet::Open);
+		assert!(tgting.check(&ctx, p1, ctx.get_player(p2).hand_last().unwrap()));
+		assert!(!tgting.check(&ctx, p1, ctx.get_player(p1).hand_last().unwrap()));
 	}
 }
