@@ -185,7 +185,7 @@ export default function OriginalMainMenu() {
 					<input
 						type="button"
 						value="Sandbox PvP"
-						style="grid-column:span 2"
+						style="width:96px;grid-column:span 2"
 						onClick={() => sendChallenge(origfoename(), true, false)}
 					/>
 					<input
@@ -198,6 +198,7 @@ export default function OriginalMainMenu() {
 				<input
 					type="button"
 					value="Electrum T99"
+					style="width:auto"
 					onClick={() => store.doNav(import('./Wealth.jsx'))}
 				/>
 			</div>

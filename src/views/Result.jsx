@@ -452,7 +452,7 @@ export default function Result(props) {
 				/>
 			)}
 			<div style="position:absolute;left:8px;top:258px">
-				<div style="white-space:pre">{tooltip}</div>
+				<div>{tooltip() ?? '\xa0'}</div>
 				{lefttext}
 			</div>
 		</>

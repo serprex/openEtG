@@ -379,7 +379,7 @@ fn eval_skill(
 			Skill::freedom => 4 * PREC,
 			Skill::freeze(x) => x as i32 * PREC,
 			Skill::freezeperm => 4 * PREC,
-			Skill::fungusrebirth => PREC,
+			Skill::fungusrebirth => 4 * PREC,
 			Skill::gas => 5 * PREC,
 			Skill::give => PREC,
 			Skill::golemhit => {
@@ -597,7 +597,7 @@ fn eval_skill(
 			Skill::snipe => 3 * PREC,
 			Skill::sosa => 6 * PREC,
 			Skill::soulcatch => 2 * PREC,
-			Skill::spores => 4 * PREC,
+			Skill::spores => 2 * PREC,
 			Skill::sskin => 15 * PREC,
 			Skill::stasisdraw => PREC,
 			Skill::steal | Skill::v_steal => 6 * PREC,
