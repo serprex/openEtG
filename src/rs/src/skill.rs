@@ -635,7 +635,6 @@ macro_rules! tgtcore {
 }
 
 impl Tgt {
-	const _not: u32 = 0;
 	deftgt!(own, _own, 1);
 	deftgt!(notself, _notself, 2);
 	deftgt!(all, _all, 3);
@@ -683,17 +682,18 @@ impl Tgt {
 		let mut opnum = 0;
 		let mut vals = [false; 4];
 		let mut valnum = 0u8;
+		let mut ignore = 0;
 
 		loop {
 			if (x & 1) == 0 {
 				let f = (x >> 1) & 31;
 				x >>= 6;
-				let res = match f {
-					Tgt::_not => {
-						ops[opnum] = (1, valnum);
-						opnum += 1;
-						continue;
-					}
+				if f == 0 {
+					ops[opnum] = (1, valnum);
+					opnum += 1;
+					continue;
+				}
+				vals[valnum as usize] = ignore == 0 && match f {
 					Tgt::_own => ctx.get_owner(c) == ctx.get_owner(t),
 					Tgt::_notself => c != t,
 					Tgt::_all => true,
@@ -792,9 +792,8 @@ impl Tgt {
 								.and_then(|&sk| sk.targeting(ctx.cardset()))
 								.is_some()
 					}
-					_ => false,
+					_ => unsafe { core::hint::unreachable_unchecked() },
 				};
-				vals[valnum as usize] = res;
 				valnum += 1;
 			} else {
 				ops[opnum] = ((x & 2) as u8, valnum);
@@ -806,25 +805,33 @@ impl Tgt {
 				if opnum == 0 {
 					return vals[valnum as usize - 1];
 				}
-				match ops[opnum - 1] {
-					(0, n) if valnum > n + 1 => {
-						opnum -= 1;
-						vals[valnum as usize - 2] &= vals[valnum as usize - 1];
-						valnum -= 1;
-						continue;
+				if valnum <= ops[opnum - 1].1 {
+					break
+				}
+				let op = ops[opnum - 1].0;
+				match op {
+					0 | 2 => { // AND | OR
+						if (op == 0) != vals[valnum as usize - 1] {
+							ignore += 1;
+							ops[opnum - 1] = (4, valnum);
+						} else {
+							valnum -= 1;
+							ops[opnum - 1] = (3, valnum);
+						}
 					}
-					(1, n) if valnum > n => {
+					1 => { // NOT
 						opnum -= 1;
 						vals[valnum as usize - 1] = !vals[valnum as usize - 1];
-						continue;
 					}
-					(2, n) if valnum > n + 1 => {
+					3 => { // NEXT
 						opnum -= 1;
-						vals[valnum as usize - 2] |= vals[valnum as usize - 1];
-						valnum -= 1;
-						continue;
 					}
-					_ => break,
+					4 => { // DROP
+						opnum -= 1;
+						valnum -= 1;
+						ignore -= 1;
+					}
+					_ => unsafe { core::hint::unreachable_unchecked() },
 				}
 			}
 		}
