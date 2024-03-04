@@ -60,9 +60,9 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 		if let Some(&active) = ctx.getSkill(id, Event::Cast).first() {
 			if let Some(tgting) = active.targeting(ctx.cardset()) {
 				let mut tgts = Vec::with_capacity(50 * ctx.players().len());
-				for id in 1..=ctx.players_len() {
-					let pl = ctx.get_player(id);
-					if id == turn {
+				for plid in 1..=ctx.players_len() {
+					let pl = ctx.get_player(plid);
+					if plid == turn {
 						if (pl.shield != 0 && ctx.get(pl.shield, Flag::reflective))
 							|| active == Skill::pandemonium
 						{

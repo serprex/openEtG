@@ -637,33 +637,32 @@ macro_rules! tgtcore {
 impl Tgt {
 	deftgt!(own, _own, 1);
 	deftgt!(notself, _notself, 2);
-	deftgt!(all, _all, 3);
-	deftgt!(card, _card, 4);
-	deftgt!(pill, _pill, 5);
-	deftgt!(weap, _weap, 6);
-	deftgt!(shie, _shie, 7);
-	deftgt!(playerweap, _playerweap, 8);
-	deftgt!(perm, _perm, 9);
-	deftgt!(nonstack, _nonstack, 10);
-	deftgt!(permstack, _permstack, 11);
-	deftgt!(crea, _crea, 12);
-	deftgt!(creacrea, _creacrea, 13);
-	deftgt!(play, _play, 14);
-	deftgt!(sing, _sing, 15);
-	deftgt!(butterfly, _butterfly, 16);
-	deftgt!(devour, _devour, 17);
-	deftgt!(paradox, _paradox, 18);
-	deftgt!(notskele, _notskele, 19);
-	deftgt!(forceplay, _forceplay, 20);
-	deftgt!(airbornecrea, _airbornecrea, 21);
-	deftgt!(golem, _golem, 22);
-	deftgt!(groundcrea, _groundcrea, 23);
-	deftgt!(wisdom, _wisdom, 24);
-	deftgt!(quinttog, _quinttog, 25);
-	deftgt!(locket, _locket, 26);
-	deftgt!(poisoned, _poisoned, 27);
-	deftgt!(permcharge, _permcharge, 28);
-	deftgt!(target, _target, 29);
+	deftgt!(card, _card, 3);
+	deftgt!(pill, _pill, 4);
+	deftgt!(weap, _weap, 5);
+	deftgt!(shie, _shie, 6);
+	deftgt!(playerweap, _playerweap, 7);
+	deftgt!(perm, _perm, 8);
+	deftgt!(nonstack, _nonstack, 9);
+	deftgt!(permstack, _permstack, 10);
+	deftgt!(crea, _crea, 11);
+	deftgt!(creacrea, _creacrea, 12);
+	deftgt!(play, _play, 13);
+	deftgt!(sing, _sing, 14);
+	deftgt!(butterfly, _butterfly, 15);
+	deftgt!(devour, _devour, 16);
+	deftgt!(paradox, _paradox, 17);
+	deftgt!(notskele, _notskele, 18);
+	deftgt!(forceplay, _forceplay, 19);
+	deftgt!(airbornecrea, _airbornecrea, 20);
+	deftgt!(golem, _golem, 21);
+	deftgt!(groundcrea, _groundcrea, 22);
+	deftgt!(wisdom, _wisdom, 23);
+	deftgt!(quinttog, _quinttog, 24);
+	deftgt!(locket, _locket, 25);
+	deftgt!(poisoned, _poisoned, 26);
+	deftgt!(permcharge, _permcharge, 27);
+	deftgt!(target, _target, 28);
 
 	pub fn full_check(self, ctx: &Game, c: i16, t: i16) -> bool {
 		let kind = ctx.get_kind(t);
@@ -696,7 +695,6 @@ impl Tgt {
 				vals[valnum as usize] = ignore == 0 && match f {
 					Tgt::_own => ctx.get_owner(c) == ctx.get_owner(t),
 					Tgt::_notself => c != t,
-					Tgt::_all => true,
 					Tgt::_card => c != t && ctx.get_kind(t) == Kind::Spell,
 					Tgt::_pill => ctx.material(t, Some(Kind::Permanent)) && ctx.get(t, Flag::pillar),
 					Tgt::_weap => {
@@ -785,7 +783,7 @@ impl Tgt {
 						ctx.material(t, Some(Kind::Permanent)) && ctx.get(t, Stat::charges) > 0
 					}
 					Tgt::_target => {
-						ctx.get_card(ctx.get(c, Stat::card)).kind == Kind::Spell
+						ctx.get_card(ctx.get(t, Stat::card)).kind == Kind::Spell
 							&& ctx
 								.getSkill(t, Event::Cast)
 								.first()
@@ -1358,7 +1356,7 @@ impl Skill {
 				}
 			}
 			Self::cseed => Tgt::crea,
-			Self::cseed2 => Tgt::all,
+			Self::cseed2 => Tgt::notself,
 			Self::destroy => Tgt::perm,
 			Self::destroycard => tgt!(or card play),
 			Self::detain => Tgt::devour,
@@ -1422,7 +1420,7 @@ impl Skill {
 			Self::lobotomize => Tgt::crea,
 			Self::locketshift => tgt!(and locket own),
 			Self::mend => Tgt::crea,
-			Self::metamorph => Tgt::all,
+			Self::metamorph => Tgt::notself,
 			Self::midas => Tgt::perm,
 			Self::mill => Tgt::play,
 			Self::millpillar => Tgt::play,
