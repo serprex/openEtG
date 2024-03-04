@@ -483,7 +483,7 @@ export default function MainMenu(props) {
 							type="button"
 							value="Trade"
 							onClick={() => {
-								if (hasflag(rx.user, 'no-trade')) {
+								if (!hasflag(rx.user, 'no-trade')) {
 									sock.userEmit('offertrade', {
 										f: foename(),
 										cards: '',

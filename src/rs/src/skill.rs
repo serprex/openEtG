@@ -2473,12 +2473,9 @@ impl Skill {
 				let thing = ctx.get_thing_mut(t);
 				if let Some(hit) = thing.skill.get_mut(Event::Hit) {
 					for sk in hit.iter_mut() {
-						match sk {
-							Skill::poison(ref mut x) => {
-								*x = x.saturating_add(1);
-								return;
-							}
-							_ => (),
+						if let Skill::poison(ref mut x) = sk {
+							*x = x.saturating_add(1);
+							return;
 						}
 					}
 					hit.push(Skill::poison(1));
