@@ -12,7 +12,6 @@ const a2n = {
 	sborder: 'Kae',
 	sabbath: 'Kae',
 	sacrifice: 'Kae',
-	protection: 'Kae',
 	gold: 'Kae',
 };
 let oldkey;

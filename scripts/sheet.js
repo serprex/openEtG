@@ -4,7 +4,7 @@ import fsa from 'fs/promises';
 import spritesheet from '@pencil.js/spritesheet';
 
 const { json, image } = await spritesheet([
-	'assets/gold.png',
+	'assets/cback.png',
 	'assets/e0.png',
 	'assets/e1.png',
 	'assets/e2.png',
@@ -20,16 +20,11 @@ const { json, image } = await spritesheet([
 	'assets/e12.png',
 	'assets/e13.png',
 	'assets/e14.png',
+	'assets/gold.png',
 	'assets/r1.png',
 	'assets/r2.png',
 	'assets/r3.png',
 	'assets/r4.png',
-	'assets/t0.png',
-	'assets/t1.png',
-	'assets/t2.png',
-	'assets/t3.png',
-	'assets/t4.png',
-	'assets/protection.png',
 	'assets/sacrifice.png',
 	'assets/s0.png',
 	'assets/s1.png',
@@ -43,7 +38,12 @@ const { json, image } = await spritesheet([
 	'assets/sborder0.png',
 	'assets/sborder1.png',
 	'assets/sborder2.png',
-	'assets/cback.png',
+	'assets/sborder3.png',
+	'assets/t0.png',
+	'assets/t1.png',
+	'assets/t2.png',
+	'assets/t3.png',
+	'assets/t4.png',
 ]);
 
 const atlasjson = {};

@@ -393,8 +393,7 @@ function SpellDisplay(props) {
 
 function ArrowLine(props) {
 	return (
-		<svg
-			style={`position:absolute;width:100%;height:100%;z-index:4;pointer-events:none;opacity:${props.opacity}`}>
+		<svg class="arrow" style={`opacity:${props.opacity}`}>
 			<defs>
 				<marker
 					id="h"
@@ -417,6 +416,11 @@ function ArrowLine(props) {
 	);
 }
 
+const statusMask = [];
+for (let i = 0; i < 12; i++) {
+	statusMask.push(1 << i);
+}
+
 function Thing(props) {
 	const isSpell = () => props.game.get_kind(props.id) === Kind.Spell,
 		bgcolor = () => maybeLightenStr(props.game.getCard(props.id)),
@@ -428,19 +432,11 @@ function Thing(props) {
 			if (!faceDown() && props.setInfo) props.setInfo(e, props.id);
 		};
 
-	const visible_status = createMemo(() => {
-		const v = props.game.visible_status(props.id);
-		const res = [];
-		for (let i = 0; i < 11; i++) {
-			res.push(!!(v & (1 << i)));
-		}
-		return res;
-	});
-
 	const memo = createMemo(() => {
 		if (faceDown()) return {};
+		const status = props.game.visible_status(props.id);
 		const [topText, statText] = props.game.instance_text(props.id).split('\n');
-		return { topText, statText };
+		return { topText, statText, status };
 	});
 
 	return (
@@ -452,7 +448,6 @@ function Thing(props) {
 				props.targeting,
 			)}`}
 			style={{
-				position: 'absolute',
 				left: `${props.pos.x - 32}px`,
 				top: `${props.pos.y - 32}px`,
 				opacity:
@@ -463,7 +458,6 @@ function Thing(props) {
 					faceDown() ? undefined
 					: props.game.getCard(props.id).upped ? '#000'
 					: '#fff',
-				'z-index': '2',
 				'pointer-events': ~props.game.getIndex(props.id) ? undefined : 'none',
 			}}
 			onMouseMove={e => {
@@ -483,60 +477,39 @@ function Thing(props) {
 			onMouseLeave={props.onMouseOut}
 			onClick={() => props.onClick(props.id)}>
 			<Show when={!faceDown()} fallback={<div class="ico cback" />}>
-				<div
-					style={`width:64px;height:64px;pointer-events:none;background-color:${bgcolor()}`}>
+				<div class="inner" style={`background-color:${bgcolor()}`}>
 					<Show when={!props.opts.lofiArt}>
 						<img
-							class={props.game.getCard(props.id).shiny ? 'shiny' : ''}
+							class={`art${props.game.getCard(props.id).shiny ? ' shiny' : ''}`}
 							src={`/Cards/${encodeCode(
 								props.game.get(props.id, 'card') +
 									(asShiny(props.game.get(props.id, 'card'), false) < 5000 ?
 										4000
 									:	0),
 							)}.webp`}
-							style="position:absolute;width:64px;height:64px;pointer-events:none"
 						/>
 					</Show>
-					<Index each={visible_status().slice(0, 8)}>
+					<Index each={statusMask}>
 						{(v, k) => (
-							<Show when={v()}>
-								<div
-									class={`ico s${k}`}
-									style={`position:absolute;bottom:-8px;left:${
-										[32, 8, 8, 0, 0, 24, 16, 8][k]
-									}px;opacity:.6;z-index:1`}
-								/>
+							<Show when={memo().status & v()}>
+								{k < 8 ?
+									<div
+										class={`status ico s${k}`}
+										style={`left:${[32, 8, 8, 0, 0, 24, 16, 8][k]}px`}
+									/>
+								:	<div class={`fullstatus ico sborder${k - 8}`} />}
 							</Show>
 						)}
 					</Index>
-					<Index each={visible_status().slice(8)}>
-						{(v, k) => (
-							<Show when={v()}>
-								<div
-									class={`ico sborder${k}`}
-									style="position:absolute;left:0;top:0;width:64px;height:64px"
-								/>
-							</Show>
-						)}
-					</Index>
-					<Show when={props.game.has_protectonce(props.id)}>
-						<div
-							class="ico protection"
-							style="position:absolute;width:64px;height:64px"
-						/>
-					</Show>
-					<div style="position:absolute;width:64px">
-						<div
-							style={`width:64px;white-space:nowrap;overflow:hidden;background-color:${bgcolor()}`}>
+					<div class="text">
+						<div class="top-text" style={`background-color:${bgcolor()}`}>
 							<Text text={memo().topText} icoprefix="se" />
 						</div>
-						<div
-							style={`display:flex;align-items:center;border-radius:0 0 3px 3px;float:right;background-color:${bgcolor()}`}>
+						<div class="stat-text" style={`background-color:${bgcolor()}`}>
 							<Text text={memo().statText} icoprefix="se" />
 						</div>
 						<Show when={!isSpell()}>
-							<div
-								style={`position:absolute;top:54px;height:10px;width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background-color:${bgcolor()}`}>
+							<div class="name" style={`background-color:${bgcolor()}`}>
 								{props.game.getCard(props.id).name}
 							</div>
 						</Show>

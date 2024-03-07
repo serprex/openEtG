@@ -462,13 +462,58 @@ input[type='button'].selected {
 	white-space: pre;
 }
 .inst {
+	position: absolute;
 	width: 68px;
 	height: 68px;
 	font-size: 8px;
 	border: transparent 2px solid;
+	z-index: 2;
 }
 .handinst {
 	transition: transform 0.5s;
+}
+.inst > .inner {
+	width: 64px;
+	height: 64px;
+	pointer-events: none;
+}
+.inst .art {
+	position: absolute;
+	width: 64px;
+	height: 64px;
+	pointer-events: none;
+}
+.inst .status {
+	position: absolute;
+	bottom: -8px;
+	opaciaty: 0.6;
+	z-index: 1;
+}
+.inst .fullstatus {
+	position: absolute;
+}
+.inst .text {
+	position: absolute;
+}
+.inst .top-text {
+	width: 64px;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.inst .stat-text {
+	display: flex;
+	align-items: center;
+	border-radius: 0 0 3px 3px;
+	float: right;
+}
+.inst .name {
+	position: absolute;
+	top: 54px;
+	height: 10px;
+	width: 64px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 .hptext {
 	text-align: center;
@@ -507,6 +552,13 @@ input[type='button'].selected {
 }
 .hpval.life {
 	background-color: #480;
+}
+.arrow {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	z-index: 4;
+	pointer-events: none;
 }
 .cantarget {
 	border: 2px #f00 solid !important;

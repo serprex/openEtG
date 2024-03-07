@@ -1116,29 +1116,27 @@ impl Game {
 	}
 
 	pub fn visible_status(&self, id: i16) -> u32 {
-		if self.get_kind(id) == Kind::Spell {
+		let c = self.get_thing(id);
+		if c.kind == Kind::Spell {
 			0
 		} else {
-			(self.get(id, Flag::psionic) as u32)
-				| (self.get(id, Flag::aflatoxin) as u32) << 1
-				| ((!self.get(id, Flag::aflatoxin) && (self.get(id, Stat::poison) > 0)) as u32) << 2
-				| (self.get(id, Flag::airborne) as u32) << 3
-				| ((!self.get(id, Flag::airborne) && self.get(id, Flag::ranged)) as u32) << 4
-				| (self.get(id, Flag::momentum) as u32) << 5
-				| ((self.get(id, Stat::adrenaline) > 0) as u32) << 6
-				| ((self.get(id, Stat::poison) < 0) as u32) << 7
-				| ((self.get(id, Stat::delayed) > 0) as u32) << 8
-				| ((id == self.get(self.get_owner(id), Stat::gpull)) as u32) << 9
-				| ((self.get(id, Stat::frozen) > 0) as u32) << 10
+			(c.flag.get(Flag::psionic) as u32)
+				| (c.flag.get(Flag::aflatoxin) as u32) << 1
+				| ((!c.flag.get(Flag::aflatoxin) && (c.status.get(Stat::poison) > 0)) as u32) << 2
+				| (c.flag.get(Flag::airborne) as u32) << 3
+				| ((!c.flag.get(Flag::airborne) && c.flag.get(Flag::ranged)) as u32) << 4
+				| (c.flag.get(Flag::momentum) as u32) << 5
+				| ((c.status.get(Stat::adrenaline) > 0) as u32) << 6
+				| ((c.status.get(Stat::poison) < 0) as u32) << 7
+				| ((c.status.get(Stat::delayed) > 0) as u32) << 8
+				| ((id == self.get(c.owner, Stat::gpull)) as u32) << 9
+				| ((c.status.get(Stat::frozen) > 0) as u32) << 10
+				| (self.hasskill(id, Event::Prespell, Skill::protectonce) as u32) << 11
 		}
 	}
 
 	pub fn has_flooding(&self) -> bool {
 		self.plprops.iter().any(|pl| pl.permanents.into_iter().any(|pr| pr != 0 && self.is_flooding(pr)))
-	}
-
-	pub fn has_protectonce(&self, id: i16) -> bool {
-		self.hasskill(id, Event::Prespell, Skill::protectonce)
 	}
 
 	pub fn is_cloaked(&self, id: i16) -> bool {
