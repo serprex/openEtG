@@ -677,10 +677,9 @@ impl Tgt {
 
 	pub fn check(self, ctx: &Game, c: i16, t: i16) -> bool {
 		let mut x = self.0.get();
-		let mut ops = [(0u8, 0u8); 4];
-		let mut opnum = 0;
-		let mut vals = [false; 4];
-		let mut valnum = 0u8;
+		let mut ops = 1u32;
+		let mut vals = 0u32;
+		let mut valnum = 0u32;
 		let mut ignore = 0;
 
 		loop {
@@ -688,11 +687,11 @@ impl Tgt {
 				let f = (x >> 1) & 31;
 				x >>= 6;
 				if f == 0 {
-					ops[opnum] = (1, valnum);
-					opnum += 1;
+					ops = ops << 6 | 1 << 3 | valnum;
 					continue;
 				}
-				vals[valnum as usize] = ignore == 0 && match f {
+				valnum += 1;
+				vals = (vals << 1) | (ignore == 0 && match f {
 					Tgt::_own => ctx.get_owner(c) == ctx.get_owner(t),
 					Tgt::_notself => c != t,
 					Tgt::_card => c != t && ctx.get_kind(t) == Kind::Spell,
@@ -791,42 +790,41 @@ impl Tgt {
 								.is_some()
 					}
 					_ => unsafe { core::hint::unreachable_unchecked() },
-				};
-				valnum += 1;
+				}) as u32;
 			} else {
-				ops[opnum] = ((x & 2) as u8, valnum);
-				opnum += 1;
+				ops = ops << 6 | ((x & 2) as u32) << 3 | valnum;
 				x >>= 2;
 				continue;
 			}
 			loop {
-				if opnum == 0 {
-					return vals[valnum as usize - 1];
+				if ops == 1 {
+					return vals & 1 == 1;
 				}
-				if valnum <= ops[opnum - 1].1 {
+				if valnum <= ops & 7 {
 					break
 				}
-				let op = ops[opnum - 1].0;
+				let op = (ops >> 3) & 7;
 				match op {
 					0 | 2 => { // AND | OR
-						if (op == 0) != vals[valnum as usize - 1] {
+						if (op == 0) != (vals & 1 == 1) {
 							ignore += 1;
-							ops[opnum - 1] = (4, valnum);
+							ops = (ops & !0x3f) | 4 << 3 | valnum;
 						} else {
 							valnum -= 1;
-							ops[opnum - 1] = (3, valnum);
+							ops = (ops & !0x3f) | 3 << 3 | valnum;
 						}
 					}
 					1 => { // NOT
-						opnum -= 1;
-						vals[valnum as usize - 1] = !vals[valnum as usize - 1];
+						ops >>= 6;
+						vals ^= 1;
 					}
 					3 => { // NEXT
-						opnum -= 1;
+						ops >>= 6;
 					}
 					4 => { // DROP
-						opnum -= 1;
+						ops >>= 6;
 						valnum -= 1;
+						vals >>= 1;
 						ignore -= 1;
 					}
 					_ => unsafe { core::hint::unreachable_unchecked() },
