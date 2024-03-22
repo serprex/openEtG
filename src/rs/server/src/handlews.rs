@@ -5,7 +5,7 @@ use std::num::NonZeroUsize;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
-use base64::engine::{general_purpose::STANDARD_NO_PAD, Engine};
+use base64::prelude::*;
 use bb8_postgres::tokio_postgres::{
 	types::{Json, ToSql},
 	Client, GenericClient,
@@ -1439,7 +1439,8 @@ pub async fn handle_ws(
 									p.as_bytes(),
 									&mut keybuf,
 								);
-								user.auth = STANDARD_NO_PAD.encode(&mut keybuf[..]);
+								user.auth.clear();
+								BASE64_STANDARD_NO_PAD.encode_string(&keybuf[..], &mut user.auth);
 							}
 							if client.execute(
 								"update users set auth = $2, salt = $3, iter = $4, algo = $5 where id = $1",
@@ -2286,13 +2287,12 @@ pub async fn handle_ws(
 								psw.as_bytes(),
 								&mut keybuf,
 							);
-							let realkey = user.auth.as_bytes();
-							if realkey.is_empty() {
-								user.auth = STANDARD_NO_PAD.encode(&mut keybuf[..]);
+							if user.auth.is_empty() {
+								user.auth = BASE64_STANDARD_NO_PAD.encode(&keybuf[..]);
 								true
 							} else {
 								let mut realkeybuf = [0u8; 64];
-								STANDARD_NO_PAD
+								BASE64_STANDARD_NO_PAD
 									.decode_slice_unchecked(user.auth.as_bytes(), &mut realkeybuf)
 									.ok();
 								keybuf == realkeybuf

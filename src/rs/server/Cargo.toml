@@ -14,7 +14,7 @@ opt-level = 1
 lto = "thin"
 
 [dependencies]
-base64 = { version = "0.21", default-features = false }
+base64 = { version = "0.22", default-features = false, features = ["alloc"] }
 bb8-postgres = { version = "0.8", features = ["with-serde_json-1"] }
 brotli = { version = "3", default-features = false, features = ["std"] }
 etg = { version = "0.1", default-features = false, path = "../" }
