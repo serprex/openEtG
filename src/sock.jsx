@@ -1,4 +1,4 @@
-import config from '../wsconfig.json' assert { type: 'json' };
+import config from '../wsconfig.json' with { type: 'json' };
 
 import Cards from './Cards.js';
 import { decodedeck, fromTrueMark } from './etgutil.js';

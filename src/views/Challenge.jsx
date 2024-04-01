@@ -6,7 +6,7 @@ import Game from '../Game.js';
 import * as etgutil from '../etgutil.js';
 import DeckDisplay from '../Components/DeckDisplay.jsx';
 import * as store from '../store.jsx';
-import aiDecks from '../Decks.json' assert { type: 'json' };
+import aiDecks from '../Decks.json' with { type: 'json' };
 import { deckgen } from '../deckgen.js';
 
 const { mage, demigod } = aiDecks;

@@ -1,7 +1,7 @@
 import { iterdeck, fromTrueMark } from './etgutil.js';
 import OriginalCards from './vanilla/Cards.js';
 import OpenCards from './Cards.js';
-import enums from './enum.json' assert { type: 'json' };
+import enums from './enum.json' with { type: 'json' };
 import * as wasm from './rs/pkg/etg.js';
 
 const GameMoveType = ['end', 'cast', 'accept', 'mulligan', 'foe', 'resign'];

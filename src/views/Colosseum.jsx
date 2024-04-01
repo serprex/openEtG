@@ -1,6 +1,6 @@
 import { mkAi, mkPremade } from '../mkAi.js';
 import * as sock from '../sock.jsx';
-import Decks from '../Decks.json' assert { type: 'json' };
+import Decks from '../Decks.json' with { type: 'json' };
 import * as store from '../store.jsx';
 
 const NymphList = new Uint16Array([

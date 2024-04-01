@@ -1,4 +1,4 @@
-import aiDecks from '../Decks.json' assert { type: 'json' };
+import aiDecks from '../Decks.json' with { type: 'json' };
 import * as etgutil from '../../etgutil.js';
 import Game from '../../Game.js';
 import { choose, randint, shuffle, upto } from '../../util.js';

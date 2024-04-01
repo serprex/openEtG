@@ -1,6 +1,6 @@
 import { decodedeck } from './etgutil.js';
 import Cards from './Cards.js';
-import Decks from './Decks.json' assert { type: 'json' };
+import Decks from './Decks.json' with { type: 'json' };
 import * as store from './store.jsx';
 import { pveCostReward } from './userutil.js';
 import { choose, randint, shuffle } from './util.js';

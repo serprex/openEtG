@@ -56,12 +56,7 @@ export default {
 					loader: 'babel-loader',
 					options: {
 						presets: ['solid'],
-						plugins: [
-							[
-								'@babel/plugin-syntax-import-attributes',
-								{ deprecatedAssertSyntax: true },
-							],
-						],
+						plugins: ['@babel/plugin-syntax-import-attributes'],
 					},
 				},
 			},

@@ -20,7 +20,7 @@ import CardImage from '../Components/CardImage.jsx';
 import Text from '../Components/Text.jsx';
 import * as store from '../store.jsx';
 import { mkQuestAi } from '../Quest.js';
-import enums from '../enum.json' assert { type: 'json' };
+import enums from '../enum.json' with { type: 'json' };
 import { Kind, Phase, Sfx } from '../rs/pkg/etg.js';
 import AiWorker from '../AiWorker.js';
 
