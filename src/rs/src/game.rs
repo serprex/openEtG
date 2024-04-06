@@ -1873,20 +1873,20 @@ impl Game {
 		dmgdata.dmg = dmg;
 		dmgdata.amt = capdmg;
 		self.proc_data(Event::Dmg, id, &mut dmgdata);
-		if dmg > 0 {
+		if realdmg < 0 {
+			return dmg
+		} else {
 			if (!dontdie || kind == Kind::Player) && self.truehp(id) <= 0 {
 				self.die(id);
 			} else if self.get(id, Flag::voodoo) {
 				let foe = self.get_foe(self.get_owner(id));
-				self.dmg(foe, dmg);
+				self.dmg(foe, capdmg);
 			}
-		}
-		if realdmg < 0 {
-			dmg
-		} else if sosa {
-			-capdmg
-		} else {
-			capdmg
+			if sosa {
+				-capdmg
+			} else {
+				capdmg
+			}
 		}
 	}
 
