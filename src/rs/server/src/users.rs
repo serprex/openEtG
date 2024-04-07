@@ -3,8 +3,7 @@ use std::num::NonZeroUsize;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 
-use bb8_postgres::tokio_postgres::types::{FromSql, ToSql};
-use bb8_postgres::tokio_postgres::{types::Json, Client, GenericClient};
+use bb8_postgres::tokio_postgres::{types::{Json, FromSql, ToSql}, Client, GenericClient};
 use ring::constant_time::verify_slices_are_equal;
 use ring::pbkdf2;
 use serde::{Deserialize, Serialize};
@@ -208,15 +207,16 @@ impl Users {
 				let name = urow.get::<usize, String>(0);
 				let type_id = urow.get::<usize, i32>(1);
 				if type_id == 1 {
-					let Ok(Json(userdata)) = urow.try_get::<usize, Json<OpenData>>(2) else {
-						panic!("Invalid json for user {}", name);
+					match urow.try_get::<usize, Json<OpenData>>(2) {
+						Ok(Json(userdata)) => data.insert(name, userdata),
+						Err(err) => panic!("Invalid json for user {} {} {}", userid, name, err),
 					};
-					data.insert(name, userdata);
 				} else {
-					let Ok(Json(userdata)) = urow.try_get::<usize, Json<LegacyData>>(2) else {
-						panic!("Invalid json for legacy {}", name);
+					match urow.try_get::<usize, Json<LegacyData>>(2) {
+						Ok(Json(userdata)) => legacy.insert(name, userdata),
+						Err(err) => panic!("Invalid json for legacy {} {} {}", userid, name, err),
 					};
-					legacy.insert(name, userdata);
+
 				}
 			}
 			Some((data, legacy))

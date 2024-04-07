@@ -49,6 +49,6 @@ impl<'de> Deserialize<'de> for Cardpool {
 	where
 		D: Deserializer<'de>,
 	{
-		Ok(Cardpool::from(String::deserialize(deserializer)?.as_str()))
+		Ok(Cardpool::from(<&str>::deserialize(deserializer)?))
 	}
 }
