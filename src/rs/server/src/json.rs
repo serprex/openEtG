@@ -469,7 +469,7 @@ pub enum WsResponse<'a> {
 	},
 	legacyboard {
 		top: &'a [(&'a str, &'a str, i32)],
-	}
+	},
 }
 
 #[derive(Serialize, Clone)]

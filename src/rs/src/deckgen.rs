@@ -3,9 +3,6 @@
 use alloc::vec::Vec;
 use core::cell::RefCell;
 
-use rand::{Rng, SeedableRng};
-use rand_pcg::Pcg32;
-
 const PREC: i16 = 12;
 
 #[cfg(target_arch = "wasm32")]
@@ -14,18 +11,19 @@ use wasm_bindgen::prelude::*;
 use crate::card::{self, AsUpped, Card, Cards};
 use crate::etg;
 use crate::game::{Flag, Kind};
+use crate::rng::Pcg32;
 use crate::skill::{Event, Skill};
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn deckgen_duo(e1: i8, e2: i8, uprate: u8, markpower: i16, maxrarity: i32, seed: i32) -> Vec<i16> {
-	let mut rng = Pcg32::seed_from_u64(seed as u64);
-	let mut build = Builder::new(e2 as i16, uprate, markpower, &mut rng);
+pub fn deckgen_duo(e1: i8, e2: i8, uprate: u8, markpower: i16, maxrarity: i32, seed: u32) -> Vec<i16> {
+	let mut rng = Pcg32::from(seed);
+	let mut build = Builder::new(e2 as i16, uprate, markpower, &rng);
 	for j in [false, true] {
 		let ele = if j { e2 } else { e1 };
 		for i in 0..(if j { 9 } else { 15 }) {
-			let upped = rng.gen_range(0..100) < uprate;
-			if let Some(card) = card::OpenSet.random_card(&mut rng, upped, |card| {
+			let upped = rng.upto(100) < uprate as u32;
+			if let Some(card) = card::OpenSet.random_card(&rng, upped, |card| {
 				card.element == ele
 					&& (card.flag & Flag::pillar) == 0
 					&& card.rarity as i32 <= maxrarity
@@ -47,28 +45,28 @@ pub fn deckgen_duo(e1: i8, e2: i8, uprate: u8, markpower: i16, maxrarity: i32, s
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn deckgen_bow(uprate: u8, markpower: i16, maxrarity: i32, seed: i32) -> Vec<i16> {
-	let mut rng = Pcg32::seed_from_u64(seed as u64);
+pub fn deckgen_bow(uprate: u8, markpower: i16, maxrarity: i32, seed: u32) -> Vec<i16> {
+	let mut rng = Pcg32::from(seed);
 	let mut build: Builder;
-	if rng.gen_range(0..200) < uprate {
-		build = Builder::new(etg::Entropy, uprate, markpower, &mut rng);
-		for _ in 0..rng.gen_range(4..=6) {
+	if rng.upto(200) < uprate as u32 {
+		build = Builder::new(etg::Entropy, uprate, markpower, &rng);
+		for _ in 0..4 + rng.upto(3) {
 			build.add_card(AsUpped(card::Nova, true));
 		}
 	} else {
-		build = Builder::new(etg::Chroma, uprate, markpower, &mut rng);
-		for _ in 0..rng.gen_range(2..=6) {
+		build = Builder::new(etg::Chroma, uprate, markpower, &rng);
+		for _ in 0..2 + rng.upto(5) {
 			build.add_card(card::Nova);
 		}
-		for _ in 0..rng.gen_range(0..=2) {
+		for _ in 0..rng.upto(3) {
 			build.add_card(card::ChromaticButterfly);
 		}
 	}
 	while build.deck.len() < 30 {
 		for ele in 1..=12 {
-			for i in 0..=rng.gen_range(1..=4) {
-				let upped = rng.gen_range(0..100) < uprate;
-				if let Some(card) = card::OpenSet.random_card(&mut rng, upped, |card| {
+			for i in 0..=1 + (rng.next32() & 3) {
+				let upped = (rng.upto(100) as u8) < uprate;
+				if let Some(card) = card::OpenSet.random_card(&rng, upped, |card| {
 					card.element == ele
 						&& (card.flag & Flag::pillar) == 0
 						&& card.cost < 7 && card.rarity as i32 <= maxrarity
@@ -99,15 +97,15 @@ pub fn deckgen_bow(uprate: u8, markpower: i16, maxrarity: i32, seed: i32) -> Vec
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn deckgen_ai4(e1: i8, e2: i8, seed: i32) -> Vec<i16> {
-	let mut rng = Pcg32::seed_from_u64(seed as u64);
+pub fn deckgen_ai4(e1: i8, e2: i8, seed: u32) -> Vec<i16> {
+	let mut rng = Pcg32::from(seed);
 	let mut deck = Vec::with_capacity(65);
 	for i in 0..24 {
-		let upped = rng.gen_range(0..100) < 30;
+		let upped = rng.upto(100) < 30;
 		deck.push(etg::PillarList[if i < 4 { 0 } else { e1 as usize }] - if upped { 2000 } else { 4000 });
 	}
 	for i in 0..40 {
-		let upped = rng.gen_range(0..100) < 30;
+		let upped = rng.upto(100) < 30;
 		let e = if i < 30 { e1 } else { e2 };
 		if let Some(card) = card::OrigSet.random_card(&mut rng, upped, |card| {
 			card.element == e
@@ -321,11 +319,11 @@ struct Builder {
 	pub anyweapon: u8,
 	pub ecost: [i16; 13],
 	pub uprate: u8,
-	pub rng: RefCell<Pcg32>,
+	pub rng: Pcg32,
 }
 
 impl Builder {
-	fn new(mark: i16, uprate: u8, markpower: i16, rng: &mut Pcg32) -> Builder {
+	fn new(mark: i16, uprate: u8, markpower: i16, rng: &Pcg32) -> Builder {
 		let mut ecost = [0; 13];
 		ecost[mark as usize] = markpower * (PREC * -8);
 		Builder {
@@ -335,7 +333,7 @@ impl Builder {
 			anyweapon: 0,
 			ecost: [0; 13],
 			uprate,
-			rng: RefCell::new(Pcg32::from_rng(rng).unwrap()),
+			rng: Pcg32::from(rng.next32()),
 		}
 	}
 
@@ -470,7 +468,7 @@ impl Builder {
 
 	fn up_code(&self, code: i16) -> i16 {
 		if self.uprate > 0 {
-			card::AsUpped(code, self.rng.borrow_mut().gen_range(0..100) < self.uprate)
+			card::AsUpped(code, (self.rng.upto(100) as u8) < self.uprate)
 		} else {
 			code
 		}

@@ -13,6 +13,7 @@ pub mod etg;
 pub mod game;
 #[rustfmt::skip]
 pub mod generated;
+pub mod rng;
 pub mod skill;
 pub mod text;
 

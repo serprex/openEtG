@@ -11,6 +11,7 @@ use crate::etg;
 pub use crate::game::CardSet;
 use crate::game::{Flag, Kind, Stat};
 pub use crate::generated::*;
+use crate::rng::Pcg32;
 use crate::skill::{Event, Skill};
 
 #[derive(Clone, Copy)]
@@ -66,14 +67,11 @@ impl Cards {
 		}
 	}
 
-	pub fn random_card<Ffilt, R>(&self, rng: &mut R, upped: bool, ffilt: Ffilt) -> Option<&'static Card>
+	pub fn random_card<Ffilt>(&self, rng: &Pcg32, upped: bool, ffilt: Ffilt) -> Option<&'static Card>
 	where
 		Ffilt: Fn(&'static Card) -> bool,
-		R: rand::Rng,
 	{
-		use rand::seq::IteratorRandom;
-
-		self.filter(upped).iter().filter(|c| (c.flag & Flag::token) == 0 && ffilt(c)).choose(rng)
+		rng.choose_iter(self.filter(upped).iter().filter(|c| (c.flag & Flag::token) == 0 && ffilt(c)))
 	}
 }
 
@@ -224,13 +222,11 @@ pub fn code_cmp_core(cards: &'static Cards, x: i16, y: i16) -> Ordering {
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn original_oracle(seed: i32) -> i16 {
-	use rand::{Rng, SeedableRng};
-	use rand_pcg::Pcg32;
-	let mut rng = Pcg32::seed_from_u64(seed as u64);
-	let nymph = rng.gen_range(0..100) < 3;
+pub fn original_oracle(seed: u32) -> i16 {
+	let mut rng = Pcg32::from(seed);
+	let nymph = rng.upto(100) < 3;
 	OrigSet
-		.random_card(&mut rng, false, |c| {
+		.random_card(&rng, false, |c| {
 			c.code != v_Relic as i16
 				&& !(c.code >= v_MarkofEntropy as i16 && c.code <= v_MarkofAether as i16)
 				&& !c.free() && nymph == etg::NymphList.contains(&(c.code + 4000))

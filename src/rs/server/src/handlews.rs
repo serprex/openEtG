@@ -1362,13 +1362,13 @@ pub async fn handle_ws(
 									userdata.ostreakday2 = today;
 									userdata.oracle = today;
 									let card = {
-										let mut rng = rand::thread_rng();
-										let ocardnymph = (rng.next_u32() & 31) == 0;
-										let Some(card) = etg::card::OpenSet.random_card(&mut rng, false, |card| {
+										let rng = etg::rng::Pcg32::from(rand::thread_rng().next_u32());
+										let ocardnymph = (rng.next32() & 31) == 0;
+										let Some(card) = etg::card::OpenSet.random_card(&rng, false, |card| {
 											(card.rarity != 4) ^ ocardnymph && (card.flag & etg::game::Flag::pillar) == 0
 										}) else { continue };
-										userdata.dailymage = rng.gen_range(0..MAGE_COUNT);
-										userdata.dailydg = rng.gen_range(0..DG_COUNT);
+										userdata.dailymage = rng.upto(MAGE_COUNT as u32) as u8;
+										userdata.dailydg = rng.upto(DG_COUNT as u32) as u8;
 										card
 									};
 									let ccode =
@@ -1568,7 +1568,7 @@ pub async fn handle_ws(
 								if bound || userdata.gold >= cost {
 									let mut newcards: Cardpool = Default::default();
 									let mut rarity: usize = 1;
-									let mut rng = rand::thread_rng();
+									let rng = etg::rng::Pcg32::from(rand::thread_rng().next_u32());
 									for i in 0..amount {
 										while rarity - 1 < rares.len() && i == rares[rarity - 1] * bulk as u16 {
 											rarity += 1;
@@ -1577,15 +1577,15 @@ pub async fn handle_ws(
 											etg::etg::NymphList[if element > 0 && element < 13 {
 												element as usize
 											} else {
-												rng.gen_range(1..13)
+												1 + rng.upto(13) as usize
 											}]
 										} else {
-											let notfromele = rng.gen_range(0..3) == 0;
+											let notfromele = rng.upto(3) == 0;
 											let bumprarity =
-												rarity + rng.gen_bool(bumprate) as usize;
+												rarity + ((rng.next32() as f64 / u32::MAX as f64) < bumprate) as usize;
 											if (element > 0 || bumprarity < 3) && element < 13 {
 												etg::card::OpenSet.random_card(
-													&mut rng,
+													&rng,
 													false,
 													|card| {
 														(card.element == element as i8)
@@ -1595,7 +1595,7 @@ pub async fn handle_ws(
 												)
 											} else {
 												etg::card::OpenSet.random_card(
-													&mut rng,
+													&rng,
 													false,
 													|card| card.rarity as usize == bumprarity,
 												)

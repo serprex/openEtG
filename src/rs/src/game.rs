@@ -15,16 +15,13 @@ use core::hash::{Hash, Hasher};
 use core::iter::once;
 
 use fxhash::FxHasher64;
-use rand::distributions::{uniform::SampleRange, uniform::SampleUniform, Distribution, Uniform};
-use rand::seq::SliceRandom;
-use rand::{Rng, SeedableRng};
-use rand_pcg::Pcg32;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
 use crate::card::{self, Card, Cards};
 use crate::etg;
 use crate::generated;
+use crate::rng::Pcg32;
 use crate::set_panic_hook;
 use crate::skill::{Event, ProcData, Skill, SkillName, Skills};
 use crate::text::SkillThing;
@@ -588,7 +585,7 @@ impl Game {
 		}
 
 		Game {
-			rng: Pcg32::seed_from_u64(seed as u64),
+			rng: seed.into(),
 			turn: 1,
 			winner: 0,
 			phase: if set == CardSet::Original { Phase::Play } else { Phase::Mulligan },
@@ -1208,7 +1205,7 @@ impl Game {
 			let mut seedrng = self.rng.clone();
 			for _ in 0..samples {
 				let mut gclone = self.clone();
-				gclone.rng = Pcg32::from_rng(&mut seedrng).unwrap();
+				gclone.rng = Pcg32::from(seedrng.next32());
 				for pl in 1..=gclone.players_len() {
 					let player = gclone.get_player(pl);
 					let sh = player.shield;
@@ -1311,12 +1308,8 @@ impl Game {
 }
 
 impl Game {
-	pub fn rng_range<T: SampleUniform, R: SampleRange<T>>(&mut self, range: R) -> T {
-		self.rng.gen_range(range)
-	}
-
 	pub fn shuffle<T>(&mut self, slice: &mut [T]) {
-		slice.shuffle(&mut self.rng);
+		self.rng.shuffle(slice)
 	}
 
 	pub fn players_len(&self) -> i16 {
@@ -1358,7 +1351,15 @@ impl Game {
 	}
 
 	pub fn choose<'a, 'b, T>(&'a mut self, slice: &'b [T]) -> Option<&'b T> {
-		slice.choose(&mut self.rng)
+		self.rng.choose(slice)
+	}
+
+	pub fn upto(&mut self, n: u32) -> u32 {
+		self.rng.upto(n)
+	}
+
+	pub fn next32(&mut self) -> u32 {
+		self.rng.next32()
 	}
 
 	pub fn cloneinst(&mut self, id: i16) -> i16 {
@@ -1408,10 +1409,7 @@ impl Game {
 	where
 		Ffilt: Fn(&Game, &'static Card) -> bool,
 	{
-		let mut rng = self.rng.clone();
-		let card = self.cards.random_card(&mut rng, upped, |c| ffilt(self, c));
-		self.rng = rng;
-		card
+		self.cards.random_card(&self.rng, upped, |c| ffilt(self, c))
 	}
 
 	pub fn skill_text(&self, id: i16, ev: Event) -> Option<SkillsName> {
@@ -1472,7 +1470,7 @@ impl Game {
 
 	fn mutantactive(&mut self, id: i16, actives: &'static [Skill]) -> bool {
 		self.lobo(id);
-		let idx = self.rng.gen_range(-3..actives.len() as isize);
+		let idx = self.rng.upto(actives.len() as u32 + 3) as i32 - 3;
 		if idx == -3 {
 			self.addskills(id, Event::Death, &[Skill::growth(1, 1)]);
 			false
@@ -1481,7 +1479,7 @@ impl Game {
 			self.set(id, flag, true);
 			false
 		} else {
-			let cast = self.rng.gen_range(1..=2);
+			let cast = 1 + (self.rng.next32() & 1) as i16;
 			let castele = self.cards.get(self.get(id, Stat::card)).element as i16;
 			self.set(id, Stat::cast, cast);
 			self.set(id, Stat::castele, castele);
@@ -1874,7 +1872,7 @@ impl Game {
 		dmgdata.amt = capdmg;
 		self.proc_data(Event::Dmg, id, &mut dmgdata);
 		if realdmg < 0 {
-			return dmg
+			return dmg;
 		} else {
 			if (!dontdie || kind == Kind::Player) && self.truehp(id) <= 0 {
 				self.die(id);
@@ -1982,7 +1980,7 @@ impl Game {
 		thing.skill =
 			Skills::from(card.skill.iter().map(|&(k, v)| (k, Cow::Borrowed(v))).collect::<Vec<_>>());
 		if thing.flag.get(Flag::mutant) {
-			let buff = self.rng.gen_range(0..25);
+			let buff = self.rng.upto(25) as i16;
 			if card.code < 5000 {
 				self.buffhp(c, buff / 5);
 				self.incrAtk(c, buff % 5);
@@ -2417,18 +2415,17 @@ impl Game {
 
 	pub fn drawhand(&mut self, id: i16, size: usize) {
 		let pl = self.get_player_mut(id);
-		let mut deckrc = pl.deck.clone();
-		let deck = Rc::make_mut(&mut deckrc);
+		let mut deck = (*pl.deck).clone();
 		deck.extend(pl.hand_iter());
 		pl.hand = [0; 8];
-		deck[..].shuffle(&mut self.rng);
+		self.rng.shuffle(&mut deck);
 		for _ in 0..size {
 			if let Some(cardid) = deck.pop() {
 				self.fx(cardid, Fx::StartPos(-id));
 				self.addCard(id, cardid);
 			}
 		}
-		self.get_player_mut(id).deck = deckrc;
+		*self.get_player_mut(id).deck_mut() = deck;
 	}
 
 	pub fn sanctified(&self, id: i16) -> bool {
@@ -2624,15 +2621,14 @@ impl Game {
 			let cap = if self.cards.set == CardSet::Original { 75 } else { 99 };
 			if qtype == 0 {
 				if amt < 0 {
-					let uni12 = Uniform::from(0..12);
 					for _ in 0..(-amt).min(1188) {
-						let q = &mut quanta[uni12.sample(&mut self.rng)];
+						let q = &mut quanta[self.rng.upto(12) as usize];
 						*q += ((*q as i16) < cap) as u8;
 					}
 				} else {
 					let total: u32 = quanta.iter().map(|&q| q as u32).sum();
 					for n in 0..(amt as u32).min(1188) {
-						let mut pick = self.rng.gen_range(0..total - n);
+						let mut pick = self.rng.upto(total - n);
 						for q in quanta.iter_mut() {
 							if pick < *q as u32 {
 								*q -= 1;

@@ -11,8 +11,6 @@ repository = "https://github.com/serprex/openEtG"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-rand = { version = "0.8", default-features = false }
-rand_pcg = { version = "0.3", default-features = false }
 fxhash = "0.2"
 
 [build-dependencies]

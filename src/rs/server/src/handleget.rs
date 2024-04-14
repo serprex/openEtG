@@ -446,15 +446,12 @@ async fn handle_get_core(
 			return response::Builder::new().status(503).body(Bytes::new());
 		}
 	} else if path.starts_with("/speed/") {
-		if let Ok(seed) = path["/speed/".len()..].parse() {
-			use rand::{Rng, SeedableRng};
-			use rand_pcg::Pcg32;
-
-			let mut rng = Pcg32::seed_from_u64(seed);
+		if let Ok(seed) = path["/speed/".len()..].parse::<u32>() {
+			let rng = etg::rng::Pcg32::from(seed);
 			let mut eles = [false; 12];
 			let mut codes = [0i16; 84];
-			for i in 0..12 {
-				let mut ele = rng.gen_range(0..12 - i);
+			for i in 0..12usize {
+				let mut ele = rng.upto(12 - i as u32);
 				for idx in 0..12 {
 					if !eles[idx] {
 						if ele == 0 {
@@ -463,7 +460,7 @@ async fn handle_get_core(
 							for j in 0..7 {
 								let ij = i * 7 + j;
 								codes[ij] = card::OpenSet
-									.random_card(&mut rng, false, |card| {
+									.random_card(&rng, false, |card| {
 										card.element == ele
 											&& (card.flag & etg::game::Flag::pillar) == 0
 											&& !codes[i * 7..ij].iter().any(|&code| code == card.code)
@@ -484,7 +481,7 @@ async fn handle_get_core(
 				deck.extend(&encode_code(code));
 			}
 			deck.extend(&b"01"[..]);
-			deck.extend(&encode_code(rng.gen_range(9010..9022)));
+			deck.extend(&encode_code(9010 + rng.upto(12) as i16));
 			PlainResponse {
 				cache: CacheControl::NoCache,
 				kind: ContentType::ImageSvgXml,

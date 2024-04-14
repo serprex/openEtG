@@ -3,7 +3,10 @@ use std::num::NonZeroUsize;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 
-use bb8_postgres::tokio_postgres::{types::{Json, FromSql, ToSql}, Client, GenericClient};
+use bb8_postgres::tokio_postgres::{
+	types::{FromSql, Json, ToSql},
+	Client, GenericClient,
+};
 use ring::constant_time::verify_slices_are_equal;
 use ring::pbkdf2;
 use serde::{Deserialize, Serialize};
@@ -216,7 +219,6 @@ impl Users {
 						Ok(Json(userdata)) => legacy.insert(name, userdata),
 						Err(err) => panic!("Invalid json for legacy {} {} {}", userid, name, err),
 					};
-
 				}
 			}
 			Some((data, legacy))
