@@ -594,7 +594,7 @@ pub async fn handle_ws(
 											}
 											let decay = awon + aloss;
 											let newscore =
-												(wilson(awon, awon + aloss) * (1.0 - decay / (decay + 64.0)) * 1000.0) as i32;
+												(wilson(awon, awon + aloss) * (1.0 - decay / (decay + 192.0)) * 1000.0) as i32;
 											trx.execute(
 												if won {
 													"update arena set won = won+1, score = $3 where arena_id = $1 and user_id = $2"
