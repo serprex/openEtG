@@ -25,7 +25,7 @@
     "build": "npm run build-wasm && webpack --mode=production --config webpack.config.js",
     "build-dev": "npm run build-wasm && webpack --mode=development --config webpack.config.js",
     "build-atlas": "node scripts/sheet.js && cwebp -m 6 -q 100 assets/atlas.png -o assets/atlas.webp",
-    "build-wasm": "cargo build --release --manifest-path src/rs/Cargo.toml --target wasm32-unknown-unknown && wasm-bindgen --no-typescript --out-dir ./src/rs/pkg ./src/rs/target/wasm32-unknown-unknown/release/etg.wasm"
+    "build-wasm": "RUSTFLAGS='-C target-feature=+bulk-memory,+sign-ext' cargo build --release --manifest-path src/rs/Cargo.toml --target wasm32-unknown-unknown && wasm-bindgen --no-typescript --out-dir ./src/rs/pkg ./src/rs/target/wasm32-unknown-unknown/release/etg.wasm"
   },
   "license": "MIT"
 }
