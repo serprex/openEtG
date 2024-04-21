@@ -3,9 +3,9 @@
 use std::collections::BTreeMap;
 use std::fmt::Write;
 use std::fs;
+use std::str::FromStr;
 
 use serde::Serialize;
-use serde_json::Value;
 
 #[derive(Default, Serialize)]
 struct Enums {
@@ -47,186 +47,166 @@ fn parseCost(s: &str, ele: u8) -> Option<(i8, u8)> {
 	}
 }
 
-fn parseCostValue(value: &Value, ele: u8) -> Option<(i8, u8)> {
-	if let Some(num) = value.as_i64() {
-		Some((num as i8, ele))
+const SPELL: u8 = 3;
+
+fn parse<F: FromStr + Default>(s: &str) -> F {
+	if s.is_empty() {
+		F::default()
+	} else if let Ok(x) = FromStr::from_str(s) {
+		x
 	} else {
-		let s = value.as_str().expect("non-numerical potential costs must be strings");
-		parseCost(s, ele)
+		panic!("failed to parse {}", s)
 	}
 }
 
-const WEAPON: u8 = 0;
-const SHIELD: u8 = 1;
-const SPELL: u8 = 3;
-const CREATURE: u8 = 4;
-
 fn process_cards(set: &'static str, path: &'static str, source: &mut String, enums: &mut Enums) {
-	let cards_json = fs::read_to_string(path).expect("failed to read Cards.json");
-	let cards_data =
-		serde_json::from_str::<Vec<Vec<Vec<Value>>>>(&cards_json).expect("failed to parse Cards.json");
 	let mut cards: Vec<Card> = Vec::new();
-	for (kind, data0) in cards_data.into_iter().enumerate() {
-		let kind = kind as u8;
-		for (ele, data1) in data0.into_iter().skip(1).enumerate() {
-			let ele = ele as u8;
-			for data in data1.into_iter() {
-				let data = data.as_array().expect("data not an array");
-				let name = data[0].as_str().expect("name not a string");
-				let code = data[1].as_u64().expect("code not an integer") as u16;
-				let (cost, costele) = parseCostValue(&data[2], ele).expect("cost not a cost");
-				let rarity = if set == "Open" { &data[3] } else { data.last().unwrap() }
-					.as_i64()
-					.expect("rarity not an integer") as i8;
-				let upped = (code - 1000) % 4000 > 1999;
-				let (attack, health) = if kind == WEAPON || kind == CREATURE || kind == SHIELD {
-					let a = if kind != SHIELD {
-						data[4 + (set == "Open") as usize].as_i64().expect("attack not an integer") as i8
-					} else {
-						0
-					};
-					let h = data[5 - (kind == SHIELD) as usize + (set == "Open") as usize]
-						.as_i64()
-						.expect("health not an integer") as i8;
-					(a, h)
+	let cards_json = fs::read_to_string(path).expect("failed to read cards.csv");
+	for row in cards_json.split('\n') {
+		if row.is_empty() {
+			continue;
+		}
+		let values = row.split('|').collect::<Vec<&str>>();
+		if values.len() != 10 {
+			panic!("rows should have 10 values: {}", row);
+		}
+		let code = parse::<u16>(values[0]);
+		let name = values[1];
+		let ele = parse::<u8>(values[2]);
+		let kind = parse::<u8>(values[3]);
+		let rarity = parse::<i8>(values[4]);
+		let (cost, costele) = parseCost(values[5], ele).expect("cost not a cost");
+		let upped = (code - 1000) % 4000 > 1999;
+		let attack = parse::<i8>(values[6]);
+		let health = parse::<i8>(values[7]);
+		let mut cast = 0;
+		let mut castele = 0;
+		let mut statstr = String::from("&[");
+		let mut flagstr = String::from("&0");
+		let mut stat = Vec::new();
+		let mut flag = Vec::new();
+		let status = values[9];
+		if !status.is_empty() {
+			for st in status.split("+") {
+				let mut split = st.splitn(2, '=');
+				if enums.FlagId.contains_key(st) {
+					flag.push(String::from(st));
 				} else {
-					(0, 0)
-				};
-				let mut cast = 0;
-				let mut castele = 0;
-				let mut statstr = String::from("&[");
-				let mut flagstr = String::from("&0");
-				if kind != SPELL {
-					let mut stat = Vec::new();
-					let mut flag = Vec::new();
-					let status = data[data.len() - 1 - (set == "Orig") as usize]
-						.as_str()
-						.expect("status not a string");
-					if !status.is_empty() {
-						for st in status.split("+") {
-							let mut split = st.splitn(2, '=');
-							if enums.FlagId.contains_key(st) {
-								flag.push(String::from(st));
-							} else {
-								let key = split.next().unwrap();
-								assert!(enums.StatId.contains_key(key));
-								let val = split.next().unwrap_or("1");
-								stat.push((String::from(key), val));
-							}
-						}
-						for st in stat {
-							write!(statstr, "(Stat::{},{}),", st.0, st.1).ok();
-						}
-					}
-					if !flag.is_empty() {
-						let lastch = flagstr.len() - 1;
-						unsafe { flagstr.as_mut_vec()[lastch] = b'(' };
-						for fl in flag {
-							write!(flagstr, "Flag::{}|", fl).ok();
-						}
-						let lastch = flagstr.len() - 1;
-						unsafe { flagstr.as_mut_vec()[lastch] = b')' };
-					}
-				}
-				statstr.push(']');
-
-				let mut skillstr = String::from("&[");
-				let skill = data[3 + (set == "Open") as usize].as_str().expect("skill not a string");
-				if !skill.is_empty() {
-					for sk in skill.split("+") {
-						let (event, skill) = if sk.contains('=') {
-							let mut split = sk.splitn(2, "=");
-							let mut event = split.next().unwrap();
-							if let Some((c, ce)) = parseCost(event, ele) {
-								event = "cast";
-								cast = c;
-								castele = ce;
-							}
-							(event, split.next().unwrap())
-						} else if kind == SPELL {
-							("cast", sk)
-						} else {
-							("ownattack", sk)
-						};
-						let mut event = Vec::from(event.as_bytes());
-						let mut skill = Vec::from(skill.as_bytes());
-						if skill.starts_with(b"static ") {
-							skill.splice(0..0, b"r#".iter().cloned());
-						}
-						event[0] -= b'a' - b'A';
-						if event.starts_with(b"Own") {
-							event[3] -= b'a' - b'A';
-						}
-						let mut idx = 0;
-						loop {
-							let mut replaced = false;
-							while idx < skill.len() {
-								let ch = skill[idx];
-								if ch == b' ' {
-									skill[idx] = if replaced { b',' } else { b'(' };
-									replaced = true;
-								} else if ch == b',' {
-									idx += 1;
-									break;
-								}
-								idx += 1;
-							}
-							if replaced {
-								skill.insert(idx - (idx < skill.len()) as usize, b')');
-								idx += 1;
-							}
-							if idx < skill.len() {
-								skill.splice(idx..idx, b"Skill::".iter().cloned());
-								idx += "Skill::".len();
-								continue;
-							} else {
-								break;
-							}
-						}
-						write!(
-							skillstr,
-							"(Event::{},&[Skill::{}]),",
-							unsafe { std::str::from_utf8_unchecked(&event) },
-							unsafe { std::str::from_utf8_unchecked(&skill) }
-						)
-						.ok();
-					}
-				}
-				skillstr.push(']');
-
-				let card = Card {
-					code,
-					name: String::from(name),
-					kind,
-					ele,
-					rarity,
-					attack,
-					health,
-					cost,
-					costele,
-					cast,
-					castele,
-					status: statstr,
-					flag: flagstr,
-					skill: skillstr,
-				};
-				cards.push(card);
-				if !upped && !name.starts_with("52") {
-					source.push_str("pub const ");
-					if set == "Orig" {
-						source.push_str("v_");
-					} else if name.starts_with('5') {
-						source.push('_');
-					}
-					for ch in name.bytes() {
-						let ch = ch as char;
-						if ch.is_ascii_alphanumeric() {
-							source.push(ch);
-						}
-					}
-					write!(source, ":i16={};", code).ok();
+					let key = split.next().unwrap();
+					assert!(enums.StatId.contains_key(key));
+					let val = split.next().unwrap_or("1");
+					stat.push((String::from(key), val));
 				}
 			}
+			for st in stat {
+				write!(statstr, "(Stat::{},{}),", st.0, st.1).ok();
+			}
+		}
+		if !flag.is_empty() {
+			let lastch = flagstr.len() - 1;
+			unsafe { flagstr.as_mut_vec()[lastch] = b'(' };
+			for fl in flag {
+				write!(flagstr, "Flag::{}|", fl).ok();
+			}
+			let lastch = flagstr.len() - 1;
+			unsafe { flagstr.as_mut_vec()[lastch] = b')' };
+		}
+		statstr.push(']');
+
+		let mut skillstr = String::from("&[");
+		let skill = values[8];
+		if !skill.is_empty() {
+			for sk in skill.split("+") {
+				let (event, skill) = if sk.contains('=') {
+					let mut split = sk.splitn(2, "=");
+					let mut event = split.next().unwrap();
+					if let Some((c, ce)) = parseCost(event, ele) {
+						event = "cast";
+						cast = c;
+						castele = ce;
+					}
+					(event, split.next().unwrap())
+				} else if kind == SPELL {
+					("cast", sk)
+				} else {
+					("ownattack", sk)
+				};
+				let mut event = Vec::from(event.as_bytes());
+				let mut skill = Vec::from(skill.as_bytes());
+				if skill.starts_with(b"static ") {
+					skill.splice(0..0, b"r#".iter().cloned());
+				}
+				event[0] -= b'a' - b'A';
+				if event.starts_with(b"Own") {
+					event[3] -= b'a' - b'A';
+				}
+				let mut idx = 0;
+				loop {
+					let mut replaced = false;
+					while idx < skill.len() {
+						let ch = skill[idx];
+						if ch == b' ' {
+							skill[idx] = if replaced { b',' } else { b'(' };
+							replaced = true;
+						} else if ch == b',' {
+							idx += 1;
+							break;
+						}
+						idx += 1;
+					}
+					if replaced {
+						skill.insert(idx - (idx < skill.len()) as usize, b')');
+						idx += 1;
+					}
+					if idx < skill.len() {
+						skill.splice(idx..idx, b"Skill::".iter().cloned());
+						idx += "Skill::".len();
+						continue;
+					} else {
+						break;
+					}
+				}
+				write!(
+					skillstr,
+					"(Event::{},&[Skill::{}]),",
+					unsafe { std::str::from_utf8_unchecked(&event) },
+					unsafe { std::str::from_utf8_unchecked(&skill) }
+				)
+				.ok();
+			}
+		}
+		skillstr.push(']');
+		let card = Card {
+			code,
+			name: String::from(name),
+			kind,
+			ele,
+			rarity,
+			attack,
+			health,
+			cost,
+			costele,
+			cast,
+			castele,
+			status: statstr,
+			flag: flagstr,
+			skill: skillstr,
+		};
+		cards.push(card);
+		if !upped && !name.starts_with("52") {
+			source.push_str("pub const ");
+			if set == "Orig" {
+				source.push_str("v_");
+			} else if name.starts_with('5') {
+				source.push('_');
+			}
+			for ch in name.bytes() {
+				let ch = ch as char;
+				if ch.is_ascii_alphanumeric() {
+					source.push(ch);
+				}
+			}
+			write!(source, ":i16={};", code).ok();
 		}
 	}
 	cards.sort_unstable_by(|a, b| a.code.cmp(&b.code));
@@ -248,8 +228,8 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 }
 
 fn main() {
-	println!("cargo:rerun-if-changed=../Cards.json");
-	println!("cargo:rerun-if-changed=../vanilla/Cards.json");
+	println!("cargo:rerun-if-changed=../cards.csv");
+	println!("cargo:rerun-if-changed=../vanilla/cards.csv");
 	println!("cargo:rerun-if-changed=./src/game.rs");
 	println!("cargo:rerun-if-changed=./src/skill.rs");
 
@@ -317,8 +297,8 @@ fn main() {
 	}
 	source.push_str("}}\n");
 
-	process_cards("Open", "../Cards.json", &mut source, &mut enums);
-	process_cards("Orig", "../vanilla/Cards.json", &mut source, &mut enums);
+	process_cards("Open", "../cards.csv", &mut source, &mut enums);
+	process_cards("Orig", "../vanilla/cards.csv", &mut source, &mut enums);
 
 	fs::write("../enum.json", &serde_json::to_string(&enums).expect("failed to serialize enums"))
 		.expect("Failed to write enum.json");

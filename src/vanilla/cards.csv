@@ -1,0 +1,478 @@
+1002|Quantum Pillar|0|2|0|0|||pillar|pillar+stackable+additive+charges=1
+3002|Quantum Tower|0|2|17|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1011|Mark of Entropy|1|2|15|0|||pillar|pillar+stackable+additive+charges=1
+3011|Mark of Entropy|1|2|20|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1012|Mark of Death|2|2|15|0|||pillar|pillar+stackable+additive+charges=1
+3012|Mark of Death|2|2|20|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1013|Mark of Gravity|3|2|15|0|||pillar|pillar+stackable+additive+charges=1
+3013|Mark of Gravity|3|2|20|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1014|Mark of Earth|4|2|15|0|||pillar|pillar+stackable+additive+charges=1
+3014|Mark of Earth|4|2|20|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1015|Mark of Life|5|2|15|0|||pillar|pillar+stackable+additive+charges=1
+3015|Mark of Life|5|2|20|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1016|Mark of Fire|6|2|15|0|||pillar|pillar+stackable+additive+charges=1
+3016|Mark of Fire|6|2|20|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1017|Mark of Water|7|2|15|0|||pillar|pillar+stackable+additive+charges=1
+3017|Mark of Water|7|2|20|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1018|Mark of Light|8|2|15|0|||pillar|pillar+stackable+additive+charges=1
+3018|Mark of Light|8|2|20|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1019|Mark of Air|9|2|15|0|||pillar|pillar+stackable+additive+charges=1
+3019|Mark of Air|9|2|20|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1020|Mark of Time|10|2|15|0|||pillar|pillar+stackable+additive+charges=1
+3020|Mark of Time|10|2|20|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1021|Mark of Darkness|11|2|15|0|||pillar|pillar+stackable+additive+charges=1
+3021|Mark of Darkness|11|2|20|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1022|Mark of Aether|12|2|15|0|||pillar|pillar+stackable+additive+charges=1
+3022|Mark of Aether|12|2|20|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1027|Dagger|0|0|2|0|2|1|buff=v_dagger|
+3027|Dirk|0|0|17|0|4|1|buff=v_dagger|
+1028|Short Sword|0|0|3|1|3|2|v_noluci|
+3028|Long Sword|0|0|17|1|6|2|v_noluci|
+1029|Hammer|0|0|3|2|3|4|buff=hammer|
+3029|Gavel|0|0|17|2|6|6|buff=hammer|
+1032|Malignant Cell|0|4|0|0|1|1|postauto=mitosis|token+aquatic
+3032|Malignant Cell|0|4|0|0|1|1|postauto=mitosis|token+aquatic
+1033|Relic|0|3|4|1|||v_relic|
+3033|Relic|0|3|16|1|||v_relic|
+1035|Short Bow|0|0|3|2|3|3|buff=bow|ranged
+3035|Long Bow|0|0|17|2|6|4|buff=bow|ranged
+1036|Shield|0|1|2|1||1||
+3036|Tower Shield|0|1|17|5||2||
+1100|Amethyst Pillar|1|2|0|0|||pillar|pillar+stackable+additive+charges=1
+3100|Amethyst Tower|1|2|17|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1101|Maxwell's Demon|1|4|3|5|3|2|2=paradox|airborne
+3101|Maxwell's Demon|1|4|17|5|3|5|2=paradox|airborne
+1102|Abomination|1|4|2|5|5|5||
+3102|Micro Abomination|1|4|17|1|2|4||
+1103|Purple Dragon|1|4|4|10|10|5||airborne
+3103|Amethyst Dragon|1|4|17|11|12|6||airborne
+1104|Dissipation Shield|1|1|3|3|||shield=disshield|
+3104|Dissipation Field|1|1|17|3|||shield=disfield|
+1105|Lycanthrope|1|4|3|2|1|1|2:11=lycanthropy|
+3105|Werewolf|1|4|17|2|1|1|1:11=lycanthropy|
+1106|Chaos Seed|1|3|3|1|||v_cseed|
+3106|Chaos Power|1|3|17|1|||cpower|
+1107|Nova|1|3|2|0|||nova|
+3107|Supernova|1|3|17|2|||nova2|
+1108|Mutation|1|3|3|2|||v_mutation|
+3108|Improved Mutation|1|3|17|3|||v_improve|
+1109|Discord|1|0|6|3|4|3|hit=v_scramble|
+3109|Discord|1|0|18|3|6|3|hit=v_scramble|
+1110|Fallen Elf|1|4|2|4|3|2|1:5=v_mutation|
+3110|Fallen Druid|1|4|17|5|3|3|1:5=v_improve|
+1111|Antimatter|1|3|3|8|||antimatter|
+3111|Improved Antimatter|1|3|17|6|||antimatter|
+1112|Butterfly Effect|1|3|3|5|||butterfly|
+3112|Butterfly Effect|1|3|17|4|||butterfly|
+1113|Pandemonium|1|3|3|3|||v_pandemonium|
+3113|Pandemonium|1|3|17|5|||v_pandemonium|
+1114|Schrödinger's Cat|1|4|4|1|1|1|1=deadalive|
+3114|Schrödinger's Cat|1|4|17|1|1|3|1=deadalive|
+1115|Singularity|1|4|2|10|-1|3|singularity|token
+3115|Singularity|1|4|17|10|-7|5|singularity|token
+1120|Purple Nymph|1|4|15|9|3|1|4=antimatter|
+3120|Entropy Nymph|1|4|20|9|3|2|4=antimatter|
+1130|Shard of Serendipity|1|3|6|3|||v_serendipity|
+3130|Shard of Serendipity|1|3|18|3|||v_serendipity|
+1150|Entropy Pendulum|1|2|0|0|||pend|pillar+stackable+additive+charges=1
+3150|Entropy Pendulum|1|2|17|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
+1200|Bone Pillar|2|2|0|0|||pillar|pillar+stackable+additive+charges=1
+3200|Bone Tower|2|2|17|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1201|Bone Dragon|2|4|4|10|10|5||airborne+nocturnal
+3201|Ivory Dragon|2|4|17|10|11|5||airborne+nocturnal
+1202|Virus|2|4|2|1|1|1|0=virusinfect|airborne+nocturnal
+3202|Retrovirus|2|4|17|2|1|1|0=v_virusplague|airborne+nocturnal
+1203|Flesh Spider|2|4|2|3|3|3|1:9=web|nocturnal
+3203|Flesh Recluse|2|4|17|3|6|3|1:9=web|nocturnal
+1204|Vulture|2|4|3|3||1|death=growth 1 1|airborne+nocturnal
+3204|Condor|2|4|17|3|1|2|death=growth 1 1|airborne+nocturnal
+1205|Skull Shield|2|1|2|3||1|shield=skull|
+3205|Skull Shield|2|1|17|2||1|shield=skull|
+1206|Skeleton|2|4|1|1|1|1||nocturnal
+3206|Elite Skeleton|2|4|17|1|2|2||nocturnal
+1207|Boneyard|2|2|3|3|||death=boneyard|
+3207|Graveyard|2|2|17|5|||death=boneyard|
+1208|Poison|2|3|2|1|||poisonfoe 2|
+3208|Deadly Poison|2|3|17|2|||poisonfoe 3|
+1209|Plague|2|3|3|4|||v_plague|
+3209|Improved Plague|2|3|17|2|||v_plague|
+1210|Arsenic|2|0|6|2|2|7|hit=poison 1|poisonous+nocturnal
+3210|Arsenic|2|0|18|2|4|7|hit=poison 1|poisonous+nocturnal
+1211|Bone Wall|2|1|3|7|||shield=blockwithcharge+death=gaincharge2|stackable+charges=7
+3211|Bone Wall|2|1|17|5|||shield=blockwithcharge+death=gaincharge2|stackable+charges=7
+1212|Aflatoxin|2|3|3|6|||aflatoxin|
+3212|Aflatoxin|2|3|17|5|||aflatoxin|
+1213|Mummy|2|4|2|4|5|3||nocturnal
+3213|Elite Mummy|2|4|17|3|5|3||nocturnal
+1214|Deathstalker|2|4|2|2||1|hit=poison 2|poisonous+nocturnal
+3214|Deathstalker|2|4|17|2||3|hit=poison 2|poisonous+nocturnal
+1215|Soul Catcher|2|2|2|0|||death=soulcatch|
+3215|Soul Catcher|2|2|17|0|||death=soulcatch|
+1220|Grey Nymph|2|4|15|8|7|8|1=aflatoxin|nocturnal
+3220|Death Nymph|2|4|20|8|8|9|1=aflatoxin|nocturnal
+1230|Shard of Sacrifice|2|3|6|2|||sosa|
+3230|Shard of Sacrifice|2|3|18|2|||sosa|
+1250|Death Pendulum|2|2|0|0|||pend|pillar+stackable+additive+charges=1
+3250|Death Pendulum|2|2|17|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
+1300|Gravity Pillar|3|2|0|0|||pillar|pillar+stackable+additive+charges=1
+3300|Gravity Tower|3|2|17|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1301|Sapphire Charger|3|4|3|5|4|5|v_noluci|momentum
+3301|Elite Charger|3|4|17|5|7|5|v_noluci|momentum
+1302|Armagio|3|4|3|5|1|25|1=gpull|
+3302|Elite Armagio|3|4|17|5|2|30|1=gpull|
+1303|Graviton Mercenary|3|4|2|3|3|5||
+3303|Graviton Guard|3|4|17|2|4|7||
+1304|Colossal Dragon|3|4|4|10|7|15||airborne
+3304|Massive Dragon|3|4|17|11|8|30||airborne
+1305|Gravity Shield|3|1|3|5|||shield=weight|
+3305|Gravity Shield|3|1|17|3|||shield=weight|
+1306|Momentum|3|3|2|2|||momentum|
+3306|Unstoppable|3|3|17|1|||momentum|
+1307|Otyugh|3|4|3|4||3|1=devour|
+3307|Elite Otyugh|3|4|17|5||5|1=devour|
+1308|Titan|3|0|6|5|7|50|v_noluci|momentum
+3308|Titan|3|0|18|5|8|50|v_noluci|momentum
+1309|Gravity Pull|3|3|2|2|||gpullspell|
+3309|Gravity Force|3|3|17|1|||gpullspell|
+1310|Graviton Fire Eater|3|4|3|2||5|1:6=growth 2 0|
+3310|Graviton Firemaster|3|4|17|1||6|1:6=growth 2 0|
+1311|Black Hole|3|3|3|4|||v_blackhole|
+3311|Black Hole|3|3|17|3|||v_blackhole|
+1312|Chimera|3|3|4|7|||chimera|
+3312|Chimera|3|3|17|6|||chimera|
+1313|Catapult|3|2|3|3|||2=catapult|
+3313|Trebuchet|3|2|17|3|||1=catapult|
+1314|Acceleration|3|3|2|3|||acceleration|
+3314|Overdrive|3|3|17|4|||acceleration|
+1315|Graviton Salvager|3|4|2|1|1|5|destroy=salvage|
+3315|Graviton Salvager|3|4|17|1|2|5|destroy=salvage|
+1320|Amber Nymph|3|4|15|8|1|3|3=v_blackhole|
+3320|Gravity Nymph|3|4|20|8|1|4|3=v_blackhole|
+1330|Shard of Focus|3|4|6|6||1|0=accretion|
+3330|Shard of Focus|3|4|18|4||1|0=accretion|
+1350|Gravity Pendulum|3|2|0|0|||pend|pillar+stackable+additive+charges=1
+3350|Gravity Pendulum|3|2|17|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
+1400|Stone Pillar|4|2|0|0|||pillar|pillar+stackable+additive+charges=1
+3400|Stone Tower|4|2|17|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1401|Antlion|4|4|2|2|2|3|1=burrow|
+3401|Elite Antlion|4|4|17|2|4|4|1=burrow|
+1402|Hematite Golem|4|4|2|4|4|6||
+3402|Steel Golem|4|4|17|4|6|9||
+1403|Stone Dragon|4|4|4|10|8|10||airborne
+3403|Basalt Dragon|4|4|17|12|10|12||airborne
+1404|Titanium Shield|4|1|3|4||2||
+3404|Diamond Shield|4|1|17|6||3||
+1405|Plate Armor|4|3|2|1|||platearmor 3|
+3405|Heavy Armor|4|3|17|1|||platearmor 6|
+1406|Gnome Rider|4|4|2|1|1|2|quanta 4|
+3406|Gnome Gemfinder|4|4|17|0|1|2|quanta 4|
+1407|Pulverizer|4|0|6|4|5|12|3:3=destroy|
+3407|Pulverizer|4|0|18|4|5|12|2:3=destroy|
+1408|Graboid|4|4|3|3|2|3|1:10=evolve|burrowed
+3408|Elite Graboid|4|4|17|3|2|3|1:10=evolve|burrowed
+1409|Shrieker|4|4|3|8|8|3|1=burrow|
+3409|Elite Shrieker|4|4|17|8|10|4|1=burrow|
+1410|Enchant Artifact|4|3|3|2|||enchant|
+3410|Protect Artifact|4|3|17|1|||enchant|
+1411|Earthquake|4|3|3|3|||earthquake 3|
+3411|Quicksand|4|3|17|2|||earthquake 3|
+1412|Stone Skin|4|3|3|2|||sskin|
+3412|Granite Skin|4|3|17|1|||sskin|
+1413|Basilisk Blood|4|3|3|2|||v_bblood|
+3413|Basilisk Blood|4|3|17|1|||v_bblood|
+1414|Iridium Warden|4|4|2|1||3|1=guard|
+3414|Vanadium Warden|4|4|17|1||6|1=guard|
+1415|Shard Golem|4|4|0|8||||token
+3415|Shard Golem|4|4|0|8||||token
+1420|Auburn Nymph|4|4|15|8|4|8|3=v_bblood|
+3420|Earth Nymph|4|4|20|8|5|9|3=v_bblood|
+1430|Shard of Integrity|4|3|6|2|||v_integrity|
+3430|Shard of Integrity|4|3|18|1|||v_integrity|
+1450|Earth Pendulum|4|2|0|0|||pend|pillar+stackable+additive+charges=1
+3450|Earth Pendulum|4|2|17|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
+1500|Emerald Pillar|5|2|0|0|||pillar|pillar+stackable+additive+charges=1
+3500|Emerald Tower|5|2|17|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1501|Emerald Dragon|5|4|4|10|10|6||airborne
+3501|Jade Dragon|5|4|17|12|12|9||airborne
+1502|Horned Frog|5|4|2|2|3|3||
+3502|Giant Frog|5|4|17|2|5|3||
+1503|Rustler|5|4|2|1|1|1|1:8=photosynthesis|airborne
+3503|Leaf Dragon|5|4|17|1|1|3|1:8=photosynthesis|airborne
+1504|Cockatrice|5|4|2|3|4|4||
+3504|Elite Cockatrice|5|4|17|3|5|5||
+1505|Forest Spirit|5|4|2|2|1|1|1:7=growth 2 2|airborne
+3505|Forest Spectre|5|4|17|3|2|3|1:7=growth 2 2|airborne
+1506|Heal|5|3|2|3|||v_heal|
+3506|Improved Heal|5|3|17|2|||v_heal|
+1507|Thorn Carapace|5|1|3|7|||shield=v_thorn|
+3507|Spine Carapace|5|1|17|7||1|shield=v_thorn|
+1508|Emerald Shield|5|1|4|5||1||immaterial+reflective
+3508|Jade Shield|5|1|17|7||2||immaterial+reflective
+1509|Druidic Staff|5|0|6|2|2|7|regenerate 5|
+3509|Jade Staff|5|0|18|2|4|7|regenerate 5|
+1510|Empathic Bond|5|2|3|5|||empathy|
+3510|Feral Bond|5|2|17|4|||empathy|
+1511|Adrenaline|5|3|3|4|||adrenaline|
+3511|Epinephrine|5|3|17|3|||adrenaline|
+1512|Forest Scorpion|5|4|2|3|1|2|hit=poison 1|poisonous
+3512|Scorpion|5|4|17|3|2|2|hit=poison 1|poisonous
+1513|Mitosis|5|3|3|5|||mitosisspell|
+3513|Mitosis|5|3|17|4|||mitosisspell|
+1520|Green Nymph|5|4|15|8|3|6|2=adrenaline|
+3520|Life Nymph|5|4|20|8|3|7|2=adrenaline|
+1530|Shard of Gratitude|5|2|6|3|||v_gratitude|stackable+additive+charges=1
+3530|Shard of Gratitude|5|2|18|2|||v_gratitude|stackable+additive+charges=1
+1550|Life Pendulum|5|2|0|0|||pend|pillar+stackable+additive+charges=1
+3550|Life Pendulum|5|2|17|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
+1600|Burning Pillar|6|2|0|0|||pillar|pillar+stackable+additive+charges=1
+3600|Burning Tower|6|2|17|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1601|Ash Eater|6|4|2|1|2|1||
+3601|Brimstone Eater|6|4|17|1|2|1|quanta 6|
+1602|Crimson Dragon|6|4|4|10|12|3||airborne
+3602|Ruby Dragon|6|4|17|12|15|2||airborne
+1603|Fire Spirit|6|4|2|2||2|1=growth 2 0|airborne
+3603|Fire Spectre|6|4|17|3|2|3|1=growth 2 0|airborne
+1604|Fire Bolt|6|3|2|3|||v_firebolt 3|
+3604|Fire Lance|6|3|17|1|||v_firebolt 1|
+1605|Fire Shield|6|1|3|6|||shield=v_firewall|
+3605|Fire Buckler|6|1|17|4|||shield=v_firewall|
+1606|Deflagration|6|3|2|3|||destroy|
+3606|Explosion|6|3|17|2|||destroy|
+1607|Fahrenheit|6|0|6|3|4|5|buff=fiery|
+3607|Fahrenheit|6|0|18|3|5|5|buff=fiery|
+1608|Rain of Fire|6|3|3|7|||v_storm 3|
+3608|Fire Storm|6|3|17|5|||v_storm 3|
+1609|Immolation|6|3|2|0|||immolate 5|
+3609|Cremation|6|3|17|0|||immolate 7|
+1610|Lava Golem|6|4|3|5|5|1|1:4=growth 2 2|
+3610|Lava Destroyer|6|4|17|5|7|1|1:4=growth 2 2|
+1611|Rage Potion|6|3|3|3|||rage|
+3611|Rage Elixir|6|3|17|3|||rage|
+1612|Phoenix|6|4|4|7|7|1|owndeath=phoenix|airborne
+3612|Minor Phoenix|6|4|17|2|4|1|owndeath=phoenix|airborne
+1613|Ash|6|4|0|7||5|1=rebirth|token
+3613|Ash|6|4|0|2||5|1=rebirth|token
+1614|Seraph|6|4|4|9|10|1|1:8=v_dshield|airborne
+3614|Seraph|6|4|17|9|12|1|1:8=v_dshield|airborne
+1620|Red Nymph|6|4|15|8|1|6|3=rage|
+3620|Fire Nymph|6|4|20|8|1|7|4=rage|
+1630|Shard of Bravery|6|3|6|2|||bravery|
+3630|Shard of Bravery|6|3|18|1|||bravery|
+1650|Fire Pendulum|6|2|0|0|||pend|pillar+stackable+additive+charges=1
+3650|Fire Pendulum|6|2|17|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
+1700|Water Pillar|7|2|0|0|||pillar|pillar+stackable+additive+charges=1
+3700|Water Tower|7|2|17|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1701|Chrysaora|7|4|2|1||2|1:2=poisonfoe 1|poisonous+aquatic
+3701|Physalia|7|4|17|1|2|2|1:2=poisonfoe 1|poisonous+aquatic
+1702|Blue Crawler|7|4|2|3|3|3||aquatic
+3702|Abyss Crawler|7|4|17|4|6|6||aquatic
+1703|Freeze|7|3|2|1|||freeze 3|
+3703|Congeal|7|3|17|1|||freeze 4|
+1704|Ice Bolt|7|3|3|2|||v_icebolt 2|
+3704|Ice Lance|7|3|17|1|||v_icebolt 1|
+1705|Ice Shield|7|1|3|6||1|shield=v_cold|
+3705|Permafrost Shield|7|1|17|7||2|shield=v_cold|
+1706|Purify|7|3|2|2|||purify|
+3706|Purify|7|3|17|1|||purify|
+1707|Arctic Squid|7|4|8|3|1|2|2=freeze 3|aquatic
+3707|Arctic Octopus|7|4|18|3|1|2|2=freeze 4|aquatic
+1708|Trident|7|0|6|3|4|9|3:4=earthquake 3|aquatic
+3708|Poseidon|7|0|18|3|4|9|2:4=earthquake 3|aquatic
+1709|Ice Dragon|7|4|4|10|9|6||airborne+aquatic
+3709|Arctic Dragon|7|4|17|11|13|5||airborne+aquatic
+1710|Toadfish|7|4|2|5|6|4|1:9=poison 1|poisonous+aquatic
+3710|Puffer Fish|7|4|17|5|3|5|hit=poison 1|poisonous+aquatic
+1711|Mind Flayer|7|4|3|2|2|2|1:12=lobotomize|aquatic
+3711|Ulitharid|7|4|17|3|3|4|1:12=lobotomize|aquatic
+1712|Nymph's Tears|7|3|3|7|||v_nymph|
+3712|Nymph's Tears|7|3|17|6|||v_nymph|
+1713|Flooding|7|2|3|3|||upkeep|flooding=7
+3713|Flooding|7|2|17|2|||upkeep|flooding=7
+1714|Steam Machine|7|4|3|4||6|2:6=steam|aquatic
+3714|Steam Machine|7|4|17|5||15|2:6=steam|aquatic
+1715|Dry Spell|7|3|2|2|||dryspell|
+3715|Dessication|7|3|17|4|||v_dessication|
+1720|Nymph Queen|7|4|15|8|5|6|4=v_nymph|aquatic
+3720|Water Nymph|7|4|20|8|6|7|4=v_nymph|aquatic
+1730|Shard of Patience|7|2|6|3|||0=die|stackable+additive+patience+charges=1
+3730|Shard of Patience|7|2|18|2|||0=die|stackable+additive+patience+charges=1
+1750|Water Pendulum|7|2|0|0|||pend|pillar+stackable+additive+charges=1
+3750|Water Pendulum|7|2|17|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
+1800|Light Pillar|8|2|0|0|||pillar|pillar+stackable+additive+charges=1
+3800|Light Tower|8|2|17|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1801|Photon|8|4|2|0|1|1||airborne
+3801|Ray of Light|8|4|17|0|1|1|quanta 8|airborne
+1802|Golden Dragon|8|4|4|12|10|10||airborne
+3802|Light Dragon|8|4|17|13|12|12||airborne
+1803|Pegasus|8|4|3|4|3|2|1:9=dive|airborne
+3803|Elite Pegasus|8|4|17|4|4|4|1:9=dive|airborne
+1804|Holy Light|8|3|2|1|||v_holylight|
+3804|Holy Flash|8|3|17|0|||v_holylight|
+1805|Solar Shield|8|1|3|3||1|shield=solar|
+3805|Solar Buckler|8|1|17|2||1|shield=solar|
+1806|Guardian Angel|8|4|2|3|1|6|1=mend|airborne
+3806|Archangel|8|4|17|6|7|7|1=mend|airborne
+1807|Blessing|8|3|3|3|||bless|
+3807|Improved Blessing|8|3|17|2|||bless|
+1808|Reflective Shield|8|1|4|1||||immaterial+reflective
+3808|Mirror Shield|8|1|17|2||1||immaterial+reflective
+1809|Morning Star|8|0|6|5|7|7||immaterial
+3809|Morning Glory|8|0|18|5|8|4||immaterial
+1810|Miracle|8|3|6|15|||miracle|
+3810|Improved Miracle|8|3|18|12|||miracle|
+1811|Luciferin|8|3|3|2:0|||luciferin|
+3811|Luciferase|8|3|17|1:0|||luciferin|
+1812|Hope|8|1|3|7|||v_hope|immaterial
+3812|Hope|8|1|17|8||1|v_hope|immaterial
+1813|Crusader|8|4|3|5|2|4|3=v_endow|
+3813|Crusader|8|4|17|5|3|5|2=v_endow|
+1814|Sanctuary|8|2|3|4|||regenerate 5,sanctify|
+3814|Sanctuary|8|2|17|3|||regenerate 5,sanctify|
+1820|Light Nymph|8|4|15|9|6|9|4=luciferin|
+3820|Light Nymph|8|4|20|9|7|9|3=luciferin|
+1830|Shard of Divinity|8|3|6|3|||v_divinity|
+3830|Shard of Divinity|8|3|18|2|||v_divinity|
+1850|Light Pendulum|8|2|0|0|||pend|pillar+stackable+additive+charges=1
+3850|Light Pendulum|8|2|17|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
+1900|Wind Pillar|9|2|0|0|||pillar|pillar+stackable+additive+charges=1
+3900|Wind Tower|9|2|17|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+1901|Dragonfly|9|4|2|1|1|1|quanta 9|airborne
+3901|Damselfly|9|4|17|0|2|1|quanta 9|airborne
+1902|Wyrm|9|4|2|4|3|3|2=dive|airborne
+3902|Elite Wyrm|9|4|17|4|5|3|2=dive|airborne
+1903|Azure Dragon|9|4|4|10|9|6||airborne
+3903|Sky Dragon|9|4|17|12|13|7||airborne
+1904|Fog Shield|9|1|3|2|||shield=evade 40|
+3904|Improved Fog|9|1|17|1|||shield=evade 40|
+1905|Thunderstorm|9|3|2|3|||v_storm 2|
+3905|Lightning Storm|9|3|17|2|||v_storm 2|
+1906|Flying Weapon|9|3|3|1|||v_flyingweapon|
+3906|Animate Weapon|9|3|17|1:0|||v_flyingweapon|
+1907|Firefly Queen|9|4|4|6|3|7|2:5=summon 1908|airborne
+3907|Elite Firefly Queen|9|4|17|6|3|7|2:5=summon 3908|airborne
+1908|Firefly|9|4|2|3|3|2|quanta 8|airborne
+3908|Elite Firefly|9|4|17|3|4|2|quanta 6|airborne
+1909|Owl's Eye|9|0|6|5|5|7|2=snipe|ranged
+3909|Eagle's Eye|9|0|18|5|7|7|2=snipe|ranged
+1910|Unstable Gas|9|2|3|6|||1:6=ignite|
+3910|Unstable Gas|9|2|17|5|||1:6=ignite|
+1911|Shockwave|9|3|3|2|||swave|
+3911|Shockwave|9|3|17|1|||swave|
+1912|Wings|9|1|3|4|||shield=wings+losecharge|charges=5
+3912|Wings|9|1|17|3|||shield=wings+losecharge|charges=5
+1913|Sky Blitz|9|3|3|9|||skyblitz|
+3913|Sky Blitz|9|3|17|8|||skyblitz|
+1920|Blue Nymph|9|4|15|8|6|5|3=gas|
+3920|Air Nymph|9|4|20|8|7|6|3=gas|
+1930|Shard of Freedom|9|2|6|2|||prespell=v_freeevade+attack=v_freedom|stackable+additive+charges=1
+3930|Shard of Freedom|9|2|18|1|||prespell=v_freeevade+attack=v_freedom|stackable+additive+charges=1
+1950|Air Pendulum|9|2|0|0|||pend|pillar+stackable+additive+charges=1
+3950|Air Pendulum|9|2|17|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
+2000|Time Factory|10|2|0|0|||pillar|pillar+stackable+additive+charges=1
+4000|Time Tower|10|2|17|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+2001|Déjà Vu|10|4|2|1|1|1|1=deja|airborne
+4001|Elite Déjà Vu|10|4|17|1|2|2|1=deja|airborne
+2002|Fate Egg|10|4|3|3||1|1=v_hatch|
+4002|Fate Egg|10|4|17|3||1|1=v_hatch|
+2003|Procrastination|10|1|3|6|||shield=v_slow|
+4003|Turtle Shield|10|1|17|4|||shield=v_slow|
+2004|Reverse Time|10|3|2|2|||v_rewind|
+4004|Rewind|10|3|17|1|||v_rewind|
+2005|Golden Hourglass|10|2|3|4|||2=hasten|
+4005|Electrum Hourglass|10|2|17|4|||1=hasten|
+2006|Devonian Dragon|10|4|4|10|10|5||airborne
+4006|Silurian Dragon|10|4|17|12|13|4||airborne
+2007|Anubis|10|4|4|8|5|8|2:12=quint|
+4007|Elite Anubis|10|4|17|8|5|8|1:12=quint|
+2008|Eternity|10|0|6|6|4|8|3=v_rewind|
+4008|Eternity|10|0|18|5|4|8|3=v_rewind|
+2009|Sundial|10|2|4|1|||1:8=hasten+losecharge+attack=stasis|charges=1
+4009|Sundial|10|2|17|0|||1:8=hasten+losecharge+attack=stasis|charges=1
+2010|Scarab|10|4|2|2|2|1|1:3=devour+v_swarm+hp=v_swarmhp|airborne
+4010|Elite Scarab|10|4|17|2|3|1|1:3=devour+v_swarm+hp=v_swarmhp|airborne
+2011|Precognition|10|3|2|2|||precognition|
+4011|Precognition|10|3|17|1|||precognition|
+2012|Pharaoh|10|4|8|9|4|9|2=summon 2010|
+4012|Pharaoh|10|4|18|9|4|9|2=summon 4010|
+2013|Dune Scorpion|10|4|2|3||1|hit=neuro|poisonous
+4013|Dune Scorpion|10|4|17|3||3|hit=neuro|poisonous
+2014|Ghost of the Past|10|4|3|6|7|4|owndiscard=v_obsession|
+4014|Ghost of the Past|10|4|17|7|9|4|owndiscard=v_obsession|
+2020|Golden Nymph|10|4|15|8|6|8|2=precognition|
+4020|Golden Nymph|10|4|20|8|7|9|2=precognition|
+2030|Shard of Readiness|10|3|6|3|||v_readiness|
+4030|Shard of Readiness|10|3|18|2|||v_readiness|
+2050|Time Pendulum|10|2|0|0|||pend|pillar+stackable+additive+charges=1
+4050|Time Pendulum|10|2|17|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
+2100|Obsidian Pillar|11|2|0|0|||pillar|pillar+stackable+additive+charges=1
+4100|Obsidian Tower|11|2|17|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+2101|Black Dragon|11|4|4|10|10|5||airborne+nocturnal
+4101|Obsidian Dragon|11|4|17|12|12|6||airborne+nocturnal
+2102|Devourer|11|4|3|2||2|1:4=burrow+siphon|nocturnal
+4102|Pest|11|4|17|2||4|1:4=burrow+siphon|nocturnal
+2103|Parasite|11|4|3|2|1|1|1:2=poison 1|poisonous+nocturnal
+4103|Bloodsucker|11|4|17|2|3|1|1:2=poison 1|poisonous+nocturnal
+2104|Dusk Mantle|11|1|3|6|||shield=evade 50|
+4104|Improved Dusk|11|1|17|4|||shield=evade 50|
+2105|Steal|11|3|3|4|||v_steal|
+4105|Improved Steal|11|3|17|3|||v_steal|
+2106|Nightfall|11|2|3|3||||nightfall
+4106|Eclipse|11|2|17|4||||nightfall
+2107|Vampire Stiletto|11|0|6|1|4|4|hit=vampire|nocturnal
+4107|Vampire Dagger|11|0|18|2|6|4|hit=vampire|nocturnal
+2108|Drain Life|11|3|3|3|||v_drainlife 3|
+4108|Siphon Life|11|3|17|1|||v_drainlife 1|
+2109|Minor Vampire|11|4|3|3|2|2|hit=vampire|airborne+nocturnal
+4109|Vampire|11|4|17|5|4|3|hit=vampire|airborne+nocturnal
+2110|Liquid Shadow|11|3|3|4|||liquid|
+4110|Liquid Shadow|11|3|17|3|||liquid|
+2111|Gargoyle|11|4|2|5|5|3|1:4=v_stoneform|airborne+nocturnal
+4111|Gargoyle|11|4|17|5|7|3|1:4=v_stoneform|airborne+nocturnal
+2112|Voodoo Doll|11|4|3|2||16||voodoo+nocturnal
+4112|Voodoo Doll|11|4|17|2||20||voodoo+nocturnal
+2113|Nightmare|11|3|2|2|||nightmare|
+4113|Nightmare|11|3|17|1|||nightmare|
+2114|Cloak|11|2|3|4|||losecharge|cloak+charges=3
+4114|Cloak|11|2|17|3|||losecharge|cloak+charges=3
+2120|Black Nymph|11|4|15|8|3|5|2=liquid|nocturnal
+4120|Dark Nymph|11|4|20|8|5|5|2=liquid|nocturnal
+2130|Shard of Void|11|2|6|2|||void|stackable+additive+charges=1
+4130|Shard of Void|11|2|18|1|||void|stackable+additive+charges=1
+2150|Dark Pendulum|11|2|0|0|||pend|pillar+stackable+additive+charges=1
+4150|Dark Pendulum|11|2|17|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
+2200|Aether Pillar|12|2|0|0|||pillar|pillar+stackable+additive+charges=1
+4200|Aether Tower|12|2|17|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
+2201|Spark|12|4|2|0|3|||airborne
+4201|Ball Lightning|12|4|17|0|5|||airborne
+2202|Lightning|12|3|2|2|||lightning|
+4202|Thunderbolt|12|3|17|1|||lightning|
+2203|Parallel Universe|12|3|3|7|||parallel|
+4203|Twin Universe|12|3|17|6|||parallel|
+2204|Immortal|12|4|3|6|4|3||immaterial
+4204|Elite Immortal|12|4|17|7|5|4||immaterial
+2205|Dimensional Shield|12|1|3|6|||shield=evade100+losecharge|charges=3
+4205|Phase Shield|12|1|17|5|||shield=evade100+losecharge|charges=3
+2206|Lobotomizer|12|0|6|3|5|4|2=lobotomize|
+4206|Electrocutor|12|0|18|3|5|4|1=lobotomize|
+2207|Phase Dragon|12|4|4|13|8|6||immaterial+airborne
+4207|Elite Phase Dragon|12|4|17|14|10|6||immaterial+airborne
+2208|Phase Spider|12|4|2|3|4|2|1:9=web|
+4208|Phase Recluse|12|4|17|4|7|2|1:9=web|
+2209|Quintessence|12|3|3|4|||quint|
+4209|Quintessence|12|3|17|3|||quint|
+2210|Fractal|12|3|3|10|||fractal|
+4210|Fractal|12|3|17|9|||fractal|
+2211|Mindgate|12|2|3|5|||2=duality|
+4211|Mindgate|12|2|17|4|||2=duality|
+2212|Silence|12|3|3|3|||v_silence|
+4212|Silence|12|3|17|2|||v_silence|
+2213|Psion|12|4|4|4|4|4|v_noluci|psionic+airborne
+4213|Psion|12|4|17|4|5|5|v_noluci|psionic+airborne
+2214|Phase Salvager|12|4|2|1|4||destroy=salvage|
+4214|Phase Salvager|12|4|17|1|6||destroy=salvage|
+2220|Turquoise Nymph|12|4|15|8|7|4|3=quint|
+4220|Aether Nymph|12|4|20|8|8|5|3=quint|
+2230|Shard of Wisdom|12|3|6|3|||wisdom|
+4230|Shard of Wisdom|12|3|18|2|||wisdom|
+2250|Aether Pendulum|12|2|0|0|||pend|pillar+stackable+additive+charges=1
+4250|Aether Pendulum|12|2|17|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
