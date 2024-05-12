@@ -453,6 +453,7 @@ impl Flag {
 	pub const vindicated: u64 = 1 << 32;
 	pub const voodoo: u64 = 1 << 33;
 	pub const whetstone: u64 = 1 << 34;
+	pub const bug: u64 = 1 << 35;
 
 	pub fn get(self, key: u64) -> bool {
 		self.0 & key != 0
@@ -1354,6 +1355,10 @@ impl Game {
 		self.rng.choose(slice)
 	}
 
+	pub fn choose_iter<'a, 'b, T>(&'a self, a: impl IntoIterator<Item = &'b T>) -> Option<&'b T> {
+		self.rng.choose_iter(a)
+	}
+
 	pub fn upto(&mut self, n: u32) -> u32 {
 		self.rng.upto(n)
 	}
@@ -1604,7 +1609,7 @@ impl Game {
 	}
 
 	pub fn truedr(&self, id: i16, t: i16) -> i16 {
-		self.get(id, Stat::hp) + self.trigger_pure(Event::Buff, id, t)
+		self.get(id, Stat::hp) + self.trigger_pure(Event::Hp, id, t)
 	}
 
 	pub fn truehp(&self, id: i16) -> i16 {
@@ -1646,8 +1651,8 @@ impl Game {
 			if dmg != 0 {
 				let mut data = ProcData::default();
 				data.dmg = dmg;
-				self.trigger_data(Event::Hit, c, t, &mut data);
 				self.trigger_data(Event::Shield, t, c, &mut data);
+				self.trigger_data(Event::Hit, c, t, &mut data);
 			}
 		}
 	}
@@ -2180,7 +2185,7 @@ impl Game {
 
 	pub fn trigger_data(&mut self, k: Event, c: i16, t: i16, data: &mut ProcData) {
 		if let Some(ss) = self.get_thing(c).skill.get(k) {
-			for &s in ss.clone().iter() {
+			for s in ss.clone().into_iter() {
 				s.proc(self, c, t, data);
 			}
 		}
