@@ -200,6 +200,7 @@ fn eval_skill(
 					ctx.trueatk(c) as i32 * (PREC * -3 / 2)
 				}
 			}
+			Skill::attack => ctx.trueatk(c) as i32 * (PREC / 2),
 			Skill::bblood | Skill::v_bblood => 7 * PREC,
 			Skill::beguilestop => {
 				(if ctx.hasskill(c, Event::OwnAttack, Skill::singularity) { 60 * PREC } else { 0 }) - ttatk
@@ -212,6 +213,7 @@ fn eval_skill(
 			Skill::bless => 4 * PREC,
 			Skill::blockhp => 2 * PREC,
 			Skill::bloodmoon => 9 * (PREC / 2),
+			Skill::bonesharpen => PREC,
 			Skill::boneyard => 3 * PREC,
 			Skill::bounce => PREC,
 			Skill::bravery => {
@@ -233,12 +235,14 @@ fn eval_skill(
 				}
 			}
 			Skill::bubbleclear => 3 * PREC,
+			Skill::bugpoison => 2 * PREC,
 			Skill::burrow => PREC,
 			Skill::butterfly => 12 * PREC,
 			Skill::catapult => 6 * PREC,
 			Skill::chimera => 4 * PREC,
 			Skill::chromastat => (3 + ctx.trueatk(c) as i32 + ctx.truehp(c) as i32) * (PREC / 3),
 			Skill::clear => 2 * PREC,
+			Skill::coldsnap => 3 * PREC + (ctx.get(c, Stat::charges) as i32 * PREC / 8),
 			Skill::corpseexplosion => PREC,
 			Skill::counter => 3 * PREC,
 			Skill::countimmbur => PREC,
@@ -285,6 +289,8 @@ fn eval_skill(
 					})
 					.sum::<i32>() * (PREC / 8)
 			}
+			Skill::databloat => (ctx.get_player(ctx.get_foe(ctx.get_owner(c))).hand_len() as i32) * PREC,
+			Skill::datashrink => PREC,
 			Skill::deadalive => 2 * PREC,
 			Skill::deathwish => PREC,
 			Skill::deckblast => ctx.get_player(ctx.get_owner(c)).deck.len() as i32 * (PREC / 2),
@@ -369,6 +375,7 @@ fn eval_skill(
 			Skill::feed => 6 * PREC,
 			Skill::fickle => 3 * PREC,
 			Skill::firebolt | Skill::v_firebolt(_) => 10 * PREC,
+			Skill::fish => 6 * PREC,
 			Skill::flyingweapon | Skill::v_flyingweapon => 7 * PREC,
 			Skill::foedraw => 8 * PREC,
 			Skill::forcedraw => -10 * PREC,
@@ -406,6 +413,7 @@ fn eval_skill(
 				}
 			}
 			Skill::gpullspell => 3 * PREC,
+			Skill::grab2h => PREC,
 			Skill::grave => PREC,
 			Skill::growth(atk, hp) => (atk + hp) as i32 * PREC,
 			Skill::guard => ttatk + (4 + ctx.get(c, Flag::airborne) as i32) * PREC,
@@ -424,6 +432,8 @@ fn eval_skill(
 				(ctx.get_player(ctx.get_owner(c)).deck.len() as i32 * (PREC / 4)).min(6 * PREC)
 			}
 			Skill::hatch | Skill::v_hatch => 4 * PREC,
+			Skill::haunt => 3 * PREC,
+			Skill::haunted(x) => ttatk * if x == ctx.turn { PREC / 2 } else { -PREC / 2 },
 			Skill::heal => {
 				if ctx.get(ctx.get_foe(ctx.get_owner(c)), Stat::sosa) != 0 {
 					16 * PREC
@@ -431,24 +441,35 @@ fn eval_skill(
 					8 * PREC
 				}
 			}
-			Skill::heatmirror => 2 * PREC,
-			Skill::hitownertwice => {
-				(if ctx.get_kind(c) == Kind::Spell {
-					ctx.get_card(ctx.get(c, Stat::card)).attack as i32
+			Skill::healblocked => {
+				if ctx.get_kind(c) == Kind::Spell {
+					let foeshield = ctx.get_shield(ctx.get_foe(ctx.get_owner(c)));
+					if foeshield != 0 {
+						(ctx.truedr(foeshield, c) as i32)
+							.min(ctx.get_card(ctx.get(c, Stat::card)).attack as i32)
+							* (PREC / 2)
+					} else {
+						PREC / 4
+					}
 				} else {
-					ctx.trueatk(c) as i32
-				}) * (-8 * PREC)
+					(ctx.trueatk(c) as i32 * PREC - ttatk) / 2
+				}
 			}
+			Skill::heatmirror => 2 * PREC,
+			Skill::heatstroke => PREC,
+			Skill::hero => 5 * PREC,
+			Skill::hitownertwice => (ctx.trueatk(c) as i32) * (-8 * PREC),
 			Skill::holylight | Skill::v_holylight => 3 * PREC,
 			Skill::hope | Skill::v_hope => 2 * PREC,
 			Skill::hush => 3 * PREC,
 			Skill::icebolt | Skill::v_icebolt(_) => 10 * PREC,
 			Skill::ignite => 10 * PREC,
-			Skill::immolate(_) => 5 * PREC,
+			Skill::imbue => 5 * PREC,
+			Skill::immolate(x) => x as i32 * (PREC / 2),
 			Skill::improve | Skill::v_improve => 6 * PREC,
 			Skill::inertia => 2 * PREC,
 			Skill::ink => 3 * PREC,
-			Skill::innovation => 3 * PREC,
+			Skill::innovate(x) => x as i32 * PREC,
 			Skill::integrity | Skill::v_integrity => 4 * PREC,
 			Skill::jelly => 5 * PREC,
 			Skill::jetstream => 5 * (PREC / 2),
@@ -467,6 +488,15 @@ fn eval_skill(
 			Skill::millpillar => PREC,
 			Skill::mimic => 3 * PREC,
 			Skill::miracle => ctx.get(ctx.get_owner(c), Stat::maxhp) as i32 * (PREC / 8),
+			Skill::miragemill => {
+				let owner = ctx.get_owner(c);
+				ctx.get_player(ctx.get_foe(owner))
+					.creatures
+					.into_iter()
+					.filter(|&cr| cr != 0 && card::IsOf(ctx.get(cr, Stat::card), card::Mirage))
+					.count() as i32 * (PREC - ctx.deck_length(owner).max(60) as i32)
+					* 2
+			}
 			Skill::mist => ctx.get(c, Stat::charges) as i32 * 5,
 			Skill::mitosis => (4 + ctx.get_card(ctx.get(c, Stat::card)).cost) as i32 * PREC,
 			Skill::mitosisspell => 6 * PREC,
@@ -571,6 +601,7 @@ fn eval_skill(
 			Skill::ren => 5 * PREC,
 			Skill::rewind | Skill::v_rewind => 6 * PREC,
 			Skill::ricochet => 2 * PREC,
+			Skill::rngfreeze => 2 * PREC,
 			Skill::sabbath => PREC,
 			Skill::sadism => 2 * PREC,
 			Skill::salvage => 3 * PREC,
@@ -585,6 +616,7 @@ fn eval_skill(
 					* (PREC / 2)
 			}
 			Skill::serendipity | Skill::v_serendipity => 4 * PREC,
+			Skill::shazam => 3 * PREC,
 			Skill::shtriga => 6 * PREC,
 			Skill::shuffle3 => 7 * PREC,
 			Skill::silence | Skill::v_silence => PREC,
@@ -870,7 +902,8 @@ fn estimate_damage(ctx: &Game, id: i16, freedom: i32, wall: &mut Wall) -> i32 {
 				(momatk * 3 + 1) / 2
 			} else {
 				momatk
-			} * freedom >> PRECBITS;
+			} * freedom
+			>> PRECBITS;
 	}
 	for &skill in ctx.getSkill(id, Event::Hit) {
 		if skill == Skill::vampire {
@@ -949,7 +982,8 @@ fn evalthing(
 	let mut hp = 0;
 	if iscrea {
 		if inhand
-			|| !flooded || thing.flag.get(Flag::aquatic)
+			|| !flooded
+			|| thing.flag.get(Flag::aquatic)
 			|| !ctx.material(id, None)
 			|| ctx.getIndex(id) <= 4
 		{
@@ -1165,7 +1199,8 @@ pub fn eval(ctx: &Game) -> i32 {
 				.filter(|&pr| pr != 0 && ctx.hasskill(pr, Event::Attack, Skill::v_freedom))
 				.map(|pr| ctx.get(pr, Stat::charges))
 				.sum::<i16>()
-				.min(4) as i32 * (PREC / 4)
+				.min(4) as i32
+				* (PREC / 4)
 		};
 		if !stasis && !patience {
 			for cr in player.creatures {

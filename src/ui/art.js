@@ -1,6 +1,6 @@
 import { card_index, card_name, CardSet } from '../rs/pkg/etg.js';
 
-function trMouseOver(e) {
+function trMouseOver() {
 	let i = 1;
 	for (; i < this.children.length; i++) {
 		const child = this.children[i].children[0];
@@ -46,7 +46,7 @@ for (const credit of [
 	[['moomoose', 'http://elementscommunity.org/forum/profile/?u=40'], ['5i6']],
 	[
 		['Niharia', 'https://etg.dek.im/forum/index.php?action=profile;u=522'],
-		'5fq5j35p6',
+		'53d5ck5fq5j35p662k',
 	],
 	[
 		['OdinVanguard', 'http://elementscommunity.org/forum/profile/?u=232'],
@@ -54,8 +54,12 @@ for (const credit of [
 	],
 	[['pepokish', 'http://theowlettenest.com'], '52g58o5bv5f05i45ie5l85lb5oj'],
 	[
+		['pimpollo', 'https://etg.dek.im/forum/index.php?action=profile;u=525'],
+		'508',
+	],
+	[
 		['Ravizant', 'http://elementscommunity.org/forum/profile/?u=8037'],
-		'4sc4tb4vp4vi4vj4vm4vq4vt4vu4vv50050350a50u52h52j52k52n52r52u52v53153353453753e54255n55q55v56456856f56i57658p58q58r58u58v59559959a59f59g59i59m5bt5c35c85ca5cb5cc5cd5ce5cf5cg5ch5ci5cq5de5f35f85f95fd5fi5fu5gi5ia5ih5ik5im5in5ip5is5j25jm5l95la5lc5lf5lh5li5lk5ln5lo5lp5m65mq5oh5ou5p15p35pa5pu5rh5rm5rn5rq5rv5se5t25uq5uu5vd5vg5vh5vi61p61q61v62062762c62g62m6rr6u377a77p7au7av7dj7e27jq7k17qa7ta80980a',
+		'4sc4tb4vp4vi4vj4vm4vq4vt4vu4vv50050350a50u52h52j52k52n52r52u52v53153353453753e54255n55q55v56456856f56i57658p58q58r58u58v59559959a59f59g59i59m5bt5c35c85ca5cb5cc5cd5ce5cf5cg5ch5ci5cq5de5f35f85f95fd5fi5fu5gi5ia5ih5ik5im5in5ip5is5j25jm5l95la5lc5lf5lh5li5lk5ln5lo5lp5m65mq5oh5ou5p15p35pa5pu5rh5rm5rn5rq5rv5se5t25uq5uu5v45vd5vg5vh5vi61p61q61v62062762c62g62m6rr6u377a77p7au7av7dj7e27jq7k17qa7ta80980a',
 	],
 	[
 		['sael', 'mailto:animaetmateria@gmail.com'],
@@ -67,7 +71,7 @@ for (const credit of [
 	],
 	[
 		['serprex', 'https://serprex.github.io'],
-		'50453a53bl8t5cj5ctlfp5iv5j05p4lrl5rolrp5s0lsb5sc5sd5sf5valvh5vl62262a62h62j',
+		'50453a53b56gl8t5cj5ctlfp5iv5j05p4lrl5rolrp5s05s2lsb5sc5sd5sf5valvh5vl62262a62h62j',
 	],
 	[
 		['Sovereign', 'https://soundcloud.com/the_sovereign'],
@@ -94,9 +98,14 @@ for (const credit of [
 		'5i95if7dl',
 	],
 	[['TheManuz', 'http://elementscommunity.org/forum/profile/?u=75'], '5025ot'],
+	[['Treldon', 'http://elemetscommunity.org/forum/profile/?u=8771'], '5iu'],
+	[
+		['Turlututu', 'https://etg.dek.im/forum/index.php?action=profile;u=430'],
+		'59n5fr5m55p7',
+	],
 	[
 		['vrt', 'http://elementscommunity.org/forum/profile/?u=16'],
-		'4sb4vc4ve4vh52t55l55o55r5605625635915c05c15c95f15f25fa5fc5i55i75id5ij5ll5oc5of5rk5rs5rt5uk5ul5um5ut5uv5v361o61t62462562674a80g590',
+		'4sb4vc4ve4vh52t55l55o55r5605625635915c05c15c95f15f25fa5fc5fs5i55i75id5ij5ll5oc5of5rk5rs5rt5uk5ul5um5ut5uv5v361o61t62462562674a80g590',
 	],
 	[['NASA', 'https://nasa.gov'], '5p2'],
 	[

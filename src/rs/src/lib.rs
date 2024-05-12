@@ -199,7 +199,7 @@ mod test {
 		ctx.set_quanta(p2, etg::Light, 2);
 		attack_foe(&mut ctx, dev);
 		attack_foe(&mut ctx, dev);
-		assert_eq!(ctx.get_player(p1).hand_last(), Some(dev));
+		assert_eq!(ctx.get_player(p1).hand_last(), dev);
 		assert_eq!(ctx.get(dev, Stat::atk), 4);
 		assert_eq!(ctx.get(dev, Stat::hp), 2);
 		assert_eq!(ctx.get(dev, Stat::maxhp), 2);
@@ -208,7 +208,7 @@ mod test {
 		Skill::ren.proc(&mut ctx, dev, dev, &mut ProcData::default());
 		Skill::pacify.proc(&mut ctx, dev, dev, &mut ProcData::default());
 		Skill::equalize.proc(&mut ctx, dev, dev, &mut ProcData::default());
-		assert_eq!(ctx.get_player(p1).hand_last(), Some(dev));
+		assert_eq!(ctx.get_player(p1).hand_last(), dev);
 		assert_eq!(ctx.get(dev, Stat::atk), 0);
 		assert_eq!(ctx.get(dev, Stat::hp), 0);
 		assert_eq!(ctx.get(dev, Stat::maxhp), 0);
@@ -286,7 +286,7 @@ mod test {
 		ctx.setWeapon(p2, dagger);
 		ctx.r#move(GameMove::End(0));
 		assert_eq!(ctx.get_weapon(p2), 0);
-		assert_eq!(ctx.get_player(p2).hand_last(), Some(dagger));
+		assert_eq!(ctx.get_player(p2).hand_last(), dagger);
 	}
 
 	#[test]
@@ -466,7 +466,7 @@ mod test {
 		let tgting = Skill::regrade.targeting(CardSet::Open).unwrap();
 		let (mut ctx, p1, p2) = setup(CardSet::Open);
 		assert!(!tgting.check(&ctx, p1, p2));
-		let pillar = ctx.get_player(p1).hand_last().unwrap();
+		let pillar = ctx.get_player(p1).hand_last();
 		assert!(!tgting.check(&ctx, pillar, pillar));
 		assert!(tgting.check(&ctx, p1, pillar));
 		ctx.play(pillar, 0, true);
@@ -597,14 +597,14 @@ mod test {
 		ctx.set(whim, Stat::casts, 1);
 		ctx.useactive(whim, tstorm);
 		assert_eq!(ctx.get_player(p1).deck.first(), Some(&tstorm));
-		assert_eq!(ctx.get_player(p1).hand_last(), Some(dfly));
+		assert_eq!(ctx.get_player(p1).hand_last(), dfly);
 	}
 
 	#[test]
 	fn yoink_targeting() {
 		let tgting = Skill::yoink.targeting(CardSet::Open).unwrap();
 		let (ctx, p1, p2) = setup(CardSet::Open);
-		assert!(tgting.check(&ctx, p1, ctx.get_player(p2).hand_last().unwrap()));
-		assert!(!tgting.check(&ctx, p1, ctx.get_player(p1).hand_last().unwrap()));
+		assert!(tgting.check(&ctx, p1, ctx.get_player(p2).hand_last()));
+		assert!(!tgting.check(&ctx, p1, ctx.get_player(p1).hand_last()));
 	}
 }

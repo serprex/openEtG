@@ -107,14 +107,14 @@ impl PlayerData {
 		self.hand_iter().count()
 	}
 
-	pub fn hand_last(&self) -> Option<i16> {
+	pub fn hand_last(&self) -> i16 {
 		if self.hand[0] == 0 {
-			None
+			return 0;
 		} else {
 			let mut idx = 7;
 			loop {
 				if self.hand[idx] != 0 {
-					return Some(self.hand[idx]);
+					return self.hand[idx];
 				}
 				idx -= 1;
 			}
@@ -453,6 +453,7 @@ impl Flag {
 	pub const vindicated: u64 = 1 << 32;
 	pub const voodoo: u64 = 1 << 33;
 	pub const whetstone: u64 = 1 << 34;
+	pub const bug: u64 = 1 << 35;
 
 	pub fn get(self, key: u64) -> bool {
 		self.0 & key != 0
@@ -853,14 +854,16 @@ impl Game {
 					format!(
 						"{}",
 						3 + (self.get_quanta(self.get_owner(c), etg::Fire) as i16
-							- self.get(c, Stat::cost)) / 4
+							- self.get(c, Stat::cost))
+							/ 4
 					)
 				}
 				Skill::drainlife => {
 					format!(
 						"{}",
 						2 + (self.get_quanta(self.get_owner(c), etg::Darkness) as i16
-							- self.get(c, Stat::cost)) / 5
+							- self.get(c, Stat::cost))
+							/ 5
 					)
 				}
 				Skill::icebolt => {
@@ -1354,6 +1357,10 @@ impl Game {
 		self.rng.choose(slice)
 	}
 
+	pub fn choose_iter<'a, 'b, T>(&'a self, a: impl IntoIterator<Item = &'b T>) -> Option<&'b T> {
+		self.rng.choose_iter(a)
+	}
+
 	pub fn upto(&mut self, n: u32) -> u32 {
 		self.rng.upto(n)
 	}
@@ -1604,7 +1611,7 @@ impl Game {
 	}
 
 	pub fn truedr(&self, id: i16, t: i16) -> i16 {
-		self.get(id, Stat::hp) + self.trigger_pure(Event::Buff, id, t)
+		self.get(id, Stat::hp) + self.trigger_pure(Event::Hp, id, t)
 	}
 
 	pub fn truehp(&self, id: i16) -> i16 {
@@ -1646,8 +1653,8 @@ impl Game {
 			if dmg != 0 {
 				let mut data = ProcData::default();
 				data.dmg = dmg;
-				self.trigger_data(Event::Hit, c, t, &mut data);
 				self.trigger_data(Event::Shield, t, c, &mut data);
+				self.trigger_data(Event::Hit, c, t, &mut data);
 			}
 		}
 	}
@@ -1964,15 +1971,20 @@ impl Game {
 		thing.status.insert(Stat::atk, card.attack as i16);
 		thing.status.insert(Stat::cost, card.cost as i16);
 		thing.status.insert(Stat::costele, card.costele as i16);
-		thing.flag.0 &=
-			!(Flag::additive
-				| Flag::airborne | Flag::aquatic
-				| Flag::golem | Flag::nightfall
-				| Flag::nocturnal
-				| Flag::pillar | Flag::poisonous
-				| Flag::ranged | Flag::stackable
-				| Flag::token | Flag::tunnel
-				| Flag::voodoo | Flag::whetstone);
+		thing.flag.0 &= !(Flag::additive
+			| Flag::airborne
+			| Flag::aquatic
+			| Flag::golem
+			| Flag::nightfall
+			| Flag::nocturnal
+			| Flag::pillar
+			| Flag::poisonous
+			| Flag::ranged
+			| Flag::stackable
+			| Flag::token
+			| Flag::tunnel
+			| Flag::voodoo
+			| Flag::whetstone);
 		thing.flag.0 |= card.flag();
 		for &(k, v) in card.status() {
 			thing.status.insert(k, v);
@@ -2180,7 +2192,7 @@ impl Game {
 
 	pub fn trigger_data(&mut self, k: Event, c: i16, t: i16, data: &mut ProcData) {
 		if let Some(ss) = self.get_thing(c).skill.get(k) {
-			for &s in ss.clone().iter() {
+			for s in ss.clone().into_iter() {
 				s.proc(self, c, t, data);
 			}
 		}
@@ -2303,6 +2315,11 @@ impl Game {
 		if !self.get(id, Flag::stackable) || self.maybeDecrStatus(id, Stat::charges) < 2 {
 			self.remove(id);
 		}
+	}
+
+	pub fn shatter(&mut self, id: i16) {
+		self.fx(id, Fx::Shatter);
+		self.die(id);
 	}
 
 	pub fn die(&mut self, id: i16) {
@@ -2448,11 +2465,12 @@ impl Game {
 
 	pub fn clearStatus(&mut self, id: i16) {
 		let thing = self.get_thing_mut(id);
-		thing.flag.0 &=
-			!(Flag::additive
-				| Flag::cloak | Flag::nightfall
-				| Flag::stackable
-				| Flag::tunnel | Flag::whetstone);
+		thing.flag.0 &= !(Flag::additive
+			| Flag::cloak
+			| Flag::nightfall
+			| Flag::stackable
+			| Flag::tunnel
+			| Flag::whetstone);
 		for (st, ref mut val) in thing.status.iter_mut() {
 			if matches!(st, Stat::charges | Stat::flooding) {
 				*val = 0;

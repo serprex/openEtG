@@ -150,7 +150,8 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 				.into_iter()
 				.filter(|&id| id != 0)
 				.map(|id| gclone.trueatk(id))
-				.sum::<i16>() > 0
+				.sum::<i16>()
+				> 0
 			{
 				proc_sopa(&mut gclone, turn);
 			}

@@ -170,6 +170,7 @@ impl<'a> SkillThing<'a> {
 				Cow::from("If target creature or weapon's attack is positive, it becomes negative. Otherwise, it becomes positive"),
 			Skill::appease =>
 				Cow::from("Sacrifice target creature you own & gain 1|1. If this ability isn't used, this creature will attack its owner. This creature attacks normally the turn it's played or if it loses this ability"),
+			Skill::attack => Cow::from("Whenever a permanent is destroyed, decrease strength by 1 for rest of turn & attack"),
 			Skill::autoburrow =>
 				Cow::from("Until end of turn, your creatures with burrow enter play burrowed"),
 			Skill::axedraw =>
@@ -194,6 +195,7 @@ impl<'a> SkillThing<'a> {
 			}
 			Skill::bloodmoon => Cow::from("Aquatic creatures gain \"Gain 1:8 when it attacks.\"\nGolems gain \"Damage dealt by this card also reduces the defender's maxHP.\"\nNocturnal creatures gain \"Heal yourself equal to the damage dealt by this card.\""),
 			Skill::bolsterintodeck => Cow::from("Add 3 copies of target creature on top of your deck"),
+			Skill::bonesharpen => Cow::from("Replace your own target creature's skills with \"0: Combine with target creature, giving strength, HP, & poison counters\"\nIf target is skeleton, reactivated"),
 			Skill::boneyard => {
 				Cow::from(format!("Whenever a creature which isn't a Skeleton dies, summon a {} Skeleton", if self.upped() { "2|2" } else { "1|1" }))
 			}
@@ -215,15 +217,17 @@ impl<'a> SkillThing<'a> {
 				Cow::from(s)
 			}
 			Skill::bubbleclear => Cow::from("Remove all statuses from target creature or permanent. If target is a creature, heal it by 1HP.\nTarget gains Bubble, protecting it the next time it's targeted by opponent, or receives spell damage"),
-			Skill::butterfly => Cow::from(if self.set() == CardSet::Open {
-				"Target creature or weapon with strength or HP less than 3 has its skills replaced with \"3:1 Destroy target permanent.\""
-			} else {
-				"Target creature with less attack than 3 has its skills replaced with \"3:1 Destroy target permanent\""
-			}),
+			Skill::buffdr => Cow::from("Increase attack by shield's damage reduction"),
+			Skill::bugpoison => Cow::from("Poison opponent when another bug enters play"),
 			Skill::burrow => Cow::from(if self.get_flag(Flag::burrowed) {
 				"Unburrow"
 			} else {
 				"Burrow. Strength is halved while burrowed"
+			}),
+			Skill::butterfly => Cow::from(if self.set() == CardSet::Open {
+				"Target creature or weapon with strength or HP less than 3 has its skills replaced with \"3:1 Destroy target permanent.\""
+			} else {
+				"Target creature with less attack than 3 has its skills replaced with \"3:1 Destroy target permanent\""
 			}),
 			Skill::catapult => Cow::from("Sacrifice your own creature. Damage opponent based on target creature's HP†. Frozen creatures deal 50% more damage. Poisoned creatures transfer poisons to opponent.\n\n† (100 * HP) / (100 + HP), rounding up"),
 			Skill::catlife => {
@@ -240,6 +244,7 @@ impl<'a> SkillThing<'a> {
 			Skill::clear =>
 				Cow::from("Remove statuses (positive & negative) from target creature or permanent, & heal target creature 1"),
 			Skill::cold => Cow::from("\u{2153} chance to freeze non-ranged attackers for 3 turns"),
+			Skill::coldsnap => Cow::from("Shuffle target card into owner's deck. Expend charges to shuffle that many more copies"),
 			Skill::corpseexplosion => Cow::from(if self.upped() {
 				"Sacrifice one of your creatures to deal 1 spell damage to all enemy creatures. Increase damage by 1 for every 5HP of the sacrifice. Poisonous sacrifices poison. Poisoned sacrifices poison. Also affect opponent"
 			} else {
@@ -255,6 +260,8 @@ impl<'a> SkillThing<'a> {
 				Cow::from("Inflict a random effect on target creature. Possible effects include damage, lobotomize, parallel universe, gravity pull, rewind, & freeze 6"),
 			Skill::cseed2 =>
 				Cow::from("Inflict a random effect on target card. All existing effects are possible"),
+			Skill::databloat => Cow::from("On hit, increase target player's hand's non-pillar card's costs by one"),
+			Skill::datashrink => Cow::from("Decrease target non-pillar card's cost by two. Cannot reduce below 0"),
 			Skill::deadalive if ev == Event::Hit => Cow::from("When this card deals damage, trigger all effects that occur when a creature dies"),
 			Skill::deadalive if ev == Event::Cast => Cow::from("Trigger all effects that occur when a creature dies"),
 			Skill::deathwish => Cow::from("Whenever opponent casts a spell or ability on an allied creature, if this creature is a valid target, that spell or ability targets this creature instead"),
@@ -354,6 +361,7 @@ impl<'a> SkillThing<'a> {
 			Skill::firebrand => Cow::from("Last an additional turn when targeted with Tempering"),
 			Skill::firestorm(x) => Cow::from(format!("Deal {} spell damage to all of target player's creatures. Remove frozen status from damaged creatures. Removes cloak", x)),
 			Skill::firewall => Cow::from("Deals 1 damage to each non-ranged attacking creature"),
+			Skill::fish => Cow::from("Draw aquatic card from target player's deck. Draw random token if not able to draw an aquatic card"),
 			Skill::flooddeath =>
 				Cow::from("Each player's non-aquatic creatures past their first five creature slots die at the end of that player's turn"),
 			Skill::flyself =>
@@ -385,6 +393,7 @@ impl<'a> SkillThing<'a> {
 			Skill::gaintimecharge =>
 				Cow::from("Gain one stack for every card you draw. Does not gain a stack from your draw at the start of your turn"),
 			Skill::gas => Cow::from("Summon an Unstable Gas"),
+			Skill::grab2h => Cow::from("Destroy your shield"),
 			Skill::grave =>
 				Cow::from("When another creature dies, unburrow & transform this creature into a fresh copy of the dying creature. This creature retains nocturnal"),
 			Skill::give =>
@@ -396,7 +405,7 @@ impl<'a> SkillThing<'a> {
 			Skill::growth(atk, hp) if ev == Event::Death => Cow::from(format!("When any creature dies, gain {atk}|{hp}")),
 			Skill::growth(atk, hp) if ev == Event::Cast => Cow::from(format!("Gain {atk}|{hp}")),
 			Skill::growth(atk, hp) if ev == Event::OwnAttack => Cow::from(format!("This creature gains {}|{} when it attacks", atk, hp)),
-			Skill::icegrowth(atk, hp) => Cow::from(format!("When this card would be frozen, instead gain {atk}|{hp}")),
+			Skill::icegrowth => Cow::from(format!("When this card would be frozen, instead gain attack for how much it would be frozen")),
 			Skill::guard =>
 				Cow::from("Delay target creature & this creature. If target creature isn't airborne or this creature is airborne, this creature deals damage equal to its strength to target creature"),
 			Skill::halveatk => Cow::from("This creature's strength is halved after it attacks"),
@@ -404,13 +413,19 @@ impl<'a> SkillThing<'a> {
 			Skill::hasten if ev == Event::Cast => Cow::from("Draw a card"),
 			Skill::hasten if ev == Event::OwnDiscard => Cow::from("When discarded, you draw a card"),
 			Skill::hatch =>
-				Cow::from("Transform this creature into a random creature. Caster can be reactivated"),
+				Cow::from("Transform this creature into a random creature. Caster reactivated"),
+			Skill::haunt => Cow::from("When target creature dies, summon a full health Skeleton with the same stats"),
+			Skill::haunted(own) => Cow::from(format!("When this dies, summon a full health Skeleton with the same stats for player {}", own)),
 			Skill::heal => Cow::from("Target creature or player heals 20HP"),
+			Skill::healblocked => Cow::from("When this creature attacks, if any damage is blocked by opponent's shield, heal yourself for the amount this creature's damage was blocked"),
 			Skill::heatmirror => Cow::from(if self.upped() {
 				"When your opponent plays a creature from their hand, summon a Ball Lightning"
 			} else {
 				"When your opponent plays a creature from their hand, summon a Spark"
 			}),
+			Skill::heatstroke if ev == Event::Hit => Cow::from("Opponent summons mirage on hit"),
+			Skill::heatstroke => Cow::from("Opponent summons mirage"),
+			Skill::hero => Cow::from("Increase your shield's damage reduction by 1, delaying this card. Increment stored counter. Remove bonus damage reduction by stored when this attacks, resetting stored value"),
 			Skill::hitownertwice => Cow::from("When this creature attacks, it also attacks its owner twice"),
 			Skill::holylight => Cow::from(if self.upped() {
 				"Remove all statuses from target creature or permanent. Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature.\nGain 1:8 when played"
@@ -424,15 +439,16 @@ impl<'a> SkillThing<'a> {
 			Skill::ignite =>
 				Cow::from("Deal 20 spell damage to opponent. Deal 1 spell damage to each creature"),
 			Skill::ignitediscard => Cow::from("When discarded, deal 5 spell damage to opponent"),
+			Skill::imbue => Cow::from("Discard target equipment card, combining its skills & statuses on corresponding equipped equipment. Return that equipment to hand. Imbued equipment cannot be `additive`"),
 			Skill::immolate(x) =>
 				Cow::from(format!("Sacrifice creature you control. Gain {}:6 plus 1 quanta of each other element", x+1)),
 			Skill::improve =>
 				Cow::from("Transform a target creature into a random mutant creature. Mutant creatures gain a random ability; & randomly gains between 1 to 5 strength & hp"),
 			Skill::inertia => Cow::from("When any card you own is targeted by either player, gain 2:3"),
-			Skill::inflation => Cow::from("Increase the cost of all active skills by 1"),
+			Skill::inflation => Cow::from("Increase the cost of all active skills by 1, caster reactivated"),
 			Skill::ink => Cow::from("Summon a Cloak that lasts 1 turn"),
-			Skill::innovation =>
-				Cow::from("Discard target card in either player's hand. The owner of target card draws three cards. Destroy top card of your deck"),
+			Skill::innovate(x) =>
+				Cow::from(format!("Discard target card in either player's hand. The owner of target card draws {} cards. Destroy top card of your deck", x)),
 			Skill::integrity =>
 				Cow::from("Destroy all shards in your hand to play a Shard Golem with stats & skills based on the shards destroyed"),
 			Skill::jelly =>
@@ -470,6 +486,7 @@ impl<'a> SkillThing<'a> {
 			}),
 			Skill::martyr =>
 				Cow::from("Gains 1|0 for every point of damage this card receives. Heals its owner when healed"),
+			Skill::maul => Cow::from("While shield equipped prevent attacking during attack phase, & block card in opposing slot"),
 			Skill::mend => Cow::from(if self.set() == CardSet::Open {
 				"Heal target creature 10HP"
 			} else {
@@ -479,11 +496,15 @@ impl<'a> SkillThing<'a> {
 				Cow::from("Change your mark to target's element.\nIncrease your mark power by 1"),
 			Skill::midas =>
 				Cow::from("Target permanent becomes a Golden Relic with \"2:0: Sacrifice this card & draw a card.\" If target is a weapon, its strength is 1. If target is a shield, its damage reduction is 1"),
-			Skill::mill => Cow::from("Destroy top card of target player's deck"),
+			Skill::mill => Cow::from(match ev {
+				Event::Hit => "Destroy top card of player's deck on hit. Throttled (only triggers twice from Adrenaline)",
+				_ => "Destroy top card of target player's deck",
+			}),
 			Skill::millpillar =>
 				Cow::from("If top card of target player's deck is a pillar, pendulum, or tower, destroy that card"),
 			Skill::mimic =>
-				Cow::from("Whenever another creature enters play, transform this card into a fresh copy of that creature. This creature retains this ability"),
+				Cow::from("When another creature enters play, transform this card into a fresh copy of that creature. This creature retains this ability"),
+			Skill::miragemill => Cow::from("When a mirage dies, their owner destroys top card of their deck"),
 			Skill::mist => Cow::from("Each stack has a 5% chance to evade attacks"),
 			Skill::miracle =>
 				Cow::from("Heal yourself to one below your maxHP. Consumes all 1:8"),
@@ -508,7 +529,7 @@ impl<'a> SkillThing<'a> {
 				}),
 			Skill::nightshade =>
 				Cow::from("Target creature becomes nocturnal, gains 5|5, & loses active skills"),
-			Skill::nothrottle => Cow::from("Your creatures whose skills have Throttled lose Throttled"),
+			Skill::nothrottle => Cow::from("Your skills having Throttled lose Throttled"),
 			Skill::nova => Cow::from("Gain 1 quanta of each element. If you play three or more of this card in one turn, summon a Singularity on your side"),
 			Skill::nova2 =>
 				Cow::from("Gain 2 quanta of each element. If you play two or more of this card in one turn, summon a Singularity on your side"),
@@ -544,7 +565,7 @@ impl<'a> SkillThing<'a> {
 				"When this creature dies, transform it into an Ash"
 			}),
 			Skill::photosynthesis =>
-				Cow::from("Gain 2:5. Unless cost was 0 or 1:0, caster can be reactivated"),
+				Cow::from("Gain 2:5. Unless cost was 0 or 1:0, caster reactivated"),
 			Skill::pillar => Cow::from(format!("Gain {}:{} every turn", if self.card().element == 0 { '3' } else { '1' }, self.card().element)),
 			Skill::pillar1 => Cow::from(format!("Gain {}:{} when played", if self.card().element == 0 { '3' } else { '1' }, self.card().element)),
 			Skill::pend =>
@@ -634,15 +655,17 @@ impl<'a> SkillThing<'a> {
 			Skill::regrade =>
 				Cow::from("If target card is upgraded, it becomes unupgraded. If target card is unupgraded, it becomes upgraded. Gain 1 quanta of target card's element. Cannot target stacks"),
 			Skill::reinforce =>
-				Cow::from("Combine with target creature, causing it to gain strength & HP equal to this creature's strength & HP"),
+				Cow::from("Combine with target creature, giving strength, HP, & poison counters"),
 			Skill::ren => Cow::from("Target creature gains: \"When dying instead return to owner's hand. Modified state besides this effect remains when played again.\""),
 			Skill::resetdr => Cow::from("Zero damage reduction at start of your turn"),
 			Skill::resummon => Cow::from("Target creature is summoned again, as is"),
 			Skill::rewind =>
 				Cow::from("Put target creature on top of its owner's deck. Removes all bonuses & modifiers on target creature"),
 			Skill::reveal if ev == Event::OwnPlay => Cow::from("Reveal opponent's hand when played & on attack"),
+			Skill::reveal if ev == Event::Cast => Cow::from("Reveal opponent's hand for this turn"),
 			Skill::ricochet =>
 				Cow::from("Any targeted spells cast by either player are copied when played. The copy has a random caster & a random non-player target"),
+			Skill::rngfreeze => Cow::from("Randomly freeze one of opponent's non-stacking permanents for two turns on hit"),
 			Skill::sabbath =>
 				Cow::from("Target cannot gain quanta until their turn ends. Their deck is protected until start of their next turn.\nSilence all your opponent's creatures & heal all your creatures by 8"),
 			Skill::sadism => Cow::from("Whenever any creatures are damaged, heal yourself an equal amount"),
@@ -666,9 +689,10 @@ impl<'a> SkillThing<'a> {
 			} else {
 				"Add 3 random non-pillar cards to your hand. At least one will be 1:1"
 			}),
+			Skill::shazam => Cow::from("Transform creature you control into a random common creature of the same element, or transform target card into a random card of the same element"),
 			Skill::shtriga => Cow::from("Gain immaterial when your next turn starts"),
 			Skill::shuffle3 =>
-				Cow::from("Shuffle 3 copies of target creature into your deck & expend a charge. Destroyed when all charges expended"),
+				Cow::from("Shuffle 3 copies of target creature into your deck & expend charge. Destroyed when all charges expended"),
 			Skill::silence =>
 				Cow::from("Silence target player or creature. Silenced players cannot play cards until the end of their next turn, while silenced creatures cannot use active skills until the end of their next turn"),
 			Skill::sing => Cow::from("Target creature without this ability attacks its owner"),
@@ -681,10 +705,11 @@ impl<'a> SkillThing<'a> {
 			Skill::siphon =>
 				Cow::from("Remove 1:0 randomly from opponent's quanta pool when this creature attacks. Gain 1:11 for each quanta removed. Throttled (only triggers twice from Adrenaline)"),
 			Skill::siphonactive =>
-				Cow::from("Copy target creature or weapon's skills. Remove skills from target. Caster can be reactivated"),
+				Cow::from("Copy target creature or weapon's skills. Remove skills from target. Caster reactivated"),
 			Skill::siphonstrength => Cow::from("Target creature loses 1|0. Gain 1|0"),
 			Skill::skeleton =>
 				Cow::from("If this creature is targeted by Rewind, it becomes a random creature"),
+			Skill::skeletoncount => Cow::from(if self.upped() { "Increase attack by sum of base attack of your skeletons" } else { "Increase attack by number of skeletons you own" }),
 			Skill::skull => Cow::from(if self.set() == CardSet::Open {
 				"Attacking non-ranged creatures may randomly die (1 in HP chance) & are replaced by Skeletons"
 			} else {
@@ -695,7 +720,8 @@ impl<'a> SkillThing<'a> {
 			Skill::slime => Cow::from("Increase damage reduction by 1 when damage reduction does not prevent all damage from non-ranged attacker"),
 			Skill::slow => Cow::from("Non-ranged attackers are delayed for one turn after their attack. Delayed creatures may not attack or use active skills"),
 			Skill::snipe => Cow::from("Deal 3 damage to target creature"),
-			Skill::solar => Cow::from("Gain 1:8 for each attacker"),
+			Skill::snowflake if ev == Event::Death => Cow::from("Whenever card dies or is destroyed, gain charge per frozen counter"),
+			Skill::solar => Cow::from("Gain 1:8 equal to amount of damage blocked"),
 			Skill::sosa =>
 				Cow::from(if self.upped() {
 					"Sacrifice 40HP. Consume all non-1:2 quanta. For two turns, damage heals you & healing damages you"
@@ -755,9 +781,9 @@ impl<'a> SkillThing<'a> {
 			Skill::tidalhealing =>
 				Cow::from("Remove frozen status & poison from all your creatures. Your aquatic creatures gain \"Give 1 purify counter to this card's owner on hit. Throttled (only triggers twice from Adrenaline)\". This ability does not stack"),
 			Skill::tornado => Cow::from(if self.upped() {
-				"Randomly choose two of opponent's permanents. Each selected permanent is shuffled into a random player's deck"
+				"Shatter all frozen permanents. Randomly choose two of opponent's permanents. Each selected permanent is shuffled into a random player's deck"
 			} else {
-				"Randomly choose two of opponent's permanents & one of your permanents. Each selected permanent is shuffled into a random player's deck"
+				"Shatter all frozen permanents. Randomly choose two of opponent's permanents & one of your permanents. Each selected permanent is shuffled into a random player's deck"
 			}),
 			Skill::trick =>
 				Cow::from("If target creature's owner has creatures in their deck, put target creature into their deck & summon a random different creature from their deck"),
@@ -847,7 +873,7 @@ impl<'a> SkillThing<'a> {
 			}),
 			Skill::v_plague => Cow::from("Poison foe's creatures. Removes cloak"),
 			Skill::v_readiness =>
-				Cow::from("Target creature's active becomes costless. Skill can be reactivated"),
+				Cow::from("Target creature's active becomes costless & reactivated"),
 			Skill::v_relic => Cow::from("Worthless"),
 			Skill::v_rewind =>
 				Cow::from("Remove target creature to top of owner's deck. If target is a Skeleton, transform it into a random creature. If target is a Mummy, transform it into a Pharaoh"),
@@ -976,6 +1002,7 @@ impl<'a> SkillThing<'a> {
 				Flag::airborne => ret.push_str("airborne, "),
 				Flag::appeased => ret.push_str("appeased, "),
 				Flag::aquatic => ret.push_str("aquatic, "),
+				Flag::bug => ret.push_str("bug, "),
 				Flag::burrowed => ret.push_str("burrowed, "),
 				Flag::golem => ret.push_str("golem, "),
 				Flag::immaterial => ret.push_str("immaterial, "),
