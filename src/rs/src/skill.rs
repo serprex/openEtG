@@ -267,6 +267,7 @@ pub enum Skill {
 	blockhp,
 	bloodmoon,
 	bolsterintodeck,
+	bonesharpen,
 	boneyard,
 	bounce,
 	bow,
@@ -276,6 +277,7 @@ pub enum Skill {
 	brokenmirror,
 	bubbleclear,
 	burrow,
+	burstout,
 	butterfly,
 	catapult,
 	catlife,
@@ -293,6 +295,8 @@ pub enum Skill {
 	cseed,
 	cseed2,
 	dagger,
+	databloat,
+	datashrink,
 	deadalive,
 	deathwish,
 	deckblast,
@@ -353,6 +357,7 @@ pub enum Skill {
 	firebrand,
 	firestorm(i16),
 	firewall,
+	fish,
 	flood,
 	flooddeath,
 	flyingweapon,
@@ -360,6 +365,7 @@ pub enum Skill {
 	foedraw,
 	forcedraw,
 	forceplay,
+	fossilize,
 	fractal,
 	frail,
 	frail2,
@@ -375,6 +381,7 @@ pub enum Skill {
 	golemhit,
 	gpull,
 	gpullspell,
+	grab2h,
 	grave,
 	growth(i8, i8),
 	guard,
@@ -383,8 +390,10 @@ pub enum Skill {
 	hammer,
 	hasten,
 	hatch,
+	haunt,
 	heal,
 	heatmirror,
+	heatstroke,
 	hitownertwice,
 	holylight,
 	hope,
@@ -466,6 +475,7 @@ pub enum Skill {
 	precognition,
 	predator,
 	predatoroff,
+	protect,
 	protectall,
 	protectonce,
 	protectoncedmg,
@@ -502,6 +512,7 @@ pub enum Skill {
 	scramblespam,
 	serendipity,
 	shardgolem,
+	shazam,
 	shtriga,
 	shuffle3,
 	silence,
@@ -536,6 +547,7 @@ pub enum Skill {
 	tempering(i16),
 	tesseractsummon,
 	thorn(u8),
+	throwfeather,
 	throwrock,
 	tick,
 	tidalhealing,
@@ -900,6 +912,19 @@ impl<'a> Display for SkillName<'a> {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		let &SkillName { sk, ctx, id } = self;
 		match sk {
+			Skill::bonesharpen => f.write_str("bonesharpen"),
+			Skill::burstout => f.write_str("burstout"),
+			Skill::databloat => f.write_str("databloat"),
+			Skill::datashrink => f.write_str("datashrink"),
+			Skill::haunt => f.write_str("haunt"),
+			Skill::throwfeather => f.write_str("throwfeather"),
+			Skill::heatstroke => f.write_str("heatstroke"),
+			Skill::grab2h
+				=> f.write_str("grab2h"),
+			Skill::protect => f.write_str("protect"),
+			Skill::fish => f.write_str("fish"),
+			Skill::shazam => f.write_str("shazam"),
+			Skill::fossilize => f.write_str("fossilize"),
 			Skill::r#_tracedeath => Ok(()),
 			Skill::abomination => Ok(()),
 			Skill::absorbdmg => f.write_str("absorbdmg"),
@@ -1571,6 +1596,124 @@ impl Skill {
 
 	pub fn proc(self, ctx: &mut Game, c: i16, t: i16, data: &mut ProcData) {
 		match self {
+			Skill::bonesharpen => {
+				ctx.incrAtk(t, ctx.get(c, Stat::atk));
+			}
+			Skill::burstout => {
+				let owner = ctx.get_owner(c);
+				let mut n = 0;
+				for cr in ctx.get_player(owner).creatures {
+					if cr != 0 {
+						let crcard = ctx.get(cr, Stat::card);
+						let bugs = [card::ChromaticButterfly,
+						card::SpiderCow,
+						card::Deathstalker,
+						card::FleshSpider,
+						card::Antlion,
+						card::Graboid,
+						card::Shrieker,
+						card::Scorpion,
+						card::GiantSpider,
+						card::AshEater,
+						card::DivingBellSpider,
+						card::BobbitWorm,
+						card::NullMantis,
+						card::Dragonfly,
+						card::Firefly,
+						card::FireflyQueen,
+						card::Scarab,
+						card::DuneScorpion,
+						card::Devourer,
+						card::Parasite,
+						card::PhaseSpider,
+						];
+				if bugs.iter().any(|x| card::IsOf(crcard, x)) {
+					n += 1;
+						Skill::parallel.proc(ctx, cr, cr, data);
+					}
+				}
+					}
+				ctx.poison(owner, n);
+				}
+			Skill::databloat => {
+				if ctx.get_kind(t) == Kind::Player {
+					for id in ctx.get_player(t).hand_iter() {
+					ctx.incrStatus(t, Stat::cost, 1)
+					}
+				} else {
+					ctx.incrStatus(t, Stat::cost, 2)
+				}
+
+			}
+			Skill::datashrink => {
+				if ctx.get_kind(t) == Kind::Player {
+					for id in ctx.get_player(t).hand_iter() {
+					ctx.incrStatus(t, Stat::cost, -1)
+					}
+				} else {
+					ctx.incrStatus(t, Stat::cost, -2)
+				}
+			}
+			Skill::haunt => {}
+			Skill::throwfeather => {}
+			Skill::heatstroke => {}
+			Skill::grab2h => {}
+			Skill::protect => {}
+			Skill::fish => {}
+			Skill::shazam => {
+				let owner = ctx.get_owner(c);
+				let mut options = [etg::Chroma; 3];
+				let mut idx = 0;
+				if ctx.get_player(owner).quanta(etg::Life) > 1 {
+					options[idx as usize] = etg::Life;
+					idx += 1;
+				}
+				if ctx.get_player(owner).quanta(etg::Light) > 1 {
+					options[idx as usize] = etg::Light;
+					idx += 1;
+				}
+				if ctx.get_player(owner).quanta(etg::Air) > 1 {
+					options[idx as usize] = etg::Air;
+					idx += 1;
+				}
+				if idx != 0 {
+					let option = options[ctx.upto(idx)];
+					ctx.spend(owner, option, 2);
+					match option {
+						etg::Life => {
+							let town = ctx.get_owner(t);
+				ctx.set(town, Stat::gpull, t);
+							ctx.transform(t, card::GuardianAngel);
+						}
+						etg::Light => {
+							ctx.set(t, Stat::atk, 3);
+							ctx.set(t, Stat::hp, 3);
+						}
+						etg::Air => {
+							ctx.transform(t, card::Wyrm);
+							ctx.set(t, Stat::atk, 2);
+							ctx.set(t, Stat::hp, 2);
+						}
+							_ => unsafe { core::hint::unreachable_unchecked() },
+
+					}
+				}
+			}
+			Skill::fossilize => {
+				if ctx.get(t, Flag::golem) {
+					let town = ctx.get_owner(t);
+					ctx.set(town, Stat::gpull, t);
+					ctx.dmg(t, -20);
+				} else {
+					let atk = ctx.get(t, Stat::atk);
+					let hp = ctx.get(t, Stat::hp);
+					let maxhp = ctx.get(t, Stat::maxhp);
+					ctx.transform(t, card::ClockworkGolem);
+					ctx.set(t, Stat::atk, atk);
+					ctx.set(t, Stat::hp, hp);
+					ctx.set(t, Stat::maxhp, maxhp);
+				}
+			}
 			Self::r#_tracedeath => {
 				ctx.incrStatus(ctx.turn, Stat::lives, 1);
 			}
