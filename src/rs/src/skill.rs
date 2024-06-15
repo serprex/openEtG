@@ -1036,7 +1036,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::give => f.write_str("give"),
 			Skill::golemhit => f.write_str("golemhit"),
 			Skill::gpull => f.write_str("gpull"),
-			Skill::gpullspell => f.write_str("gpullspell"),
+			Skill::gpullspell => Ok(()),
 			Skill::grave => f.write_str("grave"),
 			Skill::growth(atk, hp) => write!(f, "growth{atk:+}{hp:+}"),
 			Skill::guard => f.write_str("guard"),
@@ -2789,7 +2789,9 @@ impl Skill {
 			Self::gpullspell => {
 				ctx.fx(t, Fx::Pull);
 				if ctx.get_kind(t) == Kind::Creature {
-					ctx.set(ctx.get_owner(t), Stat::gpull, t);
+					if ctx.getIndex(t) != -1 {
+						ctx.set(ctx.get_owner(t), Stat::gpull, t);
+					}
 				} else {
 					ctx.set(t, Stat::gpull, 0);
 				}
