@@ -49,9 +49,11 @@ impl Pcg32 {
 
 	pub fn shuffle<T>(&self, a: &mut [T]) {
 		let al = a.len() as u32;
-		for i in 0..al - 1 {
-			let j = self.upto(al - i);
-			a.swap(i as usize, i as usize + j as usize)
+		if al > 1 {
+			for i in 0..al - 1 {
+				let j = self.upto(al - i);
+				a.swap(i as usize, i as usize + j as usize)
+			}
 		}
 	}
 
