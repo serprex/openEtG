@@ -1631,7 +1631,7 @@ impl Skill {
 							card::Parasite,
 							card::PhaseSpider,
 						];
-						if bugs.iter().any(|x| card::IsOf(crcard, x)) {
+						if bugs.iter().cloned().any(|x| card::IsOf(crcard, x)) {
 							n += 1;
 							Skill::parallel.proc(ctx, cr, cr, data);
 						}
@@ -1662,16 +1662,16 @@ impl Skill {
 				let skele = ctx.new_thing(card::As(ctx.get(c, Stat::card), card::Skeleton), owner);
 				ctx.addCrea(owner, skele);
 				if ctx.getIndex(skele) != -1 {
-					ctx.get_thing(skele)
+					ctx.get_thing_mut(skele)
 						.skill
 						.insert(Event::Hp, Cow::from(Vec::from(&[Skill::haunthp(c)])));
-					ctx.get_thing(c)
+					ctx.get_thing_mut(c)
 						.skill
 						.insert(Event::Hp, Cow::from(Vec::from(&[Skill::haunthp(skele)])));
-					ctx.get_thing(skele)
+					ctx.get_thing_mut(skele)
 						.skill
 						.insert(Event::Buff, Cow::from(Vec::from(&[Skill::hauntatk(c)])));
-					ctx.get_thing(c)
+					ctx.get_thing_mut(c)
 						.skill
 						.insert(Event::Buff, Cow::from(Vec::from(&[Skill::hauntatk(skele)])));
 				}
@@ -1685,9 +1685,9 @@ impl Skill {
 				if !ctx.get_player(owner).hand_full() {
 					let foe = ctx.get_foe(owner);
 					if !ctx.get(foe, Flag::protectdeck) {
-						let deck = ctx.get_player_mut(foe).deck_mut();
+						let deck = ctx.get_player(foe).deck.as_ref();
 						let mut foundidx = usize::MAX;
-						for (idx, card) in deck.iter().enumerate() {
+						for (idx, card) in deck.iter().cloned().enumerate() {
 							if ctx.get(card, Flag::aquatic) {
 								foundidx = idx;
 								break;
@@ -1695,7 +1695,7 @@ impl Skill {
 						}
 						if foundidx != usize::MAX {
 							let lastidx = deck.len() - 1;
-							deck.swap(foundidx, lastidx);
+							ctx.get_player_mut(foe).deck_mut().swap(foundidx, lastidx);
 							let id = ctx.draw(foe);
 							if id != 0 && ctx.addCard(owner, id) != -1 {
 								ctx.fx(id, Fx::StartPos(-foe));
@@ -1706,7 +1706,7 @@ impl Skill {
 					}
 					let upped = card::Upped(ctx.get(c, Stat::card));
 					if let Some(card) = ctx.random_card(upped, |ctx, card| (card.flag & Flag::token) != 0) {
-						let id = ctx.new_thing(card, owner);
+						let id = ctx.new_thing(card.code, owner);
 						ctx.addCard(owner, id);
 					}
 				}
@@ -1728,7 +1728,7 @@ impl Skill {
 					idx += 1;
 				}
 				if idx != 0 {
-					let option = options[ctx.upto(idx)];
+					let option = options[ctx.upto(idx) as usize];
 					ctx.spend(owner, option, 2);
 					match option {
 						etg::Life => {
@@ -5542,6 +5542,8 @@ impl Skill {
 			| Self::disc
 			| Self::fiery
 			| Self::hammer
+			| Self::haunthp(..)
+			| Self::hauntatk(..)
 			| Self::hope
 			| Self::poisondr
 			| Self::staff
