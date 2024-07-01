@@ -391,6 +391,8 @@ pub enum Skill {
 	hasten,
 	hatch,
 	haunt,
+	hauntatk(i16),
+	haunthp(i16),
 	heal,
 	heatmirror,
 	heatstroke,
@@ -917,10 +919,11 @@ impl<'a> Display for SkillName<'a> {
 			Skill::databloat => f.write_str("databloat"),
 			Skill::datashrink => f.write_str("datashrink"),
 			Skill::haunt => f.write_str("haunt"),
+			Skill::haunthp(..) => Ok(()),
+			Skill::hauntatk(..) => Ok(()),
 			Skill::throwfeather => f.write_str("throwfeather"),
 			Skill::heatstroke => f.write_str("heatstroke"),
-			Skill::grab2h
-				=> f.write_str("grab2h"),
+			Skill::grab2h => f.write_str("grab2h"),
 			Skill::protect => f.write_str("protect"),
 			Skill::fish => f.write_str("fish"),
 			Skill::shazam => f.write_str("shazam"),
@@ -1605,61 +1608,109 @@ impl Skill {
 				for cr in ctx.get_player(owner).creatures {
 					if cr != 0 {
 						let crcard = ctx.get(cr, Stat::card);
-						let bugs = [card::ChromaticButterfly,
-						card::SpiderCow,
-						card::Deathstalker,
-						card::FleshSpider,
-						card::Antlion,
-						card::Graboid,
-						card::Shrieker,
-						card::Scorpion,
-						card::GiantSpider,
-						card::AshEater,
-						card::DivingBellSpider,
-						card::BobbitWorm,
-						card::NullMantis,
-						card::Dragonfly,
-						card::Firefly,
-						card::FireflyQueen,
-						card::Scarab,
-						card::DuneScorpion,
-						card::Devourer,
-						card::Parasite,
-						card::PhaseSpider,
+						let bugs = [
+							card::ChromaticButterfly,
+							card::SpiderCow,
+							card::Deathstalker,
+							card::FleshSpider,
+							card::Antlion,
+							card::Graboid,
+							card::Shrieker,
+							card::Scorpion,
+							card::GiantSpider,
+							card::AshEater,
+							card::DivingBellSpider,
+							card::BobbitWorm,
+							card::NullMantis,
+							card::Dragonfly,
+							card::Firefly,
+							card::FireflyQueen,
+							card::Scarab,
+							card::DuneScorpion,
+							card::Devourer,
+							card::Parasite,
+							card::PhaseSpider,
 						];
-				if bugs.iter().any(|x| card::IsOf(crcard, x)) {
-					n += 1;
-						Skill::parallel.proc(ctx, cr, cr, data);
+						if bugs.iter().any(|x| card::IsOf(crcard, x)) {
+							n += 1;
+							Skill::parallel.proc(ctx, cr, cr, data);
+						}
 					}
 				}
-					}
 				ctx.poison(owner, n);
-				}
+			}
 			Skill::databloat => {
 				if ctx.get_kind(t) == Kind::Player {
 					for id in ctx.get_player(t).hand_iter() {
-					ctx.incrStatus(t, Stat::cost, 1)
+						ctx.incrStatus(t, Stat::cost, 1)
 					}
 				} else {
 					ctx.incrStatus(t, Stat::cost, 2)
 				}
-
 			}
 			Skill::datashrink => {
 				if ctx.get_kind(t) == Kind::Player {
 					for id in ctx.get_player(t).hand_iter() {
-					ctx.incrStatus(t, Stat::cost, -1)
+						ctx.incrStatus(t, Stat::cost, -1)
 					}
 				} else {
 					ctx.incrStatus(t, Stat::cost, -2)
 				}
 			}
-			Skill::haunt => {}
+			Skill::haunt => {
+				let owner = ctx.get_owner(c);
+				let skele = ctx.new_thing(card::As(ctx.get(c, Stat::card), card::Skeleton), owner);
+				ctx.addCrea(owner, skele);
+				if ctx.getIndex(skele) != -1 {
+					ctx.get_thing(skele)
+						.skill
+						.insert(Event::Hp, Cow::from(Vec::from(&[Skill::haunthp(c)])));
+					ctx.get_thing(c)
+						.skill
+						.insert(Event::Hp, Cow::from(Vec::from(&[Skill::haunthp(skele)])));
+					ctx.get_thing(skele)
+						.skill
+						.insert(Event::Buff, Cow::from(Vec::from(&[Skill::hauntatk(c)])));
+					ctx.get_thing(c)
+						.skill
+						.insert(Event::Buff, Cow::from(Vec::from(&[Skill::hauntatk(skele)])));
+				}
+			}
 			Skill::throwfeather => {}
 			Skill::heatstroke => {}
 			Skill::grab2h => {}
 			Skill::protect => {}
-			Skill::fish => {}
+			Skill::fish => {
+				let owner = ctx.get_owner(c);
+				if !ctx.get_player(owner).hand_full() {
+					let foe = ctx.get_foe(owner);
+					if !ctx.get(foe, Flag::protectdeck) {
+						let deck = ctx.get_player_mut(foe).deck_mut();
+						let mut foundidx = usize::MAX;
+						for (idx, card) in deck.iter().enumerate() {
+							if ctx.get(card, Flag::aquatic) {
+								foundidx = idx;
+								break;
+							}
+						}
+						if foundidx != usize::MAX {
+							let lastidx = deck.len() - 1;
+							deck.swap(foundidx, lastidx);
+							let id = ctx.draw(foe);
+							if id != 0 && ctx.addCard(owner, id) != -1 {
+								ctx.fx(id, Fx::StartPos(-foe));
+								ctx.proc(Event::Draw, owner);
+								return;
+							}
+						}
+					}
+					let upped = card::Upped(ctx.get(c, Stat::card));
+					if let Some(card) = ctx.random_card(upped, |ctx, card| (card.flag & Flag::token) != 0) {
+						let id = ctx.new_thing(card, owner);
+						ctx.addCard(owner, id);
+					}
+				}
+			}
 			Skill::shazam => {
 				let owner = ctx.get_owner(c);
 				let mut options = [etg::Chroma; 3];
@@ -1682,7 +1733,7 @@ impl Skill {
 					match option {
 						etg::Life => {
 							let town = ctx.get_owner(t);
-				ctx.set(town, Stat::gpull, t);
+							ctx.set(town, Stat::gpull, t);
 							ctx.transform(t, card::GuardianAngel);
 						}
 						etg::Light => {
@@ -1694,8 +1745,7 @@ impl Skill {
 							ctx.set(t, Stat::atk, 2);
 							ctx.set(t, Stat::hp, 2);
 						}
-							_ => unsafe { core::hint::unreachable_unchecked() },
-
+						_ => unsafe { core::hint::unreachable_unchecked() },
 					}
 				}
 			}
@@ -5553,6 +5603,20 @@ impl Skill {
 			Self::hammer => {
 				let mark = ctx.get_player(ctx.get_owner(c)).mark as i16;
 				(mark == etg::Gravity || mark == etg::Earth) as i16
+			}
+			Skill::haunthp(o) => {
+				if ctx.getIndex(o) != -1 {
+					ctx.get(o, Stat::hp)
+				} else {
+					0
+				}
+			}
+			Skill::hauntatk(o) => {
+				if ctx.getIndex(o) != -1 {
+					ctx.get(o, Stat::atk)
+				} else {
+					0
+				}
 			}
 			Self::hope => ctx
 				.get_player(ctx.get_owner(c))
