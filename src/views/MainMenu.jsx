@@ -106,7 +106,6 @@ export default function MainMenu(props) {
 				setocard(data.c);
 				const update = {
 					daily: 128,
-					pool: addcard(rx.user.pool, data.c),
 					dailymage: data.mage,
 					dailydg: data.dg,
 					oracle: data.day,
