@@ -566,8 +566,8 @@
 7905|Thunderstorm|9|3|2|2|||storm 2|
 5906|Flying Weapon|9|3|1|1|||flyingweapon|
 7906|Flying Weapon|9|3|1|1:0|||flyingweapon|
-5907|Firefly Queen|9|4|2|6|3|7|2:5=summon 5908|airborne
-7907|Firefly Queen|9|4|2|6|3|7|2:5=summon 7908|airborne
+5907|Firefly Queen|9|4|2|6|3|7|2:5=summon 5908|airborne+nocturnal
+7907|Firefly Queen|9|4|2|6|3|7|2:5=summon 7908|airborne+nocturnal
 5908|Firefly|9|4|1|2|3|2|quanta 8|airborne+nocturnal
 7908|Firefly|9|4|1|2|4|3|quanta 6|airborne+nocturnal
 5909|Owl's Eye|9|0|3|5|5|7|2=snipe|ranged

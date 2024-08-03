@@ -782,7 +782,7 @@ impl<'a> SkillThing<'a> {
 			Skill::vindicate =>
 				Cow::from("Once per turn, when one of your creatures dies, it attacks an additional time before dying"),
 			Skill::virtue =>
-				Cow::from("When this creature attacks, if any damage is blocked by opponent's shield, your maxHP is increased by the amount of this creature's damage that was blocked"),
+				Cow::from("When this creature attacks, if any damage is blocked by opponent's shield, your maxHP is increased by the amount this creature's damage was blocked"),
 			Skill::virusinfect =>
 				Cow::from("Sacrifice this creature. Poison target creature"),
 			Skill::virusplague =>
