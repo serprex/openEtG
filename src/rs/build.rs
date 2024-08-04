@@ -33,7 +33,7 @@ struct Card {
 	cast: i8,
 	castele: u8,
 	status: String,
-	flag: String,
+	flag: u8,
 	skill: String,
 }
 
@@ -59,7 +59,13 @@ fn parse<F: FromStr + Default>(s: &str) -> F {
 	}
 }
 
-fn process_cards(set: &'static str, path: &'static str, source: &mut String, enums: &mut Enums) {
+fn process_cards(
+	set: &'static str,
+	path: &'static str,
+	source: &mut String,
+	enums: &mut Enums,
+	flagmap: &mut BTreeMap<String, u8>,
+) {
 	let mut cards: Vec<Card> = Vec::new();
 	let cards_json = fs::read_to_string(path).expect("failed to read cards.csv");
 	for row in cards_json.split('\n') {
@@ -82,7 +88,8 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 		let mut cast = 0;
 		let mut castele = 0;
 		let mut statstr = String::from("&[");
-		let mut flagstr = String::from("&0");
+		let mut flagstr = String::from("0");
+		let flagidx;
 		let mut stat = Vec::new();
 		let mut flag = Vec::new();
 		let status = values[9];
@@ -103,14 +110,15 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 			}
 		}
 		if !flag.is_empty() {
-			let lastch = flagstr.len() - 1;
-			unsafe { flagstr.as_mut_vec()[lastch] = b'(' };
+			flag.sort_unstable();
+			flagstr.clear();
 			for fl in flag {
 				write!(flagstr, "Flag::{}|", fl).ok();
 			}
-			let lastch = flagstr.len() - 1;
-			unsafe { flagstr.as_mut_vec()[lastch] = b')' };
+			flagstr.truncate(flagstr.len() - 1);
 		}
+		let newflagidx = flagmap.len() as u8;
+		flagidx = *flagmap.entry(flagstr).or_insert(newflagidx);
 		statstr.push(']');
 
 		let mut skillstr = String::from("&[");
@@ -189,7 +197,7 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 			cast,
 			castele,
 			status: statstr,
-			flag: flagstr,
+			flag: flagidx,
 			skill: skillstr,
 		};
 		cards.push(card);
@@ -218,7 +226,7 @@ fn process_cards(set: &'static str, path: &'static str, source: &mut String, enu
 	)
 	.ok();
 	for card in cards.iter() {
-		write!(source, "Card{{code:{},name:r#\"{}\"#,kind:Kind::{},element:{},rarity:{},attack:{},health:{},cost:{},costele:{},cast:{},castele:{},flag:{},status:{},skill:{}}},\n",
+		write!(source, "Card{{code:{},name:r#\"{}\"#,kind:Kind::{},element:{},rarity:{},attack:{},health:{},cost:{},costele:{},cast:{},castele:{},flagidx:{},status:{},skill:{}}},\n",
 			   card.code, card.name, ["Weapon","Shield","Permanent","Spell","Creature"][card.kind as usize],
 			   card.ele, card.rarity, card.attack, card.health, card.cost, card.costele, card.cast, card.castele,
 			   card.flag, card.status, card.skill
@@ -297,8 +305,17 @@ fn main() {
 	}
 	source.push_str("}}\n");
 
-	process_cards("Open", "../cards.csv", &mut source, &mut enums);
-	process_cards("Orig", "../vanilla/cards.csv", &mut source, &mut enums);
+	let mut flagmap = BTreeMap::new();
+	flagmap.insert(String::from("0"), 0);
+	process_cards("Open", "../cards.csv", &mut source, &mut enums, &mut flagmap);
+	process_cards("Orig", "../vanilla/cards.csv", &mut source, &mut enums, &mut flagmap);
+	write!(source, "pub const FlagTable: [u64; {}] = [", flagmap.len()).ok();
+	let mut flagkeys: Vec<_> = flagmap.keys().collect();
+	flagkeys.sort_unstable_by_key(|k| flagmap.get(k.as_str()).cloned().unwrap_or(0));
+	for k in flagkeys.iter() {
+		write!(source, "{},", k).ok();
+	}
+	write!(source, "];\n").ok();
 
 	fs::write("../enum.json", &serde_json::to_string(&enums).expect("failed to serialize enums"))
 		.expect("Failed to write enum.json");

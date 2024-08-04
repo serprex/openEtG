@@ -33,7 +33,7 @@ pub struct Card {
 	pub costele: i8,
 	pub cast: i8,
 	pub castele: i8,
-	pub flag: &'static u64,
+	pub flagidx: u8,
 	pub status: &'static [(Stat, i16)],
 	pub skill: &'static [(Event, &'static [Skill])],
 }
@@ -71,7 +71,7 @@ impl Cards {
 	where
 		Ffilt: Fn(&'static Card) -> bool,
 	{
-		rng.choose_iter(self.filter(upped).iter().filter(|c| (c.flag & Flag::token) == 0 && ffilt(c)))
+		rng.choose_iter(self.filter(upped).iter().filter(|c| (c.flag() & Flag::token) == 0 && ffilt(c)))
 	}
 }
 
@@ -88,8 +88,12 @@ impl Card {
 		IsOf(self.code, code)
 	}
 
-	pub fn free(&self) -> bool {
-		self.rarity == 0 && (self.flag & Flag::pillar) != 0 && !self.upped()
+	pub const fn free(&self) -> bool {
+		self.rarity == 0 && (self.flag() & Flag::pillar) != 0 && !self.upped()
+	}
+
+	pub const fn flag(&self) -> u64 {
+		FlagTable[self.flagidx as usize]
 	}
 }
 
@@ -186,13 +190,13 @@ pub fn card_costele(set: CardSet, index: usize) -> Option<i8> {
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn card_pillar(set: CardSet, index: usize) -> bool {
-	cardSetCards(set).try_get_index(index).map(|&card| (card.flag & Flag::pillar) != 0).unwrap_or(false)
+	cardSetCards(set).try_get_index(index).map(|&card| (card.flag() & Flag::pillar) != 0).unwrap_or(false)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn card_token(set: CardSet, index: usize) -> bool {
-	cardSetCards(set).try_get_index(index).map(|&card| (card.flag & Flag::token) != 0).unwrap_or(false)
+	cardSetCards(set).try_get_index(index).map(|&card| (card.flag() & Flag::token) != 0).unwrap_or(false)
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -211,7 +215,7 @@ pub fn code_cmp_core(cards: &'static Cards, x: i16, y: i16) -> Ordering {
 		cx.upped()
 			.cmp(&cy.upped())
 			.then(cx.element.cmp(&cy.element))
-			.then((cy.flag & Flag::pillar).cmp(&(cx.flag & Flag::pillar)))
+			.then((cy.flag() & Flag::pillar).cmp(&(cx.flag() & Flag::pillar)))
 			.then(cx.cost.cmp(&cy.cost))
 			.then(cx.kind.cmp(&cy.kind))
 			.then(x.cmp(&y))
@@ -241,7 +245,7 @@ pub fn selector_filter(set: CardSet, col: u32, element: i8, rarity: i8) -> Vec<i
 	let cards = cardSetCards(set);
 	let mut result = Vec::with_capacity(15);
 	for card in cards.filter(col > 2) {
-		if (card.flag & Flag::token) == 0
+		if (card.flag() & Flag::token) == 0
 			&& (rarity == 4 || card.element == element)
 			&& (rarity == 0 || card.rarity == rarity)
 			&& match col % 3 {

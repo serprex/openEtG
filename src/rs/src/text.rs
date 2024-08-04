@@ -94,7 +94,7 @@ impl<'a> SkillThing<'a> {
 	fn get_flag(&self, flag: u64) -> bool {
 		match *self {
 			Self::Thing(game, id) => game.get(id, flag),
-			Self::Card(cards, c) => (c.flag & flag) != 0,
+			Self::Card(cards, c) => (c.flag() & flag) != 0,
 		}
 	}
 
@@ -119,7 +119,7 @@ impl<'a> SkillThing<'a> {
 	fn flags(&self) -> Flag {
 		match *self {
 			Self::Thing(game, id) => game.get_thing(id).flag,
-			Self::Card(cards, c) => Flag(*c.flag),
+			Self::Card(cards, c) => Flag(c.flag()),
 		}
 	}
 

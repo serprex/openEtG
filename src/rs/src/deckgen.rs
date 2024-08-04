@@ -25,7 +25,7 @@ pub fn deckgen_duo(e1: i8, e2: i8, uprate: u8, markpower: i16, maxrarity: i32, s
 			let upped = rng.upto(100) < uprate as u32;
 			if let Some(card) = card::OpenSet.random_card(&rng, upped, |card| {
 				card.element == ele
-					&& (card.flag & Flag::pillar) == 0
+					&& (card.flag() & Flag::pillar) == 0
 					&& card.rarity as i32 <= maxrarity
 					&& build.card_count(card.code) != 6
 					&& !(card.kind == Kind::Shield && build.anyshield >= 3)
@@ -68,7 +68,7 @@ pub fn deckgen_bow(uprate: u8, markpower: i16, maxrarity: i32, seed: u32) -> Vec
 				let upped = (rng.upto(100) as u8) < uprate;
 				if let Some(card) = card::OpenSet.random_card(&rng, upped, |card| {
 					card.element == ele
-						&& (card.flag & Flag::pillar) == 0
+						&& (card.flag() & Flag::pillar) == 0
 						&& card.cost < 7 && card.rarity as i32 <= maxrarity
 						&& build.card_count(card.code) != 6
 						&& !(card.kind == Kind::Shield && build.anyshield >= 3)
@@ -246,7 +246,7 @@ fn filters(code: i16, deck: &[i16], ecost: &[i16; 13]) -> bool {
 		card::TidalHealing => {
 			let mut aquatics: i32 = 0;
 			for &dcode in deck.iter() {
-				if card::OpenSet.get(dcode).flag & Flag::aquatic != 0 {
+				if card::OpenSet.get(dcode).flag() & Flag::aquatic != 0 {
 					if aquatics > 3 {
 						return true;
 					}

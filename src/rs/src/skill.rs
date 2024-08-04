@@ -3617,7 +3617,7 @@ impl Skill {
 				let roll = ctx.upto(3) < 2;
 				let e = ctx.get_player(if roll { owner } else { ctx.get_foe(owner) }).mark;
 				if let Some(newcard) = ctx.random_card(false, |ctx, card| {
-					card.element == e && card.rarity != -1 && (card.flag & Flag::pillar) != 0
+					card.element == e && card.rarity != -1 && (card.flag() & Flag::pillar) != 0
 				}) {
 					let inst = ctx.new_thing(card::As(ctx.get(c, Stat::card), newcard.code), owner);
 					ctx.fx(inst, Fx::StartPos(c));
@@ -4136,7 +4136,7 @@ impl Skill {
 				let ccard = ctx.get(c, Stat::card);
 				for i in (0..num).rev() {
 					if let Some(card) = ctx.random_card(card::Upped(ccard), |ctx, card| {
-						(card.flag & Flag::pillar) == 0
+						(card.flag() & Flag::pillar) == 0
 							&& (i > 0 || anyentro || card.element as i16 == etg::Entropy)
 					}) {
 						if card.element as i16 == etg::Entropy {
@@ -5393,7 +5393,7 @@ impl Skill {
 						.filter(|&&pr| {
 							pr != 0 && {
 								let card = ctx.get_card(ctx.get(pr, Stat::card));
-								(card.flag & Flag::pillar) == 0
+								(card.flag() & Flag::pillar) == 0
 									&& matches!(card.element as i16, etg::Darkness | etg::Death)
 							}
 						})

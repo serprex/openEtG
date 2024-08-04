@@ -1946,7 +1946,7 @@ impl Game {
 		thing.status.insert(Stat::hp, card.health as i16);
 		thing.status.insert(Stat::maxhp, card.health as i16);
 		thing.status.insert(Stat::atk, card.attack as i16);
-		thing.flag.0 |= card.flag;
+		thing.flag.0 |= card.flag();
 		for &(k, v) in card.status.iter() {
 			thing.status.insert(k, v);
 		}
@@ -1973,7 +1973,7 @@ impl Game {
 				| Flag::ranged | Flag::stackable
 				| Flag::token | Flag::tunnel
 				| Flag::voodoo | Flag::whetstone);
-		thing.flag.0 |= card.flag;
+		thing.flag.0 |= card.flag();
 		for &(k, v) in card.status {
 			thing.status.insert(k, v);
 		}
