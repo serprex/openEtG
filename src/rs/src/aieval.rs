@@ -922,7 +922,7 @@ fn evalthing(
 			};
 		}
 		if cdata.kind == Kind::Spell {
-			return eval_skill(ctx, id, cdata.skill[0].1, 0, damage, quantamap);
+			return eval_skill(ctx, id, cdata.skill()[0].1, 0, damage, quantamap);
 		}
 	}
 	let kind = if inhand { cdata.kind } else { thing.kind };

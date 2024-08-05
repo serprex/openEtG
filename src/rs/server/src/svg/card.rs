@@ -51,7 +51,7 @@ pub fn card(code: i16) -> Option<String> {
 		result.push_str(" fill='#fff'");
 	}
 	result.push('>');
-	result.push_str(card.name);
+	result.push_str(card.name());
 	result.push_str(
 			"</text><foreignObject width='160' height='256'><p xmlns='http://www.w3.org/1999/xhtml' style='font:10px sans-serif;white-space:pre-wrap;color:#"
 			);

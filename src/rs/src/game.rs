@@ -900,7 +900,7 @@ impl Game {
 		let thing = self.get_thing(id);
 		let card = self.cards.get(thing.status.get(Stat::card));
 		if thing.kind == Kind::Spell {
-			format!("{}\n{}:{}", card.name, thing.status.get(Stat::cost), thing.status.get(Stat::costele))
+			format!("{}\n{}:{}", card.name(), thing.status.get(Stat::cost), thing.status.get(Stat::costele))
 		} else {
 			let charges = thing.status.get(Stat::charges);
 			let mut text = self.active_text(id);
@@ -1947,11 +1947,11 @@ impl Game {
 		thing.status.insert(Stat::maxhp, card.health as i16);
 		thing.status.insert(Stat::atk, card.attack as i16);
 		thing.flag.0 |= card.flag();
-		for &(k, v) in card.status.iter() {
+		for &(k, v) in card.status().iter() {
 			thing.status.insert(k, v);
 		}
 		thing.skill =
-			Skills::from(card.skill.iter().map(|&(k, v)| (k, Cow::Borrowed(v))).collect::<Vec<_>>());
+			Skills::from(card.skill().iter().map(|&(k, v)| (k, Cow::Borrowed(v))).collect::<Vec<_>>());
 		self.new_id(Rc::new(thing))
 	}
 
@@ -1974,11 +1974,11 @@ impl Game {
 				| Flag::token | Flag::tunnel
 				| Flag::voodoo | Flag::whetstone);
 		thing.flag.0 |= card.flag();
-		for &(k, v) in card.status {
+		for &(k, v) in card.status() {
 			thing.status.insert(k, v);
 		}
 		thing.skill =
-			Skills::from(card.skill.iter().map(|&(k, v)| (k, Cow::Borrowed(v))).collect::<Vec<_>>());
+			Skills::from(card.skill().iter().map(|&(k, v)| (k, Cow::Borrowed(v))).collect::<Vec<_>>());
 		if thing.flag.get(Flag::mutant) {
 			let buff = self.rng.upto(25) as i16;
 			if card.code < 5000 {

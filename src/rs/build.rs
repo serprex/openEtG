@@ -22,7 +22,8 @@ fn subsource<'a, 'b>(source: &'a str, prefix: &'b str) -> &'a str {
 
 struct Card {
 	code: u16,
-	name: String,
+	nameidx: u16,
+	namelen: u8,
 	kind: u8,
 	ele: u8,
 	rarity: i8,
@@ -32,9 +33,11 @@ struct Card {
 	costele: u8,
 	cast: i8,
 	castele: u8,
-	status: String,
+	status: u8,
+	statuslen: u8,
 	flag: u8,
-	skill: String,
+	skillidx: u16,
+	skilllen: u8,
 }
 
 fn parseCost(s: &str, ele: u8) -> Option<(i8, u8)> {
@@ -59,16 +62,54 @@ fn parse<F: FromStr + Default>(s: &str) -> F {
 	}
 }
 
+fn populate_names<'a, 'b>(csv: &'a str, names: &'b mut Vec<&'a str>)
+where
+	'a: 'b,
+{
+	for row in csv.split('\n') {
+		if row.is_empty() {
+			continue;
+		}
+		let mut values = row.split('|');
+		values.next();
+		names.push(values.next().expect("failed to peek name"));
+	}
+}
+
+fn create_namemap<'a, 'b>(names: &'b [&'a str]) -> (String, BTreeMap<&'a str, u16>)
+where
+	'a: 'b,
+{
+	let mut namestr = String::new();
+	let mut namemap = BTreeMap::new();
+
+	for name in names.iter().cloned() {
+		if namemap.contains_key(name) {
+			continue;
+		} else if let Some(idx) = namestr.find(name) {
+			namemap.insert(name, idx as u16);
+		} else {
+			namemap.insert(name, namestr.len() as u16);
+			namestr.push_str(name);
+		}
+	}
+	(namestr, namemap)
+}
+
 fn process_cards(
 	set: &'static str,
-	path: &'static str,
+	csv: &str,
 	source: &mut String,
 	enums: &mut Enums,
 	flagmap: &mut BTreeMap<String, u8>,
+	statmap: &mut BTreeMap<String, u8>,
+	statcount: &mut u8,
+	skillmap: &mut BTreeMap<String, u16>,
+	skillcount: &mut u16,
+	namemap: &BTreeMap<&str, u16>,
 ) {
 	let mut cards: Vec<Card> = Vec::new();
-	let cards_json = fs::read_to_string(path).expect("failed to read cards.csv");
-	for row in cards_json.split('\n') {
+	for row in csv.split('\n') {
 		if row.is_empty() {
 			continue;
 		}
@@ -87,27 +128,42 @@ fn process_cards(
 		let health = parse::<i8>(values[7]);
 		let mut cast = 0;
 		let mut castele = 0;
-		let mut statstr = String::from("&[");
+		let mut statstr = String::new();
 		let mut flagstr = String::from("0");
 		let flagidx;
+		let statidx;
+		let statlen;
+		let skillidx;
+		let mut skilllen = 0u8;
 		let mut stat = Vec::new();
 		let mut flag = Vec::new();
 		let status = values[9];
 		if !status.is_empty() {
 			for st in status.split("+") {
-				let mut split = st.splitn(2, '=');
 				if enums.FlagId.contains_key(st) {
 					flag.push(String::from(st));
 				} else {
+					let mut split = st.splitn(2, '=');
 					let key = split.next().unwrap();
 					assert!(enums.StatId.contains_key(key));
 					let val = split.next().unwrap_or("1");
 					stat.push((String::from(key), val));
 				}
 			}
+			stat.sort_unstable();
+			statlen = stat.len() as u8;
 			for st in stat {
 				write!(statstr, "(Stat::{},{}),", st.0, st.1).ok();
 			}
+		} else {
+			statlen = 0;
+		}
+		if let Some(idx) = statmap.get(statstr.as_str()) {
+			statidx = *idx;
+		} else {
+			statidx = *statcount;
+			statmap.insert(statstr, statidx);
+			*statcount += statlen;
 		}
 		if !flag.is_empty() {
 			flag.sort_unstable();
@@ -119,9 +175,8 @@ fn process_cards(
 		}
 		let newflagidx = flagmap.len() as u8;
 		flagidx = *flagmap.entry(flagstr).or_insert(newflagidx);
-		statstr.push(']');
 
-		let mut skillstr = String::from("&[");
+		let mut skillstr = String::new();
 		let skill = values[8];
 		if !skill.is_empty() {
 			for sk in skill.split("+") {
@@ -174,6 +229,7 @@ fn process_cards(
 						break;
 					}
 				}
+				skilllen += 1;
 				write!(
 					skillstr,
 					"(Event::{},&[Skill::{}]),",
@@ -183,10 +239,18 @@ fn process_cards(
 				.ok();
 			}
 		}
-		skillstr.push(']');
+		if let Some(idx) = skillmap.get(skillstr.as_str()) {
+			skillidx = *idx;
+		} else {
+			skillidx = *skillcount;
+			skillmap.insert(skillstr, skillidx);
+			*skillcount += skilllen as u16;
+		}
+
 		let card = Card {
 			code,
-			name: String::from(name),
+			nameidx: *namemap.get(name).expect("missing name"),
+			namelen: name.len() as u8,
 			kind,
 			ele,
 			rarity,
@@ -196,9 +260,11 @@ fn process_cards(
 			costele,
 			cast,
 			castele,
-			status: statstr,
+			status: statidx,
+			statuslen: statlen,
 			flag: flagidx,
-			skill: skillstr,
+			skillidx,
+			skilllen,
 		};
 		cards.push(card);
 		if !upped && !name.starts_with("52") {
@@ -226,10 +292,10 @@ fn process_cards(
 	)
 	.ok();
 	for card in cards.iter() {
-		write!(source, "Card{{code:{},name:r#\"{}\"#,kind:Kind::{},element:{},rarity:{},attack:{},health:{},cost:{},costele:{},cast:{},castele:{},flagidx:{},status:{},skill:{}}},\n",
-			   card.code, card.name, ["Weapon","Shield","Permanent","Spell","Creature"][card.kind as usize],
+		write!(source, "Card{{code:{},nameidx:{},namelen:{},kind:Kind::{},element:{},rarity:{},attack:{},health:{},cost:{},costele:{},cast:{},castele:{},flagidx:{},statidx:{},statlen:{},skillidx:{},skilllen:{}}},\n",
+			   card.code, card.nameidx, card.namelen, ["Weapon","Shield","Permanent","Spell","Creature"][card.kind as usize],
 			   card.ele, card.rarity, card.attack, card.health, card.cost, card.costele, card.cast, card.castele,
-			   card.flag, card.status, card.skill
+			   card.flag, card.status, card.statuslen, card.skillidx, card.skilllen,
 		).ok();
 	}
 	source.push_str("]};\n");
@@ -271,7 +337,7 @@ fn main() {
 	for line in gameflag.lines() {
 		let line = line.trim();
 		if line.starts_with("pub const ") {
-			if let Some(colonidx) = line.find(": u64 = 1 << ") {
+			if let Some(colonidx) = line.find(": u64 = 1 <<") {
 				let name = &line["pub const ".len()..colonidx];
 				let id = statid;
 				statid += 1;
@@ -305,17 +371,72 @@ fn main() {
 	}
 	source.push_str("}}\n");
 
+	let opencsv = fs::read_to_string("../cards.csv").expect("failed to read cards.csv");
+	let origcsv = fs::read_to_string("../vanilla/cards.csv").expect("failed to read cards.csv");
 	let mut flagmap = BTreeMap::new();
 	flagmap.insert(String::from("0"), 0);
-	process_cards("Open", "../cards.csv", &mut source, &mut enums, &mut flagmap);
-	process_cards("Orig", "../vanilla/cards.csv", &mut source, &mut enums, &mut flagmap);
-	write!(source, "pub const FlagTable: [u64; {}] = [", flagmap.len()).ok();
+	let mut statmap = BTreeMap::new();
+	let mut statcount = 0;
+	statmap.insert(String::new(), 0);
+	let mut skillmap = BTreeMap::new();
+	let mut skillcount = 0;
+	skillmap.insert(String::new(), 0);
+	let mut names = Vec::new();
+	populate_names(opencsv.as_str(), &mut names);
+	populate_names(origcsv.as_str(), &mut names);
+	names.sort_unstable_by_key(|name| (!name.len(), *name));
+	names.dedup();
+	let (namestr, namemap) = create_namemap(&names);
+	process_cards(
+		"Open",
+		opencsv.as_str(),
+		&mut source,
+		&mut enums,
+		&mut flagmap,
+		&mut statmap,
+		&mut statcount,
+		&mut skillmap,
+		&mut skillcount,
+		&namemap,
+	);
+	process_cards(
+		"Orig",
+		origcsv.as_str(),
+		&mut source,
+		&mut enums,
+		&mut flagmap,
+		&mut statmap,
+		&mut statcount,
+		&mut skillmap,
+		&mut skillcount,
+		&namemap,
+	);
+
+	write!(source, "pub const FlagTable:[u64;{}]=[", flagmap.len()).ok();
 	let mut flagkeys: Vec<_> = flagmap.keys().collect();
-	flagkeys.sort_unstable_by_key(|k| flagmap.get(k.as_str()).cloned().unwrap_or(0));
+	flagkeys.sort_unstable_by_key(|k| flagmap.get(k.as_str()).cloned().expect("bad flag"));
 	for k in flagkeys.iter() {
 		write!(source, "{},", k).ok();
 	}
 	write!(source, "];\n").ok();
+
+	write!(source, "pub const StatTable:[(Stat,i16);{}]=[", statcount).ok();
+	let mut statkeys: Vec<_> = statmap.keys().collect();
+	statkeys.sort_unstable_by_key(|k| statmap.get(k.as_str()).cloned().expect("bad stat"));
+	for k in statkeys.iter() {
+		write!(source, "{}", k).ok();
+	}
+	write!(source, "];\n").ok();
+
+	write!(source, "pub const SkillTable:[(Event,&[Skill]);{}]=[", skillcount).ok();
+	let mut skillkeys: Vec<_> = skillmap.keys().collect();
+	skillkeys.sort_unstable_by_key(|k| skillmap.get(k.as_str()).cloned().expect("bad skill"));
+	for k in skillkeys.iter() {
+		write!(source, "{}", k).ok();
+	}
+	write!(source, "];\n").ok();
+
+	write!(source, "pub const NameTable:&'static str=\"{}\";", namestr).ok();
 
 	fs::write("../enum.json", &serde_json::to_string(&enums).expect("failed to serialize enums"))
 		.expect("Failed to write enum.json");

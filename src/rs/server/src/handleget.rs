@@ -416,7 +416,7 @@ async fn handle_get_core(
 							userdata,
 							"{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
 							code,
-							card.name,
+							card.name(),
 							row[0],
 							row[1],
 							row[2],
@@ -462,7 +462,7 @@ async fn handle_get_core(
 								codes[ij] = card::OpenSet
 									.random_card(&rng, false, |card| {
 										card.element == ele
-											&& (card.flag & etg::game::Flag::pillar) == 0
+											&& (card.flag() & etg::game::Flag::pillar) == 0
 											&& !codes[i * 7..ij].iter().any(|&code| code == card.code)
 									})
 									.unwrap()

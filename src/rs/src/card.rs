@@ -23,7 +23,8 @@ pub struct Cards {
 #[derive(Clone, Copy)]
 pub struct Card {
 	pub code: i16,
-	pub name: &'static str,
+	pub nameidx: u16,
+	pub namelen: u8,
 	pub kind: Kind,
 	pub element: i8,
 	pub rarity: i8,
@@ -34,8 +35,10 @@ pub struct Card {
 	pub cast: i8,
 	pub castele: i8,
 	pub flagidx: u8,
-	pub status: &'static [(Stat, i16)],
-	pub skill: &'static [(Event, &'static [Skill])],
+	pub statidx: u8,
+	pub statlen: u8,
+	pub skillidx: u16,
+	pub skilllen: u8,
 }
 
 impl Cards {
@@ -94,6 +97,18 @@ impl Card {
 
 	pub const fn flag(&self) -> u64 {
 		FlagTable[self.flagidx as usize]
+	}
+
+	pub fn status(&self) -> &'static [(Stat, i16)] {
+		&StatTable[self.statidx as usize..self.statidx as usize + self.statlen as usize]
+	}
+
+	pub fn skill(&self) -> &'static [(Event, &'static [Skill])] {
+		&SkillTable[self.skillidx as usize..self.skillidx as usize + self.skilllen as usize]
+	}
+
+	pub fn name(&self) -> &'static str {
+		&NameTable[self.nameidx as usize..self.nameidx as usize + self.namelen as usize]
 	}
 }
 
@@ -154,7 +169,7 @@ pub fn card_index(set: CardSet, code: i16) -> Option<usize> {
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn card_name(set: CardSet, index: usize) -> Option<String> {
-	cardSetCards(set).try_get_index(index).map(|&card| String::from(card.name))
+	cardSetCards(set).try_get_index(index).map(|&card| String::from(card.name()))
 }
 
 #[cfg(target_arch = "wasm32")]

@@ -1365,7 +1365,7 @@ pub async fn handle_ws(
 										let rng = etg::rng::Pcg32::from(rand::thread_rng().next_u32());
 										let ocardnymph = (rng.next32() & 31) == 0;
 										let Some(card) = etg::card::OpenSet.random_card(&rng, false, |card| {
-											(card.rarity != 4) ^ ocardnymph && (card.flag & etg::game::Flag::pillar) == 0
+											(card.rarity != 4) ^ ocardnymph && (card.flag() & etg::game::Flag::pillar) == 0
 										}) else { continue };
 										userdata.dailymage = rng.upto(MAGE_COUNT as u32) as u8;
 										userdata.dailydg = rng.upto(DG_COUNT as u32) as u8;
@@ -1860,7 +1860,7 @@ pub async fn handle_ws(
 															&WsResponse::bzgivec {
 																msg: &format!(
 																	"{} sold you {} of {} @ {}",
-																	u, sell.amt, card.name, sell.p
+																	u, sell.amt, card.name(), sell.p
 																),
 																c: unsafe {
 																	std::str::from_utf8_unchecked(
@@ -1875,7 +1875,7 @@ pub async fn handle_ws(
 															&WsResponse::bzgiveg {
 																msg: &format!(
 																	"{} bought {} of {} @ {} from you.",
-																	u, sell.amt, card.name, -sell.p
+																	u, sell.amt, card.name(), -sell.p
 																),
 																g: sell.amt as i32 * -sell.p as i32,
 															},

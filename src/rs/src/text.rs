@@ -86,7 +86,7 @@ impl<'a> SkillThing<'a> {
 		match *self {
 			Self::Thing(game, id) => game.get(id, stat),
 			Self::Card(cards, card) => {
-				card.status.iter().find(|&(st, _)| *st == stat).map(|&(_, val)| val).unwrap_or(0)
+				card.status().iter().find(|&(st, _)| *st == stat).map(|&(_, val)| val).unwrap_or(0)
 			}
 		}
 	}
@@ -112,7 +112,7 @@ impl<'a> SkillThing<'a> {
 	fn status(&self) -> &[(Stat, i16)] {
 		match *self {
 			Self::Thing(game, id) => &game.get_thing(id).status.0[..],
-			Self::Card(cards, c) => c.status,
+			Self::Card(cards, c) => c.status(),
 		}
 	}
 
@@ -135,7 +135,7 @@ impl<'a> SkillThing<'a> {
 				}
 			}
 			Self::Card(_, c) => {
-				for &(ev, sk) in c.skill.iter() {
+				for &(ev, sk) in c.skill().iter() {
 					f(ev, sk)
 				}
 			}
@@ -732,7 +732,7 @@ impl<'a> SkillThing<'a> {
 			Skill::storm(x) =>
 				Cow::from(format!("Deal {x} spell damage to all of target player's creatures. Removes cloak")),
 			Skill::summon(code) =>
-				Cow::from(format!("Summon a {}", self.cards().get(code as i16).name)),
+				Cow::from(format!("Summon a {}", self.cards().get(code as i16).name())),
 			Skill::swarm =>
 				Cow::from("Base HP is equal to the number of Scarabs you control, including this one"),
 			Skill::swave =>
@@ -910,7 +910,7 @@ impl<'a> SkillThing<'a> {
 				Stat::charges if v != 1 => {
 					match *self {
 						Self::Card(cards, c) => {
-							if !c.skill.iter().any(|&(ev, sk)| ev == Event::OwnAttack && sk.iter().cloned().any(|s| s == Skill::losecharge)) {
+							if !c.skill().iter().any(|&(ev, sk)| ev == Event::OwnAttack && sk.iter().cloned().any(|s| s == Skill::losecharge)) {
 								write!(stext, "Enters play with {v} {}.\n", if self.get_flag(Flag::stackable) { "stacks" } else { "charges" }).ok();
 							}
 						}

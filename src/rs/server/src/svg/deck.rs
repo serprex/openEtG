@@ -66,7 +66,7 @@ pub fn deck(deck: &str) -> String {
 				if !upped {
 					textml.push_str(" fill='#fff'");
 				}
-				write!(textml, ">{}</text>", card.name).ok();
+				write!(textml, ">{}</text>", card.name()).ok();
 				y += 16;
 				if y == 160 {
 					y = 0;
