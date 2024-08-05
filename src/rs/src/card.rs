@@ -91,24 +91,24 @@ impl Card {
 		IsOf(self.code, code)
 	}
 
-	pub const fn free(&self) -> bool {
+	pub fn free(&self) -> bool {
 		self.rarity == 0 && (self.flag() & Flag::pillar) != 0 && !self.upped()
 	}
 
-	pub const fn flag(&self) -> u64 {
-		FlagTable[self.flagidx as usize]
+	pub fn flag(&self) -> u64 {
+		unsafe { *FlagTable.get_unchecked(self.flagidx as usize) }
 	}
 
 	pub fn status(&self) -> &'static [(Stat, i16)] {
-		&StatTable[self.statidx as usize..self.statidx as usize + self.statlen as usize]
+		unsafe { StatTable.get_unchecked(self.statidx as usize..self.statidx as usize + self.statlen as usize) }
 	}
 
 	pub fn skill(&self) -> &'static [(Event, &'static [Skill])] {
-		&SkillTable[self.skillidx as usize..self.skillidx as usize + self.skilllen as usize]
+		unsafe { SkillTable.get_unchecked(self.skillidx as usize..self.skillidx as usize + self.skilllen as usize) }
 	}
 
 	pub fn name(&self) -> &'static str {
-		&NameTable[self.nameidx as usize..self.nameidx as usize + self.namelen as usize]
+		unsafe { NameTable.get_unchecked(self.nameidx as usize..self.nameidx as usize + self.namelen as usize) }
 	}
 }
 

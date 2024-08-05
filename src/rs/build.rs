@@ -141,13 +141,13 @@ fn process_cards(
 		if !status.is_empty() {
 			for st in status.split("+") {
 				if enums.FlagId.contains_key(st) {
-					flag.push(String::from(st));
+					flag.push(st);
 				} else {
 					let mut split = st.splitn(2, '=');
 					let key = split.next().unwrap();
 					assert!(enums.StatId.contains_key(key));
 					let val = split.next().unwrap_or("1");
-					stat.push((String::from(key), val));
+					stat.push((key, val));
 				}
 			}
 			stat.sort_unstable();
