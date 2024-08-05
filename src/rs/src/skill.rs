@@ -1207,7 +1207,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::stoneform => f.write_str("stoneform"),
 			Skill::stonewall => f.write_str("stonewall"),
 			Skill::storm(x) => Ok(()),
-			Skill::summon(code) => f.write_str(ctx.get_card(code as i16).name),
+			Skill::summon(code) => f.write_str(ctx.get_card(code as i16).name()),
 			Skill::swarm => f.write_str("swarm"),
 			Skill::swave => f.write_str("swave"),
 			Skill::tempering(x) => write!(f, "tempering{x}"),
@@ -2025,7 +2025,7 @@ impl Skill {
 				if let Some(card) = ctx.random_card(upped, |ctx, card| {
 					card.kind == Kind::Spell
 						&& card
-							.skill
+							.skill()
 							.first()
 							.and_then(|&(k, skills)| {
 								debug_assert!(k == Event::Cast);
@@ -2039,7 +2039,7 @@ impl Skill {
 					ctx.castSpellNoSpell(
 						c,
 						t,
-						card.skill.first().and_then(|&(_, skills)| skills.first().cloned()).unwrap(),
+						card.skill().first().and_then(|&(_, skills)| skills.first().cloned()).unwrap(),
 					);
 				}
 			}
@@ -2636,7 +2636,7 @@ impl Skill {
 					}
 					let card = ctx.get_card(ctx.get(t, Stat::card));
 					if card.kind == Kind::Spell {
-						card.skill[0].1[0].targeting(ctx.cardset())
+						card.skill()[0].1[0].targeting(ctx.cardset())
 					} else {
 						None
 					}

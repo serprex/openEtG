@@ -55,7 +55,7 @@ mod test {
 				let un = set.get(card::AsUpped(card.code, false));
 				let up = set.get(card::AsUpped(card.code, true));
 				if card.kind == Kind::Spell {
-					assert!(card.skill.iter().any(|&(k, v)| k == Event::Cast));
+					assert!(card.skill().iter().any(|&(k, v)| k == Event::Cast));
 				}
 			}
 		}

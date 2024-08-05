@@ -227,9 +227,9 @@ fn filters(code: i16, deck: &[i16], ecost: &[i16; 13]) -> bool {
 			deck.iter()
 				.filter(|&&dcode| {
 					let c = card::OpenSet.get(dcode);
-					c.skill.iter().any(|kv| kv.0 == Event::Death)
-						|| c.skill.iter().any(|&(k, sks)| {
-							k == Event::Cast
+					c.skill().iter().any(|&(k, sks)| {
+						k == Event::Death
+							|| (k == Event::Cast
 								&& sks.iter().any(|&sk| {
 									matches!(
 										sk,
@@ -237,8 +237,8 @@ fn filters(code: i16, deck: &[i16], ecost: &[i16; 13]) -> bool {
 											| Skill::improve | Skill::jelly | Skill::trick
 											| Skill::immolate(_) | Skill::appease
 									)
-								})
-						})
+								}))
+					})
 				})
 				.count() > 3
 		}
@@ -388,7 +388,7 @@ impl Builder {
 			self.ecost[0] -= 4 * PREC;
 		}
 		if card.kind == Kind::Creature {
-			if let Some(&(_, sks)) = card.skill.iter().find(|&&(k, sks)| k == Event::OwnAttack) {
+			if let Some(&(_, sks)) = card.skill().iter().find(|&&(k, sks)| k == Event::OwnAttack) {
 				for &sk in sks.iter() {
 					if let Skill::quanta(q) = sk {
 						self.ecost[q as usize] -= 3 * PREC;
