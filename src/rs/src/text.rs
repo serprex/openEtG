@@ -392,7 +392,7 @@ impl<'a> SkillThing<'a> {
 			Skill::gaintimecharge =>
 				Cow::from("Gain one stack for every card you draw. Does not gain a stack from your draw at the start of your turn"),
 			Skill::gas => Cow::from("Summon an Unstable Gas"),
-			Skill::grab2h => Cow::from("Return your target shield to hand, or discard a card in order to deal damage to opponent equivalent to this card's attack power. While shield equipped does not attack, but blocks opposing card instead."),
+			Skill::grab2h => Cow::from("Return target shield to its owner's hand, or discard one of your cards in order to deal damage to opponent equivalent to half this card's attack power. While shield equipped does not attack, but blocks opposing card instead"),
 			Skill::grave =>
 				Cow::from("When another creature dies, unburrow & transform this creature into a fresh copy of the dying creature. This creature retains nocturnal"),
 			Skill::give =>

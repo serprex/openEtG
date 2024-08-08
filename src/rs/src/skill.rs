@@ -1468,7 +1468,7 @@ impl Skill {
 					Tgt::crea
 				}
 			}
-			Self::grab2h => tgt!(and own or shie card),
+			Self::grab2h => tgt!(or shie and own card),
 			Self::guard => Tgt::crea,
 			Self::heal => tgt!(or crea play),
 			Self::holylight => tgt!(or crea play),
@@ -1694,7 +1694,7 @@ impl Skill {
 			Skill::grab2h => {
 				if ctx.get_kind(t) == Kind::Spell {
 					ctx.die(t);
-					ctx.dmg(ctx.get_foe(ctx.get_owner(c)), ctx.trueatk(c));
+					ctx.dmg(ctx.get_foe(ctx.get_owner(c)), ctx.trueatk(c)/2);
 				} else {
 					ctx.unsummon(t);
 				}
