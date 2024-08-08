@@ -1468,7 +1468,7 @@ impl Skill {
 					Tgt::crea
 				}
 			}
-			Self::grab2h => tgt!(and own or shie card),
+			Self::grab2h => tgt!(or shie and own card),
 			Self::guard => Tgt::crea,
 			Self::heal => tgt!(or crea play),
 			Self::holylight => tgt!(or crea play),
