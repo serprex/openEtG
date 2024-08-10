@@ -680,7 +680,7 @@ impl<'a> SkillThing<'a> {
 			} else {
 				"Add 3 random non-pillar cards to your hand. At least one will be 1:1"
 			}),
-			Skill::shazam => Cow::from("Randomly transform creature into rabbit for 2:8, bouquet for 2:5, or dove for 2:9"),
+			Skill::shazam => Cow::from("Transform creature you control into a random common creature of the same element, or transform target card into a random card of the same element"),
 			Skill::shtriga => Cow::from("Gain immaterial when your next turn starts"),
 			Skill::shuffle3 =>
 				Cow::from("Shuffle 3 copies of target creature into your deck & expend a charge. Destroyed when all charges expended"),

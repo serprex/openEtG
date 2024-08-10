@@ -1537,7 +1537,7 @@ impl Skill {
 			Self::scatter => tgt!(or card play),
 			Self::scramble => Tgt::play,
 			Self::scramblespam => Tgt::play,
-			Self::shazam => Tgt::crea,
+			Self::shazam => tgt!(or card and own crea),
 			Self::shuffle3 => Tgt::crea,
 			Self::silence => tgt!(or crea play),
 			Self::silence => tgt!(or crea perm),
@@ -1743,41 +1743,16 @@ impl Skill {
 				}
 			}
 			Skill::shazam => {
-				let owner = ctx.get_owner(c);
-				let mut options = [etg::Chroma; 3];
-				let mut idx = 0;
-				if ctx.get_player(owner).quanta(etg::Life) > 1 {
-					options[idx as usize] = etg::Life;
-					idx += 1;
-				}
-				if ctx.get_player(owner).quanta(etg::Light) > 1 {
-					options[idx as usize] = etg::Light;
-					idx += 1;
-				}
-				if ctx.get_player(owner).quanta(etg::Air) > 1 {
-					options[idx as usize] = etg::Air;
-					idx += 1;
-				}
-				if idx != 0 {
-					let option = options[ctx.upto(idx) as usize];
-					ctx.spend(owner, option, 2);
-					match option {
-						etg::Life => {
-							let town = ctx.get_owner(t);
-							ctx.set(town, Stat::gpull, t);
-							ctx.transform(t, card::GuardianAngel);
-						}
-						etg::Light => {
-							ctx.set(t, Stat::atk, 3);
-							ctx.set(t, Stat::hp, 3);
-						}
-						etg::Air => {
-							ctx.transform(t, card::Wyrm);
-							ctx.set(t, Stat::atk, 2);
-							ctx.set(t, Stat::hp, 2);
-						}
-						_ => unsafe { core::hint::unreachable_unchecked() },
-					}
+				let code = ctx.get(t, Stat::card);
+				let uncode = card::AsUpped(code, false);
+				let element = ctx.get_card(code).element;
+				let newcard = if ctx.get_kind(t) == Kind::Spell {
+					ctx.random_card(false, |ctx, card| card.element == element && card.code != uncode)
+				} else {
+					ctx.random_card(false, |ctx, card| card.element == element && card.rarity == 1 && card.kind == Kind::Creature && card.code != uncode)
+				};
+				if let Some(newcard) = newcard {
+					ctx.transform(t, card::As(code, newcard.code));
 				}
 			}
 			Skill::fossilize => {
