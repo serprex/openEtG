@@ -664,10 +664,10 @@
 8015|Neurotoxin|10|3|2|3|||neuroify|
 6016|Time Barrier|10|1|2|7|||shield=blockwithcharge+draw=gaintimecharge|charges=5+stackable
 8016|Time Barrier|10|1|2|5|||shield=blockwithcharge+draw=gaintimecharge|charges=5+stackable
-6017|Innovation|10|3|3|4|||innovation|
-8017|Innovation|10|3|3|3|||innovation|
-6018|Amber Amulet|10|0|3|6|6|14|3:4=fossilize|
-8018|Amber Amulet|10|0|3|6|8|14|2:4=fossilize|
+6017|Innovation|10|3|3|4|||innovate 3|
+8017|Innovation|10|3|3|3|||innovate 3|
+6018|Amulet|10|0|3|5|0|2|1=innovate 2+hit=mill|
+8018|Amulet|10|0|3|6|1|4|0=innovate 2+hit=mill|
 6020|Golden Nymph|10|4|4|8|6|4|2=precognition|
 8020|Time Nymph|10|4|4|8|7|5|2=precognition|
 6021|Time Bomb|10|4|2|1||2|0=tick|
@@ -726,8 +726,8 @@
 8114|Cloak|11|2|1|2|||losecharge|cloak+charges=4
 6115|Shadling|11|4|2|1||2|2=siphonstrength|nocturnal
 8115|Shadling|11|4|2|1|2|3|2=siphonstrength|nocturnal
-6116|Possessed Sword|11|0|3|3|1|1|ownplay=haunt|nocturnal
-8116|Possessed Sword|11|0|3|3|2|2|ownplay=haunt|nocturnal
+6116|Scythe|11|0|3|3|6|6|1=haunt|nocturnal
+8116|Scythe|11|0|3|2|6|6|1=haunt|nocturnal
 6120|Black Nymph|11|4|4|8|6|6|1=liquid|nocturnal
 8120|Dark Nymph|11|4|4|8|7|7|1=liquid|nocturnal
 6122|Despair|11|1|2|6|||shield=despair|

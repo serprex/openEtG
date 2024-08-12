@@ -413,7 +413,8 @@ impl<'a> SkillThing<'a> {
 			Skill::hasten if ev == Event::OwnDiscard => Cow::from("When discarded, you draw a card"),
 			Skill::hatch =>
 				Cow::from("Transform this creature into a random creature. Caster can be reactivated"),
-			Skill::haunt => Cow::from("Summon skeleton, haunt each other"),
+			Skill::haunt => Cow::from("When target creature dies, summon a fully health Skeleton with the same stats"),
+			Skill::haunted(own) => Cow::from(format!("When this dies, summon a fully health Skeleton with the same stats for player {}", own)),
 			Skill::heal => Cow::from("Target creature or player heals 20HP"),
 			Skill::healblocked => Cow::from("When this creature attacks, if any damage is blocked by opponent's shield, heal yourself for the amount this creature's damage was blocked"),
 			Skill::heatmirror => Cow::from(if self.upped() {
@@ -443,8 +444,8 @@ impl<'a> SkillThing<'a> {
 			Skill::inertia => Cow::from("When any card you own is targeted by either player, gain 2:3"),
 			Skill::inflation => Cow::from("Increase the cost of all active skills by 1"),
 			Skill::ink => Cow::from("Summon a Cloak that lasts 1 turn"),
-			Skill::innovation =>
-				Cow::from("Discard target card in either player's hand. The owner of target card draws three cards. Destroy top card of your deck"),
+			Skill::innovate(x) =>
+				Cow::from(format!("Discard target card in either player's hand. The owner of target card draws {} cards. Destroy top card of your deck", x)),
 			Skill::integrity =>
 				Cow::from("Destroy all shards in your hand to play a Shard Golem with stats & skills based on the shards destroyed"),
 			Skill::jelly =>
@@ -491,7 +492,10 @@ impl<'a> SkillThing<'a> {
 				Cow::from("Change your mark to target's element.\nIncrease your mark power by 1"),
 			Skill::midas =>
 				Cow::from("Target permanent becomes a Golden Relic with \"2:0: Sacrifice this card & draw a card.\" If target is a weapon, its strength is 1. If target is a shield, its damage reduction is 1"),
-			Skill::mill => Cow::from("Destroy top card of target player's deck"),
+			Skill::mill => Cow::from(match ev {
+				Event::Hit => "Destroy top card of player's deck on hit. Throttled (only triggers twice from Adrenaline)",
+				_ => "Destroy top card of target player's deck",
+			}),
 			Skill::millpillar =>
 				Cow::from("If top card of target player's deck is a pillar, pendulum, or tower, destroy that card"),
 			Skill::mimic =>

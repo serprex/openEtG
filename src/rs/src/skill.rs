@@ -396,8 +396,7 @@ pub enum Skill {
 	hasten,
 	hatch,
 	haunt,
-	hauntatk(i16),
-	haunthp(i16),
+	haunted(i16),
 	heal,
 	healblocked,
 	heatmirror,
@@ -415,7 +414,7 @@ pub enum Skill {
 	inertia,
 	inflation,
 	ink,
-	innovation,
+	innovate(u8),
 	integrity,
 	jelly,
 	jetstream,
@@ -923,8 +922,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::databloat => f.write_str("databloat"),
 			Skill::datashrink => f.write_str("datashrink"),
 			Skill::haunt => f.write_str("haunt"),
-			Skill::haunthp(..) => Ok(()),
-			Skill::hauntatk(..) => Ok(()),
+			Skill::haunted(..) => f.write_str("haunted"),
 			Skill::throwfeather => f.write_str("throwfeather"),
 			Skill::heatstroke => f.write_str("heatstroke"),
 			Skill::grab2h => f.write_str("grab2h"),
@@ -1099,7 +1097,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::inertia => f.write_str("inertia"),
 			Skill::inflation => f.write_str("inflation"),
 			Skill::ink => f.write_str("ink"),
-			Skill::innovation => f.write_str("innovation"),
+			Skill::innovate(x) => write!(f, "innovate{x}"),
 			Skill::integrity => f.write_str("integrity"),
 			Skill::jelly => f.write_str("jelly"),
 			Skill::jetstream => f.write_str("jetstream"),
@@ -1348,8 +1346,6 @@ impl Skill {
 				| Self::deepdiveproc2
 				| Self::dshieldoff
 				| Self::elf | Self::firebrand
-				| Self::hauntatk(..)
-				| Self::haunthp(..)
 				| Self::martyr | Self::mummy
 				| Self::obsession
 				| Self::predatoroff
@@ -1470,12 +1466,13 @@ impl Skill {
 			}
 			Self::grab2h => tgt!(or shie and own card),
 			Self::guard => Tgt::crea,
+			Self::haunt => Tgt::crea,
 			Self::heal => tgt!(or crea play),
 			Self::holylight => tgt!(or crea play),
 			Self::icebolt => tgt!(or crea play),
 			Self::immolate(_) => tgt!(and crea own),
 			Self::improve => Tgt::crea,
-			Self::innovation => Tgt::card,
+			Self::innovate(_) => Tgt::card,
 			Self::jelly => Tgt::crea,
 			Self::jetstream => Tgt::crea,
 			Self::lightning => tgt!(or crea play),
@@ -1656,26 +1653,23 @@ impl Skill {
 				}
 			}
 			Skill::haunt => {
-				let owner = ctx.get_owner(c);
-				let skele = ctx.new_thing(card::As(ctx.get(c, Stat::card), card::Skeleton), owner);
-				ctx.set(skele, Stat::hp, 0);
-				ctx.set(skele, Stat::maxhp, 0);
-				ctx.set(skele, Stat::atk, 0);
-				ctx.addCrea(owner, skele);
-				if ctx.getIndex(skele) != -1 {
-					ctx.get_thing_mut(skele)
-						.skill
-						.insert(Event::Hp, Cow::from(Vec::from(&[Skill::haunthp(c)])));
-					ctx.get_thing_mut(c)
-						.skill
-						.insert(Event::Hp, Cow::from(Vec::from(&[Skill::haunthp(skele)])));
-					ctx.get_thing_mut(skele)
-						.skill
-						.insert(Event::Buff, Cow::from(Vec::from(&[Skill::hauntatk(c)])));
-					ctx.get_thing_mut(c)
-						.skill
-						.insert(Event::Buff, Cow::from(Vec::from(&[Skill::hauntatk(skele)])));
+				let own = ctx.get_owner(c);
+				let thing = ctx.get_thing_mut(t);
+				if let Some(smap) = thing.skill.get_mut(Event::OwnDeath) {
+					smap.extend(&[Skill::haunted(own)]);
+				} else {
+					thing.skill.insert(Event::OwnDeath, Cow::from(Vec::from(&[Skill::haunted(own)])));
 				}
+			}
+			Skill::haunted(own) => {
+				let atk = ctx.get(t, Stat::atk);
+				let hp = ctx.get(t, Stat::maxhp);
+				let card = ctx.get(t, Stat::card);
+				let skele = ctx.new_thing(card::As(card, card::Skeleton), own);
+				ctx.set(skele, Stat::atk, atk);
+				ctx.set(skele, Stat::maxhp, hp);
+				ctx.set(skele, Stat::hp, hp);
+				ctx.addCrea(own, skele);
 			}
 			Skill::throwfeather => {
 				if ctx.maybeDecrStatus(c, Stat::charges) != 0 {
@@ -3191,11 +3185,11 @@ impl Skill {
 				ctx.set(p, Stat::charges, 1);
 				ctx.addPerm(owner, p);
 			}
-			Self::innovation => {
+			Self::innovate(x) => {
 				let town = ctx.get_owner(t);
 				if !ctx.sanctified(town) {
 					ctx.die(t);
-					for _ in 0..3 {
+					for _ in 0..x {
 						ctx.drawcard(town);
 					}
 				}
@@ -3619,7 +3613,9 @@ impl Skill {
 				}
 			}
 			Self::mill => {
-				ctx.mill(t, 1);
+				if throttle(ctx, data, c) && ctx.get_kind(t) == Kind::Player {
+					ctx.mill(t, 1);
+				}
 			}
 			Self::millpillar => {
 				if let Some(&card) = ctx.get_player(t).deck.last() {
@@ -5619,8 +5615,6 @@ impl Skill {
 			| Self::featherdr
 			| Self::fiery
 			| Self::hammer
-			| Self::haunthp(..)
-			| Self::hauntatk(..)
 			| Self::hope
 			| Self::poisondr
 			| Self::skeletoncount
@@ -5692,20 +5686,6 @@ impl Skill {
 			Self::hammer => {
 				let mark = ctx.get_player(ctx.get_owner(c)).mark as i16;
 				(mark == etg::Gravity || mark == etg::Earth) as i16
-			}
-			Skill::haunthp(o) => {
-				if ctx.getIndex(o) != -1 && ctx.hasskill(o, Event::Hp, Skill::haunthp(c)) {
-					ctx.get(o, Stat::hp)
-				} else {
-					0
-				}
-			}
-			Skill::hauntatk(o) => {
-				if ctx.getIndex(o) != -1 && ctx.hasskill(o, Event::Buff, Skill::hauntatk(c)) {
-					ctx.get(o, Stat::atk)
-				} else {
-					0
-				}
 			}
 			Self::hope => ctx
 				.get_player(ctx.get_owner(c))
