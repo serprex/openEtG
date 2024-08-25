@@ -1413,7 +1413,7 @@ impl Skill {
 			}
 			Self::cseed | Self::v_cseed => Tgt::crea,
 			Self::cseed2 => Tgt::notself,
-			Self::datashrink => tgt!(or play and card not pill),
+			Self::datashrink => tgt!(and card not pill),
 			Self::destroy => Tgt::perm,
 			Self::destroycard => tgt!(or card play),
 			Self::detain => Tgt::devour,
@@ -1641,15 +1641,12 @@ impl Skill {
 				}
 			}
 			Skill::datashrink => {
-				if ctx.get_kind(t) == Kind::Player {
-					for id in ctx.get_player(t).hand_iter() {
-						if !ctx.get(id, Flag::pillar) {
-							ctx.maybeDecrStatus(id, Stat::cost);
-						}
+				let thing = ctx.get_thing_mut(t);
+				if let Some(cost) = thing.status.get_mut(Stat::cost) {
+					*cost -= 2;
+					if *cost < 0 {
+						*cost = 0;
 					}
-				} else {
-					ctx.maybeDecrStatus(t, Stat::cost);
-					ctx.maybeDecrStatus(t, Stat::cost);
 				}
 			}
 			Skill::haunt => {
@@ -1662,6 +1659,7 @@ impl Skill {
 				}
 			}
 			Skill::haunted(own) => {
+				ctx.rmskill(c, Event::OwnDeath, Skill::haunted(own));
 				let atk = ctx.get(t, Stat::atk);
 				let hp = ctx.get(t, Stat::maxhp);
 				let card = ctx.get(t, Stat::card);

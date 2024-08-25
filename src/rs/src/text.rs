@@ -259,7 +259,7 @@ impl<'a> SkillThing<'a> {
 			Skill::cseed2 =>
 				Cow::from("Inflict a random effect on target card. All existing effects are possible"),
 			Skill::databloat => Cow::from("On hit, increase target player's hand's non-pillar card's costs by one"),
-			Skill::datashrink => Cow::from("Decrease target player's hand's non-pillar card's costs by one, or decrease target non-pillar card's cost by two. Cannot reduce below 0"),
+			Skill::datashrink => Cow::from("Decrease target non-pillar card's cost by two. Cannot reduce below 0"),
 			Skill::deadalive if ev == Event::Hit => Cow::from("When this card deals damage, trigger all effects that occur when a creature dies"),
 			Skill::deadalive if ev == Event::Cast => Cow::from("Trigger all effects that occur when a creature dies"),
 			Skill::deathwish => Cow::from("Whenever opponent casts a spell or ability on an allied creature, if this creature is a valid target, that spell or ability targets this creature instead"),

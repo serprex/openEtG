@@ -242,8 +242,8 @@
 7326|Brawl|3|3|3|13|||brawl|
 5327|Boar|3|4|1|3|2|1|growth 1 0|
 7327|Boar|3|4|1|3|3|1|growth 1 1|
-5328|Scepter of Ruling|3|0|3|5|7|5|2:12=beguile|
-7328|Scepter of Ruling|3|0|3|5|8|5|1:12=beguile|
+5328|Scepter of Ruling|3|0|3|5|4|8|3:12=beguile|
+7328|Scepter of Ruling|3|0|3|5|4|8|2:12=beguile|
 5330|Shard of Focus|3|4|3|6||1|1=accretion|
 7330|Shard of Focus|3|4|3|4||1|1=accretion|
 5331|Stasis|3|3|2|1|||stasisdraw+owndraw=sanctify+owndiscard=sanctify|
@@ -362,8 +362,8 @@
 7522|Rejuvenation|5|3|3|3|||regeneratespell|
 5523|Scorpion Claws|5|0|3|4|1|3|beginattack=nothrottle|adrenaline=1+bug
 7523|Scorpion Claws|5|0|3|4|2|3|beginattack=nothrottle|adrenaline=1+bug
-5524|Infested Log|5|0|3|3|2|2|1:2=poison 1+play=bugpoison|poisonous
-7524|Infested Log|5|0|3|3|3|3|1:2=poison 2+play=bugpoison|poisonous
+5524|Infested Log|5|0|3|3|3|2|1:2=poison 2+play=bugpoison|poisonous
+7524|Infested Log|5|0|3|2|3|2|1:2=poison 2+play=bugpoison|poisonous
 5530|Shard of Gratitude|5|2|3|3|||regenerate 4|
 7530|Shard of Gratitude|5|2|3|2|||regenerate 4|
 5531|Alpha Wolf|5|4|2|5|2|2|ownplay=alphawolf|nocturnal
@@ -432,10 +432,10 @@
 7625|Ferro Golem|6|4|2|6|7|4|1:10=drawequip|golem
 5626|Wicked Shield|6|1|2|2||4|1:11=wicked+turnstart=resetdr|
 7626|Wicked Shield|6|1|2|3||4|1:11=wicked+turnstart=halvedr|
-5627|Sun Blade|6|0|3|2|5|3|1:10=heatstroke+hit=heatstroke+death=miragemill|
-7627|Sun Blade|6|0|3|2|8|4|1:10=heatstroke+hit=heatstroke+death=miragemill|
-5628|Mirage|6|4|1|0|2|8|prespell=mirage+blocked=healblocked|token
-7628|Mirage|6|4|1|0|2|8|prespell=mirage+blocked=healblocked|token
+5627|Sun Blade|6|0|3|3|5|3|1:10=heatstroke+hit=heatstroke+death=miragemill|
+7627|Sun Blade|6|0|3|3|8|4|1:10=heatstroke+hit=heatstroke+death=miragemill|
+5628|Mirage|6|4|1|0|3|6|prespell=mirage+blocked=healblocked|token
+7628|Mirage|6|4|1|0|3|6|prespell=mirage+blocked=healblocked|token
 5630|Shard of Bravery|6|3|3|2|||bravery|
 7630|Shard of Bravery|6|3|3|1|||bravery|
 5650|Fire Pendulum|6|2|0|0|||pend|pillar+stackable+additive+charges=1
@@ -666,8 +666,8 @@
 8016|Time Barrier|10|1|2|5|||shield=blockwithcharge+draw=gaintimecharge|charges=5+stackable
 6017|Innovation|10|3|3|4|||innovate 3|
 8017|Innovation|10|3|3|3|||innovate 3|
-6018|Amulet|10|0|3|5|0|2|1=innovate 2+hit=mill|
-8018|Amulet|10|0|3|6|1|4|0=innovate 2+hit=mill|
+6018|Amulet|10|0|3|5|0|2|2=innovate 2+hit=mill|
+8018|Amulet|10|0|3|6|1|4|1=innovate 2+hit=mill|
 6020|Golden Nymph|10|4|4|8|6|4|2=precognition|
 8020|Time Nymph|10|4|4|8|7|5|2=precognition|
 6021|Time Bomb|10|4|2|1||2|0=tick|
