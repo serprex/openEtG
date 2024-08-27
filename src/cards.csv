@@ -434,8 +434,8 @@
 7626|Wicked Shield|6|1|2|3||4|1:11=wicked+turnstart=halvedr|
 5627|Sun Blade|6|0|3|3|5|3|1:10=heatstroke+hit=heatstroke+death=miragemill|
 7627|Sun Blade|6|0|3|3|8|4|1:10=heatstroke+hit=heatstroke+death=miragemill|
-5628|Mirage|6|4|1|0|3|6|prespell=mirage+blocked=healblocked|token
-7628|Mirage|6|4|1|0|3|6|prespell=mirage+blocked=healblocked|token
+5628|Mirage|6|4|3|0|3|6|blocked=healblocked|token
+7628|Mirage|6|4|3|0|3|6|blocked=healblocked|token
 5630|Shard of Bravery|6|3|3|2|||bravery|
 7630|Shard of Bravery|6|3|3|1|||bravery|
 5650|Fire Pendulum|6|2|0|0|||pend|pillar+stackable+additive+charges=1

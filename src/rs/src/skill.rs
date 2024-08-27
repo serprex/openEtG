@@ -437,7 +437,6 @@ pub enum Skill {
 	millpillar,
 	mimic,
 	miracle,
-	mirage,
 	miragemill,
 	mist,
 	mitosis,
@@ -1120,7 +1119,6 @@ impl<'a> Display for SkillName<'a> {
 			Skill::millpillar => f.write_str("millpillar"),
 			Skill::mimic => f.write_str("mimic"),
 			Skill::miracle => Ok(()),
-			Skill::mirage => f.write_str("mirage"),
 			Skill::miragemill => Ok(()),
 			Skill::mist => f.write_str("mist"),
 			Skill::mitosis => f.write_str("mitosis"),
@@ -3635,35 +3633,6 @@ impl Skill {
 					ctx.set(owner, Stat::hp, ctx.get(owner, Stat::maxhp) - 1);
 				} else {
 					ctx.set(owner, Stat::hp, 1);
-				}
-			}
-			Self::mirage => {
-				let tgt = data.tgt;
-				let owner = ctx.get_owner(c);
-				if tgt != 0
-					&& owner == ctx.get_owner(t)
-					&& owner == ctx.get_owner(tgt)
-					&& ctx.get(c, Stat::frozen) == 0
-					&& ctx.get(c, Stat::delayed) == 0
-					&& data
-						.active
-						.and_then(|sk| sk.targeting(ctx.cardset()))
-						.map(|tgt| tgt.check(ctx, t, c))
-						.unwrap_or(false)
-				{
-					if !ctx.hasskill(tgt, Event::Prespell, Skill::mirage) {
-						data.tgt = c;
-					} else {
-						let totaldw = ctx
-							.get_player(owner)
-							.creatures
-							.into_iter()
-							.map(|cr| (cr != 0 && ctx.hasskill(cr, Event::Prespell, Skill::mirage)) as u32)
-							.sum::<u32>();
-						if totaldw > 0 && ctx.upto(totaldw) == 0 {
-							data.tgt = c;
-						}
-					}
 				}
 			}
 			Self::miragemill => {
