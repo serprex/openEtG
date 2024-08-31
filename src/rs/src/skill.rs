@@ -4208,8 +4208,10 @@ impl Skill {
 				ctx.fx(c, Fx::EndPos(t));
 				let hp = ctx.truehp(c);
 				let atk = ctx.trueatk(c);
+				let psn = ctx.get(c, Stat::poison);
 				ctx.buffhp(t, hp);
 				ctx.incrAtk(t, atk);
+				ctx.poison(t, psn);
 				ctx.remove(c);
 			}
 			Self::ren => {
