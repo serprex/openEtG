@@ -5676,12 +5676,17 @@ impl Skill {
 				}
 			}
 			Self::skeletoncount => {
+				let upped = card::Upped(ctx.get(c, Stat::card));
 				let mut dmg = 0;
 				for cr in ctx.get_player(ctx.get_owner(c)).creatures {
 					if cr != 0 {
 						let crcard = ctx.get(cr, Stat::card);
 						if card::IsOf(crcard, card::Skeleton) {
-							dmg += 1;
+							dmg += if upped {
+								ctx.get(cr, Stat::atk)
+							} else {
+								1
+							};
 						}
 					}
 				}

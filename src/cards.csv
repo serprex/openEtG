@@ -180,8 +180,8 @@
 7227|Plague Mask|2|1|2|3||2|hp=poisondr+1:7=doctor|
 5228|Frailty|2|3|1|1|||frail|
 7228|Frailty|2|3|1|1|||frail2|
-5229|Skeleton Axe|2|0|3|3|2|4|1=bonesharpen+buff=skeletoncount|
-7229|Skeleton Axe|2|0|3|3|4|4|1=bonesharpen+buff=skeletoncount|
+5229|Skeleton Axe|2|0|3|3|2|4|1=bonesharpen+buff=skeletoncount|nocturnal
+7229|Skeleton Axe|2|0|3|4|0|4|1=bonesharpen+buff=skeletoncount|nocturnal
 5230|Shard of Sacrifice|2|3|3|2|||sosa|
 7230|Shard of Sacrifice|2|3|3|2|||sosa|
 5250|Death Pendulum|2|2|0|0|||pend|pillar+stackable+additive+charges=1

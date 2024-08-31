@@ -704,7 +704,7 @@ impl<'a> SkillThing<'a> {
 			Skill::siphonstrength => Cow::from("Target creature loses 1|0. Gain 1|0"),
 			Skill::skeleton =>
 				Cow::from("If this creature is targeted by Rewind, it becomes a random creature"),
-			Skill::skeletoncount => Cow::from("Increase attack by number of skeletons you own"),
+			Skill::skeletoncount => Cow::from(if self.upped() { "Increase attack by sum of base attack of your skeletons" } else { "Increase attack by number of skeletons you own" }),
 			Skill::skull => Cow::from(if self.set() == CardSet::Open {
 				"Attacking non-ranged creatures may randomly die (1 in HP chance) & are replaced by Skeletons"
 			} else {
