@@ -4042,7 +4042,8 @@ impl Skill {
 					ctx.addskills(c, Event::Turnstart, &[Skill::predatoroff]);
 					ctx.queue_attack(c, 0);
 					if !ctx.sanctified(foe) {
-						if let Some(card) = ctx.get_player(foe).hand_last() {
+						let card = ctx.get_player(foe).hand_last();
+						if card != 0 {
 							ctx.die(card);
 						}
 					}

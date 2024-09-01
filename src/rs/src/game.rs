@@ -107,14 +107,14 @@ impl PlayerData {
 		self.hand_iter().count()
 	}
 
-	pub fn hand_last(&self) -> Option<i16> {
+	pub fn hand_last(&self) -> i16 {
 		if self.hand[0] == 0 {
-			None
+			return 0;
 		} else {
 			let mut idx = 7;
 			loop {
 				if self.hand[idx] != 0 {
-					return Some(self.hand[idx]);
+					return self.hand[idx];
 				}
 				idx -= 1;
 			}
