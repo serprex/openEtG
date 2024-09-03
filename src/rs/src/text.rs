@@ -194,7 +194,7 @@ impl<'a> SkillThing<'a> {
 			}
 			Skill::bloodmoon => Cow::from("Aquatic creatures gain \"Gain 1:8 when it attacks.\"\nGolems gain \"Damage dealt by this card also reduces the defender's maxHP.\"\nNocturnal creatures gain \"Heal yourself equal to the damage dealt by this card.\""),
 			Skill::bolsterintodeck => Cow::from("Add 3 copies of target creature on top of your deck"),
-			Skill::bonesharpen => Cow::from("Replace your own target creature's skills with \"0: Combine with target creature, causing it to gain strength & HP equal to this creature's strength & HP.\"\nIf target is skeleton caster is reactivated"),
+			Skill::bonesharpen => Cow::from("Replace your own target creature's skills with \"0: Combine with target creature, causing it to gain strength & HP equal to this creature's strength & HP. Pass on poison counters\"\nIf target is skeleton caster is reactivated"),
 			Skill::boneyard => {
 				Cow::from(format!("Whenever a creature which isn't a Skeleton dies, summon a {} Skeleton", if self.upped() { "2|2" } else { "1|1" }))
 			}
@@ -404,7 +404,7 @@ impl<'a> SkillThing<'a> {
 			Skill::growth(atk, hp) if ev == Event::Death => Cow::from(format!("When any creature dies, gain {atk}|{hp}")),
 			Skill::growth(atk, hp) if ev == Event::Cast => Cow::from(format!("Gain {atk}|{hp}")),
 			Skill::growth(atk, hp) if ev == Event::OwnAttack => Cow::from(format!("This creature gains {}|{} when it attacks", atk, hp)),
-			Skill::icegrowth(atk, hp) => Cow::from(format!("When this card would be frozen, instead gain {atk}|{hp}")),
+			Skill::icegrowth => Cow::from(format!("When this card would be frozen, instead gain attack for how much it would be frozen")),
 			Skill::guard =>
 				Cow::from("Delay target creature & this creature. If target creature isn't airborne or this creature is airborne, this creature deals damage equal to its strength to target creature"),
 			Skill::halveatk => Cow::from("This creature's strength is halved after it attacks"),
@@ -762,7 +762,6 @@ impl<'a> SkillThing<'a> {
 			Skill::tesseractsummon =>
 				Cow::from("Summon a random creatures from opponent's deck. Summon two random creatures from your deck. Freeze these creatures for a number of turns equal to \u{00bc} of their quanta cost, rounded up. Freeze Tesseract for two turns"),
 			Skill::thorn(x) => Cow::from(format!("{x}% chance to poison non-ranged attackers")),
-			Skill::throwfeather => Cow::from("Expend one charge to reduce target shield's dr by 1 if greater than 0 & gain freedom until end of turn"),
 			Skill::throwrock => Cow::from(if self.upped() {
 				"Deal 4 damage to target creature, then shuffle Throw Rock into its owner's deck"
 			} else {

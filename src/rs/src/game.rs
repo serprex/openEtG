@@ -2310,6 +2310,12 @@ impl Game {
 		}
 	}
 
+	pub fn shatter(&mut self, id: i16) {
+		self.fx(id, Fx::Shatter);
+		self.proc(Event::Shatter, id);
+		self.die(id);
+	}
+
 	pub fn die(&mut self, id: i16) {
 		let idx = self.remove(id);
 		if idx == -1 {

@@ -100,15 +100,22 @@ impl Card {
 	}
 
 	pub fn status(&self) -> &'static [(Stat, i16)] {
-		unsafe { StatTable.get_unchecked(self.statidx as usize..self.statidx as usize + self.statlen as usize) }
+		unsafe {
+			StatTable.get_unchecked(self.statidx as usize..self.statidx as usize + self.statlen as usize)
+		}
 	}
 
 	pub fn skill(&self) -> &'static [(Event, &'static [Skill])] {
-		unsafe { SkillTable.get_unchecked(self.skillidx as usize..self.skillidx as usize + self.skilllen as usize) }
+		unsafe {
+			SkillTable
+				.get_unchecked(self.skillidx as usize..self.skillidx as usize + self.skilllen as usize)
+		}
 	}
 
 	pub fn name(&self) -> &'static str {
-		unsafe { NameTable.get_unchecked(self.nameidx as usize..self.nameidx as usize + self.namelen as usize) }
+		unsafe {
+			NameTable.get_unchecked(self.nameidx as usize..self.nameidx as usize + self.namelen as usize)
+		}
 	}
 }
 
