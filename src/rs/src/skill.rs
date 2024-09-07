@@ -380,7 +380,6 @@ pub enum Skill {
 	freeze(u8),
 	freezeperm,
 	fungusrebirth,
-	gaincharge,
 	gaincharge2,
 	gaintimecharge,
 	gas,
@@ -408,6 +407,7 @@ pub enum Skill {
 	hope,
 	hush,
 	icebolt,
+	icecharge,
 	icegrowth,
 	ignite,
 	ignitediscard,
@@ -1066,7 +1066,6 @@ impl<'a> Display for SkillName<'a> {
 			Skill::freeze(x) => write!(f, "freeze{x}"),
 			Skill::freezeperm => f.write_str("freezeperm"),
 			Skill::fungusrebirth => f.write_str("fungusrebirth"),
-			Skill::gaincharge => Ok(()),
 			Skill::gaincharge2 => f.write_str("gaincharge2"),
 			Skill::gaintimecharge => f.write_str("gaintimecharge"),
 			Skill::gas => f.write_str("gas"),
@@ -1090,7 +1089,8 @@ impl<'a> Display for SkillName<'a> {
 			Skill::hope => f.write_str("hope"),
 			Skill::hush => f.write_str("hush"),
 			Skill::icebolt => f.write_str("icebolt"),
-			Skill::icegrowth => f.write_str("icegrowth"),
+			Skill::icecharge => Ok(()),
+			Skill::icegrowth => Ok(()),
 			Skill::ignite => f.write_str("ignite"),
 			Skill::ignitediscard => Ok(()),
 			Skill::immolate(x) => write!(f, "immolate{x}"),
@@ -1405,7 +1405,6 @@ impl Skill {
 			Self::butterfly => Tgt::butterfly,
 			Self::catapult => tgt!(and crea own),
 			Self::clear => tgt!(or crea perm),
-			Self::coldsnap => tgt!(or crea and perm nonstack),
 			Self::corpseexplosion => tgt!(and crea own),
 			Self::cpower => {
 				if set == CardSet::Open {
@@ -2175,12 +2174,7 @@ impl Skill {
 				}
 			}
 			Self::coldsnap => {
-				let frozen = ctx.get(t, Stat::frozen);
-				if frozen > 0 {
-					ctx.incrStatus(c, Stat::charges, frozen);
-				} else {
-					ctx.freeze(t, 1);
-				}
+				ctx.incrStatus(c, Stat::charges, 1);
 			}
 			Self::corpseexplosion => {
 				let dmg = 1 + ctx.truehp(t) / 5;
@@ -2959,9 +2953,6 @@ impl Skill {
 			Self::fungusrebirth => {
 				ctx.transform(c, card::As(ctx.get(c, Stat::card), card::Fungus));
 			}
-			Self::gaincharge => {
-				ctx.incrStatus(c, Stat::charges, 1);
-			}
 			Self::gaincharge2 => {
 				if c != t {
 					ctx.incrStatus(c, Stat::charges, 2);
@@ -3114,6 +3105,10 @@ impl Skill {
 					ctx.freeze(t, if card::Upped(ctx.get(c, Stat::card)) { 4 } else { 3 });
 				}
 				ctx.spelldmg(t, 2 + bonus);
+			}
+			Self::icecharge => {
+				ctx.incrStatus(c, Stat::charges, data.amt);
+				data.amt = 0;
 			}
 			Self::icegrowth => {
 				let amt = data.amt as i8;
@@ -4294,16 +4289,16 @@ impl Skill {
 						}
 					}
 					if let Some(id) = ctx.choose(&crs) {
-						ctx.freeze(*id, 1);
+						if ctx.maybeDecrStatus(c, Stat::charges) < 2 {
+							ctx.freeze(*id, 1);
+						}
 					}
 				}
 			}
 			Self::snowflake => {
 				let charges = ctx.get(t, Stat::frozen);
 				if charges > 0 {
-					ctx.shatter(t);
-				} else {
-					ctx.freeze(t, 1);
+					ctx.incrStatus(c, Stat::charges, charges);
 				}
 			}
 			Self::sabbath => {
