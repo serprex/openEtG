@@ -717,6 +717,7 @@ impl<'a> SkillThing<'a> {
 			Skill::slime => Cow::from("Increase damage reduction by 1 when damage reduction does not prevent all damage from non-ranged attacker"),
 			Skill::slow => Cow::from("Non-ranged attackers are delayed for one turn after their attack. Delayed creatures may not attack or use active skills"),
 			Skill::snipe => Cow::from("Deal 3 damage to target creature"),
+			Skill::snowflake if ev == Event::Death => Cow::from("Whenever creature dies or permanent is destroyed, gain charge per frozen counter"),
 			Skill::solar => Cow::from("Gain 1:8 for each attacker"),
 			Skill::sosa =>
 				Cow::from(if self.upped() {
@@ -777,9 +778,9 @@ impl<'a> SkillThing<'a> {
 			Skill::tidalhealing =>
 				Cow::from("Remove frozen status & poison from all your creatures. Your aquatic creatures gain \"Give 1 purify counter to this card's owner on hit. Throttled (only triggers twice from Adrenaline)\". This ability does not stack"),
 			Skill::tornado => Cow::from(if self.upped() {
-				"Randomly choose two of opponent's permanents. Each selected permanent is shuffled into a random player's deck"
+				"Shatter all frozen permanents. Randomly choose two of opponent's permanents. Each selected permanent is shuffled into a random player's deck"
 			} else {
-				"Randomly choose two of opponent's permanents & one of your permanents. Each selected permanent is shuffled into a random player's deck"
+				"Shatter all frozen permanents. Randomly choose two of opponent's permanents & one of your permanents. Each selected permanent is shuffled into a random player's deck"
 			}),
 			Skill::trick =>
 				Cow::from("If target creature's owner has creatures in their deck, put target creature into their deck & summon a random different creature from their deck"),

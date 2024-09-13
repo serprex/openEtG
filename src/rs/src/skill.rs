@@ -42,7 +42,6 @@ impl Event {
 	pub const Spell: Event = Event(unsafe { NonZeroU8::new_unchecked(21) });
 	pub const Spelldmg: Event = Event(unsafe { NonZeroU8::new_unchecked(22) });
 	pub const Turnstart: Event = Event(unsafe { NonZeroU8::new_unchecked(23) });
-	pub const Shatter: Event = Event(unsafe { NonZeroU8::new_unchecked(24) });
 	pub const OwnAttack: Event = Self::own(Self::Attack);
 	pub const OwnBeginattack: Event = Self::own(Self::Beginattack);
 	pub const OwnBlocked: Event = Self::own(Self::Blocked);
@@ -66,7 +65,6 @@ impl Event {
 	pub const OwnSpell: Event = Self::own(Self::Spell);
 	pub const OwnSpelldmg: Event = Self::own(Self::Spelldmg);
 	pub const OwnTurnstart: Event = Self::own(Self::Turnstart);
-	pub const OwnShatter: Event = Self::own(Self::Shatter);
 
 	pub const fn own(e: Event) -> Event {
 		Event(unsafe { NonZeroU8::new_unchecked(e.0.get() | 128) })
@@ -4809,6 +4807,11 @@ impl Skill {
 							.chain(plpl.permanents.into_iter())
 							.filter(|&pr| pr != 0 && ctx.material(pr, None)),
 					);
+					for id in perms.iter().cloned() {
+						if ctx.get(id, Stat::frozen) > 0 {
+							ctx.shatter(id);
+						}
+					}
 					if let Some(&pr) = ctx.choose(&perms) {
 						ctx.fx(pr, Fx::Shuffled);
 						let newowner = if ctx.next32() & 1 == 0 { pl } else { ctx.get_foe(pl) };
