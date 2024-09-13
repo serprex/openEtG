@@ -870,7 +870,8 @@ fn estimate_damage(ctx: &Game, id: i16, freedom: i32, wall: &mut Wall) -> i32 {
 				(momatk * 3 + 1) / 2
 			} else {
 				momatk
-			} * freedom >> PRECBITS;
+			} * freedom
+			>> PRECBITS;
 	}
 	for &skill in ctx.getSkill(id, Event::Hit) {
 		if skill == Skill::vampire {
@@ -949,7 +950,8 @@ fn evalthing(
 	let mut hp = 0;
 	if iscrea {
 		if inhand
-			|| !flooded || thing.flag.get(Flag::aquatic)
+			|| !flooded
+			|| thing.flag.get(Flag::aquatic)
 			|| !ctx.material(id, None)
 			|| ctx.getIndex(id) <= 4
 		{
@@ -1165,7 +1167,8 @@ pub fn eval(ctx: &Game) -> i32 {
 				.filter(|&pr| pr != 0 && ctx.hasskill(pr, Event::Attack, Skill::v_freedom))
 				.map(|pr| ctx.get(pr, Stat::charges))
 				.sum::<i16>()
-				.min(4) as i32 * (PREC / 4)
+				.min(4) as i32
+				* (PREC / 4)
 		};
 		if !stasis && !patience {
 			for cr in player.creatures {

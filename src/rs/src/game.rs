@@ -854,14 +854,16 @@ impl Game {
 					format!(
 						"{}",
 						3 + (self.get_quanta(self.get_owner(c), etg::Fire) as i16
-							- self.get(c, Stat::cost)) / 4
+							- self.get(c, Stat::cost))
+							/ 4
 					)
 				}
 				Skill::drainlife => {
 					format!(
 						"{}",
 						2 + (self.get_quanta(self.get_owner(c), etg::Darkness) as i16
-							- self.get(c, Stat::cost)) / 5
+							- self.get(c, Stat::cost))
+							/ 5
 					)
 				}
 				Skill::icebolt => {
@@ -1969,15 +1971,20 @@ impl Game {
 		thing.status.insert(Stat::atk, card.attack as i16);
 		thing.status.insert(Stat::cost, card.cost as i16);
 		thing.status.insert(Stat::costele, card.costele as i16);
-		thing.flag.0 &=
-			!(Flag::additive
-				| Flag::airborne | Flag::aquatic
-				| Flag::golem | Flag::nightfall
-				| Flag::nocturnal
-				| Flag::pillar | Flag::poisonous
-				| Flag::ranged | Flag::stackable
-				| Flag::token | Flag::tunnel
-				| Flag::voodoo | Flag::whetstone);
+		thing.flag.0 &= !(Flag::additive
+			| Flag::airborne
+			| Flag::aquatic
+			| Flag::golem
+			| Flag::nightfall
+			| Flag::nocturnal
+			| Flag::pillar
+			| Flag::poisonous
+			| Flag::ranged
+			| Flag::stackable
+			| Flag::token
+			| Flag::tunnel
+			| Flag::voodoo
+			| Flag::whetstone);
 		thing.flag.0 |= card.flag();
 		for &(k, v) in card.status() {
 			thing.status.insert(k, v);
@@ -2459,11 +2466,12 @@ impl Game {
 
 	pub fn clearStatus(&mut self, id: i16) {
 		let thing = self.get_thing_mut(id);
-		thing.flag.0 &=
-			!(Flag::additive
-				| Flag::cloak | Flag::nightfall
-				| Flag::stackable
-				| Flag::tunnel | Flag::whetstone);
+		thing.flag.0 &= !(Flag::additive
+			| Flag::cloak
+			| Flag::nightfall
+			| Flag::stackable
+			| Flag::tunnel
+			| Flag::whetstone);
 		for (st, ref mut val) in thing.status.iter_mut() {
 			if matches!(st, Stat::charges | Stat::flooding) {
 				*val = 0;

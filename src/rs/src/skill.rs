@@ -981,7 +981,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::chromastat => f.write_str("chromastat"),
 			Skill::clear => f.write_str("clear"),
 			Skill::cold => f.write_str("cold"),
-			Skill::coldsnap => f.write_str("coldsnap"),
+			Skill::coldsnap => f.write_str("snowclone"),
 			Skill::corpseexplosion => Ok(()),
 			Skill::counter => f.write_str("counter"),
 			Skill::countimmbur => f.write_str("countimmbur"),
@@ -1341,21 +1341,27 @@ impl Skill {
 			Self::abomination
 				| Self::becomearctic
 				| Self::beguilestop
-				| Self::bounce | Self::catlife
+				| Self::bounce
+				| Self::catlife
 				| Self::cell | Self::chromastat
-				| Self::counter | Self::decrsteam
+				| Self::counter
+				| Self::decrsteam
 				| Self::deepdiveproc
 				| Self::deepdiveproc2
 				| Self::dshieldoff
 				| Self::elf | Self::firebrand
-				| Self::martyr | Self::mummy
+				| Self::martyr
+				| Self::mummy
 				| Self::obsession
 				| Self::predatoroff
 				| Self::protectonce
 				| Self::protectoncedmg
-				| Self::salvage | Self::siphon
-				| Self::skeleton | Self::swarm
-				| Self::virtue | Self::v_obsession
+				| Self::salvage
+				| Self::siphon
+				| Self::skeleton
+				| Self::swarm
+				| Self::virtue
+				| Self::v_obsession
 				| Self::v_singularity
 				| Self::v_swarm
 		)
@@ -1545,6 +1551,7 @@ impl Skill {
 			Self::siphonactive => tgt!(and or crea weap notself),
 			Self::siphonstrength => tgt!(and crea notself),
 			Self::snipe => Tgt::crea,
+			Self::coldsnap => Tgt::card,
 			Self::stasisdraw => Tgt::play,
 			Self::steal | Self::v_steal => tgt!(and perm not own),
 			Self::storm(_) => Tgt::play,
@@ -2174,7 +2181,18 @@ impl Skill {
 				}
 			}
 			Self::coldsnap => {
-				ctx.incrStatus(c, Stat::charges, 1);
+				let charges = ctx.get_mut(c, Stat::charges);
+				let count = (core::mem::replace(charges, 0) + 1) as u32;
+				let owner = ctx.get_owner(t);
+				if !ctx.sanctified(owner) {
+					ctx.remove(t);
+					let decklen = ctx.get_player(owner).deck.len() as u32;
+					for n in 1..=count {
+						let idx = ctx.upto(decklen + n) as usize;
+						let inst = if n == count { t } else { ctx.cloneinst(t) };
+						ctx.get_player_mut(owner).deck_mut().insert(idx, inst);
+					}
+				}
 			}
 			Self::corpseexplosion => {
 				let dmg = 1 + ctx.truehp(t) / 5;
@@ -3551,7 +3569,8 @@ impl Skill {
 						let thing = ctx.get_thing(cr);
 						if thing.skill.iter().all(|(k, v)| {
 							k == Event::OwnPlay
-								|| k == Event::OwnDiscard || v.iter().all(|&sk| sk.passive())
+								|| k == Event::OwnDiscard
+								|| v.iter().all(|&sk| sk.passive())
 						}) {
 							ctx.addskills(cr, Event::OwnAttack, &[Skill::quanta(etg::Light as i8)]);
 						}
@@ -4282,16 +4301,14 @@ impl Skill {
 			}
 			Self::rngfreeze => {
 				if ctx.get_kind(t) == Kind::Player {
-					let mut crs = Vec::with_capacity(23);
-					for cr in ctx.get_player(t).creatures {
-						if cr != 0 && ctx.material(cr, None) && ctx.get(cr, Stat::frozen) == 0 {
-							crs.push(cr);
+					let mut ids = Vec::with_capacity(16);
+					for id in ctx.get_player(t).permanents {
+						if id != 0 && ctx.material(id, None) && !ctx.get(id, Flag::stackable) {
+							ids.push(id);
 						}
 					}
-					if let Some(id) = ctx.choose(&crs) {
-						if ctx.maybeDecrStatus(c, Stat::charges) < 2 {
-							ctx.freeze(*id, 1);
-						}
+					if let Some(id) = ctx.choose(&ids) {
+						ctx.freeze(*id, 2);
 					}
 				}
 			}

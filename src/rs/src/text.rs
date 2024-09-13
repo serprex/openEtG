@@ -243,7 +243,7 @@ impl<'a> SkillThing<'a> {
 			Skill::clear =>
 				Cow::from("Remove statuses (positive & negative) from target creature or permanent, & heal target creature 1"),
 			Skill::cold => Cow::from("\u{2153} chance to freeze non-ranged attackers for 3 turns"),
-			Skill::coldsnap => Cow::from("Gain 1 charge"),
+			Skill::coldsnap => Cow::from("Shuffle target card into its owner's deck. Expend charges to shuffle that many copies of target card into its owner's deck"),
 			Skill::corpseexplosion => Cow::from(if self.upped() {
 				"Sacrifice one of your creatures to deal 1 spell damage to all enemy creatures. Increase damage by 1 for every 5HP of the sacrifice. Poisonous sacrifices poison. Poisoned sacrifices poison. Also affect opponent"
 			} else {
@@ -662,6 +662,7 @@ impl<'a> SkillThing<'a> {
 			Skill::reveal if ev == Event::OwnPlay => Cow::from("Reveal opponent's hand when played & on attack"),
 			Skill::ricochet =>
 				Cow::from("Any targeted spells cast by either player are copied when played. The copy has a random caster & a random non-player target"),
+			Skill::rngfreeze => Cow::from("When attackinag a player, randomly freeze one of their non-stacking permanents for two turns"),
 			Skill::sabbath =>
 				Cow::from("Target cannot gain quanta until their turn ends. Their deck is protected until start of their next turn.\nSilence all your opponent's creatures & heal all your creatures by 8"),
 			Skill::sadism => Cow::from("Whenever any creatures are damaged, heal yourself an equal amount"),
