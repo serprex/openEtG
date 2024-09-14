@@ -660,6 +660,7 @@ impl<'a> SkillThing<'a> {
 			Skill::rewind =>
 				Cow::from("Put target creature on top of its owner's deck. Removes all bonuses & modifiers on target creature"),
 			Skill::reveal if ev == Event::OwnPlay => Cow::from("Reveal opponent's hand when played & on attack"),
+			Skill::reveal if ev == Event::Cast => Cow::from("Reveal opponent's hand for this turn"),
 			Skill::ricochet =>
 				Cow::from("Any targeted spells cast by either player are copied when played. The copy has a random caster & a random non-player target"),
 			Skill::rngfreeze => Cow::from("When attackinag a player, randomly freeze one of their non-stacking permanents for two turns"),
