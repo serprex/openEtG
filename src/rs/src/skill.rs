@@ -4299,8 +4299,9 @@ impl Skill {
 			}
 			Self::rngfreeze => {
 				if ctx.get_kind(t) == Kind::Player {
-					let mut ids = Vec::with_capacity(16);
-					for id in ctx.get_player(t).permanents {
+					let mut ids = Vec::with_capacity(18);
+					let pl = ctx.get_player(t);
+					for id in pl.permanents.into_iter().chain(once(pl.weapon)).chain(once(pl.shield)) {
 						if id != 0 && ctx.material(id, None) && !ctx.get(id, Flag::stackable) {
 							ids.push(id);
 						}
