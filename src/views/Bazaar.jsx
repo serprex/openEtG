@@ -13,6 +13,7 @@ function Order(p) {
 	return (
 		<div onClick={_e => p.onClick(Math.abs(p.order.p), p.order.q)}>
 			{p.order.q} @ {Math.abs(p.order.p)}
+			<span class="ico gold" />
 		</div>
 	);
 }
@@ -37,6 +38,7 @@ function CardOrders(p) {
 						{order => (
 							<div style={order.p > 0 ? 'color:#4f8' : 'color:#f84'}>
 								{order.q} @ {Math.abs(order.p)}
+								<span class="ico gold" />
 							</div>
 						)}
 					</For>
@@ -264,15 +266,15 @@ export default function Bazaar() {
 						style="position:absolute;left:100px;top:8px"
 					/>
 					<input
-						placeholder="Sell Price"
-						value={sell() || ''}
-						onInput={e => setSell(Math.min(e.target.value | 0, 999))}
-						style="position:absolute;left:200px;top:8px"
-					/>
-					<input
 						placeholder="Sell Quantity"
 						value={sellq() || ''}
 						onInput={e => setSellq(Math.min(e.target.value | 0, 999))}
+						style="position:absolute;left:200px;top:8px"
+					/>
+					<input
+						placeholder="Sell Price"
+						value={sell() || ''}
+						onInput={e => setSell(Math.min(e.target.value | 0, 999))}
 						style="position:absolute;left:360px;top:8px"
 					/>
 					{buy() > sellValue(bcard()) && (
@@ -290,15 +292,15 @@ export default function Bazaar() {
 						/>
 					)}
 					<input
-						placeholder="Buy Price"
-						value={buy() || ''}
-						onInput={e => setBuy(Math.min(e.target.value | 0, 999))}
-						style="position:absolute;left:200px;top:40px"
-					/>
-					<input
 						placeholder="Buy Quantity"
 						value={buyq() || ''}
 						onInput={e => setBuyq(Math.min(e.target.value | 0, 999))}
+						style="position:absolute;left:200px;top:40px"
+					/>
+					<input
+						placeholder="Buy Price"
+						value={buy() || ''}
+						onInput={e => setBuy(Math.min(e.target.value | 0, 999))}
 						style="position:absolute;left:360px;top:40px"
 					/>
 					<div
