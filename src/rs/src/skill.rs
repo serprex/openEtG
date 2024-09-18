@@ -372,7 +372,6 @@ pub enum Skill {
 	foedraw,
 	forcedraw,
 	forceplay,
-	fossilize,
 	fractal,
 	frail,
 	frail2,
@@ -690,6 +689,7 @@ impl Tgt {
 	deftgt!(poisoned, _poisoned, 26);
 	deftgt!(permcharge, _permcharge, 27);
 	deftgt!(target, _target, 28);
+	deftgt!(shieldcard, _shieldcard, 29);
 
 	pub fn full_check(self, ctx: &Game, c: i16, t: i16) -> bool {
 		let kind = ctx.get_kind(t);
@@ -823,6 +823,10 @@ impl Tgt {
 										.and_then(|&sk| sk.targeting(ctx.cardset()))
 										.is_some()
 							}
+							Tgt::_shieldcard => {
+								let card = ctx.get(t, Stat::card);
+								card != 0 && ctx.get_card(card).kind == Kind::Shield
+							}
 							_ => unsafe { core::hint::unreachable_unchecked() },
 						}) as u32;
 			} else {
@@ -923,16 +927,8 @@ impl<'a> Display for SkillName<'a> {
 		let &SkillName { sk, ctx, id } = self;
 		match sk {
 			Skill::bonesharpen => f.write_str("bonesharpen"),
-			Skill::databloat => f.write_str("databloat"),
-			Skill::datashrink => f.write_str("datashrink"),
-			Skill::haunt => f.write_str("haunt"),
-			Skill::haunted(..) => f.write_str("haunted"),
-			Skill::heatstroke => f.write_str("heatstroke"),
 			Skill::grab2h => f.write_str("grab2h"),
-			Skill::protect => f.write_str("protect"),
-			Skill::fish => f.write_str("fish"),
 			Skill::shazam => f.write_str("shazam"),
-			Skill::fossilize => f.write_str("fossilize"),
 			Skill::r#_tracedeath => Ok(()),
 			Skill::abomination => Ok(()),
 			Skill::absorbdmg => f.write_str("absorbdmg"),
@@ -992,6 +988,8 @@ impl<'a> Display for SkillName<'a> {
 			Skill::cseed => f.write_str("cseed"),
 			Skill::cseed2 => Ok(()),
 			Skill::dagger => f.write_str("dagger"),
+			Skill::databloat => f.write_str("databloat"),
+			Skill::datashrink => f.write_str("datashrink"),
 			Skill::deadalive => f.write_str("deadalive"),
 			Skill::deathwish => f.write_str("deathwish"),
 			Skill::deckblast => Ok(()),
@@ -1052,6 +1050,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::firebrand => f.write_str("firebrand"),
 			Skill::firestorm(_) => Ok(()),
 			Skill::firewall => f.write_str("firewall"),
+			Skill::fish => f.write_str("fish"),
 			Skill::flood => f.write_str("flood"),
 			Skill::flooddeath => Ok(()),
 			Skill::flyingweapon => f.write_str("flyingweapon"),
@@ -1080,6 +1079,9 @@ impl<'a> Display for SkillName<'a> {
 			Skill::guard => f.write_str("guard"),
 			Skill::halveatk => Ok(()),
 			Skill::halvedr => Ok(()),
+			Skill::haunt => f.write_str("haunt"),
+			Skill::haunted(..) => f.write_str("haunted"),
+			Skill::heatstroke => f.write_str("heatstroke"),
 			Skill::hammer => f.write_str("hammer"),
 			Skill::hasten => f.write_str("hasten"),
 			Skill::hatch => f.write_str("hatch"),
@@ -1170,6 +1172,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::precognition => f.write_str("precognition"),
 			Skill::predator => f.write_str("predator"),
 			Skill::predatoroff => Ok(()),
+			Skill::protect => f.write_str("protect"),
 			Skill::protectall => f.write_str("protectall"),
 			Skill::protectonce => f.write_str("protectonce"),
 			Skill::protectoncedmg => f.write_str("protectoncedmg"),
@@ -1453,7 +1456,6 @@ impl Skill {
 			Self::fish => Tgt::play,
 			Self::flyingweapon => Tgt::playerweap,
 			Self::forceplay => Tgt::forceplay,
-			Self::fossilize => Tgt::crea,
 			Self::fractal => Tgt::crea,
 			Self::frail => tgt!(or crea permstack),
 			Self::frail2 => tgt!(or crea permstack),
@@ -1474,7 +1476,7 @@ impl Skill {
 					Tgt::crea
 				}
 			}
-			Self::grab2h => tgt!(or shie and own card),
+			Self::grab2h => tgt!(and own or shie and card shieldcard),
 			Self::guard => Tgt::crea,
 			Self::haunt => Tgt::crea,
 			Self::heal => tgt!(or crea play),
@@ -1700,6 +1702,9 @@ impl Skill {
 							let tflag = tgt.flag.0;
 							let mut sader = ctx.get_thing_mut(t);
 							for (nk, nv) in newskill.into_iter() {
+								if nk == Event::Cast {
+									continue
+								}
 								match sader.skill.entry(nk) {
 									SkillsEntry::Occupied(sk) => {
 										sk.into_mut().extend(nv.as_ref());
@@ -1720,7 +1725,7 @@ impl Skill {
 								| Stat::castele
 								| Stat::cast
 								| Stat::costele => (),
-								Stat::adrenaline => ctx.set(t, k, v),
+								Stat::adrenaline | Stat::shardgolem => ctx.set(t, k, v),
 								_ => ctx.incrStatus(t, k, v),
 							}
 						}
@@ -1788,21 +1793,6 @@ impl Skill {
 				};
 				if let Some(newcard) = newcard {
 					ctx.transform(t, card::As(code, newcard.code));
-				}
-			}
-			Skill::fossilize => {
-				if ctx.get(t, Flag::golem) {
-					let town = ctx.get_owner(t);
-					ctx.set(town, Stat::gpull, t);
-					ctx.dmg(t, -60);
-				} else {
-					let atk = ctx.get(t, Stat::atk);
-					let hp = ctx.get(t, Stat::hp);
-					let maxhp = ctx.get(t, Stat::maxhp);
-					ctx.transform(t, card::ClockworkGolem);
-					ctx.set(t, Stat::atk, atk);
-					ctx.set(t, Stat::hp, hp);
-					ctx.set(t, Stat::maxhp, maxhp);
 				}
 			}
 			Self::r#_tracedeath => {
@@ -2734,7 +2724,7 @@ impl Skill {
 						| Stat::cast
 						| Stat::costele
 						| Stat::cost => (),
-						Stat::adrenaline => ctx.set(c, k, v),
+						Stat::adrenaline | Stat::shardgolem => ctx.set(c, k, v),
 						_ => ctx.incrStatus(c, k, v),
 					}
 				}

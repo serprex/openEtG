@@ -371,7 +371,6 @@ impl<'a> SkillThing<'a> {
 			Skill::forcedraw => Cow::from("When this creature damages a player, that player draws a card"),
 			Skill::forceplay =>
 				Cow::from("The owner of target card in hand plays that card on a random target if they are able, or the owner of target card in play without this ability activates that card's ability on a random target if they are able"),
-			Skill::fossilize => Cow::from("Target golem gains gravity pull while healing 60HP, or turn target non-golem creature into Clockwork Golem with same stats"),
 			Skill::frail => Cow::from("Target creature's hp/maxhp becomes 1 without receiving damage, or target permanent with more than 1 charge/stack has one charge/stack removed"),
 			Skill::frail2 => Cow::from("Target creature's hp/maxhp becomes 1 without receiving damage, or target permanent with more than 1 charge/stack is reduced to 1 charge/stack"),
 			Skill::fractal =>
