@@ -203,6 +203,10 @@ impl Skills {
 		}
 	}
 
+	pub fn into_iter(self) -> impl Iterator<Item = (Event, Cow<'static, [Skill]>)> {
+		self.0.into_iter()
+	}
+
 	pub fn iter(&self) -> impl Iterator<Item = (Event, &[Skill])> {
 		self.0.iter().map(|&(k, ref v)| (k, v.as_ref()))
 	}
@@ -1683,9 +1687,44 @@ impl Skill {
 			Skill::grab2h => {
 				if ctx.get_kind(t) == Kind::Spell {
 					ctx.die(t);
-					ctx.dmg(ctx.get_foe(ctx.get_owner(c)), ctx.trueatk(c) / 2);
+					ctx.set(c, Stat::shardgolem, t);
 				} else {
 					ctx.unsummon(t);
+					let base = ctx.get(c, Stat::shardgolem);
+					if base != 0 {
+						ctx.fx(t, Fx::Endow);
+						let tgt = ctx.get_thing(base);
+						let tstatus = tgt.status.clone();
+						{
+							let newskill = tgt.skill.clone();
+							let tflag = tgt.flag.0;
+							let mut sader = ctx.get_thing_mut(t);
+							for (nk, nv) in newskill.into_iter() {
+								match sader.skill.entry(nk) {
+									SkillsEntry::Occupied(sk) => {
+										sk.into_mut().extend(nv.as_ref());
+									}
+									SkillsEntry::Vacant(sk) => {
+										sk.insert(nv);
+									}
+								}
+							}
+							sader.flag.0 |= tflag;
+						}
+						for &(k, v) in tstatus.iter() {
+							match k {
+								Stat::hp
+								| Stat::maxhp
+								| Stat::atk
+								| Stat::card
+								| Stat::castele
+								| Stat::cast
+								| Stat::costele => (),
+								Stat::adrenaline => ctx.set(t, k, v),
+								_ => ctx.incrStatus(t, k, v),
+							}
+						}
+					}
 				}
 			}
 			Skill::protect => {
