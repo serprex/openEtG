@@ -721,7 +721,7 @@ impl<'a> SkillThing<'a> {
 			Skill::slow => Cow::from("Non-ranged attackers are delayed for one turn after their attack. Delayed creatures may not attack or use active skills"),
 			Skill::snipe => Cow::from("Deal 3 damage to target creature"),
 			Skill::snowflake if ev == Event::Death => Cow::from("Whenever creature dies or permanent is destroyed, gain charge per frozen counter"),
-			Skill::solar => Cow::from("Gain 1:8 for each attacker"),
+			Skill::solar => Cow::from("Gain 1:8 equal to amount of damage blocked"),
 			Skill::sosa =>
 				Cow::from(if self.upped() {
 					"Sacrifice 40HP. Consume all non-1:2 quanta. For two turns, damage heals you & healing damages you"

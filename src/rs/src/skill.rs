@@ -1808,8 +1808,7 @@ impl Skill {
 				ctx.buffhp(t, 3);
 			}
 			Self::blockhp => {
-				let owner = ctx.get_owner(c);
-				let maxhp = ctx.get_mut(owner, Stat::maxhp);
+				let maxhp = ctx.get_mut(ctx.get_owner(c), Stat::maxhp);
 				*maxhp = (*maxhp + data.blocked).min(500);
 			}
 			Self::blockwithcharge => {
@@ -4647,7 +4646,7 @@ impl Skill {
 			Self::solar => {
 				let owner = ctx.get_owner(c);
 				if ctx.cardset() == CardSet::Open || !ctx.get(owner, Flag::sanctuary) {
-					ctx.spend(owner, etg::Light, -1);
+					ctx.spend(owner, etg::Light, -data.blocked);
 				}
 			}
 			Self::sosa => {
