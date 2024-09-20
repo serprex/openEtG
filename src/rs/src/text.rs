@@ -438,6 +438,7 @@ impl<'a> SkillThing<'a> {
 			Skill::ignite =>
 				Cow::from("Deal 20 spell damage to opponent. Deal 1 spell damage to each creature"),
 			Skill::ignitediscard => Cow::from("When discarded, deal 5 spell damage to opponent"),
+			Skill::imbue => Cow::from("Discard target equipment card. Imbue on equipped equipment. Return imbued equipment to hand. Imbued equipment is not additive"),
 			Skill::immolate(x) =>
 				Cow::from(format!("Sacrifice creature you control. Gain {}:6 plus 1 quanta of each other element", x+1)),
 			Skill::improve =>
@@ -484,6 +485,7 @@ impl<'a> SkillThing<'a> {
 			}),
 			Skill::martyr =>
 				Cow::from("Gains 1|0 for every point of damage this card receives. Heals its owner when healed"),
+			Skill::maul => Cow::from("Prevent attacking during attack phase when shield equipped. While shield equiped block card in opposing slot"),
 			Skill::mend => Cow::from(if self.set() == CardSet::Open {
 				"Heal target creature 10HP"
 			} else {
