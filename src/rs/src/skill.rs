@@ -255,6 +255,7 @@ pub enum Skill {
 	alphawolf,
 	antimatter,
 	appease,
+	attack,
 	autoburrow,
 	autoburrowoff,
 	autoburrowproc,
@@ -412,6 +413,7 @@ pub enum Skill {
 	icegrowth,
 	ignite,
 	ignitediscard,
+	imbue,
 	immolate(i16),
 	improve,
 	inertia,
@@ -455,7 +457,9 @@ pub enum Skill {
 	noeatspell,
 	nothrottle,
 	nova,
+	nova0,
 	nova2,
+	novaval,
 	nullspell,
 	nymph,
 	obsession,
@@ -689,7 +693,7 @@ impl Tgt {
 	deftgt!(poisoned, _poisoned, 26);
 	deftgt!(permcharge, _permcharge, 27);
 	deftgt!(target, _target, 28);
-	deftgt!(shieldcard, _shieldcard, 29);
+	deftgt!(equipcard, _equipcard, 29);
 
 	pub fn full_check(self, ctx: &Game, c: i16, t: i16) -> bool {
 		let kind = ctx.get_kind(t);
@@ -823,9 +827,9 @@ impl Tgt {
 										.and_then(|&sk| sk.targeting(ctx.cardset()))
 										.is_some()
 							}
-							Tgt::_shieldcard => {
+							Tgt::_equipcard => {
 								let card = ctx.get(t, Stat::card);
-								card != 0 && ctx.get_card(card).kind == Kind::Shield
+								card != 0 && matches!(ctx.get_card(card).kind, Kind::Shield | Kind::Weapon)
 							}
 							_ => unsafe { core::hint::unreachable_unchecked() },
 						}) as u32;
@@ -926,9 +930,6 @@ impl<'a> Display for SkillName<'a> {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		let &SkillName { sk, ctx, id } = self;
 		match sk {
-			Skill::bonesharpen => f.write_str("bonesharpen"),
-			Skill::grab2h => f.write_str("grab2h"),
-			Skill::shazam => f.write_str("shazam"),
 			Skill::r#_tracedeath => Ok(()),
 			Skill::abomination => Ok(()),
 			Skill::absorbdmg => f.write_str("absorbdmg"),
@@ -942,6 +943,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::alphawolf => Ok(()),
 			Skill::antimatter => f.write_str("antimatter"),
 			Skill::appease => f.write_str("appease"),
+			Skill::attack => f.write_str("attack"),
 			Skill::autoburrow => f.write_str("autoburrow"),
 			Skill::autoburrowoff => Ok(()),
 			Skill::autoburrowproc => Ok(()),
@@ -958,6 +960,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::blockwithcharge => f.write_str("blockwithcharge"),
 			Skill::bloodmoon => Ok(()),
 			Skill::bolsterintodeck => f.write_str("bolsterintodeck"),
+			Skill::bonesharpen => f.write_str("bonesharpen"),
 			Skill::boneyard => f.write_str("boneyard"),
 			Skill::boreset => Ok(()),
 			Skill::bounce => f.write_str("bounce"),
@@ -1074,6 +1077,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::golemhit => f.write_str("golemhit"),
 			Skill::gpull => f.write_str("gpull"),
 			Skill::gpullspell => Ok(()),
+			Skill::grab2h => f.write_str("grab2h"),
 			Skill::grave => f.write_str("grave"),
 			Skill::growth(atk, hp) => write!(f, "growth{atk:+}{hp:+}"),
 			Skill::guard => f.write_str("guard"),
@@ -1097,6 +1101,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::icegrowth => Ok(()),
 			Skill::ignite => f.write_str("ignite"),
 			Skill::ignitediscard => Ok(()),
+			Skill::imbue => Ok(()),
 			Skill::immolate(x) => write!(f, "immolate{x}"),
 			Skill::improve => f.write_str("improve"),
 			Skill::inertia => f.write_str("inertia"),
@@ -1140,7 +1145,9 @@ impl<'a> Display for SkillName<'a> {
 			Skill::noeatspell => Ok(()),
 			Skill::nothrottle => Ok(()),
 			Skill::nova => Ok(()),
+			Skill::nova0 => Ok(()),
 			Skill::nova2 => Ok(()),
+			Skill::novaval => Ok(()),
 			Skill::nullspell => f.write_str("nullspell"),
 			Skill::nymph => f.write_str("nymph"),
 			Skill::obsession => Ok(()),
@@ -1225,6 +1232,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::scramblespam => f.write_str("scramblespam"),
 			Skill::serendipity => f.write_str("serendipity"),
 			Skill::shardgolem => f.write_str("shardgolem"),
+			Skill::shazam => f.write_str("shazam"),
 			Skill::shtriga => f.write_str("shtriga"),
 			Skill::shuffle3 => f.write_str("shuffle3"),
 			Skill::silence => Ok(()),
@@ -1476,12 +1484,12 @@ impl Skill {
 					Tgt::crea
 				}
 			}
-			Self::grab2h => tgt!(and own or shie and card shieldcard),
 			Self::guard => Tgt::crea,
 			Self::haunt => Tgt::crea,
 			Self::heal => tgt!(or crea play),
 			Self::holylight => tgt!(or crea play),
 			Self::icebolt => tgt!(or crea play),
+			Self::imbue => tgt!(and own and card equipcard),
 			Self::immolate(_) => tgt!(and crea own),
 			Self::improve => Tgt::crea,
 			Self::innovate(_) => Tgt::card,
@@ -1630,171 +1638,6 @@ impl Skill {
 
 	pub fn proc(self, ctx: &mut Game, c: i16, t: i16, data: &mut ProcData) {
 		match self {
-			Skill::bonesharpen => {
-				ctx.setSkill(t, Event::Cast, &[Skill::reinforce]);
-				ctx.set(t, Stat::cast, 0);
-				if card::IsOf(ctx.get(t, Stat::card), card::Skeleton) {
-					ctx.set(c, Stat::casts, 1);
-				}
-			}
-			Skill::bugpoison => {
-				let owner = ctx.get_owner(c);
-				if c != t && ctx.get(t, Flag::bug) && owner == ctx.get_owner(t) {
-					ctx.poison(ctx.get_foe(owner), 1)
-				}
-			}
-			Skill::databloat => {
-				if ctx.get_kind(t) == Kind::Player && !ctx.sanctified(t) {
-					for id in ctx.get_player(t).hand_iter() {
-						if !ctx.get(id, Flag::pillar) {
-							ctx.incrStatus(id, Stat::cost, 1)
-						}
-					}
-				}
-			}
-			Skill::datashrink => {
-				let thing = ctx.get_thing_mut(t);
-				if let Some(cost) = thing.status.get_mut(Stat::cost) {
-					*cost -= 2;
-					if *cost < 0 {
-						*cost = 0;
-					}
-				}
-			}
-			Skill::haunt => {
-				let own = ctx.get_owner(c);
-				let thing = ctx.get_thing_mut(t);
-				if let Some(smap) = thing.skill.get_mut(Event::OwnDeath) {
-					smap.extend(&[Skill::haunted(own)]);
-				} else {
-					thing.skill.insert(Event::OwnDeath, Cow::from(Vec::from(&[Skill::haunted(own)])));
-				}
-			}
-			Skill::haunted(own) => {
-				ctx.rmskill(c, Event::OwnDeath, Skill::haunted(own));
-				let atk = ctx.get(t, Stat::atk);
-				let hp = ctx.get(t, Stat::maxhp);
-				let card = ctx.get(t, Stat::card);
-				let skele = ctx.new_thing(card::As(card, card::Skeleton), own);
-				ctx.set(skele, Stat::atk, atk);
-				ctx.set(skele, Stat::maxhp, hp);
-				ctx.set(skele, Stat::hp, hp);
-				ctx.addCrea(own, skele);
-			}
-			Skill::heatstroke => {
-				let foe = ctx.get_foe(ctx.get_owner(c));
-				let mirage = ctx.new_thing(card::As(ctx.get(c, Stat::card), card::Mirage), foe);
-				ctx.addCrea(foe, mirage);
-			}
-			Skill::grab2h => {
-				if ctx.get_kind(t) == Kind::Spell {
-					ctx.die(t);
-					ctx.set(c, Stat::shardgolem, t);
-				} else {
-					ctx.unsummon(t);
-					let base = ctx.get(c, Stat::shardgolem);
-					if base != 0 {
-						ctx.fx(t, Fx::Endow);
-						let tgt = ctx.get_thing(base);
-						let tstatus = tgt.status.clone();
-						{
-							let newskill = tgt.skill.clone();
-							let tflag = tgt.flag.0;
-							let mut sader = ctx.get_thing_mut(t);
-							for (nk, nv) in newskill.into_iter() {
-								if nk == Event::Cast {
-									continue
-								}
-								match sader.skill.entry(nk) {
-									SkillsEntry::Occupied(sk) => {
-										sk.into_mut().extend(nv.as_ref());
-									}
-									SkillsEntry::Vacant(sk) => {
-										sk.insert(nv);
-									}
-								}
-							}
-							sader.flag.0 |= tflag;
-						}
-						for &(k, v) in tstatus.iter() {
-							match k {
-								Stat::hp
-								| Stat::maxhp
-								| Stat::atk
-								| Stat::card
-								| Stat::castele
-								| Stat::cast
-								| Stat::costele => (),
-								Stat::adrenaline | Stat::shardgolem => ctx.set(t, k, v),
-								_ => ctx.incrStatus(t, k, v),
-							}
-						}
-					}
-				}
-			}
-			Skill::protect => {
-				ctx.delay(c, 1);
-				let shield = ctx.get_player(ctx.get_owner(c)).shield;
-				if shield != 0 {
-					if !ctx.hasskill(shield, Event::Hp, Skill::v_swarmhp) {
-						ctx.addskills(shield, Event::Hp, &[Skill::v_swarmhp]);
-					}
-					ctx.incrStatus(shield, Stat::swarmhp, 1);
-					ctx.incrStatus(c, Stat::swarmhp, 1);
-				}
-			}
-			Skill::fish => {
-				let owner = ctx.get_owner(c);
-				if !ctx.get_player(owner).hand_full() {
-					if !ctx.get(t, Flag::protectdeck) {
-						let deck = ctx.get_player(t).deck.as_ref();
-						let mut foundidx = usize::MAX;
-						for (idx, card) in deck.iter().cloned().enumerate() {
-							if ctx.get(card, Flag::aquatic) {
-								foundidx = idx;
-								break;
-							}
-						}
-						if foundidx != usize::MAX {
-							let lastidx = deck.len() - 1;
-							ctx.get_player_mut(t).deck_mut().swap(foundidx, lastidx);
-							let id = ctx.draw(t);
-							if id != 0 && ctx.addCard(owner, id) != -1 {
-								ctx.fx(id, Fx::StartPos(-t));
-								ctx.proc(Event::Draw, owner);
-								return;
-							}
-						}
-					}
-					let upped = card::Upped(ctx.get(c, Stat::card));
-					if let Some(card) = ctx.choose_iter(
-						ctx.get_cards()
-							.filter(upped)
-							.iter()
-							.filter(|card| (card.flag() & Flag::token) != 0),
-					) {
-						let id = ctx.new_thing(card.code, owner);
-						ctx.addCard(owner, id);
-					}
-				}
-			}
-			Skill::shazam => {
-				let code = ctx.get(t, Stat::card);
-				let uncode = card::AsUpped(code, false);
-				let element = ctx.get_card(code).element;
-				let newcard = if ctx.get_kind(t) == Kind::Spell {
-					ctx.random_card(false, |ctx, card| card.element == element && card.code != uncode)
-				} else {
-					ctx.random_card(false, |ctx, card| {
-						card.element == element
-							&& card.rarity == 1 && card.kind == Kind::Creature
-							&& card.code != uncode
-					})
-				};
-				if let Some(newcard) = newcard {
-					ctx.transform(t, card::As(code, newcard.code));
-				}
-			}
 			Self::r#_tracedeath => {
 				ctx.incrStatus(ctx.turn, Stat::lives, 1);
 			}
@@ -1883,6 +1726,11 @@ impl Skill {
 				ctx.set(c, Flag::appeased, true);
 				ctx.fx(c, Fx::Appeased);
 				Skill::devour.proc(ctx, c, t, data);
+			}
+			Self::attack => {
+				ctx.queue_attack(c, 0);
+				let nova = ctx.get_mut(c, Stat::nova);
+				*nova = nova.saturating_sub(1);
 			}
 			Self::equalize => {
 				if ctx.get_kind(t) == Kind::Creature {
@@ -1995,6 +1843,13 @@ impl Skill {
 					&[ctx.new_thing(card, owner), ctx.new_thing(card, owner), ctx.new_thing(card, owner)];
 				ctx.get_player_mut(owner).deck_mut().extend(cards);
 			}
+			Skill::bonesharpen => {
+				ctx.setSkill(t, Event::Cast, &[Skill::reinforce]);
+				ctx.set(t, Stat::cast, 0);
+				if card::IsOf(ctx.get(t, Stat::card), card::Skeleton) {
+					ctx.set(c, Stat::casts, 1);
+				}
+			}
 			Self::boneyard => {
 				let skele = if ctx.cardset() == CardSet::Open { card::Skeleton } else { card::v_Skeleton };
 				if !card::IsOf(ctx.get(t, Stat::card), skele) {
@@ -2082,6 +1937,12 @@ impl Skill {
 				Skill::clear.proc(ctx, c, t, data);
 				ctx.addskills(t, Event::Prespell, &[Skill::protectonce]);
 				ctx.addskills(t, Event::Spelldmg, &[Skill::protectoncedmg]);
+			}
+			Skill::bugpoison => {
+				let owner = ctx.get_owner(c);
+				if c != t && ctx.get(t, Flag::bug) && owner == ctx.get_owner(t) {
+					ctx.poison(ctx.get_foe(owner), 1)
+				}
 			}
 			Self::burrow => {
 				if ctx.get(c, Flag::burrowed) {
@@ -2293,6 +2154,24 @@ impl Skill {
 						t,
 						card.skill().first().and_then(|&(_, skills)| skills.first().cloned()).unwrap(),
 					);
+				}
+			}
+			Self::databloat => {
+				if ctx.get_kind(t) == Kind::Player && !ctx.sanctified(t) {
+					for id in ctx.get_player(t).hand_iter() {
+						if !ctx.get(id, Flag::pillar) {
+							ctx.incrStatus(id, Stat::cost, 1)
+						}
+					}
+				}
+			}
+			Self::datashrink => {
+				let thing = ctx.get_thing_mut(t);
+				if let Some(cost) = thing.status.get_mut(Stat::cost) {
+					*cost -= 2;
+					if *cost < 0 {
+						*cost = 0;
+					}
 				}
 			}
 			Self::deadalive => {
@@ -2700,8 +2579,6 @@ impl Skill {
 				ctx.fx(t, Fx::Endow);
 				ctx.incrAtk(c, ctx.trueatk(t) - ctx.trigger_pure(Event::Buff, t, 0));
 				ctx.buffhp(c, 2);
-				ctx.set(c, Stat::cast, ctx.get(t, Stat::cast));
-				ctx.set(c, Stat::castele, ctx.get(t, Stat::castele));
 				let tgt = ctx.get_thing(t);
 				let tstatus = tgt.status.clone();
 				{
@@ -2724,7 +2601,7 @@ impl Skill {
 						| Stat::cast
 						| Stat::costele
 						| Stat::cost => (),
-						Stat::adrenaline | Stat::shardgolem => ctx.set(c, k, v),
+						Stat::adrenaline | Stat::cast | Stat::castele => ctx.set(c, k, v),
 						_ => ctx.incrStatus(c, k, v),
 					}
 				}
@@ -2838,6 +2715,41 @@ impl Skill {
 			Self::firewall => {
 				if !ctx.get(t, Flag::ranged) {
 					ctx.spelldmg(t, 1);
+				}
+			}
+			Self::fish => {
+				let owner = ctx.get_owner(c);
+				if !ctx.get_player(owner).hand_full() {
+					if !ctx.get(t, Flag::protectdeck) {
+						let deck = ctx.get_player(t).deck.as_ref();
+						let mut foundidx = usize::MAX;
+						for (idx, card) in deck.iter().cloned().enumerate() {
+							if ctx.get(card, Flag::aquatic) {
+								foundidx = idx;
+								break;
+							}
+						}
+						if foundidx != usize::MAX {
+							let lastidx = deck.len() - 1;
+							ctx.get_player_mut(t).deck_mut().swap(foundidx, lastidx);
+							let id = ctx.draw(t);
+							if id != 0 && ctx.addCard(owner, id) != -1 {
+								ctx.fx(id, Fx::StartPos(-t));
+								ctx.proc(Event::Draw, owner);
+								return;
+							}
+						}
+					}
+					let upped = card::Upped(ctx.get(c, Stat::card));
+					if let Some(card) = ctx.choose_iter(
+						ctx.get_cards()
+							.filter(upped)
+							.iter()
+							.filter(|card| (card.flag() & Flag::token) != 0),
+					) {
+						let id = ctx.new_thing(card.code, owner);
+						ctx.addCard(owner, id);
+					}
 				}
 			}
 			Self::flood => {
@@ -3051,6 +2963,13 @@ impl Skill {
 					ctx.set(t, Stat::gpull, 0);
 				}
 			}
+			Self::grab2h => {
+				ctx.set(c, Stat::nova, 0);
+				let shield = ctx.get_shield(ctx.get_owner(c));
+				if shield != 0 {
+					Skill::destroy.proc(ctx, c, shield, data);
+				}
+			}
 			Self::grave => {
 				ctx.set(c, Flag::burrowed, false);
 				ctx.transform(c, ctx.get(t, Stat::card));
@@ -3096,6 +3015,26 @@ impl Skill {
 					ctx.set(c, Stat::casts, 1);
 				}
 			}
+			Self::haunt => {
+				let own = ctx.get_owner(c);
+				let thing = ctx.get_thing_mut(t);
+				if let Some(smap) = thing.skill.get_mut(Event::OwnDeath) {
+					smap.extend(&[Skill::haunted(own)]);
+				} else {
+					thing.skill.insert(Event::OwnDeath, Cow::from(Vec::from(&[Skill::haunted(own)])));
+				}
+			}
+			Self::haunted(own) => {
+				ctx.rmskill(c, Event::OwnDeath, Skill::haunted(own));
+				let atk = ctx.get(t, Stat::atk);
+				let hp = ctx.get(t, Stat::maxhp);
+				let card = ctx.get(t, Stat::card);
+				let skele = ctx.new_thing(card::As(card, card::Skeleton), own);
+				ctx.set(skele, Stat::atk, atk);
+				ctx.set(skele, Stat::maxhp, hp);
+				ctx.set(skele, Stat::hp, hp);
+				ctx.addCrea(own, skele);
+			}
 			Self::heal => {
 				ctx.dmg(t, -20);
 			}
@@ -3114,6 +3053,11 @@ impl Skill {
 					ctx.fx(spark, Fx::StartPos(c));
 					ctx.addCrea(owner, spark);
 				}
+			}
+			Self::heatstroke => {
+				let foe = ctx.get_foe(ctx.get_owner(c));
+				let mirage = ctx.new_thing(card::As(ctx.get(c, Stat::card), card::Mirage), foe);
+				ctx.addCrea(foe, mirage);
 			}
 			Self::hitownertwice => {
 				if !ctx.hasskill(c, Event::Turnstart, Skill::predatoroff) {
@@ -3174,6 +3118,61 @@ impl Skill {
 				let foe = ctx.get_foe(owner);
 				ctx.spelldmg(foe, 5);
 			}
+			Self::imbue => {
+				let isweap = ctx.get_card(ctx.get(t, Stat::card)).kind == Kind::Weapon;
+				let pl = ctx.get_player(ctx.get_owner(t));
+				let equip = if isweap {
+					pl.weapon
+				} else {
+					pl.shield
+				};
+				if equip == 0 {
+					return;
+				}
+				ctx.die(t);
+					ctx.unsummon(equip);
+						ctx.fx(t, Fx::Endow);
+						let tgt = ctx.get_thing(t);
+						let tstatus = tgt.status.clone();
+						let mut setcast = false;
+						{
+							let newskill = tgt.skill.clone();
+							let tflag = tgt.flag.0;
+							let mut sader = ctx.get_thing_mut(equip);
+							for (nk, nv) in newskill.into_iter() {
+								match sader.skill.entry(nk) {
+									SkillsEntry::Occupied(sk) => {
+										if nk == Event::Cast {
+											continue
+										}
+										sk.into_mut().extend(nv.as_ref());
+									}
+									SkillsEntry::Vacant(sk) => {
+										if nk == Event::Cast {
+											setcast = true;
+										}
+										sk.insert(nv);
+									}
+								}
+							}
+							sader.flag.0 |= tflag;
+						}
+						for &(k, v) in tstatus.iter() {
+							match k {
+								Stat::hp
+								| Stat::maxhp
+								| Stat::atk
+								| Stat::card
+								| Stat::costele => (),
+								Stat::castele
+								| Stat::cast => if setcast {
+									ctx.set(equip, k, v)
+								},
+								Stat::adrenaline => ctx.set(equip, k, v),
+								_ => ctx.incrStatus(equip, k, v),
+							}
+						}
+			}
 			Self::immolate(x) => {
 				ctx.die(t);
 				if !ctx.hasskill(t, Event::OwnAttack, Skill::singularity)
@@ -3223,6 +3222,7 @@ impl Skill {
 						ctx.set(id, Stat::castele, etg::Chroma);
 					}
 				}
+				ctx.set(c, Stat::casts, 1);
 			}
 			Self::ink => {
 				let owner = ctx.get_owner(c);
@@ -3815,6 +3815,9 @@ impl Skill {
 					ctx.addCrea(owner, c);
 				}
 			}
+			Self::nova0 => {
+				ctx.set(c, Stat::nova, 0);
+			}
 			Self::nova2 => {
 				let owner = ctx.get_owner(c);
 				for i in 1..13 {
@@ -4102,6 +4105,17 @@ impl Skill {
 			Self::predatoroff => {
 				ctx.rmskill(c, Event::Turnstart, Skill::predatoroff);
 			}
+			Self::protect => {
+				ctx.delay(c, 1);
+				let shield = ctx.get_player(ctx.get_owner(c)).shield;
+				if shield != 0 {
+					if !ctx.hasskill(shield, Event::Hp, Skill::v_swarmhp) {
+						ctx.addskills(shield, Event::Hp, &[Skill::v_swarmhp]);
+					}
+					ctx.incrStatus(shield, Stat::swarmhp, 1);
+					ctx.incrStatus(c, Stat::swarmhp, 1);
+				}
+			}
 			Self::protectall => {
 				let pl = ctx.get_player(ctx.get_owner(c));
 				for pr in once(pl.weapon)
@@ -4340,12 +4354,6 @@ impl Skill {
 					}
 				}
 			}
-			Self::snowflake => {
-				let charges = ctx.get(t, Stat::frozen);
-				if charges > 0 {
-					ctx.incrStatus(c, Stat::charges, charges);
-				}
-			}
 			Self::sabbath => {
 				if !ctx.sanctified(t) {
 					ctx.set(t, Flag::sabbath, true);
@@ -4465,6 +4473,23 @@ impl Skill {
 						thing.status = status;
 						thing.skill = skill;
 					}
+				}
+			}
+			Self::shazam => {
+				let code = ctx.get(t, Stat::card);
+				let uncode = card::AsUpped(code, false);
+				let element = ctx.get_card(code).element;
+				let newcard = if ctx.get_kind(t) == Kind::Spell {
+					ctx.random_card(false, |ctx, card| card.element == element && card.code != uncode)
+				} else {
+					ctx.random_card(false, |ctx, card| {
+						card.element == element
+							&& card.rarity == 1 && card.kind == Kind::Creature
+							&& card.code != uncode
+					})
+				};
+				if let Some(newcard) = newcard {
+					ctx.transform(t, card::As(code, newcard.code));
 				}
 			}
 			Self::shtriga => {
@@ -4613,6 +4638,12 @@ impl Skill {
 			Self::slow => {
 				if !ctx.get(t, Flag::ranged) {
 					ctx.delay(t, 2);
+				}
+			}
+			Self::snowflake => {
+				let charges = ctx.get(t, Stat::frozen);
+				if charges > 0 {
+					ctx.incrStatus(c, Stat::charges, charges);
 				}
 			}
 			Self::snipe => {
@@ -5658,6 +5689,7 @@ impl Skill {
 			| Self::fiery
 			| Self::hammer
 			| Self::hope
+			| Self::novaval
 			| Self::poisondr
 			| Self::skeletoncount
 			| Self::staff
@@ -5736,6 +5768,7 @@ impl Skill {
 					cr != 0 && ctx.hasskill(cr, Event::OwnAttack, Skill::quanta(etg::Light as i8))
 				})
 				.count() as i16,
+			Self::novaval => ctx.get(c, Stat::nova),
 			Self::poisondr => {
 				if t == 0 {
 					0

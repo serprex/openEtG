@@ -170,6 +170,7 @@ impl<'a> SkillThing<'a> {
 				Cow::from("If target creature or weapon's attack is positive, it becomes negative. Otherwise, it becomes positive"),
 			Skill::appease =>
 				Cow::from("Sacrifice target creature you own & gain 1|1. If this ability isn't used, this creature will attack its owner. This creature attacks normally the turn it's played or if it loses this ability"),
+			Skill::attack => Cow::from("Whenever a permanent is destroyed, attack, then decrease strength by 1 for rest of turn"),
 			Skill::autoburrow =>
 				Cow::from("Until end of turn, your creatures with burrow enter play burrowed"),
 			Skill::axedraw =>
@@ -392,7 +393,7 @@ impl<'a> SkillThing<'a> {
 			Skill::gaintimecharge =>
 				Cow::from("Gain one stack for every card you draw. Does not gain a stack from your draw at the start of your turn"),
 			Skill::gas => Cow::from("Summon an Unstable Gas"),
-			Skill::grab2h => Cow::from("Return target shield to its owner's hand after imprinting it with last discarded shield, or discard one of your shield cards. While shield equipped attack power halved, but blocks opposing card"),
+			Skill::grab2h => Cow::from("Restore lost strength & destroy your shield"),
 			Skill::grave =>
 				Cow::from("When another creature dies, unburrow & transform this creature into a fresh copy of the dying creature. This creature retains nocturnal"),
 			Skill::give =>
@@ -442,7 +443,7 @@ impl<'a> SkillThing<'a> {
 			Skill::improve =>
 				Cow::from("Transform a target creature into a random mutant creature. Mutant creatures gain a random ability; & randomly gains between 1 to 5 strength & hp"),
 			Skill::inertia => Cow::from("When any card you own is targeted by either player, gain 2:3"),
-			Skill::inflation => Cow::from("Increase the cost of all active skills by 1"),
+			Skill::inflation => Cow::from("Increase the cost of all active skills by 1, caster can be reactivated"),
 			Skill::ink => Cow::from("Summon a Cloak that lasts 1 turn"),
 			Skill::innovate(x) =>
 				Cow::from(format!("Discard target card in either player's hand. The owner of target card draws {} cards. Destroy top card of your deck", x)),

@@ -300,6 +300,8 @@
 7423|Boomstick|4|0|3|4|6|9|2=golemhit|
 5424|Golem Defender|4|1|2|3||1|0=turngolem+shield=absorbdmg|golem
 7424|Golem Defender|4|1|2|5||2|0=turngolem+shield=absorbdmg|golem
+5425|Imbue|4|3|3|4|||imbue|
+7425|Imbue|4|3|3|3|||imbue|
 5426|Minotaur|4|4|2|5|4|5|ownattack=predator|
 7426|Minotaur|4|4|2|6|6|4|ownattack=predator|
 5427|Gaian Enchantress|4|4|2|6|3|7|2:12=enchant+buff=countimmbur|
@@ -310,8 +312,8 @@
 7429|Stonewall|4|1|2|9||1|hp=stonewall|
 5430|Shard of Integrity|4|3|3|2|||integrity|
 7430|Shard of Integrity|4|3|3|1|||integrity|
-5431|Great Maul|4|0|3|7|9|60|3=grab2h+attack=maul|
-7431|Great Maul|4|0|3|7|10|70|2=grab2h+attack=maul|
+5431|Great Maul|4|0|3|7|7|60|1=grab2h+attack=maul+buff=novaval+turnstart=nova0+destroy=attack|
+7431|Great Maul|4|0|3|7|8|70|0=grab2h+attack=maul+buff=novaval+turnstart=nova0+destroy=attack|
 5450|Earth Pendulum|4|2|0|0|||pend|pillar+stackable+additive+charges=1
 7450|Earth Pendulum|4|2|0|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
 5500|Emerald Pillar|5|2|0|0|||pillar|pillar+stackable+additive+charges=1
