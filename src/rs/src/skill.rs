@@ -2963,7 +2963,6 @@ impl Skill {
 				}
 			}
 			Self::grab2h => {
-				ctx.set(c, Stat::nova, 0);
 				let shield = ctx.get_shield(ctx.get_owner(c));
 				if shield != 0 {
 					Skill::destroy.proc(ctx, c, shield, data);

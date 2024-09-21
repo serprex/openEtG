@@ -170,7 +170,7 @@ impl<'a> SkillThing<'a> {
 				Cow::from("If target creature or weapon's attack is positive, it becomes negative. Otherwise, it becomes positive"),
 			Skill::appease =>
 				Cow::from("Sacrifice target creature you own & gain 1|1. If this ability isn't used, this creature will attack its owner. This creature attacks normally the turn it's played or if it loses this ability"),
-			Skill::attack => Cow::from("Whenever a permanent is destroyed, attack, then decrease strength by 1 for rest of turn"),
+			Skill::attack => Cow::from("Whenever a permanent is destroyed, decrease strength by 1 for rest of turn & attack"),
 			Skill::autoburrow =>
 				Cow::from("Until end of turn, your creatures with burrow enter play burrowed"),
 			Skill::axedraw =>
@@ -393,7 +393,7 @@ impl<'a> SkillThing<'a> {
 			Skill::gaintimecharge =>
 				Cow::from("Gain one stack for every card you draw. Does not gain a stack from your draw at the start of your turn"),
 			Skill::gas => Cow::from("Summon an Unstable Gas"),
-			Skill::grab2h => Cow::from("Restore lost strength & destroy your shield"),
+			Skill::grab2h => Cow::from("Destroy your shield"),
 			Skill::grave =>
 				Cow::from("When another creature dies, unburrow & transform this creature into a fresh copy of the dying creature. This creature retains nocturnal"),
 			Skill::give =>
