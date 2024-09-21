@@ -422,8 +422,8 @@
 7619|Heat Mirror|6|2|2|3|||play=heatmirror+4=summon 8201|
 5620|Red Nymph|6|4|4|8|1|11|3=rage|
 7620|Fire Nymph|6|4|4|8|1|13|4=rage|
-5621|Firebrand|6|0|3|2|8|9|losecharge+prespell=firebrand+1:8=reveal|charges=2
-7621|Firebrand|6|0|3|3|12|9|losecharge+prespell=firebrand+1:8=reveal|charges=1
+5621|Firebrand|6|0|3|2|8|9|1:8=reveal+losecharge+prespell=firebrand|charges=2
+7621|Firebrand|6|0|3|3|12|9|1:8=reveal+losecharge+prespell=firebrand|charges=1
 5622|Salamander|6|4|1|4|5|2||aquatic
 7622|Salamander|6|4|1|4|7|2||aquatic
 5623|Thermal Recoil|6|1|2|0||-1|shield=absorber|
@@ -494,8 +494,8 @@
 7724|Siren|7|4|2|4|4|5|1:11=sing|aquatic
 5725|Atlantis's Protection|7|3|2|3|||protectall|
 7725|Atlantis's Protection|7|3|2|2|||protectall|
-5726|Fishing Rod|7|0|3|3|3|3|3:10=fish|aquatic
-7726|Fishing Rod|7|0|3|3|3|3|2:10=fish|aquatic
+5726|Fishing Rod|7|0|3|3|3|3|2:10=fish|aquatic
+7726|Fishing Rod|7|0|3|3|3|3|1:10=fish|aquatic
 5727|Diving Bell Spider|7|4|1|2|2|5|1:9=bellweb|aquatic+bug
 7727|Diving Bell Spider|7|4|1|2|4|4|1:9=bellweb|aquatic+bug
 5728|Bobbit Worm|7|4|2|5|3|4|1:4=detain|aquatic+burrowed+bug
@@ -566,8 +566,8 @@
 7827|Byakko|8|4|3|7|9|3|blocked=virtue|
 5828|Dispersion|8|3|3|7|||dispersion|
 7828|Dispersion|8|3|3|5|||dispersion|
-5829|Bo Staff|8|0|3|3|5|5|2=protect+buff=buffdr+hit=boreset|
-7829|Bo Staff|8|0|3|3|5|5|1=protect+buff=buffdr+hit=boreset|
+5829|Bo Staff|8|0|3|3|5|5|2=hero+buff=buffdr+hit=boreset|
+7829|Bo Staff|8|0|3|3|5|5|1=hero+buff=buffdr+hit=boreset|
 5830|Shard of Divinity|8|3|3|3|||divinity|
 7830|Shard of Divinity|8|3|3|2|||divinity|
 5850|Light Pendulum|8|2|0|0|||pend|pillar+stackable+additive+charges=1
@@ -668,8 +668,8 @@
 8016|Time Barrier|10|1|2|5|||shield=blockwithcharge+draw=gaintimecharge|charges=5+stackable
 6017|Innovation|10|3|3|4|||innovate 3|
 8017|Innovation|10|3|3|3|||innovate 3|
-6018|Amulet|10|0|3|5|0|2|2=innovate 2+hit=mill|
-8018|Amulet|10|0|3|6|1|4|1=innovate 2+hit=mill|
+6018|Dull Khopesh|10|0|3|4|0|2|2=innovate 2+hit=mill|
+8018|Dull Khopesh|10|0|3|5|1|4|1=innovate 2+hit=mill|
 6020|Golden Nymph|10|4|4|8|6|4|2=precognition|
 8020|Time Nymph|10|4|4|8|7|5|2=precognition|
 6021|Time Bomb|10|4|2|1||2|0=tick|

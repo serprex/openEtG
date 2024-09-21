@@ -404,6 +404,7 @@ pub enum Skill {
 	healblocked,
 	heatmirror,
 	heatstroke,
+	hero,
 	hitownertwice,
 	holylight,
 	hope,
@@ -491,7 +492,6 @@ pub enum Skill {
 	precognition,
 	predator,
 	predatoroff,
-	protect,
 	protectall,
 	protectonce,
 	protectoncedmg,
@@ -1085,13 +1085,14 @@ impl<'a> Display for SkillName<'a> {
 			Skill::halvedr => Ok(()),
 			Skill::haunt => f.write_str("haunt"),
 			Skill::haunted(..) => f.write_str("haunted"),
-			Skill::heatstroke => f.write_str("heatstroke"),
 			Skill::hammer => f.write_str("hammer"),
 			Skill::hasten => f.write_str("hasten"),
 			Skill::hatch => f.write_str("hatch"),
 			Skill::heal => f.write_str("heal"),
 			Skill::healblocked => Ok(()),
 			Skill::heatmirror => Ok(()),
+			Skill::heatstroke => f.write_str("heatstroke"),
+			Skill::hero => f.write_str("hero"),
 			Skill::hitownertwice => f.write_str("hitownertwice"),
 			Skill::holylight => f.write_str("holylight"),
 			Skill::hope => f.write_str("hope"),
@@ -1179,7 +1180,6 @@ impl<'a> Display for SkillName<'a> {
 			Skill::precognition => f.write_str("precognition"),
 			Skill::predator => f.write_str("predator"),
 			Skill::predatoroff => Ok(()),
-			Skill::protect => f.write_str("protect"),
 			Skill::protectall => f.write_str("protectall"),
 			Skill::protectonce => f.write_str("protectonce"),
 			Skill::protectoncedmg => f.write_str("protectoncedmg"),
@@ -2600,7 +2600,7 @@ impl Skill {
 						| Stat::cast
 						| Stat::costele
 						| Stat::cost => (),
-						Stat::adrenaline | Stat::cast | Stat::castele => ctx.set(c, k, v),
+						Stat::adrenaline | Stat::cast | Stat::castele | Stat::swarmhp => ctx.set(c, k, v),
 						_ => ctx.incrStatus(c, k, v),
 					}
 				}
@@ -3056,6 +3056,17 @@ impl Skill {
 				let foe = ctx.get_foe(ctx.get_owner(c));
 				let mirage = ctx.new_thing(card::As(ctx.get(c, Stat::card), card::Mirage), foe);
 				ctx.addCrea(foe, mirage);
+			}
+			Self::hero => {
+				ctx.delay(c, 1);
+				let shield = ctx.get_player(ctx.get_owner(c)).shield;
+				if shield != 0 {
+					if !ctx.hasskill(shield, Event::Hp, Skill::v_swarmhp) {
+						ctx.addskills(shield, Event::Hp, &[Skill::v_swarmhp]);
+					}
+					ctx.incrStatus(shield, Stat::swarmhp, 1);
+					ctx.incrStatus(c, Stat::swarmhp, 1);
+				}
 			}
 			Self::hitownertwice => {
 				if !ctx.hasskill(c, Event::Turnstart, Skill::predatoroff) {
@@ -4097,17 +4108,6 @@ impl Skill {
 			}
 			Self::predatoroff => {
 				ctx.rmskill(c, Event::Turnstart, Skill::predatoroff);
-			}
-			Self::protect => {
-				ctx.delay(c, 1);
-				let shield = ctx.get_player(ctx.get_owner(c)).shield;
-				if shield != 0 {
-					if !ctx.hasskill(shield, Event::Hp, Skill::v_swarmhp) {
-						ctx.addskills(shield, Event::Hp, &[Skill::v_swarmhp]);
-					}
-					ctx.incrStatus(shield, Stat::swarmhp, 1);
-					ctx.incrStatus(c, Stat::swarmhp, 1);
-				}
 			}
 			Self::protectall => {
 				let pl = ctx.get_player(ctx.get_owner(c));
