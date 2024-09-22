@@ -1577,7 +1577,7 @@ pub async fn handle_ws(
 											etg::etg::NymphList[if element > 0 && element < 13 {
 												element as usize
 											} else {
-												1 + rng.upto(13) as usize
+												1 + rng.upto(12) as usize
 											}]
 										} else {
 											let notfromele = rng.upto(3) == 0;
