@@ -425,7 +425,7 @@ impl<'a> SkillThing<'a> {
 			}),
 			Skill::heatstroke if ev == Event::Hit => Cow::from("Opponent summons mirage on hit"),
 			Skill::heatstroke => Cow::from("Opponent summons mirage"),
-			Skill::hero => Cow::from("Increase your shield's damage reduction by 1, delaying this card. Increment stored counter. Remove bonus damage reduction by stored when this attacks, resetting stored value"),
+			Skill::hero => Cow::from("Increase your shield's damage reduction by 1, delaying this card. Increment stored counter. Remove bonus damage reduction by stored when this attacks or is destroyed, resetting stored value"),
 			Skill::hitownertwice => Cow::from("When this creature attacks, it also attacks its owner twice"),
 			Skill::holylight => Cow::from(if self.upped() {
 				"Remove all statuses from target creature or permanent. Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature.\nGain 1:8 when played"
