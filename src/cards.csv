@@ -6,10 +6,10 @@
 7004|Quantum Pendulum|0|2|0|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
 5005|Regrade|0|3|1|1|||regrade|
 7005|Regrade|0|3|1|0|||regrade|
-5006|Disc|0|0|1|3|1|1|buff=disc+2=discping|ranged
-7006|Chakram|0|0|1|3|2|2|buff=disc+2=discping|ranged
-5007|Battle Axe|0|0|1|3|2|4|buff=axe+draw=axedraw|
-7007|War Axe|0|0|1|3|4|2|buff=axe+draw=axedraw|
+5006|Disc|0|0|1|3|1|1|ownbuff=disc+2=discping|ranged
+7006|Chakram|0|0|1|3|2|2|ownbuff=disc+2=discping|ranged
+5007|Battle Axe|0|0|1|3|2|4|ownbuff=axe+draw=axedraw|
+7007|War Axe|0|0|1|3|4|2|ownbuff=axe+draw=axedraw|
 5008|Quantum Locket|0|2|1|1|||1=locketshift+locket|
 7008|Quantum Locket|0|2|1|0|||1=locketshift+locket|
 5009|Chromatic Butterfly|0|4|2|1|1|1|hit=chromastat|airborne+bug
@@ -40,20 +40,20 @@
 7021|Mark of Darkness|11|2|-1|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
 5022|Mark of Aether|12|2|-1|0|||pillar|pillar+stackable+additive+charges=1
 7022|Mark of Aether|12|2|-1|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
-5027|Dagger|0|0|1|0|3|1|buff=dagger|nocturnal
-7027|Dirk|0|0|1|0|4|1|buff=dagger|nocturnal
+5027|Dagger|0|0|1|0|3|1|ownbuff=dagger|nocturnal
+7027|Dirk|0|0|1|0|4|1|ownbuff=dagger|nocturnal
 5028|Short Sword|0|0|1|1|4|2||
 7028|Long Sword|0|0|1|1|6|2||
-5029|Hammer|0|0|1|2|5|20|buff=hammer|
-7029|Gavel|0|0|1|2|7|9|buff=hammer|
+5029|Hammer|0|0|1|2|5|20|ownbuff=hammer|
+7029|Gavel|0|0|1|2|7|9|ownbuff=hammer|
 5032|Malignant Cell|2|4|1|0|1|1|postauto=mitosis|aquatic+nocturnal+token
 7032|Malignant Cell|2|4|1|0|1|1|postauto=mitosis|aquatic+nocturnal+token
-5035|Short Bow|0|0|1|2|4|3|buff=bow|ranged
-7035|Long Bow|0|0|1|2|6|4|buff=bow|ranged
+5035|Short Bow|0|0|1|2|4|3|ownbuff=bow|ranged
+7035|Long Bow|0|0|1|2|6|4|ownbuff=bow|ranged
 5036|Shield|0|1|2|0||1||
 7036|Tower Shield|0|1|2|4||2||
-5037|Wand|0|0|1|2|4|2|buff=staff|psionic
-7037|Staff|0|0|1|2|5|2|buff=staff|psionic
+5037|Wand|0|0|1|2|4|2|ownbuff=staff|psionic
+7037|Staff|0|0|1|2|5|2|ownbuff=staff|psionic
 5038|Material Pillar|0|2|0|0|||quadpillar 38756|pillar+stackable+additive+charges=1
 7038|Material Tower|0|2|0|0|||quadpillar 38756+ownplay=quadpillar1 38756|pillar+stackable+additive+charges=1
 5039|Spiritual Pillar|0|2|0|0|||quadpillar 47186|pillar+stackable+additive+charges=1
@@ -176,12 +176,12 @@
 7225|Envenom|2|3|1|2|||envenom|
 5226|Reaper|2|4|3|7|7|4|2:8=reap+prespell=evadecrea|nocturnal
 7226|Reaper|2|4|3|7|8|4|1:8=reap+prespell=evadecrea|nocturnal
-5227|Plague Mask|2|1|2|2||1|hp=poisondr+1:7=doctor|
-7227|Plague Mask|2|1|2|3||2|hp=poisondr+1:7=doctor|
+5227|Plague Mask|2|1|2|2||1|owndr=poisondr+1:7=doctor|
+7227|Plague Mask|2|1|2|3||2|owndr=poisondr+1:7=doctor|
 5228|Frailty|2|3|1|1|||frail|
 7228|Frailty|2|3|1|1|||frail2|
-5229|Skeleton Axe|2|0|3|3|2|4|1=bonesharpen+buff=skeletoncount|nocturnal
-7229|Skeleton Axe|2|0|3|4|0|4|1=bonesharpen+buff=skeletoncount|nocturnal
+5229|Skeleton Axe|2|0|3|3|2|4|1=bonesharpen+ownbuff=skeletoncount|nocturnal
+7229|Skeleton Axe|2|0|3|4|0|4|1=bonesharpen+ownbuff=skeletoncount|nocturnal
 5230|Shard of Sacrifice|2|3|3|2|||sosa|
 7230|Shard of Sacrifice|2|3|3|2|||sosa|
 5250|Death Pendulum|2|2|0|0|||pend|pillar+stackable+additive+charges=1
@@ -218,8 +218,8 @@
 7314|Overdrive|3|3|1|4|||acceleration|
 5315|Graviton Salvager|3|4|1|1|1|5|destroy=salvage|
 7315|Graviton Salvager|3|4|1|1|2|5|destroy=salvage|
-5316|Repulsor|3|1|2|1|||hp=accumulation|stackable+additive+charges=1
-7316|Repulsors|3|1|2|6|||hp=accumulation|stackable+additive+charges=2
+5316|Repulsor|3|1|2|1|||owndr=accumulation|stackable+additive+charges=1
+7316|Repulsors|3|1|2|6|||owndr=accumulation|stackable+additive+charges=2
 5317|Graviton Defender|3|4|1|5|3|10|shield=counter+2=gpull|
 7317|Graviton Defender|3|4|1|5|4|12|shield=counter+2=gpull|
 5318|Graviton Deployer|3|4|2|7|4|6|2=deployblobs|
@@ -292,8 +292,8 @@
 7419|Orochi|4|4|3|7|12|8|0=appease+ownattack=unappease|appeased
 5420|Auburn Nymph|4|4|4|8|4|8|3=bblood|
 7420|Earth Nymph|4|4|4|8|5|9|3=bblood|
-5421|Lodestone|4|2|2|2|||1=inflation|whetstone
-7421|Lodestone|4|2|2|2|||0=inflation|whetstone
+5421|Lodestone|4|2|2|2|||1=inflation+buff=lodestone 1+hp=lodestone 1+dr=lodestone 1|
+7421|Lodestone|4|2|2|2|||0=inflation+buff=lodestone 1+hp=lodestone 2+dr=lodestone 1|
 5422|Georesonator|5|2|2|2|||ownattack=paleomagnetism|
 7422|Georesonator|5|2|2|2|||ownattack=paleomagnetism|
 5423|Boomstick|4|0|3|4|4|6|2=golemhit|
@@ -304,16 +304,16 @@
 7425|Imbue|4|3|3|3|||imbue|
 5426|Minotaur|4|4|2|5|4|5|ownattack=predator|
 7426|Minotaur|4|4|2|6|6|4|ownattack=predator|
-5427|Gaian Enchantress|4|4|2|6|3|7|2:12=enchant+buff=countimmbur|
-7427|Gaian Enchantress|4|4|2|5|3|7|2:12=enchant+buff=countimmbur|
+5427|Gaian Enchantress|4|4|2|6|3|7|2:12=enchant+ownbuff=countimmbur|
+7427|Gaian Enchantress|4|4|2|5|3|7|2:12=enchant+ownbuff=countimmbur|
 5428|Ironclad Blacksmith|4|4|1|4|3|6|1:6=tempering 3|
 7428|Ironclad Blacksmith|4|4|1|4|3|7|2:6=tempering 5|
-5429|Stonewall|4|1|2|9|||hp=stonewall|
-7429|Stonewall|4|1|2|9||1|hp=stonewall|
+5429|Stonewall|4|1|2|9|||owndr=stonewall|
+7429|Stonewall|4|1|2|9||1|owndr=stonewall|
 5430|Shard of Integrity|4|3|3|2|||integrity|
 7430|Shard of Integrity|4|3|3|1|||integrity|
-5431|Great Maul|4|0|3|7|7|60|0=grab2h+attack=maul+buff=novaval+turnstart=nova0+destroy=attack|
-7431|Great Maul|4|0|3|7|8|70|0=grab2h+attack=maul+buff=novaval+turnstart=nova0+destroy=attack|
+5431|Great Maul|4|0|3|7|7|60|0=grab2h+attack=maul+ownbuff=novaval+turnstart=nova0+destroy=attack|
+7431|Great Maul|4|0|3|7|8|70|0=grab2h+attack=maul+ownbuff=novaval+turnstart=nova0+destroy=attack|
 5450|Earth Pendulum|4|2|0|0|||pend|pillar+stackable+additive+charges=1
 7450|Earth Pendulum|4|2|0|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
 5500|Emerald Pillar|5|2|0|0|||pillar|pillar+stackable+additive+charges=1
@@ -394,8 +394,8 @@
 7605|Fire Shield|6|1|2|4|||shield=firewall|
 5606|Deflagration|6|3|1|3|||destroy|
 7606|Deflagration|6|3|1|2|||destroy|
-5607|Fahrenheit|6|0|3|3|4|5|buff=fiery|
-7607|Fahrenheit|6|0|3|3|5|5|buff=fiery|
+5607|Fahrenheit|6|0|3|3|4|5|ownbuff=fiery|
+7607|Fahrenheit|6|0|3|3|5|5|ownbuff=fiery|
 5608|Rain of Fire|6|3|2|7|||firestorm 3|
 7608|Rain of Fire|6|3|2|5|||firestorm 3|
 5609|Immolation|6|3|1|0|||immolate 5|
@@ -532,8 +532,8 @@
 7810|Miracle|8|3|3|12|||miracle|
 5811|Luciferin|8|3|2|2:0|||luciferin|
 7811|Luciferin|8|3|2|0|||luciferin|
-5812|Hope|8|1|2|7|||hp=hope|immaterial
-7812|Hope|8|1|2|7||1|hp=hope|immaterial
+5812|Hope|8|1|2|7|||owndr=hope|immaterial
+7812|Hope|8|1|2|7||1|owndr=hope|immaterial
 5813|Crusader|8|4|1|5|2|4|2=endow|
 7813|Crusader|8|4|1|5|3|5|2=endow|
 5814|Sanctuary|8|2|1|4|||regenerate 4,sanctify+owndraw=sanctify|
@@ -566,8 +566,8 @@
 7827|Byakko|8|4|3|7|9|3|blocked=virtue|
 5828|Dispersion|8|3|3|7|||dispersion|
 7828|Dispersion|8|3|3|5|||dispersion|
-5829|Bo Staff|8|0|3|3|5|5|2=hero+buff=buffdr+hit=boreset+owndestroy=boreset|
-7829|Bo Staff|8|0|3|3|5|5|1=hero+buff=buffdr+hit=boreset+owndestroy=boreset|
+5829|Bo Staff|8|0|3|3|5|5|2=hero+ownbuff=buffdr+hit=boreset+dr=bo|
+7829|Bo Staff|8|0|3|3|5|5|1=hero+ownbuff=buffdr+hit=boreset+dr=bo|
 5830|Shard of Divinity|8|3|3|3|||divinity|
 7830|Shard of Divinity|8|3|3|2|||divinity|
 5850|Light Pendulum|8|2|0|0|||pend|pillar+stackable+additive+charges=1
@@ -652,8 +652,8 @@
 8008|Eternity|10|0|3|5|4|8|3=rewind|
 6009|Sundial|10|2|1|3|||3:8=hasten+losecharge+attack=stasis|charges=1
 8009|Sundial|10|2|1|2|||3:8=hasten+losecharge+attack=stasis|charges=1
-6010|Scarab|10|4|1|2|2||1:3=devour+hp=swarm|airborne+bug
-8010|Scarab|10|4|1|2|3||1:3=devour+hp=swarm|airborne+bug
+6010|Scarab|10|4|1|2|2||1:3=devour+ownhp=swarm|airborne+bug
+8010|Scarab|10|4|1|2|3||1:3=devour+ownhp=swarm|airborne+bug
 6011|Precognition|10|3|2|1|||precognition|
 8011|Precognition|10|3|2|2:0|||precognition|
 6012|Pharaoh|10|4|3|9|4|9|2=summon 6010|
@@ -708,8 +708,8 @@
 8104|Dusk Mantle|11|1|2|4|||shield=evade 50|
 6105|Steal|11|3|2|4|||steal|
 8105|Steal|11|3|2|3|||steal|
-6106|Nightfall|11|2|1|3||||nightfall
-8106|Eclipse|11|2|1|4||||nightfall
+6106|Nightfall|11|2|1|3|||buff=nightfall 1+hp=nightfall 1|
+8106|Eclipse|11|2|1|4|||buff=nightfall 2+hp=nightfall 1|
 6107|Vampiric Stiletto|11|0|3|1|4|4|hit=vampire|nocturnal
 8107|Vampiric Dagger|11|0|3|2|6|4|hit=vampire|nocturnal
 6108|Drain Life|11|3|1|2|||drainlife|

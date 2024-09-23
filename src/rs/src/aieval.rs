@@ -478,6 +478,7 @@ fn eval_skill(
 			Skill::livingweapon => 2 * PREC,
 			Skill::lobotomize => 6 * PREC,
 			Skill::locket => PREC,
+			Skill::lodestone(x) => x as i32 * PREC / 8,
 			Skill::loot => 2 * PREC,
 			Skill::luciferin => 3 * PREC,
 			Skill::lycanthropy => 4 * PREC,
@@ -516,6 +517,7 @@ fn eval_skill(
 					2 * PREC
 				}
 			}
+			Skill::nightfall(x) => x as i32 * PREC / 8,
 			Skill::nightmare => {
 				let owner = ctx.get_owner(c);
 				let n = ctx
@@ -1064,10 +1066,8 @@ fn evalthing(
 			}
 		}
 	}
-	if thing.flag.get(Flag::airborne | Flag::ranged | Flag::whetstone) {
+	if thing.flag.get(Flag::airborne | Flag::ranged) {
 		score += PREC / 5;
-	} else if thing.flag.get(Flag::nightfall) {
-		score += PREC / 2;
 	} else if thing.flag.get(Flag::patience) {
 		score += 2 * PREC;
 	} else if thing.flag.get(Flag::reflective | Flag::tunnel | Flag::voodoo) {

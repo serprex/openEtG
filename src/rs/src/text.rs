@@ -425,7 +425,7 @@ impl<'a> SkillThing<'a> {
 			}),
 			Skill::heatstroke if ev == Event::Hit => Cow::from("Opponent summons mirage on hit"),
 			Skill::heatstroke => Cow::from("Opponent summons mirage"),
-			Skill::hero => Cow::from("Increase your shield's damage reduction by 1, delaying this card. Increment stored counter. Remove bonus damage reduction by stored when this attacks or is destroyed, resetting stored value"),
+			Skill::hero => Cow::from("Increase your shield's damage reduction by 1, delaying this card. Increases are correlated; Bo Staff or the shield changing will nullify increased damage reduction. Remove bonus damage reduction by stored when this attacks or is destroyed, resetting stored value"),
 			Skill::hitownertwice => Cow::from("When this creature attacks, it also attacks its owner twice"),
 			Skill::holylight => Cow::from(if self.upped() {
 				"Remove all statuses from target creature or permanent. Heal target creature or player 10. If target creature is nocturnal, instead deal 10 spell damage to target creature.\nGain 1:8 when played"
@@ -468,7 +468,11 @@ impl<'a> SkillThing<'a> {
 				Cow::from("Gains 1:0 each turn, until set to gain quanta of a specific element"),
 			Skill::locketshift =>
 				Cow::from("Switch production to match element of any non-player non-1:0 target you own, including immaterial & burrowed cards"),
-			Skill::loot => Cow::from("When one of your permanents is destroyed, gain control of a random permanent from opponent"),
+				Skill::lodestone(..) if ev == Event::Buff => Cow::from(if self.upped() {
+					"Weapons & golems gain 1|2 while Whetstone is in play, while shields gain 1 damage reduction. Does not stack"
+				} else {
+					"Weapons & golems gain 1|1 while Whetstone is in play, while shields gain 1 damage reduction. Does not stack"
+				}),
 			Skill::losecharge => {
 				let charges = self.get_stat(Stat::charges);
 				if charges == 0 {
@@ -521,6 +525,12 @@ impl<'a> SkillThing<'a> {
 				Cow::from("Poison on hit. Apply neurotoxin on hit. Neurotoxin poisons for every card played by affected player or active ability used by affected creature. Throttled (only triggers twice from Adrenaline)"),
 			Skill::neuroify =>
 				Cow::from("If target creature or player is poisoned, target gains neurotoxin. Neurotoxin poisons for every card played by affected player or active ability used by affected creature. Remove target's purify counters"),
+			Skill::nightfall(..) if ev == Event::Buff => Cow::from(if self.upped() {
+				"Nocturnal creatures gain 2|1 while Eclipse is in play. Does not stack"
+			} else {
+				"Nocturnal creatures gain 1|1 while Nightfall is in play. Does not stack"
+			}),
+			Skill::loot => Cow::from("When one of your permanents is destroyed, gain control of a random permanent from opponent"),
 			Skill::nightmare =>
 				Cow::from(if self.set() == CardSet::Open && !self.upped() {
 					"Fill opponent's hand with fresh copies of target creature. Deal 1 damage per card added in this way. Heal yourself an equal amount"
@@ -987,16 +997,6 @@ impl<'a> SkillThing<'a> {
 					ret.push_str("Each turn delay own creatures. They gain 2|2. 5|5 if flooded. Unique.\n"),
 				Flag::voodoo =>
 					ret.push_str("Whenever this creature takes non-lethal damage or is affected by any status, that status or damage is also applied to opponent.\n"),
-				Flag::nightfall => ret.push_str(if self.upped() {
-					"Nocturnal creatures gain 2|1 while Eclipse is in play. Does not stack.\n"
-				} else {
-					"Nocturnal creatures gain 1|1 while Nightfall is in play. Does not stack.\n"
-				}),
-				Flag::whetstone => ret.push_str(if self.upped() {
-					"Weapons & golems gain 1|2 while Whetstone is in play. Does not stack.\n"
-				} else {
-					"Weapons & golems gain 1|1 while Whetstone is in play. Does not stack.\n"
-				}),
 				Flag::additive => ret.push_str("additive, "),
 				Flag::aflatoxin => ret.push_str("aflatoxin, "),
 				Flag::airborne => ret.push_str("airborne, "),

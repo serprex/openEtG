@@ -24,18 +24,18 @@
 3021|Mark of Darkness|11|2|20|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
 1022|Mark of Aether|12|2|15|0|||pillar|pillar+stackable+additive+charges=1
 3022|Mark of Aether|12|2|20|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
-1027|Dagger|0|0|2|0|2|1|buff=v_dagger|
-3027|Dirk|0|0|17|0|4|1|buff=v_dagger|
+1027|Dagger|0|0|2|0|2|1|ownbuff=v_dagger|
+3027|Dirk|0|0|17|0|4|1|ownbuff=v_dagger|
 1028|Short Sword|0|0|3|1|3|2|v_noluci|
 3028|Long Sword|0|0|17|1|6|2|v_noluci|
-1029|Hammer|0|0|3|2|3|4|buff=hammer|
-3029|Gavel|0|0|17|2|6|6|buff=hammer|
+1029|Hammer|0|0|3|2|3|4|ownbuff=hammer|
+3029|Gavel|0|0|17|2|6|6|ownbuff=hammer|
 1032|Malignant Cell|0|4|0|0|1|1|postauto=mitosis|token+aquatic
 3032|Malignant Cell|0|4|0|0|1|1|postauto=mitosis|token+aquatic
 1033|Relic|0|3|4|1|||v_relic|
 3033|Relic|0|3|16|1|||v_relic|
-1035|Short Bow|0|0|3|2|3|3|buff=bow|ranged
-3035|Long Bow|0|0|17|2|6|4|buff=bow|ranged
+1035|Short Bow|0|0|3|2|3|3|ownbuff=bow|ranged
+3035|Long Bow|0|0|17|2|6|4|ownbuff=bow|ranged
 1036|Shield|0|1|2|1||1||
 3036|Tower Shield|0|1|17|5||2||
 1100|Amethyst Pillar|1|2|0|0|||pillar|pillar+stackable+additive+charges=1
@@ -238,8 +238,8 @@
 3605|Fire Buckler|6|1|17|4|||shield=v_firewall|
 1606|Deflagration|6|3|2|3|||destroy|
 3606|Explosion|6|3|17|2|||destroy|
-1607|Fahrenheit|6|0|6|3|4|5|buff=fiery|
-3607|Fahrenheit|6|0|18|3|5|5|buff=fiery|
+1607|Fahrenheit|6|0|6|3|4|5|ownbuff=fiery|
+3607|Fahrenheit|6|0|18|3|5|5|ownbuff=fiery|
 1608|Rain of Fire|6|3|3|7|||v_storm 3|
 3608|Fire Storm|6|3|17|5|||v_storm 3|
 1609|Immolation|6|3|2|0|||immolate 5|
@@ -388,8 +388,8 @@
 4008|Eternity|10|0|18|5|4|8|3=v_rewind|
 2009|Sundial|10|2|4|1|||1:8=hasten+losecharge+attack=stasis|charges=1
 4009|Sundial|10|2|17|0|||1:8=hasten+losecharge+attack=stasis|charges=1
-2010|Scarab|10|4|2|2|2|1|1:3=devour+v_swarm+hp=v_swarmhp|airborne
-4010|Elite Scarab|10|4|17|2|3|1|1:3=devour+v_swarm+hp=v_swarmhp|airborne
+2010|Scarab|10|4|2|2|2|1|1:3=devour+v_swarm+ownhp=v_swarmhp|airborne
+4010|Elite Scarab|10|4|17|2|3|1|1:3=devour+v_swarm+ownhp=v_swarmhp|airborne
 2011|Precognition|10|3|2|2|||precognition|
 4011|Precognition|10|3|17|1|||precognition|
 2012|Pharaoh|10|4|8|9|4|9|2=summon 2010|
@@ -416,8 +416,8 @@
 4104|Improved Dusk|11|1|17|4|||shield=evade 50|
 2105|Steal|11|3|3|4|||v_steal|
 4105|Improved Steal|11|3|17|3|||v_steal|
-2106|Nightfall|11|2|3|3||||nightfall
-4106|Eclipse|11|2|17|4||||nightfall
+2106|Nightfall|11|2|3|3|||buff=nightfall 1+hp=nightfall 1|
+4106|Eclipse|11|2|17|4|||buff=nightfall 2+hp=nightfall 1|
 2107|Vampire Stiletto|11|0|6|1|4|4|hit=vampire|nocturnal
 4107|Vampire Dagger|11|0|18|2|6|4|hit=vampire|nocturnal
 2108|Drain Life|11|3|3|3|||v_drainlife 3|

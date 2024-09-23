@@ -29,19 +29,20 @@ impl Event {
 	pub const Destroy: Event = Event(unsafe { NonZeroU8::new_unchecked(8) });
 	pub const Discard: Event = Event(unsafe { NonZeroU8::new_unchecked(9) });
 	pub const Dmg: Event = Event(unsafe { NonZeroU8::new_unchecked(10) });
-	pub const Draw: Event = Event(unsafe { NonZeroU8::new_unchecked(11) });
-	pub const Freeze: Event = Event(unsafe { NonZeroU8::new_unchecked(12) });
-	pub const Hit: Event = Event(unsafe { NonZeroU8::new_unchecked(13) });
-	pub const Hp: Event = Event(unsafe { NonZeroU8::new_unchecked(14) });
-	pub const Play: Event = Event(unsafe { NonZeroU8::new_unchecked(15) });
-	pub const Poison: Event = Event(unsafe { NonZeroU8::new_unchecked(16) });
-	pub const Postauto: Event = Event(unsafe { NonZeroU8::new_unchecked(17) });
-	pub const Predeath: Event = Event(unsafe { NonZeroU8::new_unchecked(18) });
-	pub const Prespell: Event = Event(unsafe { NonZeroU8::new_unchecked(19) });
-	pub const Shield: Event = Event(unsafe { NonZeroU8::new_unchecked(20) });
-	pub const Spell: Event = Event(unsafe { NonZeroU8::new_unchecked(21) });
-	pub const Spelldmg: Event = Event(unsafe { NonZeroU8::new_unchecked(22) });
-	pub const Turnstart: Event = Event(unsafe { NonZeroU8::new_unchecked(23) });
+	pub const Dr: Event = Event(unsafe { NonZeroU8::new_unchecked(11) });
+	pub const Draw: Event = Event(unsafe { NonZeroU8::new_unchecked(12) });
+	pub const Freeze: Event = Event(unsafe { NonZeroU8::new_unchecked(13) });
+	pub const Hit: Event = Event(unsafe { NonZeroU8::new_unchecked(14) });
+	pub const Hp: Event = Event(unsafe { NonZeroU8::new_unchecked(15) });
+	pub const Play: Event = Event(unsafe { NonZeroU8::new_unchecked(16) });
+	pub const Poison: Event = Event(unsafe { NonZeroU8::new_unchecked(17) });
+	pub const Postauto: Event = Event(unsafe { NonZeroU8::new_unchecked(18) });
+	pub const Predeath: Event = Event(unsafe { NonZeroU8::new_unchecked(19) });
+	pub const Prespell: Event = Event(unsafe { NonZeroU8::new_unchecked(20) });
+	pub const Shield: Event = Event(unsafe { NonZeroU8::new_unchecked(21) });
+	pub const Spell: Event = Event(unsafe { NonZeroU8::new_unchecked(22) });
+	pub const Spelldmg: Event = Event(unsafe { NonZeroU8::new_unchecked(23) });
+	pub const Turnstart: Event = Event(unsafe { NonZeroU8::new_unchecked(24) });
 	pub const OwnAttack: Event = Self::own(Self::Attack);
 	pub const OwnBeginattack: Event = Self::own(Self::Beginattack);
 	pub const OwnBlocked: Event = Self::own(Self::Blocked);
@@ -52,6 +53,7 @@ impl Event {
 	pub const OwnDestroy: Event = Self::own(Self::Destroy);
 	pub const OwnDiscard: Event = Self::own(Self::Discard);
 	pub const OwnDmg: Event = Self::own(Self::Dmg);
+	pub const OwnDr: Event = Self::own(Self::Dr);
 	pub const OwnDraw: Event = Self::own(Self::Draw);
 	pub const OwnFreeze: Event = Self::own(Self::Freeze);
 	pub const OwnHit: Event = Self::own(Self::Hit);
@@ -271,6 +273,7 @@ pub enum Skill {
 	blockwithcharge,
 	blockhp,
 	bloodmoon,
+	bo,
 	bolsterintodeck,
 	bonesharpen,
 	boneyard,
@@ -430,6 +433,7 @@ pub enum Skill {
 	lobotomize,
 	locket,
 	locketshift,
+	lodestone(i16),
 	loot,
 	losecharge,
 	luciferin,
@@ -453,6 +457,7 @@ pub enum Skill {
 	mutation,
 	neuro,
 	neuroify,
+	nightfall(i16),
 	nightmare,
 	nightshade,
 	noeatspell,
@@ -960,6 +965,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::blockwithcharge => f.write_str("blockwithcharge"),
 			Skill::bloodmoon => Ok(()),
 			Skill::bolsterintodeck => f.write_str("bolsterintodeck"),
+			Skill::bo => Ok(()),
 			Skill::bonesharpen => f.write_str("bonesharpen"),
 			Skill::boneyard => f.write_str("boneyard"),
 			Skill::boreset => Ok(()),
@@ -1118,6 +1124,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::lobotomize => f.write_str("lobotomize"),
 			Skill::locket => f.write_str("locket"),
 			Skill::locketshift => f.write_str("locketshift"),
+			Skill::lodestone(..) => Ok(()),
 			Skill::loot => f.write_str("loot"),
 			Skill::losecharge => f.write_str("losecharge"),
 			Skill::luciferin => f.write_str("luciferin"),
@@ -1141,6 +1148,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::mutation => f.write_str("mutation"),
 			Skill::neuro => f.write_str("neuro"),
 			Skill::neuroify => Ok(()),
+			Skill::nightfall(..) => Ok(()),
 			Skill::nightmare => Ok(()),
 			Skill::nightshade => Ok(()),
 			Skill::noeatspell => Ok(()),
@@ -1608,6 +1616,8 @@ impl Skill {
 		match self {
 			Skill::firestorm(x)
 			| Skill::immolate(x)
+			| Skill::lodestone(x)
+			| Skill::nightfall(x)
 			| Skill::platearmor(x)
 			| Skill::poison(x)
 			| Skill::poisonfoe(x)
@@ -1858,18 +1868,7 @@ impl Skill {
 				}
 			}
 			Self::boreset => {
-				let shield = ctx.get_shield(ctx.get_owner(c));
-				if shield != 0 {
-					if let Some(stored) = ctx.get_thing_mut(c).status.get_mut(Stat::swarmhp) {
-						let limit = core::mem::replace(stored, 0);
-						let sswarm = ctx.get(shield, Stat::swarmhp);
-						if limit >= sswarm {
-							ctx.set(shield, Stat::swarmhp, 0);
-						} else {
-							ctx.set(shield, Stat::swarmhp, sswarm - limit);
-						}
-					}
-				}
+				ctx.set(c, Stat::swarmhp, 0);
 			}
 			Self::bounce => {
 				ctx.set(c, Stat::hp, ctx.get(c, Stat::maxhp));
@@ -2576,7 +2575,10 @@ impl Skill {
 			}
 			Self::endow => {
 				ctx.fx(t, Fx::Endow);
-				ctx.incrAtk(c, ctx.trueatk(t) - ctx.trigger_pure(Event::Buff, t, 0));
+				ctx.incrAtk(
+					c,
+					ctx.trueatk(t) - ctx.trigger_pure(Event::OwnBuff, t, t, &mut ProcData::default()),
+				);
 				ctx.buffhp(c, 2);
 				let tgt = ctx.get_thing(t);
 				let tstatus = tgt.status.clone();
@@ -2599,8 +2601,9 @@ impl Skill {
 						| Stat::castele
 						| Stat::cast
 						| Stat::costele
-						| Stat::cost => (),
-						Stat::adrenaline | Stat::cast | Stat::castele | Stat::swarmhp => ctx.set(c, k, v),
+						| Stat::cost
+						| Stat::swarmhp => (),
+						Stat::adrenaline | Stat::cast | Stat::castele => ctx.set(c, k, v),
 						_ => ctx.incrStatus(c, k, v),
 					}
 				}
@@ -3061,11 +3064,11 @@ impl Skill {
 				ctx.delay(c, 1);
 				let shield = ctx.get_player(ctx.get_owner(c)).shield;
 				if shield != 0 {
-					if !ctx.hasskill(shield, Event::Hp, Skill::v_swarmhp) {
-						ctx.addskills(shield, Event::Hp, &[Skill::v_swarmhp]);
+					if core::mem::replace(ctx.get_mut(c, Stat::shardgolem), shield) == shield {
+						ctx.incrStatus(c, Stat::swarmhp, 1);
+					} else {
+						ctx.set(c, Stat::swarmhp, 1);
 					}
-					ctx.incrStatus(shield, Stat::swarmhp, 1);
-					ctx.incrStatus(c, Stat::swarmhp, 1);
 				}
 			}
 			Self::hitownertwice => {
@@ -5164,7 +5167,10 @@ impl Skill {
 				}
 				ctx.set(c, Stat::cast, ctx.get(t, Stat::cast));
 				ctx.set(c, Stat::castele, ctx.get(t, Stat::castele));
-				ctx.incrAtk(c, ctx.trueatk(t) - ctx.trigger_pure(Event::Buff, t, 0));
+				ctx.incrAtk(
+					c,
+					ctx.trueatk(t) - ctx.trigger_pure(Event::OwnBuff, t, t, &mut ProcData::default()),
+				);
 				ctx.buffhp(c, 2);
 				ctx.get_thing_mut(c).skill = ctx.get_thing(t).skill.clone();
 			}
@@ -5237,7 +5243,7 @@ impl Skill {
 				ctx.dmg(t, if !ctx.get(t, Flag::nocturnal) { -10 } else { 10 });
 			}
 			Self::v_hope => {
-				let dr = Self::hope.proc_pure(ctx, c, t);
+				let dr = Self::hope.proc_pure(ctx, c, c, data);
 				ctx.set(c, Stat::hp, dr + card::Upped(ctx.get(c, Stat::card)) as i16);
 			}
 			Self::v_icebolt(cost) => {
@@ -5674,14 +5680,17 @@ impl Skill {
 			}
 			Self::accumulation
 			| Self::axe
-			| Self::buffdr
+			| Self::bo
 			| Self::bow
+			| Self::buffdr
 			| Self::countimmbur
 			| Self::dagger
 			| Self::disc
 			| Self::fiery
 			| Self::hammer
 			| Self::hope
+			| Self::lodestone(..)
+			| Self::nightfall(..)
 			| Self::novaval
 			| Self::poisondr
 			| Self::skeletoncount
@@ -5693,12 +5702,23 @@ impl Skill {
 		}
 	}
 
-	pub fn proc_pure(self, ctx: &Game, c: i16, t: i16) -> i16 {
+	pub fn proc_pure(self, ctx: &Game, c: i16, t: i16, data: &mut ProcData) -> i16 {
 		match self {
 			Self::accumulation => ctx.get(c, Stat::charges),
 			Self::axe => {
 				let mark = ctx.get_player(ctx.get_owner(c)).mark as i16;
 				(mark == etg::Fire || mark == etg::Time) as i16
+			}
+			Self::bo => {
+				if ctx.get(c, Stat::shardgolem) == t {
+					ctx.get(c, Stat::swarmhp)
+				} else {
+					0
+				}
+			}
+			Self::bow => {
+				let mark = ctx.get_player(ctx.get_owner(c)).mark as i16;
+				(mark == etg::Air || ctx.cardset() == CardSet::Open && mark == etg::Light) as i16
 			}
 			Self::buffdr => {
 				let shield = ctx.get_player(ctx.get_owner(c)).shield as i16;
@@ -5707,10 +5727,6 @@ impl Skill {
 				} else {
 					ctx.truedr(shield, 0)
 				}
-			}
-			Self::bow => {
-				let mark = ctx.get_player(ctx.get_owner(c)).mark as i16;
-				(mark == etg::Air || ctx.cardset() == CardSet::Open && mark == etg::Light) as i16
 			}
 			Self::countimmbur => ctx
 				.players()
@@ -5761,12 +5777,33 @@ impl Skill {
 					cr != 0 && ctx.hasskill(cr, Event::OwnAttack, Skill::quanta(etg::Light as i8))
 				})
 				.count() as i16,
+			Self::nightfall(x) => {
+				if x > data.amt && ctx.get(t, Flag::nocturnal) && ctx.get_kind(t) == Kind::Creature {
+					x - core::mem::replace(&mut data.amt, x)
+				} else {
+					0
+				}
+			}
+			Self::lodestone(x) => {
+				if x > data.dmg
+					&& (ctx.get(t, Flag::golem) || {
+						let kind = ctx.get_kind(t);
+						kind == Kind::Weapon
+							|| kind == Kind::Shield
+							|| (kind == Kind::Creature
+								&& ctx.get_card(ctx.get(t, Stat::card)).kind == Kind::Weapon)
+					}) {
+					x - core::mem::replace(&mut data.dmg, x)
+				} else {
+					0
+				}
+			}
 			Self::novaval => ctx.get(c, Stat::nova),
 			Self::poisondr => {
-				if t == 0 {
+				if data.tgt == 0 {
 					0
 				} else {
-					let thing = ctx.get_thing(t);
+					let thing = ctx.get_thing(data.tgt);
 					let dr = thing.status.get(Stat::poison);
 					if thing.kind == Kind::Weapon {
 						dr.saturating_add(ctx.get(thing.owner, Stat::poison))
@@ -5800,7 +5837,7 @@ impl Skill {
 				.get_player(ctx.get_owner(c))
 				.creatures
 				.iter()
-				.filter(|&&cr| cr != 0 && ctx.hasskill(cr, Event::Hp, Skill::swarm))
+				.filter(|&&cr| cr != 0 && ctx.hasskill(cr, Event::OwnHp, Skill::swarm))
 				.count() as i16,
 			Self::v_dagger => {
 				let mark = ctx.get_player(ctx.get_owner(c)).mark as i16;

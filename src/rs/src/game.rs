@@ -431,29 +431,27 @@ impl Flag {
 	pub const momentum: u64 = 1 << 10;
 	pub const mutant: u64 = 1 << 11;
 	pub const neuro: u64 = 1 << 12;
-	pub const nightfall: u64 = 1 << 13;
-	pub const nocturnal: u64 = 1 << 14;
-	pub const out: u64 = 1 << 15;
-	pub const patience: u64 = 1 << 16;
-	pub const pendstate: u64 = 1 << 17;
-	pub const pillar: u64 = 1 << 18;
-	pub const poisonous: u64 = 1 << 19;
-	pub const precognition: u64 = 1 << 20;
-	pub const protectdeck: u64 = 1 << 21;
-	pub const psionic: u64 = 1 << 22;
-	pub const ranged: u64 = 1 << 23;
-	pub const ready: u64 = 1 << 24;
-	pub const reflective: u64 = 1 << 25;
-	pub const resigned: u64 = 1 << 26;
-	pub const sabbath: u64 = 1 << 27;
-	pub const sanctuary: u64 = 1 << 28;
-	pub const stackable: u64 = 1 << 29;
-	pub const token: u64 = 1 << 30;
-	pub const tunnel: u64 = 1 << 31;
-	pub const vindicated: u64 = 1 << 32;
-	pub const voodoo: u64 = 1 << 33;
-	pub const whetstone: u64 = 1 << 34;
-	pub const bug: u64 = 1 << 35;
+	pub const nocturnal: u64 = 1 << 13;
+	pub const out: u64 = 1 << 14;
+	pub const patience: u64 = 1 << 15;
+	pub const pendstate: u64 = 1 << 16;
+	pub const pillar: u64 = 1 << 17;
+	pub const poisonous: u64 = 1 << 18;
+	pub const precognition: u64 = 1 << 19;
+	pub const protectdeck: u64 = 1 << 20;
+	pub const psionic: u64 = 1 << 21;
+	pub const ranged: u64 = 1 << 22;
+	pub const ready: u64 = 1 << 23;
+	pub const reflective: u64 = 1 << 24;
+	pub const resigned: u64 = 1 << 25;
+	pub const sabbath: u64 = 1 << 26;
+	pub const sanctuary: u64 = 1 << 27;
+	pub const stackable: u64 = 1 << 28;
+	pub const token: u64 = 1 << 29;
+	pub const tunnel: u64 = 1 << 30;
+	pub const vindicated: u64 = 1 << 31;
+	pub const voodoo: u64 = 1 << 32;
+	pub const bug: u64 = 1 << 33;
 
 	pub fn get(self, key: u64) -> bool {
 		self.0 & key != 0
@@ -1555,67 +1553,12 @@ impl Game {
 		self.hasskill(id, Event::Attack, Skill::flooddeath) || self.get(id, Stat::flooding) != 0
 	}
 
-	pub fn calcCore(&self, id: i16, filterstat: u64) -> i16 {
-		let owner = self.get_owner(id);
-		for j in 0..2 {
-			let pl = if j == 0 { owner } else { self.get_foe(owner) };
-			for pr in self.get_player(pl).permanents {
-				if pr != 0 && self.get(pr, filterstat) {
-					return 1;
-				}
-			}
-		}
-		0
-	}
-
-	pub fn calcCore2(&self, id: i16, filterstat: u64) -> i16 {
-		let mut bonus = 0;
-		let owner = self.get_owner(id);
-		for j in 0..2 {
-			let pl = if j == 0 { owner } else { self.get_foe(owner) };
-			for pr in self.get_player(pl).permanents {
-				if pr != 0 && self.get(pr, filterstat) {
-					if card::Upped(self.get(pr, Stat::card)) {
-						return 2;
-					}
-					bonus = 1
-				}
-			}
-		}
-		bonus
-	}
-
-	pub fn isEclipseCandidate(&self, id: i16) -> bool {
-		self.get(id, Flag::nocturnal) && self.get_kind(id) == Kind::Creature
-	}
-
-	pub fn isWhetCandidate(&self, id: i16) -> bool {
-		self.get(id, Flag::golem)
-			|| self.get_kind(id) == Kind::Weapon
-			|| self.cards.get(self.get(id, Stat::card)).kind == Kind::Weapon
-	}
-
-	pub fn calcBonusAtk(&self, id: i16) -> i16 {
-		(if self.isEclipseCandidate(id) { self.calcCore2(id, Flag::nightfall) } else { 0 })
-			+ (if self.isWhetCandidate(id) { self.calcCore(id, Flag::whetstone) } else { 0 })
-	}
-
-	pub fn calcBonusHp(&self, id: i16) -> i16 {
-		if id > self.players_len() {
-			(if self.isEclipseCandidate(id) { self.calcCore(id, Flag::nightfall) } else { 0 })
-				+ (if self.isWhetCandidate(id) { self.calcCore2(id, Flag::whetstone) } else { 0 })
-				+ self.trigger_pure(Event::Hp, id, 0)
-		} else {
-			0
-		}
-	}
-
 	pub fn truedr(&self, id: i16, t: i16) -> i16 {
-		self.get(id, Stat::hp) + self.trigger_pure(Event::Hp, id, t)
+		self.get(id, Stat::hp) + self.proc_pure(Event::Dr, id, t)
 	}
 
 	pub fn truehp(&self, id: i16) -> i16 {
-		self.get(id, Stat::hp) + self.calcBonusHp(id)
+		self.get(id, Stat::hp) + self.proc_pure(Event::Hp, id, 0)
 	}
 
 	pub fn trueatk(&self, id: i16) -> i16 {
@@ -1626,8 +1569,7 @@ impl Game {
 		let dmg = self
 			.get(id, Stat::atk)
 			.saturating_add(self.get(id, Stat::dive))
-			.saturating_add(self.trigger_pure(Event::Buff, id, 0))
-			.saturating_add(self.calcBonusAtk(id));
+			.saturating_add(self.proc_pure(Event::Buff, id, 0));
 		etg::calcAdrenaline(
 			adrenaline,
 			if self.get(id, Flag::burrowed) && self.cards.set != CardSet::Original {
@@ -1975,7 +1917,6 @@ impl Game {
 			| Flag::airborne
 			| Flag::aquatic
 			| Flag::golem
-			| Flag::nightfall
 			| Flag::nocturnal
 			| Flag::pillar
 			| Flag::poisonous
@@ -1983,8 +1924,7 @@ impl Game {
 			| Flag::stackable
 			| Flag::token
 			| Flag::tunnel
-			| Flag::voodoo
-			| Flag::whetstone);
+			| Flag::voodoo);
 		thing.flag.0 |= card.flag();
 		for &(k, v) in card.status() {
 			thing.status.insert(k, v);
@@ -2198,11 +2138,11 @@ impl Game {
 		}
 	}
 
-	pub fn trigger_pure(&self, k: Event, c: i16, t: i16) -> i16 {
+	pub fn trigger_pure(&self, k: Event, c: i16, t: i16, data: &mut ProcData) -> i16 {
 		let mut n = 0;
 		if let Some(ss) = self.get_thing(c).skill.get(k) {
 			for &s in ss.iter() {
-				n += s.proc_pure(self, c, t);
+				n += s.proc_pure(self, c, t, data);
 			}
 		}
 		n
@@ -2238,6 +2178,37 @@ impl Game {
 				self.trigger_data(k, weapon, c, data);
 			}
 		}
+	}
+
+	pub fn proc_pure(&self, k: Event, c: i16, tgt: i16) -> i16 {
+		let owner = self.get_owner(c);
+		let foe = self.get_foe(owner);
+		let mut data = ProcData::default();
+		data.tgt = tgt;
+		let mut r = 0;
+		r += self.trigger_pure(Event::own(k), c, c, &mut data);
+		for pl in [owner, foe] {
+			r += self.trigger_pure(k, pl, c, &mut data);
+			for cr in self.get_player(pl).creatures {
+				if cr != 0 {
+					r += self.trigger_pure(k, cr, c, &mut data);
+				}
+			}
+			for pr in self.get_player(pl).permanents {
+				if pr != 0 {
+					r += self.trigger_pure(k, pr, c, &mut data);
+				}
+			}
+			let shield = self.get_shield(pl);
+			if shield != 0 {
+				r += self.trigger_pure(k, shield, c, &mut data);
+			}
+			let weapon = self.get_weapon(pl);
+			if weapon != 0 {
+				r += self.trigger_pure(k, weapon, c, &mut data);
+			}
+		}
+		r
 	}
 
 	pub fn masscc<F>(&mut self, owner: i16, foe: i16, func: F)
@@ -2465,12 +2436,7 @@ impl Game {
 
 	pub fn clearStatus(&mut self, id: i16) {
 		let thing = self.get_thing_mut(id);
-		thing.flag.0 &= !(Flag::additive
-			| Flag::cloak
-			| Flag::nightfall
-			| Flag::stackable
-			| Flag::tunnel
-			| Flag::whetstone);
+		thing.flag.0 &= !(Flag::additive | Flag::cloak | Flag::stackable | Flag::tunnel);
 		for (st, ref mut val) in thing.status.iter_mut() {
 			if matches!(st, Stat::charges | Stat::flooding) {
 				*val = 0;
