@@ -2598,10 +2598,9 @@ impl Skill {
 						| Stat::maxhp
 						| Stat::atk
 						| Stat::card
-						| Stat::castele
-						| Stat::cast
 						| Stat::costele
 						| Stat::cost
+						| Stat::shardgolem
 						| Stat::swarmhp => (),
 						Stat::adrenaline | Stat::cast | Stat::castele => ctx.set(c, k, v),
 						_ => ctx.incrStatus(c, k, v),
@@ -3168,7 +3167,7 @@ impl Skill {
 				}
 				for &(k, v) in tstatus.iter() {
 					match k {
-						Stat::hp | Stat::maxhp | Stat::atk | Stat::card | Stat::costele => (),
+						Stat::hp | Stat::maxhp | Stat::atk | Stat::card | Stat::costele | Stat::shardgolem | Stat::swarmhp => (),
 						Stat::castele | Stat::cast => {
 							if setcast {
 								ctx.set(equip, k, v)
