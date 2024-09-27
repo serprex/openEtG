@@ -59,8 +59,26 @@ function gridLinePaths(hor, ver) {
 	return ren;
 }
 
+// prettier-ignore
 const landscapeGrid = gridLinePaths(
-		new Uint16Array([140, 172, 900, 300, 172, 900, 460, 172, 900]),
+		new Uint16Array([140, 172, 900, 300, 172, 900, 460, 172, 900,
+			70, 160, 172,
+			102, 160, 172,
+			134, 160, 172,
+			166, 160, 172,
+			198, 160, 172,
+			230, 160, 172,
+			262, 160, 172,
+			294, 160, 172,
+			370, 160, 172,
+			402, 160, 172,
+			434, 160, 172,
+			466, 160, 172,
+			498, 160, 172,
+			530, 160, 172,
+			562, 160, 172,
+			594, 160, 172,
+		]),
 		new Uint16Array([170, 0, 600, 246, 0, 139, 246, 459, 600]),
 	),
 	portraitGrid = gridLinePaths(
@@ -1508,11 +1526,11 @@ export default function Match(props) {
 							<span
 								style={`z-index:1;position:absolute;left:${
 									landscape() ?
-										`101px;top:${j ? 0 : 300}px;width:66px;height:263`
+										`100px;top:${j ? 0 : 300}px;width:70px;height:300`
 									:	`152px;top:${j ? 21 : 796}px;width:563px;height:84`
 								}px;background-color:${
 									strcols[handOverlay()]
-								};opacity:.3;border-radius:4px;pointer-events:none`}
+								};opacity:.3;border-radius:2px;pointer-events:none`}
 							/>
 						</Show>
 						<div
