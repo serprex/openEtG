@@ -1493,7 +1493,7 @@ impl Skill {
 				}
 			}
 			Self::guard => Tgt::crea,
-			Self::haunt => Tgt::crea,
+			Self::haunt => tgt!(and crea not skele),
 			Self::heal => tgt!(or crea play),
 			Self::holylight => tgt!(or crea play),
 			Self::icebolt => tgt!(or crea play),
@@ -3167,7 +3167,13 @@ impl Skill {
 				}
 				for &(k, v) in tstatus.iter() {
 					match k {
-						Stat::hp | Stat::maxhp | Stat::atk | Stat::card | Stat::costele | Stat::shardgolem | Stat::swarmhp => (),
+						Stat::hp
+						| Stat::maxhp
+						| Stat::atk
+						| Stat::card
+						| Stat::costele
+						| Stat::shardgolem
+						| Stat::swarmhp => (),
 						Stat::castele | Stat::cast => {
 							if setcast {
 								ctx.set(equip, k, v)
@@ -4845,18 +4851,10 @@ impl Skill {
 				let owner = ctx.get_owner(c);
 				let foe = ctx.get_foe(owner);
 				let upped = card::Upped(ctx.get(c, Stat::card));
-				for i in 0..3 {
-					let pl = if i == 2 {
-						if upped {
-							break;
-						} else {
-							owner
-						}
-					} else {
-						foe
-					};
-					let mut perms = Vec::with_capacity(18);
-					let plpl = ctx.get_player(pl);
+				let mut perms = Vec::with_capacity(18);
+				for i in 0..2 {
+					let plpl = ctx.get_player(if i == 0 { owner } else { foe });
+					perms.clear();
 					perms.extend(
 						once(plpl.weapon)
 							.chain(once(plpl.shield))
@@ -4868,6 +4866,25 @@ impl Skill {
 							ctx.shatter(id);
 						}
 					}
+				}
+				for i in 0..3 {
+					let pl = if i == 2 {
+						if upped {
+							break;
+						} else {
+							owner
+						}
+					} else {
+						foe
+					};
+					let plpl = ctx.get_player(pl);
+					perms.clear();
+					perms.extend(
+						once(plpl.weapon)
+							.chain(once(plpl.shield))
+							.chain(plpl.permanents.into_iter())
+							.filter(|&pr| pr != 0 && ctx.material(pr, None)),
+					);
 					if let Some(&pr) = ctx.choose(&perms) {
 						ctx.fx(pr, Fx::Shuffled);
 						let newowner = if ctx.next32() & 1 == 0 { pl } else { ctx.get_foe(pl) };

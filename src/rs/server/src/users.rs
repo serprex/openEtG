@@ -416,7 +416,8 @@ impl Users {
 			self.0.retain(|_, (ref gc, ref sockid, _)| {
 				NonZeroUsize::new(sockid.load(Ordering::Acquire))
 					.map(|id| rsocks.contains_key(&id))
-					.unwrap_or(false) || gc.swap(false, Ordering::AcqRel)
+					.unwrap_or(false)
+					|| gc.swap(false, Ordering::AcqRel)
 			});
 		}
 	}
