@@ -3133,54 +3133,55 @@ impl Skill {
 				let isweap = ctx.get_card(ctx.get(t, Stat::card)).kind == Kind::Weapon;
 				let pl = ctx.get_player(ctx.get_owner(t));
 				let equip = if isweap { pl.weapon } else { pl.shield };
-				ctx.die(t);
 				if equip == 0 {
-					return;
-				}
-				ctx.unsummon(equip);
-				ctx.fx(t, Fx::Endow);
-				let tgt = ctx.get_thing(t);
-				let tstatus = tgt.status.clone();
-				let mut setcast = false;
-				{
-					let newskill = tgt.skill.clone();
-					let tflag = tgt.flag.0;
-					let mut sader = ctx.get_thing_mut(equip);
-					for (nk, nv) in newskill.into_iter() {
-						match sader.skill.entry(nk) {
-							SkillsEntry::Occupied(sk) => {
-								if nk == Event::Cast {
-									continue;
+					ctx.play(t, 0, true);
+				} else {
+					ctx.die(t);
+					ctx.unsummon(equip);
+					ctx.fx(t, Fx::Endow);
+					let tgt = ctx.get_thing(t);
+					let tstatus = tgt.status.clone();
+					let mut setcast = false;
+					{
+						let newskill = tgt.skill.clone();
+						let tflag = tgt.flag.0;
+						let mut sader = ctx.get_thing_mut(equip);
+						for (nk, nv) in newskill.into_iter() {
+							match sader.skill.entry(nk) {
+								SkillsEntry::Occupied(sk) => {
+									if nk == Event::Cast {
+										continue;
+									}
+									sk.into_mut().extend(nv.as_ref());
 								}
-								sk.into_mut().extend(nv.as_ref());
-							}
-							SkillsEntry::Vacant(sk) => {
-								if nk == Event::Cast {
-									setcast = true;
+								SkillsEntry::Vacant(sk) => {
+									if nk == Event::Cast {
+										setcast = true;
+									}
+									sk.insert(nv);
 								}
-								sk.insert(nv);
 							}
 						}
+						sader.flag.0 |= tflag;
+						sader.flag.0 &= !Flag::additive;
 					}
-					sader.flag.0 |= tflag;
-					sader.flag.0 &= !Flag::additive;
-				}
-				for &(k, v) in tstatus.iter() {
-					match k {
-						Stat::hp
-						| Stat::maxhp
-						| Stat::atk
-						| Stat::card
-						| Stat::costele
-						| Stat::shardgolem
-						| Stat::swarmhp => (),
-						Stat::castele | Stat::cast => {
-							if setcast {
-								ctx.set(equip, k, v)
+					for &(k, v) in tstatus.iter() {
+						match k {
+							Stat::hp
+							| Stat::maxhp
+							| Stat::atk
+							| Stat::card
+							| Stat::costele
+							| Stat::shardgolem
+							| Stat::swarmhp => (),
+							Stat::castele | Stat::cast => {
+								if setcast {
+									ctx.set(equip, k, v)
+								}
 							}
+							Stat::adrenaline => ctx.set(equip, k, v),
+							_ => ctx.incrStatus(equip, k, v),
 						}
-						Stat::adrenaline => ctx.set(equip, k, v),
-						_ => ctx.incrStatus(equip, k, v),
 					}
 				}
 			}

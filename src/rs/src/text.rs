@@ -439,7 +439,7 @@ impl<'a> SkillThing<'a> {
 			Skill::ignite =>
 				Cow::from("Deal 20 spell damage to opponent. Deal 1 spell damage to each creature"),
 			Skill::ignitediscard => Cow::from("When discarded, deal 5 spell damage to opponent"),
-			Skill::imbue => Cow::from("Discard target equipment card, combining its skills & statuses on corresponding equipped equipment. Return that equipment to hand. Imbued equipment cannot be `additive`"),
+			Skill::imbue => Cow::from("Discard target equipment card, combining its skills & statuses on corresponding equipped equipment. Return that equipment to hand. Imbued equipment cannot be `additive`.\nIf no equipment available to imbue, instead play target card"),
 			Skill::immolate(x) =>
 				Cow::from(format!("Sacrifice creature you control. Gain {}:6 plus 1 quanta of each other element", x+1)),
 			Skill::improve =>

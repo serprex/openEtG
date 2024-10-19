@@ -2682,7 +2682,7 @@ impl Game {
 				Kind::Shield => self.setShieldCore(owner, c, fromhand),
 				Kind::Permanent => self.addPermCore(owner, c, fromhand),
 				Kind::Creature => self.addCreaCore(owner, c, fromhand),
-				_ => (),
+				_ => unsafe { core::hint::unreachable_unchecked() },
 			}
 		}
 	}
