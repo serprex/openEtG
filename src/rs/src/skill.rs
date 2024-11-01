@@ -1554,7 +1554,7 @@ impl Skill {
 			Self::reap => tgt!(and crea not skele),
 			Self::regeneratespell => tgt!(or crea and perm nonstack),
 			Self::regrade => tgt!(and not or play permstack notself),
-			Self::reinforce => Tgt::crea,
+			Self::reinforce => tgt!(and notself crea),
 			Self::ren => Tgt::crea,
 			Self::resummon => Tgt::crea,
 			Self::rewind | Self::v_rewind => Tgt::crea,
@@ -4048,7 +4048,7 @@ impl Skill {
 			Self::photosynthesis => {
 				ctx.fx(c, Fx::Quanta(2, etg::Life as i8));
 				ctx.spend(ctx.get_owner(c), etg::Life, -2);
-				if ctx.get(c, Stat::cast) > if ctx.get(c, Stat::castele) == etg::Chroma { 1 } else { 0 } {
+				if ctx.get(c, Stat::poison) <= 0 && ctx.get(c, Stat::cast) > if ctx.get(c, Stat::castele) == etg::Chroma { 1 } else { 0 } {
 					ctx.set(c, Stat::casts, 1);
 				}
 			}

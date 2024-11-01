@@ -459,9 +459,9 @@ impl<'a> SkillThing<'a> {
 			Skill::liquid =>
 				Cow::from("Poison target creature. Target creature's skills are replaced with \"Heal yourself equal to the damage dealt by this card.\""),
 			Skill::livingweapon => Cow::from(if self.upped() {
-				"Target creature is equipped as target owner's weapon. If card already exists in weapon slot, return it to owners hand as base card. Heal yourself equal to target creature's HP. Gain quanta equivalent to target creature's cost"
+				"Target creature is equipped as target owner's weapon. If card already exists in weapon slot, return it to owner's hand. Heal yourself equal to target creature's HP. Gain quanta equivalent to target creature's cost"
 			} else {
-				"Target creature is equipped as target owner's weapon. If card already exists in weapon slot, return it to owners hand as base card. Heal yourself equal to target creature's HP"
+				"Target creature is equipped as target owner's weapon. If card already exists in weapon slot, return it to owner's hand. Heal yourself equal to target creature's HP"
 			}),
 			Skill::lobotomize => Cow::from("Remove target creature's skills. Also remove psionism"),
 			Skill::locket =>
@@ -575,7 +575,7 @@ impl<'a> SkillThing<'a> {
 				"When this creature dies, transform it into an Ash"
 			}),
 			Skill::photosynthesis =>
-				Cow::from("Gain 2:5. Unless cost was 0 or 1:0, caster reactivated"),
+				Cow::from("Gain 2:5. Unless poisoned or cost was 0 or 1:0, caster reactivated"),
 			Skill::pillar => Cow::from(format!("Gain {}:{} every turn", if self.card().element == 0 { '3' } else { '1' }, self.card().element)),
 			Skill::pillar1 => Cow::from(format!("Gain {}:{} when played", if self.card().element == 0 { '3' } else { '1' }, self.card().element)),
 			Skill::pend =>
@@ -665,7 +665,7 @@ impl<'a> SkillThing<'a> {
 			Skill::regrade =>
 				Cow::from("If target card is upgraded, it becomes unupgraded. If target card is unupgraded, it becomes upgraded. Gain 1 quanta of target card's element. Cannot target stacks"),
 			Skill::reinforce =>
-				Cow::from("Combine with target creature, giving strength, HP, & poison counters"),
+				Cow::from("Combine with another target creature, giving strength, HP, & poison counters"),
 			Skill::ren => Cow::from("Target creature gains: \"When dying instead return to owner's hand. Modified state besides this effect remains when played again.\""),
 			Skill::resetdr => Cow::from("Zero damage reduction at start of your turn"),
 			Skill::resummon => Cow::from("Target creature is summoned again, as is"),

@@ -29,3 +29,4 @@ wasm-opt = false
 opt-level = "z"
 lto = "fat"
 codegen-units = 1
+strip = true
