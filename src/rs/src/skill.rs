@@ -1855,7 +1855,7 @@ impl Skill {
 			Skill::bonesharpen => {
 				ctx.setSkill(t, Event::Cast, &[Skill::reinforce]);
 				ctx.set(t, Stat::cast, 0);
-				if card::IsOf(ctx.get(t, Stat::card), card::Skeleton) {
+				if ctx.get(c, Stat::poison) <= 0 && card::IsOf(ctx.get(t, Stat::card), card::Skeleton) {
 					ctx.set(c, Stat::casts, 1);
 				}
 			}
