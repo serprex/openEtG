@@ -58,7 +58,7 @@ where
 	T: serde::Serialize,
 {
 	if let Ok(valstr) = serde_json::to_string(val) {
-		let msg = Message::Text(valstr);
+		let msg = Message::text(valstr);
 		for sock in socks.read().await.values() {
 			sock.tx.send(msg.clone()).ok();
 		}
@@ -81,7 +81,7 @@ where
 	T: serde::Serialize,
 {
 	if let Ok(valstr) = serde_json::to_string(val) {
-		tx.send(Message::Text(valstr)).ok();
+		tx.send(Message::text(valstr)).ok();
 	}
 }
 
@@ -146,7 +146,7 @@ where
 
 async fn login_success(tx: &WsSender, user: &mut UserObject, client: &mut Client) {
 	if let Ok(userstr) = serde_json::to_string(&WsResponse::login(user)) {
-		tx.send(Message::Text(userstr)).ok();
+		tx.send(Message::text(userstr)).ok();
 	}
 
 	if user.id != -1 {
@@ -401,7 +401,7 @@ pub async fn handle_ws(
 										{
 											user.data.insert(String::new(), data);
 											if let Ok(userstr) = serde_json::to_string(&WsResponse::login(&user)) {
-												tx.send(Message::Text(userstr)).ok();
+												tx.send(Message::text(userstr)).ok();
 											}
 										}
 									}
@@ -1012,7 +1012,7 @@ pub async fn handle_ws(
 																	id: gameid,
 																	data: &gamedata,
 																}) {
-																	let pvpgive = Message::Text(pvpgive);
+																	let pvpgive = Message::text(pvpgive);
 																	tx.send(pvpgive.clone()).ok();
 																	foesock.tx.send(pvpgive).ok();
 																}
@@ -1097,7 +1097,7 @@ pub async fn handle_ws(
 														let name: &str = row.get(1);
 														if let Some(ref sockid) = rusers.get_sockid(name) {
 															if let Some(sock) = rsocks.get(sockid) {
-																sock.tx.send(Message::Text(movejson.clone())).ok();
+																sock.tx.send(Message::text(movejson.clone())).ok();
 															}
 														}
 													}
@@ -1477,7 +1477,7 @@ pub async fn handle_ws(
 											msg: &msg,
 										})
 										.ok()
-										.and_then(|msgstr| sock.tx.send(Message::Text(msgstr)).ok())
+										.and_then(|msgstr| sock.tx.send(Message::text(msgstr)).ok())
 										.is_some()
 										{
 											sent = true;
