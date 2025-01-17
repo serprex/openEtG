@@ -3019,7 +3019,9 @@ impl Skill {
 				let own = ctx.get_owner(c);
 				let thing = ctx.get_thing_mut(t);
 				if let Some(smap) = thing.skill.get_mut(Event::OwnDeath) {
-					smap.extend(&[Skill::haunted(own)]);
+					if smap.iter().all(|&s| s != Skill::haunted(own)) {
+						smap.push(Skill::haunted(own));
+					}
 				} else {
 					thing.skill.insert(Event::OwnDeath, Cow::from(Vec::from(&[Skill::haunted(own)])));
 				}

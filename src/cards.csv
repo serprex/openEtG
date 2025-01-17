@@ -312,8 +312,8 @@
 7429|Stonewall|4|1|2|9||1|owndr=stonewall|
 5430|Shard of Integrity|4|3|3|2|||integrity|
 7430|Shard of Integrity|4|3|3|1|||integrity|
-5431|Great Maul|4|0|3|7|7|60|0=grab2h+attack=maul+ownbuff=novaval+turnstart=nova0+destroy=attack|
-7431|Great Maul|4|0|3|7|8|70|0=grab2h+attack=maul+ownbuff=novaval+turnstart=nova0+destroy=attack|
+5431|Great Maul|4|0|3|6|7|60|0=grab2h+attack=maul+ownbuff=novaval+turnstart=nova0+destroy=attack|
+7431|Great Maul|4|0|3|6|8|70|0=grab2h+attack=maul+ownbuff=novaval+turnstart=nova0+destroy=attack|
 5450|Earth Pendulum|4|2|0|0|||pend|pillar+stackable+additive+charges=1
 7450|Earth Pendulum|4|2|0|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
 5500|Emerald Pillar|5|2|0|0|||pillar|pillar+stackable+additive+charges=1
