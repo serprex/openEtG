@@ -496,7 +496,7 @@ async fn handle_get_core(
 		use rand::RngCore;
 		return response::Builder::new()
 			.status(302)
-			.header(header::LOCATION, format!("/speed/{}", rand::thread_rng().next_u32()))
+			.header(header::LOCATION, format!("/speed/{}", rand::rng().next_u32()))
 			.body(Bytes::new());
 	} else {
 		return response::Builder::new().status(404).body(Bytes::new());

@@ -13,7 +13,7 @@ use bb8_postgres::tokio_postgres::{
 use futures::{SinkExt, StreamExt, TryFutureExt};
 use fxhash::{FxHashMap, FxHasher64};
 use hyper_tungstenite::tungstenite::Message;
-use rand::distributions::{Distribution, Uniform};
+use rand::distr::{Distribution, Uniform};
 use rand::{Rng, RngCore};
 use ring::pbkdf2;
 use serde_json::Value;
@@ -619,8 +619,8 @@ pub async fn handle_ws(
 								let len = row.get::<usize, i64>(0);
 								if len > 0 {
 									let (seed, idx) = {
-										let mut rng = rand::thread_rng();
-										let mut r = rng.gen::<f64>();
+										let mut rng = rand::rng();
+										let mut r = rng.random::<f64>();
 										let mut p = 0.05;
 										let p0 = 1.0 - p;
 										let mut idx = 0;
@@ -629,7 +629,7 @@ pub async fn handle_ws(
 											p *= p0;
 											idx += 1;
 										}
-										(rng.gen::<u32>(), idx)
+										(rng.random::<u32>(), idx)
 									};
 									if let Ok(row) = client.query_one("select u.name, a.deck, a.hp, a.mark, a.draw, a.code from arena a join users u on u.id = a.user_id where a.arena_id = $1 and a.user_id <> $2 order by a.\"rank\" limit 1 offset $3", &[&arenaid, &userid, &idx]).await {
 										let name: &str = row.get(0);
@@ -713,10 +713,10 @@ pub async fn handle_ws(
 								);
 							} else {
 								if role_check(UserRole::Codesmith, &tx, &client, userid).await {
-									use rand::distributions::Alphanumeric;
+									use rand::distr::Alphanumeric;
 									let mut codebin = [0u8; 8];
 									let code = {
-										let mut rng = rand::thread_rng();
+										let mut rng = rand::rng();
 										for i in 0..8 {
 											codebin[i] = rng.sample(Alphanumeric)
 										}
@@ -1002,7 +1002,7 @@ pub async fn handle_ws(
 														let gameid: i64 = pending_request.get(0);
 														if trx.execute("update match_request set accepted = true where game_id = $1 and user_id = $2", &[&gameid, &userid]).await.is_ok() {
 															let Json(mut gamedata) = pending_request.get::<usize, Json<GamesData>>(1);
-															gamedata.seed = rand::thread_rng().gen();
+															gamedata.seed = rand::rng().random();
 															gamedata.players[1].deck = deck;
 															if gamedata.seed & 1 != 0 {
 																gamedata.players.reverse();
@@ -1362,7 +1362,7 @@ pub async fn handle_ws(
 									userdata.ostreakday2 = today;
 									userdata.oracle = today;
 									let card = {
-										let rng = etg::rng::Pcg32::from(rand::thread_rng().next_u32());
+										let rng = etg::rng::Pcg32::from(rand::rng().next_u32());
 										let ocardnymph = (rng.next32() & 31) == 0;
 										let Some(card) = etg::card::OpenSet.random_card(&rng, false, |card| {
 											(card.rarity != 4) ^ ocardnymph && (card.flag() & etg::game::Flag::pillar) == 0
@@ -1520,9 +1520,8 @@ pub async fn handle_ws(
 						}
 						AuthMessage::roll { rolls, sides } => {
 							let mut sum = 0u64;
-							if sides > 0 {
-								let range = Uniform::from(1..=sides as u64);
-								let mut rng = rand::thread_rng();
+							if let Ok(range) = Uniform::try_from(1..=sides as u64) {
+								let mut rng = rand::rng();
 								for _ in 0..rolls {
 									sum = sum.saturating_add(range.sample(&mut rng));
 								}
@@ -1568,7 +1567,7 @@ pub async fn handle_ws(
 								if bound || userdata.gold >= cost {
 									let mut newcards: Cardpool = Default::default();
 									let mut rarity: usize = 1;
-									let rng = etg::rng::Pcg32::from(rand::thread_rng().next_u32());
+									let rng = etg::rng::Pcg32::from(rand::rng().next_u32());
 									for i in 0..amount {
 										while rarity - 1 < rares.len() && i == rares[rarity - 1] * bulk as u16 {
 											rarity += 1;

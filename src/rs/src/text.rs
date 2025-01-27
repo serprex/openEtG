@@ -727,7 +727,11 @@ impl<'a> SkillThing<'a> {
 			}),
 			Skill::skyblitz =>
 				Cow::from("Your airborne creatures all dive (double their strength until end of turn.) Consumes all 1:9"),
-			Skill::slime => Cow::from("Increase damage reduction by 1 when damage reduction does not prevent all damage from non-ranged attacker"),
+			Skill::slime => Cow::from(if self.upped() {
+				"Increase damage reduction by 1 when attacked by non-ranged attacker"
+			} else {
+				"Increase damage reduction by 1 when damage reduction does not prevent all damage from non-ranged attacker"
+			}),
 			Skill::slow => Cow::from("Non-ranged attackers are delayed for one turn after their attack. Delayed creatures may not attack or use active skills"),
 			Skill::snipe => Cow::from("Deal 3 damage to target creature"),
 			Skill::snowflake if ev == Event::Death => Cow::from("Whenever card dies or is destroyed, gain charge per frozen counter"),

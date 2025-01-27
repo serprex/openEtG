@@ -181,7 +181,7 @@ pub const HASH_ALGO: HashAlgo = HashAlgo::Sha512;
 impl UserObject {
 	pub fn initsalt(&mut self) {
 		let mut saltbin = [0u8; 16];
-		getrandom::getrandom(&mut saltbin).expect("Where, O entropy, is your sting?");
+		getrandom::fill(&mut saltbin).expect("Where, O entropy, is your sting?");
 		self.salt = Vec::from(&saltbin[..]);
 		self.iter = HASH_ITER;
 		self.algo = HASH_ALGO;

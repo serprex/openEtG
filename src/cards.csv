@@ -377,7 +377,7 @@
 5534|Shaman|5|4|2|4|-4|4|ownattack=hitownertwice|aquatic
 7534|Shaman|5|4|2|4|-5|5|ownattack=hitownertwice|aquatic
 5535|Slime Shield|5|1|2|4|||shield=slime+turnstart=resetdr|
-7535|Slime Shield|5|1|2|3|||shield=slime+turnstart=resetdr|
+7535|Slime Shield|5|1|2|4|||shield=slime+turnstart=resetdr|
 5550|Life Pendulum|5|2|0|0|||pend|pillar+stackable+additive+charges=1
 7550|Life Pendulum|5|2|0|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
 5600|Burning Pillar|6|2|0|0|||pillar|pillar+stackable+additive+charges=1

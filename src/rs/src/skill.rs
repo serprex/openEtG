@@ -4635,7 +4635,7 @@ impl Skill {
 				}
 			}
 			Self::slime => {
-				if data.dmg > 0 && !ctx.get(t, Flag::ranged) {
+				if (card::Upped(ctx.get(c, Stat::card)) || data.dmg > 0) && !ctx.get(t, Flag::ranged) {
 					ctx.incrStatus(c, Stat::hp, 1);
 				}
 			}
