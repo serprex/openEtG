@@ -32,10 +32,9 @@ impl Pcg32 {
 		let max = u32::MAX - u32::MAX % n;
 		loop {
 			let r = self.next32();
-			if r > max {
-				continue;
+			if r <= max {
+				return r % n;
 			}
-			return r % n;
 		}
 	}
 

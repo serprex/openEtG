@@ -8,16 +8,16 @@
     "url": "https://github.com/serprex/openEtG"
   },
   "devDependencies": {
-    "@babel/plugin-syntax-import-attributes": "^7.25.6",
+    "@babel/plugin-syntax-import-attributes": "^7.26.0",
     "@pencil.js/spritesheet": "^1.5.1",
     "babel-loader": "^9.2.1",
-    "babel-preset-solid": "^1.8.22",
+    "babel-preset-solid": "^1.9.3",
     "copy-webpack-plugin": "^12.0.2",
-    "html-webpack-plugin": "^5.6.0",
-    "prettier": "^3.3.3",
-    "solid-js": "^1.8.22",
-    "webpack": "^5.94.0",
-    "webpack-cli": "^5.1.4"
+    "html-webpack-plugin": "^5.6.3",
+    "prettier": "^3.5.1",
+    "solid-js": "^1.9.4",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
   },
   "scripts": {
     "test": "cargo test --manifest-path=./src/rs/Cargo.toml",
