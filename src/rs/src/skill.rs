@@ -1740,7 +1740,7 @@ impl Skill {
 			Self::attack => {
 				ctx.queue_attack(c, 0);
 				let nova = ctx.get_mut(c, Stat::nova);
-				*nova = nova.saturating_sub(1);
+				*nova = nova.saturating_sub(2);
 			}
 			Self::equalize => {
 				if ctx.get_kind(t) == Kind::Creature {
@@ -2720,36 +2720,38 @@ impl Skill {
 			}
 			Self::fish => {
 				let owner = ctx.get_owner(c);
-				if !ctx.get_player(owner).hand_full() {
-					if !ctx.get(t, Flag::protectdeck) {
-						let deck = ctx.get_player(t).deck.as_ref();
-						let mut foundidx = usize::MAX;
-						for (idx, card) in deck.iter().cloned().enumerate() {
-							if ctx.get(card, Flag::aquatic) {
-								foundidx = idx;
-								break;
+				for _ in 0..if ctx.has_flooding() { 2 } else { 1 } {
+					if !ctx.get_player(owner).hand_full() {
+						if !ctx.get(t, Flag::protectdeck) {
+							let deck = ctx.get_player(t).deck.as_ref();
+							let mut foundidx = usize::MAX;
+							for (idx, card) in deck.iter().cloned().enumerate() {
+								if ctx.get(card, Flag::aquatic) {
+									foundidx = idx;
+									break;
+								}
+							}
+							if foundidx != usize::MAX {
+								let lastidx = deck.len() - 1;
+								ctx.get_player_mut(t).deck_mut().swap(foundidx, lastidx);
+								let id = ctx.draw(t);
+								if id != 0 && ctx.addCard(owner, id) != -1 {
+									ctx.fx(id, Fx::StartPos(-t));
+									ctx.proc(Event::Draw, owner);
+									continue;
+								}
 							}
 						}
-						if foundidx != usize::MAX {
-							let lastidx = deck.len() - 1;
-							ctx.get_player_mut(t).deck_mut().swap(foundidx, lastidx);
-							let id = ctx.draw(t);
-							if id != 0 && ctx.addCard(owner, id) != -1 {
-								ctx.fx(id, Fx::StartPos(-t));
-								ctx.proc(Event::Draw, owner);
-								return;
-							}
-						}
-					}
-					let upped = card::Upped(ctx.get(c, Stat::card));
-					if let Some(card) = ctx.choose_iter(
-						ctx.get_cards()
+						let upped = card::Upped(ctx.get(c, Stat::card));
+						if let Some(card) = ctx.choose_iter(
+							ctx.get_cards()
 							.filter(upped)
 							.iter()
 							.filter(|card| (card.flag() & Flag::token) != 0),
-					) {
-						let id = ctx.new_thing(card.code, owner);
-						ctx.addCard(owner, id);
+						) {
+							let id = ctx.new_thing(card.code, owner);
+							ctx.addCard(owner, id);
+						}
 					}
 				}
 			}

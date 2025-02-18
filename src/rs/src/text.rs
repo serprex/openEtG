@@ -170,7 +170,7 @@ impl<'a> SkillThing<'a> {
 				Cow::from("If target creature or weapon's attack is positive, it becomes negative. Otherwise, it becomes positive"),
 			Skill::appease =>
 				Cow::from("Sacrifice target creature you own & gain 1|1. If this ability isn't used, this creature will attack its owner. This creature attacks normally the turn it's played or if it loses this ability"),
-			Skill::attack => Cow::from("Whenever a permanent is destroyed, decrease strength by 1 for rest of turn & attack"),
+			Skill::attack => Cow::from("Whenever a permanent is destroyed, decrease strength by 2 for rest of turn & attack"),
 			Skill::autoburrow =>
 				Cow::from("Until end of turn, your creatures with burrow enter play burrowed"),
 			Skill::axedraw =>
@@ -361,7 +361,7 @@ impl<'a> SkillThing<'a> {
 			Skill::firebrand => Cow::from("Last an additional turn when targeted with Tempering"),
 			Skill::firestorm(x) => Cow::from(format!("Deal {} spell damage to all of target player's creatures. Remove frozen status from damaged creatures. Removes cloak", x)),
 			Skill::firewall => Cow::from("Deals 1 damage to each non-ranged attacking creature"),
-			Skill::fish => Cow::from("Draw aquatic card from target player's deck. Draw random token if not able to draw an aquatic card"),
+			Skill::fish => Cow::from("Draw aquatic card from target player's deck. Draw random token if not able to draw an aquatic card. Activate twice if flooded"),
 			Skill::flooddeath =>
 				Cow::from("Each player's non-aquatic creatures past their first five creature slots die at the end of that player's turn"),
 			Skill::flyself =>
