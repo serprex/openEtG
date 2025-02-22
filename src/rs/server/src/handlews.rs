@@ -2,13 +2,13 @@ use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::hash::{Hash, Hasher};
 use std::num::NonZeroUsize;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use base64::prelude::*;
 use bb8_postgres::tokio_postgres::{
-	types::{Json, ToSql},
 	Client, GenericClient,
+	types::{Json, ToSql},
 };
 use futures::{SinkExt, StreamExt, TryFutureExt};
 use fxhash::{FxHashMap, FxHasher64};
@@ -18,13 +18,13 @@ use rand::{Rng, RngCore};
 use ring::pbkdf2;
 use serde_json::Value;
 use tokio::join;
-use tokio::sync::{mpsc, Mutex, MutexGuard, RwLock};
+use tokio::sync::{Mutex, MutexGuard, RwLock, mpsc};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 use std::net::ToSocketAddrs;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
-use tokio_rustls::{rustls::pki_types::ServerName, TlsConnector};
+use tokio_rustls::{TlsConnector, rustls::pki_types::ServerName};
 
 use crate::cardpool::Cardpool;
 use crate::etgutil::{decode_code, encode_code, encode_count, iterraw};
@@ -34,7 +34,7 @@ use crate::json::{
 };
 use crate::starters::ORIGINAL_STARTERS;
 use crate::users::{self, HashAlgo, Leaderboard, LegacyData, OpenData, UserObject, UserRole, Users};
-use crate::{get_day, PgPool, WsStream};
+use crate::{PgPool, WsStream, get_day};
 
 static NEXT_SOCK_ID: AtomicUsize = AtomicUsize::new(1);
 
@@ -131,7 +131,13 @@ async fn rm_role_handler<'a>(
 	m: &'a str,
 ) {
 	if role_check(role, tx, client, userid).await {
-		client.execute("delete from user_role ur using users u where ur.user_id = u.id and ur.role_id = $2 and u.name = $1", &[&m, &role]).await.ok();
+		client
+			.execute(
+				"delete from user_role ur using users u where ur.user_id = u.id and ur.role_id = $2 and u.name = $1",
+				&[&m, &role],
+			)
+			.await
+			.ok();
 	}
 }
 
@@ -639,7 +645,8 @@ pub async fn handle_ws(
 										let draw: i32 = row.get(4);
 										let code = row.get::<usize, i32>(5) as i16;
 										deck.push_str("05");
-										deck.push_str(unsafe { std::str::from_utf8_unchecked(&encode_code(etg::card::AsUpped(code, lv != 0))) });
+										let code_bytes = encode_code(etg::card::AsUpped(code, lv != 0));
+										deck.push_str(unsafe { std::str::from_utf8_unchecked(&code_bytes) });
 										sendmsg(&tx, &WsResponse::foearena { seed, name, hp, mark, draw, deck: &deck, rank: idx, lv });
 									}
 								}
@@ -984,7 +991,7 @@ pub async fn handle_ws(
 									if let Some(foesock) = socks.read().await.get(&foesockid) {
 											let foeuserid = foeuser.lock().await.id;
 											if let Ok(trx) = client.transaction().await {
-												trx.execute("delete from match_request mr1 where user_id = $1 and accepted", &[&userid]).await.ok();
+												trx.execute("lock table match_request;delete from match_request mr1 where user_id = $1 and accepted", &[&userid]).await.ok();
 												if let Ok(pending_request_maybe) = trx
 													.query_opt(
 														"select mr1.game_id, games.data \
@@ -1222,7 +1229,7 @@ pub async fn handle_ws(
 										if let Ok(trx) = client.transaction().await {
 											let g32 = g as i32;
 											let forg32 = forg.map(|g| g as i32);
-											if let (Some(ref forcardsref), Some(forg32), Some(ref foraltref)) = (&forcards, forg32, &foralt) {
+											if let (Some(forcardsref), Some(forg32), Some(foraltref)) = (&forcards, forg32, &foralt) {
 												let (Some(userdata), Some(foedata)) = (
 													user.data.get_mut(&uname), foeuser.data.get_mut(foraltref)
 												) else {

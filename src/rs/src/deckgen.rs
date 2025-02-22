@@ -467,11 +467,7 @@ impl Builder {
 	}
 
 	fn up_code(&self, code: i16) -> i16 {
-		if self.uprate > 0 {
-			card::AsUpped(code, (self.rng.upto(100) as u8) < self.uprate)
-		} else {
-			code
-		}
+		if self.uprate > 0 { card::AsUpped(code, (self.rng.upto(100) as u8) < self.uprate) } else { code }
 	}
 
 	fn add_equipment(&mut self) {

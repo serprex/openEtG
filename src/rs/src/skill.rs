@@ -9,7 +9,7 @@ use alloc::vec;
 use alloc::vec::Vec;
 use core::fmt::{self, Display, Write};
 use core::iter::once;
-use core::num::{NonZeroU32, NonZeroU8};
+use core::num::{NonZeroU8, NonZeroU32};
 
 use crate::card::{self, CardSet};
 use crate::etg;
@@ -87,11 +87,7 @@ impl TryFrom<u8> for Event {
 	type Error = ();
 
 	fn try_from(x: u8) -> Result<Self, ()> {
-		if x != 0 && x != 128 {
-			Ok(Event(unsafe { NonZeroU8::new_unchecked(x) }))
-		} else {
-			Err(())
-		}
+		if x != 0 && x != 128 { Ok(Event(unsafe { NonZeroU8::new_unchecked(x) })) } else { Err(()) }
 	}
 }
 
@@ -2047,7 +2043,7 @@ impl Skill {
 				ctx.fx(t, Fx::Clear);
 				let thing = ctx.get_thing_mut(t);
 				thing.flag.0 &= !(Flag::aflatoxin | Flag::neuro | Flag::momentum | Flag::psionic);
-				for (st, ref mut val) in thing.status.iter_mut() {
+				for (st, val) in thing.status.iter_mut() {
 					if matches!(st, Stat::poison | Stat::adrenaline | Stat::delayed | Stat::frozen) {
 						*val = 0;
 					}
@@ -2426,7 +2422,7 @@ impl Skill {
 						SkillsEntry::Occupied(e) => {
 							let mut skills = e.into_mut();
 							for sk in skills.iter_mut() {
-								if let Skill::poisonfoe(ref mut x) = sk {
+								if let Skill::poisonfoe(x) = sk {
 									*x = x.saturating_add(poison);
 									return;
 								}
@@ -2612,7 +2608,7 @@ impl Skill {
 				let thing = ctx.get_thing_mut(t);
 				if let Some(hit) = thing.skill.get_mut(Event::Hit) {
 					for sk in hit.iter_mut() {
-						if let Skill::poison(ref mut x) = sk {
+						if let Skill::poison(x) = sk {
 							*x = x.saturating_add(1);
 							return;
 						}
@@ -2745,9 +2741,9 @@ impl Skill {
 						let upped = card::Upped(ctx.get(c, Stat::card));
 						if let Some(card) = ctx.choose_iter(
 							ctx.get_cards()
-							.filter(upped)
-							.iter()
-							.filter(|card| (card.flag() & Flag::token) != 0),
+								.filter(upped)
+								.iter()
+								.filter(|card| (card.flag() & Flag::token) != 0),
 						) {
 							let id = ctx.new_thing(card.code, owner);
 							ctx.addCard(owner, id);
@@ -4052,7 +4048,9 @@ impl Skill {
 			Self::photosynthesis => {
 				ctx.fx(c, Fx::Quanta(2, etg::Life as i8));
 				ctx.spend(ctx.get_owner(c), etg::Life, -2);
-				if ctx.get(c, Stat::poison) <= 0 && ctx.get(c, Stat::cast) > if ctx.get(c, Stat::castele) == etg::Chroma { 1 } else { 0 } {
+				if ctx.get(c, Stat::poison) <= 0
+					&& ctx.get(c, Stat::cast) > if ctx.get(c, Stat::castele) == etg::Chroma { 1 } else { 0 }
+				{
 					ctx.set(c, Stat::casts, 1);
 				}
 			}
@@ -5679,7 +5677,7 @@ impl Skill {
 				}
 			}
 			Self::v_storm(dmg) => {
-				return Skill::storm(dmg).proc(ctx, c, ctx.get_foe(ctx.get_owner(c)), data)
+				return Skill::storm(dmg).proc(ctx, c, ctx.get_foe(ctx.get_owner(c)), data);
 			}
 			Self::v_swarm => {
 				let hp: i16 = ctx
@@ -5743,11 +5741,7 @@ impl Skill {
 			}
 			Self::buffdr => {
 				let shield = ctx.get_player(ctx.get_owner(c)).shield as i16;
-				if shield == 0 {
-					0
-				} else {
-					ctx.truedr(shield, 0)
-				}
+				if shield == 0 { 0 } else { ctx.truedr(shield, 0) }
 			}
 			Self::countimmbur => ctx
 				.players()

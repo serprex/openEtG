@@ -138,7 +138,7 @@ impl PlayerData {
 		self.hand[7] = 0;
 	}
 
-	pub fn hand_iter(&self) -> impl Iterator<Item = i16> {
+	pub fn hand_iter(&self) -> impl Iterator<Item = i16> + use<> {
 		self.hand.into_iter().take_while(|&id| id != 0)
 	}
 }
@@ -631,43 +631,23 @@ impl Game {
 	}
 
 	pub fn get_owner(&self, id: i16) -> i16 {
-		if id <= self.players_len() {
-			id
-		} else {
-			self.props[self.props_idx(id)].owner
-		}
+		if id <= self.players_len() { id } else { self.props[self.props_idx(id)].owner }
 	}
 
 	pub fn get_kind(&self, id: i16) -> Kind {
-		if id <= self.players_len() {
-			Kind::Player
-		} else {
-			self.props[self.props_idx(id)].kind
-		}
+		if id <= self.players_len() { Kind::Player } else { self.props[self.props_idx(id)].kind }
 	}
 
 	pub fn get_foe(&self, id: i16) -> i16 {
-		if id <= self.players_len() {
-			self.plprops[self.plprops_idx(id)].foe
-		} else {
-			0
-		}
+		if id <= self.players_len() { self.plprops[self.plprops_idx(id)].foe } else { 0 }
 	}
 
 	pub fn get_weapon(&self, id: i16) -> i16 {
-		if id <= self.players_len() {
-			self.plprops[self.plprops_idx(id)].weapon
-		} else {
-			0
-		}
+		if id <= self.players_len() { self.plprops[self.plprops_idx(id)].weapon } else { 0 }
 	}
 
 	pub fn get_shield(&self, id: i16) -> i16 {
-		if id <= self.players_len() {
-			self.plprops[self.plprops_idx(id)].shield
-		} else {
-			0
-		}
+		if id <= self.players_len() { self.plprops[self.plprops_idx(id)].shield } else { 0 }
 	}
 
 	pub fn clonegame(&self) -> Game {
@@ -1072,11 +1052,7 @@ impl Game {
 	pub fn material(&self, id: i16, kind: Option<Kind>) -> bool {
 		let ckind = self.get_kind(id);
 		(if let Some(kind) = kind {
-			if kind == Kind::Permanent {
-				ckind <= kind
-			} else {
-				ckind == kind
-			}
+			if kind == Kind::Permanent { ckind <= kind } else { ckind == kind }
 		} else {
 			ckind != Kind::Player
 		}) && (ckind == Kind::Spell || !self.get(id, Flag::immaterial | Flag::burrowed))
@@ -1785,11 +1761,7 @@ impl Game {
 		let mut dmgdata = ProcData::default();
 		dmgdata.dmg = dmg;
 		self.trigger_data(Event::Spelldmg, id, 0, &mut dmgdata);
-		if dmgdata.get(ProcData::evade) {
-			0
-		} else {
-			self.dmg(id, dmgdata.dmg)
-		}
+		if dmgdata.get(ProcData::evade) { 0 } else { self.dmg(id, dmgdata.dmg) }
 	}
 
 	pub fn dmg_die(&mut self, mut id: i16, dmg: i16, dontdie: bool) -> i16 {
@@ -1829,11 +1801,7 @@ impl Game {
 				let foe = self.get_foe(self.get_owner(id));
 				self.dmg(foe, capdmg);
 			}
-			if sosa {
-				-capdmg
-			} else {
-				capdmg
-			}
+			if sosa { -capdmg } else { capdmg }
 		}
 	}
 
@@ -2437,7 +2405,7 @@ impl Game {
 	pub fn clearStatus(&mut self, id: i16) {
 		let thing = self.get_thing_mut(id);
 		thing.flag.0 &= !(Flag::additive | Flag::cloak | Flag::stackable | Flag::tunnel);
-		for (st, ref mut val) in thing.status.iter_mut() {
+		for (st, val) in thing.status.iter_mut() {
 			if matches!(st, Stat::charges | Stat::flooding) {
 				*val = 0;
 			}

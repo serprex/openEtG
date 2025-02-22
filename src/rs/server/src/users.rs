@@ -1,11 +1,11 @@
 use std::collections::{HashMap, HashSet};
 use std::num::NonZeroUsize;
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 use bb8_postgres::tokio_postgres::{
-	types::{FromSql, Json, ToSql},
 	Client, GenericClient,
+	types::{FromSql, Json, ToSql},
 };
 use ring::constant_time::verify_slices_are_equal;
 use ring::pbkdf2;
@@ -239,7 +239,7 @@ impl Users {
 	{
 		let ruserslock = users.read().await;
 		let Users(ref rusers) = *ruserslock;
-		if let Some((ref gc, ref usersockid, ref u)) = rusers.get(name) {
+		if let Some((gc, usersockid, u)) = rusers.get(name) {
 			let user = u.lock().await;
 			return if verify_slices_are_equal(user.auth.as_bytes(), auth.as_bytes()) == Ok(()) {
 				gc.store(false, Ordering::Release);
@@ -291,7 +291,7 @@ impl Users {
 	where
 		GC: GenericClient,
 	{
-		if let Some((ref gc, _, ref user)) = self.0.get(name) {
+		if let Some((gc, _, user)) = self.0.get(name) {
 			gc.store(false, Ordering::Release);
 			Some(user.clone())
 		} else if let Some(row) = client
@@ -342,7 +342,7 @@ impl Users {
 	}
 
 	pub fn set_sockid(&mut self, name: &str, sockid: usize) {
-		if let Some((_, ref usersockid, _)) = self.0.get(name) {
+		if let Some((_, usersockid, _)) = self.0.get(name) {
 			usersockid.store(sockid, Ordering::Release);
 		}
 	}
@@ -413,7 +413,7 @@ impl Users {
 	pub async fn store(&mut self, client: &Client, socks: &AsyncSocks) {
 		if self.saveall(client).await {
 			let rsocks = socks.read().await;
-			self.0.retain(|_, (ref gc, ref sockid, _)| {
+			self.0.retain(|_, (gc, sockid, _)| {
 				NonZeroUsize::new(sockid.load(Ordering::Acquire))
 					.map(|id| rsocks.contains_key(&id))
 					.unwrap_or(false)

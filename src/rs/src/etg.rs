@@ -30,11 +30,7 @@ const AdrenalineTable: [u16; 16] = [
 
 pub fn countAdrenaline(x: i16) -> i16 {
 	let x = x.abs() as usize;
-	if x > 15 {
-		1
-	} else {
-		(AdrenalineTable[x] as i16) & 7
-	}
+	if x > 15 { 1 } else { (AdrenalineTable[x] as i16) & 7 }
 }
 
 pub fn calcAdrenaline(y: i16, dmg: i16) -> i16 {
@@ -48,11 +44,7 @@ pub fn calcAdrenaline(y: i16, dmg: i16) -> i16 {
 			0
 		} else {
 			let admg = ((AdrenalineTable[absdmg] as u32) >> (y * 3) & 7) as i16;
-			if dmg < 0 {
-				-admg
-			} else {
-				admg
-			}
+			if dmg < 0 { -admg } else { admg }
 		}
 	}
 }

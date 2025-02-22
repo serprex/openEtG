@@ -43,11 +43,7 @@ pub struct Card {
 
 impl Cards {
 	pub fn get(&self, code: i16) -> &'static Card {
-		if let Some(card) = self.try_get(code) {
-			card
-		} else {
-			panic!("Unknown code: {}", code)
-		}
+		if let Some(card) = self.try_get(code) { card } else { panic!("Unknown code: {}", code) }
 	}
 
 	pub fn try_get(&self, code: i16) -> Option<&'static Card> {
@@ -63,11 +59,7 @@ impl Cards {
 
 	pub fn filter(&self, upped: bool) -> &'static [Card] {
 		let pivot = self.data.len() / 2;
-		if upped {
-			&self.data[pivot..]
-		} else {
-			&self.data[..pivot]
-		}
+		if upped { &self.data[pivot..] } else { &self.data[..pivot] }
 	}
 
 	pub fn random_card<Ffilt>(&self, rng: &Pcg32, upped: bool, ffilt: Ffilt) -> Option<&'static Card>
@@ -147,11 +139,7 @@ pub const fn AsUpped(code: i16, upped: bool) -> i16 {
 }
 
 pub const fn AsShiny(code: i16, shiny: bool) -> i16 {
-	if shiny {
-		code | 0x4000
-	} else {
-		code & 0x3fff
-	}
+	if shiny { code | 0x4000 } else { code & 0x3fff }
 }
 
 pub const fn cardSetCards(set: CardSet) -> &'static Cards {

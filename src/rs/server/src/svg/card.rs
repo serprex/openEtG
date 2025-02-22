@@ -61,11 +61,8 @@ pub fn card(code: i16) -> Option<String> {
 		result.push_str("class='shiny' ");
 	}
 	result.push_str("src='/Cards/");
-	result.push_str(unsafe {
-		std::str::from_utf8_unchecked(&encode_code(
-			code + if card::AsShiny(code, false) < 5000 { 4000 } else { 0 },
-		))
-	});
+	let code_bytes = encode_code(code + if card::AsShiny(code, false) < 5000 { 4000 } else { 0 });
+	result.push_str(unsafe { std::str::from_utf8_unchecked(&code_bytes) });
 	result.push_str(".webp' style='position:absolute;top:-130px;left:0px'/>");
 	let mut text = etg::text::rawCardText(cards, card).replace('&', "&amp;");
 	let colons = text.rmatch_indices(':').map(|m| m.0).collect::<Vec<_>>();
@@ -117,6 +114,11 @@ pub fn card(code: i16) -> Option<String> {
 		)
 		.ok();
 	}
-	write!(result, "<span class='ico t{}' style='position:absolute;right:2px;top:-130px'></span></p></foreignObject></svg>", card.kind as i32).ok();
+	write!(
+		result,
+		"<span class='ico t{}' style='position:absolute;right:2px;top:-130px'></span></p></foreignObject></svg>",
+		card.kind as i32
+	)
+	.ok();
 	Some(result)
 }

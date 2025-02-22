@@ -9,13 +9,13 @@ use std::time::SystemTime;
 use http_body_util::Full;
 use httpdate::HttpDate;
 use hyper::body::Bytes;
-use hyper::http::{self, header, response, HeaderValue, Response};
+use hyper::http::{self, HeaderValue, Response, header, response};
 
 use etg::card;
 
 use crate::etgutil::{decode_code, encode_code};
 use crate::handlews::AsyncUsers;
-use crate::{svg, PgPool};
+use crate::{PgPool, svg};
 
 #[derive(Clone, Copy)]
 pub enum Encoding {

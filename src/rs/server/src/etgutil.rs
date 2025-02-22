@@ -26,11 +26,7 @@ pub fn encode_code(code: i16) -> [u8; 3] {
 }
 
 pub fn encode_count(count: u32) -> [u8; 2] {
-	if count >= 1023 {
-		[b'v', b'v']
-	} else {
-		[digit32((count / 32) as i16), digit32(count as i16)]
-	}
+	if count >= 1023 { [b'v', b'v'] } else { [digit32((count / 32) as i16), digit32(count as i16)] }
 }
 
 pub fn iterraw<'a>(deck: &'a [u8]) -> impl Iterator<Item = (i16, u16)> + 'a {

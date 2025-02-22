@@ -2,7 +2,7 @@
 name = "etg-server"
 version = "0.1.0"
 authors = ["serprex"]
-edition = "2021"
+edition = "2024"
 description = "openEtG server"
 license = "MIT"
 repository = "https://github.com/serprex/openEtG"

@@ -310,7 +310,9 @@ fn main() {
 	let gamers = fs::read_to_string("src/game.rs").expect("failed to read game.rs");
 
 	let mut enums = Enums::default();
-	let mut source = String::from("#![no_std]\n#![allow(non_upper_case_globals)]\nuse crate::card::{Card,CardSet,Cards};use crate::game::{Flag,Fx,Kind,Stat};use crate::skill::{Event,Skill};\n");
+	let mut source = String::from(
+		"#![no_std]\n#![allow(non_upper_case_globals)]\nuse crate::card::{Card,CardSet,Cards};use crate::game::{Flag,Fx,Kind,Stat};use crate::skill::{Event,Skill};\n",
+	);
 
 	source.push_str("pub fn id_stat(s:Stat)->i32{match s{\n");
 	let gamestat = subsource(&gamers, "pub enum Stat {\n");

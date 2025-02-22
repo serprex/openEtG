@@ -228,11 +228,7 @@ fn eval_skill(
 			Skill::brew => 4 * PREC,
 			Skill::brokenmirror => {
 				let shield = ctx.get_shield(ctx.get_foe(ctx.get_owner(c)));
-				if shield == 0 || !ctx.get(shield, Flag::reflective) {
-					2 * PREC
-				} else {
-					-3 * PREC
-				}
+				if shield == 0 || !ctx.get(shield, Flag::reflective) { 2 * PREC } else { -3 * PREC }
 			}
 			Skill::bubbleclear => 3 * PREC,
 			Skill::bugpoison => 2 * PREC,
@@ -916,11 +912,7 @@ fn estimate_damage(ctx: &Game, id: i16, freedom: i32, wall: &mut Wall) -> i32 {
 			}
 		}
 	}
-	if ctx.get(foe, Stat::sosa) == 0 {
-		atk
-	} else {
-		-atk
-	}
+	if ctx.get(foe, Stat::sosa) == 0 { atk } else { -atk }
 }
 
 fn evalthing(

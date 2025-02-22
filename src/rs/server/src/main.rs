@@ -17,21 +17,20 @@ use std::time::{Duration, SystemTime};
 
 use http_body_util::Full;
 use hyper_tungstenite::{
-	hyper::{
-		self,
-		body::{Bytes, Incoming},
-		Request, Response,
-	},
 	WebSocketStream,
+	hyper::{
+		self, Request, Response,
+		body::{Bytes, Incoming},
+	},
 };
 use hyper_util::rt::TokioIo;
-use tokio::signal::unix::{signal, SignalKind};
+use tokio::signal::unix::{SignalKind, signal};
 use tokio_rustls::{
-	rustls::{ClientConfig, RootCertStore},
 	TlsConnector,
+	rustls::{ClientConfig, RootCertStore},
 };
 
-use bb8_postgres::{bb8::Pool, tokio_postgres, PostgresConnectionManager};
+use bb8_postgres::{PostgresConnectionManager, bb8::Pool, tokio_postgres};
 
 use crate::handleget::AsyncCache;
 use crate::handlews::{AsyncSocks, AsyncUsers};
