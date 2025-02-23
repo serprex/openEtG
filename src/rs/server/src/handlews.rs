@@ -991,7 +991,7 @@ pub async fn handle_ws(
 									if let Some(foesock) = socks.read().await.get(&foesockid) {
 											let foeuserid = foeuser.lock().await.id;
 											if let Ok(trx) = client.transaction().await {
-												trx.execute("lock table match_request;delete from match_request mr1 where user_id = $1 and accepted", &[&userid]).await.ok();
+												trx.execute("delete from match_request mr1 where user_id = $1 and accepted", &[&userid]).await.ok();
 												if let Ok(pending_request_maybe) = trx
 													.query_opt(
 														"select mr1.game_id, games.data \

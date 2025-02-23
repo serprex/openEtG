@@ -78,7 +78,7 @@ const sockEvents = {
 					text.push(data.msg.slice(lastindex, reres.index));
 				let notlink = false;
 				for (let i = 2; i < reres[0].length; i += 5) {
-					const code = parseInt(reres[0].substr(i, 3), 32);
+					const code = parseInt(reres[0].substring(i, i + 3), 32);
 					if (
 						!Cards.Codes[code] &&
 						!OrigCards.Codes[code] &&
@@ -303,13 +303,12 @@ export function sendChallenge(foe, orig = false, deckcheck = true) {
 		store.chatMsg('Invalid deck', 'System');
 		return;
 	}
-	const msg = {
+	userEmit('foewant', {
 		f: foe,
 		deck: orig ? deck : undefined,
 		set: orig ? 'Original' : undefined,
 		deckcheck,
-	};
-	userEmit('foewant', msg);
+	});
 	pvp = foe;
 }
 export function setCmds(c) {

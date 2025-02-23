@@ -25,8 +25,8 @@ export function toTrueMarkSuffix(n) {
 }
 export function* iterraw(deck) {
 	for (let i = 0; i < deck.length; i += 5) {
-		const count = parseInt(deck.substr(i, 2), 32),
-			code = parseInt(deck.substr(i + 2, 3), 32);
+		const count = parseInt(deck.substring(i, i + 2), 32),
+			code = parseInt(deck.substring(i + 2, i + 5), 32);
 		yield [code, count];
 	}
 }
@@ -47,7 +47,7 @@ export function count(deck, code) {
 export function decklength(deck) {
 	let r = 0;
 	for (let i = 0; i < deck.length; i += 5) {
-		r += parseInt(deck.substr(i, 2), 32);
+		r += parseInt(deck.substring(i, i + 2), 32);
 	}
 	return r;
 }
@@ -75,9 +75,9 @@ export function deck2pool(deck, pool = []) {
 export function addcard(deck, card, x = 1) {
 	deck ||= '';
 	for (let i = 0; i < deck.length; i += 5) {
-		const code = parseInt(deck.substr(i + 2, 3), 32);
+		const code = parseInt(deck.substring(i + 2, i + 5), 32);
 		if (code === card) {
-			const oldcount = parseInt(deck.substr(i, 2), 32);
+			const oldcount = parseInt(deck.substring(i, i + 2), 32);
 			let count = oldcount + x;
 			if (oldcount === 1023 && count >= 1023) continue;
 			while (count >= 1023) {
