@@ -1,14 +1,12 @@
-import * as store from './store.jsx';
-import * as sock from './sock.jsx';
-import { randint, shuffle } from './util.js';
-import { decodedeck, encodeCode } from './etgutil.js';
 import Cards from './Cards.js';
+import { decodedeck, encodeCode } from './etgutil.js';
 import Game from './Game.js';
+import * as sock from './sock.jsx';
+import * as store from './store.jsx';
+import { randint, shuffle } from './util.js';
 
 export function requireQuest(quest, user) {
-	return (quest.questdependencies ?? []).every(
-		dependency => user.quests[dependency],
-	);
+	return (quest.depends ?? []).every(dependency => user.quests[dependency]);
 }
 
 export const quarks = {
@@ -221,7 +219,7 @@ export const quarks = {
 		wintext:
 			'The creatures seemed very afraid of something, like there was something in the forest that did not belong there.',
 		info: 'They seemed to come from the forest, so you go inside.',
-		questdependencies: ['necromancer'],
+		depends: ['necromancer'],
 	},
 	necromancer3: {
 		deck: '0553104535047170d52g0652m0352l0552t018pk',
@@ -232,7 +230,7 @@ export const quarks = {
 		wintext:
 			'You defeated the evil necromancer and stopped his undead from spreading through the land!',
 		info: 'Deep inside the forest you find the necromancer responsible for filling the lands with undead!',
-		questdependencies: ['necromancer2'],
+		depends: ['necromancer2'],
 	},
 	spirit: {
 		deck: '0c606045um045us045v3025uu025v2025va018pi',
@@ -256,7 +254,7 @@ export const quarks = {
 		'Only the worthy may pass'...You state that your only intention is to destroy the portal not pass through it.\
 		'Only the incubus key can close this portal.' The guardian glowers at you darkly.\
 		If you wish to find it you must first pass my test.' The guardian attacks!",
-		questdependencies: ['spirit'],
+		depends: ['spirit'],
 	},
 	spirit3: {
 		deck: '02530015340a542044vq034vk024vv014vo0452v0252k0352n018pj',
@@ -273,7 +271,7 @@ export const quarks = {
 		Far off, in the distant center of the dark and brooding expanse, stands an ominous fortress.\
 		The gravel road before you winds its way toward it like a great serpent slithering its way through a desolate bog.\
 		A lone maiden blocks your path. In a voice like claws upon glass she shrieks 'you do not belong here... DIE!'",
-		questdependencies: ['spirit2'],
+		depends: ['spirit2'],
 	},
 	spirit4: {
 		deck: '065ot025og065on0a6rb067n6018po',
@@ -290,7 +288,7 @@ export const quarks = {
 		info: "As you continue up the road, a foul stench assaults your nose... Then you hear a poping sound.\
 		To the side of the road a sign reads 'Danger, swamp gas is explosive. Travelers beware'\
 		You decide that NOW would be a good time to run!... But a flock of giant angry birds is in your way",
-		questdependencies: ['spirit3'],
+		depends: ['spirit3'],
 	},
 	bombmaker: {
 		deck: '046220f5t2065s50680d018pu',
@@ -333,7 +331,7 @@ export const quarks = {
 		wintext:
 			'You defeat the creatures that were attacking, and can finally take the rare weapon that was hiding in the cave; a Trident! But before you can grab it, you hear strange sounds behind you...',
 		info: 'You enter the cave, it is dark and icy. Suddenly you meet some creatures there, which promptly attacks you. You seem to glimpse the rare weapon right behind them though...',
-		questdependencies: ['icecave'],
+		depends: ['icecave'],
 	},
 	icecave3: {
 		deck: '054sa0a4sc025i5015im025iq015ic025il025ii025ie035ig018pp',
@@ -342,7 +340,7 @@ export const quarks = {
 		wintext:
 			'After defeating the Guardians, you quickly get out of the cave, ready to head home as fast as you can...',
 		info: "You look behind you and see a range of different creatures, which you can swear were not here before. 'We are the Guardians of this Cave, and we will not allow you to take our treasure!'",
-		questdependencies: ['icecave2'],
+		depends: ['icecave2'],
 	},
 	icecave4: {
 		deck: '0f5i4035ib025ih025i9025ig047gt018pp',
@@ -352,7 +350,7 @@ export const quarks = {
 			'You finally get though the storm and reach the safety of the city. You got the weapon you were looking for, and some other ice souvenirs as well.',
 		cardreward: '025i8015ic',
 		info: 'The storm you got past while heading here is still raging, and it seems to have gotten a lot worse.',
-		questdependencies: ['icecave3'],
+		depends: ['icecave3'],
 	},
 	inventor: {
 		deck: '03561065950d55k0655m0255s018pm',
@@ -369,7 +367,7 @@ export const quarks = {
 		wintext:
 			'Defeating the machines that were terrorizing the village, you head inside to face the inventor.',
 		info: 'In front of the house some machines seems to stand guards. These must be the machines that were attacking the village!',
-		questdependencies: ['inventor'],
+		depends: ['inventor'],
 	},
 	inventor3: {
 		deck: '0d5de065c5065fh065f7018po',
@@ -379,9 +377,9 @@ export const quarks = {
 			"Even with his inventions, you manage to defeat him. 'No, please, spare me, I will never hurt anyone again!' he cries. You agree to let him go, but only if he leaves the area and never comes back. You see him walking away and can't help but thinking that you haven't seen the last of him... On your way out of the house, you find some of his inventions and decide that they can be useful!",
 		cardreward: '03561025fh025ii',
 		info: "'All I wanted was to test the offensive capabilities of my machines. But now when you are here, I can test this on you!' says the crazy inventor and laughs.",
-		questdependencies: ['inventor2'],
+		depends: ['inventor2'],
 	},
-	//Proving Grounds
+	// Proving Grounds
 	pgdragon: {
 		deck: '0g4sa014vf0152h0155o0158r015bt015f2015id015la015op015rm015ul0661t018pu',
 		name: 'Dragon Tamer',
@@ -401,20 +399,11 @@ export const quarks = {
 		wintext:
 			'You have proved your worth for the Master of Arms, and he gives you one of his rare weapons.',
 		/* prettier-ignore */
-		choicerewards: [
-			5109, 5124,
-			5210, 5222,
-			5308, 5324,
-			5407, 5423,
-			5509, 5523,
-			5607, 5621,
-			5708, 5723,
-			5809, 5822,
-			5909, 5924,
-			6008, 6025,
-			6107, 6126,
-			6206, 6223,
-		],
+		choicerewards : [
+              5109, 5124, 5210, 5222, 5308, 5324, 5407, 5423,
+              5509, 5523, 5607, 5621, 5708, 5723, 5809, 5822,
+              5909, 5924, 6008, 6025, 6107, 6126, 6206, 6223,
+            ],
 		info: 'Fight the Master of Arms at the Proving Grounds!',
 	},
 	pgshard: {
@@ -457,7 +446,7 @@ export const quarks = {
 		info: 'Fight the Eunuch at the Proving Grounds!',
 	},
 
-	//Elemental Temples
+	// Elemental Temples
 	elementalshrine: {
 		deck: '015990c4sa014vi014vh0152m0152o0155t0155n0158p015c8015c7015f3015fb015ia015i6015lp015lr015on015ou015ri015rr015v1015ut0162a0161q018pi',
 		name: 'Shrine Guardian',
@@ -473,7 +462,7 @@ export const quarks = {
 		cardreward: '0380a',
 		wintext:
 			'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
-		questdependencies: ['elementalshrine'],
+		depends: ['elementalshrine'],
 		info: 'As you approach the Aether Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 	},
 	airtemple: {
@@ -483,7 +472,7 @@ export const quarks = {
 		cardreward: '037n1',
 		wintext:
 			'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
-		questdependencies: ['elementalshrine'],
+		depends: ['elementalshrine'],
 		info: 'As you approach the Air Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 	},
 	darktemple: {
@@ -493,7 +482,7 @@ export const quarks = {
 		cardreward: '037tc',
 		wintext:
 			'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
-		questdependencies: ['elementalshrine'],
+		depends: ['elementalshrine'],
 		info: 'As you approach the Dark Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 	},
 	deathtemple: {
@@ -503,7 +492,7 @@ export const quarks = {
 		cardreward: '03718',
 		wintext:
 			'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
-		questdependencies: ['elementalshrine'],
+		depends: ['elementalshrine'],
 		info: 'As you approach the Death Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 	},
 	earthtemple: {
@@ -513,7 +502,7 @@ export const quarks = {
 		cardreward: '0377l',
 		wintext:
 			'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
-		questdependencies: ['elementalshrine'],
+		depends: ['elementalshrine'],
 		info: 'As you approach the Earth Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 	},
 	entropytemple: {
@@ -523,7 +512,7 @@ export const quarks = {
 		cardreward: '036u2',
 		wintext:
 			'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
-		questdependencies: ['elementalshrine'],
+		depends: ['elementalshrine'],
 		info: 'As you approach the Entropy Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 	},
 	firetemple: {
@@ -533,7 +522,7 @@ export const quarks = {
 		cardreward: '037dk',
 		wintext:
 			'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
-		questdependencies: ['elementalshrine'],
+		depends: ['elementalshrine'],
 		info: 'As you approach the Fire Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 	},
 	gravitytemple: {
@@ -543,7 +532,7 @@ export const quarks = {
 		cardreward: '0374k',
 		wintext:
 			'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
-		questdependencies: ['elementalshrine'],
+		depends: ['elementalshrine'],
 		info: 'As you approach the Gravity Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 	},
 	lifetemple: {
@@ -553,7 +542,7 @@ export const quarks = {
 		cardreward: '037ai',
 		wintext:
 			'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
-		questdependencies: ['elementalshrine'],
+		depends: ['elementalshrine'],
 		info: 'As you approach the Life Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 	},
 	lighttemple: {
@@ -563,7 +552,7 @@ export const quarks = {
 		cardreward: '037jv',
 		wintext:
 			'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
-		questdependencies: ['elementalshrine'],
+		depends: ['elementalshrine'],
 		info: 'As you approach the Light Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 	},
 	timetemple: {
@@ -573,7 +562,7 @@ export const quarks = {
 		cardreward: '037q4',
 		wintext:
 			'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
-		questdependencies: ['elementalshrine'],
+		depends: ['elementalshrine'],
 		info: 'As you approach the Time Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 	},
 	watertemple: {
@@ -583,7 +572,7 @@ export const quarks = {
 		cardreward: '037go',
 		wintext:
 			'As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.',
-		questdependencies: ['elementalshrine'],
+		depends: ['elementalshrine'],
 		info: 'As you approach the Water Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians.',
 	},
 	chromatemple: {
@@ -595,7 +584,7 @@ export const quarks = {
 		rewardamount: 2,
 		wintext:
 			'You have done it. You have completed the battle of the temples. A quest which took you all over the world. The chroma elemental looks at you, pleased. He knows how long it took to get here and he knows how hard it was to win. He is proud of you. As a reward, he offers you a choice of his finest possessions.',
-		questdependencies: [
+		depends: [
 			'aethertemple',
 			'airtemple',
 			'darktemple',
@@ -643,6 +632,138 @@ export const quarks = {
 		info: 'The AI has taken control of Serprex’s account and gone berserk. It has a power beyond a demigod!',
 		wintext:
 			'You defeat the AI menace and restore Serprex’s account to their rightful place. Phew!',
+	},
+	cream1: {
+		deck: '06598045og035ov0577e06779067mt018pm',
+		name: 'Setting up',
+		hp: 150,
+		markpower: 2,
+		drawpower: 1,
+		info: 'The CEO offers you a job selling ice cream as a roaming bike vendor. Will you accept the job in hopes for a day of big earnings?',
+		wintext:
+			'Fog, potholes, and a few ants slowed your preparations but your vending stall is all set for business.',
+	},
+	cream2: {
+		deck: '065s5015ur065vg057ri057qn077t4057tr027u4037u5018pt',
+		name: 'Thieves',
+		hp: 150,
+		markpower: 2,
+		drawpower: 1,
+		info: "Potential customers approach but they don't look like they’re about to buy ice cream.",
+		wintext: 'Clearly, you can handle small time criminals.',
+		depends: ['cream1'],
+	},
+	cream3: {
+		deck: '024vl064vu015fb086ts056u3016um027dp027dm027ea027do018ps',
+		name: 'Angry moms',
+		hp: 150,
+		markpower: 2,
+		drawpower: 1,
+		info: 'Rowdy children snatch fudgesicles and polar bars while you are distracted. Their mommas nearby think you gave it to them. They are not happy.',
+		wintext: 'Those geese had a lot of odd looking kids.',
+		depends: ['cream2'],
+	},
+	cream4: {
+		deck: '055940574i067450b7780678q04785018pl',
+		name: 'Steep hill',
+		hp: 150,
+		markpower: 2,
+		drawpower: 1,
+		info: "There's a great spot to set up shop on that nearby hill, but it sure is steep.",
+		wintext: "You've made it up to the hill with calves on fire.",
+		depends: ['cream3'],
+	},
+	cream5: {
+		deck: '045fr067f2017n2027q0027ri057qn067qs017qh037qv018ps',
+		name: 'Scorching temps',
+		hp: 150,
+		markpower: 2,
+		drawpower: 1,
+		info: 'The hill is scorching hot. Head to a cool area where potential customers may be waiting for refreshments.',
+		wintext:
+			'You cool off in a shady spot. Potential customers look welcomingly at your stall.',
+		depends: ['cream4'],
+	},
+	cream6: {
+		deck: '0252j035c6025c9015ca076rv046r1047b4027ki017k2027mt017n2027n8027th027t7018pn',
+		name: 'Bugs',
+		hp: 150,
+		markpower: 2,
+		drawpower: 1,
+		info: 'A long line of customers form but oh no! Some of your stock melted and attracted BUGS!',
+		wintext: 'Bugs begone. But the customers have left as well',
+		depends: ['cream5'],
+	},
+	cream7: {
+		deck: '044vi06507026u7057ms067mt047nj027mu017n5017mv018pj',
+		name: 'Windy chaos',
+		hp: 150,
+		markpower: 2,
+		drawpower: 1,
+		info: 'Just as you open your vending stand  the winds pick up and wreak havoc.',
+		wintext: 'You break wind and order is regained.',
+		depends: ['cream6'],
+	},
+	cream8: {
+		deck: '035f6035ic096ru0674j0274p017nf067n6018pl',
+		name: 'After the Storm',
+		hp: 150,
+		markpower: 2,
+		drawpower: 1,
+		info: 'The windstorm has left debris and hidden dangers. Be careful.',
+		wintext: 'Let’s find a safer area to sell ice cream.',
+		depends: ['cream7'],
+	},
+	cream9: {
+		deck: '035cg015lu096rv0271r0171n037ac017b2027hc027h0017k8017kb047t7018pp',
+		name: 'Ambulance',
+		hp: 150,
+		markpower: 2,
+		drawpower: 1,
+		info: "An ambulance approaches with blaring sirens. You're in their way and viewed as a threat.",
+		wintext: 'Better not get on the bad side of healthcare workers.',
+		depends: ['cream8'],
+	},
+	cream10: {
+		deck: '0562g087jo077la067kd037km027kl057k6027k202813018pu',
+		name: 'Lullaby',
+		hp: 150,
+		markpower: 2,
+		drawpower: 1,
+		info: 'A mother is singing a lullaby to her baby. You fight the urge to sleep.',
+		wintext: 'You stay awake and turn on upbeat music',
+		depends: ['cream9'],
+	},
+	cream11: {
+		deck: '047t4047um067u2047tc017tk027th027u4017t9067u1018pt',
+		name: 'Dark Waters',
+		hp: 150,
+		markpower: 2,
+		drawpower: 1,
+		info: "Black waters surround you. These customers don't want ice cream, they want your flesh.",
+		wintext: 'The water levels finally drop.',
+		depends: ['cream10'],
+	},
+	cream12: {
+		deck: '066rk017dg017f2057dh027dk047dm067dv017dj047n2018po',
+		name: 'Big Tip',
+		hp: 150,
+		markpower: 2,
+		drawpower: 2,
+		info: 'A customer buys an ice cream and says they’re leaving you a big tip.',
+		wintext: 'You wonder if it’s worth being an ice cream biker after all.',
+		depends: ['cream11'],
+	},
+	cream13: {
+		deck: '0a6s0026uo016u8016un0274s02750017h7057n2027q80180v0281401813018pi',
+		name: 'CEO Evaluation',
+		hp: 200,
+		markpower: 3,
+		drawpower: 2,
+		info: 'The CEO checks in on you and is displeased by the low sales. They move to plan b: turning you into their eternal minion. This is no joke! Fight for your life.',
+		wintext:
+			"The CEO is defeated. You don't collect any pay, but you keep the bike and sweet treats. Oh, and your last customer orders an ice cream sandwich. They give you a nice tip.",
+		depends: ['cream12'],
 	},
 };
 for (const key in quarks) {
@@ -725,6 +846,24 @@ export const root = {
 		{
 			name: 'AI Takeover',
 			children: ['ai1', 'ai2', 'ai3'],
+		},
+		{
+			name: 'Ice Cream Biker',
+			children: [
+				'cream1',
+				'cream2',
+				'cream3',
+				'cream4',
+				'cream5',
+				'cream6',
+				'cream7',
+				'cream8',
+				'cream9',
+				'cream10',
+				'cream11',
+				'cream12',
+				'cream13',
+			],
 		},
 	],
 };
