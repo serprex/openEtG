@@ -469,6 +469,7 @@ fn eval_skill(
 			Skill::integrity | Skill::v_integrity => 4 * PREC,
 			Skill::jelly => 5 * PREC,
 			Skill::jetstream => 5 * (PREC / 2),
+			Skill::kindle => PREC / 2,
 			Skill::lightning => 6 * PREC,
 			Skill::liquid => 5 * PREC,
 			Skill::livingweapon => 2 * PREC,
@@ -565,7 +566,7 @@ fn eval_skill(
 			}
 			Skill::protectonce => 2 * PREC,
 			Skill::protectall => 4 * PREC,
-			Skill::purify => 2 * PREC,
+			Skill::purify(x) => 2 * PREC + x as i32,
 			Skill::quanta(_) => PREC / 10,
 			Skill::quint => 6 * PREC,
 			Skill::quinttog => 7 * PREC,

@@ -831,7 +831,7 @@ impl Game {
 				Skill::firebolt => {
 					format!(
 						"{}",
-						3 + (self.get_quanta(self.get_owner(c), etg::Fire) as i16
+						2 + (self.get_quanta(self.get_owner(c), etg::Fire) as i16
 							- self.get(c, Stat::cost))
 							/ 4
 					)
@@ -2721,9 +2721,16 @@ impl Game {
 				}
 			}
 			GameMove::Mulligan => {
-				let handlen = self.get_player(self.turn).hand_len();
-				self.fx(self.turn, Fx::Sfx(Sfx::mulligan));
-				self.drawhand(self.turn, handlen - 1);
+				let player = self.get_player(self.turn);
+				let mut handlen = usize::MAX;
+				for c in player.hand_iter() {
+					handlen = handlen.wrapping_add(1);
+					self.trigger(Event::Mulligan, c, self.turn);
+				}
+				if handlen != usize::MAX {
+					self.fx(self.turn, Fx::Sfx(Sfx::mulligan));
+					self.drawhand(self.turn, handlen);
+				}
 			}
 			GameMove::Foe(t) => {
 				self.get_player_mut(self.turn).foe = t;
