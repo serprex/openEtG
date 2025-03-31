@@ -7,8 +7,7 @@ use bb8_postgres::tokio_postgres::{
 	Client, GenericClient,
 	types::{FromSql, Json, ToSql},
 };
-use ring::constant_time::verify_slices_are_equal;
-use ring::pbkdf2;
+use aws_lc_rs::{pbkdf2, constant_time::verify_slices_are_equal};
 use serde::{Deserialize, Serialize};
 use tokio::sync::{Mutex, RwLock};
 

@@ -10,9 +10,9 @@
   "devDependencies": {
     "@babel/plugin-syntax-import-attributes": "^7.26.0",
     "@pencil.js/spritesheet": "^1.5.1",
-    "babel-loader": "^9.2.1",
+    "babel-loader": "^10.0.0",
     "babel-preset-solid": "^1.9.3",
-    "copy-webpack-plugin": "^12.0.2",
+    "copy-webpack-plugin": "^13.0.0",
     "html-webpack-plugin": "^5.6.3",
     "prettier": "^3.5.1",
     "solid-js": "^1.9.4",
