@@ -98,8 +98,8 @@
 3209|Improved Plague|2|3|17|2|||v_plague|
 1210|Arsenic|2|0|6|2|2|7|hit=poison 1|poisonous+nocturnal
 3210|Arsenic|2|0|18|2|4|7|hit=poison 1|poisonous+nocturnal
-1211|Bone Wall|2|1|3|7|||shield=blockwithcharge+death=gaincharge2|stackable+charges=7
-3211|Bone Wall|2|1|17|5|||shield=blockwithcharge+death=gaincharge2|stackable+charges=7
+1211|Bone Wall|2|1|3|7|||shield=blockwithcharge+death=gaincharge 2|stackable+charges=7
+3211|Bone Wall|2|1|17|5|||shield=blockwithcharge+death=gaincharge 2|stackable+charges=7
 1212|Aflatoxin|2|3|3|6|||aflatoxin|
 3212|Aflatoxin|2|3|17|5|||aflatoxin|
 1213|Mummy|2|4|2|4|5|3||nocturnal
@@ -272,8 +272,8 @@
 3704|Ice Lance|7|3|17|1|||v_icebolt 1|
 1705|Ice Shield|7|1|3|6||1|shield=v_cold|
 3705|Permafrost Shield|7|1|17|7||2|shield=v_cold|
-1706|Purify|7|3|2|2|||purify|
-3706|Purify|7|3|17|1|||purify|
+1706|Purify|7|3|2|2|||purify 2|
+3706|Purify|7|3|17|1|||purify 2|
 1707|Arctic Squid|7|4|8|3|1|2|2=freeze 3|aquatic
 3707|Arctic Octopus|7|4|18|3|1|2|2=freeze 4|aquatic
 1708|Trident|7|0|6|3|4|9|3:4=earthquake 3|aquatic

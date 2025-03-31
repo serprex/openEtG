@@ -144,8 +144,8 @@
 7209|Plague|2|3|2|2|||plague|
 5210|Arsenic|2|0|3|2|2|7|hit=poison 1|poisonous+nocturnal
 7210|Arsenic|2|0|3|2|4|7|hit=poison 1|poisonous+nocturnal
-5211|Bone Wall|2|1|2|7|||shield=blockwithcharge+death=gaincharge2|stackable+charges=7
-7211|Bone Wall|2|1|2|5|||shield=blockwithcharge+death=gaincharge2|stackable+charges=7
+5211|Bone Wall|2|1|2|7|||shield=blockwithcharge+death=gaincharge 1|stackable+charges=7
+7211|Bone Wall|2|1|2|6|||shield=blockwithcharge+death=gaincharge 2|stackable+charges=7
 5212|Aflatoxin|2|3|2|5|||aflatoxin|
 7212|Aflatoxin|2|3|2|4|||aflatoxin|
 5213|Mummy|2|4|1|4|5|3|prespell=mummy|nocturnal
@@ -169,7 +169,7 @@
 5222|Spite|2|0|3|1|2||hit=deadalive|nocturnal
 7222|Spite|2|0|3|1|3||hit=deadalive|nocturnal
 5223|Infected|2|4|2|5|8|6||poison=3+poisonous+golem+nocturnal
-7223|Infected|2|4|2|4|8|8||poison=4+poisonous+golem+nocturnal
+7223|Infected|2|4|2|4|8|7||poison=4+poisonous+golem+nocturnal
 5224|Shtriga|2|4|2|6|6|3|2:11=feed+turnstart=shtriga|nocturnal+poison=1
 7224|Shtriga|2|4|2|6|8|3|2:11=feed+turnstart=shtriga|nocturnal+poison=1
 5225|Envenom|2|3|1|3|||envenom|
@@ -228,8 +228,8 @@
 7319|Blob|3|4|1|1|1|1|0=reinforce|token
 5320|Amber Nymph|3|4|4|10|1|2|3=blackhole|
 7320|Gravity Nymph|3|4|4|10|1|4|3=blackhole|
-5321|Debris Barricade|3|1|2|7|||shield=blockwithcharge+destroy=gaincharge2|stackable+charges=7
-7321|Debris Barricade|3|1|2|5|||shield=blockwithcharge+destroy=gaincharge2|stackable+charges=7
+5321|Debris Barricade|3|1|2|6|||shield=blockwithcharge+destroy=gaincharge 1|stackable+charges=7
+7321|Debris Barricade|3|1|2|5|||shield=blockwithcharge+destroy=gaincharge 2|stackable+charges=7
 5322|Inertia|3|2|1|1|||spell=inertia|
 7322|Inertia|3|2|1|2:0|||spell=inertia|
 5323|Lemming|3|4|2|2|1|4|prespell=deathwish|
@@ -308,8 +308,8 @@
 7427|Gaian Enchantress|4|4|2|5|3|7|2:12=enchant+ownbuff=countimmbur|
 5428|Ironclad Blacksmith|4|4|1|4|3|6|1:6=tempering 3|
 7428|Ironclad Blacksmith|4|4|1|4|3|7|2:6=tempering 5|
-5429|Stonewall|4|1|2|9|||owndr=stonewall|
-7429|Stonewall|4|1|2|9||1|owndr=stonewall|
+5429|Stonewall|4|1|2|8|||owndr=stonewall|
+7429|Stonewall|4|1|2|8||1|owndr=stonewall|
 5430|Shard of Integrity|4|3|3|2|||integrity|
 7430|Shard of Integrity|4|3|3|1|||integrity|
 5431|Great Maul|4|0|3|5|7|60|1=grab2h+attack=maul+ownbuff=novaval+turnstart=nova0+destroy=attack|
@@ -382,8 +382,8 @@
 7550|Life Pendulum|5|2|0|0|||pend+ownplay=pillar1|pillar+stackable+additive+charges=1
 5600|Burning Pillar|6|2|0|0|||pillar|pillar+stackable+additive+charges=1
 7600|Burning Tower|6|2|0|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
-5601|Ash Eater|6|4|1|1|2|1|quanta 6|bug
-7601|Brimstone Eater|6|4|1|1|3|1|quanta 6|bug
+5601|Ash Eater|6|4|1|1|1|1|quanta 6+1=kindle|bug
+7601|Brimstone Eater|6|4|1|1|2|1|quanta 6+1=kindle|bug
 5602|Crimson Dragon|6|4|2|10|12|3||airborne
 7602|Ruby Dragon|6|4|2|12|15|3||airborne
 5603|Fire Spirit|6|4|1|1||2|1=growth 2 0|airborne
@@ -454,8 +454,8 @@
 7704|Ice Bolt|7|3|1|1|||icebolt|
 5705|Ice Shield|7|1|2|6||1|shield=cold|
 7705|Permafrost Shield|7|1|2|7||2|shield=cold|
-5706|Purify|7|3|1|2|||purify|
-7706|Purify|7|3|1|1|||purify|
+5706|Purify|7|3|1|1|||purify 2|
+7706|Purify|7|3|1|1|||purify 3|
 5707|Arctic Squid|7|4|3|3|1|2|2=freeze 2|aquatic
 7707|Arctic Octopus|7|4|3|3|1|2|2=freeze 3|aquatic
 5708|Trident|7|0|3|3|4|9|2:4=earthquake 2|aquatic
@@ -542,8 +542,8 @@
 7815|Monk|8|4|2|3|3|5|hit=disarm|
 5816|Surgeon|8|4|1|2|2|3|1=clear|aquatic
 7816|Surgeon|8|4|1|3|4|5|1=clear|aquatic
-5817|Sabbath|8|3|1|2|||sabbath|
-7817|Sabbath|8|3|1|2|||sabbath+owndraw=sanctify|
+5817|Sabbath|8|3|1|2|||sabbath+mulligan=sabbath|
+7817|Sabbath|8|3|1|2|||sabbath+mulligan=sabbath+owndraw=sanctify|
 5818|Give|8|3|2|1|||give|
 7818|Give|8|3|2|1|||give|
 5819|Martyr|8|4|2|4|3|6|owndmg=martyr|
@@ -788,8 +788,8 @@
 8212|Silence|12|3|1|2|||silence|
 6213|Psion|12|4|2|4|4|3||psionic
 8213|Psion|12|4|2|4|5|4||psionic
-6214|Phase Salvager|12|4|1|1|5||destroy=salvage|
-8214|Phase Salvager|12|4|1|1|7||destroy=salvage|
+6214|Phase Salvager|12|4|1|1|4||destroy=salvage|
+8214|Phase Salvager|12|4|1|1|6||destroy=salvage|
 6215|Blue Mage|12|4|2|3|3|3|0=siphonactive|
 8215|Blue Mage|12|4|2|3|3|5|0=siphonactive|
 6216|Broken Mirror|12|2|2|4|||play=brokenmirror+4=summon 6217|

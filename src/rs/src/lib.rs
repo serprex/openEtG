@@ -165,10 +165,10 @@ mod test {
 		ctx.r#move(GameMove::End(0));
 		ctx.r#move(GameMove::End(0));
 		assert_eq!(ctx.get_shield(p1), bw);
-		assert_eq!(ctx.get(bw, Stat::charges), 6);
+		assert_eq!(ctx.get(bw, Stat::charges), 5);
 		let dragon = ctx.get_player(p2).creatures[0];
 		ctx.die(dragon);
-		assert_eq!(ctx.get(bw, Stat::charges), 8);
+		assert_eq!(ctx.get(bw, Stat::charges), 6);
 		assert_eq!(ctx.get_shield(p1), bw);
 		assert_eq!(ctx.get(p1, Stat::hp), 100);
 		assert_eq!(ctx.get(p2, Stat::hp), 98);
@@ -451,10 +451,10 @@ mod test {
 		Skill::neuroify.proc(&mut ctx, p1, p2, &mut ProcData::default());
 		assert_eq!(ctx.get(p2, Stat::poison), 6);
 		assert!(ctx.get(p2, Flag::neuro));
-		Skill::purify.proc(&mut ctx, p1, p2, &mut ProcData::default());
+		Skill::purify(2).proc(&mut ctx, p1, p2, &mut ProcData::default());
 		assert_eq!(ctx.get(p2, Stat::poison), -2);
 		assert!(!ctx.get(p2, Flag::neuro));
-		Skill::purify.proc(&mut ctx, p1, p2, &mut ProcData::default());
+		Skill::purify(2).proc(&mut ctx, p1, p2, &mut ProcData::default());
 		assert_eq!(ctx.get(p2, Stat::poison), -4);
 		Skill::neuroify.proc(&mut ctx, p1, p2, &mut ProcData::default());
 		assert_eq!(ctx.get(p2, Stat::poison), 0);

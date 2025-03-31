@@ -13,7 +13,7 @@ use core::num::{NonZeroU8, NonZeroU32};
 
 use crate::card::{self, CardSet};
 use crate::etg;
-use crate::game::{Flag, Fx, Game, Kind, Sfx, Stat, StatusEntry, ThingData};
+use crate::game::{Flag, Fx, Game, Kind, Phase, Sfx, Stat, StatusEntry, ThingData};
 
 #[derive(Clone, Copy, Hash, Eq, PartialEq)]
 pub struct Event(NonZeroU8);
@@ -43,6 +43,7 @@ impl Event {
 	pub const Spell: Event = Event(unsafe { NonZeroU8::new_unchecked(22) });
 	pub const Spelldmg: Event = Event(unsafe { NonZeroU8::new_unchecked(23) });
 	pub const Turnstart: Event = Event(unsafe { NonZeroU8::new_unchecked(24) });
+	pub const Mulligan: Event = Event(unsafe { NonZeroU8::new_unchecked(25) });
 	pub const OwnAttack: Event = Self::own(Self::Attack);
 	pub const OwnBeginattack: Event = Self::own(Self::Beginattack);
 	pub const OwnBlocked: Event = Self::own(Self::Blocked);
@@ -67,6 +68,7 @@ impl Event {
 	pub const OwnSpell: Event = Self::own(Self::Spell);
 	pub const OwnSpelldmg: Event = Self::own(Self::Spelldmg);
 	pub const OwnTurnstart: Event = Self::own(Self::Turnstart);
+	pub const OwnMulligan: Event = Self::own(Self::Mulligan);
 
 	pub const fn own(e: Event) -> Event {
 		Event(unsafe { NonZeroU8::new_unchecked(e.0.get() | 128) })
@@ -381,7 +383,7 @@ pub enum Skill {
 	freeze(u8),
 	freezeperm,
 	fungusrebirth,
-	gaincharge2,
+	gaincharge(i16),
 	gaintimecharge,
 	gas,
 	give,
@@ -423,6 +425,7 @@ pub enum Skill {
 	integrity,
 	jelly,
 	jetstream,
+	kindle,
 	lightning,
 	liquid,
 	livingweapon,
@@ -496,7 +499,7 @@ pub enum Skill {
 	protectall,
 	protectonce,
 	protectoncedmg,
-	purify,
+	purify(i16),
 	quanta(i8),
 	quantagift,
 	quint,
@@ -1072,7 +1075,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::freeze(x) => write!(f, "freeze{x}"),
 			Skill::freezeperm => f.write_str("freezeperm"),
 			Skill::fungusrebirth => f.write_str("fungusrebirth"),
-			Skill::gaincharge2 => f.write_str("gaincharge2"),
+			Skill::gaincharge(x) => write!(f, "gaincharge{x}"),
 			Skill::gaintimecharge => f.write_str("gaintimecharge"),
 			Skill::gas => f.write_str("gas"),
 			Skill::give => f.write_str("give"),
@@ -1114,6 +1117,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::integrity => f.write_str("integrity"),
 			Skill::jelly => f.write_str("jelly"),
 			Skill::jetstream => f.write_str("jetstream"),
+			Skill::kindle => f.write_str("kindle"),
 			Skill::lightning => f.write_str("lightning"),
 			Skill::liquid => f.write_str("liquid"),
 			Skill::livingweapon => f.write_str("livingweapon"),
@@ -1187,7 +1191,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::protectall => f.write_str("protectall"),
 			Skill::protectonce => f.write_str("protectonce"),
 			Skill::protectoncedmg => f.write_str("protectoncedmg"),
-			Skill::purify => f.write_str("purify"),
+			Skill::purify(x) => write!(f, "purify{x}"),
 			Skill::quanta(x) => f.write_str(match x {
 				0 => "chroma",
 				1 => "entropy",
@@ -1542,7 +1546,7 @@ impl Skill {
 			}
 			Self::poison(_) => Tgt::crea,
 			Self::powerdrain => Tgt::crea,
-			Self::purify => tgt!(or crea play),
+			Self::purify(_) => tgt!(or crea play),
 			Self::quint => Tgt::crea,
 			Self::quinttog => Tgt::quinttog,
 			Self::rage => Tgt::crea,
@@ -1611,12 +1615,14 @@ impl Skill {
 	pub const fn param1(self) -> i32 {
 		match self {
 			Skill::firestorm(x)
+			| Skill::gaincharge(x)
 			| Skill::immolate(x)
 			| Skill::lodestone(x)
 			| Skill::nightfall(x)
 			| Skill::platearmor(x)
 			| Skill::poison(x)
 			| Skill::poisonfoe(x)
+			| Skill::purify(x)
 			| Skill::regenerate(x)
 			| Skill::storm(x)
 			| Skill::tempering(x)
@@ -2081,8 +2087,9 @@ impl Skill {
 				ctx.die(t);
 				let owner = ctx.get_owner(c);
 				let foe = ctx.get_foe(owner);
-				let poison = ctx.get(t, Flag::poisonous) as i16 + (ctx.get(t, Stat::poison) > 0) as i16;
-				ctx.masscc(foe, if card::Upped(ctx.get(c, Stat::card)) { 0 } else { owner }, |ctx, cr| {
+				let poison = (ctx.get(t, Flag::poisonous) || ctx.get(t, Stat::poison) > 0) as i16;
+				let upped = card::Upped(ctx.get(c, Stat::card));
+				ctx.masscc(foe, if upped { 0 } else { owner }, |ctx, cr| {
 					if cr != t {
 						ctx.spelldmg(cr, dmg);
 						ctx.poison(cr, poison);
@@ -2090,6 +2097,10 @@ impl Skill {
 				});
 				ctx.spelldmg(foe, dmg);
 				ctx.poison(foe, poison);
+				if upped {
+					ctx.spelldmg(owner, dmg);
+					ctx.poison(owner, poison);
+				}
 			}
 			Self::counter => {
 				if ctx.get(c, Stat::frozen) == 0
@@ -2695,7 +2706,7 @@ impl Skill {
 			Self::firebolt => {
 				let bonus = ctx.get_player(ctx.get_owner(c)).quanta(etg::Fire) as i16 / 4;
 				ctx.fx(t, Fx::Bolt(bonus, etg::Fire as i8));
-				ctx.spelldmg(t, 3 + bonus);
+				ctx.spelldmg(t, 2 + bonus);
 				ctx.set(t, Stat::frozen, 0);
 			}
 			Self::firebrand => {
@@ -2831,7 +2842,9 @@ impl Skill {
 						Some(0)
 					} {
 						ctx.fx(t, Fx::Forced);
+						ctx.turn = realturn;
 						ctx.useactive(t, tgt);
+						return
 					}
 				}
 				ctx.turn = realturn;
@@ -2860,7 +2873,12 @@ impl Skill {
 				let mut thing = ctx.get_thing_mut(t);
 				if thing.kind == Kind::Creature {
 					thing.status.insert(Stat::hp, 1);
-					thing.status.insert(Stat::maxhp, 1);
+					if let Some(amt) = thing.status.get_mut(Stat::maxhp).map(|hp| core::mem::replace(hp, 1)) {
+						if amt > 0 {
+							let maxhp = ctx.get_mut(ctx.get_owner(c), Stat::maxhp);
+							*maxhp = (*maxhp + amt - 1).min(500);
+						}
+					}
 				} else if let Some(charges) = thing.status.get_mut(Stat::charges) {
 					*charges -= (*charges > 1) as i16;
 				}
@@ -2869,7 +2887,12 @@ impl Skill {
 				let mut thing = ctx.get_thing_mut(t);
 				if thing.kind == Kind::Creature {
 					thing.status.insert(Stat::hp, 1);
-					thing.status.insert(Stat::maxhp, 1);
+					if let Some(amt) = thing.status.get_mut(Stat::maxhp).map(|hp| core::mem::replace(hp, 1)) {
+						if amt > 0 {
+							let maxhp = ctx.get_mut(ctx.get_owner(c), Stat::maxhp);
+							*maxhp = (*maxhp + amt - 1).min(500);
+						}
+					}
 				} else if let Some(charges) = thing.status.get_mut(Stat::charges) {
 					*charges = 1;
 				}
@@ -2909,9 +2932,9 @@ impl Skill {
 			Self::fungusrebirth => {
 				ctx.transform(c, card::As(ctx.get(c, Stat::card), card::Fungus));
 			}
-			Self::gaincharge2 => {
+			Self::gaincharge(x) => {
 				if c != t {
-					ctx.incrStatus(c, Stat::charges, 2);
+					ctx.incrStatus(c, Stat::charges, x);
 				}
 			}
 			Self::gaintimecharge => {
@@ -3524,6 +3547,9 @@ impl Skill {
 				} else {
 					ctx.set(t, Flag::airborne, true);
 				}
+			}
+			Self::kindle => {
+				ctx.incrStatus(c, Stat::dive, 1)
 			}
 			Self::lightning => {
 				ctx.fx(t, Fx::Lightning);
@@ -4145,7 +4171,7 @@ impl Skill {
 				ctx.rmskill(c, Event::Spelldmg, Skill::protectoncedmg);
 				data.flags |= ProcData::evade;
 			}
-			Self::purify => {
+			Self::purify(x) => {
 				let thing = ctx.get_thing_mut(t);
 				match thing.status.entry(Stat::poison) {
 					StatusEntry::Vacant(hole) => {
@@ -4153,7 +4179,7 @@ impl Skill {
 					}
 					StatusEntry::Occupied(spot) => {
 						let poison = &mut spot.status.0[spot.idx].1;
-						*poison = poison.saturating_sub(2).min(-2);
+						*poison = poison.saturating_sub(x).min(-x);
 					}
 				}
 				thing.flag.0 &= !(Flag::aflatoxin | Flag::neuro);
@@ -4359,10 +4385,14 @@ impl Skill {
 				}
 			}
 			Self::sabbath => {
+				let owner = ctx.get_owner(c);
+				if ctx.phase == Phase::Mulligan && t == owner {
+					ctx.set(ctx.get_foe(owner), Flag::sabbath, true);
+					return
+				}
 				if !ctx.sanctified(t) {
 					ctx.set(t, Flag::sabbath, true);
 				}
-				let owner = ctx.get_owner(c);
 				for cr in ctx.get_player(ctx.get_foe(owner)).creatures {
 					if cr != 0 {
 						ctx.fx(cr, Fx::Silence);

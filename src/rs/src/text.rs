@@ -289,9 +289,9 @@ impl<'a> SkillThing<'a> {
 				"Shuffle target card into owner's deck. Expend charges to shuffle that many more copies",
 			),
 			Skill::corpseexplosion => Cow::from(if self.upped() {
-				"Sacrifice one of your creatures to deal 1 spell damage to all enemy creatures. Increase damage by 1 for every 5HP of the sacrifice. Poisonous sacrifices poison. Poisoned sacrifices poison. Also affect opponent"
+				"Sacrifice one of your creatures to deal 1 spell damage to all enemy creatures. Increase damage by 1 for every 5HP of the sacrifice. Poisonous or poisoned sacrifices inflict 1 poison. Also affect opponent"
 			} else {
-				"Sacrifice one of your creatures to deal 1 spell damage to all other creatures. Increase damage by 1 for every 5HP of the sacrifice. Poisonous sacrifices poison. Poisoned sacrifices poison. Also affect opponent"
+				"Sacrifice one of your creatures to deal 1 spell damage to all other creatures. Increase damage by 1 for every 5HP of the sacrifice. Poisonous or poisoned sacrifices inflict 1 poison. Also affect all players"
 			}),
 			Skill::counter => Cow::from(
 				"When this creature is attacked by another creature, if this creature is able to attack, it deals its damage to the attacking creature",
@@ -441,7 +441,7 @@ impl<'a> SkillThing<'a> {
 			),
 			Skill::fiery => Cow::from("Gains 1 strength for every 5:6 in your quanta pool"),
 			Skill::firebolt => Cow::from(
-				"Deal 3 spell damage plus one per 4:6 you have after playing this card. If target is frozen, it loses frozen status",
+				"Deal 2 spell damage plus one per 4:6 you have after playing this card. If target is frozen, it loses frozen status",
 			),
 			Skill::firebrand => Cow::from("Last an additional turn when targeted with Tempering"),
 			Skill::firestorm(x) => Cow::from(format!(
@@ -467,10 +467,10 @@ impl<'a> SkillThing<'a> {
 				"The owner of target card in hand plays that card on a random target if they are able, or the owner of target card in play without this ability activates that card's ability on a random target if they are able",
 			),
 			Skill::frail => Cow::from(
-				"Target creature's hp/maxhp becomes 1 without receiving damage, or target permanent with more than 1 charge/stack has one charge/stack removed",
+				"Target creature's hp/maxHP becomes 1 without receiving damage while your maxHP is raised by the difference, or target permanent with more than 1 charge/stack has one charge/stack removed",
 			),
 			Skill::frail2 => Cow::from(
-				"Target creature's hp/maxhp becomes 1 without receiving damage, or target permanent with more than 1 charge/stack is reduced to 1 charge/stack",
+				"Target creature's hp/maxHP becomes 1 without receiving damage while your maxHP is raised by the difference, or target permanent with more than 1 charge/stack is reduced to 1 charge/stack",
 			),
 			Skill::fractal => Cow::from(
 				"Fill your hand with copies of target creature. Consumes all 1:12. If this spell costs 1:0, consumes all quanta",
@@ -491,12 +491,8 @@ impl<'a> SkillThing<'a> {
 			} else {
 				"Transform this card into a Fungus"
 			}),
-			Skill::gaincharge2 if ev == Event::Death => {
-				Cow::from("Whenever any creature dies, gain two stacks")
-			}
-			Skill::gaincharge2 if ev == Event::Destroy => {
-				Cow::from("Whenever any other permanent is destroyed, gain two stacks")
-			}
+			Skill::gaincharge(x) if ev == Event::Death => Cow::from(format!("Whenever any creature dies, gain {} stack{}", x, if x == 1 { "" } else { "s" })),
+			Skill::gaincharge(x) if ev == Event::Destroy => Cow::from(format!("Whenever any other permanent is destroyed, gain {} stack{}", x, if x == 1 { "" } else { "s" })),
 			Skill::gaintimecharge => Cow::from(
 				"Gain one stack for every card you draw. Does not gain a stack from your draw at the start of your turn",
 			),
@@ -600,6 +596,7 @@ impl<'a> SkillThing<'a> {
 			Skill::jetstream => Cow::from(
 				"Target airborne creature gains 3|-1. Target non-airborne creature gains airborne",
 			),
+			Skill::kindle => Cow::from("Increase this creature's strength by 1 for next attack"),
 			Skill::lightning => Cow::from("Deal 5 spell damage to target creature or player"),
 			Skill::liquid => Cow::from(
 				"Poison target creature. Target creature's skills are replaced with \"Heal yourself equal to the damage dealt by this card.\"",
@@ -628,7 +625,7 @@ impl<'a> SkillThing<'a> {
 				} else {
 					Cow::from(format!(
 						"Lasts for {charges} more turn{}",
-						if charges == 1 { "s" } else { "" }
+						if charges == 1 { "" } else { "s" }
 					))
 				}
 			}
@@ -828,9 +825,9 @@ impl<'a> SkillThing<'a> {
 			Skill::protectonce => Cow::from(
 				"Nullify the next spell, ability, or spell damage used by opponent that targets or damages this card",
 			),
-			Skill::purify => Cow::from(
-				"Remove all poison & sacrifice status from target creature or player. Target creature or player gains two purify counters",
-			),
+			Skill::purify(x) => Cow::from(format!(
+				"Remove all poison & sacrifice status from target creature or player. Target creature or player gains {x} purify counters",
+			)),
 			Skill::quadpillar(x) => Cow::from(format!(
 				"Randomly gain 1-2 {}each turn. \u{2154} chance to gain 2",
 				DecodeQuad(x)
@@ -908,8 +905,11 @@ impl<'a> SkillThing<'a> {
 			Skill::rngfreeze => {
 				Cow::from("Randomly freeze one of opponent's non-stacking permanents for two turns on hit")
 			}
-			Skill::sabbath => Cow::from(
+			Skill::sabbath if ev == Event::Cast => Cow::from(
 				"Target cannot gain quanta until their turn ends. Their deck is protected until start of their next turn.\nSilence all your opponent's creatures & heal all your creatures by 8",
+			),
+			Skill::sabbath if ev == Event::Mulligan => Cow::from(
+				"When this card is mulliganed, opponent cannot gain quanta until their first turn ends.",
 			),
 			Skill::sadism => Cow::from("Whenever any creatures are damaged, heal yourself an equal amount"),
 			Skill::salvage => Cow::from(if self.set() == CardSet::Open {
@@ -926,7 +926,7 @@ impl<'a> SkillThing<'a> {
 			}
 			Skill::unsanctify if ev == Event::OwnPlay => Cow::from("Nullify opponent's sanctuary effect"),
 			Skill::scatter => Cow::from(
-				"Target player mulligans their hand for an equal number of cards.\nTargeting a card will only shuffle that card.\nIncrease your mark power by 1",
+				"Target player redraws their hand for an equal number of cards, this does not trigger on-draw effects.\nTargeting a card will only shuffle that card.\nIncrease your mark power by 1",
 			),
 			Skill::scramble if ev == Event::Hit => {
 				Cow::from("Randomize up to 9 quanta randomly chosen from opponent's quanta pool on hit")
