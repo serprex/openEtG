@@ -1673,8 +1673,8 @@ export default function Match(props) {
 				)}
 			{props.replay && (
 				<>
-					<span style="position:absolute;left:760px;top:560px">
-						{game().aieval().toFixed(2)}
+					<span style="position:absolute;left:740px;top:560px">
+						{game().aieval()}
 					</span>
 					<span style="position:absolute;left:760px;top:520px">
 						{replayindex()}
