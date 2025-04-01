@@ -202,9 +202,7 @@ fn eval_skill(
 			}
 			Skill::attack => ctx.trueatk(c) as i32 * (PREC / 2),
 			Skill::bblood | Skill::v_bblood => 7 * PREC,
-			Skill::beguilestop => {
-				(if ctx.hasskill(c, Event::OwnAttack, Skill::singularity) { 60 * PREC } else { 0 }) - ttatk
-			}
+			Skill::beguilestop if ctx.hasskill(c, Event::OwnAttack, Skill::singularity) => 60 * PREC,
 			Skill::bellweb => PREC,
 			Skill::blackhole | Skill::v_blackhole => {
 				let foe = ctx.get_foe(ctx.get_owner(c));
@@ -366,7 +364,11 @@ fn eval_skill(
 				}
 				4 * PREC
 			}
-			Skill::epoch => 2 * PREC,
+			Skill::epoch => {
+				let owner = ctx.get_owner(c);
+				(4 + ctx.get_player(ctx.get_foe(owner)).hand_len() - ctx.get_player(owner).hand_len()) as i32 * (PREC / 2)
+			},
+			Skill::epochreset => PREC / 2,
 			Skill::evolve => 3 * PREC,
 			Skill::feed => 6 * PREC,
 			Skill::fickle => 3 * PREC,
@@ -427,7 +429,7 @@ fn eval_skill(
 			Skill::hasten => {
 				(ctx.get_player(ctx.get_owner(c)).deck.len() as i32 * (PREC / 4)).min(6 * PREC)
 			}
-			Skill::hatch | Skill::v_hatch => 4 * PREC,
+			Skill::hatch | Skill::v_hatch => PREC,
 			Skill::haunt => 3 * PREC,
 			Skill::haunted(x) => ttatk * if x == ctx.turn { PREC / 2 } else { -PREC / 2 },
 			Skill::heal => {
@@ -520,9 +522,9 @@ fn eval_skill(
 				let n = ctx
 					.get_player(owner)
 					.hand_iter()
-					.map(|inst| card::IsOf(ctx.get(inst, Stat::card), card::Nightmare) as usize)
-					.sum::<usize>();
-				((24 - ctx.get_player(ctx.get_foe(owner)).hand_len()) >> n) as i32 * PREC
+					.map(|inst| card::IsOf(ctx.get(inst, Stat::card), card::Nightmare) as i32)
+					.sum::<i32>();
+				((16 - ctx.get_player(ctx.get_foe(owner)).hand_len()) as i32 * PREC) / (n + 1)
 			}
 			Skill::nightshade => 6 * PREC,
 			Skill::nova => PREC,
@@ -946,7 +948,7 @@ fn evalthing(
 			{
 				-6 * PREC
 			} else {
-				0
+				-1
 			};
 		}
 		if cdata.kind == Kind::Spell {
@@ -988,9 +990,8 @@ fn evalthing(
 			}
 			let mut poison = thing.status.get(Stat::poison);
 			for &sk in ctx.getSkill(id, Event::OwnAttack).iter() {
-				match sk {
-					Skill::growth(_, ghp) => poison = poison.saturating_sub(ghp as i16),
-					_ => (),
+				if let Skill::growth(_, ghp) = sk {
+					poison = poison.saturating_sub(ghp as i16)
 				}
 			}
 			if poison > 0 {
@@ -1009,13 +1010,18 @@ fn evalthing(
 			score += eval_skill(ctx, id, ctx.getSkill(id, Event::OwnDeath), ttatk, damage, quantamap);
 			for j in 0..2 {
 				let pl = ctx.get_player(if j == 0 { owner } else { ctx.get_foe(owner) });
-				score += once(pl.shield)
+				let val = once(pl.shield)
 					.chain(once(pl.weapon))
 					.chain(pl.creatures.into_iter())
 					.chain(pl.permanents.into_iter())
 					.filter(|&r| r != 0)
 					.map(|r| eval_skill(ctx, r, ctx.getSkill(r, Event::Death), ttatk, damage, quantamap))
 					.sum::<i32>();
+				if j == 0 {
+					score += val
+				} else {
+					score -= val
+				}
 			}
 		}
 	}
@@ -1089,7 +1095,7 @@ fn evalthing(
 	} else {
 		score = if ctx.material(id, None) { score * 5 / 4 } else { score * 7 / 2 };
 	}
-	score * if inhand { 2 } else { 3 }
+	score * if inhand { 2 } else if ctx.hasskill(id, Event::Turnstart, Skill::beguilestop) && !ctx.hasskill(id, Event::OwnAttack, Skill::singularity) { -1 } else { 3 }
 }
 
 pub fn eval(ctx: &Game) -> i32 {
