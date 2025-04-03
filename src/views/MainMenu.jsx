@@ -31,6 +31,7 @@ const tipjar = [
 	"Typing '/who' in chat you will get a list of the users who are online. '/w user message' whispers that user",
 	"Typing '/help' in chat will list all commands",
 	'Keyboard shortcuts: space ends turn, backspace cancels, w targets opponent, s targets yourself, 1 through 8 cast cards in hand',
+	'Holding shift while dragging cursor over cards allows activating them without clicking',
 	'Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped',
 	"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons",
 	'A ply is half a turn',
