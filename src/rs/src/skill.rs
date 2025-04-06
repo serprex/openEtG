@@ -2844,7 +2844,7 @@ impl Skill {
 						ctx.fx(t, Fx::Forced);
 						ctx.turn = realturn;
 						ctx.useactive(t, tgt);
-						return
+						return;
 					}
 				}
 				ctx.turn = realturn;
@@ -2873,7 +2873,8 @@ impl Skill {
 				let mut thing = ctx.get_thing_mut(t);
 				if thing.kind == Kind::Creature {
 					thing.status.insert(Stat::hp, 1);
-					if let Some(amt) = thing.status.get_mut(Stat::maxhp).map(|hp| core::mem::replace(hp, 1)) {
+					if let Some(amt) = thing.status.get_mut(Stat::maxhp).map(|hp| core::mem::replace(hp, 1))
+					{
 						if amt > 0 {
 							let maxhp = ctx.get_mut(ctx.get_owner(c), Stat::maxhp);
 							*maxhp = (*maxhp + amt - 1).min(500);
@@ -2887,7 +2888,8 @@ impl Skill {
 				let mut thing = ctx.get_thing_mut(t);
 				if thing.kind == Kind::Creature {
 					thing.status.insert(Stat::hp, 1);
-					if let Some(amt) = thing.status.get_mut(Stat::maxhp).map(|hp| core::mem::replace(hp, 1)) {
+					if let Some(amt) = thing.status.get_mut(Stat::maxhp).map(|hp| core::mem::replace(hp, 1))
+					{
 						if amt > 0 {
 							let maxhp = ctx.get_mut(ctx.get_owner(c), Stat::maxhp);
 							*maxhp = (*maxhp + amt - 1).min(500);
@@ -3548,9 +3550,7 @@ impl Skill {
 					ctx.set(t, Flag::airborne, true);
 				}
 			}
-			Self::kindle => {
-				ctx.incrStatus(c, Stat::dive, 1)
-			}
+			Self::kindle => ctx.incrStatus(c, Stat::dive, 1),
 			Self::lightning => {
 				ctx.fx(t, Fx::Lightning);
 				ctx.spelldmg(t, 5);
@@ -4388,7 +4388,7 @@ impl Skill {
 				let owner = ctx.get_owner(c);
 				if ctx.phase == Phase::Mulligan && t == owner {
 					ctx.set(ctx.get_foe(owner), Flag::sabbath, true);
-					return
+					return;
 				}
 				if !ctx.sanctified(t) {
 					ctx.set(t, Flag::sabbath, true);

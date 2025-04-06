@@ -4,7 +4,15 @@ import OpenCards from './Cards.js';
 import enums from './enum.json' with { type: 'json' };
 import * as wasm from './rs/pkg/etg.js';
 
-const GameMoveType = ['end', 'cast', 'accept', 'mulligan', 'foe', 'resign'];
+const GameMoveType = [
+	'end',
+	'cast',
+	'accept',
+	'mulligan',
+	'shuffle',
+	'foe',
+	'resign',
+];
 
 export default class Game {
 	constructor(data) {

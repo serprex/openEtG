@@ -1141,7 +1141,9 @@ export default function Match(props) {
 	const endClick = (discard = 0) => {
 		const game = pgame();
 		if (game.turn === p1id() && game.phase === Phase.Mulligan) {
-			applyNext({ x: 'accept' });
+			if (game.tax_left(p1id()) === 0) {
+				applyNext({ x: 'accept' });
+			}
 		} else if (game.winner) {
 			gotoResult();
 		} else if (game.turn === p1id()) {
@@ -1163,13 +1165,44 @@ export default function Match(props) {
 		}
 	};
 
+	const shuffleClick = t => {
+		applyNext({ x: 'shuffle', t });
+		const game = pgame(),
+			tax_left = game.tax_left(p1id());
+		setTargeting(
+			tax_left === 0 ? null : (
+				{
+					filter: id =>
+						game.get_kind(id) === Kind.Spell && game.get_owner(id) === p1id(),
+					cb: shuffleClick,
+					text: 'Shuffle ' + tax_left,
+					src: null,
+				}
+			),
+		);
+	};
+
 	const cancelClick = () => {
-		const game = pgame();
+		let game = pgame();
 		if (resigning()) {
 			setResigning(false);
 		} else if (game.turn === p1id()) {
 			if (game.phase === Phase.Mulligan && !game.empty_hand(p1id())) {
 				applyNext({ x: 'mulligan' });
+				game = pgame();
+				const tax_left = game.tax_left(p1id());
+				setTargeting(
+					tax_left === 0 ? null : (
+						{
+							filter: id =>
+								game.get_kind(id) === Kind.Spell &&
+								game.get_owner(id) === p1id(),
+							cb: shuffleClick,
+							text: 'Shuffle ' + tax_left,
+							src: null,
+						}
+					),
+				);
 			} else {
 				setTargeting(null);
 			}
@@ -1191,14 +1224,18 @@ export default function Match(props) {
 	const thingClick = id => {
 		const game = pgame();
 		clearCard();
-		if (props.replay || game.phase !== Phase.Play) return;
+		if (props.replay || game.phase === Phase.End) return;
 		const tgting = targeting();
 		if (tgting) {
 			if (tgting.filter(id)) {
 				setTargeting(null);
 				tgting.cb(id);
 			}
-		} else if (game.get_owner(id) === p1id() && game.canactive(id)) {
+		} else if (
+			game.phase === Phase.Play &&
+			game.get_owner(id) === p1id() &&
+			game.canactive(id)
+		) {
 			const cb = tgt => applyNext({ x: 'cast', c: id, t: tgt });
 			if (
 				(game.get_kind(id) === Kind.Spell &&
@@ -1400,23 +1437,25 @@ export default function Match(props) {
 		let turntell, endText, cancelText;
 		if (g.phase !== Phase.End) {
 			turntell =
-				targeting() ?
-					targeting().text
-				:	`${g.turn === p1 ? 'Your' : 'Their'} turn${
-						g.phase > Phase.Mulligan ? ''
-						: p1 === 1 ? "\nYou're first"
-						: "\nYou're second"
-					}`;
+				targeting()?.text ??
+				`${g.turn === p1 ? 'Your' : 'Their'} turn${
+					g.phase > Phase.Mulligan ? ''
+					: p1 === 1 ? "\nYou're first"
+					: "\nYou're second"
+				}`;
 			if (g.turn === p1) {
-				endText =
-					targeting() ? ''
-					: g.phase === Phase.Play ? 'End Turn'
-					: g.turn === p1 ? 'Accept'
-					: '';
 				if (g.phase !== Phase.Play) {
-					cancelText = g.turn === p1 ? 'Mulligan' : '';
+					cancelText = 'Mulligan';
+					const tax_left = g.tax_left(p1);
+					if (tax_left === 0) {
+						endText = 'Accept';
+					} else {
+						endText = '';
+						turntell += `\nYou're ${p1 === 1 ? 'first' : 'second'}`;
+					}
 				} else {
 					cancelText = targeting() || resigning() ? 'Cancel' : '';
+					endText = targeting() ? '' : 'End Turn';
 				}
 			} else cancelText = endText = '';
 		} else {

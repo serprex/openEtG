@@ -83,9 +83,10 @@ pub struct PlayerData {
 	pub markpower: i8,
 	pub deckpower: u8,
 	pub drawpower: u8,
+	pub tax: u8,
+	pub quanta: [u8; 12],
 	pub creatures: [i16; 23],
 	pub permanents: [i16; 16],
-	pub quanta: [u8; 12],
 	pub hand: [i16; 8],
 	pub deck: Rc<Vec<i16>>,
 }
@@ -157,6 +158,7 @@ pub enum GameMove {
 	Cast(i16, i16),
 	Accept,
 	Mulligan,
+	Shuffle(i16),
 	Foe(i16),
 	Resign(i16),
 }
@@ -168,8 +170,9 @@ impl From<GameMove> for [i16; 3] {
 			GameMove::Cast(c, t) => [1, c, t],
 			GameMove::Accept => [2, 0, 0],
 			GameMove::Mulligan => [3, 0, 0],
-			GameMove::Foe(t) => [4, 0, t],
-			GameMove::Resign(c) => [5, c, 0],
+			GameMove::Shuffle(t) => [4, 0, t],
+			GameMove::Foe(t) => [5, 0, t],
+			GameMove::Resign(c) => [6, c, 0],
 		}
 	}
 }
@@ -181,8 +184,9 @@ impl From<[i16; 3]> for GameMove {
 			1 => GameMove::Cast(cmd[1], cmd[2]),
 			2 => GameMove::Accept,
 			3 => GameMove::Mulligan,
-			4 => GameMove::Foe(cmd[2]),
-			5 => GameMove::Resign(cmd[1]),
+			4 => GameMove::Shuffle(cmd[2]),
+			5 => GameMove::Foe(cmd[2]),
+			6 => GameMove::Resign(cmd[1]),
 			_ => GameMove::Mulligan,
 		}
 	}
@@ -677,6 +681,15 @@ impl Game {
 
 	pub fn get_quanta(&self, id: i16, ele: i16) -> u8 {
 		self.get_player(id).quanta(ele)
+	}
+
+	pub fn tax_left(&self, id: i16) -> u8 {
+		let player = self.get_player(id);
+		player.tax - (7 - player.hand_len() as u8)
+	}
+
+	pub fn tax(&self, id: i16) -> u8 {
+		self.get_player(id).tax
 	}
 
 	pub fn count_creatures(&self, id: i16) -> i16 {
@@ -2729,7 +2742,21 @@ impl Game {
 				}
 				if handlen != usize::MAX {
 					self.fx(self.turn, Fx::Sfx(Sfx::mulligan));
-					self.drawhand(self.turn, handlen);
+					self.drawhand(self.turn, 7);
+					let player = self.get_player_mut(self.turn);
+					if player.tax < 7 {
+						player.tax += 1;
+					}
+				}
+			}
+			GameMove::Shuffle(t) => {
+				self.remove(t);
+				let decklen = self.get_player(self.turn).deck.len() as u32;
+				let idx = self.upto(decklen + 1) as usize;
+				let mut player = self.get_player_mut(self.turn);
+				player.deck_mut().insert(idx, t);
+				if player.hand_len() + player.tax as usize == 7 {
+					self.r#move(GameMove::Accept);
 				}
 			}
 			GameMove::Foe(t) => {

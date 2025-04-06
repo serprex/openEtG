@@ -1017,11 +1017,7 @@ fn evalthing(
 					.filter(|&r| r != 0)
 					.map(|r| eval_skill(ctx, r, ctx.getSkill(r, Event::Death), ttatk, damage, quantamap))
 					.sum::<i32>();
-				if j == 0 {
-					score += val
-				} else {
-					score -= val
-				}
+				if j == 0 { score += val } else { score -= val }
 			}
 		}
 	}
@@ -1095,7 +1091,16 @@ fn evalthing(
 	} else {
 		score = if ctx.material(id, None) { score * 5 / 4 } else { score * 7 / 2 };
 	}
-	score * if inhand { 2 } else if ctx.hasskill(id, Event::Turnstart, Skill::beguilestop) && !ctx.hasskill(id, Event::OwnAttack, Skill::singularity) { -1 } else { 3 }
+	score
+		* if inhand {
+			2
+		} else if ctx.hasskill(id, Event::Turnstart, Skill::beguilestop)
+			&& !ctx.hasskill(id, Event::OwnAttack, Skill::singularity)
+		{
+			-1
+		} else {
+			3
+		}
 }
 
 pub fn eval(ctx: &Game) -> i32 {
