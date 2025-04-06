@@ -491,8 +491,16 @@ impl<'a> SkillThing<'a> {
 			} else {
 				"Transform this card into a Fungus"
 			}),
-			Skill::gaincharge(x) if ev == Event::Death => Cow::from(format!("Whenever any creature dies, gain {} stack{}", x, if x == 1 { "" } else { "s" })),
-			Skill::gaincharge(x) if ev == Event::Destroy => Cow::from(format!("Whenever any other permanent is destroyed, gain {} stack{}", x, if x == 1 { "" } else { "s" })),
+			Skill::gaincharge(x) if ev == Event::Death => Cow::from(format!(
+				"Whenever any creature dies, gain {} stack{}",
+				x,
+				if x == 1 { "" } else { "s" }
+			)),
+			Skill::gaincharge(x) if ev == Event::Destroy => Cow::from(format!(
+				"Whenever any other permanent is destroyed, gain {} stack{}",
+				x,
+				if x == 1 { "" } else { "s" }
+			)),
 			Skill::gaintimecharge => Cow::from(
 				"Gain one stack for every card you draw. Does not gain a stack from your draw at the start of your turn",
 			),

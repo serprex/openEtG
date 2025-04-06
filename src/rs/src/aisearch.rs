@@ -30,22 +30,21 @@ struct Candidate {
 	pub score: i32,
 }
 
-fn get_worst_card(ctx: &Game) -> (i16, i32) {
-	if ctx.full_hand(ctx.turn) {
-		ctx.get_player(ctx.turn)
-			.hand
-			.into_iter()
-			.filter(|&card| card != 0)
-			.map(|card| {
-				let mut clone = ctx.clonegame();
-				clone.die(card);
-				(card, eval(&clone))
-			})
-			.max_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal))
-			.unwrap()
-	} else {
-		(0, eval(ctx))
-	}
+fn get_worst_card(ctx: &Game) -> Option<(i16, i32)> {
+	ctx.get_player(ctx.turn)
+		.hand
+		.into_iter()
+		.filter(|&card| card != 0)
+		.map(|card| {
+			let mut clone = ctx.clonegame();
+			clone.die(card);
+			(card, eval(&clone))
+		})
+		.max_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal))
+}
+
+fn get_discard_card(ctx: &Game) -> (i16, i32) {
+	if ctx.full_hand(ctx.turn) { get_worst_card(ctx).unwrap() } else { (0, eval(ctx)) }
 }
 
 fn lethal(ctx: &Game) -> Option<GameMove> {
@@ -235,7 +234,7 @@ fn scancore(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32, cmd:
 	}) {
 		gclone.r#move(cmd);
 	}
-	let score = get_worst_card(&gclone).1;
+	let (_, score) = get_discard_card(&gclone);
 	if score > candy.score || (score == candy.score && depth < candy.depth) {
 		if depth == 0 {
 			*candy = Candidate { cmd, depth, score };
@@ -286,28 +285,33 @@ fn scan(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32) {
 
 pub fn search(ctx: &Game) -> GameMove {
 	if ctx.phase == Phase::Mulligan {
-		let turn = ctx.turn;
-		let pl = ctx.get_player(turn);
-		return if pl.hand_len() < 6
-			|| pl.hand_iter().any(|id| {
-				ctx.get(id, Flag::pillar) || {
-					let card = ctx.get(id, Stat::card);
-					card::IsOf(card, card::Nova)
-						|| card::IsOf(card, card::Immolation)
-						|| card::IsOf(card, card::GiftofOceanus)
-						|| card::IsOf(card, card::QuantumLocket)
-				}
-			}) || pl.deck.iter().all(|&id| !ctx.get(id, Flag::pillar))
+		let pl = ctx.get_player(ctx.turn);
+		if ctx.tax_left(ctx.turn) != 0 {
+			if let Some((discard, _)) = get_worst_card(ctx) {
+				return GameMove::Shuffle(discard);
+			} else {
+				return GameMove::Accept;
+			}
+		} else if pl.hand_iter().any(|id| {
+			ctx.get(id, Flag::pillar) || {
+				let card = ctx.get(id, Stat::card);
+				card::IsOf(card, card::Nova)
+					|| card::IsOf(card, card::Immolation)
+					|| card::IsOf(card, card::GiftofOceanus)
+					|| card::IsOf(card, card::QuantumLocket)
+			}
+		}) || pl.deck.iter().all(|&id| !ctx.get(id, Flag::pillar))
 		{
 			GameMove::Accept
 		} else {
 			GameMove::Mulligan
-		};
+		}
+	} else {
+		lethal(ctx).unwrap_or_else(|| {
+			let (discard, score) = get_discard_card(ctx);
+			let mut candy = Candidate { cmd: GameMove::End(discard), depth: 0, score };
+			scan(ctx, 0, &mut candy, &mut 5040);
+			candy.cmd
+		})
 	}
-	lethal(ctx).unwrap_or_else(|| {
-		let (discard, score) = get_worst_card(ctx);
-		let mut candy = Candidate { cmd: GameMove::End(discard), depth: 0, score };
-		scan(ctx, 0, &mut candy, &mut 5040);
-		candy.cmd
-	})
 }
