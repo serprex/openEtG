@@ -95,12 +95,12 @@ export default function parseChat(e) {
 			const sp = msg.indexOf(' ');
 			sock.userEmit(msg.slice(1, sp), { m: msg.slice(sp + 1) });
 		} else if (msg.startsWith('/code ')) {
-			sock.userEmit('codecreate', { t: msg.slice(6) });
+			sock.userEmit('codecreate', { t: msg.slice(6).trim() });
 		} else if (msg.startsWith('/setgold ')) {
 			const [t, g] = msg.slice(9).split(' ');
 			sock.userEmit('setgold', { t, g: g | 0 });
 		} else if (msg.startsWith('/addbound ')) {
-			const [t, pool] = msg.slice(10).split(' ');
+			const [t, pool] = msg.slice(10).trim().split(' ');
 			sock.userEmit('addpool', { t, pool, bound: true });
 		} else if (msg.startsWith('/addpool ')) {
 			const [t, pool] = msg.slice(9).split(' ');
