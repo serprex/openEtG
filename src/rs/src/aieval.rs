@@ -366,8 +366,9 @@ fn eval_skill(
 			}
 			Skill::epoch => {
 				let owner = ctx.get_owner(c);
-				(4 + ctx.get_player(ctx.get_foe(owner)).hand_len() - ctx.get_player(owner).hand_len()) as i32 * (PREC / 2)
-			},
+				(4 + ctx.get_player(ctx.get_foe(owner)).hand_len() - ctx.get_player(owner).hand_len())
+					as i32 * (PREC / 2)
+			}
 			Skill::epochreset => PREC / 2,
 			Skill::evolve => 3 * PREC,
 			Skill::feed => 6 * PREC,

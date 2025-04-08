@@ -814,22 +814,26 @@ impl Game {
 			pl.markpower = markpower;
 		}
 		self.drawhand(id, 7);
-		if self.cards.set == CardSet::Original
-			&& self.get_player(id).hand.into_iter().all(|card| self.get(card, Stat::cost) != 0)
-		{
-			let pl = self.get_player_mut(id);
-			let pldecklen = pl.deck.len();
-			let oldhand = pl.hand;
-			let mut newhand = [0; 8];
-			for (idx, id) in
-				pl.deck_mut().drain(if pldecklen <= 7 { 0 } else { pldecklen - 7 }..).enumerate()
-			{
-				newhand[idx] = id;
+		if self.cards.set == CardSet::Open {
+			if id > 1 {
+				self.proc_mark(id);
 			}
-			pl.deck_mut().extend_from_slice(&oldhand);
-			pl.hand = newhand;
-			for id in pl.hand_iter() {
-				self.set_kind(id, Kind::Spell);
+		} else {
+			if self.get_player(id).hand.into_iter().all(|card| self.get(card, Stat::cost) != 0) {
+				let pl = self.get_player_mut(id);
+				let pldecklen = pl.deck.len();
+				let oldhand = pl.hand;
+				let mut newhand = [0; 8];
+				for (idx, id) in
+					pl.deck_mut().drain(if pldecklen <= 7 { 0 } else { pldecklen - 7 }..).enumerate()
+				{
+					newhand[idx] = id;
+				}
+				pl.deck_mut().extend_from_slice(&oldhand);
+				pl.hand = newhand;
+				for id in pl.hand_iter() {
+					self.set_kind(id, Kind::Spell);
+				}
 			}
 		}
 	}
@@ -2459,12 +2463,12 @@ impl Game {
 		}
 	}
 
-	fn proc_mark(&mut self, id: i16) -> bool {
+	fn proc_mark(&mut self, id: i16) {
 		let (mark, markpower) = {
 			let pl = self.get_player(id);
 			(pl.mark as i16, pl.markpower as i16)
 		};
-		self.spend(id, mark, markpower * if mark > 0 { -1 } else { -3 })
+		self.spend(id, mark, markpower * if mark > 0 { -1 } else { -3 });
 	}
 
 	pub fn nextPlayer(&self, id: i16) -> i16 {

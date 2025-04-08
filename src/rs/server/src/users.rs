@@ -3,11 +3,11 @@ use std::num::NonZeroUsize;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
+use aws_lc_rs::{constant_time::verify_slices_are_equal, pbkdf2};
 use bb8_postgres::tokio_postgres::{
 	Client, GenericClient,
 	types::{FromSql, Json, ToSql},
 };
-use aws_lc_rs::{pbkdf2, constant_time::verify_slices_are_equal};
 use serde::{Deserialize, Serialize};
 use tokio::sync::{Mutex, RwLock};
 

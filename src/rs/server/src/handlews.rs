@@ -5,6 +5,7 @@ use std::num::NonZeroUsize;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+use aws_lc_rs::pbkdf2;
 use base64::prelude::*;
 use bb8_postgres::tokio_postgres::{
 	Client, GenericClient,
@@ -15,7 +16,6 @@ use fxhash::{FxHashMap, FxHasher64};
 use hyper_tungstenite::tungstenite::Message;
 use rand::distr::{Distribution, Uniform};
 use rand::{Rng, RngCore};
-use aws_lc_rs::pbkdf2;
 use serde_json::Value;
 use tokio::join;
 use tokio::sync::{Mutex, MutexGuard, RwLock, mpsc};
