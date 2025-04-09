@@ -344,6 +344,46 @@ function BoltFx(props) {
 	);
 }
 
+function IgniteFx(props) {
+	const time = useAnimation();
+	createEffect(() => {
+		if (time() > 200) props.setEffects(removeFx(props.self));
+	});
+	return (
+		<svg
+			height="600"
+			width="900"
+			style={`position:absolute;pointer-events:none;z-index:4`}>
+			<defs>
+				<radialGradient id="g">
+					<stop
+						offset={`${(time() * time()) / 400}%`}
+						stop-color="#fff"
+						stop-opacity="0"
+					/>
+					<stop
+						offset={`${Math.min(7 * Math.sqrt(time()), 100)}%`}
+						stop-color="#ff8"
+						stop-opacity={`${0.5 - (time() / 290) ** 2}`}
+					/>
+					<stop
+						offset={`${Math.min(time() * 2, 100)}%`}
+						stop-color="#f42"
+						stop-opacity="0"
+					/>
+				</radialGradient>
+			</defs>
+			<ellipse
+				cx={props.pos.x}
+				cy={props.pos.y}
+				ry={time()}
+				rx={time() + time() * Math.log(time())}
+				fill="url('#g')"
+			/>
+		</svg>
+	);
+}
+
 function SpellDisplayChild(props) {
 	const time = useAnimation();
 	const p1 = props.getIdTrack(props.spell.t);
@@ -1001,6 +1041,21 @@ export default function Match(props) {
 							newstate.effects ??= new Set(state.effects);
 							newstate.effects.add(mkText(state, newstate, id, `+${param}`));
 							break;
+						case 'Ignite': {
+							newstate.effects ??= new Set(state.effects);
+							const pos = getIdTrack(id);
+							if (pos) {
+								const IgniteEffect = () => (
+									<IgniteFx
+										self={IgniteEffect}
+										setEffects={setEffects}
+										pos={pos}
+									/>
+								);
+								newstate.effects.add(IgniteEffect);
+							}
+							break;
+						}
 						case 'Lightning': {
 							newstate.effects ??= new Set(state.effects);
 							const pos = getIdTrack(id);

@@ -354,15 +354,18 @@ fn eval_skill(
 			Skill::endow | Skill::v_endow => 4 * PREC,
 			Skill::envenom => 3 * PREC,
 			Skill::epidemic => {
+				let mut score = 4 * PREC;
 				let pl = ctx.get_player(ctx.get_owner(c));
 				if pl.shield != 0 {
 					for &sk in ctx.getSkill(pl.shield, Event::Shield) {
 						if let Skill::thorn(x) = sk {
-							return 4 * PREC + ctx.count_creatures(pl.foe) as i32 * PREC * 100 / x as i32;
+							if x > 0 {
+								score += ctx.count_creatures(pl.foe) as i32 * (PREC * 100 / x as i32);
+							}
 						}
 					}
 				}
-				4 * PREC
+				score
 			}
 			Skill::epoch => {
 				let owner = ctx.get_owner(c);

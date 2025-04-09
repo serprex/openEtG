@@ -288,9 +288,9 @@ pub fn search(ctx: &Game) -> GameMove {
 		let pl = ctx.get_player(ctx.turn);
 		if ctx.tax_left(ctx.turn) != 0 {
 			if let Some((discard, _)) = get_worst_card(ctx) {
-				return GameMove::Shuffle(discard);
+				GameMove::Shuffle(discard)
 			} else {
-				return GameMove::Accept;
+				GameMove::Accept
 			}
 		} else if pl.hand_iter().any(|id| {
 			ctx.get(id, Flag::pillar) || {

@@ -237,6 +237,7 @@ pub enum Fx {
 	Freeze(i16),
 	Hatch,
 	Heal(i16),
+	Ignite,
 	Improve,
 	LastCard,
 	Lightning,

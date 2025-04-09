@@ -9,6 +9,7 @@ use alloc::vec;
 use alloc::vec::Vec;
 use core::fmt::{self, Display, Write};
 use core::iter::once;
+use core::mem;
 use core::num::{NonZeroU8, NonZeroU32};
 
 use crate::card::{self, CardSet};
@@ -2428,7 +2429,7 @@ impl Skill {
 				let thing = ctx.get_thing_mut(t);
 				thing.flag.0 &= !(Flag::aflatoxin | Flag::neuro);
 				if let Some(tpoison) = thing.status.get_mut(Stat::poison) {
-					let poison = core::mem::replace(tpoison, 0);
+					let poison = mem::replace(tpoison, 0);
 					match ctx.get_thing_mut(c).skill.entry(Event::OwnDestroy) {
 						SkillsEntry::Occupied(e) => {
 							let mut skills = e.into_mut();
@@ -2873,7 +2874,7 @@ impl Skill {
 				let mut thing = ctx.get_thing_mut(t);
 				if thing.kind == Kind::Creature {
 					thing.status.insert(Stat::hp, 1);
-					if let Some(amt) = thing.status.get_mut(Stat::maxhp).map(|hp| core::mem::replace(hp, 1))
+					if let Some(amt) = thing.status.get_mut(Stat::maxhp).map(|hp| mem::replace(hp, 1))
 					{
 						if amt > 0 {
 							let maxhp = ctx.get_mut(ctx.get_owner(c), Stat::maxhp);
@@ -2888,7 +2889,7 @@ impl Skill {
 				let mut thing = ctx.get_thing_mut(t);
 				if thing.kind == Kind::Creature {
 					thing.status.insert(Stat::hp, 1);
-					if let Some(amt) = thing.status.get_mut(Stat::maxhp).map(|hp| core::mem::replace(hp, 1))
+					if let Some(amt) = thing.status.get_mut(Stat::maxhp).map(|hp| mem::replace(hp, 1))
 					{
 						if amt > 0 {
 							let maxhp = ctx.get_mut(ctx.get_owner(c), Stat::maxhp);
@@ -3088,7 +3089,7 @@ impl Skill {
 				ctx.delay(c, 1);
 				let shield = ctx.get_player(ctx.get_owner(c)).shield;
 				if shield != 0 {
-					if core::mem::replace(ctx.get_mut(c, Stat::shardgolem), shield) == shield {
+					if mem::replace(ctx.get_mut(c, Stat::shardgolem), shield) == shield {
 						ctx.incrStatus(c, Stat::swarmhp, 1);
 					} else {
 						ctx.set(c, Stat::swarmhp, 1);
@@ -3132,15 +3133,14 @@ impl Skill {
 				ctx.spelldmg(t, 2 + bonus);
 			}
 			Self::icecharge => {
-				ctx.incrStatus(c, Stat::charges, data.amt);
-				data.amt = 0;
+				ctx.incrStatus(c, Stat::charges, mem::replace(&mut data.amt, 0));
 			}
 			Self::icegrowth => {
-				let amt = data.amt as i8;
-				data.amt = 0;
+				let amt = mem::replace(&mut data.amt, 0) as i8;
 				Skill::growth(amt, 0).proc(ctx, c, t, data);
 			}
 			Self::ignite => {
+				ctx.fx(c, Fx::Ignite);
 				ctx.die(c);
 				let owner = ctx.get_owner(c);
 				let foe = ctx.get_foe(owner);
@@ -3150,9 +3150,7 @@ impl Skill {
 				});
 			}
 			Self::ignitediscard => {
-				let owner = ctx.get_owner(c);
-				let foe = ctx.get_foe(owner);
-				ctx.spelldmg(foe, 5);
+				ctx.spelldmg(ctx.get_foe(ctx.get_owner(c)), 5);
 			}
 			Self::imbue => {
 				let isweap = ctx.get_card(ctx.get(t, Stat::card)).kind == Kind::Weapon;
@@ -4977,7 +4975,7 @@ impl Skill {
 				ctx.remove(c);
 				let thing = ctx.get_thing_mut(c);
 				let stored = if let Some(stored) = thing.status.get_mut(Stat::storedpower) {
-					core::mem::replace(stored, 0)
+					mem::replace(stored, 0)
 				} else {
 					0
 				};
@@ -5120,7 +5118,7 @@ impl Skill {
 				ctx.incrStatus(c, Stat::hp, dr);
 			}
 			Self::wind => {
-				let stored = core::mem::replace(ctx.get_mut(c, Stat::storedpower), 0);
+				let stored = mem::replace(ctx.get_mut(c, Stat::storedpower), 0);
 				ctx.incrAtk(c, stored);
 				ctx.buffhp(c, stored);
 			}
@@ -5824,7 +5822,7 @@ impl Skill {
 				.count() as i16,
 			Self::nightfall(x) => {
 				if x > data.amt && ctx.get(t, Flag::nocturnal) && ctx.get_kind(t) == Kind::Creature {
-					x - core::mem::replace(&mut data.amt, x)
+					x - mem::replace(&mut data.amt, x)
 				} else {
 					0
 				}
@@ -5838,7 +5836,7 @@ impl Skill {
 							|| (kind == Kind::Creature
 								&& ctx.get_card(ctx.get(t, Stat::card)).kind == Kind::Weapon)
 					}) {
-					x - core::mem::replace(&mut data.dmg, x)
+					x - mem::replace(&mut data.dmg, x)
 				} else {
 					0
 				}
