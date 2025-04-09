@@ -85,6 +85,7 @@ mod test {
 				.collect(),
 			);
 		}
+		ctx.get_player_mut(2).quanta = Default::default();
 		ctx.r#move(GameMove::Accept);
 		ctx.r#move(GameMove::Accept);
 		(ctx, 1, 2)
