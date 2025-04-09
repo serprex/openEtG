@@ -2874,8 +2874,7 @@ impl Skill {
 				let mut thing = ctx.get_thing_mut(t);
 				if thing.kind == Kind::Creature {
 					thing.status.insert(Stat::hp, 1);
-					if let Some(amt) = thing.status.get_mut(Stat::maxhp).map(|hp| mem::replace(hp, 1))
-					{
+					if let Some(amt) = thing.status.get_mut(Stat::maxhp).map(|hp| mem::replace(hp, 1)) {
 						if amt > 0 {
 							let maxhp = ctx.get_mut(ctx.get_owner(c), Stat::maxhp);
 							*maxhp = (*maxhp + amt - 1).min(500);
@@ -2889,8 +2888,7 @@ impl Skill {
 				let mut thing = ctx.get_thing_mut(t);
 				if thing.kind == Kind::Creature {
 					thing.status.insert(Stat::hp, 1);
-					if let Some(amt) = thing.status.get_mut(Stat::maxhp).map(|hp| mem::replace(hp, 1))
-					{
+					if let Some(amt) = thing.status.get_mut(Stat::maxhp).map(|hp| mem::replace(hp, 1)) {
 						if amt > 0 {
 							let maxhp = ctx.get_mut(ctx.get_owner(c), Stat::maxhp);
 							*maxhp = (*maxhp + amt - 1).min(500);

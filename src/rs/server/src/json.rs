@@ -514,6 +514,9 @@ pub enum GamesMoveCmd {
 	},
 	accept,
 	mulligan,
+	shuffle {
+		t: i32,
+	},
 	foe {
 		t: i32,
 	},

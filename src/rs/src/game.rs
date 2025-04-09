@@ -693,6 +693,11 @@ impl Game {
 		self.get_player(id).tax
 	}
 
+	pub fn enable_player_precog(&mut self, id: i16) {
+		self.set(id, Flag::precognition, true);
+		self.addskills(id, Event::Turnstart, &[Skill::reveal]);
+	}
+
 	pub fn count_creatures(&self, id: i16) -> i16 {
 		self.get_player(id).creatures.into_iter().map(|cr| (cr != 0) as i16).sum()
 	}

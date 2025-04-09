@@ -11,6 +11,7 @@ import Card from '../Components/Card.jsx';
 import DeckDisplay from '../Components/DeckDisplay.jsx';
 
 function RenderInfo(props) {
+	const [testPrecog, setTestPrecog] = createSignal(false);
 	const testDeck = () => {
 		const deck = store.getDeck();
 		if (decklength(deck) < 9 || decklength(adeck) < 9) {
@@ -34,6 +35,7 @@ function RenderInfo(props) {
 				},
 			]),
 		});
+		if (testPrecog()) game.enable_player_precog(game.userId(props.name));
 		store.doNav(import('./Match.jsx'), { game });
 	};
 	const card =
@@ -51,7 +53,7 @@ function RenderInfo(props) {
 			<div
 				style={`position:absolute;left:100px;top:${
 					4 + props.y
-				}px;width:600px;display:flex;justify-content:space-between`}>
+				}px;width:620px;display:flex;justify-content:space-between`}>
 				<span>
 					{props.info.win ?? 0}&ndash;{props.info.loss ?? 0}
 				</span>
@@ -71,7 +73,7 @@ function RenderInfo(props) {
 			<div
 				style={`position:absolute;left:100px;top:${
 					224 + props.y
-				}px;width:600px;display:flex;justify-content:space-between`}>
+				}px;width:620px;display:flex;justify-content:space-between`}>
 				<span>HP: {props.info.hp}</span>
 				<span>Mark: {props.info.mark}</span>
 				<span>Draw: {props.info.draw}</span>
@@ -87,7 +89,15 @@ function RenderInfo(props) {
 						});
 					}}
 				/>
-				<input type="button" value="Test" onClick={testDeck} />
+				<div style="display:flex;width:108px;justify-content:space-between">
+					<input type="button" value="Test" onClick={testDeck} />
+					<input
+						type="checkbox"
+						title="Reveal AI's hand during game"
+						checked={testPrecog()}
+						onChange={e => setTestPrecog(e.target.checked)}
+					/>
+				</div>
 			</div>
 		</>
 	);
