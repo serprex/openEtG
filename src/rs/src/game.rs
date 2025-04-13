@@ -1608,14 +1608,14 @@ impl Game {
 					let mut trueatk = self.trueatk(id);
 					if trueatk != 0 {
 						let psionic = self.get(id, Flag::psionic);
-						let mut bypass = psionic || self.get(id, Flag::momentum);
-						if !bypass && self.get(id, Flag::burrowed) {
-							bypass = self
-								.get_player(self.get_owner(id))
-								.permanents
-								.into_iter()
-								.any(|pr| pr != 0 && self.get(pr, Flag::tunnel))
-						}
+						let mut bypass = psionic
+							|| self.get(id, Flag::momentum)
+							|| (self.get(id, Flag::burrowed)
+								&& self
+									.get_player(self.get_owner(id))
+									.permanents
+									.into_iter()
+									.any(|pr| pr != 0 && self.get(pr, Flag::tunnel)));
 						let gpull = self.get(data.tgt, Stat::gpull);
 						let shield = self.get_shield(data.tgt);
 						if data.get(ProcData::freedom) {

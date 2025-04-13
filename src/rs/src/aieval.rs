@@ -843,6 +843,7 @@ impl WallShield {
 struct Wall {
 	pub shield: Option<WallShield>,
 	pub dmg: i16,
+	pub gpull: Option<i16>,
 	pub patience: bool,
 }
 
@@ -856,13 +857,16 @@ fn estimate_damage(ctx: &Game, id: i16, freedom: i32, wall: &mut Wall) -> i32 {
 	let foe = ctx.get_foe(owner);
 	let fsh = ctx.get_shield(foe);
 	let psionic = ctx.get(id, Flag::psionic);
-	if psionic && fsh != 0 && ctx.get(fsh, Flag::reflective) {
-		let reflect_dmg = once(tatk)
+	let iter_atk = || {
+		once(tatk)
 			.chain(
 				(1..if ctx.get(id, Stat::adrenaline) == 0 { 1 } else { etg::countAdrenaline(tatk) })
 					.map(|a| ctx.trueatk_adrenaline(id, a)),
 			)
-			.sum::<i16>();
+			.skip(delay as usize)
+	};
+	if psionic && fsh != 0 && ctx.get(fsh, Flag::reflective) {
+		let reflect_dmg = iter_atk().sum::<i16>();
 		if ctx.get(owner, Stat::sosa) == 0 {
 			wall.dmg += reflect_dmg
 		} else {
@@ -870,24 +874,35 @@ fn estimate_damage(ctx: &Game, id: i16, freedom: i32, wall: &mut Wall) -> i32 {
 		}
 		return 0;
 	}
-	let bypass = fsh == 0 || psionic || ctx.get(id, Flag::momentum);
-	let momentum = bypass
-		|| tatk <= 0
+	let bypass = psionic
+		|| ctx.get(id, Flag::momentum)
 		|| (ctx.get(id, Flag::burrowed)
-			&& ctx.get_player(owner).permanents.into_iter().any(|pr| pr != 0 && ctx.get(pr, Flag::tunnel)));
-	let dr = if !momentum && fsh != 0 { ctx.truedr(fsh, id) } else { 0 };
+			&& ctx.get_player(owner).permanents.into_iter().any(|pr| pr != 0 && ctx.get(pr, Flag::tunnel)))
+		|| tatk <= 0;
+	let dr = if !bypass && fsh != 0 { ctx.truedr(fsh, id) } else { 0 };
 	let mut atk = 0;
 	let mut momatk = 0;
-	for dmg in once(tatk).chain(
-		(1..if ctx.get(id, Stat::adrenaline) == 0 { 1 } else { etg::countAdrenaline(tatk) })
-			.map(|a| ctx.trueatk_adrenaline(id, a)),
-	) {
-		if delay != 0 {
-			delay -= 1;
-			continue;
+	let mut gpulldmg = 0;
+	for dmg in iter_atk() {
+		if !bypass {
+			if let Some(ref mut gp) = wall.gpull {
+				let capdmg = dmg.min((*gp).max(0));
+				gpulldmg += capdmg;
+				*gp -= dmg;
+				if *gp <= 0 {
+					wall.gpull = None;
+				} else if ctx.get(id, Flag::voodoo) {
+					wall.dmg = if ctx.get(owner, Stat::sosa) == 0 {
+						wall.dmg.saturating_add(capdmg)
+					} else {
+						wall.dmg.saturating_sub(capdmg)
+					};
+				}
+				continue;
+			}
 		}
 		momatk += dmg as i32;
-		if !momentum {
+		if !bypass && fsh != 0 {
 			atk += if let Some(ref mut wshield) = wall.shield {
 				wshield.dmg(ctx, id, (dmg - dr).max(0))
 			} else if dmg > dr {
@@ -898,12 +913,12 @@ fn estimate_damage(ctx: &Game, id: i16, freedom: i32, wall: &mut Wall) -> i32 {
 		}
 	}
 	momatk *= PREC;
-	if momentum {
+	if bypass {
 		atk = momatk;
 	}
 	if freedom != 0 && ctx.get(id, Flag::airborne) {
 		atk = atk * (PREC - freedom)
-			+ if (bypass && ctx.get(foe, Stat::gpull) == 0) || ctx.cardset() == CardSet::Original {
+			+ if (bypass && wall.gpull.is_none()) || ctx.cardset() == CardSet::Original {
 				(momatk * 3 + 1) / 2
 			} else {
 				momatk
@@ -912,11 +927,11 @@ fn estimate_damage(ctx: &Game, id: i16, freedom: i32, wall: &mut Wall) -> i32 {
 	}
 	for &skill in ctx.getSkill(id, Event::Hit) {
 		if skill == Skill::vampire {
-			if ctx.get(owner, Stat::sosa) == 0 {
-				wall.dmg = wall.dmg.saturating_sub((atk >> PRECBITS) as i16);
+			wall.dmg = if ctx.get(owner, Stat::sosa) == 0 {
+				wall.dmg.saturating_sub((atk >> PRECBITS) as i16 + gpulldmg)
 			} else {
-				wall.dmg = wall.dmg.saturating_add((atk >> PRECBITS) as i16);
-			}
+				wall.dmg.saturating_add((atk >> PRECBITS) as i16 + gpulldmg)
+			};
 		}
 	}
 	if ctx.get(foe, Stat::sosa) == 0 { atk } else { -atk }
@@ -1133,6 +1148,10 @@ pub fn eval(ctx: &Game) -> i32 {
 				&& ctx.get(pr, Stat::frozen) < 2
 				&& (ctx.hasskill(pr, Event::Attack, Skill::patience) || ctx.get(pr, Flag::patience))
 		});
+		let gpullid = player.thing.status.get(Stat::gpull);
+		if gpullid != 0 {
+			wall.gpull = Some(ctx.get(gpullid, Stat::hp));
+		}
 		if shield != 0 {
 			for &fsh in ctx.getSkill(shield, Event::Shield) {
 				match fsh {
