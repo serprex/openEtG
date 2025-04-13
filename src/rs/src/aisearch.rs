@@ -262,7 +262,7 @@ fn scan(ctx: &Game, depth: i32, candy: &mut Candidate, limit: &mut u32) {
 	for (id, sk) in pl
 		.hand
 		.into_iter()
-		.filter(|&id| ctx.canactive(id))
+		.filter(|&id| id != 0 && ctx.canactive(id))
 		.map(|id| {
 			let card = ctx.get_card(ctx.get(id, Stat::card));
 			(id, (if card.kind == Kind::Spell { ctx.getSkill(id, Event::Cast).first() } else { None }))

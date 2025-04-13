@@ -771,9 +771,7 @@ impl Tgt {
 							Tgt::_boom => {
 								let tkind = ctx.get_kind(t);
 								(tkind == Kind::Weapon || tkind == Kind::Creature)
-									&& ctx.get(t, Flag::golem)
-									&& !ctx.hasskill(t, Event::Cast, Skill::golemhit)
-
+									&& ctx.get(t, Flag::golem) && !ctx.hasskill(t, Event::Cast, Skill::golemhit)
 							}
 							Tgt::_butterfly => {
 								if ctx.cardset() == CardSet::Open {
@@ -2231,10 +2229,9 @@ impl Skill {
 			}
 			Self::deckblock => {
 				let owner = ctx.get_owner(c);
-				let pl = ctx.get_player(owner);
-				if !pl.thing.flag.get(Flag::protectdeck) {
+				if !ctx.get(owner, Flag::protectdeck) {
 					let mut idx = usize::MAX;
-					for (index, &id) in pl.deck.iter().enumerate().rev() {
+					for (index, &id) in ctx.get_player(owner).deck.iter().enumerate().rev() {
 						if ctx.get(id, Flag::pillar) {
 							idx = index;
 						}
@@ -2916,11 +2913,10 @@ impl Skill {
 				ctx.rmskill(c, Event::Attack, Skill::freedom);
 			}
 			Self::freeevade => {
-				if !data.get(ProcData::evade) {
+				if !data.get(ProcData::evade) && data.tgt != 0 {
 					let tgt = data.tgt;
 					let tgtowner = ctx.get_owner(tgt);
-					if tgt != 0
-						&& tgtowner == ctx.get_owner(c)
+					if tgtowner == ctx.get_owner(c)
 						&& tgtowner != ctx.get_owner(t)
 						&& ctx.get_kind(tgt) == Kind::Creature
 						&& ctx.get(tgt, Flag::airborne)
@@ -4745,9 +4741,8 @@ impl Skill {
 			}
 			Self::stasisdraw => {
 				let dlen = {
-					let pl = ctx.get_player_mut(t);
-					pl.thing.flag.0 |= Flag::drawlock | Flag::protectdeck;
-					pl.hand_len() as i16
+					ctx.get_thing_mut(t).flag.0 |= Flag::drawlock | Flag::protectdeck;
+					ctx.get_player(t).hand_len() as i16
 				};
 				let own = ctx.get_owner(c);
 				ctx.dmg(own, dlen * if card::Upped(ctx.get(c, Stat::card)) { -2 } else { -1 });
@@ -4840,7 +4835,10 @@ impl Skill {
 				ctx.freeze(c, 2);
 			}
 			Self::thorn(chance) => {
-				if !data.get(ProcData::poisoned) && !ctx.get(t, Flag::ranged) && ctx.upto(100) < chance as u32 {
+				if !data.get(ProcData::poisoned)
+					&& !ctx.get(t, Flag::ranged)
+					&& ctx.upto(100) < chance as u32
+				{
 					data.flags |= ProcData::poisoned;
 					ctx.poison(t, 1);
 				}
@@ -5256,17 +5254,18 @@ impl Skill {
 				}
 			}
 			Self::v_freeevade => {
-				let tgt = data.tgt;
-				let tgtowner = ctx.get_owner(tgt);
-				if tgt != 0
-					&& tgtowner == ctx.get_owner(c)
-					&& tgtowner != ctx.get_owner(t)
-					&& ctx.get_kind(tgt) == Kind::Creature
-					&& ctx.get(tgt, Flag::airborne)
-					&& ctx.get_card(ctx.get(tgt, Stat::card)).element as i16 == etg::Air
-					&& ctx.next32() & 3 < ctx.get(c, Stat::charges) as u32
-				{
-					data.flags |= ProcData::evade;
+				if data.tgt != 0 {
+					let tgt = data.tgt;
+					let tgtowner = ctx.get_owner(tgt);
+					if tgtowner == ctx.get_owner(c)
+						&& tgtowner != ctx.get_owner(t)
+						&& ctx.get_kind(tgt) == Kind::Creature
+						&& ctx.get(tgt, Flag::airborne)
+						&& ctx.get_card(ctx.get(tgt, Stat::card)).element as i16 == etg::Air
+						&& ctx.next32() & 3 < ctx.get(c, Stat::charges) as u32
+					{
+						data.flags |= ProcData::evade;
+					}
 				}
 			}
 			Self::v_gratitude => {

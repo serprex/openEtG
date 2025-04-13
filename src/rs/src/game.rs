@@ -74,7 +74,6 @@ impl ThingData {
 
 #[derive(Clone, Default)]
 pub struct PlayerData {
-	pub thing: ThingData,
 	pub foe: i16,
 	pub leader: i16,
 	pub weapon: i16,
@@ -573,12 +572,14 @@ impl Game {
 	pub fn new(seed: u32, set: CardSet, players: u8, now: u32) -> Game {
 		set_panic_hook();
 		let mut plprops = Vec::with_capacity(players as usize);
+		let mut props = Vec::with_capacity(players as usize * 60);
 		for id in 1..=players as i16 {
-			let mut pl: PlayerData = Default::default();
-			pl.thing.owner = id;
-			pl.thing.kind = Kind::Player;
-			pl.thing.status.insert(Stat::casts, 1);
-			plprops.push(Rc::new(pl));
+			plprops.push(Rc::new(PlayerData::default()));
+			let mut pl: ThingData = Default::default();
+			pl.owner = id;
+			pl.kind = Kind::Player;
+			pl.status.insert(Stat::casts, 1);
+			props.push(Rc::new(pl));
 		}
 
 		Game {
@@ -587,7 +588,7 @@ impl Game {
 			winner: 0,
 			phase: if set == CardSet::Original { Phase::Play } else { Phase::Mulligan },
 			plprops,
-			props: Vec::new(),
+			props,
 			attacks: Vec::new(),
 			cards: card::cardSetCards(set),
 			fx: None,
@@ -621,31 +622,27 @@ impl Game {
 	}
 
 	fn props_idx(&self, id: i16) -> usize {
-		id as usize - self.plprops.len() - 1
-	}
-
-	fn plprops_idx(&self, id: i16) -> usize {
-		(id - 1) as usize
+		id as usize - 1
 	}
 
 	pub fn get_owner(&self, id: i16) -> i16 {
-		if id <= self.players_len() { id } else { self.props[self.props_idx(id)].owner }
+		self.props[self.props_idx(id)].owner
 	}
 
 	pub fn get_kind(&self, id: i16) -> Kind {
-		if id <= self.players_len() { Kind::Player } else { self.props[self.props_idx(id)].kind }
+		self.props[self.props_idx(id)].kind
 	}
 
 	pub fn get_foe(&self, id: i16) -> i16 {
-		if id <= self.players_len() { self.plprops[self.plprops_idx(id)].foe } else { 0 }
+		if let Some(pl) = self.plprops.get(self.props_idx(id)) { pl.foe } else { 0 }
 	}
 
 	pub fn get_weapon(&self, id: i16) -> i16 {
-		if id <= self.players_len() { self.plprops[self.plprops_idx(id)].weapon } else { 0 }
+		if let Some(pl) = self.plprops.get(self.props_idx(id)) { pl.weapon } else { 0 }
 	}
 
 	pub fn get_shield(&self, id: i16) -> i16 {
-		if id <= self.players_len() { self.plprops[self.plprops_idx(id)].shield } else { 0 }
+		if let Some(pl) = self.plprops.get(self.props_idx(id)) { pl.shield } else { 0 }
 	}
 
 	pub fn clonegame(&self) -> Game {
@@ -756,7 +753,6 @@ impl Game {
 			v.hand.hash(&mut hasher);
 			v.deck.hash(&mut hasher);
 			v.quanta.hash(&mut hasher);
-			v.thing.hash(&mut hasher);
 		}
 		for (k, v) in self.props.iter().enumerate() {
 			k.hash(&mut hasher);
@@ -805,12 +801,13 @@ impl Game {
 		{
 			let mut pl = self.get_player_mut(id);
 			pl.deck = Rc::new(deck);
-			pl.thing.status.insert(Stat::hp, hp);
-			pl.thing.status.insert(Stat::maxhp, maxhp);
 			pl.mark = mark;
 			pl.drawpower = drawpower;
 			pl.deckpower = deckpower;
 			pl.markpower = markpower;
+			let mut thing = self.get_thing_mut(id);
+			thing.status.insert(Stat::hp, hp);
+			thing.status.insert(Stat::maxhp, maxhp);
 		}
 		self.drawhand(id, 7);
 		if self.cards.set == CardSet::Open {
@@ -1364,30 +1361,21 @@ impl Game {
 	}
 
 	pub fn get_player(&self, id: i16) -> &PlayerData {
-		self.plprops[self.plprops_idx(id)].as_ref()
+		self.plprops[self.props_idx(id)].as_ref()
 	}
 
 	pub fn get_player_mut(&mut self, id: i16) -> &mut PlayerData {
-		let idx = self.plprops_idx(id);
+		let idx = self.props_idx(id);
 		Rc::make_mut(&mut self.plprops[idx])
 	}
 
 	pub fn get_thing(&self, id: i16) -> &ThingData {
-		if id <= self.players_len() {
-			&self.plprops[self.plprops_idx(id)].thing
-		} else {
-			self.props[self.props_idx(id)].as_ref()
-		}
+		self.props[self.props_idx(id)].as_ref()
 	}
 
 	pub fn get_thing_mut(&mut self, id: i16) -> &mut ThingData {
-		if id <= self.players_len() {
-			let idx = self.plprops_idx(id);
-			&mut Rc::make_mut(&mut self.plprops[idx]).thing
-		} else {
-			let idx = self.props_idx(id);
-			Rc::make_mut(&mut self.props[idx])
-		}
+		let idx = self.props_idx(id);
+		Rc::make_mut(&mut self.props[idx])
 	}
 
 	pub fn get_mut(&mut self, id: i16, k: Stat) -> &mut i16 {
@@ -1767,9 +1755,7 @@ impl Game {
 	}
 
 	pub fn spelldmg(&mut self, mut id: i16, dmg: i16) -> i16 {
-		if id <= self.players_len() {
-			let idx = self.plprops_idx(id);
-			let pl = &self.plprops[idx];
+		if let Some(pl) = self.plprops.get(self.props_idx(id)) {
 			if pl.shield != 0 && self.get(pl.shield, Flag::reflective) {
 				id = pl.foe;
 			}
@@ -1935,10 +1921,10 @@ impl Game {
 	pub fn new_id(&mut self, ent: Rc<ThingData>) -> i16 {
 		if self.props.len() < 32000 {
 			self.props.push(ent);
-			self.players_len() + self.props.len() as i16
+			self.props.len() as i16
 		} else {
 			self.die(self.turn);
-			31999 + self.players_len()
+			31999
 		}
 	}
 
@@ -2235,12 +2221,12 @@ impl Game {
 				Kind::Weapon => self.get_player_mut(owner).weapon = 0,
 				Kind::Shield => self.get_player_mut(owner).shield = 0,
 				Kind::Creature => {
-					let mut pl = self.get_player_mut(owner);
-					if let StatusEntry::Occupied(o) = pl.thing.status.entry(Stat::gpull) {
+					if let StatusEntry::Occupied(o) = self.get_thing_mut(owner).status.entry(Stat::gpull) {
 						if o.get() == id {
 							o.remove();
 						}
 					}
+					let mut pl = self.get_player_mut(owner);
 					pl.creatures[index as usize] = 0;
 				}
 				Kind::Permanent => {
@@ -2311,8 +2297,8 @@ impl Game {
 			self.set(id, Flag::out, true);
 			if self.winner == 0 {
 				let mut winners = 0;
-				for pl in self.plprops.iter() {
-					if !pl.thing.flag.get(Flag::out) {
+				for (pl, thing) in self.plprops.iter().zip(self.props.iter()) {
+					if !thing.flag.get(Flag::out) {
 						if winners == 0 {
 							winners = pl.leader;
 						} else {
@@ -2436,19 +2422,19 @@ impl Game {
 				if self.cards.set != CardSet::Original {
 					self.dmg(next, self.get(next, Stat::poison));
 				}
-				let pl = self.get_player_mut(next);
-				if let Some(sosa) = pl.thing.status.get_mut(Stat::sosa) {
+				let pl = self.get_thing_mut(next);
+				if let Some(sosa) = pl.status.get_mut(Stat::sosa) {
 					if *sosa > 0 {
 						*sosa -= 1;
 					}
 				}
-				pl.thing.flag.0 &= !(Flag::sanctuary | Flag::precognition | Flag::protectdeck);
+				pl.flag.0 &= !(Flag::sanctuary | Flag::precognition | Flag::protectdeck);
 				for status in [Stat::nova, Stat::nova2] {
-					if let Some(val) = pl.thing.status.get_mut(status) {
+					if let Some(val) = pl.status.get_mut(status) {
 						*val = 0;
 					}
 				}
-				for _ in 0..pl.drawpower {
+				for _ in 0..self.get_player(next).drawpower {
 					self.drawstep(next);
 				}
 				self.turn = next;
