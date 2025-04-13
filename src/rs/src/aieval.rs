@@ -1148,7 +1148,7 @@ pub fn eval(ctx: &Game) -> i32 {
 				&& ctx.get(pr, Stat::frozen) < 2
 				&& (ctx.hasskill(pr, Event::Attack, Skill::patience) || ctx.get(pr, Flag::patience))
 		});
-		let gpullid = player.thing.status.get(Stat::gpull);
+		let gpullid = ctx.get(pl, Stat::gpull);
 		if gpullid != 0 {
 			wall.gpull = Some(ctx.get(gpullid, Stat::hp));
 		}

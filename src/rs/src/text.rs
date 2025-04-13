@@ -513,9 +513,9 @@ impl<'a> SkillThing<'a> {
 				"Give target card you own, either in hand or in play, to your opponent. Heal yourself {}. This card bypasses sanctuary, & can target immaterial or burrowed cards",
 				if self.upped() { "10" } else { "5" }
 			)),
-			Skill::golemhit => {
-				Cow::from("Target golem without this ability attacks. This ability can target immaterial or burrowed cards")
-			}
+			Skill::golemhit => Cow::from(
+				"Target golem without this ability attacks. This ability can target immaterial or burrowed cards",
+			),
 			Skill::gpull => Cow::from("Redirect attacks to this creature's owner to self"),
 			Skill::gpullspell => Cow::from("Redirect attacks to target's owner to target"),
 			Skill::growth(atk, hp) if ev == Event::Death => {
@@ -1052,7 +1052,9 @@ impl<'a> SkillThing<'a> {
 			Skill::tesseractsummon => Cow::from(
 				"Summon a random creatures from opponent's deck. Summon two random creatures from your deck. Freeze these creatures for a number of turns equal to \u{00bc} of their quanta cost, rounded up. Freeze Tesseract for two turns",
 			),
-			Skill::thorn(x) => Cow::from(format!("{x}% chance to poison non-ranged attackers unless poisoned already by shield")),
+			Skill::thorn(x) => Cow::from(format!(
+				"{x}% chance to poison non-ranged attackers unless poisoned already by shield"
+			)),
 			Skill::throwrock => Cow::from(if self.upped() {
 				"Deal 4 damage to target creature, then shuffle Throw Rock into its owner's deck"
 			} else {
