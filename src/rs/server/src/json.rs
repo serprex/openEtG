@@ -505,22 +505,22 @@ pub struct GamesMove {
 pub enum GamesMoveCmd {
 	end {
 		#[serde(default)]
-		t: i32,
+		t: i16,
 	},
 	cast {
-		c: i32,
+		c: i16,
 		#[serde(default)]
-		t: i32,
+		t: i16,
 	},
 	accept,
 	mulligan,
 	shuffle {
-		t: i32,
+		t: i16,
 	},
 	foe {
-		t: i32,
+		t: i16,
 	},
 	resign {
-		c: i32,
+		c: i16,
 	},
 }

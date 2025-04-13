@@ -463,26 +463,19 @@ impl Flag {
 	}
 }
 
-pub struct FlagIter {
-	value: u64,
-	result: u64,
-}
+pub struct FlagIter(u64);
 
 impl Iterator for FlagIter {
 	type Item = u64;
 
 	fn next(&mut self) -> Option<Self::Item> {
-		while self.value != 0 {
-			let result = if (self.value & 1) != 0 { Some(self.result) } else { None };
-
-			self.value >>= 1;
-			self.result <<= 1;
-
-			if result.is_some() {
-				return result;
-			}
+		if self.0 != 0 {
+			let result = 1 << self.0.trailing_zeros();
+			self.0 &= !result;
+			Some(result)
+		} else {
+			None
 		}
-		None
 	}
 }
 
@@ -491,7 +484,7 @@ impl IntoIterator for Flag {
 	type IntoIter = FlagIter;
 
 	fn into_iter(self) -> Self::IntoIter {
-		FlagIter { value: self.0, result: 1 }
+		FlagIter(self.0)
 	}
 }
 
