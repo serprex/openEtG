@@ -413,7 +413,7 @@ impl<'a> SkillThing<'a> {
 				"Gain the strength, skills, & statuses of target weapon. Gain 0|2.\nCannot gain Endow skill",
 			),
 			Skill::envenom => Cow::from(
-				"Target equipment gains \"Give 1 poison on hit. Throttled (only triggers twice from Adrenaline)\" & \"25% chance to poison non-ranged attackers.\"",
+				"Target equipment gains \"Give 1 poison on hit. Throttled (only triggers twice from Adrenaline)\" & \"25% chance to poison non-ranged attackers unless poisoned already by shield\"",
 			),
 			Skill::epidemic => {
 				Cow::from("When any creature dies, poison opponent equal to dying creature's poison")
@@ -514,7 +514,7 @@ impl<'a> SkillThing<'a> {
 				if self.upped() { "10" } else { "5" }
 			)),
 			Skill::golemhit => {
-				Cow::from("Target golem attacks. This ability can target immaterial or burrowed cards")
+				Cow::from("Target golem without this ability attacks. This ability can target immaterial or burrowed cards")
 			}
 			Skill::gpull => Cow::from("Redirect attacks to this creature's owner to self"),
 			Skill::gpullspell => Cow::from("Redirect attacks to target's owner to target"),
@@ -1052,7 +1052,7 @@ impl<'a> SkillThing<'a> {
 			Skill::tesseractsummon => Cow::from(
 				"Summon a random creatures from opponent's deck. Summon two random creatures from your deck. Freeze these creatures for a number of turns equal to \u{00bc} of their quanta cost, rounded up. Freeze Tesseract for two turns",
 			),
-			Skill::thorn(x) => Cow::from(format!("{x}% chance to poison non-ranged attackers")),
+			Skill::thorn(x) => Cow::from(format!("{x}% chance to poison non-ranged attackers unless poisoned already by shield")),
 			Skill::throwrock => Cow::from(if self.upped() {
 				"Deal 4 damage to target creature, then shuffle Throw Rock into its owner's deck"
 			} else {

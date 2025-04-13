@@ -360,7 +360,7 @@ fn eval_skill(
 					for &sk in ctx.getSkill(pl.shield, Event::Shield) {
 						if let Skill::thorn(x) = sk {
 							if x > 0 {
-								score += ctx.count_creatures(pl.foe) as i32 * (PREC * 100 / x as i32);
+								score += ctx.count_creatures(pl.foe) as i32 * (PREC * 16) / x as i32;
 							}
 						}
 					}

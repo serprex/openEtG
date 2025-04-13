@@ -117,6 +117,7 @@ impl ProcData {
 	pub const flood: u16 = 1 << 8;
 	pub const nothrottle: u16 = 1 << 9;
 	pub const vindicated: u16 = 1 << 10;
+	pub const poisoned: u16 = 1 << 11;
 
 	pub fn get(self, flag: u16) -> bool {
 		(self.flags & flag) != 0
@@ -684,13 +685,13 @@ impl Tgt {
 	deftgt!(creacrea, _creacrea, 12);
 	deftgt!(play, _play, 13);
 	deftgt!(sing, _sing, 14);
-	deftgt!(butterfly, _butterfly, 15);
-	deftgt!(devour, _devour, 16);
-	deftgt!(paradox, _paradox, 17);
-	deftgt!(skele, _skele, 18);
-	deftgt!(forceplay, _forceplay, 19);
-	deftgt!(airbornecrea, _airbornecrea, 20);
-	deftgt!(golem, _golem, 21);
+	deftgt!(boom, _boom, 15);
+	deftgt!(butterfly, _butterfly, 16);
+	deftgt!(devour, _devour, 17);
+	deftgt!(paradox, _paradox, 18);
+	deftgt!(skele, _skele, 19);
+	deftgt!(forceplay, _forceplay, 20);
+	deftgt!(airbornecrea, _airbornecrea, 21);
 	deftgt!(groundcrea, _groundcrea, 22);
 	deftgt!(wisdom, _wisdom, 23);
 	deftgt!(quinttog, _quinttog, 24);
@@ -767,6 +768,13 @@ impl Tgt {
 								ctx.material(t, Some(Kind::Creature))
 									&& !ctx.hasskill(t, Event::Cast, Skill::sing)
 							}
+							Tgt::_boom => {
+								let tkind = ctx.get_kind(t);
+								(tkind == Kind::Weapon || tkind == Kind::Creature)
+									&& ctx.get(t, Flag::golem)
+									&& !ctx.hasskill(t, Event::Cast, Skill::golemhit)
+
+							}
 							Tgt::_butterfly => {
 								if ctx.cardset() == CardSet::Open {
 									let tkind = ctx.get_kind(t);
@@ -796,11 +804,6 @@ impl Tgt {
 							}
 							Tgt::_airbornecrea => {
 								ctx.material(t, Some(Kind::Creature)) && ctx.get(t, Flag::airborne)
-							}
-							Tgt::_golem => {
-								let tkind = ctx.get_kind(t);
-								(tkind == Kind::Weapon || tkind == Kind::Creature)
-									&& ctx.get(t, Flag::golem)
 							}
 							Tgt::_groundcrea => {
 								ctx.material(t, Some(Kind::Creature)) && !ctx.get(t, Flag::airborne)
@@ -1485,7 +1488,7 @@ impl Skill {
 			}
 			Self::freezeperm => tgt!(and perm nonstack),
 			Self::give => tgt!(and and own not play notself),
-			Self::golemhit => tgt!(and golem notself),
+			Self::golemhit => Tgt::boom,
 			Self::gpullspell => {
 				if set == CardSet::Open {
 					tgt!(or crea play)
@@ -4837,7 +4840,8 @@ impl Skill {
 				ctx.freeze(c, 2);
 			}
 			Self::thorn(chance) => {
-				if !ctx.get(t, Flag::ranged) && ctx.upto(100) < chance as u32 {
+				if !data.get(ProcData::poisoned) && !ctx.get(t, Flag::ranged) && ctx.upto(100) < chance as u32 {
+					data.flags |= ProcData::poisoned;
 					ctx.poison(t, 1);
 				}
 			}
