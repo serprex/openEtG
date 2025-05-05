@@ -4170,7 +4170,7 @@ impl Skill {
 				let thing = ctx.get_thing_mut(t);
 				match thing.status.entry(Stat::poison) {
 					StatusEntry::Vacant(hole) => {
-						hole.status.0.insert(hole.idx, (hole.stat, -2));
+						hole.status.0.insert(hole.idx, (hole.stat, -x));
 					}
 					StatusEntry::Occupied(spot) => {
 						let poison = &mut spot.status.0[spot.idx].1;
