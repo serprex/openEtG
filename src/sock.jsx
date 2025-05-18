@@ -197,7 +197,7 @@ const sockEvents = {
 					}
 				}
 			}
-			flagstr ??= data.flag.sort().join(' ');
+			flagstr ??= data.flags.sort().join(' ');
 		}
 		store.chat(() => (
 			<div
