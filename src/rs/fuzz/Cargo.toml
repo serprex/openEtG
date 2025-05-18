@@ -12,6 +12,6 @@ opt-level = 1
 
 [dependencies]
 etg = { version = "0.1", path = "../" }
-rand = { version = "0.8", default-features = false }
-rand_pcg = { version = "0.3", default-features = false }
+rand = { version = "0.9", default-features = false }
+rand_pcg = { version = "0.9", default-features = false }
 rayon = "1"

@@ -29,7 +29,7 @@ fn main() {
 	println!("seed = {}", seed);
 	let rng = Mutex::new(rand_pcg::Pcg32::seed_from_u64(seed));
 	(0..usize::MAX).into_par_iter().for_each(|_| {
-		let seed = rng.lock().unwrap().gen();
+		let seed = rng.lock().unwrap().random();
 		let (set, pillar, sose) = if seed & 1 == 1 {
 			(CardSet::Open, card::QuantumPillar, card::ShardofSerendipity)
 		} else {
@@ -40,7 +40,7 @@ fn main() {
 			)
 		};
 		println!("{}", seed);
-		let mut game = Game::new(seed, set, 2);
+		let mut game = Game::new(seed, set, 2, 0);
 		let players = [1, 2];
 		for p in players {
 			game.set_leader(p, p);
@@ -50,7 +50,7 @@ fn main() {
 				p,
 				100,
 				100,
-				Chroma,
+				Chroma as i8,
 				1,
 				1,
 				1,
