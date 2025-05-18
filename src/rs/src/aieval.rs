@@ -902,7 +902,7 @@ fn estimate_damage(ctx: &Game, id: i16, freedom: i32, wall: &mut Wall) -> i32 {
 			}
 		}
 		momatk += dmg as i32;
-		if !bypass && fsh != 0 {
+		if !bypass {
 			atk += if let Some(ref mut wshield) = wall.shield {
 				wshield.dmg(ctx, id, (dmg - dr).max(0))
 			} else if dmg > dr {
