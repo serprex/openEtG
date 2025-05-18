@@ -167,7 +167,8 @@ async fn main() {
 	let server = Arc::new(Server { pgpool, users, socks, cache, tls });
 	let gc = server.clone();
 
-	let mut interval = tokio::time::interval(Duration::new(300, 0));
+	let mut interval59 = tokio::time::interval(Duration::new(59, 0));
+	let mut interval293 = tokio::time::interval(Duration::new(293, 0));
 	tokio::spawn(async move {
 		loop {
 			tokio::select! {
@@ -179,18 +180,24 @@ async fn main() {
 						break;
 					}
 				}
-				_ = interval.tick() => (),
-			}
-			if let Ok(client) = gc.pgpool.get().await {
-				let mut users = gc.users.write().await;
-				let _ = tokio::join!(users
-					.store(&client, &gc.socks),
-					client.execute("delete from trade_request where expire_at < now()", &[]),
-					client.execute(
-						"with expiredids (id) as (select id from games where expire_at < now()) \
-						, requests as (delete from match_request mr where exists (select * from expiredids eg where eg.id = mr.game_id)) \
-						delete from games g where exists (select * from expiredids eg where eg.id = g.id)", &[]),
-				);
+				_ = interval59.tick() => {
+					for sock in gc.socks.read().await.values() {
+						sock.tx.send(hyper_tungstenite::tungstenite::Message::Ping(Bytes::new())).ok();
+					}
+				}
+				_ = interval293.tick() => {
+					if let Ok(client) = gc.pgpool.get().await {
+						let mut users = gc.users.write().await;
+						let _ = tokio::join!(users
+							.store(&client, &gc.socks),
+							client.execute("delete from trade_request where expire_at < now()", &[]),
+							client.execute(
+								"with expiredids (id) as (select id from games where expire_at < now()) \
+								, requests as (delete from match_request mr where exists (select * from expiredids eg where eg.id = mr.game_id)) \
+								delete from games g where exists (select * from expiredids eg where eg.id = g.id)", &[]),
+						);
+					}
+				}
 			}
 		}
 	});

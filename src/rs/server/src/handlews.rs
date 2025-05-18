@@ -68,9 +68,9 @@ where
 type WsSender = mpsc::UnboundedSender<Message>;
 
 pub struct Sock {
-	tx: WsSender,
-	afk: bool,
-	hide: bool,
+	pub tx: WsSender,
+	pub afk: bool,
+	pub hide: bool,
 }
 
 pub type AsyncUsers = RwLock<Users>;
