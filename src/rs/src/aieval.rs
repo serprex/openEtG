@@ -762,7 +762,7 @@ fn eval_skill(
 }
 
 fn throttled(s: Skill) -> bool {
-	matches!(s, Skill::poison(_) | Skill::neuro | Skill::regen | Skill::siphon)
+	matches!(s, Skill::poison(_) | Skill::mill | Skill::neuro | Skill::regen | Skill::siphon)
 }
 
 fn caneventuallyactive(ctx: &Game, id: i16, cost: i16, costele: i16, quantamap: &QuantaMap) -> bool {
@@ -1362,7 +1362,7 @@ pub fn eval(ctx: &Game) -> i32 {
 			pscore -= 2 * PREC;
 		}
 		if ctx.get(pl, Flag::neuro) {
-			pscore -= (24 + player.hand_len() as i32) * (PREC / 8);
+			pscore -= 24 + player.hand_len() as i32;
 		}
 		score += if ctx.get_leader(pl) == ctx.get_leader(turn) { pscore } else { -pscore };
 	}
