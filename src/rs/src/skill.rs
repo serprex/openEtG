@@ -915,14 +915,14 @@ const fn legacy_banned(code: i16) -> bool {
 }
 
 enum Soya {
-	Flag(u8),
-	Stat(Stat, i16),
-	Skill(Event, [Skill; 1]),
+	Flag(u8, u8, u8),
+	Stat(u8, u8, Stat, i16),
+	Skill(u8, u8, Event, [Skill; 1]),
 }
 
 impl Soya {
-	const fn flag(flag: u64) -> Self {
-		Soya::Flag(flag.trailing_zeros() as u8)
+	const fn flag(e: u8, amt: u8, flag: u64) -> Self {
+		Soya::Flag(e, amt, flag.trailing_zeros() as u8)
 	}
 }
 
@@ -3371,39 +3371,46 @@ impl Skill {
 						Skill::wisdom,
 					],
 				];
-				const ShardStats: [(u8, u8, Soya); 28] = [
-					(0, 3, Soya::Skill(Event::Hit, [Skill::scramble])),
-					(1, 1, Soya::Skill(Event::Death, [Skill::growth(1, 1)])),
-					(1, 1, Soya::flag(Flag::nocturnal)),
-					(1, 2, Soya::Skill(Event::Hit, [Skill::poison(1)])),
-					(2, 2, Soya::flag(Flag::momentum)),
-					(4, 1, Soya::flag(Flag::poisonous)),
-					(4, 2, Soya::Stat(Stat::adrenaline, 1)),
-					(4, 4, Soya::Skill(Event::OwnAttack, [Skill::regenerate(5)])),
-					(5, 1, Soya::Skill(Event::Buff, [Skill::fiery])),
-					(6, 1, Soya::flag(Flag::aquatic)),
-					(6, 3, Soya::Skill(Event::Hit, [Skill::regen])),
-					(7, 1, Soya::Skill(Event::OwnAttack, [Skill::quanta(etg::Light as i8)])),
-					(7, 2, Soya::Skill(Event::Blocked, [Skill::virtue])),
-					(7, 3, Soya::Skill(Event::OwnDmg, [Skill::martyr])),
-					(7, 4, Soya::Skill(Event::OwnFreeze, [Skill::growth(2, 2)])),
-					(7, 5, Soya::Skill(Event::Hit, [Skill::disarm])),
-					(7, 6, Soya::Skill(Event::OwnAttack, [Skill::sanctify])),
-					(8, 1, Soya::flag(Flag::airborne)),
-					(9, 2, Soya::Skill(Event::Hit, [Skill::neuro])),
-					(10, 1, Soya::flag(Flag::nocturnal)),
-					(10, 1, Soya::flag(Flag::voodoo)),
-					(10, 2, Soya::Skill(Event::OwnAttack, [Skill::siphon])),
-					(10, 3, Soya::Skill(Event::Hit, [Skill::vampire])),
-					(10, 4, Soya::Skill(Event::Hit, [Skill::reducemaxhp])),
-					(10, 5, Soya::Skill(Event::Destroy, [Skill::loot])),
-					(10, 6, Soya::Skill(Event::OwnDeath, [Skill::catlife])),
-					(10, 6, Soya::Stat(Stat::lives, 9000)),
-					(11, 3, Soya::flag(Flag::immaterial)),
+				const ShardStats: [Soya; 35] = [
+					Soya::Skill(0, 2, Event::Hit, [Skill::scramble]),
+					Soya::Skill(0, 3, Event::Spell, [Skill::ricochet]),
+					Soya::Skill(0, 5, Event::Hit, [Skill::dmgproduce]),
+					Soya::Skill(1, 1, Event::Death, [Skill::growth(1, 1)]),
+					Soya::flag(1, 1, Flag::nocturnal),
+					Soya::Skill(1, 2, Event::Hit, [Skill::poison(1)]),
+					Soya::Skill(2, 1, Event::Prespell, [Skill::deathwish]),
+					Soya::flag(2, 2, Flag::momentum),
+					Soya::flag(4, 1, Flag::poisonous),
+					Soya::Stat(4, 2, Stat::adrenaline, 1),
+					Soya::Skill(4, 4, Event::OwnAttack, [Skill::regenerate(5)]),
+					Soya::Skill(5, 1, Event::Buff, [Skill::fiery]),
+					Soya::Skill(5, 2, Event::Buff, [Skill::quanta(etg::Fire as i8)]),
+					Soya::flag(6, 1, Flag::aquatic),
+					Soya::Skill(6, 2, Event::Hit, [Skill::regen]),
+					Soya::Skill(7, 1, Event::OwnAttack, [Skill::quanta(etg::Light as i8)]),
+					Soya::Skill(7, 2, Event::Blocked, [Skill::virtue]),
+					Soya::Skill(7, 3, Event::OwnDmg, [Skill::martyr]),
+					Soya::Skill(7, 4, Event::OwnFreeze, [Skill::growth(2, 2)]),
+					Soya::Skill(7, 5, Event::Hit, [Skill::disarm]),
+					Soya::Skill(7, 6, Event::OwnAttack, [Skill::sanctify]),
+					Soya::flag(8, 1, Flag::airborne),
+					Soya::Skill(8, 2, Event::Predeath, [Skill::bounce]),
+					Soya::Skill(9, 2, Event::Hit, [Skill::mill]),
+					Soya::Skill(9, 3, Event::Hit, [Skill::neuro]),
+					Soya::flag(10, 1, Flag::nocturnal),
+					Soya::flag(10, 1, Flag::voodoo),
+					Soya::Skill(10, 2, Event::OwnAttack, [Skill::siphon]),
+					Soya::Skill(10, 3, Event::Hit, [Skill::vampire]),
+					Soya::Skill(10, 4, Event::Hit, [Skill::reducemaxhp]),
+					Soya::Skill(10, 5, Event::Destroy, [Skill::loot]),
+					Soya::Skill(10, 6, Event::OwnDeath, [Skill::catlife]),
+					Soya::Stat(10, 6, Stat::lives, 9000),
+					Soya::flag(11, 2, Flag::psionic),
+					Soya::flag(11, 3, Flag::immaterial),
 				];
 				let mut tally = [0u8; 12];
 				tally[etg::Earth as usize - 1] = 1;
-				let mut stat2 = 2;
+				let mut stat4 = 4;
 				let owner = ctx.get_owner(c);
 				let mut idx = 0;
 				let mut len = ctx.get_player(owner).hand_len();
@@ -3412,7 +3419,7 @@ impl Skill {
 					if etg::ShardList[1..].iter().any(|&shard| card::IsOf(code, shard)) {
 						let card = ctx.get_card(code);
 						tally[card.element as usize - 1] += 1;
-						stat2 += if card::Upped(code) { 4 } else { 3 };
+						stat4 += if card::Upped(code) { 7 } else { 6 };
 						ctx.get_player_mut(owner).hand_remove(idx);
 						len -= 1;
 					} else {
@@ -3491,29 +3498,35 @@ impl Skill {
 					_ => 0,
 				};
 				let mut shardgolem = ThingData::default();
-				shardgolem.status.insert(Stat::atk, stat2 / 2);
-				shardgolem.status.insert(Stat::maxhp, stat2 / 2);
-				shardgolem.status.insert(Stat::hp, stat2 / 2);
+				shardgolem.status.insert(Stat::atk, stat4 >> 2);
+				shardgolem.status.insert(Stat::maxhp, stat4 >> 2);
+				shardgolem.status.insert(Stat::hp, stat4 >> 2);
 				shardgolem.status.insert(Stat::castele, etg::Earth);
 				shardgolem.status.insert(Stat::cast, activecost);
 				shardgolem.skill.insert(Event::Cast, active);
-				for &(idx, n, ref soya) in ShardStats.iter() {
-					if tally[idx as usize] >= n {
-						match soya {
-							&Soya::Flag(flag) => {
+				for soya in ShardStats.iter() {
+					match soya {
+						&Soya::Flag(idx, n, flag) => {
+							if tally[idx as usize] >= n {
 								shardgolem.flag.0 |= 1 << flag;
 							}
-							&Soya::Stat(stat, val) => {
+						}
+						&Soya::Stat(idx, n, stat, val) => {
+							if tally[idx as usize] >= n {
 								shardgolem.status.insert(stat, val);
 							}
-							&Soya::Skill(ev, ref sk) => match shardgolem.skill.entry(ev) {
-								SkillsEntry::Occupied(o) => {
-									o.into_mut().extend_from_slice(sk);
+						}
+						&Soya::Skill(idx, n, ev, ref sk) => {
+							if tally[idx as usize] >= n {
+								match shardgolem.skill.entry(ev) {
+									SkillsEntry::Occupied(o) => {
+										o.into_mut().extend_from_slice(sk);
+									}
+									SkillsEntry::Vacant(v) => {
+										v.insert(Cow::from(&sk[..]));
+									}
 								}
-								SkillsEntry::Vacant(v) => {
-									v.insert(Cow::from(&sk[..]));
-								}
-							},
+							}
 						}
 					}
 				}
