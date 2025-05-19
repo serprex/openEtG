@@ -985,7 +985,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::catlife => f.write_str("catlife"),
 			Skill::cell => f.write_str("cell"),
 			Skill::chaos => f.write_str("chaos"),
-			Skill::chimera => Ok(()),
+			Skill::chimera => f.write_str("chimera"),
 			Skill::chromastat => f.write_str("chromastat"),
 			Skill::clear => f.write_str("clear"),
 			Skill::cold => f.write_str("cold"),
