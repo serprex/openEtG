@@ -89,6 +89,7 @@ function fightItOut() {
 			}\n`;
 		},
 	};
+	let n = 0;
 	async function gameStep(worker) {
 		for (;;) {
 			const seed = (mode === fight && parseInt(seedput.value)) || randint();
@@ -98,7 +99,7 @@ function fightItOut() {
 				name: i.toString(),
 				deck,
 			}));
-			if (seed & 1) players.reverse();
+			if ((limit.value ? n++ : seed) & 1) players.reverse();
 			const game = new Game({ seed, set, players });
 			const realp1 = game.userId(0);
 

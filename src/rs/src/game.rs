@@ -812,7 +812,7 @@ impl Game {
 		self.drawhand(id, 7);
 		if self.cards.set == CardSet::Open {
 			if id > 1 {
-				self.proc_mark(id);
+				self.spend(id, mark as i16, -1);
 			}
 		} else {
 			if self.get_player(id).hand.into_iter().all(|card| self.get(card, Stat::cost) != 0) {
