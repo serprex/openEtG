@@ -126,7 +126,7 @@ pub enum ContentType {
 	ApplicationJavascript,
 	ApplicationJson,
 	ApplicationOctetStream,
-	ApplicationOgg,
+	ApplicationOpus,
 	ApplicationWasm,
 	ImageIcon,
 	ImageSvgXml,
@@ -180,7 +180,7 @@ impl CachedResponse {
 					ContentType::ApplicationJavascript => "application/javascript",
 					ContentType::ApplicationJson => "application/json",
 					ContentType::ApplicationOctetStream => "application/octet-stream",
-					ContentType::ApplicationOgg => "application/ogg",
+					ContentType::ApplicationOpus => "audio/ogg",
 					ContentType::ApplicationWasm => "application/wasm",
 					ContentType::ImageIcon => "image/x-icon",
 					ContentType::ImageSvgXml => "image/svg+xml",
@@ -210,7 +210,7 @@ async fn handle_get_core(
 	if path.contains("..") || !path.starts_with('/') {
 		return response::Builder::new().status(403).body(Bytes::new());
 	}
-	let accept = if path.ends_with(".webp") || path.ends_with(".ogg") {
+	let accept = if path.ends_with(".webp") || path.ends_with(".opus") {
 		Encoding::identity
 	} else {
 		accept.map(|x| x.0).unwrap_or(Encoding::identity)
@@ -305,7 +305,7 @@ async fn handle_get_core(
 		let data = tokio::fs::read(&uppath).await.unwrap_or(Vec::new());
 		let mtime = tokio::fs::metadata(&uppath).await.ok().and_then(|md| md.modified().ok());
 		PlainResponse {
-			kind: ContentType::ApplicationOgg,
+			kind: ContentType::ApplicationOpus,
 			cache: CacheControl::NoCache,
 			content: data,
 			mtime,

@@ -3,11 +3,18 @@ const sounds = new Map(),
 let currentMusic,
 	soundEnabled = false,
 	musicEnabled = false;
+
+export const musicList = [
+	[0, null, 'Silence'],
+	[1, 'openingMusic', "Timpa's Piano"],
+	[2, 'avesElemental', "Aves' Elemental"],
+];
+
 export function playSound(name, mayreset = false) {
 	if (soundEnabled) {
 		let sound = sounds.get(name);
 		if (!sound) {
-			sound = new Audio(`sound/${name}.ogg`);
+			sound = new Audio(`sound/${name}.opus`);
 			sounds.set(name, sound);
 		}
 		if (mayreset && sound.duration) sound.currentTime = 0;
@@ -19,14 +26,18 @@ export function playMusic(name) {
 	let music;
 	if (musicEnabled && (music = musics.get(currentMusic))) music.pause();
 	currentMusic = name;
-	if (musicEnabled) {
+	if (musicEnabled && currentMusic) {
 		music = musics.get(name);
 		if (!music) {
-			music = new Audio(`sound/${name}.ogg`);
+			music = new Audio(`sound/${name}.opus`);
 			musics.set(name, music);
 			music.loop = true;
 		}
-		music.play();
+		music.play().catch(() => {
+			if (currentMusic === name) {
+				currentMusic = null;
+			}
+		});
 	}
 }
 export function changeSound(enabled) {
@@ -40,10 +51,12 @@ export function changeSound(enabled) {
 export function changeMusic(enabled) {
 	musicEnabled = enabled;
 	if (!musicEnabled) {
-		const music = musics.get(currentMusic);
-		if (music) music.pause();
+		if (currentMusic) {
+			const music = musics.get(currentMusic);
+			if (music) music.pause();
+		}
 	} else {
-		const name = currentMusic;
+		const name = currentMusic ?? 'openingMusic';
 		currentMusic = null;
 		playMusic(name);
 	}

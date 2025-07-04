@@ -1390,15 +1390,17 @@ export default function Match(props) {
 	};
 	const setlandscape = e => setLandscape(!e.target.type.startsWith('portrait'));
 	onMount(() => {
+		const { game } = props;
+
+		store.loadMusic(game.data.level !== undefined ? game.data.level : 'match');
 		if (typeof screen !== 'undefined' && screen.orientation)
 			screen.orientation.addEventListener('change', setlandscape);
 		if (props.replay) return;
-		if (!props.game.data.spectate) {
+		if (!game.data.spectate) {
 			document.addEventListener('keydown', onkeydown);
 			window.addEventListener('beforeunload', onbeforeunload);
 		}
 
-		const { game } = props;
 		if (
 			!props.noloss &&
 			!game.data.endurance &&

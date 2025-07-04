@@ -2,8 +2,10 @@ import { onCleanup } from 'solid-js';
 import { createStore } from 'solid-js/store';
 
 import * as usercmd from './usercmd.js';
-import { changeMusic, changeSound } from './audio.js';
+import { changeMusic, changeSound, musicList } from './audio.js';
 import { iterraw, mergedecks, removedecks } from './etgutil.js';
+import { playMusic } from './audio.js';
+import { choose } from './util.js';
 
 export const Login =
 	typeof kongregateAPI === 'undefined' ?
@@ -247,4 +249,28 @@ export function useRx(cb = x => x) {
 	const [signal, setState] = createStore(cb(state));
 	onCleanup(subscribe(state => setState(cb(state))));
 	return signal;
+}
+
+var cooldown = 0,
+	cooldownPrefix = '';
+export function loadMusic(prefix) {
+	if (
+		state.opts.enableMusic &&
+		(prefix != cooldownPrefix ||
+			Date.now() - cooldown > (+state.opts.musicCooldown || 300) * 1000)
+	) {
+		cooldownPrefix = prefix;
+		const candidates = [];
+		for (const [id, opus, _] of musicList) {
+			if (state.opts[`music${prefix}_${id}`]) {
+				candidates.push(opus);
+			}
+		}
+		if (prefix !== 'main' && prefix !== 'match' && candidates.length === 0) {
+			return loadMusic('match');
+		}
+		const candidate =
+			candidates.length === 0 ? musicList[1][1] : choose(candidates);
+		playMusic(candidate);
+	}
 }

@@ -1,6 +1,6 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 
-import { changeMusic, changeSound } from '../audio.js';
+import { changeMusic, changeSound, musicList } from '../audio.js';
 import Chat from '../Components/Chat.jsx';
 import * as sock from '../sock.jsx';
 import { mkAi, mkPremade } from '../mkAi.js';
@@ -35,7 +35,7 @@ const tipjar = [
 	'Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped',
 	"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons",
 	'A ply is half a turn',
-	'Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm',
+	'Mark cards are only obtainable through PvP events',
 	"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
 	'Wealth used by leaderboards is a combination of current gold & cardpool',
 ];
@@ -73,6 +73,17 @@ function logout() {
 	store.doNav(store.Login);
 }
 
+const musicTargetList = [
+	['main', 'Default'],
+	['match', 'Match'],
+	['0', 'Commoner'],
+	['1', 'Mage'],
+	['2', 'Champion'],
+	['3', 'Demigod'],
+	['4', 'Arena 1'],
+	['5', 'Arena 2'],
+];
+
 export default function MainMenu(props) {
 	const rx = store.useRx();
 	const foename = () => (rx.opts.foename ?? '').trim(),
@@ -80,6 +91,8 @@ export default function MainMenu(props) {
 
 	const [ocard, setocard] = createSignal(props.nymph);
 	const [settings, setSettings] = createSignal(false);
+	const [musicbox, setMusicbox] = createSignal(false);
+	const [musicboxTarget, setMusicboxTarget] = createSignal(musicTargetList[0]);
 	const [changepass, setChangepass] = createSignal(false);
 	let newpass, newpass2, rewardcode;
 
@@ -95,6 +108,7 @@ export default function MainMenu(props) {
 	};
 
 	onMount(() => {
+		store.loadMusic('main');
 		if (
 			!hasflag(rx.user, 'no-oracle') &&
 			((Date.now() / 86400000) | 0) > rx.user.oracle
@@ -538,6 +552,49 @@ export default function MainMenu(props) {
 						/>
 					</div>
 				</div>
+				{musicbox() && (
+					<div
+						class="bgbox"
+						style="position:relative;left:302px;top:150px;width:290px;height:160px;z-index:1;display:flex;flex-direction:column;align-content:space-between;justify-content:space-between">
+						<div style="display:flex;flex-direction:column;align-content:center;justify-content:space-between;flex-wrap:wrap;align-items:flex-start">
+							<input
+								type="number"
+								placeholder="cooldown"
+								value={+rx.opts.musicCooldown || 300}
+								onChange={e => store.setOpt('musicCooldown', e.target.value)}
+							/>
+							<div>
+								{musicTargetList.map(target => (
+									<input
+										type="button"
+										class={musicboxTarget() === target ? 'selected' : ''}
+										value={target[1]}
+										onClick={() => setMusicboxTarget(target)}
+									/>
+								))}
+								{musicboxTarget()[1]}
+							</div>
+							{musicList.map(([id, _opus, name]) => (
+								<label>
+									<input
+										type="checkbox"
+										checked={!!rx.opts[`music${musicboxTarget()[0]}_${id}`]}
+										onChange={e => {
+											store.setOpt(
+												`music${musicboxTarget()[0]}_${id}`,
+												e.target.checked,
+											);
+											if (musicboxTarget()[0] === 'main') {
+												store.loadMusic('main');
+											}
+										}}
+									/>
+									{name}
+								</label>
+							))}
+						</div>
+					</div>
+				)}
 				{changepass() && (
 					<div
 						class="bgbox"
@@ -583,6 +640,7 @@ export default function MainMenu(props) {
 						onClick={() => {
 							setSettings(settings => !settings);
 							setChangepass(false);
+							setMusicbox(false);
 							if (newpass) newpass.value = '';
 							if (newpass2) newpass2.value = '';
 						}}
@@ -600,15 +658,14 @@ export default function MainMenu(props) {
 				{settings() && (
 					<div
 						class="bgbox"
-						style="position:absolute;left:302px;top:310px;width:min-content;height:200px;display:flex;flex-direction:column;align-content:space-between;justify-content:space-between;">
-						<input
-							type="button"
-							value="Change Password"
-							onClick={() => setChangepass(true)}
-							style="width:fit-content"
-						/>
+						style="position:absolute;left:302px;top:310px;width:min-content;height:200px;display:flex;flex-direction:column;align-content:space-between;justify-content:space-between">
 						<div style="display:flex;flex-wrap:nowrap;justify-content:space-between;align-items:flex-start">
 							<div style="display:flex;flex-direction:column;align-content:center;justify-content:space-between;flex-wrap:wrap;align-items:flex-start;">
+								<input
+									type="button"
+									value="Change Password"
+									onClick={() => setChangepass(true)}
+								/>
 								<label>
 									<input
 										type="checkbox"
@@ -653,6 +710,11 @@ export default function MainMenu(props) {
 								</label>
 							</div>
 							<div style="display:flex;flex-direction:column;align-content:center;justify-content:space-between;flex-wrap:wrap;align-items:flex-start">
+								<input
+									type="button"
+									value="Musicbox"
+									onClick={() => setMusicbox(value => !value)}
+								/>
 								<label>
 									<input
 										type="checkbox"
