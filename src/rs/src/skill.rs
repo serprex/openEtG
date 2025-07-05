@@ -2572,9 +2572,25 @@ impl Skill {
 				let heal = ctx.count_creatures(owner);
 				ctx.fx(c, Fx::Heal(heal));
 				ctx.dmg(owner, -heal);
-				if ctx.cardset() == CardSet::Open && !ctx.spend(owner, etg::Chroma, heal / 8) {
-					ctx.get_player_mut(owner).quanta.fill(0);
-					ctx.die(c);
+				if ctx.cardset() == CardSet::Open {
+					let free = ctx
+						.get_player(owner)
+						.creatures
+						.into_iter()
+						.map(|cr| {
+							(cr != 0
+								&& ctx.get(cr, Flag::burrowed)
+								&& ctx
+									.get_player(ctx.get_owner(c))
+									.permanents
+									.into_iter()
+									.any(|pr| pr != 0 && ctx.get(pr, Flag::tunnel))) as i16
+						})
+						.sum::<i16>();
+					if !ctx.spend(owner, etg::Chroma, (heal - free) / 8) {
+						ctx.get_player_mut(owner).quanta.fill(0);
+						ctx.die(c);
+					}
 				}
 			}
 			Self::enchant => {
@@ -5033,6 +5049,15 @@ impl Skill {
 				ctx.set(c, Flag::vindicated, false);
 			}
 			Self::upkeep => {
+				if ctx.get(c, Flag::burrowed)
+					&& ctx
+						.get_player(ctx.get_owner(c))
+						.permanents
+						.into_iter()
+						.any(|pr| pr != 0 && ctx.get(pr, Flag::tunnel))
+				{
+					return;
+				}
 				if !ctx.spend(ctx.get_owner(c), ctx.get_card(ctx.get(c, Stat::card)).element as i16, 1) {
 					ctx.die(c);
 				}

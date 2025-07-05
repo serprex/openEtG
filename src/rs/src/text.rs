@@ -1295,7 +1295,7 @@ impl<'a> SkillThing<'a> {
 		for k in self.flags() {
 			match k {
 				Flag::cloak => ret.push_str("Cloaks your field. Opponent cannot see your actions or directly target your other cards.\n"),
-				Flag::tunnel => ret.push_str("Any of your creatures that are burrowed bypass shields.\n"),
+				Flag::tunnel => ret.push_str("Any of your creatures that are burrowed bypass shields & are immune to upkeep.\n"),
 				Flag::patience =>
 					ret.push_str("Each turn delay own creatures. They gain 2|2. 5|5 if flooded. Unique.\n"),
 				Flag::voodoo =>
