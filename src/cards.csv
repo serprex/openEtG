@@ -192,7 +192,7 @@
 7301|Sapphire Charger|3|4|1|5|7|4||momentum
 5302|Armagio|3|4|1|3|1|25|0=gpull|ranged
 7302|Armagio|3|4|1|3|2|30|0=gpull|ranged
-5303|Graviton Mercenary|3|4|1|3|3|5||
+5303|Graviton Mercenary|3|4|1|3|3|6||
 7303|Graviton Guard|3|4|1|2|4|7||
 5304|Colossal Dragon|3|4|2|9|8|24||airborne
 7304|Massive Dragon|3|4|2|9|8|32||airborne
@@ -446,7 +446,7 @@
 7700|Water Tower|7|2|0|0|||pillar+ownplay=pillar1|pillar+stackable+additive+charges=1
 5701|Chrysaora|7|4|1|1||2|1:2=poisonfoe 1|poisonous+aquatic
 7701|Physalia|7|4|1|1|2|2|1:2=poisonfoe 1|poisonous+aquatic
-5702|Blue Crawler|7|4|1|3|3|4||nocturnal+aquatic
+5702|Blue Crawler|7|4|1|3|3|5||nocturnal+aquatic
 7702|Abyss Crawler|7|4|1|4|6|6||nocturnal+aquatic
 5703|Freeze|7|3|1|1|||freeze 4|
 7703|Freeze|7|3|1|1|||freeze 5|
@@ -496,7 +496,7 @@
 7725|Atlantis's Protection|7|3|2|2|||protectall|
 5726|Fishing Rod|7|0|3|3|3|3|2:10=fish|aquatic
 7726|Fishing Rod|7|0|3|3|3|3|1:10=fish|aquatic
-5727|Diving Bell Spider|7|4|1|2|2|5|1:9=bellweb|aquatic+bug
+5727|Diving Bell Spider|7|4|1|2|2|5|1:9=bellweb+prespell=protectonce+spelldmg=protectoncedmg|aquatic+bug
 7727|Diving Bell Spider|7|4|1|2|4|4|1:9=bellweb|aquatic+bug
 5728|Bobbit Worm|7|4|2|5|3|4|1:4=detain|aquatic+burrowed+bug
 7728|Bobbit Worm|7|4|2|5|5|5|1:4=detain|aquatic+burrowed+bug
@@ -554,8 +554,8 @@
 7821|Pacify|8|3|1|2|||pacify|
 5822|Prismatic Gladius|8|0|3|1|3|5|1:7=growth 2 2+ownfreeze=icegrowth|
 7822|Prismatic Gladius|8|0|3|1|5|5|1:7=growth 2 2+ownfreeze=icegrowth|
-5823|Reinforce|8|3|2|4|||bolsterintodeck|
-7823|Reinforce|8|3|2|3|||bolsterintodeck|
+5823|Reinforce|8|3|2|3|||bolsterintodeck|
+7823|Reinforce|8|3|2|2|||bolsterintodeck|
 5824|Writ of Vindication|8|2|2|3|||death=vindicate+turnstart=unvindicate|
 7824|Writ of Vindication|8|2|2|2|||death=vindicate+turnstart=unvindicate|
 5825|Writ of Vengeance|8|2|2|4|||death=vengeance|stackable+additive+charges=108

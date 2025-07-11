@@ -213,7 +213,7 @@ impl<'a> SkillThing<'a> {
 			Skill::bloodmoon => Cow::from(
 				"Aquatic creatures gain \"Gain 1:8 when it attacks.\"\nGolems gain \"Damage dealt by this card also reduces the defender's maxHP.\"\nNocturnal creatures gain \"Heal yourself equal to the damage dealt by this card.\"",
 			),
-			Skill::bolsterintodeck => Cow::from("Add 3 copies of target creature on top of your deck"),
+			Skill::bolsterintodeck => Cow::from("Add 3 exact copies of target creature or weapon on top of your deck"),
 			Skill::bonesharpen => Cow::from(
 				"Replace your own target creature's skills with \"0: Combine with target creature, giving strength, HP, & poison counters\"\nIf not poisoned & target is skeleton, reactivated",
 			),
