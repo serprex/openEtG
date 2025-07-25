@@ -1021,6 +1021,9 @@ impl Game {
 	}
 
 	pub fn getIndex(&self, id: i16) -> i32 {
+		if !self.has_id(id) {
+			return -1
+		}
 		let owner = self.get_owner(id);
 		match self.get_kind(id) {
 			Kind::Player => id as i32 - 1,

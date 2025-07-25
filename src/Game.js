@@ -63,7 +63,7 @@ export default class Game {
 	}
 
 	getCard(id) {
-		return this.Cards.Codes[this.get(id, 'card')];
+		return this.has_id(id) ? this.Cards.Codes[this.get(id, 'card')] : null;
 	}
 
 	clone() {
@@ -95,7 +95,9 @@ export default class Game {
 		return null;
 	}
 	get(id, key) {
-		return this.get_stat(id, enums.StatId[key] ?? enums.FlagId[key]);
+		return this.has_id(id) ?
+				this.get_stat(id, enums.StatId[key] ?? enums.FlagId[key])
+			:	null;
 	}
 	aiSearch() {
 		const cmd = this.aisearch();

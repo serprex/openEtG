@@ -480,7 +480,9 @@ for (let i = 0; i < 12; i++) {
 }
 
 function Thing(props) {
-	const isSpell = () => props.game.get_kind(props.id) === Kind.Spell,
+	const isSpell = () =>
+			props.game.has_id(props.id) &&
+			props.game.get_kind(props.id) === Kind.Spell,
 		bgcolor = () => maybeLightenStr(props.game.getCard(props.id)),
 		faceDown = () =>
 			isSpell() &&
@@ -514,7 +516,7 @@ function Thing(props) {
 					:	(props.game.material(props.id) ? 1 : 0.7) * props.pos.opacity,
 				color:
 					faceDown() ? undefined
-					: props.game.getCard(props.id).upped ? '#000'
+					: props.game.getCard(props.id)?.upped ? '#000'
 					: '#fff',
 				'pointer-events': ~props.game.getIndex(props.id) ? undefined : 'none',
 			}}
@@ -524,7 +526,7 @@ function Thing(props) {
 					e.buttons & 1 &&
 					!props.targeting &&
 					(props.opts.shiftDrag || e.shiftKey) &&
-					props.game.get_kind(props.id) !== Kind.Spell
+					!isSpell()
 				) {
 					props.onClick(props.id);
 				} else {
@@ -538,12 +540,16 @@ function Thing(props) {
 				<div class="inner" style={`background-color:${bgcolor()}`}>
 					<Show when={!props.opts.lofiArt}>
 						<img
-							class={`art${props.game.getCard(props.id).shiny ? ' shiny' : ''}`}
+							class={`art${
+								props.game.getCard(props.id)?.shiny ? ' shiny' : ''
+							}`}
 							src={`/Cards/${encodeCode(
-								props.game.get(props.id, 'card') +
-									(asShiny(props.game.get(props.id, 'card'), false) < 5000 ?
-										4000
-									:	0),
+								props.game.has_id(props.id) ?
+									props.game.get(props.id, 'card') +
+										(asShiny(props.game.get(props.id, 'card'), false) < 5000 ?
+											4000
+										:	0)
+								:	'',
 							)}.webp`}
 						/>
 					</Show>
@@ -568,7 +574,7 @@ function Thing(props) {
 						</div>
 						<Show when={!isSpell()}>
 							<div class="name" style={`background-color:${bgcolor()}`}>
-								{props.game.getCard(props.id).name}
+								{props.game.getCard(props.id)?.name}
 							</div>
 						</Show>
 					</div>
@@ -725,7 +731,11 @@ function addNoHealData(game, newdata) {
 function tgtclass(game, p1id, id, targeting) {
 	if (targeting) {
 		if (targeting.filter(id)) return ' cantarget';
-	} else if (game.get_owner(id) === p1id && game.canactive(id))
+	} else if (
+		game.has_id(id) &&
+		game.get_owner(id) === p1id &&
+		game.canactive(id)
+	)
 		return ' canactive';
 	return '';
 }
@@ -1205,7 +1215,9 @@ export default function Match(props) {
 			if (discard === 0 && game.full_hand(p1id())) {
 				setTargeting({
 					filter: id =>
-						game.get_kind(id) === Kind.Spell && game.get_owner(id) === p1id(),
+						game.has_id(id) &&
+						game.get_kind(id) === Kind.Spell &&
+						game.get_owner(id) === p1id(),
 					cb: endClick,
 					text: 'Discard',
 					src: null,
@@ -1228,7 +1240,9 @@ export default function Match(props) {
 			tax_left === 0 ? null : (
 				{
 					filter: id =>
-						game.get_kind(id) === Kind.Spell && game.get_owner(id) === p1id(),
+						game.has_id(id) &&
+						game.get_kind(id) === Kind.Spell &&
+						game.get_owner(id) === p1id(),
 					cb: shuffleClick,
 					text: 'Shuffle ' + tax_left,
 					src: null,
@@ -1250,6 +1264,7 @@ export default function Match(props) {
 					tax_left === 0 ? null : (
 						{
 							filter: id =>
+								game.has_id(id) &&
 								game.get_kind(id) === Kind.Spell &&
 								game.get_owner(id) === p1id(),
 							cb: shuffleClick,
@@ -1279,7 +1294,7 @@ export default function Match(props) {
 	const thingClick = id => {
 		const game = pgame();
 		clearCard();
-		if (props.replay || game.phase === Phase.End) return;
+		if (props.replay || game.phase === Phase.End || !game.has_id(id)) return;
 		const tgting = targeting();
 		if (tgting) {
 			if (tgting.filter(id)) {
@@ -1288,6 +1303,7 @@ export default function Match(props) {
 			}
 		} else if (
 			game.phase === Phase.Play &&
+			game.has_id(id) &&
 			game.get_owner(id) === p1id() &&
 			game.canactive(id)
 		) {
@@ -1470,7 +1486,8 @@ export default function Match(props) {
 			text: `${game().thingText(id)}${actinfo ? '\n' + actinfo : ''}`,
 			style: `position:fixed;left:${e.clientX}px;top:${e.clientY}px;z-index:5`,
 		});
-		if (game().get_kind(id) !== Kind.Player) setCard(e, game().getCard(id));
+		if (game().has_id(id) && game().get_kind(id) !== Kind.Player)
+			setCard(e, game().getCard(id));
 	};
 
 	const clearCard = () => {

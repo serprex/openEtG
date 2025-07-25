@@ -44,7 +44,7 @@ export const strcols = [
 	'#ade',
 ];
 export function maybeLightenStr(card) {
-	return strcols[card.element + card.upped * 13];
+	return card && strcols[card.element + card.upped * 13];
 }
 const avgcols = [];
 for (let i = 0; i < 13; i++) {
