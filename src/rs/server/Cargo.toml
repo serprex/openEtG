@@ -23,7 +23,7 @@ fxhash = "0.2"
 getrandom = "0.3"
 http-body-util = "0.1.0"
 hyper = { version = "1", features = ["http1", "server"] }
-hyper-tungstenite = "0.17"
+hyper-tungstenite = "0.18"
 hyper-util = { version = "0.1", default-features = false }
 tokio-rustls = { version = "0.26", default-features = false, features = ["aws-lc-rs"] }
 postgres-types = { version = "0.2", features = ["derive"] }

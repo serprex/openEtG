@@ -167,7 +167,7 @@ async fn main() {
 	let server = Arc::new(Server { pgpool, users, socks, cache, tls });
 	let gc = server.clone();
 
-	let mut interval59 = tokio::time::interval(Duration::new(59, 0));
+	let mut interval47 = tokio::time::interval(Duration::new(47, 0));
 	let mut interval293 = tokio::time::interval(Duration::new(293, 0));
 	tokio::spawn(async move {
 		loop {
@@ -180,7 +180,7 @@ async fn main() {
 						break;
 					}
 				}
-				_ = interval59.tick() => {
+				_ = interval47.tick() => {
 					for sock in gc.socks.read().await.values() {
 						sock.tx.send(hyper_tungstenite::tungstenite::Message::Ping(Bytes::new())).ok();
 					}
