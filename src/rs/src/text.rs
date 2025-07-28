@@ -1056,9 +1056,9 @@ impl<'a> SkillThing<'a> {
 				"{x}% chance to poison non-ranged attackers unless poisoned already by shield"
 			)),
 			Skill::throwrock => Cow::from(if self.upped() {
-				"Deal 4 damage to target creature, then shuffle Throw Rock into the creature owner's deck"
+				"Deal 4 damage to target creature, then shuffle Throw Rock into target's owner's deck"
 			} else {
-				"Deal 3 damage to target creature, then shuffle Throw Rock into the creature owner's deck"
+				"Deal 3 damage to target creature, then shuffle Throw Rock into target's owner's deck"
 			}),
 			Skill::tick => Cow::from(if self.upped() {
 				"This creature takes 2 damage. If this damage kills the creature, deal 4 spell damage to all of opponent's creatures"
