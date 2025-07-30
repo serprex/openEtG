@@ -7,10 +7,10 @@ import * as store from '../store.jsx';
 import { chain } from '../util.js';
 import Editor from '../Components/Editor.jsx';
 
-const arpts = 380;
+const arpts = 400;
 const artable = {
-	hp: { min: 60, incr: 20, cost: 1 },
-	mark: { cost: 20 },
+	hp: { min: 50, incr: 25, cost: 1 },
+	mark: { cost: 25 },
 	draw: { cost: 100 },
 };
 function AttrUi(p) {
@@ -94,7 +94,7 @@ export default function ArenaEditor(props) {
 	});
 
 	const [attr, setAttr] = createSignal({
-		hp: props.ainfo.hp ?? 140,
+		hp: props.ainfo.hp ?? 150,
 		mark: props.ainfo.mark ?? 2,
 		draw: props.ainfo.draw ?? 2,
 	});
