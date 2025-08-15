@@ -402,7 +402,7 @@ impl Status {
 		}
 	}
 
-	pub fn entry(&mut self, stat: Stat) -> StatusEntry {
+	pub fn entry<'a>(&'a mut self, stat: Stat) -> StatusEntry<'a> {
 		match self.0.binary_search_by_key(&stat, |kv| kv.0) {
 			Err(idx) => StatusEntry::Vacant(StatusVacant { status: self, idx, stat }),
 			Ok(idx) => StatusEntry::Occupied(StatusOccupied { status: self, idx }),
@@ -1022,7 +1022,7 @@ impl Game {
 
 	pub fn getIndex(&self, id: i16) -> i32 {
 		if !self.has_id(id) {
-			return -1
+			return -1;
 		}
 		let owner = self.get_owner(id);
 		match self.get_kind(id) {
@@ -1400,7 +1400,7 @@ impl Game {
 		self.cards.random_card(&self.rng, upped, |c| ffilt(self, c))
 	}
 
-	pub fn skill_text(&self, id: i16, ev: Event) -> Option<SkillsName> {
+	pub fn skill_text<'a>(&'a self, id: i16, ev: Event) -> Option<SkillsName<'a>> {
 		if let Some(sk) = self.get_thing(id).skill.get(ev) {
 			if !sk.is_empty() {
 				return Some(SkillsName { ctx: self, sk, id });
