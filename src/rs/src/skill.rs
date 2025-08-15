@@ -2073,15 +2073,17 @@ impl Skill {
 			}
 			Self::coldsnap => {
 				let charges = ctx.get_mut(c, Stat::charges);
-				let count = (core::mem::replace(charges, 0) + 1) as u32;
-				let owner = ctx.get_owner(t);
-				if !ctx.sanctified(owner) {
-					ctx.remove(t);
-					let decklen = ctx.get_player(owner).deck.len() as u32;
-					for n in 1..=count {
-						let idx = ctx.upto(decklen + n) as usize;
-						let inst = if n == count { t } else { ctx.cloneinst(t) };
-						ctx.get_player_mut(owner).deck_mut().insert(idx, inst);
+				let count = core::mem::replace(charges, 0);
+				if count > 0 {
+					let owner = ctx.get_owner(t);
+					if !ctx.sanctified(owner) {
+						ctx.remove(t);
+						let decklen = ctx.get_player(owner).deck.len() as u32;
+						for n in 0..count {
+							let idx = ctx.upto(decklen + n as u32) as usize;
+							let inst = if n == 0 { t } else { ctx.cloneinst(t) };
+							ctx.get_player_mut(owner).deck_mut().insert(idx, inst);
+						}
 					}
 				}
 			}
@@ -4099,7 +4101,7 @@ impl Skill {
 			Self::photosynthesis => {
 				ctx.fx(c, Fx::Quanta(2, etg::Life as i8));
 				ctx.spend(ctx.get_owner(c), etg::Life, -2);
-				if ctx.get(c, Stat::poison) <= 0
+				if !ctx.get(c, Flag::neuro)
 					&& ctx.get(c, Stat::cast) > if ctx.get(c, Stat::castele) == etg::Chroma { 1 } else { 0 }
 				{
 					ctx.set(c, Stat::casts, 1);
@@ -4900,10 +4902,29 @@ impl Skill {
 			Self::tidalhealing => {
 				for cr in ctx.get_player(ctx.get_owner(c)).creatures {
 					if cr != 0 {
-						ctx.set(cr, Stat::poison, 0);
-						ctx.set(cr, Stat::frozen, 0);
-						if ctx.get(cr, Flag::aquatic) && !ctx.hasskill(cr, Event::Hit, Skill::regen) {
-							ctx.addskills(cr, Event::Hit, &[Skill::regen]);
+						let thing = ctx.get_thing_mut(cr);
+						if let Some(val) = thing.status.get_mut(Stat::poison) {
+							*val = 0
+						}
+						if let Some(val) = thing.status.get_mut(Stat::frozen) {
+							*val = 0
+						}
+						thing.flag.0 &= !(Flag::aflatoxin | Flag::neuro);
+						if thing.flag.get(Flag::aquatic) {
+							match thing.skill.entry(Event::Hit) {
+								SkillsEntry::Vacant(hole) => {
+									hole.insert(Cow::from(&[Skill::regen]));
+								}
+								SkillsEntry::Occupied(spot) => {
+									for (k, v) in spot.skills.iter_mut() {
+										if k == Event::Hit {
+											if v.iter().all(|sk| !matches!(sk, Skill::regen)) {
+												v.to_mut().push(Skill::regen)
+											}
+										}
+									}
+								}
+							}
 						}
 					}
 				}

@@ -213,7 +213,9 @@ impl<'a> SkillThing<'a> {
 			Skill::bloodmoon => Cow::from(
 				"Aquatic creatures gain \"Gain 1:8 when it attacks.\"\nGolems gain \"Damage dealt by this card also reduces the defender's maxHP.\"\nNocturnal creatures gain \"Heal yourself equal to the damage dealt by this card.\"",
 			),
-			Skill::bolsterintodeck => Cow::from("Add 3 exact copies of target creature or weapon on top of your deck"),
+			Skill::bolsterintodeck => {
+				Cow::from("Add 3 exact copies of target creature or weapon on top of your deck")
+			}
 			Skill::bonesharpen => Cow::from(
 				"Replace your own target creature's skills with \"0: Combine with target creature, giving strength, HP, & poison counters\"\nIf not poisoned & target is skeleton, reactivated",
 			),
@@ -286,7 +288,7 @@ impl<'a> SkillThing<'a> {
 			),
 			Skill::cold => Cow::from("\u{2153} chance to freeze non-ranged attackers for 3 turns"),
 			Skill::coldsnap => Cow::from(
-				"Shuffle target card into owner's deck. Expend charges to shuffle that many more copies",
+				"Expend charges to shuffle as many copies of target card into its owner's deck. Ineffective without charges",
 			),
 			Skill::corpseexplosion => Cow::from(if self.upped() {
 				"Sacrifice one of your creatures to deal 1 spell damage to all enemy creatures. Increase damage by 1 for every 5HP of the sacrifice. Poisonous or poisoned sacrifices inflict 1 poison. Also affect opponent"
@@ -761,9 +763,9 @@ impl<'a> SkillThing<'a> {
 			} else {
 				"When this creature dies, transform it into an Ash"
 			}),
-			Skill::photosynthesis => {
-				Cow::from("Gain 2:5. Unless poisoned or cost was 0 or 1:0, caster reactivated")
-			}
+			Skill::photosynthesis => Cow::from(
+				"Gain 2:5. Unless afflicted with neurotoxin or cost was 0 or 1:0, caster reactivated",
+			),
 			Skill::pillar => Cow::from(format!(
 				"Gain {}:{} every turn",
 				if self.card().element == 0 { '3' } else { '1' },
@@ -917,7 +919,7 @@ impl<'a> SkillThing<'a> {
 				"Target cannot gain quanta until their turn ends. Their deck is protected until start of their next turn.\nSilence all your opponent's creatures & heal all your creatures by 8",
 			),
 			Skill::sabbath if ev == Event::Mulligan => Cow::from(
-				"When this card is mulliganed, opponent cannot gain quanta until their first turn ends.",
+				"When this card is mulliganed, opponent cannot gain quanta until their first turn ends",
 			),
 			Skill::sadism => Cow::from("Whenever any creatures are damaged, heal yourself an equal amount"),
 			Skill::salvage => Cow::from(if self.set() == CardSet::Open {
