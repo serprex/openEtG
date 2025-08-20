@@ -497,7 +497,7 @@
 5726|Fishing Rod|7|0|3|3|3|3|2:10=fish|aquatic
 7726|Fishing Rod|7|0|3|3|3|3|1:10=fish|aquatic
 5727|Diving Bell Spider|7|4|1|2|2|5|1:9=bellweb+prespell=protectonce+spelldmg=protectoncedmg|aquatic+bug
-7727|Diving Bell Spider|7|4|1|2|4|4|1:9=bellweb|aquatic+bug
+7727|Diving Bell Spider|7|4|1|2|4|4|1:9=bellweb+prespell=protectonce+spelldmg=protectoncedmg|aquatic+bug
 5728|Bobbit Worm|7|4|2|5|3|4|1:4=detain|aquatic+burrowed+bug
 7728|Bobbit Worm|7|4|2|5|5|5|1:4=detain|aquatic+burrowed+bug
 5729|Arctic Dolphin|7|4|2|6|6|4|2=deepdive|aquatic
