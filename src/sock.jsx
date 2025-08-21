@@ -272,6 +272,10 @@ socket.onclose = function () {
 	}, timeout);
 	store.chatMsg(`Reconnecting in ${timeout}ms`, 'System');
 };
+const emptyBlob = new Blob();
+setInterval(function () {
+	socket.send(emptyBlob);
+}, 50003);
 export function emit(data) {
 	const msg = JSON.stringify(data);
 	if (socket?.readyState === 1) {
