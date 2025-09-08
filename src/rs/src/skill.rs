@@ -4428,7 +4428,7 @@ impl Skill {
 				}
 				for cr in ctx.get_player(owner).creatures {
 					if cr != 0 {
-						ctx.dmg(cr, -10);
+						ctx.dmg(cr, -8);
 					}
 				}
 				ctx.set(t, Flag::protectdeck, true);
