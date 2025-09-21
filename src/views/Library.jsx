@@ -41,13 +41,7 @@ export default function Library(props) {
 				);
 			};
 		Cards.Codes.forEach((card, code) => {
-			if (
-				!card.upped &&
-				!card.shiny &&
-				card.type &&
-				!card.token &&
-				~card.rarity
-			) {
+			if (!card.upped && !card.shiny && !card.token && ~card.rarity) {
 				progressmax += 42;
 				const prog = codeprog(code);
 				const idx = card.rarity * 13 + card.element;
