@@ -1,6 +1,6 @@
 import { createSignal, onMount, Index } from 'solid-js';
 
-import { emit, setCmds } from '../../sock.jsx';
+import { userEmit, setCmds } from '../../sock.jsx';
 import { doNav } from '../../store.jsx';
 
 export default function Wealth() {
@@ -8,22 +8,25 @@ export default function Wealth() {
 
 	onMount(() => {
 		setCmds({
-			legacyboard: ({ top }) => {
-				setTop(top);
+			legacyboard: ({ ownscore, top }) => {
+				setTop({ ownscore, top });
 			},
 		});
-		emit({ x: 'legacyboard' });
+		userEmit('legacyboard');
 	});
 
 	return (
 		<div style="display:flex">
-			<input
-				type="button"
-				value="Exit"
-				onClick={() => doNav(import('./MainMenu.jsx'))}
-			/>
+			<div>
+				<input
+					type="button"
+					value="Exit"
+					onClick={() => doNav(import('./MainMenu.jsx'))}
+				/>
+				<div>{getTop()?.ownscore}</div>
+			</div>
 			<div style="width:810px;display:grid;grid-template-rows:repeat(33,18px);column-gap:18px;grid-auto-flow:column;grid-auto-columns:257px;white-space:nowrap">
-				<Index each={getTop()}>
+				<Index each={getTop()?.top}>
 					{(item, i) => (
 						<div style="display:flex;justify-content:space-between">
 							<div style="text-overflow:ellipsis;overflow:hidden">

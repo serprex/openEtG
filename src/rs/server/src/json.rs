@@ -243,6 +243,11 @@ pub enum AuthMessage {
 	setquest {
 		quest: String,
 	},
+	leaderboard {
+		flags: HashSet<String>,
+		category: Leaderboard,
+	},
+	legacyboard,
 }
 
 #[derive(Deserialize, Clone)]
@@ -280,11 +285,6 @@ pub enum UserMessage {
 	arenatop {
 		lv: u8,
 	},
-	leaderboard {
-		flags: HashSet<String>,
-		category: Leaderboard,
-	},
-	legacyboard,
 	chatus {
 		hide: Option<bool>,
 		afk: Option<bool>,
@@ -466,9 +466,11 @@ pub enum WsResponse<'a> {
 		flags: HashSet<String>,
 		category: Leaderboard,
 		top: &'a [(&'a str, &'a str, i32)],
+		ownscore: i32,
 	},
 	legacyboard {
 		top: &'a [(&'a str, &'a str, i32)],
+		ownscore: i32,
 	},
 }
 

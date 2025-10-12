@@ -2235,6 +2235,57 @@ pub async fn handle_ws(
 								}
 							}
 						}
+						AuthMessage::leaderboard { flags, category } => {
+							let leagueid = leagueid(&flags);
+							let ownscore = logerr(client
+								.query(concat!(
+										"select val ",
+										"from leaderboard l ",
+										"join user_data ud on l.data_id = ud.id and ud.user_id = $3 ",
+										"where league_id = $1 and category = $2"), &[&leagueid, &category, &userid])
+								.await).ok().and_then(|rows| rows.first().map(|row| row.get::<usize, i32>(0))).unwrap_or_default();
+							if let Ok(rows) = logerr(client
+								.query(concat!(
+										"select u.name, ud.name, val ",
+										"from leaderboard l ",
+										"join user_data ud on l.data_id = ud.id ",
+										"join users u on ud.user_id = u.id ",
+										"where league_id = $1 and category = $2 ",
+										"order by val desc limit 99"), &[&leagueid, &category])
+								.await)
+							{
+								let mut top = Vec::with_capacity(rows.len());
+								for row in rows.iter() {
+									top.push((row.get::<usize, &str>(0), row.get::<usize, &str>(1), row.get::<usize, i32>(2)));
+								}
+								sendmsg(&tx, &WsResponse::leaderboard { flags, category, ownscore, top: &top });
+							}
+						}
+						AuthMessage::legacyboard => {
+							let ownscore = logerr(client
+								.query(concat!(
+										"select val ",
+										"from leaderboard l ",
+										"join user_data ud on l.data_id = ud.id and ud.user_id = $1 ",
+										"where league_id = 1 and category = 'Wealth'"), &[&userid])
+								.await).ok().and_then(|rows| rows.first().map(|row| row.get::<usize, i32>(0))).unwrap_or_default();
+							if let Ok(rows) = logerr(client
+								.query(concat!(
+										"select u.name, ud.name, val ",
+										"from leaderboard l ",
+										"join user_data ud on l.data_id = ud.id ",
+										"join users u on ud.user_id = u.id ",
+										"where league_id = 1 and category = 'Wealth' ",
+										"order by val desc limit 99"), &[])
+								.await)
+							{
+								let mut top = Vec::with_capacity(rows.len());
+								for row in rows.iter() {
+									top.push((row.get::<usize, &str>(0), row.get::<usize, &str>(1), row.get::<usize, i32>(2)));
+								}
+								sendmsg(&tx, &WsResponse::legacyboard { ownscore, top: &top });
+							}
+						}
 					}
 				}
 				UserMessage::guestchat { u, msg } => {
@@ -2527,43 +2578,6 @@ pub async fn handle_ws(
 							top.push((row.get::<usize, String>(0), row.get::<usize, i32>(1), row.get::<usize, i32>(2), row.get::<usize, i32>(3), today.saturating_sub(row.get::<usize, i32>(4) as u32), row.get::<usize, i32>(5), row.get::<usize, String>(6)));
 						}
 						sendmsg(&tx, &WsResponse::arenatop { lv, top: &top });
-					}
-				}
-				UserMessage::leaderboard { flags, category } => {
-					let leagueid = leagueid(&flags);
-					if let Ok(rows) = client
-						.query(concat!(
-								"select u.name, ud.name, val ",
-								"from leaderboard l ",
-								"join user_data ud on l.data_id = ud.id ",
-								"join users u on ud.user_id = u.id ",
-								"where league_id = $1 and category = $2 ",
-								"order by val desc limit 99"), &[&leagueid, &category])
-						.await
-					{
-						let mut top = Vec::with_capacity(rows.len());
-						for row in rows.iter() {
-							top.push((row.get::<usize, &str>(0), row.get::<usize, &str>(1), row.get::<usize, i32>(2)));
-						}
-						sendmsg(&tx, &WsResponse::leaderboard { flags, category, top: &top });
-					}
-				}
-				UserMessage::legacyboard => {
-					if let Ok(rows) = logerr(client
-						.query(concat!(
-								"select u.name, ud.name, val ",
-								"from leaderboard l ",
-								"join user_data ud on l.data_id = ud.id ",
-								"join users u on ud.user_id = u.id ",
-								"where league_id = 1 and category = 'Wealth' ",
-								"order by val desc limit 99"), &[])
-						.await)
-					{
-						let mut top = Vec::with_capacity(rows.len());
-						for row in rows.iter() {
-							top.push((row.get::<usize, &str>(0), row.get::<usize, &str>(1), row.get::<usize, i32>(2)));
-						}
-						sendmsg(&tx, &WsResponse::legacyboard { top: &top });
 					}
 				}
 				UserMessage::bzread => {

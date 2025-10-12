@@ -312,7 +312,9 @@ export default function DeckEditor() {
 				style="position:absolute;left:8px;top:162px"
 			/>
 			<div style="position:absolute;left:8px;top:8px;width:720px;display:flex;justify-content:space-between">
-				<div style="overflow:hidden;text-overflow:ellipsis;width:192px">
+				<div
+					style="overflow:hidden;text-overflow:ellipsis;width:192px;white-space:nowrap"
+					title={rx.user.selectedDeck ?? ''}>
 					{rx.user.selectedDeck ?? ''}
 				</div>
 				<Qecks onClick={loadDeck} user={rx.user} />

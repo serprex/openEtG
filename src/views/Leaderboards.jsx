@@ -1,5 +1,5 @@
 import { createComputed, createSignal, onMount, Index } from 'solid-js';
-import { emit, setCmds } from '../sock.jsx';
+import { userEmit, setCmds } from '../sock.jsx';
 import { doNav, state } from '../store.jsx';
 import { presets } from '../ui.js';
 
@@ -21,11 +21,11 @@ export default function Leaderboards() {
 
 	onMount(() => {
 		setCmds({
-			leaderboard: ({ flags, category, top }) => {
+			leaderboard: ({ flags, category, ownscore, top }) => {
 				const name = category + ':' + flags.sort().join(' ');
 				setTop(t => ({
 					...t,
-					[name]: top,
+					[name]: [ownscore, top],
 				}));
 			},
 		});
@@ -34,7 +34,7 @@ export default function Leaderboards() {
 	createComputed(() => {
 		const top = getTop();
 		if (!top[getCategory() + ':' + getFlags().join(' ')]) {
-			emit({ x: 'leaderboard', flags: getFlags(), category: getCategory() });
+			userEmit('leaderboard', { flags: getFlags(), category: getCategory() });
 		}
 	});
 
@@ -67,16 +67,22 @@ export default function Leaderboards() {
 						/>
 					))}
 				</div>
-				<input
-					type="button"
-					value="Exit"
-					onClick={() => doNav(import('./MainMenu.jsx'))}
-					style="margin-top:auto"
-				/>
+				<div style="margin-top:auto">
+					<div>
+						{getTop()?.[getCategory() + ':' + getFlags().join(' ')]?.[0]}
+					</div>
+					<input
+						type="button"
+						value="Exit"
+						onClick={() => doNav(import('./MainMenu.jsx'))}
+					/>
+				</div>
 			</div>
 			<div style="width:810px;display:grid;grid-template-rows:repeat(33,18px);column-gap:18px;grid-auto-flow:column;grid-auto-columns:257px;white-space:nowrap">
 				<Index
-					each={getTop()?.[getCategory() + ':' + getFlags().join(' ')] ?? []}>
+					each={
+						getTop()?.[getCategory() + ':' + getFlags().join(' ')]?.[1] ?? []
+					}>
 					{(item, i) => (
 						<div
 							style="display:flex;justify-content:space-between"

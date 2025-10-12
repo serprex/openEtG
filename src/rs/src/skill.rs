@@ -4133,21 +4133,13 @@ impl Skill {
 				let owner = ctx.get_owner(c);
 				let candidates = ctx.count_creatures(owner);
 				if candidates > 0 {
-					let mut candidate = ctx.upto(candidates as u32);
-					for &cr in ctx.get_player(owner).creatures.iter() {
-						if cr != 0 {
-							if candidate == 0 {
-								ctx.buffhp(cr, halfhp);
-								ctx.incrAtk(cr, halfatk);
-								break;
-							} else {
-								candidate -= 1;
-							}
-						}
+					let mut nth = ctx.upto(candidates as u32);
+					if let Some(&cr) =
+						ctx.get_player(owner).creatures.iter().filter(|&&cr| cr != 0).nth(nth as usize)
+					{
+						ctx.buffhp(cr, halfhp);
+						ctx.incrAtk(cr, halfatk);
 					}
-				} else if owner == ctx.get_owner(t) {
-					ctx.buffhp(t, halfhp);
-					ctx.incrAtk(t, halfatk);
 				}
 			}
 			Self::precognition => {
