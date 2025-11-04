@@ -162,9 +162,9 @@ impl<'a> SkillThing<'a> {
 			Skill::adrenaline => Cow::from(
 				"Target creature attacks multiple times per turn. Creatures with lower strength attack more times per turn",
 			),
-			Skill::aflatoxin => {
-				Cow::from("Give target 2 poison. When the target dies, it becomes a 1|1 Malignant Cell that creates new copies")
-			}
+			Skill::aflatoxin => Cow::from(
+				"Give target 2 poison. When the target dies, it becomes a 1|1 Malignant Cell that creates new copies",
+			),
 			Skill::aggroskele => {
 				let mut s = String::from("Summon a ");
 				s.push_str(if self.upped() { "2|2" } else { "1|1" });
@@ -334,7 +334,9 @@ impl<'a> SkillThing<'a> {
 				"Burrow. While burrowed, replace this ability with \"2:3 Freeze target permanent.\" Next turn, unburrow, become airborne, & triple this creature's strength until its next attack",
 			),
 			Skill::deja => Cow::from("Remove this ability & summon a copy of this creature"),
-			Skill::deployblobs => Cow::from("Summon 3 1|1 Blobs that can combine with other creatures. Gain -2|-2"),
+			Skill::deployblobs => {
+				Cow::from("Summon 3 1|1 Blobs that can combine with other creatures. Gain -2|-2")
+			}
 			Skill::despair => Cow::from(
 				"Non-ranged attackers have a 50% chance plus 1% per nocturnal creature you control to gain -1|-1",
 			),
