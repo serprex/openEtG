@@ -965,7 +965,7 @@ impl<'a> Display for SkillName<'a> {
 			Skill::blockhp => f.write_str("appreciate"),
 			Skill::blockwithcharge => f.write_str("blockwithcharge"),
 			Skill::bloodmoon => Ok(()),
-			Skill::bolsterintodeck => f.write_str("bolsterintodeck"),
+			Skill::bolsterintodeck => Ok(()),
 			Skill::bo => Ok(()),
 			Skill::bonesharpen => f.write_str("bonesharpen"),
 			Skill::boneyard => f.write_str("boneyard"),
@@ -1856,6 +1856,9 @@ impl Skill {
 					ctx.set_owner(id, owner);
 				}
 				ctx.get_player_mut(owner).deck_mut().extend(&cards);
+				if card::Upped(ctx.get(c, Stat::card)) {
+					ctx.drawcard(owner);
+				}
 			}
 			Skill::bonesharpen => {
 				ctx.setSkill(t, Event::Cast, &[Skill::reinforce]);

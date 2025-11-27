@@ -214,7 +214,11 @@ impl<'a> SkillThing<'a> {
 				"Aquatic creatures gain \"Gain 1:8 when it attacks.\"\nGolems gain \"Damage dealt by this card also reduces the defender's maxHP.\"\nNocturnal creatures gain \"Heal yourself equal to the damage dealt by this card.\"",
 			),
 			Skill::bolsterintodeck => {
-				Cow::from("Add 3 exact copies of target creature or weapon on top of your deck")
+				Cow::from(if self.upped() {
+					"Add 3 exact copies of target creature or weapon on top of your deck. Draw a card"
+				} else {
+					"Add 3 exact copies of target creature or weapon on top of your deck"
+				})
 			}
 			Skill::bonesharpen => Cow::from(
 				"Replace your own target creature's skills with \"0: Combine with target creature, giving strength, HP, & poison counters\"\nIf not poisoned & target is skeleton, reactivated",
@@ -480,7 +484,7 @@ impl<'a> SkillThing<'a> {
 				"Fill your hand with copies of target creature. Consumes all 1:12. If this spell costs 1:0, consumes all quanta",
 			),
 			Skill::freeevade => Cow::from(
-				"If your opponent has a shield, your airborne creatures have a 25% chance to bypass the shield. Otherwise, your creatures have a 25% chance to deal 50% more damage. Your creatures have 20% chance to evade opponent's targeted spells & skills",
+				"If your opponent has a shield, your airborne creatures have a 25% chance to bypass the shield. Otherwise, your airborne creatures have a 25% chance to deal 50% more damage. Your airborne creatures have 20% chance to evade opponent's targeted spells & skills",
 			),
 			Skill::freeze(x) => Cow::from(format!(
 				"Freeze target creature or weapon for {} turns. Frozen cards cannot attack, use active skills, or activate per-turn skills",
