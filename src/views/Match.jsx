@@ -816,7 +816,7 @@ export default function Match(props) {
 	const [replayhistory, setReplayHistory] = createSignal([props.game]);
 	const [replayindex, setreplayindex] = createSignal(0);
 	const game = () =>
-		props.replay ? replayhistory()[replayindex()] : tempgame() ?? pgame();
+		props.replay ? replayhistory()[replayindex()] : (tempgame() ?? pgame());
 
 	const [p1id, setPlayer1] = createSignal(
 		props.replay ? game().turn : game().userId(rx.username),
