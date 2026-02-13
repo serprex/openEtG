@@ -991,9 +991,9 @@ impl<'a> SkillThing<'a> {
 				"Increase attack by number of skeletons you own"
 			}),
 			Skill::skull => Cow::from(if self.set() == CardSet::Open {
-				"Attacking non-ranged creatures may randomly die (1 in HP chance) & are replaced by Skeletons"
+				"Attacking non-ranged creatures may randomly die (50%/HP chance) & are replaced by Skeletons"
 			} else {
-				"Attacking creatures may randomly die (1 in HP chance) & are replaced by Skeletons"
+				"Attacking creatures may randomly die (50%/HP chance) & are replaced by Skeletons"
 			}),
 			Skill::skyblitz => Cow::from(
 				"Your airborne creatures all dive (double their strength until end of turn.) Consumes all 1:9",
