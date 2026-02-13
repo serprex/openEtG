@@ -15,7 +15,7 @@ use futures::{SinkExt, StreamExt, TryFutureExt};
 use fxhash::{FxHashMap, FxHasher64};
 use hyper_tungstenite::tungstenite::Message;
 use rand::distr::{Distribution, Uniform};
-use rand::{Rng, RngCore};
+use rand::{Rng, RngExt};
 use serde_json::Value;
 use tokio::join;
 use tokio::sync::{Mutex, MutexGuard, RwLock, mpsc};

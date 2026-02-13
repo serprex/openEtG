@@ -493,7 +493,7 @@ async fn handle_get_core(
 			return response::Builder::new().status(400).body(Bytes::new());
 		}
 	} else if path == "/speed" {
-		use rand::RngCore;
+		use rand::Rng;
 		return response::Builder::new()
 			.status(302)
 			.header(header::LOCATION, format!("/speed/{}", rand::rng().next_u32()))
