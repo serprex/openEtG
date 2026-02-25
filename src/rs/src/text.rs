@@ -215,9 +215,9 @@ impl<'a> SkillThing<'a> {
 			),
 			Skill::bolsterintodeck => {
 				Cow::from(if self.upped() {
-					"Add 3 exact copies of target creature or weapon on top of your deck. Draw a card"
-				} else {
 					"Add 3 exact copies of target creature or weapon on top of your deck"
+				} else {
+					"Add 3 copies of target creature or weapon on top of your deck"
 				})
 			}
 			Skill::bonesharpen => Cow::from(

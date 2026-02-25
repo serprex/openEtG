@@ -1851,14 +1851,16 @@ impl Skill {
 			}
 			Self::bolsterintodeck => {
 				let owner = ctx.get_owner(c);
-				let cards = [ctx.cloneinst(t), ctx.cloneinst(t), ctx.cloneinst(t)];
+				let card = ctx.get(c, Stat::card);
+				let cards = if card::Upped(card) {
+					[ctx.cloneinst(t), ctx.cloneinst(t), ctx.cloneinst(t)]
+				} else {
+					[ctx.new_thing(card, owner), ctx.new_thing(card, owner), ctx.new_thing(card, owner)]
+				};
 				for id in cards {
 					ctx.set_owner(id, owner);
 				}
 				ctx.get_player_mut(owner).deck_mut().extend(&cards);
-				if card::Upped(ctx.get(c, Stat::card)) {
-					ctx.drawcard(owner);
-				}
 			}
 			Skill::bonesharpen => {
 				ctx.setSkill(t, Event::Cast, &[Skill::reinforce]);
