@@ -40,10 +40,11 @@ impl Pcg32 {
 
 	pub fn choose<'a, 'b, T>(&'a self, a: &'b [T]) -> Option<&'b T> {
 		if a.is_empty() {
-			return None;
+			None
+		} else {
+			let i = self.upto(a.len() as u32);
+			Some(unsafe { a.get_unchecked(i as usize) })
 		}
-		let i = self.upto(a.len() as u32);
-		return Some(unsafe { a.get_unchecked(i as usize) });
 	}
 
 	pub fn shuffle<T>(&self, a: &mut [T]) {

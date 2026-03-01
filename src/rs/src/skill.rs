@@ -1851,7 +1851,7 @@ impl Skill {
 			}
 			Self::bolsterintodeck => {
 				let owner = ctx.get_owner(c);
-				let card = ctx.get(c, Stat::card);
+				let card = ctx.get(t, Stat::card);
 				let cards = if card::Upped(card) {
 					[ctx.cloneinst(t), ctx.cloneinst(t), ctx.cloneinst(t)]
 				} else {
@@ -2085,7 +2085,7 @@ impl Skill {
 						ctx.remove(t);
 						let decklen = ctx.get_player(owner).deck.len() as u32;
 						for n in 0..count {
-							let idx = ctx.upto(decklen + n as u32) as usize;
+							let idx = ctx.upto(decklen + n as u32 + 1) as usize;
 							let inst = if n == 0 { t } else { ctx.cloneinst(t) };
 							ctx.get_player_mut(owner).deck_mut().insert(idx, inst);
 						}
