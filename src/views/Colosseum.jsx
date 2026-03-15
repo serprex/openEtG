@@ -123,28 +123,21 @@ export default function Colosseum() {
 					/>
 					You successfully completed all tasks.
 				</div>
-			:	<div style="white-space:pre">
-					Completing any colosseum event contributes to a 5 day reward cycle.
-					{'\n'}
-					At the end of the cycle, your streak is reset.
-					{'\n\n'}
-					Reward Cycle: 15
-					<span class="ico gold" />, 25
-					<span class="ico gold" />, 77
-					<span class="ico gold" />, 100
-					<span class="ico gold" />, 250
-					<span class="ico gold" />
-					{'\n'}
-					{user.ostreak ?
-						`\nYou currently have a ${user.ostreak} day colosseum streak.`
-					:	"\nYou'ven't begun a streak."}
+			:	<>
+					<div>
+						Completing any colosseum event earns 100 <span class="ico gold" />.
+					</div>
+					<div>
+						{user.ostreak ?
+							`You currently have a ${user.ostreak} day colosseum streak.`
+						:	"You'ven't begun a streak."}
+					</div>
 					{user.ostreak && user.ostreakday ?
-						<>
-							{`\nYou've redeemed ${[250, 15, 25, 77, 100][user.ostreak % 5]}`}
-							<span ico="ico gold" /> today.
-						</>
-					:	"\nYou'ven't redeemed a colosseum streak today."}
-				</div>
+						<div>
+							You've redeemed 100 <span ico="ico gold" /> today.
+						</div>
+					:	<div>You'ven't redeemed a colosseum streak today.</div>}
+				</>
 			}
 		</div>
 	);

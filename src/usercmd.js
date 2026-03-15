@@ -173,7 +173,7 @@ export function donedaily(data, user) {
 		(data.daily < 3 || data.daily === 5) &&
 		!user.ostreakday
 	) {
-		result.gold = user.gold + [15, 25, 77, 100, 250][user.ostreak % 5];
+		result.gold = user.gold + 100;
 		result.ostreak = user.ostreak + 1;
 		result.ostreakday = user.ostreakday2;
 		result.ostreakday2 = 0;
