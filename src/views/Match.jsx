@@ -1148,6 +1148,15 @@ export default function Match(props) {
 			setreplayindex(idx);
 			setPlayer1(game.turn);
 			setPlayer2(game.get_foe(game.turn));
+			setEffects({
+				effects: new Set(),
+				startPos: new Map(),
+				endPos: new Map(),
+				fxTextPos: new Map(),
+				fxStatChange: new Map(),
+			});
+			setSpells([]);
+			idtrack.clear();
 		});
 
 	const gotoResult = () => {
