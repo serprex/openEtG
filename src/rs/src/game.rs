@@ -2727,18 +2727,18 @@ impl Game {
 			}
 			GameMove::Mulligan => {
 				let player = self.get_player(self.turn);
-				let mut handlen = usize::MAX;
 				for c in player.hand_iter() {
-					handlen = handlen.wrapping_add(1);
 					self.trigger(Event::Mulligan, c, self.turn);
 				}
-				if handlen != usize::MAX {
-					self.fx(self.turn, Fx::Sfx(Sfx::mulligan));
-					self.drawhand(self.turn, 7);
-					let player = self.get_player_mut(self.turn);
-					if player.tax < 7 {
-						player.tax += 1;
-					}
+				self.fx(self.turn, Fx::Sfx(Sfx::mulligan));
+				self.drawhand(self.turn, 7);
+				let player = self.get_player_mut(self.turn);
+				if player.tax < 6 {
+					player.tax += 1;
+				} else {
+					player.tax = 7;
+					self.drawhand(self.turn, 0);
+					self.r#move(GameMove::Accept);
 				}
 			}
 			GameMove::Shuffle(t) => {
