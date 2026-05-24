@@ -68,12 +68,10 @@ function OrderSummary(props) {
 			}
 			if (props.showDeal) {
 				const worth = cardValue(card);
-				if (
-					!(
-						(props.showSell && o0.p < 0 && -o0.p < worth) ||
-						(props.showBuy && o1.p > 0 && o1.p > worth)
-					)
-				) {
+				if (!(
+					(props.showSell && o0.p < 0 && -o0.p < worth) ||
+					(props.showBuy && o1.p > 0 && o1.p > worth)
+				)) {
 					continue;
 				}
 			}

@@ -29,7 +29,7 @@ extern "C" {
 
 #[cfg(target_arch = "wasm32")]
 #[global_allocator]
-static ALLOCATOR: talc::TalckWasm = unsafe { talc::TalckWasm::new_global() };
+static ALLOCATOR: talc::wasm::WasmDynamicTalc = talc::wasm::new_wasm_dynamic_allocator();
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn log(s: &str) {
