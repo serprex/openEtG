@@ -22,7 +22,6 @@ use crate::card::{self, Card, Cards};
 use crate::etg;
 use crate::generated;
 use crate::rng::Pcg32;
-use crate::set_panic_hook;
 use crate::skill::{Event, ProcData, Skill, SkillName, Skills};
 use crate::text::SkillThing;
 
@@ -570,7 +569,6 @@ impl Clone for Game {
 impl Game {
 	#[cfg_attr(target_arch = "wasm32", wasm_bindgen(constructor))]
 	pub fn new(seed: u32, set: CardSet, players: u8, now: u32) -> Game {
-		set_panic_hook();
 		let mut plprops = Vec::with_capacity(players as usize);
 		let mut props = Vec::with_capacity(players as usize * 60);
 		for id in 1..=players as i16 {

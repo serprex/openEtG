@@ -36,11 +36,6 @@ pub fn log(s: &str) {
 	println!("{}", s);
 }
 
-pub fn set_panic_hook() {
-	#[cfg(target_arch = "wasm32")]
-	console_error_panic_hook::set_once();
-}
-
 #[cfg(test)]
 mod test {
 	use crate::card::{self, CardSet};
