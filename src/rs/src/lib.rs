@@ -4,6 +4,8 @@
 #[macro_use]
 extern crate alloc;
 extern crate core;
+#[cfg(target_arch = "wasm32")]
+extern crate std;
 
 pub mod aieval;
 pub mod aisearch;
@@ -25,6 +27,8 @@ use wasm_bindgen::prelude::*;
 extern "C" {
 	#[wasm_bindgen(js_namespace = console)]
 	fn log(s: &str);
+	#[wasm_bindgen(js_namespace = console)]
+	fn error(s: &str);
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -34,6 +38,19 @@ static ALLOCATOR: talc::wasm::WasmDynamicTalc = talc::wasm::new_wasm_dynamic_all
 #[cfg(not(target_arch = "wasm32"))]
 pub fn log(s: &str) {
 	println!("{}", s);
+}
+
+pub fn set_panic_hook() {
+	#[cfg(target_arch = "wasm32")]
+	{
+		use core::sync::atomic::{AtomicBool, Ordering};
+		static SET: AtomicBool = AtomicBool::new(false);
+		if !SET.swap(true, Ordering::Relaxed) {
+			std::panic::set_hook(alloc::boxed::Box::new(|info| {
+				error(&alloc::format!("{info}"));
+			}));
+		}
+	}
 }
 
 #[cfg(test)]
