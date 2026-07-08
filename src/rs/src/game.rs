@@ -658,7 +658,7 @@ impl Game {
 	}
 
 	pub fn has_id(&self, id: i16) -> bool {
-		id > 0 && (id as usize) <= self.props_len()
+		id > 0 && (id as usize) <= self.props.len()
 	}
 
 	pub fn get_hand(&self, id: i16) -> Box<[i16]> {
@@ -1309,12 +1309,12 @@ impl Game {
 		self.plprops.len() as i16
 	}
 
-	pub fn players(&self) -> &[Rc<PlayerData>] {
-		&self.plprops
+	pub fn props_len(&self) -> usize {
+		self.props.len()
 	}
 
-	pub fn props_len(&self) -> usize {
-		self.props.len() + self.plprops.len()
+	pub fn players(&self) -> &[Rc<PlayerData>] {
+		&self.plprops
 	}
 
 	pub fn cardset(&self) -> CardSet {
