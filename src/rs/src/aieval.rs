@@ -33,7 +33,7 @@ fn sqrt(x: i32) -> i32 {
 
 fn log2(x: i32) -> i32 {
 	let lg2 = x.ilog2() as i32;
-	let lo = 1 << lg2 + PRECBITS;
+	let lo = 1 << lg2;
 	(lg2 - PRECBITS) * PREC + (x - lo) * PREC / lo
 }
 
@@ -405,7 +405,7 @@ fn eval_skill(
 						}
 					}
 				}
-				dmg
+				dmg * (PREC / 2)
 			}
 			Skill::gpull => {
 				if ctx.get_kind(c) == Kind::Spell || c != ctx.get(ctx.get_owner(c), Stat::gpull) {
