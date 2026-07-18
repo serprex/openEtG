@@ -8,6 +8,7 @@ export const musicList = [
 	[0, null, 'Silence'],
 	[1, 'openingMusic', "Timpa's Piano"],
 	[2, 'avesElemental', "Aves' Elemental"],
+	[3, 'avesChallenge', "Aves' Challenge"],
 ];
 
 export function playSound(name, mayreset = false) {

@@ -436,10 +436,12 @@ export default function MainMenu(props) {
 							type="button"
 							value="Upgrade"
 							onClick={() => {
-								if (!(
-									hasflag(rx.user, 'no-up-pillar') &&
-									hasflag(rx.user, 'no-up-merge')
-								)) {
+								if (
+									!(
+										hasflag(rx.user, 'no-up-pillar') &&
+										hasflag(rx.user, 'no-up-merge')
+									)
+								) {
 									store.doNav(import('./Upgrade.jsx'));
 								}
 							}}
@@ -553,7 +555,7 @@ export default function MainMenu(props) {
 				{musicbox() && (
 					<div
 						class="bgbox"
-						style="position:relative;left:302px;top:150px;width:290px;height:160px;z-index:1;display:flex;flex-direction:column;align-content:space-between;justify-content:space-between">
+						style="position:relative;left:302px;top:120px;width:290px;z-index:1;display:flex;flex-direction:column;align-content:space-between;justify-content:space-between">
 						<div style="display:flex;flex-direction:column;align-content:center;justify-content:space-between;flex-wrap:wrap;align-items:flex-start">
 							<input
 								type="number"
@@ -570,7 +572,6 @@ export default function MainMenu(props) {
 										onClick={() => setMusicboxTarget(target)}
 									/>
 								))}
-								{musicboxTarget()[1]}
 							</div>
 							{musicList.map(([id, _opus, name]) => (
 								<label>
