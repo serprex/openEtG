@@ -5170,7 +5170,7 @@ impl Skill {
 				}
 			}
 			Self::wicked => {
-				let dr = ctx.get_card(ctx.get(t, Stat::card)).cost as i16;
+				let dr = ctx.get(t, Stat::cost);
 				ctx.die(t);
 				ctx.incrStatus(c, Stat::hp, dr);
 			}
