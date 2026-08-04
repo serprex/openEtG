@@ -240,7 +240,7 @@ export default function Result(props) {
 
 	const exitFunc = () => {
 		if (game.data.quest) {
-			if (game.winner === p1id && game.data.choicerewards) {
+			if (game.won(p1id) && game.data.choicerewards) {
 				store.doNav(import('./Reward.jsx'), {
 					type: game.data.choicerewards,
 					amount: game.data.rewardamount,
@@ -271,7 +271,7 @@ export default function Result(props) {
 	});
 
 	const level = game.data.level,
-		winner = game.winner === p1id,
+		winner = game.won(p1id),
 		lefttext = [
 			() => <div>{game.countPlies()} plies</div>,
 			() => <div>{(game.duration / 1000).toFixed(1)} seconds</div>,
@@ -428,7 +428,7 @@ export default function Result(props) {
 					<input type="button" value="Rematch" onClick={game.data.rematch} />
 				)}
 			</div>
-			{game.winner === p1id && (
+			{winner && (
 				<>
 					{goldreward > 0 && (
 						<div style="text-align:center;width:900px;position:absolute;left:0;top:550px">
@@ -445,7 +445,7 @@ export default function Result(props) {
 					</div>
 				</>
 			)}
-			{game.winner !== p1id && props.hardcoreback && (
+			{!winner && props.hardcoreback && (
 				<Card
 					style="opacity:.3;position:absolute;left:370px;top:170px"
 					card={Cards.Codes[props.hardcoreback]}

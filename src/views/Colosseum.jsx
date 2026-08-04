@@ -29,7 +29,7 @@ function mkDaily(type) {
 				const { user } = store.state;
 				return !(user.daily & (1 << type)) && mkDaily(type);
 			};
-			dataNext.rematchFilter = (game, p1id) => game.winner !== p1id;
+			dataNext.rematchFilter = (game, p1id) => !game.won(p1id);
 			dataNext.dataNext = dataNext;
 			if (store.hasflag('hardcore')) {
 				dataNext.ante = ante;

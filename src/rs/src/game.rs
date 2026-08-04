@@ -2297,6 +2297,9 @@ impl Game {
 				self.deatheffect(id, idx);
 			}
 		} else if kind == Kind::Player {
+			if self.get(id, Flag::out) {
+				return;
+			}
 			self.set(id, Flag::out, true);
 			if self.winner == 0 {
 				let mut winners = 0;
@@ -2313,8 +2316,6 @@ impl Game {
 				if winners != 0 {
 					self.winner = winners;
 					self.phase = Phase::End;
-				} else if self.turn == id {
-					self.nextTurn();
 				}
 			}
 		}
@@ -2417,35 +2418,75 @@ impl Game {
 		}
 	}
 
+	fn next_foe(&self, id: i16) -> i16 {
+		let plen = self.players_len();
+		let leader = self.get_leader(id);
+		for i in 1..plen {
+			let pid = (id - 1 + i) % plen + 1;
+			if leader != self.get_leader(pid) && !self.get(pid, Flag::out) {
+				return pid;
+			}
+		}
+		0
+	}
+
+	fn retarget_foes(&mut self) {
+		for id in 1..=self.players_len() {
+			if self.get(id, Flag::out) {
+				continue;
+			}
+			let foe = self.get_foe(id);
+			if foe == 0 || self.get(foe, Flag::out) {
+				let newfoe = self.next_foe(id);
+				if newfoe != 0 {
+					self.get_player_mut(id).foe = newfoe;
+				}
+			}
+		}
+	}
+
 	pub fn nextTurn(&mut self) -> i16 {
 		loop {
 			let turn = self.turn;
+			if self.winner != 0 {
+				return turn;
+			}
+			self.retarget_foes();
 			let next = self.nextPlayer(turn);
-			if next != turn {
-				if self.cards.set != CardSet::Original {
-					self.dmg(next, self.get(next, Stat::poison));
-				}
-				let pl = self.get_thing_mut(next);
-				if let Some(sosa) = pl.status.get_mut(Stat::sosa) {
-					if *sosa > 0 {
-						*sosa -= 1;
-					}
-				}
-				pl.flag.0 &= !(Flag::sanctuary | Flag::precognition | Flag::protectdeck);
-				for status in [Stat::nova, Stat::nova2] {
-					if let Some(val) = pl.status.get_mut(status) {
-						*val = 0;
-					}
-				}
-				for _ in 0..self.get_player(next).drawpower {
-					self.drawstep(next);
-				}
-				self.turn = next;
-				self.proc(Event::Turnstart, next);
-				if self.get(next, Flag::resigned) {
-					self.die(next);
+			if next == turn {
+				return next;
+			}
+			if self.cards.set != CardSet::Original {
+				self.dmg(next, self.get(next, Stat::poison));
+				if self.get(next, Flag::out) {
 					continue;
 				}
+			}
+			let pl = self.get_thing_mut(next);
+			if let Some(sosa) = pl.status.get_mut(Stat::sosa) {
+				if *sosa > 0 {
+					*sosa -= 1;
+				}
+			}
+			pl.flag.0 &= !(Flag::sanctuary | Flag::precognition | Flag::protectdeck);
+			for status in [Stat::nova, Stat::nova2] {
+				if let Some(val) = pl.status.get_mut(status) {
+					*val = 0;
+				}
+			}
+			for _ in 0..self.get_player(next).drawpower {
+				self.drawstep(next);
+			}
+			if self.get(next, Flag::out) {
+				continue;
+			}
+			self.turn = next;
+			self.proc(Event::Turnstart, next);
+			if self.get(next, Flag::resigned) {
+				self.die(next);
+			}
+			if self.get(next, Flag::out) {
+				continue;
 			}
 			return next;
 		}
@@ -2460,7 +2501,13 @@ impl Game {
 	}
 
 	pub fn nextPlayer(&self, id: i16) -> i16 {
-		id % self.players_len() + 1
+		let mut next = id;
+		loop {
+			next = next % self.players_len() + 1;
+			if next == id || !self.get(next, Flag::out) {
+				return next;
+			}
+		}
 	}
 
 	pub fn o_endturn(&mut self, id: i16) {
@@ -2759,11 +2806,13 @@ impl Game {
 			GameMove::Resign(c) => {
 				if self.turn == c {
 					self.die(c);
-					self.nextTurn();
 				} else {
 					self.set(c, Flag::resigned, true);
 				}
 			}
+		}
+		if self.phase == Phase::Play && self.winner == 0 && self.get(self.turn, Flag::out) {
+			self.nextTurn();
 		}
 	}
 

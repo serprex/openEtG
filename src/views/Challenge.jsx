@@ -6,6 +6,7 @@ import Game from '../Game.js';
 import * as etgutil from '../etgutil.js';
 import DeckDisplay from '../Components/DeckDisplay.jsx';
 import * as store from '../store.jsx';
+import { userEmit } from '../sock.jsx';
 import aiDecks from '../Decks.json' with { type: 'json' };
 import { deckgen } from '../deckgen.js';
 
@@ -45,13 +46,13 @@ function PremadePicker({ onClick, onClose }) {
 function PlayerEditor(props) {
 	const [pdeckgen, setdeckgen] = createSignal(props.player.deckgen ?? '');
 	const [premade, setpremade] = createSignal(false);
-	let hp, mark, draw, deck, deckpower, name, rnguprate, rngmaxrare;
+	let hp, mark, draw, deck, deckpower, name, user, rnguprate, rngmaxrare;
 
 	return (
 		<div>
 			<div>
 				<input placeholder="HP" class="numput" max="500" ref={hp} />
-				<input placeholder="Mark" class="numput" max="1188" ref={mark} />
+				<input placeholder="Mark" class="numput" max="99" ref={mark} />
 				<input placeholder="Draw" class="numput" max="8" ref={draw} />
 				<input placeholder="Deck" class="numput" ref={deckpower} />
 				&emsp;
@@ -59,7 +60,7 @@ function PlayerEditor(props) {
 					type="button"
 					value="Ok"
 					onClick={() => {
-						const data = {};
+						const data = { user: user.value.trim() || undefined };
 						if (hp.value && !Number.isNaN(+hp.value)) data.hp = hp.value | 0;
 						if (mark.value && !Number.isNaN(+mark.value))
 							data.markpower = mark.value | 0;
@@ -85,6 +86,7 @@ function PlayerEditor(props) {
 								newdeck = Promise.resolve(deck.value);
 						}
 						if (name.value) data.name = name.value;
+						else if (data.user) data.name = data.user;
 						newdeck.then(x => {
 							data.deck = x;
 							props.updatePlayer(data);
@@ -121,6 +123,13 @@ function PlayerEditor(props) {
 			)}
 			<div>
 				<input placeholder="Name" ref={name} />
+				&emsp;
+				<input
+					placeholder="User"
+					ref={user}
+					value={props.player.user ?? ''}
+					disabled={props.player.user === props.host}
+				/>
 			</div>
 			{premade() && (
 				<PremadePicker
@@ -173,6 +182,7 @@ function Group(props) {
 						{props.editing.has(pl.idx) && (
 							<PlayerEditor
 								player={pl}
+								host={props.host}
 								updatePlayer={pl => {
 									const players = props.players.slice(),
 										{ idx } = players[i()];
@@ -211,6 +221,57 @@ function Group(props) {
 	);
 }
 
+function Spectators(props) {
+	let specname;
+	return (
+		<div class="bgbox" style="width:300px;margin-bottom:8px">
+			<div>Spectators</div>
+			<For each={props.spectators}>
+				{(user, i) => (
+					<div style="min-height:24px">
+						<i>{user}</i>
+						{props.editable && (
+							<input
+								type="button"
+								value="-"
+								class="editbtn"
+								style="float:right"
+								onClick={() => {
+									const spectators = props.spectators.slice();
+									spectators.splice(i(), 1);
+									props.updateSpectators(spectators);
+								}}
+							/>
+						)}
+					</div>
+				)}
+			</For>
+			{props.editable && (
+				<div>
+					<input placeholder="User" ref={specname} />
+					<input
+						type="button"
+						value="+"
+						class="editbtn"
+						style="float:right"
+						onClick={() => {
+							const user = specname.value.trim();
+							if (
+								user &&
+								!props.spectators.includes(user) &&
+								!props.hasUserAsPlayer(user)
+							) {
+								props.updateSpectators(props.spectators.concat([user]));
+							}
+							specname.value = '';
+						}}
+					/>
+				</div>
+			)}
+		</div>
+	);
+}
+
 function toMainMenu() {
 	store.doNav(import('./MainMenu.jsx'));
 }
@@ -219,11 +280,9 @@ export default function Challenge(props) {
 	const rx = store.useRx();
 
 	const [groups, setGroups] = createSignal(
-		props.groups ?? [
-			[{ user: rx.username, name: rx.username, idx: 1, pending: 1 }],
-			[],
-		],
+		props.groups ?? [[{ user: rx.username, name: rx.username, idx: 1 }], []],
 	);
+	const [spectators, setSpectators] = createSignal(props.spectators ?? []);
 	const [editing, setEditing] = createSignal([new Set(), new Set()]);
 	let replay;
 	const [mydeck, setMyDeck] = createSignal(store.getDeck());
@@ -244,7 +303,10 @@ export default function Challenge(props) {
 					user: player.user,
 					leader: leader,
 					hp: player.hp,
-					deck: player.deck || deck,
+					// blank deck means the server fills in that user's selected deck
+					deck:
+						player.deck ||
+						(player.user && player.user !== rx.username ? '' : deck),
 					markpower: player.markpower,
 					deckpower: player.deckpower,
 					drawpower: player.drawpower,
@@ -270,6 +332,19 @@ export default function Challenge(props) {
 		shuffle(gameData.players);
 		const game = new Game(gameData);
 		store.doNav(import('./Match.jsx'), { game });
+	};
+
+	const startClick = () => {
+		if (!isMultiplayer()) return aiClick();
+		const deck = groups()[0][0].deck || mydeck();
+		if (etgutil.decklength(deck) < 9) {
+			store.doNav(import('./DeckEditor.jsx'));
+			return;
+		}
+		const players = playersAsData(deck);
+		shuffle(players);
+		// server seeds the game & hands it to every player and spectator
+		userEmit('lobbystart', { players, spectators: spectators() });
 	};
 
 	const replayClick = () => {
@@ -337,8 +412,11 @@ export default function Challenge(props) {
 		return null;
 	});
 
+	const hasUserAsPlayer = name =>
+		groups().some(g => g.some(p => p.user === name));
 	const amhost = () => rx.username === groups()[0][0].user;
 	const isMultiplayer = () =>
+		spectators().length > 0 ||
 		groups().some(g => g.some(p => p.user && p.user !== rx.username));
 	const allReady = () =>
 		amhost() &&
@@ -379,9 +457,7 @@ export default function Challenge(props) {
 					<Group
 						players={players}
 						host={rx.username}
-						hasUserAsPlayer={name =>
-							groups().some(g => g.some(p => p.user === name))
-						}
+						hasUserAsPlayer={hasUserAsPlayer}
 						updatePlayers={p => updatePlayers(i(), p)}
 						removeGroup={i() > 0 && (() => removeGroup(i()))}
 						getNextIdx={getNextIdx}
@@ -418,6 +494,12 @@ export default function Challenge(props) {
 					/>
 				)}
 			</For>
+			<Spectators
+				spectators={spectators()}
+				editable={amhost()}
+				hasUserAsPlayer={hasUserAsPlayer}
+				updateSpectators={setSpectators}
+			/>
 			<div style="width:300px">
 				{amhost() && <input type="button" value="+Group" onClick={addGroup} />}
 				{allReady() &&
@@ -428,7 +510,7 @@ export default function Challenge(props) {
 							style="float:right"
 							type="button"
 							value="Start"
-							onClick={() => aiClick()}
+							onClick={startClick}
 						/>
 					)}
 			</div>

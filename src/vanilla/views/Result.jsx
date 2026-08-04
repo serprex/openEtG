@@ -39,7 +39,7 @@ export default function OriginalResult({ game }) {
 		store.chat(() => replay, 'Replay');
 	}
 
-	if (game.winner === p1id) {
+	if (game.won(p1id)) {
 		const foedecks = game.data.players.filter(pd => !pd.user);
 		if (foedecks.length !== 0) {
 			const foedeck = choose(foedecks);

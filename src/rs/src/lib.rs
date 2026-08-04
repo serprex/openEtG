@@ -613,6 +613,59 @@ mod test {
 		assert_eq!(ctx.get_player(p1).hand_last(), dfly);
 	}
 
+	fn setup3() -> Game {
+		let mut ctx = Game::new(1728, CardSet::Open, 3, 0);
+		for p in 1..=3 {
+			ctx.set_leader(p, p);
+		}
+		for p in 1..=3 {
+			ctx.init_player(
+				p,
+				100,
+				100,
+				etg::Entropy as i8,
+				1,
+				1,
+				1,
+				core::iter::repeat(card::AmethystPillar).take(30).collect(),
+			);
+		}
+		for _ in 0..3 {
+			ctx.r#move(GameMove::Accept);
+		}
+		ctx
+	}
+
+	#[test]
+	fn suicide_passes_turn() {
+		let mut ctx = setup3();
+		assert_eq!(ctx.get_foe(2), 1);
+		ctx.set(1, Stat::hp, 3);
+		ctx.set_quanta(1, etg::Aether, 4);
+		let bolt = ctx.new_thing(card::Lightning, 1);
+		ctx.addCard(1, bolt);
+		ctx.r#move(GameMove::Cast(bolt, 1));
+		assert!(ctx.get(1, Flag::out));
+		assert_eq!(ctx.winner, 0);
+		assert_eq!(ctx.turn, 2);
+		assert_eq!(ctx.get_player(2).hand_len(), 8);
+		assert_eq!(ctx.get_foe(2), 3);
+	}
+
+	#[test]
+	fn dead_player_skipped() {
+		let mut ctx = setup3();
+		ctx.set(2, Stat::hp, 1);
+		ctx.dmg(2, 1);
+		assert!(ctx.get(2, Flag::out));
+		assert_eq!(ctx.turn, 1);
+		ctx.r#move(GameMove::End(0));
+		assert_eq!(ctx.turn, 3);
+		assert_eq!(ctx.get_player(2).hand_len(), 7);
+		ctx.r#move(GameMove::End(0));
+		assert_eq!(ctx.turn, 1);
+	}
+
 	#[test]
 	fn yoink_targeting() {
 		let tgting = Skill::yoink.targeting(CardSet::Open).unwrap();

@@ -47,6 +47,7 @@ pub enum AuthMessage {
 		e: u8,
 		name: String,
 	},
+	hello,
 	logout,
 	delete,
 	altcreate {
@@ -107,6 +108,14 @@ pub enum AuthMessage {
 		#[serde(default)]
 		deck: String,
 		deckcheck: bool,
+	},
+	lobbystart {
+		players: Vec<GamesDataPlayer>,
+		#[serde(default)]
+		spectators: Vec<String>,
+	},
+	lobbyaccept {
+		id: i64,
 	},
 	canceltrade {
 		f: String,
@@ -405,6 +414,11 @@ pub enum WsResponse<'a> {
 		aiwins: i32,
 		ailosses: i32,
 	},
+	lobbyinvite {
+		id: i64,
+		f: &'a str,
+		spectate: bool,
+	},
 	login(&'a UserObject),
 	#[serde(rename = "login")]
 	loginfail {
@@ -488,12 +502,38 @@ pub struct GamesData {
 	pub players: Vec<GamesDataPlayer>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct GamesDataPlayer {
 	pub idx: u8,
+	#[serde(default)]
 	pub user: String,
+	#[serde(default)]
 	pub name: String,
+	#[serde(default)]
 	pub deck: String,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub leader: Option<u8>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub hp: Option<i16>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub markpower: Option<i8>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub deckpower: Option<u8>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub drawpower: Option<u8>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub ai: Option<u8>,
+}
+
+impl GamesDataPlayer {
+	/// keep hostile lobby hosts from blowing up other clients
+	pub fn clamp(&mut self) {
+		self.hp = self.hp.map(|hp| hp.clamp(1, 500));
+		self.markpower = self.markpower.map(|mp| mp.clamp(0, 99));
+		self.deckpower = self.deckpower.map(|dp| dp.clamp(1, 8));
+		self.drawpower = self.drawpower.map(|dp| dp.clamp(1, 8));
+		self.name.truncate(64);
+	}
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

@@ -17,7 +17,6 @@ const buffer = [];
 let socket = new WebSocket(endpoint),
 	attempts = 0,
 	attemptTimeout = 0,
-	pvp = null,
 	cmds = {};
 const sockEvents = {
 	altadd(data) {
@@ -163,14 +162,21 @@ const sockEvents = {
 		store.doNav(import('./views/Match.jsx'), { game });
 	},
 	pvpgive(data) {
-		if (pvp) {
-			pvp = null;
-			const game = new Game(data.data);
-			store.doNav(import('./views/Match.jsx'), {
-				gameid: data.id,
-				game,
-			});
-		}
+		const { username } = store.state,
+			spectate = !data.data.players.some(pl => pl.user === username);
+		store.doNav(import('./views/Match.jsx'), {
+			gameid: data.id,
+			game: new Game({ ...data.data, spectate }),
+		});
+	},
+	lobbyinvite(data) {
+		store.chat(() => (
+			<div
+				style="cursor:pointer;color:#69f"
+				onClick={() => userEmit('lobbyaccept', { id: data.id })}>
+				{`${data.f} invites you to ${data.spectate ? 'spectate' : 'join'} a lobby!`}
+			</div>
+		));
 	},
 	challenge(data) {
 		store.chat(() => (
@@ -246,7 +252,7 @@ socket.onopen = function () {
 		clearTimeout(attemptTimeout);
 		attemptTimeout = 0;
 	}
-	const { opts } = store.state;
+	const { opts, username } = store.state;
 	if (opts.offline || opts.afk) {
 		emit({
 			x: 'chatus',
@@ -254,8 +260,14 @@ socket.onopen = function () {
 			afk: !!opts.afk,
 		});
 	}
+	// flush anything queued while down before asking the server to catch us up
 	buffer.forEach(this.send, this);
 	buffer.length = 0;
+	if (username) {
+		// server routes to whichever socket last authed, so rebind this one
+		userEmit('hello');
+		cmds.reconnect?.();
+	}
 	store.chatMsg('Connected', 'System');
 };
 socket.onclose = function () {
@@ -313,7 +325,6 @@ export function sendChallenge(foe, orig = false, deckcheck = true) {
 		set: orig ? 'Original' : undefined,
 		deckcheck,
 	});
-	pvp = foe;
 }
 export function setCmds(c) {
 	cmds = c;

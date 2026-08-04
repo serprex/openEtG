@@ -429,6 +429,7 @@ pub async fn handle_ws(
 								}
 							}
 						}
+						AuthMessage::hello => {}
 						AuthMessage::logout => {
 							users.write().await.evict(&client, &u).await;
 						}
@@ -1035,12 +1036,14 @@ pub async fn handle_ws(
 																	user: u.clone(),
 																	name: u.clone(),
 																	deck: deck,
+																	..Default::default()
 																},
 																GamesDataPlayer {
 																	idx: 2,
 																	user: f.clone(),
 																	name: f.clone(),
 																	deck: String::new(),
+																	..Default::default()
 																},
 															],
 														};
@@ -1064,6 +1067,194 @@ pub async fn handle_ws(
 									}
 							}
 						}
+						AuthMessage::lobbystart { mut players, spectators } => {
+							if players.len() < 2 || players.len() > 8 || spectators.len() > 16 {
+								sendmsg(&tx, &WsResponse::chat { mode: 1, msg: "Invalid lobby" });
+								continue;
+							}
+							let mut names: Vec<String> = Vec::new();
+							for pl in players.iter() {
+								if !pl.user.is_empty() && !names.contains(&pl.user) {
+									names.push(pl.user.clone());
+								}
+							}
+							for spec in spectators.iter() {
+								if !spec.is_empty() && !names.contains(spec) {
+									names.push(spec.clone());
+								}
+							}
+							if !names.iter().any(|name| name == &u) {
+								sendmsg(&tx, &WsResponse::chat { mode: 1, msg: "You aren't in that lobby" });
+								continue;
+							}
+							let mut lobbyusers = Vec::with_capacity(names.len());
+							{
+								let mut wusers = users.write().await;
+								for name in names.iter() {
+									let Some(nuser) = wusers.load(&*client, name).await else {
+										sendmsg(&tx, &WsResponse::chat {
+											mode: 1,
+											msg: &format!("Unknown user {}", name),
+										});
+										continue 'msgloop;
+									};
+									lobbyusers.push(nuser);
+								}
+							}
+							let mut offline = None;
+							{
+								let rusers = users.read().await;
+								let rsocks = socks.read().await;
+								for name in names.iter() {
+									if !rusers
+										.get_sockid(name)
+										.map(|sockid| rsocks.contains_key(&sockid))
+										.unwrap_or(false)
+									{
+										offline = Some(name.clone());
+										break;
+									}
+								}
+							}
+							if let Some(offline) = offline {
+								sendmsg(&tx, &WsResponse::chat {
+									mode: 1,
+									msg: &format!("{} is not online", offline),
+								});
+								continue;
+							}
+							let mut userids = Vec::with_capacity(lobbyusers.len());
+							let mut decks: HashMap<&str, String> = HashMap::new();
+							for (name, nuser) in names.iter().zip(lobbyusers.iter()) {
+								let nuser = nuser.lock().await;
+								userids.push(nuser.id);
+								if let Some(userdata) = nuser.data.get("") {
+									if let Some(deck) = userdata.decks.get(&userdata.selecteddeck) {
+										decks.insert(name, deck.clone());
+									}
+								}
+							}
+							for pl in players.iter_mut() {
+								pl.clamp();
+								if pl.deck.is_empty() {
+									if let Some(deck) = decks.get(&pl.user[..]) {
+										pl.deck = deck.clone();
+									}
+								}
+							}
+							let gamedata = GamesData {
+								set: String::new(),
+								seed: rand::rng().random(),
+								players,
+							};
+							if let Ok(trx) = client.transaction().await {
+								if let Ok(new_game) = trx.query_one("insert into games (data, moves, expire_at) values ($1,'{}',now() + interval '1 hour') returning id", &[&Json(&gamedata)]).await {
+									let gameid: i64 = new_game.get(0);
+									let mut inserted = true;
+									for (name, nuserid) in names.iter().zip(userids.iter()) {
+										if trx.execute(
+											"insert into match_request (game_id, user_id, accepted) values ($1,$2,$3)",
+											&[&gameid, nuserid, &(name == &u)]).await.is_err()
+										{
+											inserted = false;
+											break;
+										}
+									}
+									if inserted && trx.commit().await.is_ok() {
+										let live = !names.iter().any(|name| {
+											name != &u && gamedata.players.iter().any(|pl| &pl.user == name)
+										});
+										{
+											let rusers = users.read().await;
+											let rsocks = socks.read().await;
+											for name in names.iter() {
+												if name == &u { continue }
+												if let Some(sockid) = rusers.get_sockid(name) {
+													if let Some(sock) = rsocks.get(&sockid) {
+														sendmsg(&sock.tx, &WsResponse::lobbyinvite {
+															id: gameid,
+															f: &u,
+															spectate: !gamedata.players.iter().any(|pl| &pl.user == name),
+														});
+													}
+												}
+											}
+										}
+										if live {
+											sendmsg(&tx, &WsResponse::pvpgive { id: gameid, data: &gamedata });
+										} else {
+											sendmsg(&tx, &WsResponse::chat {
+												mode: 1,
+												msg: "Waiting for lobby to accept",
+											});
+										}
+									}
+								}
+							}
+						}
+						AuthMessage::lobbyaccept { id } => {
+							let Ok(trx) = client.transaction().await else { continue };
+							let accepted = trx.execute(
+								"update match_request set accepted = true where game_id = $1 and user_id = $2 and not accepted",
+								&[&id, &userid]).await.unwrap_or(0);
+							if accepted == 0 { continue }
+							let (Ok(gamerow), Ok(urows)) = (
+								trx.query_one("select data from games where id = $1", &[&id]).await,
+								trx.query(
+									"select u.name, mr.accepted from match_request mr join users u on u.id = mr.user_id where mr.game_id = $1",
+									&[&id]).await,
+							) else { continue };
+							let Json(gamedata) = gamerow.get::<usize, Json<GamesData>>(0);
+							if trx.commit().await.is_err() { continue }
+							{
+								let msg = format!(
+									"{} accepted the lobby invite as {}",
+									u,
+									if gamedata.players.iter().any(|pl| pl.user == u) { "a player" } else { "a spectator" },
+								);
+								let rusers = users.read().await;
+								let rsocks = socks.read().await;
+								for row in urows.iter() {
+									let name = row.get::<usize, &str>(0);
+									if u == name || !row.get::<usize, bool>(1) { continue }
+									if let Some(sockid) = rusers.get_sockid(name) {
+										if let Some(sock) = rsocks.get(&sockid) {
+											sendmsg(&sock.tx, &WsResponse::chat { mode: 1, msg: &msg });
+										}
+									}
+								}
+							}
+							let live = urows.iter().all(|row| {
+								row.get::<usize, bool>(1)
+									|| !gamedata.players.iter().any(|pl| pl.user == row.get::<usize, &str>(0))
+							});
+							if !live {
+								sendmsg(&tx, &WsResponse::chat {
+									mode: 1,
+									msg: "Waiting for lobby to accept",
+								});
+								continue;
+							}
+							let Ok(pvpgive) = serde_json::to_string(&WsResponse::pvpgive {
+								id,
+								data: &gamedata,
+							}) else { continue };
+							let pvpgive = Message::text(pvpgive);
+							if gamedata.players.iter().any(|pl| pl.user == u) {
+								let rusers = users.read().await;
+								let rsocks = socks.read().await;
+								for row in urows.iter() {
+									if !row.get::<usize, bool>(1) { continue }
+									if let Some(sockid) = rusers.get_sockid(row.get::<usize, &str>(0)) {
+										if let Some(sock) = rsocks.get(&sockid) {
+											sock.tx.send(pvpgive.clone()).ok();
+										}
+									}
+								}
+							} else {
+								tx.send(pvpgive).ok();
+							}
+						}
 						AuthMessage::r#move {
 							id,
 							hash,
@@ -1073,7 +1264,7 @@ pub async fn handle_ws(
 							if let Ok(trx) = client.transaction().await {
 								if let (Ok(moves), Ok(urows)) = (
 									trx.query_one(
-										"select g.moves from games g join match_request mr on mr.game_id = g.id join users u on u.id = mr.user_id where g.id = $1 and u.id = $2 for update",
+										"select g.moves, g.data from games g join match_request mr on mr.game_id = g.id join users u on u.id = mr.user_id where g.id = $1 and u.id = $2 for update",
 										&[&id, &userid]).await,
 										trx.query(
 											"select u.id, u.name from match_request mr join users u on mr.user_id = u.id where mr.game_id = $1",
@@ -1083,6 +1274,14 @@ pub async fn handle_ws(
 										sendmsg(&tx, &WsResponse::chat {
 											mode: 1,
 											msg: "You aren't in that match",
+										});
+										continue 'msgloop;
+									}
+									let Json(gamedata) = moves.get::<usize, Json<GamesData>>(1);
+									if !gamedata.players.iter().any(|pl| pl.user == u) {
+										sendmsg(&tx, &WsResponse::chat {
+											mode: 1,
+											msg: "You're only spectating that match",
 										});
 										continue 'msgloop;
 									}

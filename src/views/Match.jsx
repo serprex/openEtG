@@ -818,8 +818,10 @@ export default function Match(props) {
 	const game = () =>
 		props.replay ? replayhistory()[replayindex()] : (tempgame() ?? pgame());
 
+	// spectators are in the match feed but own no player, so they watch whoever's turn it is
+	const spectate = !!props.game.data.spectate;
 	const [p1id, setPlayer1] = createSignal(
-		props.replay ? game().turn : game().userId(rx.username),
+		props.replay || spectate ? game().turn : game().userId(rx.username),
 	);
 	const [p2id, setPlayer2] = createSignal(game().get_foe(p1id()));
 
@@ -909,11 +911,11 @@ export default function Match(props) {
 		newstate.effects.add(newentry.dom);
 	};
 
-	const applyNext = (cmd, iscmd) =>
+	const applyNext = (cmd, iscmd, emit = !iscmd) =>
 		batch(() => {
 			const game = pgame(),
 				{ turn } = game,
-				prehash = iscmd || game.hash();
+				prehash = emit ? game.hash() : true;
 			if (cmd.x === 'cast' || cmd.x === 'end') {
 				let play;
 				if (cmd.x === 'cast') {
@@ -965,7 +967,8 @@ export default function Match(props) {
 			}
 			const [ng, effects] = game.nextClone(cmd);
 			setGame(ng);
-			if (!iscmd && isMultiplayer(ng)) {
+			// every move in a server hosted game is relayed, spectators watch AI games too
+			if (emit && props.gameid) {
 				userEmit('move', {
 					id: props.gameid,
 					prehash,
@@ -1120,7 +1123,10 @@ export default function Match(props) {
 			});
 			const newTurn = ng.turn;
 			if (newTurn !== turn) {
-				if (ng.data.players[newTurn - 1].user === rx.username) {
+				if (spectate) {
+					setPlayer1(newTurn);
+					setPlayer2(ng.get_foe(newTurn));
+				} else if (ng.data.players[newTurn - 1].user === rx.username) {
 					setPlayer1(newTurn);
 				}
 				setFoeplays(foeplays => new Map(foeplays).set(newTurn, []));
@@ -1164,11 +1170,11 @@ export default function Match(props) {
 		if (game.data.arena) {
 			userEmit('modarena', {
 				aname: game.data.arena,
-				won: game.winner !== p1id(),
+				won: !game.won(p1id()),
 				lv: game.data.level - 4,
 			});
 		}
-		if (game.winner === p1id()) {
+		if (game.won(p1id())) {
 			if (game.data.quest !== undefined) {
 				if (game.data.quest.autonext) {
 					store.navGame(
@@ -1214,7 +1220,9 @@ export default function Match(props) {
 
 	const endClick = (discard = 0) => {
 		const game = pgame();
-		if (game.turn === p1id() && game.phase === Phase.Mulligan) {
+		if (spectate) {
+			if (game.winner) gotoResult();
+		} else if (game.turn === p1id() && game.phase === Phase.Mulligan) {
 			if (game.tax_left(p1id()) === 0) {
 				applyNext({ x: 'accept' });
 			}
@@ -1262,7 +1270,9 @@ export default function Match(props) {
 
 	const cancelClick = () => {
 		let game = pgame();
-		if (resigning()) {
+		if (spectate) {
+			setTargeting(null);
+		} else if (resigning()) {
 			setResigning(false);
 		} else if (game.turn === p1id()) {
 			if (game.phase === Phase.Mulligan && !game.empty_hand(p1id())) {
@@ -1291,6 +1301,8 @@ export default function Match(props) {
 	const resignClick = () => {
 		if (props.replay) {
 			store.doNav(import('./Challenge.jsx'));
+		} else if (spectate) {
+			store.doNav(import('./MainMenu.jsx'));
 		} else if (pgame().winner || pgame().get(p1id(), 'resigned')) {
 			gotoResult();
 		} else if (!resigning()) {
@@ -1303,7 +1315,13 @@ export default function Match(props) {
 	const thingClick = id => {
 		const game = pgame();
 		clearCard();
-		if (props.replay || game.phase === Phase.End || !game.has_id(id)) return;
+		if (
+			props.replay ||
+			spectate ||
+			game.phase === Phase.End ||
+			!game.has_id(id)
+		)
+			return;
 		const tgting = targeting();
 		if (tgting) {
 			if (tgting.filter(id)) {
@@ -1334,8 +1352,35 @@ export default function Match(props) {
 		}
 	};
 
+	// lobbies can seat more than 2, so step through the living foes
+	const cyclePlayer = dir => {
+		const g = game(),
+			len = g.data.players.length;
+		for (let i = 1; i < len; i++) {
+			const nextId = ((((p2id() - 1 + i * dir) % len) + len) % len) + 1;
+			if (nextId !== p1id() && !g.get(nextId, 'out')) {
+				setPlayer2(nextId);
+				return;
+			}
+		}
+	};
+	const manyPlayers = () => game().data.players.length > 2;
+
+	// with multiple humans watching, only one client may drive the AI or its moves double up
+	// skip players who left, else the AI stops moving once the first human resigns
+	const isAiDriver = game =>
+		!props.gameid ||
+		game.data.players.find(
+			(pl, i) =>
+				pl.user && !game.get(i + 1, 'out') && !game.get(i + 1, 'resigned'),
+		)?.user === rx.username;
+
 	const gameStep = game => {
-		if (game.data.players[game.turn - 1].ai === 1 && game.phase <= Phase.Play) {
+		if (
+			game.data.players[game.turn - 1].ai === 1 &&
+			game.phase <= Phase.Play &&
+			isAiDriver(game)
+		) {
 			aiWorker
 				.send({
 					data: {
@@ -1355,7 +1400,7 @@ export default function Match(props) {
 						await new Promise(resolve => setTimeout(resolve, aiDelay - now));
 					}
 					aiDelay = Date.now() + (e.data.cmd.x === 'end' ? 1728 : 216);
-					applyNext(e.data.cmd, true);
+					applyNext(e.data.cmd, true, !!props.gameid);
 				});
 		}
 	};
@@ -1384,31 +1429,23 @@ export default function Match(props) {
 			const card = pgame().get_hand(p1id())[chi];
 			if (card) thingClick(card);
 		} else if (e.key === 'p') {
-			if (pgame().turn === p1id() && p2id() !== pgame().get_foe(p1id())) {
+			if (
+				!spectate &&
+				pgame().turn === p1id() &&
+				p2id() !== pgame().get_foe(p1id())
+			) {
 				applyNext({ x: 'foe', t: p2id() });
 			}
 		} else if (e.key === 'l' && props.gameid) {
 			userEmit('reloadmoves', { id: props.gameid });
 		} else if (~(chi = '[]'.indexOf(e.key))) {
-			const { players } = pgame(),
-				dir = chi ? players.length + 1 : 1;
-			let nextId,
-				i = 1;
-			for (; i < players.length; i++) {
-				nextId = players[(players.indexOf(p2id()) + i * dir) % players.length];
-				if (nextId !== p1id() && !pgame().get(nextId, 'out')) {
-					break;
-				}
-			}
-			if (i !== players.length) {
-				setPlayer2(nextId);
-			}
+			cyclePlayer(chi ? 1 : -1);
 		} else return;
 		e.preventDefault();
 	};
 
 	const onbeforeunload = e => {
-		if (isMultiplayer(game())) {
+		if (!spectate && props.gameid) {
 			e.preventDefault();
 			e.returnValue = '';
 		}
@@ -1421,13 +1458,14 @@ export default function Match(props) {
 		if (typeof screen !== 'undefined' && screen.orientation)
 			screen.orientation.addEventListener('change', setlandscape);
 		if (props.replay) return;
-		if (!game.data.spectate) {
-			document.addEventListener('keydown', onkeydown);
+		document.addEventListener('keydown', onkeydown);
+		if (!spectate) {
 			window.addEventListener('beforeunload', onbeforeunload);
 		}
 
 		if (
 			!props.noloss &&
+			!spectate &&
 			!game.data.endurance &&
 			game.Cards.cardSet === 'Open' &&
 			(game.data.level !== undefined || isMultiplayer(game))
@@ -1453,6 +1491,7 @@ export default function Match(props) {
 			}
 			userExec('addloss', msg);
 		}
+		let resyncs = 0;
 		setCmds({
 			move: ({ cmd, hash }) => {
 				const game = pgame();
@@ -1462,13 +1501,29 @@ export default function Match(props) {
 				userEmit('reloadmoves', { id: props.gameid });
 			},
 			reloadmoves: ({ moves }) => {
+				// shorter than what we've played means a move of ours is still
+				// in flight, so ask again rather than roll it back
+				if (moves.length < pgame().replay.length && resyncs < 3) {
+					resyncs++;
+					userEmit('reloadmoves', { id: props.gameid });
+					return;
+				}
+				resyncs = 0;
+				const newgame = game.withMoves(moves);
+				if (newgame.hash() === pgame().hash()) return;
 				store.doNav(Promise.resolve({ default: Match }), {
 					...rx.nav.props,
-					game: game.withMoves(moves),
+					game: newgame,
 					noloss: true,
 				});
 			},
+			reconnect: () => {
+				// moves sent while we were down went to a dead socket, so pull the truth
+				if (props.gameid) userEmit('reloadmoves', { id: props.gameid });
+			},
 		});
+		// spectators may accept their invite long after the match started
+		if (spectate && props.gameid) userEmit('reloadmoves', { id: props.gameid });
 		gameStep(game);
 	});
 
@@ -1541,9 +1596,11 @@ export default function Match(props) {
 					endText = targeting() ? '' : 'End Turn';
 				}
 			} else cancelText = endText = '';
+			// resigning out of turn only flags, so say so rather than show nothing
+			if (g.get(p2id(), 'resigned')) turntell += '\nFoe resigned';
 		} else {
 			turntell = `${g.turn === p1 ? 'Your' : 'Their'} Turn\n${
-				g.winner === p1 ? 'Won' : 'Lost'
+				g.won(p1) ? 'Won' : 'Lost'
 			}`;
 			endText = 'Continue';
 			cancelText = '';
@@ -1707,7 +1764,15 @@ export default function Match(props) {
 				landscape={landscape()}
 			/>
 			{game().has_flooding() && <FloodSvg landscape={landscape()} />}
-			<div style="white-space:pre-wrap;text-align:center;position:absolute;right:0px;top:30px;width:120px;z-index:3;overflow:hidden;text-overflow:ellipsis">
+			<div
+				style={`white-space:pre-wrap;text-align:center;position:absolute;right:0px;top:30px;width:120px;z-index:3;overflow:hidden;text-overflow:ellipsis${
+					manyPlayers() ? ';cursor:pointer' : ''
+				}`}
+				onClick={() => cyclePlayer(1)}
+				onContextMenu={e => {
+					e.preventDefault();
+					cyclePlayer(-1);
+				}}>
 				{`${
 					[
 						'Commoner\n',
@@ -1758,7 +1823,7 @@ export default function Match(props) {
 			<input
 				type="button"
 				value={
-					props.replay ? 'Exit'
+					props.replay || spectate ? 'Exit'
 					: resigning() ?
 						'Confirm'
 					:	'Resign'

@@ -85,6 +85,9 @@ export default class Game {
 		}
 		return null;
 	}
+	won(id) {
+		return !!id && this.winner === this.get_leader(id);
+	}
 	playerDataByIdx(idx) {
 		const pldata = this.data.players;
 		for (let i = 0; i < pldata.length; i++) {
@@ -134,8 +137,9 @@ export default class Game {
 	withMoves(moves) {
 		const newgame = new Game(this.data);
 		for (const move of moves) {
-			newgame.next(move, false);
+			newgame.nextCmd(move, false);
 		}
+		newgame.replay = moves.slice();
 		return newgame;
 	}
 	replayJson() {

@@ -194,7 +194,7 @@ impl<'a> SkillThing<'a> {
 				let mut s = String::from("Passive: if frozen, this creature instead turns into a");
 				s.push_str(if self.upped() { "1|2 Arctic Octopus" } else { "1|2 Arctic Squid" });
 				Cow::from(s)
-			},
+			}
 			Skill::beguile => {
 				Cow::from("Target creature's opponent gains control of target creature until next turn")
 			}
@@ -217,13 +217,11 @@ impl<'a> SkillThing<'a> {
 			Skill::bloodmoon => Cow::from(
 				"Aquatic creatures gain \"Gain 1:8 when it attacks.\"\nGolems gain \"Damage dealt by this card also reduces the defender's maxHP.\"\nNocturnal creatures gain \"Heal yourself equal to the damage dealt by this card.\"",
 			),
-			Skill::bolsterintodeck => {
-				Cow::from(if self.upped() {
-					"Add 3 exact copies of target creature or weapon on top of your deck"
-				} else {
-					"Add 3 copies of target creature or weapon on top of your deck"
-				})
-			}
+			Skill::bolsterintodeck => Cow::from(if self.upped() {
+				"Add 3 exact copies of target creature or weapon on top of your deck"
+			} else {
+				"Add 3 copies of target creature or weapon on top of your deck"
+			}),
 			Skill::bonesharpen => Cow::from(
 				"Replace your own target creature's skills with \"0: Combine with target creature, giving strength, HP, & poison counters\"\nIf not poisoned & target is skeleton, reactivated",
 			),
@@ -338,9 +336,7 @@ impl<'a> SkillThing<'a> {
 			Skill::deckblock => Cow::from(
 				"Search from top of deck for a pillar when being attacked. If pillar found, block attack & destroy pillar",
 			),
-			Skill::decrsteam => Cow::from(
-				"Passive: lose 1 strength gained from steam"
-			),
+			Skill::decrsteam => Cow::from("Passive: lose 1 strength gained from steam"),
 			Skill::deepdive => Cow::from(
 				"Burrow. While burrowed, replace this ability with \"2:3 Freeze target permanent.\" Next turn, unburrow, become airborne, & triple this creature's strength until its next attack",
 			),
@@ -415,7 +411,7 @@ impl<'a> SkillThing<'a> {
 				let mut s = String::from("Passive: if this card is targeted by Chaos Seed it becomes a ");
 				s.push_str(if self.upped() { "3|3 Fallen Druid" } else { "3|3 Fallen Elf" });
 				Cow::from(s)
-			},
+			}
 			Skill::embezzle => Cow::from(
 				"Replaces target creature's skills with \"When this creature damages a player, that player draws a card. When this creature dies, destroy top card of opponent's deck",
 			),
@@ -749,7 +745,7 @@ impl<'a> SkillThing<'a> {
 				let mut s = String::from("Passive: when discarded, its owner receives");
 				s.push_str(if self.upped() { "13 spell damage" } else { "10 spell damage" });
 				Cow::from(s)
-			},
+			}
 			Skill::ouija => Cow::from(
 				"Whenever a creature dies, add an Ouija Essence to opponent's hand, add 1 to your maxHP if their hand was already full",
 			),
@@ -1059,9 +1055,9 @@ impl<'a> SkillThing<'a> {
 				"Deal {x} spell damage to all of target player's creatures. Removes cloak"
 			)),
 			Skill::summon(code) => Cow::from(format!("Summon a {}", self.cards().get(code as i16).name())),
-			Skill::swarm => {
-				Cow::from("Passive: base HP is equal to the number of Scarabs you control, including this one")
-			}
+			Skill::swarm => Cow::from(
+				"Passive: base HP is equal to the number of Scarabs you control, including this one",
+			),
 			Skill::swave => Cow::from(
 				"Deal 4 spell damage to target creature or player. If target creature is frozen, it dies. If target player's weapon is frozen, destroy it",
 			),
