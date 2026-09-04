@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onMount } from 'solid-js';
+import { createSignal, onCleanup, onSettled } from 'solid-js';
 
 import { changeMusic, changeSound, musicList } from '../audio.js';
 import Chat from '../Components/Chat.jsx';
@@ -107,7 +107,7 @@ export default function MainMenu(props) {
 		}
 	};
 
-	onMount(() => {
+	onSettled(() => {
 		store.loadMusic('main');
 		if (
 			!hasflag(rx.user, 'no-oracle') &&
@@ -436,12 +436,10 @@ export default function MainMenu(props) {
 							type="button"
 							value="Upgrade"
 							onClick={() => {
-								if (
-									!(
-										hasflag(rx.user, 'no-up-pillar') &&
-										hasflag(rx.user, 'no-up-merge')
-									)
-								) {
+								if (!(
+									hasflag(rx.user, 'no-up-pillar') &&
+									hasflag(rx.user, 'no-up-merge')
+								)) {
 									store.doNav(import('./Upgrade.jsx'));
 								}
 							}}

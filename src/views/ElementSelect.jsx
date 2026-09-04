@@ -1,4 +1,4 @@
-import { createSignal, onMount } from 'solid-js';
+import { createSignal, onSettled } from 'solid-js';
 
 import { eleNames } from '../ui.js';
 import { emit, userEmit, setCmds } from '../sock.jsx';
@@ -55,7 +55,7 @@ export default function ElementSelect() {
 	const [eledesc, setEledesc] = createSignal(-1),
 		[err, setErr] = createSignal('');
 
-	onMount(() => {
+	onSettled(() => {
 		setCmds({
 			login: data => {
 				if (data.err) {

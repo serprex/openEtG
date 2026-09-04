@@ -1,4 +1,4 @@
-import { createMemo, createSignal, Show } from 'solid-js';
+import { Show, createMemo, createSignal } from 'solid-js';
 
 import * as sock from '../sock.jsx';
 import { doNav, useRx, hasflag } from '../store.jsx';

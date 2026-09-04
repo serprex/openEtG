@@ -1,4 +1,4 @@
-import { createSignal, onMount, Index } from 'solid-js';
+import { For, createSignal, onSettled } from 'solid-js';
 
 import { userEmit, setCmds } from '../../sock.jsx';
 import { doNav } from '../../store.jsx';
@@ -6,7 +6,7 @@ import { doNav } from '../../store.jsx';
 export default function Wealth() {
 	const [getTop, setTop] = createSignal([]);
 
-	onMount(() => {
+	onSettled(() => {
 		setCmds({
 			legacyboard: ({ ownscore, top }) => {
 				setTop({ ownscore, top });
@@ -26,7 +26,7 @@ export default function Wealth() {
 				<div>{getTop()?.ownscore}</div>
 			</div>
 			<div style="width:810px;display:grid;grid-template-rows:repeat(33,18px);column-gap:18px;grid-auto-flow:column;grid-auto-columns:257px;white-space:nowrap">
-				<Index each={getTop()?.top}>
+				<For each={getTop()?.top} keyed={false}>
 					{(item, i) => (
 						<div style="display:flex;justify-content:space-between">
 							<div style="text-overflow:ellipsis;overflow:hidden">
@@ -35,7 +35,7 @@ export default function Wealth() {
 							{item()[2]}
 						</div>
 					)}
-				</Index>
+				</For>
 			</div>
 		</div>
 	);

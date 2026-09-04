@@ -10,7 +10,7 @@ window.onerror = function (...args) {
 };
 
 doNav(Login);
-import { render } from 'solid-js/web';
+import { render } from '@solidjs/web';
 
 import Rightpane from '../views/Rightpane.jsx';
 render(() => <Rightpane />, document.getElementById('rightpane'));

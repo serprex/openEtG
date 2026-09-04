@@ -1,5 +1,5 @@
-import { onMount, createSignal } from 'solid-js';
-import { render } from 'solid-js/web';
+import { createSignal, onSettled } from 'solid-js';
+import { render } from '@solidjs/web';
 import Cards from '../AllCards.js';
 import Card from '../Components/Card.jsx';
 import DeckDisplay from '../Components/DeckDisplay.jsx';
@@ -10,7 +10,7 @@ function App() {
 	const [deck, setDeck] = createSignal(decodedeck(location.hash.slice(1))),
 		[card, setCard] = createSignal(null);
 
-	onMount(() => {
+	onSettled(() => {
 		window.addEventListener('hashchange', () => {
 			setDeck(decodedeck(location.hash.slice(1)));
 		});

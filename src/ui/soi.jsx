@@ -1,5 +1,5 @@
-import { render } from 'solid-js/web';
 import { createSignal } from 'solid-js';
+import { render } from '@solidjs/web';
 import Game from '../Game.js';
 import { encodedeck } from '../etgutil.js';
 import { Kind } from '../rs/pkg/etg.js';

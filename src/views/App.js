@@ -1,5 +1,5 @@
 import { useRx } from '../store.jsx';
-import { untrack, createMemo } from 'solid-js';
+import { createMemo, untrack } from 'solid-js';
 
 export default function App(props) {
 	const nav = useRx(state => state.nav);

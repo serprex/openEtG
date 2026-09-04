@@ -1,5 +1,4 @@
-import { createSignal, onMount } from 'solid-js';
-import { Show } from 'solid-js/web';
+import { Show, createSignal, onSettled } from 'solid-js';
 
 import Cards from '../Cards.js';
 import Game from '../Game.js';
@@ -125,7 +124,7 @@ function ArenaCard(props) {
 export default function ArenaInfo() {
 	const rx = store.useRx();
 	const [AB, setAB] = createSignal({});
-	onMount(() => {
+	onSettled(() => {
 		sock.setCmds({ arenainfo: setAB });
 		sock.userEmit('arenainfo');
 	});

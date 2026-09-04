@@ -1,4 +1,4 @@
-import { createMemo, Index, Show } from 'solid-js';
+import { For, Show, createMemo } from 'solid-js';
 import * as Quest from '../Quest.js';
 import Text from '../Components/Text.jsx';
 import * as store from '../store.jsx';
@@ -7,7 +7,7 @@ export function QuestColumn(props) {
 	const user = store.useRx(state => state.user);
 	return (
 		<div style="display:flex;flex-direction:column;width:177px">
-			<Index each={props.area.children}>
+			<For each={props.area.children} keyed={false}>
 				{(area, i) => (
 					<Show
 						when={
@@ -29,7 +29,7 @@ export function QuestColumn(props) {
 						</span>
 					</Show>
 				)}
-			</Index>
+			</For>
 		</div>
 	);
 }
@@ -82,11 +82,11 @@ export default function QuestView() {
 				/>
 			</div>
 			<div style="display:flex;margin:8px">
-				<Index each={questInfo().questAreas}>
+				<For each={questInfo().questAreas} keyed={false}>
 					{(area, qi) => (
 						<QuestColumn quest={opts.quest ?? []} qi={qi} area={area()} />
 					)}
-				</Index>
+				</For>
 			</div>
 		</>
 	);

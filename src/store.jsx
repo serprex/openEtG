@@ -1,5 +1,4 @@
-import { onCleanup } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { createStore, onCleanup } from 'solid-js';
 
 import * as usercmd from './usercmd.js';
 import { changeMusic, changeSound, musicList } from './audio.js';
@@ -247,7 +246,7 @@ export function hardcoreante(Cards, deck) {
 
 export function useRx(cb = x => x) {
 	const [signal, setState] = createStore(cb(state));
-	onCleanup(subscribe(state => setState(cb(state))));
+	onCleanup(subscribe(state => setState(() => cb(state))));
 	return signal;
 }
 

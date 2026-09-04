@@ -1,5 +1,4 @@
-import { createSignal, onMount, Show } from 'solid-js';
-import { For } from 'solid-js/web';
+import { For, Show, createSignal, onSettled } from 'solid-js';
 
 import { encodeCode } from '../etgutil.js';
 import Cards from '../Cards.js';
@@ -11,7 +10,7 @@ export default function ArenaTop({ lv }) {
 	const [top, setTop] = createSignal([]);
 	const [card, setCard] = createSignal(null);
 
-	onMount(() => {
+	onSettled(() => {
 		setCmds({ arenatop: ({ top }) => setTop(top) });
 		emit({ x: 'arenatop', lv });
 	});
