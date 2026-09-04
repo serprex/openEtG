@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show } from 'solid-js';
+import { Show, createSignal, onSettled } from 'solid-js';
 
 import { emit, setCmds } from '../sock.jsx';
 import * as store from '../store.jsx';
@@ -24,7 +24,7 @@ export default function Login() {
 		if (e.key === 'Enter') loginClick();
 	};
 
-	onMount(() => {
+	onSettled(() => {
 		setCmds({
 			login: data => {
 				if (!data.err) {

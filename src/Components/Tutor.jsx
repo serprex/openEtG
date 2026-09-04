@@ -1,4 +1,4 @@
-import { createSignal, For } from 'solid-js';
+import { For, createSignal } from 'solid-js';
 import { useRx } from '../store.jsx';
 import Text from './Text.jsx';
 

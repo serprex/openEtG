@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createSignal, onMount } from 'solid-js';
+import { createEffect, createMemo, createSignal, onSettled } from 'solid-js';
 
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
@@ -20,7 +20,7 @@ export default function Trade(props) {
 		etgutil.decodedeck(offer()?.forcards ?? ''),
 	);
 
-	onMount(() => {
+	onSettled(() => {
 		sock.setCmds({
 			offertrade: data => {
 				setOffer({
@@ -48,7 +48,10 @@ export default function Trade(props) {
 		});
 	});
 
-	createEffect(() => sock.userEmit('reloadtrade', { f: props.foe }));
+	createEffect(
+		() => props.foe,
+		foe => sock.userEmit('reloadtrade', { f: foe }),
+	);
 
 	const cardminus = createMemo(() => {
 			const minus = [];

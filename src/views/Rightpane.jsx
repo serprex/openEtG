@@ -24,7 +24,7 @@ export default function Rightpane() {
 		<Show when={!opts.hideRightpane}>
 			<div id="rightlinks">
 				<div style="display:flex;margin-bottom:4px;justify-content:space-evenly">
-					<a href="artcredit.htm" target="_blank">
+					<a href="artcredit.html" target="_blank">
 						Art credits
 					</a>
 					&emsp;&emsp;

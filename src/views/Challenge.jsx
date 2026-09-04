@@ -68,29 +68,24 @@ function PlayerEditor(props) {
 							data.drawpower = draw.value | 0;
 						if (deckpower.value && !Number.isNaN(+deckpower))
 							data.deckpower = deckpower.value | 0;
-						let newdeck;
 						switch (pdeckgen()) {
 							case 'mage':
 							case 'demigod':
-								[data.name, newdeck] = choose(aiDecks[pdeckgen()]);
-								newdeck = Promise.resolve(newdeck);
+								[data.name, data.deck] = choose(aiDecks[pdeckgen()]);
 								break;
 							case 'rng':
-								[data.name, newdeck] = deckgen(
+								[data.name, data.deck] = deckgen(
 									(rnguprate.value * 100) | 0,
 									data.markpower,
 									rngmaxrare.value | 0,
 								);
 								break;
 							default:
-								newdeck = Promise.resolve(deck.value);
+								data.deck = deck.value;
 						}
 						if (name.value) data.name = name.value;
 						else if (data.user) data.name = data.user;
-						newdeck.then(x => {
-							data.deck = x;
-							props.updatePlayer(data);
-						});
+						props.updatePlayer(data);
 					}}
 				/>
 			</div>

@@ -1,4 +1,4 @@
-import { createMemo, createSignal, onMount } from 'solid-js';
+import { createMemo, createSignal, onSettled } from 'solid-js';
 
 import Cards from '../Cards.js';
 import * as sock from '../sock.jsx';
@@ -18,7 +18,7 @@ export default function Library(props) {
 	const [showBound, setShowBound] = createSignal(false);
 	let altname;
 
-	onMount(() => {
+	onSettled(() => {
 		sock.setCmds({ librarygive: setData });
 		sock.emit({ x: 'librarywant', f: props.name, a: props.alt ?? '' });
 	});

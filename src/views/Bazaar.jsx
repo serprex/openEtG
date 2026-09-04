@@ -1,5 +1,4 @@
-import { createMemo, createSignal, onMount } from 'solid-js';
-import { For, Show } from 'solid-js/web';
+import { For, Show, createMemo, createSignal, onSettled } from 'solid-js';
 
 import Cards from '../Cards.js';
 import { deck2pool } from '../etgutil.js';
@@ -195,7 +194,7 @@ export default function Bazaar() {
 	const [buyq, setBuyq] = createSignal(0);
 	const [showOrders, setShowOrders] = createSignal(false);
 
-	onMount(() => {
+	onSettled(() => {
 		sock.setCmds({
 			bzread: ({ bz }) => {
 				for (const k in bz) {

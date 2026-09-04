@@ -1,5 +1,4 @@
-import { createSignal } from 'solid-js';
-import { Index } from 'solid-js/web';
+import { For, createSignal } from 'solid-js';
 
 import { playSound } from '../audio.js';
 import { selector_filter } from '../rs/pkg/etg.js';
@@ -121,7 +120,7 @@ function CardSelectorCore(props) {
 	};
 
 	return (
-		<Index each={columns()}>
+		<For each={columns()} keyed={false}>
 			{(cards, i) => (
 				<div
 					class="cardselector"
@@ -131,7 +130,7 @@ function CardSelectorCore(props) {
 					<CardSelectorColumn {...props} cards={cards()} />
 				</div>
 			)}
-		</Index>
+		</For>
 	);
 }
 

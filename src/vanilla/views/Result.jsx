@@ -1,5 +1,4 @@
-import { onCleanup, onMount } from 'solid-js';
-import { Index } from 'solid-js/web';
+import { For, onCleanup, onSettled } from 'solid-js';
 
 import { userEmit } from '../../sock.jsx';
 import { addcard, decodedeck } from '../../etgutil.js';
@@ -26,7 +25,7 @@ export default function OriginalResult({ game }) {
 		else if (e.key === 'w' && canRematch()) game.data.rematch();
 	};
 
-	onMount(() => {
+	onSettled(() => {
 		document.addEventListener('keydown', onkeydown);
 	});
 	onCleanup(() => {
@@ -87,7 +86,7 @@ export default function OriginalResult({ game }) {
 	return (
 		<div style="display:flex;flex-direction:column;justify-content:space-evenly;align-items:center;height:600px">
 			<div style="display:flex;justify-content:space-evenly;position:relative;top:16px;width:100%;height:300px">
-				<Index each={cardswon}>
+				<For each={cardswon} keyed={false}>
 					{c => (
 						<div
 							style={`position:relative${
@@ -105,7 +104,7 @@ export default function OriginalResult({ game }) {
 							))}
 						</div>
 					)}
-				</Index>
+				</For>
 			</div>
 			<div style="display:flex;justify-content:space-evenly;width:200px">
 				<input type="button" value="Exit" onClick={exitFunc} />

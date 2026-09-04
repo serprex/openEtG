@@ -58,6 +58,10 @@ export default class Game {
 		}
 	}
 
+	get [Symbol.toStringTag]() {
+		return 'Game';
+	}
+
 	get Cards() {
 		return this.data?.set === 'Original' ? OriginalCards : OpenCards;
 	}

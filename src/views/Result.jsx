@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onMount } from 'solid-js';
+import { createSignal, onCleanup, onSettled } from 'solid-js';
 
 import * as etgutil from '../etgutil.js';
 import * as sock from '../sock.jsx';
@@ -263,7 +263,7 @@ export default function Result(props) {
 
 	const clearTip = () => setTip(null);
 
-	onMount(() => {
+	onSettled(() => {
 		document.addEventListener('keydown', onkeydown);
 	});
 	onCleanup(() => {

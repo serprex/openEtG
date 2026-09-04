@@ -1,4 +1,4 @@
-import { createSignal, onMount } from 'solid-js';
+import { createSignal, onSettled } from 'solid-js';
 
 import * as sock from '../../sock.jsx';
 import * as store from '../../store.jsx';
@@ -61,7 +61,7 @@ function NameSelect(props) {
 export default function OriginalLogin() {
 	const [select, setSelect] = createSignal(null);
 
-	onMount(() => {
+	onSettled(() => {
 		sock.setCmds({
 			originaldata: data => {
 				store.addLegacy(data.name, data.data);

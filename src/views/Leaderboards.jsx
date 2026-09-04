@@ -1,4 +1,4 @@
-import { createComputed, createSignal, onMount, Index } from 'solid-js';
+import { For, createEffect, createSignal, onSettled } from 'solid-js';
 import { userEmit, setCmds } from '../sock.jsx';
 import { doNav, state } from '../store.jsx';
 import { presets } from '../ui.js';
@@ -19,7 +19,7 @@ export default function Leaderboards() {
 		[getFlags, setFlags] = createSignal(state.user.flags.slice().sort()),
 		[getTop, setTop] = createSignal({});
 
-	onMount(() => {
+	onSettled(() => {
 		setCmds({
 			leaderboard: ({ flags, category, ownscore, top }) => {
 				const name = category + ':' + flags.sort().join(' ');
@@ -31,12 +31,14 @@ export default function Leaderboards() {
 		});
 	});
 
-	createComputed(() => {
-		const top = getTop();
-		if (!top[getCategory() + ':' + getFlags().join(' ')]) {
-			userEmit('leaderboard', { flags: getFlags(), category: getCategory() });
-		}
-	});
+	createEffect(
+		() => [getTop(), getCategory(), getFlags()],
+		([top, category, flags]) => {
+			if (!top[category + ':' + flags.join(' ')]) {
+				userEmit('leaderboard', { flags, category });
+			}
+		},
+	);
 
 	return (
 		<div style="display:flex">
@@ -79,10 +81,11 @@ export default function Leaderboards() {
 				</div>
 			</div>
 			<div style="width:810px;display:grid;grid-template-rows:repeat(33,18px);column-gap:18px;grid-auto-flow:column;grid-auto-columns:257px;white-space:nowrap">
-				<Index
+				<For
 					each={
 						getTop()?.[getCategory() + ':' + getFlags().join(' ')]?.[1] ?? []
-					}>
+					}
+					keyed={false}>
 					{(item, i) => (
 						<div
 							style="display:flex;justify-content:space-between"
@@ -98,7 +101,7 @@ export default function Leaderboards() {
 							{item()[2]}
 						</div>
 					)}
-				</Index>
+				</For>
 			</div>
 		</div>
 	);

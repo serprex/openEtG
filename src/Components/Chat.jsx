@@ -1,29 +1,32 @@
-import { createComputed, createEffect } from 'solid-js';
-import { For } from 'solid-js/web';
+import { For, createEffect, createRenderEffect } from 'solid-js';
 import { useRx } from '../store.jsx';
 
 export default function Chat(props) {
 	const rx = useRx();
 	let chat = null,
-		scrollTop = null;
+		scrollTop = null,
+		prevChannel = props.channel;
 
-	createComputed(channel => {
-		rx.chat;
-		scrollTop =
-			(
-				chat &&
-				props.channel === channel &&
-				Math.abs(chat.scrollTop - chat.scrollHeight + chat.offsetHeight) >= 8
-			) ?
-				chat.scrollTop
-			:	-1;
-		return props.channel;
-	}, props.channel);
-	createEffect(() => {
-		rx.chat;
-		props.channel;
-		chat.scrollTop = ~scrollTop ? scrollTop : chat.scrollHeight;
-	});
+	createRenderEffect(
+		() => [rx.chat, props.channel],
+		() => {
+			scrollTop =
+				(
+					chat &&
+					props.channel === prevChannel &&
+					Math.abs(chat.scrollTop - chat.scrollHeight + chat.offsetHeight) >= 8
+				) ?
+					chat.scrollTop
+				:	-1;
+			prevChannel = props.channel;
+		},
+	);
+	createEffect(
+		() => [rx.chat, props.channel],
+		() => {
+			chat.scrollTop = ~scrollTop ? scrollTop : chat.scrollHeight;
+		},
+	);
 
 	return (
 		<div class="chatBox" style={props.style} ref={chat}>

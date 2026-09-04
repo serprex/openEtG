@@ -1,4 +1,4 @@
-import { createSignal, onMount } from 'solid-js';
+import { createSignal, onSettled } from 'solid-js';
 
 import Cards from '../Cards.js';
 import { addcard, encodeCount } from '../etgutil.js';
@@ -44,7 +44,7 @@ export default function Reward(props) {
 	const rewardList = getRewardList(props.type);
 	const [chosenReward, setChosenReward] = createSignal(null);
 
-	onMount(() => {
+	onSettled(() => {
 		if (rewardList) {
 			setCmds({
 				codedone: data => {

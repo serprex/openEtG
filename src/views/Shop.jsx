@@ -1,5 +1,4 @@
-import { createSignal, onMount } from 'solid-js';
-import { For } from 'solid-js/web';
+import { For, createSignal, onSettled } from 'solid-js';
 
 import { playSound } from '../audio.js';
 import * as sock from '../sock.jsx';
@@ -78,7 +77,7 @@ export default function Shop() {
 	const [buy, setBuy] = createSignal(true);
 	const [cards, setCards] = createSignal('');
 
-	onMount(() => {
+	onSettled(() => {
 		sock.setCmds({
 			boostergive: data => {
 				const userdelta = {};

@@ -210,6 +210,18 @@ async fn handle_get_core(
 	if path.contains("..") || !path.starts_with('/') {
 		return response::Builder::new().status(403).body(Bytes::new());
 	}
+	if let Some(stem) = path.strip_suffix(".htm") {
+		let mut newpath = String::from(stem);
+		newpath.push_str(".html");
+		if let Some(query) = uri.query() {
+			newpath.push('?');
+			newpath.push_str(query);
+		}
+		return response::Builder::new()
+			.status(301)
+			.header(header::LOCATION, newpath)
+			.body(Bytes::new());
+	}
 	let accept = if path.ends_with(".webp") || path.ends_with(".opus") {
 		Encoding::identity
 	} else {
@@ -314,7 +326,6 @@ async fn handle_get_core(
 	} else if path.ends_with(".js")
 		|| path.ends_with(".json")
 		|| path.ends_with(".css")
-		|| path.ends_with(".htm")
 		|| path.ends_with(".html")
 		|| path.ends_with(".wasm")
 		|| path.ends_with(".js.map")
@@ -339,7 +350,7 @@ async fn handle_get_core(
 				ContentType::ApplicationJson
 			} else if path.ends_with(".css") {
 				ContentType::TextCss
-			} else if path.ends_with(".htm") || path.ends_with(".html") {
+			} else if path.ends_with(".html") {
 				ContentType::TextHtml
 			} else if path.ends_with(".wasm") {
 				ContentType::ApplicationWasm
@@ -381,7 +392,7 @@ async fn handle_get_core(
 				file: None,
 			}
 		} else {
-			let mut newpath = String::from("/deck.htm#");
+			let mut newpath = String::from("/deck.html#");
 			newpath.push_str(&path["/deck/".len()..]);
 			return response::Builder::new()
 				.status(302)

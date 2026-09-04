@@ -1,3 +1,5 @@
+import { Errored, Loading } from 'solid-js';
+
 import { chatMsg, doNav, Login } from '../store.jsx';
 
 let lastError = 0;
@@ -10,13 +12,22 @@ window.onerror = function (...args) {
 };
 
 doNav(Login);
-import { render } from 'solid-js/web';
+import { render } from '@solidjs/web';
 
 import Rightpane from '../views/Rightpane.jsx';
 render(() => <Rightpane />, document.getElementById('rightpane'));
 
 import App from '../views/App.js';
-render(() => <App />, document.getElementById('leftpane'));
+render(
+	() => (
+		<Errored fallback={err => <div>{err().toString()}</div>}>
+			<Loading fallback={<div>Loading...</div>}>
+				<App />
+			</Loading>
+		</Errored>
+	),
+	document.getElementById('leftpane'),
+);
 
 import { emit } from '../sock.jsx';
 emit({ x: 'motd' });

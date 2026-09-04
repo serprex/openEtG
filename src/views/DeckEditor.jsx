@@ -1,11 +1,4 @@
-import {
-	createMemo,
-	createSignal,
-	createComputed,
-	onCleanup,
-	onMount,
-} from 'solid-js';
-import { Index } from 'solid-js/web';
+import { For, createMemo, createSignal, onCleanup, onSettled } from 'solid-js';
 
 import Cards from '../Cards.js';
 import Editor from '../Components/Editor.jsx';
@@ -98,7 +91,7 @@ function DeckName(props) {
 
 function DeckSelector(props) {
 	let deckput;
-	onMount(() => deckput.focus());
+	onSettled(() => deckput.focus());
 	const [name, setName] = createSignal('');
 	const decks = createMemo(() => Object.keys(props.user.decks).sort());
 	const names = () => {
@@ -164,7 +157,7 @@ function DeckSelector(props) {
 				/>
 			</div>
 			<div style="display:grid;grid-template-columns:repeat(6,1fr)">
-				<Index each={names()}>
+				<For each={names()} keyed={false}>
 					{name => (
 						<DeckName
 							deck={props.user.decks[name()]}
@@ -172,7 +165,7 @@ function DeckSelector(props) {
 							onClick={props.loadDeck}
 						/>
 					)}
-				</Index>
+				</For>
 			</div>
 		</div>
 	);
@@ -193,11 +186,10 @@ export default function DeckEditor() {
 		return pool;
 	});
 	let deckref;
-	onMount(() => deckref.setSelectionRange(0, 999));
+	onSettled(() => deckref.setSelectionRange(0, 999));
 
-	const [deckData, setDeckData] = createSignal(null);
-	createComputed(() =>
-		setDeckData(processDeck(rx.user.decks[rx.user.selectedDeck] ?? '')),
+	const [deckData, setDeckData] = createSignal(() =>
+		processDeck(rx.user.decks[rx.user.selectedDeck] ?? ''),
 	);
 
 	const autoup = () => !store.hasflag(rx.user, 'no-up-merge');
@@ -230,7 +222,7 @@ export default function DeckEditor() {
 		if (~chi) loadDeck(rx.user.qecks[chi]);
 	};
 
-	onMount(() => {
+	onSettled(() => {
 		document.addEventListener('keydown', onkeydown);
 	});
 	onCleanup(() => {

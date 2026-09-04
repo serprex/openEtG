@@ -1,32 +1,28 @@
 {
-  "name": "openetg",
-  "type": "module",
-  "description": "openEtG",
-  "readme": "README.md",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/serprex/openEtG"
-  },
-  "devDependencies": {
-    "@babel/plugin-syntax-import-attributes": "^7.26.0",
-    "@pencil.js/spritesheet": "^1.5.1",
-    "babel-loader": "^10.0.0",
-    "babel-preset-solid": "^1.9.3",
-    "copy-webpack-plugin": "^14.0.0",
-    "html-webpack-plugin": "^5.6.3",
-    "prettier": "^3.9.0",
-    "solid-js": "^1.9.4",
-    "webpack": "^5.98.0",
-    "webpack-cli": "^7.0.0"
-  },
-  "scripts": {
-    "test": "cargo test --manifest-path=./src/rs/Cargo.toml",
-    "dev": "webpack --mode=development --watch --config webpack.config.js",
-    "build": "npm run build-wasm && webpack --mode=production --config webpack.config.js",
-    "build-dev": "npm run build-wasm && webpack --mode=development --config webpack.config.js",
-    "build-atlas": "node scripts/sheet.js && cwebp -m 6 -q 100 assets/atlas.png -o assets/atlas.webp",
-    "build-wasm": "RUSTFLAGS='-C target-feature=+bulk-memory,+sign-ext' cargo build --release --manifest-path src/rs/Cargo.toml --target wasm32-unknown-unknown && wasm-bindgen --no-typescript --out-dir ./src/rs/pkg ./src/rs/target/wasm32-unknown-unknown/release/etg.wasm",
-    "build-wasm-debug": "RUSTFLAGS='-C target-feature=+bulk-memory,+sign-ext' cargo build --manifest-path src/rs/Cargo.toml --target wasm32-unknown-unknown && wasm-bindgen --no-typescript --out-dir ./src/rs/pkg ./src/rs/target/wasm32-unknown-unknown/debug/etg.wasm"
-  },
-  "license": "MIT"
+	"name": "openetg",
+	"type": "module",
+	"description": "openEtG",
+	"readme": "README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/serprex/openEtG"
+	},
+	"devDependencies": {
+		"@pencil.js/spritesheet": "^1.5.1",
+		"@solidjs/compiler": "^2.0.0-rc.6",
+		"@solidjs/web": "^2.0.0-rc.6",
+		"prettier": "^3.9.0",
+		"rolldown": "^1.2.7",
+		"solid-js": "^2.0.0-rc.6"
+	},
+	"scripts": {
+		"test": "cargo test --manifest-path=./src/rs/Cargo.toml",
+		"dev": "rolldown -c --watch",
+		"build": "npm run build-wasm && rolldown -c",
+		"build-dev": "npm run build-wasm && rolldown -c --no-minify",
+		"build-atlas": "node scripts/sheet.js && cwebp -m 6 -q 100 assets/atlas.png -o assets/atlas.webp",
+		"build-wasm": "RUSTFLAGS='-C target-feature=+bulk-memory,+sign-ext' cargo build --release --manifest-path src/rs/Cargo.toml --target wasm32-unknown-unknown && wasm-bindgen --no-typescript --out-dir ./src/rs/pkg ./src/rs/target/wasm32-unknown-unknown/release/etg.wasm",
+		"build-wasm-debug": "RUSTFLAGS='-C target-feature=+bulk-memory,+sign-ext' cargo build --manifest-path src/rs/Cargo.toml --target wasm32-unknown-unknown && wasm-bindgen --no-typescript --out-dir ./src/rs/pkg ./src/rs/target/wasm32-unknown-unknown/debug/etg.wasm"
+	},
+	"license": "MIT"
 }

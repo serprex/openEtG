@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show } from 'solid-js';
+import { Show, createSignal, onSettled } from 'solid-js';
 
 import { emit, setCmds } from '../sock.jsx';
 import { chatMsg, doNav, setUser } from '../store.jsx';
@@ -7,7 +7,7 @@ const MainMenu = import('./MainMenu.jsx');
 export default function KongLogin() {
 	const [guest, setGuest] = createSignal(false);
 
-	onMount(() => {
+	onSettled(() => {
 		kongregateAPI.loadAPI(() => {
 			const kong = kongregateAPI.getAPI();
 			if (kong.services.isGuest()) {

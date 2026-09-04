@@ -1,5 +1,4 @@
-import { onCleanup } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { createStore, onCleanup } from 'solid-js';
 
 import * as usercmd from './usercmd.js';
 import { changeMusic, changeSound, musicList } from './audio.js';
@@ -25,7 +24,7 @@ changeMusic(opts.enableMusic);
 
 const listeners = new Set();
 export let state = {
-	nav: { view: () => null, props: undefined, key: 0 },
+	nav: { view: { default: () => null }, props: undefined, key: 0 },
 	opts,
 	alts: {},
 	legacy: {},
@@ -45,12 +44,10 @@ function subscribe(cb) {
 }
 
 export function doNav(view, props = {}) {
-	view.then(view =>
-		dispatch({
-			...state,
-			nav: { view: view.default, props, key: state.nav.key + 1 },
-		}),
-	);
+	dispatch({
+		...state,
+		nav: { view, props, key: state.nav.key + 1 },
+	});
 }
 
 export function navGame(game) {
@@ -247,7 +244,7 @@ export function hardcoreante(Cards, deck) {
 
 export function useRx(cb = x => x) {
 	const [signal, setState] = createStore(cb(state));
-	onCleanup(subscribe(state => setState(cb(state))));
+	onCleanup(subscribe(state => setState(() => cb(state))));
 	return signal;
 }
 

@@ -1,5 +1,4 @@
-import { createMemo, createSignal } from 'solid-js';
-import { Show } from 'solid-js/web';
+import { Show, createMemo, createSignal } from 'solid-js';
 
 import * as etgutil from '../../etgutil.js';
 import Cards from '../Cards.js';

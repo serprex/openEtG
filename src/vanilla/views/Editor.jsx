@@ -1,4 +1,4 @@
-import { createMemo, onMount } from 'solid-js';
+import { createMemo, onSettled } from 'solid-js';
 
 import { parseDeck } from './MainMenu.jsx';
 import Cards from '../Cards.js';
@@ -38,7 +38,7 @@ export default function OriginalEditor() {
 	});
 
 	let deckref;
-	onMount(() => {
+	onSettled(() => {
 		deckref.setSelectionRange(0, 999);
 	});
 
