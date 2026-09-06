@@ -436,10 +436,12 @@ export default function MainMenu(props) {
 							type="button"
 							value="Upgrade"
 							onClick={() => {
-								if (!(
-									hasflag(rx.user, 'no-up-pillar') &&
-									hasflag(rx.user, 'no-up-merge')
-								)) {
+								if (
+									!(
+										hasflag(rx.user, 'no-up-pillar') &&
+										hasflag(rx.user, 'no-up-merge')
+									)
+								) {
 									store.doNav(import('./Upgrade.jsx'));
 								}
 							}}

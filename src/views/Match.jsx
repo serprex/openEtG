@@ -1502,11 +1502,14 @@ export default function Match(props) {
 				resyncs = 0;
 				const newgame = game.withMoves(moves);
 				if (newgame.hash() === pgame().hash()) return;
-				store.doNav(Promise.resolve({ default: Match }), {
-					...rx.nav.props,
-					game: newgame,
-					noloss: true,
-				});
+				store.doNav(
+					{ default: Match },
+					{
+						...rx.nav.props,
+						game: newgame,
+						noloss: true,
+					},
+				);
 			},
 			reconnect: () => {
 				// moves sent while we were down went to a dead socket, so pull the truth

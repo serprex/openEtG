@@ -24,7 +24,7 @@ changeMusic(opts.enableMusic);
 
 const listeners = new Set();
 export let state = {
-	nav: { view: () => null, props: undefined, key: 0 },
+	nav: { view: { default: () => null }, props: undefined, key: 0 },
 	opts,
 	alts: {},
 	legacy: {},
@@ -44,12 +44,10 @@ function subscribe(cb) {
 }
 
 export function doNav(view, props = {}) {
-	view.then(view =>
-		dispatch({
-			...state,
-			nav: { view: view.default, props, key: state.nav.key + 1 },
-		}),
-	);
+	dispatch({
+		...state,
+		nav: { view, props, key: state.nav.key + 1 },
+	});
 }
 
 export function navGame(game) {
