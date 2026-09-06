@@ -1,9 +1,12 @@
 import {
 	For,
 	Show,
+	action,
 	createEffect,
 	createMemo,
 	createSignal,
+	getOwner,
+	isDisposed,
 	onCleanup,
 	onSettled,
 	untrack,
@@ -1366,33 +1369,33 @@ export default function Match(props) {
 				pl.user && !game.get(i + 1, 'out') && !game.get(i + 1, 'resigned'),
 		)?.user === rx.username;
 
+	const owner = getOwner();
+	const aiStep = action(async function* (game) {
+		const e = await aiWorker.send({
+			data: {
+				seed: game.data.seed,
+				set: game.data.set,
+				players: game.data.players,
+			},
+			moves: game.replay,
+		});
+		const now = Date.now();
+		if (now < aiDelay && game.phase === Phase.Play && e.data.cmd.x !== 'end') {
+			await new Promise(resolve => setTimeout(resolve, aiDelay - now));
+		}
+		aiDelay = Date.now() + (e.data.cmd.x === 'end' ? 1728 : 216);
+		if (isDisposed(owner)) return;
+		yield;
+		applyNext(e.data.cmd, true, !!props.gameid);
+	});
+
 	const gameStep = game => {
 		if (
 			game.data.players[game.turn - 1].ai === 1 &&
 			game.phase <= Phase.Play &&
 			isAiDriver(game)
 		) {
-			aiWorker
-				.send({
-					data: {
-						seed: game.data.seed,
-						set: game.data.set,
-						players: game.data.players,
-					},
-					moves: game.replay,
-				})
-				.then(async e => {
-					const now = Date.now();
-					if (
-						now < aiDelay &&
-						game.phase === Phase.Play &&
-						e.data.cmd.x !== 'end'
-					) {
-						await new Promise(resolve => setTimeout(resolve, aiDelay - now));
-					}
-					aiDelay = Date.now() + (e.data.cmd.x === 'end' ? 1728 : 216);
-					applyNext(e.data.cmd, true, !!props.gameid);
-				});
+			setTimeout(() => aiStep(game), 0);
 		}
 	};
 
