@@ -3,7 +3,6 @@ import {
 	Show,
 	createEffect,
 	createMemo,
-	createRenderEffect,
 	createSignal,
 	onCleanup,
 	onSettled,
@@ -614,60 +613,51 @@ function Things(props) {
 					}
 			);
 		});
-	const [getDeath, setDeath] = createSignal(new Map()),
-		[allthings, setAll] = createSignal([]),
-		banned = new Set();
+	const death = new Map(),
+		banned = new Set(),
+		[getBump, bump] = createSignal(undefined, { equals: false });
 	let oldthings = props.things;
-	createRenderEffect(
-		() => props.things,
-		things => {
-			const death = getDeath();
-			let newDeath = null;
-			for (const id of things) {
-				if (death.has(id)) {
-					newDeath = newDeath ?? new Map(death);
-					newDeath.delete(id);
-				} else if (banned.has(id)) banned.delete(id);
+	const state = createMemo(() => {
+		getBump();
+		const things = props.things;
+		for (const id of things) {
+			if (!death.delete(id)) banned.delete(id);
+		}
+		const newthings = new Set(things);
+		for (const id of oldthings) {
+			if (!newthings.has(id) && !banned.has(id) && props.game.has_id(id)) {
+				const endpos = props.endPos.get(id) ?? id;
+				const pos =
+					endpos < 0 ?
+						{
+							x: 103,
+							y: ~endpos === props.p1id ? 551 + portraitoffset() : 258,
+						}
+					:	props.getIdTrack(endpos);
+				if (pos) death.set(id, { opacity: 0, ...pos });
 			}
-			const newthings = new Set(things);
-			for (const id of oldthings) {
-				if (!newthings.has(id) && !banned.has(id) && props.game.has_id(id)) {
-					const endpos = props.endPos.get(id) ?? id;
-					const pos =
-						endpos < 0 ?
-							{
-								x: 103,
-								y: ~endpos === props.p1id ? 551 + portraitoffset() : 258,
-							}
-						:	props.getIdTrack(endpos);
-					if (pos) {
-						newDeath = newDeath ?? new Map(death);
-						newDeath.set(id, { opacity: 0, ...pos });
-					}
-				}
-			}
-			if (newDeath) setDeath(newDeath);
-			oldthings = things;
-			setAll(things.concat(Array.from((newDeath ?? death).keys())));
-		},
-	);
+		}
+		oldthings = things;
+		return {
+			all: things.concat(Array.from(death.keys())),
+			death: new Map(death),
+		};
+	});
 	const unregister = id => {
-		const death = getDeath();
 		if (death.has(id)) {
 			banned.add(id);
-			const newdeath = new Map(death);
-			newdeath.delete(id);
-			setDeath(newdeath);
+			death.delete(id);
+			bump();
 		}
 	};
 	return (
-		<For each={allthings()}>
+		<For each={state().all}>
 			{id => (
 				<Show when={props.game && props.game.has_id(id)}>
 					<Tween
 						initial={birth(id)}
 						state={
-							getDeath().get(id) ?? {
+							state().death.get(id) ?? {
 								opacity: 1,
 								...props.game.tgtToPos(id, props.p1id, props.landscape),
 							}
