@@ -1,4 +1,4 @@
-import { createSignal } from 'solid-js';
+import { Repeat, createSignal } from 'solid-js';
 
 import { playSound } from '../audio.js';
 import Card from './Card.jsx';
@@ -68,16 +68,18 @@ export default function Editor(props) {
 				style="position:absolute;left:66px;top:200px"
 			/>
 			<div style="position:absolute;left:100px;top:234px">
-				{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => (
-					<span
-						class={`imgb ico e${i}${props.mark === i ? ' selected' : ''}`}
-						onClick={() => {
-							playSound('click');
-							props.setMark(i);
-						}}
-						onMouseOver={props.onMouseOver}
-					/>
-				))}
+				<Repeat count={13}>
+					{i => (
+						<span
+							class={['imgb', 'ico', `e${i}`, { selected: props.mark === i }]}
+							onClick={() => {
+								playSound('click');
+								props.setMark(i);
+							}}
+							onMouseOver={props.onMouseOver}
+						/>
+					)}
+				</Repeat>
 			</div>
 			<Card style="position:absolute;left:734px;top:8px" card={card()} />
 		</>

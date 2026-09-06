@@ -1,19 +1,17 @@
 import { For, createSignal, onSettled } from 'solid-js';
 
-import { userEmit, setCmds } from '../../sock.jsx';
+import { userEmit, useCmds } from '../../sock.jsx';
 import { doNav } from '../../store.jsx';
 
 export default function Wealth() {
 	const [getTop, setTop] = createSignal([]);
 
-	onSettled(() => {
-		setCmds({
-			legacyboard: ({ ownscore, top }) => {
-				setTop({ ownscore, top });
-			},
-		});
-		userEmit('legacyboard');
+	useCmds({
+		legacyboard: ({ ownscore, top }) => {
+			setTop({ ownscore, top });
+		},
 	});
+	onSettled(() => userEmit('legacyboard'));
 
 	return (
 		<div style="display:flex">

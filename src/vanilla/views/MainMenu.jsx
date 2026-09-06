@@ -49,12 +49,11 @@ function parseAiDeck(dcode) {
 }
 
 export default function OriginalMainMenu() {
-	const rx = store.useRx();
-	const origfoename = () => rx.opts.origfoename ?? '';
+	const origfoename = () => store.appState.opts.origfoename ?? '';
 
 	let ocard = null;
-	const user_oracle = rx.alts[''].oracle;
-	if (rx.user.oracle !== user_oracle) {
+	const user_oracle = store.appState.alts[''].oracle;
+	if (store.appState.user.oracle !== user_oracle) {
 		const fg = upto(aiDecks.fg.length);
 		const ocode = original_oracle(randint());
 		ocard = Cards.Codes[ocode];
@@ -70,7 +69,10 @@ export default function OriginalMainMenu() {
 	const vsAi = (level, cost, basereward, hpreward) => {
 		if (
 			hpreward > 0 &&
-			!Cards.isDeckLegal(etgutil.decodedeck(rx.user.deck), rx.user)
+			!Cards.isDeckLegal(
+				etgutil.decodedeck(store.appState.user.deck),
+				store.appState.user,
+			)
 		) {
 			store.chatMsg('Invalid deck', 'System');
 			return;
@@ -86,10 +88,10 @@ export default function OriginalMainMenu() {
 		const [ainame, aideck] =
 			aiinfo ? [aiinfo.name, aiinfo.deck]
 			: level === 'ai4' ? deckgenAi4()
-			: level === 'fg' && typeof rx.user.fg === 'number' ?
-				aiDecks.fg[rx.user.fg]
+			: level === 'fg' && typeof store.appState.user.fg === 'number' ?
+				aiDecks.fg[store.appState.user.fg]
 			:	choose(aiDecks[level]);
-		if (level === 'fg' && typeof rx.user.fg === 'number') {
+		if (level === 'fg' && typeof store.appState.user.fg === 'number') {
 			userEmit('origadd', { fg: -1 });
 			store.addOrig({ fg: -1 });
 		}
@@ -106,7 +108,12 @@ export default function OriginalMainMenu() {
 				: 3,
 			rematch: () => vsAi(level, cost, basereward, hpreward),
 			players: shuffle([
-				{ idx: 1, name: rx.username, user: rx.username, deck: rx.user.deck },
+				{
+					idx: 1,
+					name: store.appState.username,
+					user: store.appState.username,
+					deck: store.appState.user.deck,
+				},
 				{
 					idx: 2,
 					ai: 1,
@@ -141,7 +148,9 @@ export default function OriginalMainMenu() {
 				<input
 					type="button"
 					value={
-						typeof rx.user.fg === 'number' ? aiDecks.fg[rx.user.fg][0] : 'FG'
+						typeof store.appState.user.fg === 'number' ?
+							aiDecks.fg[store.appState.user.fg][0]
+						:	'FG'
 					}
 					onClick={() => vsAi('fg', 30, 30, 30)}
 				/>
@@ -167,7 +176,7 @@ export default function OriginalMainMenu() {
 						}}
 					/>
 					<div>
-						{rx.user.electrum}
+						{store.appState.user.electrum}
 						<span class="ico gold" />
 					</div>
 				</div>

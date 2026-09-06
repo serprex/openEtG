@@ -1,3 +1,5 @@
+import { onSettled } from 'solid-js';
+
 import config from '../wsconfig.json' with { type: 'json' };
 
 import Cards from './Cards.js';
@@ -14,10 +16,18 @@ const endpoint = `${location.protocol === 'http:' ? 'ws://' : 'wss://'}
 		location.protocol === 'http:' ? config.wsport : config.wssport
 	}/ws`;
 const buffer = [];
+const cmdstack = [];
 let socket = new WebSocket(endpoint),
 	attempts = 0,
-	attemptTimeout = 0,
-	cmds = {};
+	attemptTimeout = 0;
+
+function findCmd(x) {
+	for (let i = cmdstack.length - 1; i >= 0; i--) {
+		const func = cmdstack[i][x];
+		if (func) return func;
+	}
+	return sockEvents[x];
+}
 const sockEvents = {
 	altadd(data) {
 		store.addAlt(data.name, data.data);
@@ -48,16 +58,15 @@ const sockEvents = {
 		);
 	},
 	chat(data) {
-		const state = store.state;
-		if (state.opts.muteall) {
+		if (store.appState.opts.muteall) {
 			if (!data.mode) return;
-		} else if (state.opts.muteguests && data.guest) {
+		} else if (store.appState.opts.muteguests && data.guest) {
 			return;
 		} else if (
 			typeof Notification !== 'undefined' &&
 			Notification.permission !== 'denied' &&
-			state.user &&
-			~data.msg.indexOf(state.username) &&
+			store.appState.user &&
+			~data.msg.indexOf(store.appState.username) &&
 			!document.hasFocus()
 		) {
 			Notification.requestPermission().then(result => {
@@ -117,17 +126,16 @@ const sockEvents = {
 					{text}
 				</div>
 			),
-			data.mode === 1 ? store.state.opts.channel : 'Main',
+			data.mode === 1 ? store.appState.opts.channel : 'Main',
 		);
 	},
 	foearena(data) {
-		const { username } = store.state;
 		const game = new Game({
 			players: shuffle([
 				{
 					idx: 1,
-					name: username,
-					user: username,
+					name: store.appState.username,
+					user: store.appState.username,
 					deck: store.getDeck(),
 				},
 				{
@@ -146,13 +154,14 @@ const sockEvents = {
 			level: 4 + data.lv,
 			cost: arenaCost(data.lv),
 			rematch: () => {
-				const { user } = store.state;
-				if (!Cards.isDeckLegal(decodedeck(store.getDeck()), user)) {
+				if (
+					!Cards.isDeckLegal(decodedeck(store.getDeck()), store.appState.user)
+				) {
 					store.chatMsg('Invalid deck', 'System');
 					return;
 				}
 				const cost = arenaCost(data.lv);
-				if (user.gold < cost) {
+				if (store.appState.user.gold < cost) {
 					store.requiresGold(cost);
 					return;
 				}
@@ -162,8 +171,9 @@ const sockEvents = {
 		store.doNav(import('./views/Match.jsx'), { game });
 	},
 	pvpgive(data) {
-		const { username } = store.state,
-			spectate = !data.data.players.some(pl => pl.user === username);
+		const spectate = !data.data.players.some(
+			pl => pl.user === store.appState.username,
+		);
 		store.doNav(import('./views/Match.jsx'), {
 			gameid: data.id,
 			game: new Game({ ...data.data, spectate }),
@@ -209,13 +219,13 @@ const sockEvents = {
 			<div
 				style="cursor:pointer;color:#69f"
 				onClick={() => {
-					const user = store.state.user;
+					const flags = store.appState.user.flags;
 					const matches =
 						!data.flags ||
-						(!user.flags && !data.flags.length) ||
-						(user.flags &&
-							data.flags.length === user.flags.length &&
-							data.flags.every(f => user.flags.includes(f)));
+						(!flags && !data.flags.length) ||
+						(flags &&
+							data.flags.length === flags.length &&
+							data.flags.every(f => flags.includes(f)));
 					if (matches) {
 						store.doNav(import('./views/Trade.jsx'), { foe: data.f });
 					} else {
@@ -240,10 +250,9 @@ const sockEvents = {
 	},
 };
 socket.onmessage = function (msg) {
-	const data = JSON.parse(msg.data),
-		state = store.state;
-	if (data.u && state.muted.has(data.u)) return;
-	const func = cmds[data.x] ?? sockEvents[data.x];
+	const data = JSON.parse(msg.data);
+	if (data.u && store.appState.muted[data.u]) return;
+	const func = findCmd(data.x);
 	if (func) func.call(this, data);
 };
 socket.onopen = function () {
@@ -252,21 +261,20 @@ socket.onopen = function () {
 		clearTimeout(attemptTimeout);
 		attemptTimeout = 0;
 	}
-	const { opts, username } = store.state;
-	if (opts.offline || opts.afk) {
+	if (store.appState.opts.offline || store.appState.opts.afk) {
 		emit({
 			x: 'chatus',
-			hide: !!opts.offline,
-			afk: !!opts.afk,
+			hide: !!store.appState.opts.offline,
+			afk: !!store.appState.opts.afk,
 		});
 	}
 	// flush anything queued while down before asking the server to catch us up
 	buffer.forEach(this.send, this);
 	buffer.length = 0;
-	if (username) {
+	if (store.appState.username) {
 		// server routes to whichever socket last authed, so rebind this one
 		userEmit('hello');
-		cmds.reconnect?.();
+		for (const c of cmdstack) c.reconnect?.();
 	}
 	store.chatMsg('Connected', 'System');
 };
@@ -297,12 +305,11 @@ export function emit(data) {
 	}
 }
 export function userEmit(x, data = {}) {
-	const { username, auth, uname } = store.state;
 	data.x = 'a';
 	data.z = x;
-	data.u = username;
-	data.a = auth;
-	if (uname) data.uname = uname;
+	data.u = store.appState.username;
+	data.a = store.appState.auth;
+	if (store.appState.uname) data.uname = store.appState.uname;
 	emit(data);
 }
 export function userExec(x, data = {}) {
@@ -310,11 +317,13 @@ export function userExec(x, data = {}) {
 	store.userCmd(x, data);
 }
 export function sendChallenge(foe, orig = false, deckcheck = true) {
-	const deck = orig ? store.state.user.deck : store.getDeck(),
-		state = store.state;
+	const deck = orig ? store.appState.user.deck : store.getDeck();
 	if (
 		deckcheck &&
-		!(orig ? OrigCards : Cards).isDeckLegal(decodedeck(deck), state.user)
+		!(orig ? OrigCards : Cards).isDeckLegal(
+			decodedeck(deck),
+			store.appState.user,
+		)
 	) {
 		store.chatMsg('Invalid deck', 'System');
 		return;
@@ -326,6 +335,12 @@ export function sendChallenge(foe, orig = false, deckcheck = true) {
 		deckcheck,
 	});
 }
-export function setCmds(c) {
-	cmds = c;
+export function useCmds(c) {
+	onSettled(() => {
+		cmdstack.push(c);
+		return () => {
+			const i = cmdstack.lastIndexOf(c);
+			if (~i) cmdstack.splice(i, 1);
+		};
+	});
 }

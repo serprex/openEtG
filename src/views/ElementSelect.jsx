@@ -1,7 +1,7 @@
-import { createSignal, onSettled } from 'solid-js';
+import { createSignal, flush } from 'solid-js';
 
 import { eleNames } from '../ui.js';
-import { emit, userEmit, setCmds } from '../sock.jsx';
+import { emit, userEmit, useCmds } from '../sock.jsx';
 import Card from '../Components/Card.jsx';
 import * as store from '../store.jsx';
 import { mkQuestAi, quarks } from '../Quest.js';
@@ -50,40 +50,38 @@ const descriptions = [
 ];
 
 export default function ElementSelect() {
-	const rx = store.useRx();
 	let username, password, confirmpass, skiptut;
 	const [eledesc, setEledesc] = createSignal(-1),
 		[err, setErr] = createSignal('');
 
-	onSettled(() => {
-		setCmds({
-			login: data => {
-				if (data.err) {
-					setErr(
-						`Failed to register. Try a different username. Server response: ${data.err}`,
-					);
-				} else if (!data.data['']) {
-					store.setUser(data);
-				} else if (rx.user) {
-					store.setUser(data);
-					if (skiptut.checked) {
-						store.doNav(import('./MainMenu.jsx'));
-					} else {
-						store.setOptTemp('quest', [0]);
-						store.navGame(mkQuestAi(quarks.basic_damage));
-					}
+	useCmds({
+		login: data => {
+			if (data.err) {
+				setErr(
+					`Failed to register. Try a different username. Server response: ${data.err}`,
+				);
+			} else if (!data.data['']) {
+				store.setUser(data);
+			} else if (store.appState.user) {
+				store.setUser(data);
+				if (skiptut.checked) {
+					store.doNav(import('./MainMenu.jsx'));
 				} else {
-					setErr(
-						`${data.name} already exists with that password. Click Exit to return to the login screen`,
-					);
+					store.setOptTemp('quest', [0]);
+					flush();
+					store.navGame(mkQuestAi(quarks.basic_damage));
 				}
-			},
-		});
+			} else {
+				setErr(
+					`${data.name} already exists with that password. Click Exit to return to the login screen`,
+				);
+			}
+		},
 	});
 
 	return (
 		<>
-			{rx.user && (
+			{store.appState.user && (
 				<>
 					<span
 						class="maintitle"
@@ -93,7 +91,7 @@ export default function ElementSelect() {
 					{eledesc() !== -1 && descriptions[eledesc()]()}
 				</>
 			)}
-			{!rx.user && (
+			{!store.appState.user && (
 				<div style="position:absolute;left:30px;top:30px;width:200px;display:flex;flex-direction:column;gap:8px">
 					<input ref={username} placeholder="Username" />
 					<input ref={password} type="password" placeholder="Password" />
@@ -138,7 +136,7 @@ export default function ElementSelect() {
 						type="button"
 						value="Exit"
 						onClick={() => {
-							if (rx.user) {
+							if (store.appState.user) {
 								userEmit('delete');
 								store.logout();
 							}
@@ -148,7 +146,7 @@ export default function ElementSelect() {
 					/>
 				</div>
 			</div>
-			{rx.user &&
+			{store.appState.user &&
 				[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(i => (
 					<span
 						class={`imgb ico e${

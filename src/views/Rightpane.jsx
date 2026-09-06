@@ -6,11 +6,11 @@ import * as store from '../store.jsx';
 import parseChat from '../parseChat.js';
 
 function ChannelTab(props) {
-	const opts = store.useRx(state => state.opts);
-
 	return (
 		<span
-			class={opts.channel === props.channel ? 'tab selected' : 'tab'}
+			class={
+				store.appState.opts.channel === props.channel ? 'tab selected' : 'tab'
+			}
 			onClick={_e => store.setOptTemp('channel', props.channel)}>
 			{props.channel}
 		</span>
@@ -18,10 +18,8 @@ function ChannelTab(props) {
 }
 
 export default function Rightpane() {
-	const opts = store.useRx(state => state.opts);
-
 	return (
-		<Show when={!opts.hideRightpane}>
+		<Show when={!store.appState.opts.hideRightpane}>
 			<div id="rightlinks">
 				<div style="display:flex;margin-bottom:4px;justify-content:space-evenly">
 					<a href="artcredit.html" target="_blank">
@@ -43,7 +41,7 @@ export default function Rightpane() {
 					<label>
 						<input
 							type="checkbox"
-							checked={opts.offline}
+							checked={store.appState.opts.offline}
 							onChange={e => {
 								sock.emit({ x: 'chatus', hide: e.target.checked });
 								store.setOpt('offline', e.target.checked);
@@ -54,7 +52,7 @@ export default function Rightpane() {
 					<label>
 						<input
 							type="checkbox"
-							checked={opts.afk}
+							checked={store.appState.opts.afk}
 							onChange={e => {
 								sock.emit({ x: 'chatus', afk: e.target.checked });
 								store.setOptTemp('afk', e.target.checked);
@@ -70,7 +68,7 @@ export default function Rightpane() {
 				<ChannelTab channel="Stats" />
 				<ChannelTab channel="Replay" />
 			</div>
-			<Chat channel={opts.channel} />
+			<Chat channel={store.appState.opts.channel} />
 			<textarea class="chatinput" placeholder="Chat" onKeyDown={parseChat} />
 		</Show>
 	);

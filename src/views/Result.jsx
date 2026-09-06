@@ -225,9 +225,8 @@ function computeBonuses(game, p1id, lefttext, streakrate, setTip, clearTip) {
 }
 
 export default function Result(props) {
-	const rx = store.useRx();
 	const { game } = props,
-		p1id = game.userId(rx.username);
+		p1id = game.userId(store.appState.username);
 	const [tooltip, setTip] = createSignal(null);
 	let goldreward = game.data.goldreward,
 		boundreward = game.data.cardreward ?? '',
@@ -317,7 +316,7 @@ export default function Result(props) {
 				if (level !== undefined) {
 					if (game.data.daily === undefined) {
 						const streak = (props.streakback ?? 0) + 1;
-						if (streak !== rx.user.streak[level]) {
+						if (streak !== store.appState.user.streak[level]) {
 							sock.userExec('setstreak', {
 								l: level,
 								n: streak,
@@ -388,13 +387,15 @@ export default function Result(props) {
 		});
 		stats[stats.length - 1] = +stats[stats.length - 1].toFixed(3);
 		store.chatMsg(stats.join(), 'Stats');
-		const { opts } = store.state;
-		if (opts.runcount) {
-			if (opts.runcountcur === opts.runcount) {
-				store.chatMsg(`${opts.runcount} runs completed`, 'System');
+		if (store.appState.opts.runcount) {
+			if (store.appState.opts.runcountcur === store.appState.opts.runcount) {
+				store.chatMsg(
+					`${store.appState.opts.runcount} runs completed`,
+					'System',
+				);
 				store.setOptTemp('runcountcur', 1);
 			} else {
-				store.setOptTemp('runcountcur', opts.runcountcur + 1);
+				store.setOptTemp('runcountcur', store.appState.opts.runcountcur + 1);
 			}
 		}
 	}

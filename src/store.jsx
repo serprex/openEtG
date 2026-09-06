@@ -1,4 +1,4 @@
-import { createStore, onCleanup } from 'solid-js';
+import { createStore, snapshot } from 'solid-js';
 
 import * as usercmd from './usercmd.js';
 import { changeMusic, changeSound, musicList } from './audio.js';
@@ -22,31 +22,19 @@ try {
 changeSound(opts.enableSound);
 changeMusic(opts.enableMusic);
 
-const listeners = new Set();
-export let state = {
+export const [appState, setAppState] = createStore({
 	nav: { view: { default: () => null }, props: undefined, key: 0 },
 	opts,
 	alts: {},
 	legacy: {},
 	islegacy: false,
-	chat: new Map(),
-	muted: new Set(),
-};
-
-function dispatch(newstate) {
-	state = newstate;
-	for (const listener of listeners) listener(state);
-}
-
-function subscribe(cb) {
-	listeners.add(cb);
-	return () => listeners.delete(cb);
-}
+	chat: {},
+	muted: {},
+});
 
 export function doNav(view, props = {}) {
-	dispatch({
-		...state,
-		nav: { view, props, key: state.nav.key + 1 },
+	setAppState(s => {
+		s.nav = { view, props, key: s.nav.key + 1 };
 	});
 }
 
@@ -54,13 +42,19 @@ export function navGame(game) {
 	if (game) doNav(import('./views/Match.jsx'), { game });
 }
 
+export function deckOf(user) {
+	return user.decks[user.selectedDeck] ?? '';
+}
+
 export function getDeck() {
-	return state.user.decks[state.user.selectedDeck] ?? '';
+	return deckOf(appState.user);
 }
 
 export function setOptTemp(key, val) {
 	if (hasLocalStorage && !val) delete localStorage[key];
-	dispatch({ ...state, opts: { ...state.opts, [key]: val } });
+	setAppState(s => {
+		s.opts[key] = val;
+	});
 }
 
 export function setOpt(key, val) {
@@ -69,26 +63,25 @@ export function setOpt(key, val) {
 }
 
 export function mute(name) {
-	const muted = new Set(state.muted);
-	muted.add(name);
-	dispatch({ ...state, muted });
+	setAppState(s => {
+		s.muted[name] = true;
+	});
 }
 export function unmute(name) {
-	const muted = new Set(state.muted);
-	muted.delete(name);
-	dispatch({ ...state, muted });
+	setAppState(s => {
+		delete s.muted[name];
+	});
 }
 export function clearChat(name) {
-	const chat = new Map(state.chat);
-	chat.delete(name);
-	dispatch({ ...state, chat });
+	setAppState(s => {
+		delete s.chat[name];
+	});
 }
-export function chat(span, name = state.opts.channel) {
-	const chat = new Map(state.chat);
-	chat.set(name, (chat.get(name) ?? []).concat([span]));
-	if (name === 'System')
-		chat.set('Main', (chat.get('Main') ?? []).concat([span]));
-	dispatch({ ...state, chat });
+export function chat(span, name = appState.opts.channel) {
+	setAppState(s => {
+		(s.chat[name] ??= []).push(span);
+		if (name === 'System') (s.chat.Main ??= []).push(span);
+	});
 }
 export function chatMsg(msg, name) {
 	chat(() => <div>{msg}</div>, name);
@@ -105,111 +98,101 @@ export function requiresGold(gold) {
 	);
 }
 export function setAlt(uname) {
-	const newalts = {
-		...state.alts,
-		[state.uname ?? '']: state.user,
-	};
-	dispatch({ ...state, alts: newalts, user: newalts[uname ?? ''], uname });
+	setAppState(s => {
+		s.alts[s.uname ?? ''] = snapshot(s.user);
+		s.user = snapshot(s.alts[uname ?? '']);
+		s.uname = uname;
+	});
 }
 export function addAlt(uname, data) {
-	dispatch({ ...state, alts: { ...state.alts, [uname]: data } });
+	setAppState(s => {
+		s.alts[uname] = data;
+	});
 }
 export function rmAlt(uname) {
-	const alts = { ...state.alts };
-	delete alts[uname];
-	dispatch({ ...state, alts });
+	setAppState(s => {
+		delete s.alts[uname];
+	});
 }
 export function stopLegacy() {
-	if (!state.islegacy) return;
-	dispatch({
-		...state,
-		user: state.alts[''],
-		legacy: {
-			...state.legacy,
-			[state.uname]: state.user,
-		},
-		islegacy: false,
-		uname: null,
+	if (!appState.islegacy) return;
+	setAppState(s => {
+		s.legacy[s.uname] = snapshot(s.user);
+		s.user = snapshot(s.alts['']);
+		s.islegacy = false;
+		s.uname = null;
 	});
 }
 export function setLegacy(uname) {
-	if (state.islegacy) return;
-	const newalts = {
-		...state.alts,
-		[state.uname ?? '']: state.user,
-	};
-	dispatch({
-		...state,
-		alts: newalts,
-		user: state.legacy[uname ?? ''],
-		islegacy: true,
-		uname,
+	if (appState.islegacy) return;
+	setAppState(s => {
+		s.alts[s.uname ?? ''] = snapshot(s.user);
+		s.user = snapshot(s.legacy[uname ?? '']);
+		s.islegacy = true;
+		s.uname = uname;
 	});
 }
 export function addLegacy(name, data) {
-	dispatch({
-		...state,
-		legacy: {
-			...state.legacy,
-			[name]: data,
-		},
+	setAppState(s => {
+		s.legacy[name] = data;
 	});
 }
 export function setUser({ name, auth, data, legacy }) {
-	dispatch({
-		...state,
-		user: data[''] ?? {},
-		alts: data,
-		legacy: legacy,
-		username: name,
-		auth,
-		uname: null,
+	setAppState(s => {
+		s.user = data[''] ?? {};
+		s.alts = data;
+		s.legacy = legacy;
+		s.username = name;
+		s.auth = auth;
+		s.uname = null;
 	});
 }
 export function logout() {
-	dispatch({
-		...state,
-		user: null,
-		alts: {},
-		username: null,
-		auth: null,
-		uname: null,
+	setAppState(s => {
+		s.user = null;
+		s.alts = {};
+		s.username = null;
+		s.auth = null;
+		s.uname = null;
 	});
 }
 export function userCmd(cmd, data) {
-	dispatch({
-		...state,
-		user: { ...state.user, ...usercmd[cmd](data, state.user) },
+	setAppState(s => {
+		s.user ??= {};
+		Object.assign(s.user, usercmd[cmd](data, s.user));
 	});
 }
 export function setAuth(auth) {
-	dispatch({ ...state, auth });
+	setAppState(s => {
+		s.auth = auth;
+	});
 }
+// data may be a function of the user, to read it after a write earlier in the tick
 export function updateUser(data) {
-	dispatch({ ...state, user: { ...state.user, ...data } });
+	setAppState(s => {
+		s.user ??= {};
+		Object.assign(s.user, typeof data === 'function' ? data(s.user) : data);
+	});
 }
 export function setOrig(orig) {
-	dispatch({ ...state, orig });
+	setAppState(s => {
+		s.orig = orig;
+	});
 }
 export function updateOrig(data) {
-	dispatch({ ...state, user: { ...state.user, ...data } });
+	updateUser(data);
 }
 export function addOrig(update) {
-	let pool = state.user.pool;
-	if (update.pool) pool = mergedecks(pool, update.pool);
-	if (update.rmpool) pool = removedecks(pool, update.rmpool);
-	dispatch({
-		...state,
-		user: {
-			...state.user,
-			electrum: state.user.electrum + (update.electrum | 0),
-			pool,
-			oracle: update.oracle ?? state.user.oracle,
-			fg:
-				typeof update.fg !== 'number' ? state.user.fg
-				: update.fg === -1 ? null
-				: update.fg,
-		},
+	setAppState(s => {
+		const user = s.user;
+		let pool = user.pool;
+		if (update.pool) pool = mergedecks(pool, update.pool);
+		if (update.rmpool) pool = removedecks(pool, update.rmpool);
+		user.electrum += update.electrum | 0;
+		user.pool = pool;
+		if (update.oracle !== undefined) user.oracle = update.oracle;
+		if (typeof update.fg === 'number')
+			user.fg = update.fg === -1 ? null : update.fg;
 	});
 }
 
@@ -230,7 +213,7 @@ export function hardcoreante(Cards, deck) {
 	const pick = (Math.random() * sum) | 0;
 	for (const [gsum, gcode] of groups) {
 		if (pick < gsum) {
-			for (const [code, _count] of iterraw(state.user.accountbound)) {
+			for (const [code, _count] of iterraw(appState.user.accountbound)) {
 				if (code === gcode) {
 					return { c: gcode, bound: true };
 				}
@@ -242,24 +225,18 @@ export function hardcoreante(Cards, deck) {
 	return null;
 }
 
-export function useRx(cb = x => x) {
-	const [signal, setState] = createStore(cb(state));
-	onCleanup(subscribe(state => setState(() => cb(state))));
-	return signal;
-}
-
 var cooldown = 0,
 	cooldownPrefix = '';
 export function loadMusic(prefix) {
 	if (
-		state.opts.enableMusic &&
+		appState.opts.enableMusic &&
 		(prefix != cooldownPrefix ||
-			Date.now() - cooldown > (+state.opts.musicCooldown || 300) * 1000)
+			Date.now() - cooldown > (+appState.opts.musicCooldown || 300) * 1000)
 	) {
 		cooldownPrefix = prefix;
 		const candidates = [];
 		for (const [id, opus, _] of musicList) {
-			if (state.opts[`music${prefix}_${id}`]) {
+			if (appState.opts[`music${prefix}_${id}`]) {
 				candidates.push(opus);
 			}
 		}

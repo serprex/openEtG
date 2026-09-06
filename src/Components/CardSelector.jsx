@@ -1,9 +1,9 @@
-import { For, createSignal } from 'solid-js';
+import { Repeat, createSignal } from 'solid-js';
 
 import { playSound } from '../audio.js';
 import { selector_filter } from '../rs/pkg/etg.js';
 import { asShiny, asUpped } from '../etgutil.js';
-import { useRx, setOpt } from '../store.jsx';
+import { appState, setOpt } from '../store.jsx';
 import CardImage from './CardImage.jsx';
 
 function maybeShiny(props, card) {
@@ -60,13 +60,13 @@ function CardSelectorColumn(props) {
 				}
 				countText = (
 					<span
-						class={`selectortext${
-							props.maxedIndicator && !card.pillar && cardAmount >= 6 ?
-								cardAmount >= 12 ?
-									' beigeback'
-								:	' lightback'
-							:	''
-						}`}>
+						class={[
+							'selectortext',
+							props.maxedIndicator &&
+								!card.pillar &&
+								cardAmount >= 6 &&
+								(cardAmount >= 12 ? 'beigeback' : 'lightback'),
+						]}>
 						{cardAmount + (shinyAmount ? '/' + shinyAmount : '')}
 					</span>
 				);
@@ -98,44 +98,34 @@ function CardSelectorColumn(props) {
 }
 
 function CardSelectorCore(props) {
-	const columns = () => {
-		const columns = [];
-		const count = props.noupped ? 3 : 6;
-		for (let i = 0; i < count; i++) {
-			let column = Array.from(
-				selector_filter(props.cards.set, i, props.element, props.rarity),
-				code => props.cards.Codes[code],
-			);
-			if (props.filter) column = column.filter(props.filter);
-			columns.push(column);
-		}
+	const column = i => {
+		let column = Array.from(
+			selector_filter(props.cards.set, i, props.element, props.rarity),
+			code => props.cards.Codes[code],
+		);
+		if (props.filter) column = column.filter(props.filter);
 		if (props.shiny && !props.filterboth) {
-			for (const column of columns) {
-				for (let i = 0; i < column.length; i++) {
-					column[i] = column[i].asShiny(true);
-				}
-			}
+			column = column.map(card => card.asShiny(true));
 		}
-		return columns;
+		return column;
 	};
 
 	return (
-		<For each={columns()} keyed={false}>
-			{(cards, i) => (
+		<Repeat count={props.noupped ? 3 : 6}>
+			{i => (
 				<div
 					class="cardselector"
 					style={`position:absolute;left:${props.x + i * 133}px;top:${
 						props.y
 					}px`}>
-					<CardSelectorColumn {...props} cards={cards()} />
+					<CardSelectorColumn {...props} cards={column(i)} />
 				</div>
 			)}
-		</For>
+		</Repeat>
 	);
 }
 
 export default function CardSelector(props) {
-	const opts = useRx(state => state.opts);
 	const [element, setElement] = createSignal(0);
 	const [rarity, setRarity] = createSignal(0);
 
@@ -145,36 +135,40 @@ export default function CardSelector(props) {
 				<input
 					type="button"
 					value="Shiny"
-					class={opts.toggleshiny ? 'selected' : ''}
+					class={appState.opts.toggleshiny ? 'selected' : ''}
 					style="position:absolute;left:4px;top:578px"
-					onClick={() => setOpt('toggleshiny', !opts.toggleshiny)}
+					onClick={() => setOpt('toggleshiny', !appState.opts.toggleshiny)}
 				/>
 			)}
 			<div style="position:absolute;left:78px;top:338px">
-				{[1, 2, 3, 4].map(i => (
-					<div
-						class={`imgb ico r${i}${rarity() === i ? ' selected' : ''}`}
-						style="display:block;margin-top:18px"
-						onClick={() => {
-							playSound('click');
-							setRarity(cur => (cur === i ? 0 : i));
-						}}
-					/>
-				))}
+				<Repeat count={4} from={1}>
+					{i => (
+						<div
+							class={['imgb', 'ico', `r${i}`, { selected: rarity() === i }]}
+							style="display:block;margin-top:18px"
+							onClick={() => {
+								playSound('click');
+								setRarity(cur => (cur === i ? 0 : i));
+							}}
+						/>
+					)}
+				</Repeat>
 			</div>
 			<div
 				class="selectorelements"
 				style="position:absolute;left:4px;top:288px">
-				{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => (
-					<span
-						class={`imgb ico e${i}${element() === i ? ' selected' : ''}`}
-						style={i ? undefined : 'grid-column:2'}
-						onClick={() => {
-							playSound('click');
-							setElement(i);
-						}}
-					/>
-				))}
+				<Repeat count={13}>
+					{i => (
+						<span
+							class={['imgb', 'ico', `e${i}`, { selected: element() === i }]}
+							style={i ? undefined : 'grid-column:2'}
+							onClick={() => {
+								playSound('click');
+								setElement(i);
+							}}
+						/>
+					)}
+				</Repeat>
 			</div>
 			<CardSelectorCore
 				{...props}
@@ -182,7 +176,7 @@ export default function CardSelector(props) {
 				y={272}
 				rarity={rarity()}
 				element={element()}
-				shiny={props.shiny ?? opts.toggleshiny}
+				shiny={props.shiny ?? appState.opts.toggleshiny}
 				autoup={props.autoup}
 			/>
 		</>

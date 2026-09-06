@@ -272,10 +272,17 @@ function toMainMenu() {
 }
 
 export default function Challenge(props) {
-	const rx = store.useRx();
-
 	const [groups, setGroups] = createSignal(
-		props.groups ?? [[{ user: rx.username, name: rx.username, idx: 1 }], []],
+		props.groups ?? [
+			[
+				{
+					user: store.appState.username,
+					name: store.appState.username,
+					idx: 1,
+				},
+			],
+			[],
+		],
 	);
 	const [spectators, setSpectators] = createSignal(props.spectators ?? []);
 	const [editing, setEditing] = createSignal([new Set(), new Set()]);
@@ -301,7 +308,9 @@ export default function Challenge(props) {
 					// blank deck means the server fills in that user's selected deck
 					deck:
 						player.deck ||
-						(player.user && player.user !== rx.username ? '' : deck),
+						(player.user && player.user !== store.appState.username ?
+							''
+						:	deck),
 					markpower: player.markpower,
 					deckpower: player.deckpower,
 					drawpower: player.drawpower,
@@ -399,7 +408,7 @@ export default function Challenge(props) {
 	const mydata = createMemo(() => {
 		for (const group of groups()) {
 			for (const player of group) {
-				if (player.user === rx.username) {
+				if (player.user === store.appState.username) {
 					return player;
 				}
 			}
@@ -409,10 +418,12 @@ export default function Challenge(props) {
 
 	const hasUserAsPlayer = name =>
 		groups().some(g => g.some(p => p.user === name));
-	const amhost = () => rx.username === groups()[0][0].user;
+	const amhost = () => store.appState.username === groups()[0][0].user;
 	const isMultiplayer = () =>
 		spectators().length > 0 ||
-		groups().some(g => g.some(p => p.user && p.user !== rx.username));
+		groups().some(g =>
+			g.some(p => p.user && p.user !== store.appState.username),
+		);
 	const allReady = () =>
 		amhost() &&
 		(!isMultiplayer() || groups().every(g => g.every(p => !p.pending)));
@@ -451,7 +462,7 @@ export default function Challenge(props) {
 				{(players, i) => (
 					<Group
 						players={players}
-						host={rx.username}
+						host={store.appState.username}
 						hasUserAsPlayer={hasUserAsPlayer}
 						updatePlayers={p => updatePlayers(i(), p)}
 						removeGroup={i() > 0 && (() => removeGroup(i()))}

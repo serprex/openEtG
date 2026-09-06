@@ -1,14 +1,13 @@
 import { For, createEffect, createRenderEffect } from 'solid-js';
-import { useRx } from '../store.jsx';
+import { appState } from '../store.jsx';
 
 export default function Chat(props) {
-	const rx = useRx();
 	let chat = null,
 		scrollTop = null,
 		prevChannel = props.channel;
 
 	createRenderEffect(
-		() => [rx.chat, props.channel],
+		() => [appState.chat[props.channel]?.length, props.channel],
 		() => {
 			scrollTop =
 				(
@@ -22,7 +21,7 @@ export default function Chat(props) {
 		},
 	);
 	createEffect(
-		() => [rx.chat, props.channel],
+		() => [appState.chat[props.channel]?.length, props.channel],
 		() => {
 			chat.scrollTop = ~scrollTop ? scrollTop : chat.scrollHeight;
 		},
@@ -30,7 +29,7 @@ export default function Chat(props) {
 
 	return (
 		<div class="chatBox" style={props.style} ref={chat}>
-			<For each={rx.chat.get(props.channel)}>{span => span()}</For>
+			<For each={appState.chat[props.channel]}>{span => span()}</For>
 		</div>
 	);
 }

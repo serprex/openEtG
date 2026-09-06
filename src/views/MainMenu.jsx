@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onSettled } from 'solid-js';
+import { Repeat, createSignal, onCleanup, onSettled } from 'solid-js';
 
 import { changeMusic, changeSound, musicList } from '../audio.js';
 import Chat from '../Components/Chat.jsx';
@@ -85,9 +85,9 @@ const musicTargetList = [
 ];
 
 export default function MainMenu(props) {
-	const rx = store.useRx();
-	const foename = () => (rx.opts.foename ?? '').trim(),
-		expectedDamageSamples = () => rx.opts.expectedDamageSamples || '4';
+	const foename = () => (store.appState.opts.foename ?? '').trim(),
+		expectedDamageSamples = () =>
+			store.appState.opts.expectedDamageSamples || '4';
 
 	const [ocard, setocard] = createSignal(props.nymph);
 	const [settings, setSettings] = createSignal(false);
@@ -107,18 +107,10 @@ export default function MainMenu(props) {
 		}
 	};
 
-	onSettled(() => {
-		store.loadMusic('main');
-		if (
-			!hasflag(rx.user, 'no-oracle') &&
-			((Date.now() / 86400000) | 0) > rx.user.oracle
-		) {
-			sock.userEmit('oracle', {});
-		}
-		document.addEventListener('mousemove', resetTip);
-		sock.setCmds({
-			oracle: data => {
-				setocard(data.c);
+	sock.useCmds({
+		oracle: data => {
+			setocard(data.c);
+			store.updateUser(user => {
 				const update = {
 					daily: 128,
 					dailymage: data.mage,
@@ -129,36 +121,47 @@ export default function MainMenu(props) {
 					ocard: data.c,
 				};
 				if (data.bound) {
-					update.accountbound = addcard(rx.user.accountbound, data.c);
+					update.accountbound = addcard(user.accountbound, data.c);
 				} else {
-					update.pool = addcard(rx.user.pool, data.c);
+					update.pool = addcard(user.pool, data.c);
 				}
-				store.updateUser(update);
-				store.chatMsg('Daily Reward: ' + Cards.Codes[data.c].name, 'System');
-			},
-			codecard: data => {
-				store.doNav(import('./Reward.jsx'), {
-					type: data.type,
-					amount: data.num,
-					code: rewardcode.value,
-				});
-			},
-			codegold: data => {
-				store.updateUser({ gold: rx.user.gold + data.g });
-				store.chat(() => (
-					<div>
-						{data.g}
-						<span class="ico gold" /> added!
-					</div>
-				));
-			},
-			codecode: data => {
-				store.updateUser({
-					pool: addcard(rx.user.pool, data.card),
-				});
-				store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System');
-			},
-		});
+				return update;
+			});
+			store.chatMsg('Daily Reward: ' + Cards.Codes[data.c].name, 'System');
+		},
+		codecard: data => {
+			store.doNav(import('./Reward.jsx'), {
+				type: data.type,
+				amount: data.num,
+				code: rewardcode.value,
+			});
+		},
+		codegold: data => {
+			store.updateUser(user => ({ gold: user.gold + data.g }));
+			store.chat(() => (
+				<div>
+					{data.g}
+					<span class="ico gold" /> added!
+				</div>
+			));
+		},
+		codecode: data => {
+			store.updateUser(user => ({
+				pool: addcard(user.pool, data.card),
+			}));
+			store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System');
+		},
+	});
+
+	onSettled(() => {
+		store.loadMusic('main');
+		if (
+			!hasflag(store.appState.user, 'no-oracle') &&
+			((Date.now() / 86400000) | 0) > store.appState.user.oracle
+		) {
+			sock.userEmit('oracle', {});
+		}
+		document.addEventListener('mousemove', resetTip);
 	});
 
 	onCleanup(() => document.removeEventListener('mousemove', resetTip));
@@ -166,9 +169,11 @@ export default function MainMenu(props) {
 	const arenaAi = i => {
 		const cost = arenaCost(i);
 		return e => {
-			if (!Cards.isDeckLegal(decodedeck(store.getDeck()), rx.user)) {
+			if (
+				!Cards.isDeckLegal(decodedeck(store.getDeck()), store.appState.user)
+			) {
 				store.chatMsg('Invalid deck', 'System');
-			} else if (rx.user.gold < cost) {
+			} else if (store.appState.user.gold < cost) {
 				store.requiresGold(cost);
 			} else {
 				sock.userEmit('foearena', { lv: i });
@@ -190,18 +195,25 @@ export default function MainMenu(props) {
 
 	const quickslots = () => {
 		const slots = [];
-		if (rx.user) {
+		if (store.appState.user) {
 			for (let i = 0; i < 10; i++) {
 				slots.push(
 					<input
 						type="button"
 						value={i + 1}
-						class={`editbtn ${
-							rx.user.selectedDeck === rx.user.qecks[i] ? ' selected' : ''
-						}`}
-						onMouseOver={() => setTip(rx.user.qecks[i] ?? '')}
+						class={[
+							'editbtn',
+							{
+								selected:
+									store.appState.user.selectedDeck ===
+									store.appState.user.qecks[i],
+							},
+						]}
+						onMouseOver={() => setTip(store.appState.user.qecks[i] ?? '')}
 						onClick={() => {
-							sock.userExec('setdeck', { name: rx.user.qecks[i] ?? '' });
+							sock.userExec('setdeck', {
+								name: store.appState.user.qecks[i] ?? '',
+							});
 						}}
 					/>,
 				);
@@ -211,7 +223,7 @@ export default function MainMenu(props) {
 	};
 
 	return (
-		rx.user && (
+		store.appState.user && (
 			<div class="bg_main">
 				<div style="position:absolute;left:196px;top:4px;width:504px;height:48px">
 					{tip()}
@@ -227,19 +239,21 @@ export default function MainMenu(props) {
 					/>
 				</div>
 				<div style="position:absolute;left:100px;top:92px;width:170px;height:120px;font-size:14px;display:grid;align-content:stretch">
-					<div>{rx.username}</div>
-					{rx.uname && <div>↪{rx.uname}</div>}
+					<div>{store.appState.username}</div>
+					{store.appState.uname && <div>↪{store.appState.uname}</div>}
 					<div>
-						{rx.user?.gold}
+						{store.appState.user?.gold}
 						<span class="ico gold" />
 					</div>
 					<div style="display:grid;grid-template-columns:auto 1fr auto 1fr">
 						PvE
-						<span style="text-align:right">{rx.user?.aiwins}</span>&ndash;
-						<span>{rx.user?.ailosses}</span>
+						<span style="text-align:right">{store.appState.user?.aiwins}</span>
+						&ndash;
+						<span>{store.appState.user?.ailosses}</span>
 						PvP
-						<span style="text-align:right">{rx.user?.pvpwins}</span>&ndash;
-						<span>{rx.user?.pvplosses}</span>
+						<span style="text-align:right">{store.appState.user?.pvpwins}</span>
+						&ndash;
+						<span>{store.appState.user?.pvplosses}</span>
 					</div>
 				</div>
 				<div style="position:absolute;left:317px;top:383px;width:264px;height:110px;display:grid;justify-items:center">
@@ -249,7 +263,7 @@ export default function MainMenu(props) {
 							type="button"
 							value="Colosseum"
 							onClick={() => {
-								if (!hasflag(rx.user, 'no-oracle')) {
+								if (!hasflag(store.appState.user, 'no-oracle')) {
 									store.doNav(import('./Colosseum.jsx'));
 								}
 							}}
@@ -257,18 +271,18 @@ export default function MainMenu(props) {
 								setTip,
 								'Try some daily challenges in the Colosseum',
 							]}
-							disabled={hasflag(rx.user, 'no-oracle')}
+							disabled={hasflag(store.appState.user, 'no-oracle')}
 						/>
 						<input
 							type="button"
 							value="Quests"
 							onClick={() => {
-								if (!hasflag(rx.user, 'no-quest')) {
+								if (!hasflag(store.appState.user, 'no-quest')) {
 									store.doNav(import('./Quest.jsx'));
 								}
 							}}
 							onMouseOver={[setTip, 'Go on an adventure']}
-							disabled={hasflag(rx.user, 'no-quest')}
+							disabled={hasflag(store.appState.user, 'no-quest')}
 						/>
 					</div>
 					<div style="display:flex;font-size:14px;width:100%;align-items:center;justify-content:space-between">
@@ -287,12 +301,12 @@ export default function MainMenu(props) {
 							type="button"
 							value="Arena Deck"
 							onClick={() => {
-								if (!rx.uname) {
+								if (!store.appState.uname) {
 									store.doNav(import('./ArenaInfo.jsx'));
 								}
 							}}
 							onMouseOver={[setTip, 'Check how your arena decks are doing']}
-							disabled={rx.uname}
+							disabled={store.appState.uname}
 						/>
 					</div>
 					<div style="display:flex;font-size:14px;width:100%;align-items:center;justify-content:space-between">
@@ -320,7 +334,7 @@ export default function MainMenu(props) {
 							<Card card={Cards.Codes[ocard()]} />
 						</div>
 					</>
-				:	!rx.opts.hideMainchat && (
+				:	!store.appState.opts.hideMainchat && (
 						<>
 							<Chat
 								channel="Main"
@@ -348,7 +362,7 @@ export default function MainMenu(props) {
 							setTip,
 							'Commoners have no upgraded cards & mostly common cards',
 						]}
-						disabled={hasflag(rx.user, 'no-battle')}
+						disabled={hasflag(store.appState.user, 'no-battle')}
 					/>
 					<AiButton
 						name="Mage"
@@ -358,14 +372,14 @@ export default function MainMenu(props) {
 							setTip,
 							'Mages have preconstructed decks with a couple rares',
 						]}
-						disabled={hasflag(rx.user, 'no-battle')}
+						disabled={hasflag(store.appState.user, 'no-battle')}
 					/>
 					<AiButton
 						name="Champion"
 						lv={2}
 						onClick={() => store.navGame(mkAi(2))}
 						onMouseOver={[setTip, 'Champions have some upgraded cards']}
-						disabled={hasflag(rx.user, 'no-battle')}
+						disabled={hasflag(store.appState.user, 'no-battle')}
 					/>
 					<AiButton
 						name="Demigod"
@@ -375,7 +389,7 @@ export default function MainMenu(props) {
 							setTip,
 							'Demigods are extremely powerful. Come prepared',
 						]}
-						disabled={hasflag(rx.user, 'no-battle')}
+						disabled={hasflag(store.appState.user, 'no-battle')}
 					/>
 					<AiButton
 						name="Arena 1"
@@ -385,7 +399,7 @@ export default function MainMenu(props) {
 							'In the arena you will face decks from other players',
 						]}
 						lv={4}
-						disabled={hasflag(rx.user, 'no-battle')}
+						disabled={hasflag(store.appState.user, 'no-battle')}
 					/>
 					<AiButton
 						name="Arena 2"
@@ -395,13 +409,13 @@ export default function MainMenu(props) {
 							'In the arena you will face upgraded decks from other players',
 						]}
 						lv={5}
-						disabled={hasflag(rx.user, 'no-battle')}
+						disabled={hasflag(store.appState.user, 'no-battle')}
 					/>
 				</div>
 				<div style="position:absolute;left:620px;top:92px;width:196px;height:150px;display:grid;align-content:space-between">
 					<div class="maintitle">Cards</div>
 					<div style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:16px;margin-top:12px">
-						{`Deck: ${rx.user?.selectedDeck}`}
+						{`Deck: ${store.appState.user?.selectedDeck}`}
 					</div>
 					<div style="display:flex;flex-wrap:wrap;justify-content:space-evenly;gap:2px">
 						{quickslots}
@@ -418,8 +432,9 @@ export default function MainMenu(props) {
 							value="Shop"
 							onClick={() => {
 								if (
-									!hasflag(rx.user, 'no-shop') ||
-									(rx.user.freepacks && rx.user.freepacks.some(x => x))
+									!hasflag(store.appState.user, 'no-shop') ||
+									(store.appState.user.freepacks &&
+										store.appState.user.freepacks.some(x => x))
 								) {
 									store.doNav(import('./Shop.jsx'));
 								}
@@ -429,7 +444,8 @@ export default function MainMenu(props) {
 								'Buy booster packs which contain cards from the elements you choose',
 							]}
 							disabled={
-								hasflag(rx.user, 'no-shop') && !rx.user.freepacks?.some(x => x)
+								hasflag(store.appState.user, 'no-shop') &&
+								!store.appState.user.freepacks?.some(x => x)
 							}
 						/>
 						<input
@@ -437,23 +453,23 @@ export default function MainMenu(props) {
 							value="Upgrade"
 							onClick={() => {
 								if (!(
-									hasflag(rx.user, 'no-up-pillar') &&
-									hasflag(rx.user, 'no-up-merge')
+									hasflag(store.appState.user, 'no-up-pillar') &&
+									hasflag(store.appState.user, 'no-up-merge')
 								)) {
 									store.doNav(import('./Upgrade.jsx'));
 								}
 							}}
 							onMouseOver={[setTip, 'Upgrade or sell cards']}
 							disabled={
-								hasflag(rx.user, 'no-up-pillar') &&
-								hasflag(rx.user, 'no-up-merge')
+								hasflag(store.appState.user, 'no-up-pillar') &&
+								hasflag(store.appState.user, 'no-up-merge')
 							}
 						/>
 						<input
 							type="button"
 							value="Bazaar"
 							onClick={() => {
-								if (!rx.uname) {
+								if (!store.appState.uname) {
 									store.doNav(import('./Bazaar.jsx'));
 								}
 							}}
@@ -461,7 +477,7 @@ export default function MainMenu(props) {
 								setTip,
 								"Put up cards for sale & review other players' offers",
 							]}
-							disabled={rx.uname}
+							disabled={store.appState.uname}
 						/>
 					</div>
 				</div>
@@ -470,17 +486,17 @@ export default function MainMenu(props) {
 						<div class="maintitle">Social</div>
 						<input
 							placeholder="Player's Name"
-							value={rx.opts.foename ?? ''}
+							value={store.appState.opts.foename ?? ''}
 							onInput={e => store.setOptTemp('foename', e.target.value)}
 						/>
 						<input
 							type="button"
 							value="Library"
 							onClick={() => {
-								const name = foename() || rx.username;
+								const name = foename() || store.appState.username;
 								if (name) {
 									const props = { name };
-									if (!foename()) props.alt = rx.uname;
+									if (!foename()) props.alt = store.appState.uname;
 									store.doNav(import('./Library.jsx'), props);
 								}
 							}}
@@ -495,7 +511,7 @@ export default function MainMenu(props) {
 							type="button"
 							value="Trade"
 							onClick={() => {
-								if (!hasflag(rx.user, 'no-trade')) {
+								if (!hasflag(store.appState.user, 'no-trade')) {
 									sock.userEmit('offertrade', {
 										f: foename(),
 										cards: '',
@@ -507,7 +523,7 @@ export default function MainMenu(props) {
 								}
 							}}
 							onMouseOver={[setTip, 'Trade cards/$ with another player']}
-							disabled={hasflag(rx.user, 'no-trade')}
+							disabled={hasflag(store.appState.user, 'no-trade')}
 						/>
 					</div>
 					<div style="display:flex;flex-wrap:wrap;align-content:center;justify-content:center;align-items:center">
@@ -528,17 +544,21 @@ export default function MainMenu(props) {
 					</div>
 					<div style="display:flex;flex-wrap:wrap;justify-content:space-evenly;align-items:center;padding:8px">
 						<div class="maintitle">Leaderboards</div>
-						{[0, 1].map(i => (
-							<input
-								type="button"
-								value={`Arena${i + 1} T30`}
-								onClick={() => store.doNav(import('./ArenaTop.jsx'), { lv: i })}
-								onMouseOver={[
-									setTip,
-									'See who the top players in arena are right now',
-								]}
-							/>
-						))}
+						<Repeat count={2}>
+							{i => (
+								<input
+									type="button"
+									value={`Arena${i + 1} T30`}
+									onClick={() =>
+										store.doNav(import('./ArenaTop.jsx'), { lv: i })
+									}
+									onMouseOver={[
+										setTip,
+										'See who the top players in arena are right now',
+									]}
+								/>
+							)}
+						</Repeat>
 						<input
 							type="button"
 							value="View"
@@ -558,7 +578,7 @@ export default function MainMenu(props) {
 							<input
 								type="number"
 								placeholder="cooldown"
-								value={+rx.opts.musicCooldown || 300}
+								value={+store.appState.opts.musicCooldown || 300}
 								onChange={e => store.setOpt('musicCooldown', e.target.value)}
 							/>
 							<div>
@@ -575,7 +595,9 @@ export default function MainMenu(props) {
 								<label>
 									<input
 										type="checkbox"
-										checked={!!rx.opts[`music${musicboxTarget()[0]}_${id}`]}
+										checked={
+											!!store.appState.opts[`music${musicboxTarget()[0]}_${id}`]
+										}
 										onChange={e => {
 											store.setOpt(
 												`music${musicboxTarget()[0]}_${id}`,
@@ -666,7 +688,7 @@ export default function MainMenu(props) {
 								<label>
 									<input
 										type="checkbox"
-										checked={!!rx.opts.enableSound}
+										checked={!!store.appState.opts.enableSound}
 										onChange={e => {
 											changeSound(e.target.checked);
 											store.setOpt('enableSound', e.target.checked);
@@ -677,7 +699,7 @@ export default function MainMenu(props) {
 								<label>
 									<input
 										type="checkbox"
-										checked={!!rx.opts.enableMusic}
+										checked={!!store.appState.opts.enableMusic}
 										onChange={e => {
 											changeMusic(e.target.checked);
 											store.setOpt('enableMusic', e.target.checked);
@@ -688,7 +710,7 @@ export default function MainMenu(props) {
 								<label>
 									<input
 										type="checkbox"
-										checked={!!rx.opts.hideMainchat}
+										checked={!!store.appState.opts.hideMainchat}
 										onChange={e =>
 											store.setOpt('hideMainchat', e.target.checked)
 										}
@@ -698,7 +720,7 @@ export default function MainMenu(props) {
 								<label>
 									<input
 										type="checkbox"
-										checked={!!rx.opts.hideRightpane}
+										checked={!!store.appState.opts.hideRightpane}
 										onChange={e =>
 											store.setOpt('hideRightpane', e.target.checked)
 										}
@@ -715,7 +737,7 @@ export default function MainMenu(props) {
 								<label>
 									<input
 										type="checkbox"
-										checked={!!rx.opts.disableTut}
+										checked={!!store.appState.opts.disableTut}
 										onChange={e => store.setOpt('disableTut', e.target.checked)}
 									/>
 									Hide help
@@ -723,7 +745,7 @@ export default function MainMenu(props) {
 								<label>
 									<input
 										type="checkbox"
-										checked={!!rx.opts.lofiArt}
+										checked={!!store.appState.opts.lofiArt}
 										onChange={e => store.setOpt('lofiArt', e.target.checked)}
 									/>
 									Lofi Art
@@ -731,7 +753,7 @@ export default function MainMenu(props) {
 								<label>
 									<input
 										type="checkbox"
-										checked={!!rx.opts.shiftDrag}
+										checked={!!store.appState.opts.shiftDrag}
 										onChange={e => store.setOpt('shiftDrag', e.target.checked)}
 									/>
 									Shift Drag
@@ -745,7 +767,7 @@ export default function MainMenu(props) {
 									type="radio"
 									name="settings-pbp"
 									value=""
-									checked={!rx.opts.playByPlayMode}
+									checked={!store.appState.opts.playByPlayMode}
 									onChange={setPbpSetting}
 								/>
 								On
@@ -755,7 +777,7 @@ export default function MainMenu(props) {
 									type="radio"
 									name="settings-pbp"
 									value="noline"
-									checked={rx.opts.playByPlayMode === 'noline'}
+									checked={store.appState.opts.playByPlayMode === 'noline'}
 									onChange={setPbpSetting}
 								/>
 								No line
@@ -765,7 +787,7 @@ export default function MainMenu(props) {
 									type="radio"
 									name="settings-pbp"
 									value="disabled"
-									checked={rx.opts.playByPlayMode === 'disabled'}
+									checked={store.appState.opts.playByPlayMode === 'disabled'}
 									onChange={setPbpSetting}
 								/>
 								Off

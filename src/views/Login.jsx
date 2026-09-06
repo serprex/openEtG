@@ -1,16 +1,16 @@
 import { Show, createSignal, onSettled } from 'solid-js';
 
-import { emit, setCmds } from '../sock.jsx';
+import { emit, useCmds } from '../sock.jsx';
 import * as store from '../store.jsx';
 const MainMenu = import('./MainMenu.jsx');
 
 export default function Login() {
-	const rx = store.useRx();
 	const [commit, setCommit] = createSignal(null);
 	let password;
 
 	const loginClick = auth => {
-		const username = rx.opts.username && rx.opts.username.trim();
+		const username =
+			store.appState.opts.username && store.appState.opts.username.trim();
 		if (username) {
 			store.setOpt('username', username);
 			const data = { x: 'login', u: username };
@@ -24,28 +24,31 @@ export default function Login() {
 		if (e.key === 'Enter') loginClick();
 	};
 
-	onSettled(() => {
-		setCmds({
-			login: data => {
-				if (!data.err) {
-					store.setUser(data);
-					if (rx.opts.remember && typeof localStorage !== 'undefined') {
-						localStorage.auth = data.auth;
-					}
-					if (!data.data['']) {
-						store.doNav(import('./ElementSelect.jsx'));
-					} else {
-						store.setOptTemp('deck', store.getDeck());
-						store.doNav(MainMenu);
-					}
-				} else {
-					store.chatMsg(data.err);
+	useCmds({
+		login: data => {
+			if (!data.err) {
+				store.setUser(data);
+				if (
+					store.appState.opts.remember &&
+					typeof localStorage !== 'undefined'
+				) {
+					localStorage.auth = data.auth;
 				}
-			},
-		});
+				if (!data.data['']) {
+					store.doNav(import('./ElementSelect.jsx'));
+				} else {
+					store.setOptTemp('deck', store.deckOf(data.data['']));
+					store.doNav(MainMenu);
+				}
+			} else {
+				store.chatMsg(data.err);
+			}
+		},
+	});
 
+	onSettled(() => {
 		if (
-			rx.opts.remember &&
+			store.appState.opts.remember &&
 			typeof localStorage !== 'undefined' &&
 			localStorage.auth
 		) {
@@ -64,7 +67,7 @@ export default function Login() {
 				autoFocus
 				tabIndex="1"
 				onKeyDown={maybeLogin}
-				value={rx.opts.username ?? ''}
+				value={store.appState.opts.username ?? ''}
 				onInput={e => store.setOpt('username', e.target.value)}
 				style="position:absolute;left:270px;top:350px"
 			/>
@@ -79,7 +82,7 @@ export default function Login() {
 			<label style="position:absolute;left:270px;top:410px">
 				<input
 					type="checkbox"
-					checked={!!rx.opts.remember}
+					checked={!!store.appState.opts.remember}
 					onChange={e => {
 						if (typeof localStorage !== 'undefined' && !e.target.checked) {
 							delete localStorage.auth;

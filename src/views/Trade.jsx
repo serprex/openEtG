@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createSignal, onSettled } from 'solid-js';
+import { createEffect, createMemo, createSignal } from 'solid-js';
 
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
@@ -10,7 +10,6 @@ import * as sock from '../sock.jsx';
 import * as store from '../store.jsx';
 
 export default function Trade(props) {
-	const rx = store.useRx();
 	const [confirm, setConfirm] = createSignal(0);
 	const [card, setCard] = createSignal(null);
 	const [deck, setDeck] = createSignal([]);
@@ -20,32 +19,30 @@ export default function Trade(props) {
 		etgutil.decodedeck(offer()?.forcards ?? ''),
 	);
 
-	onSettled(() => {
-		sock.setCmds({
-			offertrade: data => {
-				setOffer({
-					foralt: data.a,
-					forcards: data.c,
-					forg: data.g,
-				});
-			},
-			tradedone: data => {
-				store.setAlt(data.alt || null);
-				store.updateUser({
-					pool: etgutil.mergedecks(
-						etgutil.removedecks(rx.user.pool, data.oldcards),
-						data.newcards,
-					),
-					gold: rx.user.gold + data.g,
-				});
+	sock.useCmds({
+		offertrade: data => {
+			setOffer({
+				foralt: data.a,
+				forcards: data.c,
+				forg: data.g,
+			});
+		},
+		tradedone: data => {
+			store.setAlt(data.alt || null);
+			store.updateUser(user => ({
+				pool: etgutil.mergedecks(
+					etgutil.removedecks(user.pool, data.oldcards),
+					data.newcards,
+				),
+				gold: user.gold + data.g,
+			}));
+			store.doNav(import('./MainMenu.jsx'));
+		},
+		tradecanceled: data => {
+			if (data.u === props.foe) {
 				store.doNav(import('./MainMenu.jsx'));
-			},
-			tradecanceled: data => {
-				if (data.u === props.foe) {
-					store.doNav(import('./MainMenu.jsx'));
-				}
-			},
-		});
+			}
+		},
 	});
 
 	createEffect(
@@ -60,7 +57,7 @@ export default function Trade(props) {
 			}
 			return minus;
 		}),
-		cardpool = createMemo(() => etgutil.deck2pool(rx.user.pool));
+		cardpool = createMemo(() => etgutil.deck2pool(store.appState.user.pool));
 
 	return (
 		<>
@@ -144,7 +141,7 @@ export default function Trade(props) {
 				onChange={e =>
 					setGold(
 						Math.min(
-							Math.min(rx.user.gold, Math.abs(e.target.value | 0)),
+							Math.min(store.appState.user.gold, Math.abs(e.target.value | 0)),
 							65535,
 						),
 					)

@@ -10,22 +10,22 @@ import Game from './Game.js';
 export function mkPremade(level, daily, datafn = null) {
 	const name = level === 1 ? 'mage' : 'demigod';
 	const urdeck = store.getDeck(),
-		{ user } = store.state,
-		minsize = user ? 30 : 10;
-	if (!Cards.isDeckLegal(decodedeck(urdeck), user, minsize)) {
+		minsize = store.appState.user ? 30 : 10;
+	if (!Cards.isDeckLegal(decodedeck(urdeck), store.appState.user, minsize)) {
 		store.chatMsg('Invalid deck', 'System');
 		return;
 	}
 	const cost = daily !== undefined ? 0 : pveCostReward[level * 2];
 	let foedata;
-	if (user) {
+	if (store.appState.user) {
 		if (daily === undefined) {
-			if (user.gold < cost) {
+			if (store.appState.user.gold < cost) {
 				store.requiresGold(cost);
 				return;
 			}
 		} else {
-			foedata = Decks[name][user[level === 1 ? 'dailymage' : 'dailydg']];
+			foedata =
+				Decks[name][store.appState.user[level === 1 ? 'dailymage' : 'dailydg']];
 		}
 	}
 	foedata ??= choose(Decks[name]);
@@ -37,8 +37,8 @@ export function mkPremade(level, daily, datafn = null) {
 		players: [
 			{
 				idx: 1,
-				name: store.state.username,
-				user: store.state.username,
+				name: store.appState.username,
+				user: store.appState.username,
 				deck: urdeck,
 			},
 			{
@@ -61,14 +61,13 @@ export function mkPremade(level, daily, datafn = null) {
 }
 export function mkAi(level, daily, datafn = null) {
 	const urdeck = store.getDeck(),
-		{ user } = store.state,
-		minsize = user ? 30 : 10;
-	if (!Cards.isDeckLegal(decodedeck(urdeck), user, minsize)) {
+		minsize = store.appState.user ? 30 : 10;
+	if (!Cards.isDeckLegal(decodedeck(urdeck), store.appState.user, minsize)) {
 		store.chatMsg('Invalid deck', 'System');
 		return;
 	}
 	const cost = daily !== undefined ? 0 : pveCostReward[level * 2];
-	if (cost && user.gold < cost) {
+	if (cost && store.appState.user.gold < cost) {
 		store.requiresGold(cost);
 		return;
 	}
@@ -83,8 +82,8 @@ export function mkAi(level, daily, datafn = null) {
 		players: [
 			{
 				idx: 1,
-				name: store.state.username,
-				user: store.state.username ?? '',
+				name: store.appState.username,
+				user: store.appState.username ?? '',
 				deck: urdeck,
 			},
 			{

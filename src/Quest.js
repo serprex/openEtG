@@ -892,11 +892,10 @@ export function mkQuestAi(quest, datafn) {
 	const drawpower = quest.drawpower ?? 1;
 	const hp = quest.hp ?? 100;
 	const playerHPstart = quest.urhp ?? 100;
-	const { user, username } = store.state;
 	let urdeck = quest.urdeck;
 	if (!urdeck) {
 		urdeck = store.getDeck();
-		if (!Cards.isDeckLegal(decodedeck(urdeck), user)) {
+		if (!Cards.isDeckLegal(decodedeck(urdeck), store.appState.user)) {
 			store.chatMsg('Invalid deck', 'System');
 			return;
 		}
@@ -909,8 +908,8 @@ export function mkQuestAi(quest, datafn) {
 		players: [
 			{
 				idx: 1,
-				name: username,
-				user: username,
+				name: store.appState.username,
+				user: store.appState.username,
 				deck: urdeck,
 				hp: playerHPstart,
 			},
@@ -925,12 +924,12 @@ export function mkQuestAi(quest, datafn) {
 			},
 		],
 	};
-	if (!user.quests[quest.key]) {
+	if (!store.appState.user.quests[quest.key]) {
 		data.cardreward = quest.cardreward;
 		data.goldreward = quest.goldreward;
 		data.choicerewards = quest.choicerewards;
 		data.rewardamount = quest.rewardamount;
-		if (!quest.urdeck && store.hasflag(user, 'hardcore')) {
+		if (!quest.urdeck && store.hasflag(store.appState.user, 'hardcore')) {
 			const ante = store.hardcoreante(Cards, urdeck);
 			if (ante) {
 				data.ante = ante;

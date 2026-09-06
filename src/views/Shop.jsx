@@ -1,4 +1,4 @@
-import { For, createSignal, onSettled } from 'solid-js';
+import { For, Repeat, createSignal } from 'solid-js';
 
 import { playSound } from '../audio.js';
 import * as sock from '../sock.jsx';
@@ -68,8 +68,7 @@ function PackDisplay(props) {
 }
 
 export default function Shop() {
-	const rx = store.useRx();
-	const bulk = () => rx.opts.bulk ?? '1';
+	const bulk = () => store.appState.opts.bulk ?? '1';
 	const [info1, setInfo1] = createSignal('Select from which element you want');
 	const [info2, setInfo2] = createSignal('Select which type of pack you want');
 	const [ele, setEle] = createSignal(-1);
@@ -77,29 +76,29 @@ export default function Shop() {
 	const [buy, setBuy] = createSignal(true);
 	const [cards, setCards] = createSignal('');
 
-	onSettled(() => {
-		sock.setCmds({
-			boostergive: data => {
+	sock.useCmds({
+		boostergive: data => {
+			store.updateUser(user => {
 				const userdelta = {};
 				if (data.accountbound) {
 					userdelta.accountbound = etgutil.mergedecks(
-						rx.user.accountbound,
+						user.accountbound,
 						data.cards,
 					);
-					const freepacks = rx.user.freepacks && rx.user.freepacks.slice();
+					const freepacks = user.freepacks && user.freepacks.slice();
 					if (freepacks) {
 						freepacks[data.packtype]--;
 						userdelta.freepacks = freepacks;
 					}
 				} else {
-					userdelta.pool = etgutil.mergedecks(rx.user.pool, data.cards);
+					userdelta.pool = etgutil.mergedecks(user.pool, data.cards);
 					userdelta.gold = data.g;
 				}
-				store.updateUser(userdelta);
-				setCards(data.cards);
-				setBuy(false);
-			},
-		});
+				return userdelta;
+			});
+			setCards(data.cards);
+			setBuy(false);
+		},
 	});
 
 	const buyPack = () => {
@@ -110,8 +109,9 @@ export default function Shop() {
 			bulk: bulk() | 0 || 1,
 		};
 		if (
-			rx.user.gold >= pack.cost * (boostdata.bulk || 1) ||
-			(rx.user.freepacks && rx.user.freepacks[rarity()] > 0)
+			store.appState.user.gold >= pack.cost * (boostdata.bulk || 1) ||
+			(store.appState.user.freepacks &&
+				store.appState.user.freepacks[rarity()] > 0)
 		) {
 			sock.userEmit('booster', boostdata);
 			setBuy(false);
@@ -121,7 +121,9 @@ export default function Shop() {
 	};
 
 	const hasFreePacks = () =>
-		!!(rx.user.freepacks && rx.user.freepacks[rarity()]);
+		!!(
+			store.appState.user.freepacks && store.appState.user.freepacks[rarity()]
+		);
 	return (
 		<>
 			<Tutor.Tutor x={8} y={500} panels={Tutor.Shop} />
@@ -133,9 +135,9 @@ export default function Shop() {
 						</span>
 						{hasFreePacks() && (
 							<span>
-								{!!rx.user.freepacks[rarity()] &&
+								{!!store.appState.user.freepacks[rarity()] &&
 									`Free ${packdata[rarity()].type} packs left: ${
-										rx.user.freepacks[rarity()]
+										store.appState.user.freepacks[rarity()]
 									}`}
 							</span>
 						)}
@@ -144,22 +146,24 @@ export default function Shop() {
 				</div>
 				<div style="display:flex;justify-content:space-between;width:100%">
 					<div class="bgbox shop-ele">
-						{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(i => (
-							<span
-								class={`imgb ico e${i}${ele() === i ? ' selected' : ''}`}
-								onClick={() => {
-									playSound('click');
-									setEle(i);
-									setInfo1(
-										`Selected Element: ${i === 13 ? 'Random' : '1:' + i}`,
-									);
-								}}
-							/>
-						))}
+						<Repeat count={14}>
+							{i => (
+								<span
+									class={['imgb', 'ico', `e${i}`, { selected: ele() === i }]}
+									onClick={() => {
+										playSound('click');
+										setEle(i);
+										setInfo1(
+											`Selected Element: ${i === 13 ? 'Random' : '1:' + i}`,
+										);
+									}}
+								/>
+							)}
+						</Repeat>
 					</div>
 					<div class="bgbox" style="width:94px;height:184px;position:relative">
 						<div style="position:absolute;right:8px;top:11px">
-							{rx.user.gold}
+							{store.appState.user.gold}
 							<span class="ico gold" />
 						</div>
 						{cards() && (
@@ -176,7 +180,8 @@ export default function Shop() {
 						{buy() &&
 							!!~ele() &&
 							!!~rarity() &&
-							(!store.hasflag(rx.user, 'no-shop') || hasFreePacks()) && (
+							(!store.hasflag(store.appState.user, 'no-shop') ||
+								hasFreePacks()) && (
 								<>
 									{!hasFreePacks() && (
 										<input
@@ -187,7 +192,7 @@ export default function Shop() {
 												store.setOptTemp(
 													'bulk',
 													Math.min(
-														(rx.user.gold / pack.cost) | 0,
+														(store.appState.user.gold / pack.cost) | 0,
 														255,
 													).toString(),
 												);
@@ -204,7 +209,7 @@ export default function Shop() {
 								</>
 							)}
 						{!hasFreePacks() &&
-							!store.hasflag(rx.user, 'no-shop') &&
+							!store.hasflag(store.appState.user, 'no-shop') &&
 							!!~ele() &&
 							!!~rarity() && (
 								<input
@@ -234,15 +239,18 @@ export default function Shop() {
 							<div class="shop-pack">
 								<img
 									src={`/assets/pack${n()}.webp`}
-									class={`imgb${rarity() === n() ? ' selected' : ''}`}
+									class={['imgb', { selected: rarity() === n() }]}
 									onClick={() => {
 										setRarity(n());
 										setInfo2(`${pack.type} Pack: ${pack.info}`);
 									}}
 								/>
-								{rx.user.freepacks && rx.user.freepacks[n()] > 0 && (
-									<span class="free-pack">{rx.user.freepacks[n()]}</span>
-								)}
+								{store.appState.user.freepacks &&
+									store.appState.user.freepacks[n()] > 0 && (
+										<span class="free-pack">
+											{store.appState.user.freepacks[n()]}
+										</span>
+									)}
 								{pack.cost}
 								<span class="ico gold" />
 							</div>

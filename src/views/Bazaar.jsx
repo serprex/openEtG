@@ -183,8 +183,7 @@ function OrderBook(p) {
 }
 
 export default function Bazaar() {
-	const rx = store.useRx();
-	const cardpool = createMemo(() => deck2pool(rx.user.pool));
+	const cardpool = createMemo(() => deck2pool(store.appState.user.pool));
 
 	const [bz, setBz] = createSignal(null);
 	const [bcard, setBcard] = createSignal(null);
@@ -194,42 +193,42 @@ export default function Bazaar() {
 	const [buyq, setBuyq] = createSignal(0);
 	const [showOrders, setShowOrders] = createSignal(false);
 
-	onSettled(() => {
-		sock.setCmds({
-			bzread: ({ bz }) => {
-				for (const k in bz) {
-					bz[k].sort(
-						(x, y) =>
-							Math.sign(x.p) - Math.sign(y.p) || Math.abs(x.p) - Math.abs(y.p),
-					);
+	sock.useCmds({
+		bzread: ({ bz }) => {
+			for (const k in bz) {
+				bz[k].sort(
+					(x, y) =>
+						Math.sign(x.p) - Math.sign(y.p) || Math.abs(x.p) - Math.abs(y.p),
+				);
+			}
+			setBz(bz);
+		},
+		bzbid: data => {
+			setBz(bz => {
+				const newbz = { ...bz };
+				for (const code in data.rm) {
+					if (newbz[code]) {
+						newbz[code] = newbz[code].filter(
+							bid =>
+								!data.rm[code].some(
+									rm => rm.u === bid.u && rm.q === bid.q && rm.p === bid.p,
+								),
+						);
+					}
 				}
-				setBz(bz);
-			},
-			bzbid: data => {
-				setBz(bz => {
-					const newbz = { ...bz };
-					for (const code in data.rm) {
-						if (newbz[code]) {
-							newbz[code] = newbz[code].filter(
-								bid =>
-									!data.rm[code].some(
-										rm => rm.u === bid.u && rm.q === bid.q && rm.p === bid.p,
-									),
-							);
-						}
-					}
-					for (const code in data.add) {
-						newbz[code] = newbz[code] ? newbz[code].slice() : [];
-						newbz[code].push(...data.add[code]);
-					}
-					return newbz;
-				});
-				store.updateUser({
-					gold: data.g,
-					pool: data.pool,
-				});
-			},
-		});
+				for (const code in data.add) {
+					newbz[code] = newbz[code] ? newbz[code].slice() : [];
+					newbz[code].push(...data.add[code]);
+				}
+				return newbz;
+			});
+			store.updateUser({
+				gold: data.g,
+				pool: data.pool,
+			});
+		},
+	});
+	onSettled(() => {
 		sock.emit({ x: 'bzread' });
 	});
 
@@ -311,7 +310,7 @@ export default function Bazaar() {
 						<span class="ico g" />
 					</div>
 					<CardOrders
-						username={rx.username}
+						username={store.appState.username}
 						bc={bz()[bcard().code]}
 						onClickBuy={(sell, sellq) => {
 							setSell(sell);
@@ -355,7 +354,7 @@ export default function Bazaar() {
 				</div>
 			)}
 			<div style="position:absolute;left:5px;top:240px">
-				{rx.user.gold}
+				{store.appState.user.gold}
 				<span class="ico gold" />
 			</div>
 			<Card style="position:absolute;left:732px;top:8px" card={bcard()} />
@@ -372,11 +371,11 @@ export default function Bazaar() {
 			/>
 			{showOrders() && (
 				<OrderBook
-					username={rx.username}
-					deal={rx.opts.orderFilter_Deal ?? false}
-					buy={rx.opts.orderFilter_Buy ?? true}
-					sell={rx.opts.orderFilter_Sell ?? true}
-					mine={rx.opts.orderFilter_Mine ?? false}
+					username={store.appState.username}
+					deal={store.appState.opts.orderFilter_Deal ?? false}
+					buy={store.appState.opts.orderFilter_Buy ?? true}
+					sell={store.appState.opts.orderFilter_Sell ?? true}
+					mine={store.appState.opts.orderFilter_Mine ?? false}
 					bz={bz()}
 					onClick={code => {
 						setBcard(Cards.Codes[code]);

@@ -1,6 +1,6 @@
-import { For, createEffect, createSignal, onSettled } from 'solid-js';
-import { userEmit, setCmds } from '../sock.jsx';
-import { doNav, state } from '../store.jsx';
+import { For, createEffect, createSignal } from 'solid-js';
+import { userEmit, useCmds } from '../sock.jsx';
+import { doNav, appState } from '../store.jsx';
 import { presets } from '../ui.js';
 
 const categories = [
@@ -16,19 +16,17 @@ const categories = [
 
 export default function Leaderboards() {
 	const [getCategory, setCategory] = createSignal('Wealth'),
-		[getFlags, setFlags] = createSignal(state.user.flags.slice().sort()),
+		[getFlags, setFlags] = createSignal(appState.user.flags.slice().sort()),
 		[getTop, setTop] = createSignal({});
 
-	onSettled(() => {
-		setCmds({
-			leaderboard: ({ flags, category, ownscore, top }) => {
-				const name = category + ':' + flags.sort().join(' ');
-				setTop(t => ({
-					...t,
-					[name]: [ownscore, top],
-				}));
-			},
-		});
+	useCmds({
+		leaderboard: ({ flags, category, ownscore, top }) => {
+			const name = category + ':' + flags.sort().join(' ');
+			setTop(t => ({
+				...t,
+				[name]: [ownscore, top],
+			}));
+		},
 	});
 
 	createEffect(

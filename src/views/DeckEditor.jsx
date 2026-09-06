@@ -1,4 +1,11 @@
-import { For, createMemo, createSignal, onCleanup, onSettled } from 'solid-js';
+import {
+	For,
+	Repeat,
+	createMemo,
+	createSignal,
+	onCleanup,
+	onSettled,
+} from 'solid-js';
 
 import Cards from '../Cards.js';
 import Editor from '../Components/Editor.jsx';
@@ -36,38 +43,41 @@ function Qecks(props) {
 				class={setting() ? 'selected' : undefined}
 				onClick={() => setSetting(value => !value)}
 			/>
-			{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => (
-				<input
-					type="button"
-					value={`${i + 1}`}
-					class={`editbtn${
-						props.user.selectedDeck === props.user.qecks[i] ? ' selected' : ''
-					}`}
-					onClick={() => {
-						if (setting()) {
-							let swap = -1;
-							for (let i = 0; i < 10; i++) {
-								if (props.user.qecks[i] === props.user.selectedDeck) {
-									swap = i;
+			<Repeat count={10}>
+				{i => (
+					<input
+						type="button"
+						value={`${i + 1}`}
+						class={[
+							'editbtn',
+							{ selected: props.user.selectedDeck === props.user.qecks[i] },
+						]}
+						onClick={() => {
+							if (setting()) {
+								let swap = -1;
+								for (let i = 0; i < 10; i++) {
+									if (props.user.qecks[i] === props.user.selectedDeck) {
+										swap = i;
+									}
 								}
-							}
-							if (~swap) {
+								if (~swap) {
+									userExec('changeqeck', {
+										number: swap,
+										name: props.user.qecks[i],
+									});
+								}
 								userExec('changeqeck', {
-									number: swap,
-									name: props.user.qecks[i],
+									number: i,
+									name: props.user.selectedDeck,
 								});
+								setSetting(false);
+							} else if (props.onClick) {
+								props.onClick(props.user.qecks[i]);
 							}
-							userExec('changeqeck', {
-								number: i,
-								name: props.user.selectedDeck,
-							});
-							setSetting(false);
-						} else if (props.onClick) {
-							props.onClick(props.user.qecks[i]);
-						}
-					}}
-				/>
-			))}
+						}}
+					/>
+				)}
+			</Repeat>
 		</>
 	);
 }
@@ -172,12 +182,11 @@ function DeckSelector(props) {
 }
 
 export default function DeckEditor() {
-	const rx = store.useRx();
 	const pool = createMemo(() => {
 		const pool = [];
 		for (const [code, count] of chain(
-			etgutil.iterraw(rx.user.pool),
-			etgutil.iterraw(rx.user.accountbound),
+			etgutil.iterraw(store.appState.user.pool),
+			etgutil.iterraw(store.appState.user.accountbound),
 		)) {
 			if (Cards.Codes[code]) {
 				pool[code] = (pool[code] ?? 0) + count;
@@ -188,11 +197,16 @@ export default function DeckEditor() {
 	let deckref;
 	onSettled(() => deckref.setSelectionRange(0, 999));
 
-	const [deckData, setDeckData] = createSignal(() =>
-		processDeck(rx.user.decks[rx.user.selectedDeck] ?? ''),
+	const savedDeck = createMemo(() =>
+		processDeck(
+			store.appState.user.decks[store.appState.user.selectedDeck] ?? '',
+		),
 	);
+	const [edit, setEdit] = createSignal(null);
+	const deckData = () => edit() ?? savedDeck();
+	const editDeck = fn => setEdit(data => fn(data ?? savedDeck()));
 
-	const autoup = () => !store.hasflag(rx.user, 'no-up-merge');
+	const autoup = () => !store.hasflag(store.appState.user, 'no-up-merge');
 	const cardMinus = createMemo(() =>
 		Cards.filterDeck(deckData().deck, pool(), true, autoup()),
 	);
@@ -205,21 +219,21 @@ export default function DeckEditor() {
 		const currentDeckCode =
 			etgutil.encodedeck(deckData().deck) +
 			etgutil.toTrueMarkSuffix(deckData().mark);
-		if (currentDeckCode !== rx.user.decks[name]) {
+		if (currentDeckCode !== store.appState.user.decks[name]) {
 			userExec('setdeck', { d: currentDeckCode, name });
 		} else if (force) userExec('setdeck', { name });
 	};
 
 	const loadDeck = name => {
-		saveDeck(rx.user.selectedDeck);
+		saveDeck(store.appState.user.selectedDeck);
+		setEdit(null);
 		userExec('setdeck', { name });
-		setDeckData(processDeck(store.getDeck()));
 	};
 
 	const onkeydown = e => {
 		if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
 		const chi = '1234567890'.indexOf(e.key);
-		if (~chi) loadDeck(rx.user.qecks[chi]);
+		if (~chi) loadDeck(store.appState.user.qecks[chi]);
 	};
 
 	onSettled(() => {
@@ -243,9 +257,9 @@ export default function DeckEditor() {
 				cardMinus={cardMinus()}
 				autoup={autoup()}
 				setDeck={deck =>
-					setDeckData(data => ({ ...data, deck: deck.sort(Cards.codeCmp) }))
+					editDeck(data => ({ ...data, deck: deck.sort(Cards.codeCmp) }))
 				}
-				setMark={mark => setDeckData(data => ({ ...data, mark }))}
+				setMark={mark => editDeck(data => ({ ...data, mark }))}
 			/>
 			<Tutor.Tutor x={4} y={220} panels={Tutor.Editor} />
 			<label style="position:absolute;left:536px;top:238px">
@@ -273,7 +287,7 @@ export default function DeckEditor() {
 								dcode += di;
 							}
 						}
-						setDeckData(processDeck(dcode));
+						setEdit(processDeck(dcode));
 					}}
 					ref={deckref}
 					onClick={e => {
@@ -292,7 +306,7 @@ export default function DeckEditor() {
 				type="button"
 				value="Exit"
 				onClick={() => {
-					saveDeck(rx.user.selectedDeck, true);
+					saveDeck(store.appState.user.selectedDeck, true);
 					store.doNav(import('./MainMenu.jsx'));
 				}}
 				style="position:absolute;left:8px;top:110px"
@@ -306,14 +320,14 @@ export default function DeckEditor() {
 			<div style="position:absolute;left:8px;top:8px;width:720px;display:flex;justify-content:space-between">
 				<div
 					style="overflow:hidden;text-overflow:ellipsis;width:192px;white-space:nowrap"
-					title={rx.user.selectedDeck ?? ''}>
-					{rx.user.selectedDeck ?? ''}
+					title={store.appState.user.selectedDeck ?? ''}>
+					{store.appState.user.selectedDeck ?? ''}
 				</div>
-				<Qecks onClick={loadDeck} user={rx.user} />
+				<Qecks onClick={loadDeck} user={store.appState.user} />
 			</div>
 			{viewDecks() && (
 				<DeckSelector
-					user={rx.user}
+					user={store.appState.user}
 					loadDeck={loadDeck}
 					saveDeck={saveDeck}
 					onClose={deckModeOff}

@@ -1,7 +1,7 @@
 import { Show, createMemo, createSignal } from 'solid-js';
 
 import * as sock from '../sock.jsx';
-import { doNav, useRx, hasflag } from '../store.jsx';
+import { doNav, appState, hasflag } from '../store.jsx';
 import Cards from '../Cards.js';
 import * as etgutil from '../etgutil.js';
 import Card from '../Components/Card.jsx';
@@ -9,9 +9,10 @@ import CardSelector from '../Components/CardSelector.jsx';
 import Text from '../Components/Text.jsx';
 
 export default function Upgrade() {
-	const user = useRx(state => state.user);
-	const cardpool = createMemo(() => etgutil.deck2pool(user.pool));
-	const boundpool = createMemo(() => etgutil.deck2pool(user.accountbound));
+	const cardpool = createMemo(() => etgutil.deck2pool(appState.user.pool));
+	const boundpool = createMemo(() =>
+		etgutil.deck2pool(appState.user.accountbound),
+	);
 	const [showBound, setShowBound] = createSignal(false);
 	const [error, setError] = createSignal('');
 	const [state, setState] = createSignal({
@@ -33,7 +34,7 @@ export default function Upgrade() {
 				sock.userExec('upgrade', { card: card.code });
 			} else
 				return `You need at least ${use} copies to be able to upgrade this card!`;
-		} else if (user.gold >= 50) {
+		} else if (appState.user.gold >= 50) {
 			sock.userExec('uppillar', { c: card.code });
 		} else return 'You need 50$ to afford an upgraded pillar!';
 	}
@@ -52,7 +53,7 @@ export default function Upgrade() {
 				sock.userExec('polish', { card: card.code });
 			} else
 				return `You need at least ${use} copies to be able to polish this card!`;
-		} else if (user.gold >= 50) {
+		} else if (appState.user.gold >= 50) {
 			sock.userExec('shpillar', { c: card.code });
 		} else return 'You need 50$ to afford a shiny pillar!';
 	}
@@ -79,7 +80,7 @@ export default function Upgrade() {
 						value="Exit"
 						onClick={() => doNav(import('./MainMenu.jsx'))}
 					/>
-					{!hasflag(user, 'no-up-merge') && (
+					{!hasflag(appState.user, 'no-up-merge') && (
 						<input
 							type="button"
 							value="Autoconvert"
@@ -87,7 +88,7 @@ export default function Upgrade() {
 						/>
 					)}
 					<div>
-						{user.gold}
+						{appState.user.gold}
 						<span class="ico gold" />
 					</div>
 				</div>
@@ -146,7 +147,7 @@ export default function Upgrade() {
 						card1: card,
 						card2: card.asUpped(true),
 						canGrade: !hasflag(
-							user,
+							appState.user,
 							card.pillar ? 'no-up-pillar' : 'no-up-merge',
 						),
 						canLish: true,

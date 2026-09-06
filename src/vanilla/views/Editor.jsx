@@ -8,10 +8,9 @@ import * as store from '../../store.jsx';
 import { userEmit } from '../../sock.jsx';
 
 export default function OriginalEditor() {
-	const rx = store.useRx();
 	const pool = createMemo(() => {
 		const pool = [];
-		for (const [code, count] of etgutil.iterraw(rx.user.pool)) {
+		for (const [code, count] of etgutil.iterraw(store.appState.user.pool)) {
 			if (Cards.Codes[code]) {
 				pool[code] = (pool[code] ?? 0) + count;
 			}
@@ -20,7 +19,7 @@ export default function OriginalEditor() {
 	});
 	const data = createMemo(() => {
 		let mark = 0,
-			deck = etgutil.decodedeck(rx.user.deck);
+			deck = etgutil.decodedeck(store.appState.user.deck);
 		for (let i = deck.length - 1; i >= 0; i--) {
 			if (!Cards.Codes[deck[i]]) {
 				const index = etgutil.fromTrueMark(deck[i]);

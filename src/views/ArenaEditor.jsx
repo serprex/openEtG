@@ -53,13 +53,12 @@ function AttrUi(p) {
 }
 
 export default function ArenaEditor(props) {
-	const rx = store.useRx();
 	const pool = createMemo(() => {
 		const baseacard = props.acard.asUpped(false).asShiny(false),
 			pool = [];
 		for (const [code, count] of chain(
-			etgutil.iterraw(rx.user.pool),
-			etgutil.iterraw(rx.user.accountbound),
+			etgutil.iterraw(store.appState.user.pool),
+			etgutil.iterraw(store.appState.user.accountbound),
 		)) {
 			const card = Cards.Codes[code];
 			if (
@@ -86,7 +85,7 @@ export default function ArenaEditor(props) {
 	}
 	const [deck, setDeck] = createSignal(adeck);
 	const [mark, setMark] = createSignal(amark);
-	const autoup = () => !store.hasflag(rx.user, 'no-up-merge');
+	const autoup = () => !store.hasflag(store.appState.user, 'no-up-merge');
 	const cardMinus = createMemo(() => {
 		const cardMinus = Cards.filterDeck(deck(), pool(), false, autoup());
 		cardMinus[props.acard.code] = 5;
@@ -128,7 +127,10 @@ export default function ArenaEditor(props) {
 					value="Save & Exit"
 					style="margin-left:8px"
 					onClick={() => {
-						if (!Cards.isDeckLegal(deck(), rx.user) || sumscore() > arpts) {
+						if (
+							!Cards.isDeckLegal(deck(), store.appState.user) ||
+							sumscore() > arpts
+						) {
 							store.chatMsg(
 								'Invalid deck, 35 cards required before submission',
 								'System',
@@ -145,9 +147,9 @@ export default function ArenaEditor(props) {
 						}
 						sock.userEmit('setarena', data);
 						if (props.acreate && props.ainfo.day > 0) {
-							store.updateUser({
-								gold: rx.user.gold + Math.min(props.ainfo.day * 25, 350),
-							});
+							store.updateUser(user => ({
+								gold: user.gold + Math.min(props.ainfo.day * 25, 350),
+							}));
 						}
 						store.chatMsg('Arena deck submitted', 'System');
 						store.doNav(import('./MainMenu.jsx'));

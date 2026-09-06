@@ -1,11 +1,27 @@
 import { Show, createSignal, onSettled } from 'solid-js';
 
-import { emit, setCmds } from '../sock.jsx';
+import { emit, useCmds } from '../sock.jsx';
 import { chatMsg, doNav, setUser } from '../store.jsx';
 const MainMenu = import('./MainMenu.jsx');
 
 export default function KongLogin() {
 	const [guest, setGuest] = createSignal(false);
+
+	useCmds({
+		login: data => {
+			if (!data.err) {
+				setUser(data);
+				if (!data.data['']) {
+					doNav(import('./ElementSelect.jsx'));
+				} else {
+					doNav(MainMenu);
+				}
+			} else {
+				chatMsg(data.err);
+				alert(data.err);
+			}
+		},
+	});
 
 	onSettled(() => {
 		kongregateAPI.loadAPI(() => {
@@ -13,21 +29,6 @@ export default function KongLogin() {
 			if (kong.services.isGuest()) {
 				setGuest(true);
 			} else {
-				setCmds({
-					login: data => {
-						if (!data.err) {
-							setUser(data);
-							if (!data.data['']) {
-								doNav(import('./ElementSelect.jsx'));
-							} else {
-								doNav(MainMenu);
-							}
-						} else {
-							chatMsg(data.err);
-							alert(data.err);
-						}
-					},
-				});
 				emit({
 					x: 'konglogin',
 					u: kong.services.getUserId(),

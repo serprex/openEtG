@@ -1,4 +1,4 @@
-import { createMemo, createSignal } from 'solid-js';
+import { Repeat, createMemo, createSignal } from 'solid-js';
 
 import { eleNames, presets } from '../ui.js';
 import { userEmit } from '../sock.jsx';
@@ -98,22 +98,32 @@ function AltCreator(props) {
 					))}
 				</div>
 			)}
-			{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map((i, idx) => (
-				<span
-					class={`imgb ico e${
-						i === 14 ? 13
-						: i === 13 ? 14
-						: i
-					}${ele() === i ? ' selected' : ''}`}
-					style={`position:absolute;left:${600 + (idx & 1) * 180}px;top:${
-						40 + (idx >> 1) * 40
-					}px`}
-					onClick={[setEle, i]}>
-					<span style="position:absolute;left:40px;top:6px;width:144px">
-						{eleNames[i]}
-					</span>
-				</span>
-			))}
+			<Repeat count={14}>
+				{idx => {
+					const i = idx + 1;
+					return (
+						<span
+							class={[
+								'imgb',
+								'ico',
+								`e${
+									i === 14 ? 13
+									: i === 13 ? 14
+									: i
+								}`,
+								{ selected: ele() === i },
+							]}
+							style={`position:absolute;left:${600 + (idx & 1) * 180}px;top:${
+								40 + (idx >> 1) * 40
+							}px`}
+							onClick={[setEle, i]}>
+							<span style="position:absolute;left:40px;top:6px;width:144px">
+								{eleNames[i]}
+							</span>
+						</span>
+					);
+				}}
+			</Repeat>
 			<div style="position:absolute;left:8px;top:572px">
 				<input
 					type="input"
@@ -154,11 +164,10 @@ function chooseAlt(alt) {
 }
 
 export default function Alts() {
-	const rx = store.useRx();
 	let yesdelete;
 	const [viewCreator, setViewCreator] = createSignal(false);
 	const [viewDeletor, setViewDeletor] = createSignal(null);
-	const [selected, setSelected] = createSignal(rx.uname);
+	const [selected, setSelected] = createSignal(store.appState.uname);
 
 	return (
 		<>
@@ -168,7 +177,7 @@ export default function Alts() {
 				onClick={() => store.doNav(import('./MainMenu.jsx'))}
 				style="position:absolute;left:800px;top:578px"
 			/>
-			{selected() !== rx.uname && (
+			{selected() !== store.appState.uname && (
 				<input
 					type="button"
 					value="Select"
@@ -176,7 +185,7 @@ export default function Alts() {
 					onClick={[chooseAlt, selected()]}
 				/>
 			)}
-			{selected() && selected() !== rx.uname && (
+			{selected() && selected() !== store.appState.uname && (
 				<input
 					type="button"
 					value="Delete"
@@ -205,10 +214,12 @@ export default function Alts() {
 							style={selected() ? '' : 'background-color:#456'}
 							onClick={[setSelected, null]}
 							onDblClick={[chooseAlt, null]}>
-							<td>{rx.username}</td>
-							<td style={`color:#${rx.uname ? 'ccb' : 'ed8'}`}>Main</td>
+							<td>{store.appState.username}</td>
+							<td style={`color:#${store.appState.uname ? 'ccb' : 'ed8'}`}>
+								Main
+							</td>
 						</tr>
-						<For each={Object.keys(rx.alts).sort()}>
+						<For each={Object.keys(store.appState.alts).sort()}>
 							{name => {
 								if (!name) return null;
 								return (
@@ -219,11 +230,11 @@ export default function Alts() {
 										onDblClick={[chooseAlt, name]}>
 										<td
 											style={`padding-top:4px;color:#${
-												name === rx.uname ? 'ed8' : 'ccb'
+												name === store.appState.uname ? 'ed8' : 'ccb'
 											}`}>
 											{name}
 										</td>
-										<Flags flags={rx.alts[name].flags} />
+										<Flags flags={store.appState.alts[name].flags} />
 									</tr>
 								);
 							}}

@@ -1,3 +1,5 @@
+import { Repeat } from 'solid-js';
+
 import { mkAi, mkPremade } from '../mkAi.js';
 import * as sock from '../sock.jsx';
 import Decks from '../Decks.json' with { type: 'json' };
@@ -25,13 +27,11 @@ function mkDaily(type) {
 						daily: 2,
 					};
 			dataNext.cost = 0;
-			dataNext.rematch = () => {
-				const { user } = store.state;
-				return !(user.daily & (1 << type)) && mkDaily(type);
-			};
+			dataNext.rematch = () =>
+				!(store.appState.user.daily & (1 << type)) && mkDaily(type);
 			dataNext.rematchFilter = (game, p1id) => !game.won(p1id);
 			dataNext.dataNext = dataNext;
-			if (store.hasflag('hardcore')) {
+			if (store.hasflag(store.appState.user, 'hardcore')) {
 				dataNext.ante = ante;
 				sock.userExec('rmcard', ante);
 				const key = ante.bound ? 'cardreward' : 'poolreward';
@@ -53,9 +53,8 @@ function mkDaily(type) {
 	store.navGame(game);
 }
 export default function Colosseum() {
-	const user = store.useRx(state => state.user);
-	const [magename, magedeck] = Decks.mage[user.dailymage],
-		[dgname, dgdeck] = Decks.demigod[user.dailydg];
+	const [magename, magedeck] = Decks.mage[store.appState.user.dailymage],
+		[dgname, dgdeck] = Decks.demigod[store.appState.user.dailydg];
 	const events = [
 		() =>
 			'Novice Endurance\nFight 3 Commoners in a row without healing in between. May try until you win.',
@@ -87,29 +86,33 @@ export default function Colosseum() {
 				value="Exit"
 				onClick={() => store.doNav(import('./MainMenu.jsx'))}
 			/>
-			{[1, 2, 3, 4].map(i => {
-				const active = !(user.daily & (1 << i));
-				return (
-					<div style="margin-bottom:24px;min-height:36px;display:flex">
-						<input
-							type="button"
-							value="Fight!"
-							style={`margin-right:12px${active ? '' : ';visibility:hidden'}`}
-							onClick={[mkDaily, i]}
-						/>
-						<div style="white-space:pre">
-							{active ?
-								events[i - 1]
-							: i > 2 ?
-								user.daily & (i === 3 ? 1 : 32) ?
-									'You defeated this already today.'
-								:	'You failed this today. Better luck tomorrow!'
-							:	'Completed.'}
+			<Repeat count={4} from={1}>
+				{i => {
+					const active = () => !(store.appState.user.daily & (1 << i));
+					return (
+						<div style="margin-bottom:24px;min-height:36px;display:flex">
+							<input
+								type="button"
+								value="Fight!"
+								style={`margin-right:12px${
+									active() ? '' : ';visibility:hidden'
+								}`}
+								onClick={[mkDaily, i]}
+							/>
+							<div style="white-space:pre">
+								{active() ?
+									events[i - 1]
+								: i > 2 ?
+									store.appState.user.daily & (i === 3 ? 1 : 32) ?
+										'You defeated this already today.'
+									:	'You failed this today. Better luck tomorrow!'
+								:	'Completed.'}
+							</div>
 						</div>
-					</div>
-				);
-			})}
-			{user.daily === 191 ?
+					);
+				}}
+			</Repeat>
+			{store.appState.user.daily === 191 ?
 				<div>
 					<input
 						type="button"
@@ -128,11 +131,11 @@ export default function Colosseum() {
 						Completing any colosseum event earns 100 <span class="ico gold" />.
 					</div>
 					<div>
-						{user.ostreak ?
-							`You currently have a ${user.ostreak} day colosseum streak.`
+						{store.appState.user.ostreak ?
+							`You currently have a ${store.appState.user.ostreak} day colosseum streak.`
 						:	"You'ven't begun a streak."}
 					</div>
-					{user.ostreak && user.ostreakday ?
+					{store.appState.user.ostreak && store.appState.user.ostreakday ?
 						<div>
 							You've redeemed 100 <span ico="ico gold" /> today.
 						</div>

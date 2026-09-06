@@ -4,7 +4,6 @@ import Text from '../Components/Text.jsx';
 import * as store from '../store.jsx';
 
 export function QuestColumn(props) {
-	const user = store.useRx(state => state.user);
 	return (
 		<div style="display:flex;flex-direction:column;width:177px">
 			<For each={props.area.children} keyed={false}>
@@ -12,11 +11,16 @@ export function QuestColumn(props) {
 					<Show
 						when={
 							typeof area() !== 'string' ||
-							Quest.requireQuest(Quest.quarks[area()], user)
+							Quest.requireQuest(Quest.quarks[area()], store.appState.user)
 						}>
 						<span
 							style={`margin-top:8px;color:#${
-								typeof area() === 'string' && !user.quests[area()] ? 'f' : 'a'
+								(
+									typeof area() === 'string' &&
+									!store.appState.user.quests[area()]
+								) ?
+									'f'
+								:	'a'
 							}${props.quest[props.qi] === i ? 'ff' : 'aa'}`}
 							onClick={() => {
 								const newquest = props.quest.slice(0, props.qi);
@@ -35,10 +39,9 @@ export function QuestColumn(props) {
 }
 
 export default function QuestView() {
-	const opts = store.useRx(state => state.opts);
 	const questInfo = createMemo(() => {
 		const questAreas = [],
-			quest = opts.quest ?? [];
+			quest = store.appState.opts.quest ?? [];
 		let qbag = Quest.root;
 		for (let qi = 0; qi < quest.length + 1; qi++) {
 			questAreas.push(qbag);
@@ -84,7 +87,11 @@ export default function QuestView() {
 			<div style="display:flex;margin:8px">
 				<For each={questInfo().questAreas} keyed={false}>
 					{(area, qi) => (
-						<QuestColumn quest={opts.quest ?? []} qi={qi} area={area()} />
+						<QuestColumn
+							quest={store.appState.opts.quest ?? []}
+							qi={qi}
+							area={area()}
+						/>
 					)}
 				</For>
 			</div>

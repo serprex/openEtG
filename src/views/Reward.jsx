@@ -4,7 +4,7 @@ import Cards from '../Cards.js';
 import { addcard, encodeCount } from '../etgutil.js';
 import Card from '../Components/Card.jsx';
 import CardImage from '../Components/CardImage.jsx';
-import { setCmds, userEmit, userExec } from '../sock.jsx';
+import { useCmds, userEmit, userExec } from '../sock.jsx';
 import * as store from '../store.jsx';
 
 const rewardwords = {
@@ -44,23 +44,22 @@ export default function Reward(props) {
 	const rewardList = getRewardList(props.type);
 	const [chosenReward, setChosenReward] = createSignal(null);
 
-	onSettled(() => {
-		if (rewardList) {
-			setCmds({
-				codedone: data => {
-					const { user } = store.state;
-					store.updateUser({
-						pool: addcard(user.pool, data.card),
-					});
-					store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System');
-					store.doNav(import('./MainMenu.jsx'));
-				},
-			});
-		} else {
+	if (rewardList) {
+		useCmds({
+			codedone: data => {
+				store.updateUser(user => ({
+					pool: addcard(user.pool, data.card),
+				}));
+				store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System');
+				store.doNav(import('./MainMenu.jsx'));
+			},
+		});
+	} else {
+		onSettled(() => {
 			store.chatMsg(`Unknown reward ${props.type}`, 'System');
 			store.doNav(import('./MainMenu.jsx'));
-		}
-	});
+		});
+	}
 
 	const numberofcopies = props.amount ?? 1;
 	return (

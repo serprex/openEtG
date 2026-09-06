@@ -1,4 +1,4 @@
-import { createMemo, createSignal, onSettled } from 'solid-js';
+import { Repeat, createMemo, createSignal, onSettled } from 'solid-js';
 
 import Cards from '../Cards.js';
 import * as sock from '../sock.jsx';
@@ -18,10 +18,10 @@ export default function Library(props) {
 	const [showBound, setShowBound] = createSignal(false);
 	let altname;
 
-	onSettled(() => {
-		sock.setCmds({ librarygive: setData });
-		sock.emit({ x: 'librarywant', f: props.name, a: props.alt ?? '' });
-	});
+	sock.useCmds({ librarygive: setData });
+	onSettled(() =>
+		sock.emit({ x: 'librarywant', f: props.name, a: props.alt ?? '' }),
+	);
 
 	const memo = createMemo(() => {
 		let progressmax = 0,
@@ -111,29 +111,31 @@ export default function Library(props) {
 			</div>
 			<div style="margin-top:18px;row-gap:4px;display:grid;grid-template-rows:36px auto auto auto;grid-template-columns:24px repeat(13, 1fr);width:730px">
 				<div></div>
-				{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(e => (
-					<span class={`ico e${e}`} />
-				))}
-				{[1, 2, 3, 4].map(r => (
-					<>
-						<span class={`ico r${r}`} />
-						{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(e => {
-							const idx = r * 13 + e;
-							return (
-								<span
-									style={{
-										'font-size': '11px',
-										'text-shadow':
-											memo().reprog[idx] === memo().reprogmax[idx] ?
-												'1px 1px 2px #fff'
-											:	undefined,
-									}}>
-									{memo().reprog[idx] ?? 0}/{memo().reprogmax[idx] ?? 0}
-								</span>
-							);
-						})}
-					</>
-				))}
+				<Repeat count={13}>{e => <span class={`ico e${e}`} />}</Repeat>
+				<Repeat count={4} from={1}>
+					{r => (
+						<>
+							<span class={`ico r${r}`} />
+							<Repeat count={13}>
+								{e => {
+									const idx = r * 13 + e;
+									return (
+										<span
+											style={{
+												'font-size': '11px',
+												'text-shadow':
+													memo().reprog[idx] === memo().reprogmax[idx] ?
+														'1px 1px 2px #fff'
+													:	undefined,
+											}}>
+											{memo().reprog[idx] ?? 0}/{memo().reprogmax[idx] ?? 0}
+										</span>
+									);
+								}}
+							</Repeat>
+						</>
+					)}
+				</Repeat>
 			</div>
 			<Card style="position:absolute;left:734px;top:8px" card={card()} />
 			<input

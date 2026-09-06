@@ -4,16 +4,14 @@ import { encodeCode } from '../etgutil.js';
 import Cards from '../Cards.js';
 import Card from '../Components/Card.jsx';
 import { doNav } from '../store.jsx';
-import { emit, setCmds } from '../sock.jsx';
+import { emit, useCmds } from '../sock.jsx';
 
 export default function ArenaTop({ lv }) {
 	const [top, setTop] = createSignal([]);
 	const [card, setCard] = createSignal(null);
 
-	onSettled(() => {
-		setCmds({ arenatop: ({ top }) => setTop(top) });
-		emit({ x: 'arenatop', lv });
-	});
+	useCmds({ arenatop: ({ top }) => setTop(top) });
+	onSettled(() => emit({ x: 'arenatop', lv }));
 
 	return (
 		<>

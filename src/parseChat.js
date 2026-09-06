@@ -2,13 +2,13 @@ import * as sock from './sock.jsx';
 import * as store from './store.jsx';
 
 const guestname = `${(Math.random() * 89999 + 10000) | 0}`;
-function chatmute(state) {
+function chatmute() {
 	store.chatMsg(
 		`${
-			state.opts.muteall ? 'You have chat muted. '
-			: state.opts.muteguest ? 'You have guests muted. '
+			store.appState.opts.muteall ? 'You have chat muted. '
+			: store.appState.opts.muteguest ? 'You have guests muted. '
 			: ''
-		}Muted: ${Array.from(state.muted).join(', ')}`,
+		}Muted: ${Object.keys(store.appState.muted).join(', ')}`,
 		'System',
 	);
 }
@@ -17,9 +17,7 @@ export default function parseChat(e) {
 	if (e.key === 'Enter') {
 		e.preventDefault();
 		const chatinput = e.target,
-			msg = chatinput.value.trim(),
-			storeState = store.state,
-			{ user } = storeState;
+			msg = chatinput.value.trim();
 		chatinput.value = '';
 		if (msg === '/help') {
 			const cmds = [
@@ -40,22 +38,25 @@ export default function parseChat(e) {
 				store.chatMsg(cmd);
 			}
 		} else if (msg === '/clear') {
-			store.clearChat(storeState.opts.channel);
+			store.clearChat(store.appState.opts.channel);
 		} else if (msg === '/who') {
 			sock.emit({ x: 'who' });
 		} else if (msg === '/deleteme') {
-			if (storeState.opts.foename === storeState.username + 'yesdelete') {
+			if (
+				store.appState.opts.foename ===
+				store.appState.username + 'yesdelete'
+			) {
 				sock.userEmit('delete');
 				store.logout();
 				store.setOpt('remember', false);
 				store.doNav(store.Login);
 			} else {
 				store.chatMsg(
-					`Input '${storeState.username}yesdelete' into Player's Name to delete your account`,
+					`Input '${store.appState.username}yesdelete' into Player's Name to delete your account`,
 					'System',
 				);
 			}
-		} else if (user && msg.match(/^\/roll( |$)\d*d?\d*$/)) {
+		} else if (store.appState.user && msg.match(/^\/roll( |$)\d*d?\d*$/)) {
 			const data = {};
 			const ndn = msg.slice(6).split('d');
 			if (!ndn[1]) {
@@ -68,28 +69,28 @@ export default function parseChat(e) {
 			sock.userEmit('roll', data);
 		} else if (msg === '/mute') {
 			store.setOptTemp('muteall', true);
-			chatmute(storeState);
+			chatmute();
 		} else if (msg === '/unmute') {
 			store.setOptTemp('muteall', false);
-			chatmute(storeState);
+			chatmute();
 		} else if (msg === '/muteguest') {
 			store.setOptTemp('muteguest', true);
-			chatmute(storeState);
+			chatmute();
 		} else if (msg === '/unmuteguest') {
 			store.setOptTemp('muteguest', false);
-			chatmute(storeState);
+			chatmute();
 		} else if (msg.startsWith('/mute ')) {
 			store.mute(msg.slice(6));
-			chatmute(storeState);
+			chatmute();
 		} else if (msg.startsWith('/unmute')) {
 			store.unmute(msg.slice(8));
-			chatmute(storeState);
+			chatmute();
 		} else if (msg.match(/^\/(motd|mod|codesmith)$/)) {
 			sock.emit({ x: msg.slice(1) });
-		} else if (user && msg === '/modclear') {
+		} else if (store.appState.user && msg === '/modclear') {
 			sock.userEmit('modclear');
 		} else if (
-			user &&
+			store.appState.user &&
 			msg.match(/^\/(mod(guest|mute|add|rm|motd|resetpass)|codesmith(add|rm)) /)
 		) {
 			const sp = msg.indexOf(' ');
@@ -118,10 +119,13 @@ export default function parseChat(e) {
 				code = msg.slice(lastIndexSpace + 1);
 			sock.userExec('setdeck', { d: code, name });
 			store.chatMsg(`Saved ${name} as ${code}`, 'System');
-		} else if (!msg.match(/^\/[^/]/) || (user && msg.match(/^\/w( |")/))) {
+		} else if (
+			!msg.match(/^\/[^/]/) ||
+			(store.appState.user && msg.match(/^\/w( |")/))
+		) {
 			if (!msg.match(/^\s*$/)) {
 				const escapedmsg = msg.replace(/^\/\//, '/');
-				if (user) {
+				if (store.appState.user) {
 					const data = { msg: escapedmsg };
 					if (msg.match(/^\/w( |")/)) {
 						const match = msg.match(/^\/w"([^"]*)"/);
@@ -136,7 +140,7 @@ export default function parseChat(e) {
 					sock.emit({
 						x: 'guestchat',
 						msg: escapedmsg,
-						u: storeState.opts.username || guestname,
+						u: store.appState.opts.username || guestname,
 					});
 				}
 			}

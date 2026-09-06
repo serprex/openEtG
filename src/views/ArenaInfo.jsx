@@ -122,12 +122,9 @@ function ArenaCard(props) {
 }
 
 export default function ArenaInfo() {
-	const rx = store.useRx();
 	const [AB, setAB] = createSignal({});
-	onSettled(() => {
-		sock.setCmds({ arenainfo: setAB });
-		sock.userEmit('arenainfo');
-	});
+	sock.useCmds({ arenainfo: setAB });
+	onSettled(() => sock.userEmit('arenainfo'));
 
 	return (
 		<>
@@ -147,17 +144,19 @@ export default function ArenaInfo() {
 				style="position:absolute;left:8px;top:300px"
 			/>
 			<Show when={AB().A}>
-				{x => <RenderInfo info={x()} y={0} name={rx.username} />}
+				{x => <RenderInfo info={x()} y={0} name={store.appState.username} />}
 			</Show>
 			<Show when={AB().B}>
-				{x => <RenderInfo info={x()} y={300} name={rx.username} />}
+				{x => <RenderInfo info={x()} y={300} name={store.appState.username} />}
 			</Show>
-			{!!rx.user.ocard && (
+			{!!store.appState.user.ocard && (
 				<div style="position:absolute;left:734px;height:600px;display:flex;flex-direction:column;justify-content:space-evenly">
 					{['A', 'B'].map(key => (
 						<ArenaCard
 							info={AB()[key]}
-							card={Cards.Codes[asUpped(rx.user.ocard, key === 'B')]}
+							card={
+								Cards.Codes[asUpped(store.appState.user.ocard, key === 'B')]
+							}
 						/>
 					))}
 				</div>

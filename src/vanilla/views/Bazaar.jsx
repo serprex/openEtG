@@ -9,7 +9,6 @@ import CardSelector from '../../Components/CardSelector.jsx';
 import DeckDisplay from '../../Components/DeckDisplay.jsx';
 
 export default function OriginalUpgrade() {
-	const rx = store.useRx();
 	const [deck, setDeck] = createSignal([]);
 	const [card, setCard] = createSignal(null);
 
@@ -20,7 +19,9 @@ export default function OriginalUpgrade() {
 		}
 		return cardminus;
 	});
-	const cardpool = createMemo(() => etgutil.deck2pool(rx.user.pool));
+	const cardpool = createMemo(() =>
+		etgutil.deck2pool(store.appState.user.pool),
+	);
 
 	const buyCost = createMemo(() => {
 		let cost = 0;
@@ -77,16 +78,16 @@ export default function OriginalUpgrade() {
 				}}
 			/>
 			<div style="position:absolute;left:4px;top:235px">
-				{rx.user.electrum}
+				{store.appState.user.electrum}
 				<span class="ico gold" />
 			</div>
 			<div style="position:absolute;left:200px;top:4px">
-				{canBuy() && rx.user.electrum < buyCost() ?
-					`Need ${buyCost() - rx.user.electrum} more to afford card${
+				{canBuy() && store.appState.user.electrum < buyCost() ?
+					`Need ${buyCost() - store.appState.user.electrum} more to afford card${
 						deck().length === 1 ? '' : 's'
 					}`
-				: canUpgrade() && rx.user.electrum < upgradeCost() ?
-					`Need ${upgradeCost() - rx.user.electrum} more to afford upgrade${
+				: canUpgrade() && store.appState.user.electrum < upgradeCost() ?
+					`Need ${upgradeCost() - store.appState.user.electrum} more to afford upgrade${
 						deck().length === 1 ? '' : 's'
 					}`
 				:	''}
@@ -96,7 +97,7 @@ export default function OriginalUpgrade() {
 					{buyCost()}
 					<span class="ico gold" />
 				</div>
-				<Show when={canBuy() && rx.user.electrum >= buyCost()}>
+				<Show when={canBuy() && store.appState.user.electrum >= buyCost()}>
 					<input
 						type="button"
 						value="Buy"
@@ -138,7 +139,8 @@ export default function OriginalUpgrade() {
 					{upgradeCost()}
 					<span class="ico gold" />
 				</span>
-				<Show when={canUpgrade() && rx.user.electrum >= upgradeCost()}>
+				<Show
+					when={canUpgrade() && store.appState.user.electrum >= upgradeCost()}>
 					<input
 						type="button"
 						value="Upgrade"

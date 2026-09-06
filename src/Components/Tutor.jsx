@@ -1,12 +1,11 @@
 import { For, createSignal } from 'solid-js';
-import { useRx } from '../store.jsx';
+import { appState } from '../store.jsx';
 import Text from './Text.jsx';
 
 export function Tutor(props) {
-	const opts = useRx(state => state.opts);
 	const [tut, setTut] = createSignal(false);
 	return (
-		<Show when={!opts.disableTut}>
+		<Show when={!appState.opts.disableTut}>
 			<span
 				class="imgb ico e13"
 				onMouseEnter={[setTut, true]}
