@@ -929,10 +929,10 @@ impl<'a> SkillThing<'a> {
 				Cow::from("Randomly freeze one of opponent's non-stacking permanents for two turns on hit")
 			}
 			Skill::sabbath if ev == Event::Cast => Cow::from(
-				"Target cannot gain quanta until their turn ends. Their deck is protected until start of their next turn.\nSilence all your opponent's creatures & heal all your creatures by 8",
+				"Block target's quanta gains until their turn ends. Protect their deck until their next turn starts.\nSilence opponent's creatures & heal your creatures by 8",
 			),
 			Skill::sabbath if ev == Event::Mulligan => Cow::from(
-				"When this card is mulliganed, opponent cannot gain quanta until their first turn ends",
+				"On mulligan, block opponent's quanta gains until their first turn ends",
 			),
 			Skill::sadism => Cow::from("Whenever any creatures are damaged, heal yourself an equal amount"),
 			Skill::salvage => Cow::from(if self.set() == CardSet::Open {
@@ -945,7 +945,7 @@ impl<'a> SkillThing<'a> {
 				"During your opponent's turn, your hand & quanta pool are protected & you cannot be silenced",
 			),
 			Skill::sanctify if ev == Event::OwnDraw => {
-				Cow::from("When drawn, your hand & quanta pool are protected & you cannot be silenced")
+				Cow::from("On draw, protect your hand & quanta pool. You cannot be silenced")
 			}
 			Skill::unsanctify if ev == Event::OwnPlay => Cow::from("Nullify opponent's sanctuary effect"),
 			Skill::scatter => Cow::from(
