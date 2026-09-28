@@ -3844,7 +3844,7 @@ impl Skill {
 					let card = ctx.get(t, Stat::card);
 					let copies = 8 - ctx.get_player(foe).hand_len() as i16;
 					let dmg = if ctx.cardset() == CardSet::Open {
-						ctx.spelldmg(foe, copies * if card::Upped(card) { 2 } else { 1 })
+						ctx.spelldmg(foe, copies * if card::Upped(ctx.get(c, Stat::card)) { 2 } else { 1 })
 					} else {
 						ctx.dmg(foe, copies * 2)
 					};
