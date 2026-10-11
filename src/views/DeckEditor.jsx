@@ -314,7 +314,7 @@ export default function DeckEditor() {
 			<input
 				type="button"
 				value="Revert"
-				onClick={() => setDeckData(processDeck(store.getDeck()))}
+				onClick={() => setEdit(null)}
 				style="position:absolute;left:8px;top:162px"
 			/>
 			<div style="position:absolute;left:8px;top:8px;width:720px;display:flex;justify-content:space-between">
