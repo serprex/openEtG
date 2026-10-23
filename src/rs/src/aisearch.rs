@@ -51,12 +51,14 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 	let turn = ctx.turn;
 	let foe = ctx.get_foe(turn);
 	let foehp = ctx.get(foe, Stat::hp);
-	let mut dmgmoves = Vec::new();
+	let mut dmgmoves: Vec<(i16, i16, i16)> = Vec::new();
 	alltgtsforplayer(ctx, turn, &mut |ctx, id| {
 		if id == 0 || !ctx.canactive(id) {
 			return;
 		}
 		if let Some(&active) = ctx.getSkill(id, Event::Cast).first() {
+			let mut push =
+				|m: (i16, i16, i16)| dmgmoves.insert(dmgmoves.partition_point(|x| x.2 <= m.2), m);
 			if let Some(tgting) = active.targeting(ctx.cardset()) {
 				let mut tgts = Vec::with_capacity(50 * ctx.players().len());
 				for plid in 1..=ctx.players_len() {
@@ -106,23 +108,22 @@ fn lethal(ctx: &Game) -> Option<GameMove> {
 					.filter(|candy| candy.2 < foehp)
 					.min_by_key(|candy| candy.2)
 				{
-					dmgmoves.push(choice);
+					push(choice);
 				}
 			} else {
 				let mut gclone = ctx.clone();
 				gclone.r#move(GameMove::Cast(id, 0));
 				if gclone.winner == turn {
-					dmgmoves.push((id, 0, i16::MIN));
+					push((id, 0, i16::MIN));
 				} else if gclone.winner == 0 {
 					let clonefoehp = gclone.get(foe, Stat::hp);
 					if clonefoehp < foehp {
-						dmgmoves.push((id, 0, clonefoehp));
+						push((id, 0, clonefoehp));
 					}
 				}
 			}
 		}
 	});
-	dmgmoves.sort_unstable_by_key(|&x| x.2);
 	if let Some(&firstmove) = dmgmoves.first() {
 		let firstmove = Some(GameMove::Cast(firstmove.0, firstmove.1));
 		let mut gclone = ctx.clone();

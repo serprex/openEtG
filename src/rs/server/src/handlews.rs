@@ -2358,7 +2358,7 @@ pub async fn handle_ws(
 								base.dedup();
 								let convert =
 									|pool: &mut Cardpool, oldcode: i16, oldamt: u16, newcode: i16| {
-										if pool.0.get(&newcode).cloned() == Some(u16::max_value())
+										if pool.0.get(&newcode).cloned() == Some(u16::MAX)
 											|| pool
 												.0
 												.get(&oldcode)

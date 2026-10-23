@@ -234,6 +234,10 @@ pub fn code_cmp_core(cards: &'static Cards, x: i16, y: i16) -> Ordering {
 	}
 }
 
+pub fn sort_codes(cards: &'static Cards, codes: &mut [i16]) {
+	codes.sort_unstable_by(|&x, &y| code_cmp_core(cards, x, y));
+}
+
 #[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn original_oracle(seed: u32) -> i16 {
@@ -266,6 +270,6 @@ pub fn selector_filter(set: CardSet, col: u32, element: i8, rarity: i8) -> Vec<i
 			result.push(card.code);
 		}
 	}
-	result.sort_unstable_by(|&x, &y| code_cmp_core(cards, x, y));
+	sort_codes(cards, &mut result);
 	result
 }

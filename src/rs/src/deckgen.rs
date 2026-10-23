@@ -121,7 +121,7 @@ pub fn deckgen_ai4(e1: i8, e2: i8, seed: u32) -> Vec<i16> {
 			deck.push(card.code);
 		}
 	}
-	deck.sort_unstable_by(|&x, &y| card::code_cmp_core(&card::OrigSet, x, y));
+	card::sort_codes(&card::OrigSet, &mut deck);
 	deck.push((e2 as i16) + 9010);
 	deck
 }
@@ -492,7 +492,7 @@ impl Builder {
 	}
 
 	fn finish(mut self) -> Vec<i16> {
-		self.deck.sort_unstable_by(|&x, &y| card::code_cmp_core(&card::OpenSet, x, y));
+		card::sort_codes(&card::OpenSet, &mut self.deck);
 		self.deck.push(self.mark + 9010);
 		self.deck
 	}
