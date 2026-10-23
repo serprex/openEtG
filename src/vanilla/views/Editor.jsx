@@ -51,13 +51,13 @@ export default function OriginalEditor() {
 				pool={pool()}
 				cardMinus={data().cardMinus}
 				setDeck={deck =>
-					store.updateOrig({
+					store.updateUser({
 						deck:
 							etgutil.encodedeck(deck) + etgutil.toTrueMarkSuffix(data().mark),
 					})
 				}
 				setMark={mark =>
-					store.updateOrig({
+					store.updateUser({
 						deck: data().deckCode.slice(0, -5) + etgutil.toTrueMarkSuffix(mark),
 					})
 				}
@@ -68,7 +68,7 @@ export default function OriginalEditor() {
 				onClick={() => {
 					const update = { deck: data().deckCode };
 					userEmit('updateorig', update);
-					store.updateOrig(update);
+					store.updateUser(update);
 					store.doNav(import('./MainMenu.jsx'));
 				}}
 				style="position:absolute;left:8px;top:110px"
@@ -78,7 +78,7 @@ export default function OriginalEditor() {
 				<input
 					autoFocus
 					value={data().deckCode}
-					onInput={e => store.updateOrig({ deck: parseDeck(e.target.value) })}
+					onInput={e => store.updateUser({ deck: parseDeck(e.target.value) })}
 					ref={deckref}
 					onClick={e => {
 						e.target.setSelectionRange(0, 999);

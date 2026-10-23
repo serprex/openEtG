@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onSettled } from 'solid-js';
+import { createSignal } from 'solid-js';
 
 import * as etgutil from '../etgutil.js';
 import * as sock from '../sock.jsx';
@@ -262,12 +262,7 @@ export default function Result(props) {
 
 	const clearTip = () => setTip(null);
 
-	onSettled(() => {
-		document.addEventListener('keydown', onkeydown);
-	});
-	onCleanup(() => {
-		document.removeEventListener('keydown', onkeydown);
-	});
+	store.listen(document, 'keydown', onkeydown);
 
 	const level = game.data.level,
 		winner = game.won(p1id),

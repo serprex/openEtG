@@ -1,9 +1,8 @@
-import { createStore, snapshot } from 'solid-js';
+import { createStore, onCleanup, onSettled, snapshot } from 'solid-js';
 
 import * as usercmd from './usercmd.js';
-import { changeMusic, changeSound, musicList } from './audio.js';
+import { changeMusic, changeSound, musicList, playMusic } from './audio.js';
 import { iterraw, mergedecks, removedecks } from './etgutil.js';
-import { playMusic } from './audio.js';
 import { choose } from './util.js';
 
 export const Login =
@@ -35,6 +34,15 @@ export const [appState, setAppState] = createStore({
 export function doNav(view, props = {}) {
 	setAppState(s => {
 		s.nav = { view, props, key: s.nav.key + 1 };
+	});
+}
+
+export function listen(target, type, fn) {
+	onSettled(() => {
+		target.addEventListener(type, fn);
+	});
+	onCleanup(() => {
+		target.removeEventListener(type, fn);
 	});
 }
 
@@ -174,14 +182,6 @@ export function updateUser(data) {
 		Object.assign(s.user, typeof data === 'function' ? data(s.user) : data);
 	});
 }
-export function setOrig(orig) {
-	setAppState(s => {
-		s.orig = orig;
-	});
-}
-export function updateOrig(data) {
-	updateUser(data);
-}
 export function addOrig(update) {
 	setAppState(s => {
 		const user = s.user;
@@ -213,12 +213,12 @@ export function hardcoreante(Cards, deck) {
 	const pick = (Math.random() * sum) | 0;
 	for (const [gsum, gcode] of groups) {
 		if (pick < gsum) {
-			for (const [code, _count] of iterraw(appState.user.accountbound)) {
-				if (code === gcode) {
-					return { c: gcode, bound: true };
-				}
-			}
-			return { c: gcode, bound: false };
+			return {
+				c: gcode,
+				bound: iterraw(appState.user.accountbound).some(
+					([code]) => code === gcode,
+				),
+			};
 		}
 	}
 

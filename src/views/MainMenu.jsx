@@ -1,4 +1,4 @@
-import { Repeat, createSignal, onCleanup, onSettled } from 'solid-js';
+import { Repeat, createSignal, onSettled } from 'solid-js';
 
 import { changeMusic, changeSound, musicList } from '../audio.js';
 import Chat from '../Components/Chat.jsx';
@@ -40,22 +40,22 @@ const tipjar = [
 	'Wealth used by leaderboards is a combination of current gold & cardpool',
 ];
 
-function AiButton({ name, onClick, onMouseOver, lv, disabled }) {
+function AiButton(props) {
 	return (
 		<div style="display:flex;font-size:14px;align-items:center">
 			<input
 				type="button"
-				value={name}
-				onClick={onClick}
-				onMouseOver={onMouseOver}
-				disabled={disabled}
+				value={props.name}
+				onClick={props.onClick}
+				onMouseOver={props.onMouseOver}
+				disabled={props.disabled}
 			/>
 			<div class="costcolumn">
-				{pveCostReward[lv * 2]}
+				{pveCostReward[props.lv * 2]}
 				<span class="ico gold" />
 			</div>
 			<div class="costcolumn">
-				{pveCostReward[lv * 2 + 1]}
+				{pveCostReward[props.lv * 2 + 1]}
 				<span class="ico gold" />
 			</div>
 		</div>
@@ -161,10 +161,8 @@ export default function MainMenu(props) {
 		) {
 			sock.userEmit('oracle', {});
 		}
-		document.addEventListener('mousemove', resetTip);
 	});
-
-	onCleanup(() => document.removeEventListener('mousemove', resetTip));
+	store.listen(document, 'mousemove', resetTip);
 
 	const arenaAi = i => {
 		const cost = arenaCost(i);

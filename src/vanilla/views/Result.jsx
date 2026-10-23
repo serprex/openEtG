@@ -1,4 +1,4 @@
-import { For, onCleanup, onSettled } from 'solid-js';
+import { For } from 'solid-js';
 
 import { userEmit } from '../../sock.jsx';
 import { addcard, decodedeck } from '../../etgutil.js';
@@ -25,12 +25,7 @@ export default function OriginalResult({ game }) {
 		else if (e.key === 'w' && canRematch()) game.data.rematch();
 	};
 
-	onSettled(() => {
-		document.addEventListener('keydown', onkeydown);
-	});
-	onCleanup(() => {
-		document.removeEventListener('keydown', onkeydown);
-	});
+	store.listen(document, 'keydown', onkeydown);
 
 	const replay = game.replayJson();
 	if (replay) {

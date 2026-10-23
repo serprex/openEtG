@@ -1,11 +1,4 @@
-import {
-	For,
-	Repeat,
-	createMemo,
-	createSignal,
-	onCleanup,
-	onSettled,
-} from 'solid-js';
+import { For, Repeat, createMemo, createSignal, onSettled } from 'solid-js';
 
 import Cards from '../Cards.js';
 import Editor from '../Components/Editor.jsx';
@@ -236,12 +229,7 @@ export default function DeckEditor() {
 		if (~chi) loadDeck(store.appState.user.qecks[chi]);
 	};
 
-	onSettled(() => {
-		document.addEventListener('keydown', onkeydown);
-	});
-	onCleanup(() => {
-		document.removeEventListener('keydown', onkeydown);
-	});
+	store.listen(document, 'keydown', onkeydown);
 
 	const [viewDecks, setViewDecks] = createSignal(false);
 	const deckModeToggle = () => setViewDecks(x => !x);
